@@ -8,20 +8,32 @@
  */
 
 /**
+ * SCENARIO: Disk Full Outage (Logs & Metrics Only)
  * Simulates a service outage caused by a host running out of disk space.
- * This scenario is purely based on logs and metrics, containing no APM traces.
+ * The "needle" (root cause) is buried under ambiguous logs and confounding metrics.
  *
- * The Demo Story:
- * "A critical `billing-processor` service has suddenly stopped processing invoices.
- * The service's error logs are flooding with 'No space left on device'. The on-call
- * engineer needs to quickly confirm the root cause by correlating the application
- * logs with the underlying infrastructure metrics."
+ * THE STORY:
+ * "A critical `billing-processor` service has become slow and is now intermittently
+ * failing. The logs show vague warnings like 'processing is taking longer than usual'
+ * and some CPU metrics are slightly elevated. The on-call engineer needs to dig
+ * deeper to find the true root cause before it causes a full outage."
  *
- * What this scenario generates:
- * For the first 70% of the time, the `billing-processor` logs successful invoices
- * and host disk metrics show usage gradually increasing. For the final 30%, the
- * host's disk usage spikes to 100%, and the service begins logging critical
- * file write errors.
+ * ROOT CAUSE:
+ * The host `billing-host-01` runs out of disk space, with the
+ * `system.filesystem.used.pct` metric reaching 100%.
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in the Logs Explorer and observe the flood of "No space left on device"
+ *    errors from the `billing-processor` service.
+ * 2. Note the `host.name` (`billing-host-01`) from the log documents.
+ * 3. Pivot to the Infrastructure UI and view the metrics for `billing-host-01`.
+ * 4. Observe that the "Disk Usage" metric is at 100%, and its spike correlates
+ *    perfectly with the start of the error logs.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "Why is the billing-processor service logging errors?"
+ * - "Show me the disk usage for host billing-host-01."
+ * - "Correlate the errors from the billing-processor with host metrics."
  */
 
 import type { InfraDocument, LogDocument } from '@kbn/apm-synthtrace-client';
@@ -33,7 +45,8 @@ import { parseLogsScenarioOpts } from '../helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const HOST_NAME = 'billing-host-01';
-const SERVICE_NAME = 'billing-processor';
+const BILLING_SERVICE = 'billing-processor';
+const LOG_ARCHIVER_SERVICE = 'log-archiver';
 
 const scenario: Scenario<InfraDocument | LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
@@ -41,57 +54,126 @@ const scenario: Scenario<InfraDocument | LogDocument> = async (runOptions) => {
 
   return {
     generate: ({ range, clients: { infraEsClient, logsEsClient } }) => {
-      const incidentStartTime =
+      const degradedStartTime =
         range.from.getTime() + (range.to.getTime() - range.from.getTime()) * 0.7;
+      const outageStartTime =
+        range.from.getTime() + (range.to.getTime() - range.from.getTime()) * 0.95;
 
       const timestamps = range.interval('10s').rate(1);
 
       // Generate Host Metrics
       const host = infra.host(HOST_NAME);
       const hostMetrics = timestamps.generator((timestamp) => {
-        const isIncident = timestamp > incidentStartTime;
-        const diskUsedPct = isIncident
-          ? 1.0
-          : 0.6 +
-            0.3 * ((timestamp - range.from.getTime()) / (incidentStartTime - range.from.getTime()));
+        const isDegraded = timestamp > degradedStartTime;
+        const isOutage = timestamp > outageStartTime;
 
-        return host
-          .filesystem({ 'system.filesystem.used.pct': diskUsedPct })
-          .defaults({
-            'agent.id': 'metricbeat-agent',
-            'host.hostname': HOST_NAME,
-            'host.name': HOST_NAME,
-          })
-          .timestamp(timestamp);
+        let diskUsedPct;
+        if (isOutage) {
+          diskUsedPct = 1.0;
+        } else if (isDegraded) {
+          diskUsedPct = 0.95 + Math.random() * 0.04; // Hover between 95% and 99%
+        } else {
+          // Steadily increase from 60% to 95%
+          diskUsedPct =
+            0.6 +
+            0.35 *
+              ((timestamp - range.from.getTime()) / (degradedStartTime - range.from.getTime()));
+        }
+
+        const defaults = {
+          'agent.id': 'metricbeat-agent',
+          'host.hostname': HOST_NAME,
+          'host.name': HOST_NAME,
+        };
+
+        return [
+          host
+            .filesystem({ 'system.filesystem.used.pct': diskUsedPct })
+            .defaults(defaults)
+            .timestamp(timestamp),
+          host
+            .cpu({
+              // Red herring: CPU load increases slightly during the incident
+              'system.cpu.total.norm.pct': isDegraded ? 0.4 + Math.random() * 0.1 : 0.2,
+              'system.cpu.user.pct': 0.1,
+              'system.cpu.system.pct': isDegraded ? 0.3 + Math.random() * 0.1 : 0.1,
+              'process.cpu.pct': 0.1,
+              'system.cpu.nice.pct': 0,
+            })
+            .defaults(defaults)
+            .timestamp(timestamp),
+        ];
       });
 
       // Generate Service Logs
       const logGenerator = timestamps.generator((timestamp, i) => {
-        const isIncident = timestamp > incidentStartTime;
+        const isDegraded = timestamp > degradedStartTime;
+        const isOutage = timestamp > outageStartTime;
 
-        if (isIncident) {
-          return log
-            .create({ isLogsDb })
-            .message('CRITICAL: Failed to write invoice to disk. No space left on device.')
-            .logLevel('error')
-            .defaults({
-              'service.name': SERVICE_NAME,
-              'host.name': HOST_NAME,
-              'service.environment': ENVIRONMENT,
-            })
-            .timestamp(timestamp);
+        const logs = [];
+
+        if (isOutage) {
+          logs.push(
+            log
+              .create({ isLogsDb })
+              .message('CRITICAL: Failed to write invoice to disk. No space left on device.')
+              .logLevel('error')
+              .defaults({
+                'service.name': BILLING_SERVICE,
+                'host.name': HOST_NAME,
+                'service.environment': ENVIRONMENT,
+              })
+              .timestamp(timestamp),
+            log
+              .create({ isLogsDb })
+              .message('FATAL: Could not write to archive. No space left on device.')
+              .logLevel('error')
+              .defaults({
+                'service.name': LOG_ARCHIVER_SERVICE,
+                'host.name': HOST_NAME,
+                'service.environment': ENVIRONMENT,
+              })
+              .timestamp(timestamp)
+          );
+        } else if (isDegraded) {
+          logs.push(
+            log
+              .create({ isLogsDb })
+              .message(`Invoice processing for #${1000 + i} is taking longer than usual.`)
+              .logLevel('warn')
+              .defaults({
+                'service.name': BILLING_SERVICE,
+                'host.name': HOST_NAME,
+                'service.environment': ENVIRONMENT,
+              })
+              .timestamp(timestamp),
+            log
+              .create({ isLogsDb })
+              .message('Log rotation queue is filling up. Archiving is delayed.')
+              .logLevel('warn')
+              .defaults({
+                'service.name': LOG_ARCHIVER_SERVICE,
+                'host.name': HOST_NAME,
+                'service.environment': ENVIRONMENT,
+              })
+              .timestamp(timestamp)
+          );
+        } else {
+          logs.push(
+            log
+              .create({ isLogsDb })
+              .message(`Successfully processed and saved invoice #${1000 + i}.`)
+              .logLevel('info')
+              .defaults({
+                'service.name': BILLING_SERVICE,
+                'host.name': HOST_NAME,
+                'service.environment': ENVIRONMENT,
+              })
+              .timestamp(timestamp)
+          );
         }
 
-        return log
-          .create({ isLogsDb })
-          .message(`Successfully processed and saved invoice #${1000 + i}.`)
-          .logLevel('info')
-          .defaults({
-            'service.name': SERVICE_NAME,
-            'host.name': HOST_NAME,
-            'service.environment': ENVIRONMENT,
-          })
-          .timestamp(timestamp);
+        return logs;
       });
 
       return [

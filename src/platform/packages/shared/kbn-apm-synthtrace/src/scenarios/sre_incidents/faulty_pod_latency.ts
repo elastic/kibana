@@ -8,13 +8,33 @@
  */
 
 /**
+ * SCENARIO: Faulty Pod Latency
  * Simulates a latency spike affecting a single faulty pod in a load-balanced service.
  *
- * The Demo Story:
+ * THE STORY:
  * A `user-profile-service` is experiencing high latency, but no errors. The issue
  * is isolated to a single pod, `user-profile-pod-3`, which is suffering from high
- * disk I/O. This scenario is designed to be solved using correlation analysis to
- * link the slow transactions to the specific faulty pod.
+ * disk I/O.
+ *
+ * ROOT CAUSE:
+ * High disk I/O (`system.diskio.read.bytes`) on the host serving
+ * `user-profile-pod-3`, causing degraded performance for that specific pod.
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in the APM UI and view the `user-profile-service`. Observe the high
+ *    latency anomaly in the main transaction chart.
+ * 2. Group the latency chart by `kubernetes.pod.name`. This will clearly
+ *    isolate `user-profile-pod-3` as the source of the latency.
+ * 3. Pivot to the Logs Explorer, filtering for `kubernetes.pod.name : "user-profile-pod-3"`.
+ *    Notice the recurring "High I/O wait detected" warning logs.
+ * 4. Pivot to the Infrastructure UI and view the host for `user-profile-pod-3`.
+ *    Correlate the APM latency spike with a spike in the "Disk I/O" metric on the host.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "Why is the user-profile-service slow?"
+ * - "Is the latency spike for the user-profile-service correlated with a specific pod?"
+ * - "Show me the logs for user-profile-pod-3."
+ * - "What is the root cause of the high latency on user-profile-pod-3?"
  */
 
 import type { ApmFields, InfraDocument, LogDocument } from '@kbn/apm-synthtrace-client';
@@ -49,10 +69,13 @@ const scenario: Scenario<ApmFields | LogDocument | InfraDocument> = async (runOp
         .service({ name: 'user-profile-service', agentName: 'nodejs', environment: ENVIRONMENT })
         .instance('ups-1');
 
+      const incidentStartTime =
+        range.from.getTime() + (range.to.getTime() - range.from.getTime()) * 0.5;
+
       // Generate Traces
       const traceEvents = timestamps.generator((timestamp, i) => {
         const podName = POD_NAMES[i % POD_NAMES.length];
-        const isFaulty = podName === FAULTY_POD_NAME;
+        const isFaulty = podName === FAULTY_POD_NAME && timestamp > incidentStartTime;
         const duration = isFaulty ? 2500 : 250;
 
         const userProfileTransaction = userProfileService
@@ -84,7 +107,7 @@ const scenario: Scenario<ApmFields | LogDocument | InfraDocument> = async (runOp
       // Generate Logs
       const logEvents = timestamps.generator((timestamp, i) => {
         const podName = POD_NAMES[i % POD_NAMES.length];
-        if (podName !== FAULTY_POD_NAME) {
+        if (podName !== FAULTY_POD_NAME || timestamp < incidentStartTime) {
           return [];
         }
 
@@ -106,7 +129,7 @@ const scenario: Scenario<ApmFields | LogDocument | InfraDocument> = async (runOp
         .rate(1)
         .generator((timestamp) => {
           return POD_NAMES.map((podName) => {
-            const isFaulty = podName === FAULTY_POD_NAME;
+            const isFaulty = podName === FAULTY_POD_NAME && timestamp > incidentStartTime;
             const hostName = `host-for-${podName}`;
             const host = infra.host(hostName);
             const defaults = {

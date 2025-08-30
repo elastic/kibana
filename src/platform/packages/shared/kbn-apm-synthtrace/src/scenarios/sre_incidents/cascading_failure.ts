@@ -8,12 +8,32 @@
  */
 
 /**
+ * SCENARIO: Cascading Failure
  * Simulates a cascading failure caused by a slow downstream dependency.
  *
+ * THE STORY:
  * A slow database query in the `inventory-service` causes timeouts that cascade
  * up to the `product-recommendation` and user-facing `frontend-web` services.
  * The trace includes other healthy downstream dependencies (Redis, Elasticsearch)
  * to make identifying the root cause more challenging.
+ *
+ * ROOT CAUSE:
+ * A slow DB query in the `inventory-service` causing a timeout error.
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in APM, view the `frontend-web` service, and observe the high latency and errors.
+ * 2. Examine a failed trace and follow the waterfall. Notice the long duration of the
+ *    downstream call to `product-recommendation`.
+ * 3. Drill into the `product-recommendation` service. Observe that its call to the
+ *    `inventory-service` is the source of the high latency.
+ * 4. Drill into the `inventory-service`. In a failed trace, find the `db.postgresql`
+ *    span for `SELECT * FROM products` and note its extremely long duration.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "What's causing the errors in the frontend-web service?"
+ * - "Show me a trace for a failed transaction in the product-recommendation service."
+ * - "Which downstream dependency of the inventory-service is the slowest?"
+ * - "What is the root cause of the cascading failure?"
  */
 
 import type { ApmFields, LogDocument } from '@kbn/apm-synthtrace-client';

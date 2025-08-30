@@ -8,18 +8,31 @@
  */
 
 /**
+ * SCENARIO: Third-Party API Failure
  * Simulates a cascading failure caused by a critical third-party API outage.
  *
- * The Demo Story:
+ * THE STORY:
  * "We're an e-commerce company. Our on-call SRE gets a high-severity alert:
  * 'Checkout Success Rate has dropped to 0%'. Users are calling support, saying
  * they can't buy anything. Revenue has stopped. The SRE needs to find the root
  * cause immediately."
  *
- * What this scenario generates:
- * The `checkout-service` fails because its external dependency, `shipping-rates-api.com`,
- * begins returning HTTP 503 Service Unavailable errors. This causes a 100% error
- * rate for the checkout process, which cascades up to the API gateway and frontend.
+ * ROOT CAUSE:
+ * The external `shipping-rates-api.com` dependency begins returning
+ * `HTTP 503 Service Unavailable` errors, causing all checkout transactions to fail.
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in the APM Service Map. Observe that the `checkout-service` is red.
+ * 2. View the Dependencies tab in APM. Note that `shipping-rates-api.com` has a
+ *    high error rate and impact score.
+ * 3. Inspect a failed trace from the `checkout-service`. The trace waterfall will
+ *    show a red external HTTP span to `shipping-rates-api.com`.
+ * 4. Click the failed span to see the `http.response.status_code: 503` in the metadata.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "What is the root cause of the errors in the checkout-service?"
+ * - "Are there any failing dependencies?"
+ * - "Show me the HTTP status code for calls to shipping-rates-api.com."
  */
 
 import type { ApmFields, LogDocument } from '@kbn/apm-synthtrace-client';
@@ -69,8 +82,12 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
         .service({ name: 'inventory-service', agentName: 'nodejs', environment: ENVIRONMENT })
         .instance('in-1');
 
+      const incidentStartTime =
+        range.from.getTime() + (range.to.getTime() - range.from.getTime()) * 0.5;
+
       const traceEvents = timestamps.generator((timestamp) => {
         const traceId = generateLongId();
+        const isIncident = timestamp > incidentStartTime;
 
         const authExit = checkoutService
           .span(
@@ -125,24 +142,27 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
             spanSubtype: 'http',
           })
           .duration(240)
-          .failure()
+          .outcome(isIncident ? 'failure' : 'success')
           .destination('shipping-rates-api.com')
           .timestamp(timestamp + 180)
-          .defaults({ 'http.response.status_code': 503 });
+          .defaults({ 'http.response.status_code': isIncident ? 503 : 200 });
 
         const checkoutTransaction = checkoutService
           .transaction({ transactionName: 'POST /checkout' })
           .timestamp(timestamp + 45)
-          .duration(450)
-          .failure()
-          .children(authExit, userProfileExit, inventoryExit, failingShippingSpan)
-          .errors(
+          .duration(isIncident ? 450 : 250)
+          .outcome(isIncident ? 'failure' : 'success')
+          .children(authExit, userProfileExit, inventoryExit, failingShippingSpan);
+
+        if (isIncident) {
+          checkoutTransaction.errors(
             checkoutService
               .error({
                 message: 'Failed to retrieve shipping rates. External API returned status 503',
               })
               .timestamp(timestamp + 420)
           );
+        }
 
         const apiGatewayExit = apiGateway
           .span(
@@ -152,27 +172,35 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
             })
           )
           .timestamp(timestamp + 20)
-          .duration(500)
+          .duration(isIncident ? 500 : 300)
           .children(checkoutTransaction);
         const apiGatewayTransaction = apiGateway
           .transaction({ transactionName: 'POST /api/v1/checkout' })
           .timestamp(timestamp + 20)
-          .duration(500)
-          .failure()
-          .children(apiGatewayExit)
-          .errors(
+          .duration(isIncident ? 500 : 300)
+          .outcome(isIncident ? 'failure' : 'success')
+          .children(apiGatewayExit);
+
+        if (isIncident) {
+          apiGatewayTransaction.errors(
             apiGateway
               .error({ message: 'Downstream service checkout-service failed' })
               .timestamp(timestamp + 480)
           );
+        }
 
         const frontendTransaction = frontendService
           .transaction({ transactionName: 'Submit Checkout Form' })
           .timestamp(timestamp)
-          .duration(550)
-          .failure()
-          .children(apiGatewayTransaction)
-          .errors(frontendService.error({ message: 'API call failed' }).timestamp(timestamp + 520));
+          .duration(isIncident ? 550 : 350)
+          .outcome(isIncident ? 'failure' : 'success')
+          .children(apiGatewayTransaction);
+
+        if (isIncident) {
+          frontendTransaction.errors(
+            frontendService.error({ message: 'API call failed' }).timestamp(timestamp + 520)
+          );
+        }
 
         const allEvents = [frontendTransaction];
         allEvents.forEach((event) =>
@@ -184,30 +212,34 @@ const scenario: Scenario<LogDocument | ApmFields> = async (runOptions) => {
 
       const logEvents = timestamps.generator((timestamp) => {
         const traceId = generateLongId();
-        return [
-          log
-            .create({ isLogsDb })
-            .message(
-              'Failed to retrieve shipping rates for transaction. External API returned status 503'
-            )
-            .logLevel('error')
-            .defaults({
-              'service.name': 'checkout-service',
-              'trace.id': traceId,
-              'service.environment': ENVIRONMENT,
-            })
-            .timestamp(timestamp + 425),
-          log
-            .create({ isLogsDb })
-            .message('Downstream service checkout-service failed with status 500')
-            .logLevel('error')
-            .defaults({
-              'service.name': 'api-gateway',
-              'trace.id': traceId,
-              'service.environment': ENVIRONMENT,
-            })
-            .timestamp(timestamp + 485),
-        ];
+        const isIncident = timestamp > incidentStartTime;
+        if (isIncident) {
+          return [
+            log
+              .create({ isLogsDb })
+              .message(
+                'Failed to retrieve shipping rates for transaction. External API returned status 503'
+              )
+              .logLevel('error')
+              .defaults({
+                'service.name': 'checkout-service',
+                'trace.id': traceId,
+                'service.environment': ENVIRONMENT,
+              })
+              .timestamp(timestamp + 425),
+            log
+              .create({ isLogsDb })
+              .message('Downstream service checkout-service failed with status 500')
+              .logLevel('error')
+              .defaults({
+                'service.name': 'api-gateway',
+                'trace.id': traceId,
+                'service.environment': ENVIRONMENT,
+              })
+              .timestamp(timestamp + 485),
+          ];
+        }
+        return [];
       });
 
       return [

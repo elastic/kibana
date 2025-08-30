@@ -8,11 +8,31 @@
  */
 
 /**
+ * SCENARIO: Spiked Latency
  * Simulates a service with intermittent and constant high-latency transactions.
  *
+ * THE STORY:
  * The `spikey-frontend` and `spikey-backend` services have several endpoints.
  * One endpoint, `/always-spike`, is always slow, while another, `/sometimes-spike`,
  * is intermittently slow, providing data to test anomaly detection.
+ *
+ * ROOT CAUSE:
+ * The application code contains inefficient operations for the
+ * `/always-spike` and `/sometimes-spike` endpoints.
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in the APM UI for the `spikey-frontend` service.
+ * 2. Observe the high average latency, but notice that the p95 or p99 latency
+ *    is significantly higher, suggesting outliers.
+ * 3. Go to the Transactions tab and sort by Impact or Latency. This will
+ *    immediately highlight the `/always-spike` and `/sometimes-spike` transactions.
+ * 4. View the latency distribution for the `/sometimes-spike` transaction to see
+ *    the bimodal distribution of fast and slow requests.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "Which transactions in the spikey-frontend service are the slowest?"
+ * - "Is there a latency anomaly in the spikey-backend service?"
+ * - "Show me the latency distribution for the 'GET /sometimes-spike' transaction."
  */
 
 import { random } from 'lodash';

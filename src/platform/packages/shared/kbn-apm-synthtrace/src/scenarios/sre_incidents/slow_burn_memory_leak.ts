@@ -8,15 +8,32 @@
  */
 
 /**
- * Simulates a slow-burn memory leak in a service, leading to performance
+ * SCENARIO: Slow-Burn Memory Leak
+ * Simulates a service with a gradual memory leak, leading to performance
  * degradation and eventual crashes.
  *
- * The Demo Story:
- * A critical `cart-service` shows slowly degrading performance, with transaction
- * times creeping up. The service intermittently crashes and restarts, after which
- * performance returns to normal, but the cycle of degradation repeats. This
- * scenario is designed to be solved by correlating the sawtooth memory pattern
- * with increasing latency and the final `OutOfMemoryError` log.
+ * THE STORY:
+ * A critical `cart-service` shows slowly degrading performance. The service
+ * intermittently crashes and restarts, after which performance returns to normal,
+ * but the cycle of degradation repeats.
+ *
+ * ROOT CAUSE:
+ * A memory leak in the `cart-service` causes heap usage (`jvm.memory.heap.used`)
+ * to climb steadily until it triggers a fatal `java.lang.OutOfMemoryError`.
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in APM for the `cart-service`. Observe the repeating pattern of
+ *    gradually increasing latency followed by a sharp drop (indicating a restart).
+ * 2. View the JVM metrics for the service. Observe the classic "sawtooth" pattern
+ *    for `jvm.memory.heap.used` that correlates with the latency pattern.
+ * 3. Filter logs for the `cart-service` in the Logs Explorer.
+ * 4. Find the `java.lang.OutOfMemoryError` log message that occurs at the peak
+ *    of each memory usage spike.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "Why does the cart-service keep restarting?"
+ * - "Show me the JVM memory usage for the cart-service."
+ * - "Are there any errors in the cart-service logs around the time of the crashes?"
  */
 
 import type { ApmFields, LogDocument } from '@kbn/apm-synthtrace-client';

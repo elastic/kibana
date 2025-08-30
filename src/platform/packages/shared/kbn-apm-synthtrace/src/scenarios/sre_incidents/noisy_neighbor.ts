@@ -8,19 +8,30 @@
  */
 
 /**
- * Simulates a "noisy neighbor" incident where the root cause is in the
- * underlying infrastructure, not the application code.
+ * SCENARIO: Noisy Neighbor
+ * Simulates a latency spike caused by a resource-hogging process on the same host.
  *
- * The Demo Story:
- * "Our most critical service, the `payment-service`, has suddenly slowed to a crawl.
- * Latency has jumped from 150ms to over 5 seconds. Alerts are firing for 'High 99th
- * Percentile Latency'. There have been no new deployments, and the service isn't
- * reporting any errors. The team is baffled."
+ * THE STORY:
+ * A critical `payment-service` has suddenly slowed to a crawl, but is not reporting
+ * any errors. The team is baffled as to why a healthy service is suddenly timing out.
  *
- * What this scenario generates:
- * The `payment-service` experiences a massive latency spike. The root cause is not
- * in its code, but a separate `batch-processing-service` running on the same host
- * which begins consuming 95% of the CPU, starving the payment service of resources.
+ * ROOT CAUSE:
+ * The `batch-processing-service` monopolizes host CPU (`system.cpu.total.norm.pct`),
+ * starving the critical `payment-service` of resources and causing high latency.
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in APM for the `payment-service` and confirm the high latency spike.
+ * 2. Inspect a slow trace and observe that time is spent "in-process" with no slow
+ *    downstream spans. Note the `host.name`.
+ * 3. Pivot to the Infrastructure UI for the affected host.
+ * 4. Correlate the latency spike with the host's CPU utilization, which spiked to 95%.
+ * 5. Inspect the processes on the host to identify the `batch-processing-service`
+ *    as the top CPU consumer.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "Why is the payment-service so slow?"
+ * - "Is the latency in the payment-service correlated with any host metrics?"
+ * - "What process is using the most CPU on host-1.example.com?"
  */
 
 import type { ApmFields, InfraDocument } from '@kbn/apm-synthtrace-client';

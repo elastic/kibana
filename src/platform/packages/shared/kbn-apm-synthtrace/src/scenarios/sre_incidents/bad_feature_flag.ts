@@ -8,19 +8,35 @@
  */
 
 /**
+ * SCENARIO: Bad Feature Flag
  * Simulates a subtle "bad feature flag" incident affecting a specific subset of users.
  *
- * The Demo Story:
+ * THE STORY:
  * "The product team has just enabled a new 'Personalized Recommendations' feature for
  * our premium-tier users. A few minutes later, a VIP customer contacts support,
  * saying product searches are failing. No main alarms have fired because the overall
  * error rate for the `product-service` is still very low. An engineer needs to
  * investigate this 'needle in a haystack' problem."
  *
- * What this scenario generates:
- * Product searches start failing, but only for users with `user.tier: 'premium'`.
- * This is caused by a bad configuration in the new feature that results in a
- * 401 Unauthorized error from a downstream `recommendation-service`.
+ * ROOT CAUSE:
+ * A misconfiguration in the new feature flag causes the `product-service`
+ * to send invalid credentials to the downstream `recommendation-service`, resulting
+ * in `401 Unauthorized` errors (obfuscated as `500` errors to the client).
+ *
+ * TROUBLESHOOTING PATH (MANUAL):
+ * 1. Start in APM for the `product-service`. Observe the low overall error rate.
+ * 2. Group the transaction charts by `user.tier`. This will reveal that the error
+ *    rate for `premium` users is high, while it's low for `standard` users.
+ * 3. Inspect a failed trace for a `premium` user. Note the failed HTTP call to the
+ *    `recommendation-service` with a `500` status code.
+ * 4. Pivot to the logs for the `recommendation-service`. Filter for `warn` level
+ *    logs and discover the "Authentication failed... Invalid token provided" message,
+ *    revealing the true root cause.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "Are there any errors affecting premium users in the product-service?"
+ * - "Correlate the errors in the product-service with logs from the recommendation-service."
+ * - "Why are premium users seeing errors when searching for products?"
  */
 
 import { apm, ApmSynthtracePipelineSchema, log } from '@kbn/apm-synthtrace-client';
