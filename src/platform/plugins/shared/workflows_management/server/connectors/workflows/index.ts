@@ -181,6 +181,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId,
             alerts: workflowAlerts,
             inputs: { event: alertContext },
+            spaceId,
           },
         };
       } catch (error) {
@@ -189,6 +190,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             alerts: [],
+            spaceId,
           },
         };
       }

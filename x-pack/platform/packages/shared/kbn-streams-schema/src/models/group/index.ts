@@ -12,12 +12,14 @@ import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 
 export interface Group {
+  tags: string[];
   members: string[];
 }
 
 export const Group: Validation<unknown, Group> = validation(
   z.unknown(),
   z.object({
+    tags: z.array(z.string()),
     members: z.array(z.string()),
   })
 );

@@ -21,7 +21,7 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 13000
-  core: 565651
+  core: 602071
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -40,7 +40,7 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 10290
   discoverShared: 2322
-  elasticAssistant: 294308
+  elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 18810
   embeddableAlertsTable: 6596
@@ -200,4 +200,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 5768
+  workflowsManagement: 5773

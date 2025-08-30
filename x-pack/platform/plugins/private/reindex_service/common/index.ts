@@ -28,3 +28,5 @@ export interface ReindexArgs {
   };
   settings?: IndexSettings;
 }
+
+export type BatchReindexArgs = Omit<ReindexArgs, 'reindexOptions'>;
