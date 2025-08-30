@@ -13,7 +13,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { UUID } from '@kbn/elastic-assistant-common';
-import { getResourceName } from '../../ai_assistant_service';
 
 export interface BulkOperationError {
   message: string;
@@ -220,7 +219,9 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
-    const isConversationUpdate = this.options.index.includes(getResourceName('conversation'));
+    const isConversationUpdate = this.options.index.includes(
+      '.kibana-elastic-ai-assistant-conversation'
+    );
     const responseToUpdate = await this.options.esClient.search({
       query: {
         bool: {
@@ -272,7 +273,9 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
-    const isConversationUpdate = this.options.index.includes(getResourceName('conversation'));
+    const isConversationUpdate = this.options.index.includes(
+      '.kibana-elastic-ai-assistant-conversation'
+    );
     const responseToDelete = await this.options.esClient.search({
       query: {
         bool: {
