@@ -70,7 +70,7 @@ const scenario: Scenario = async (runOptions) => {
         const transaction = productService.transaction({ transactionName }).timestamp(timestamp);
 
         // Introduce a low, baseline failure rate for standard users
-        const isFailure = i % 50 === 0; // 2% failure rate
+        const isFailure = i % 50 === 0; // Roughly 2% failure rate
         if (isFailure) {
           return transaction
             .duration(350)

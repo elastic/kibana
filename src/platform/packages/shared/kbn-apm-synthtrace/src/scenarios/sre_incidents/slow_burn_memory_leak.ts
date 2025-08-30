@@ -13,9 +13,9 @@
  * degradation and eventual crashes.
  *
  * THE STORY:
- * A critical `cart-service` shows slowly degrading performance. The service
- * intermittently crashes and restarts, after which performance returns to normal,
- * but the cycle of degradation repeats.
+ * A critical `cart-service` shows slowly degrading performance, with transaction
+ * times creeping up. The service intermittently crashes and restarts, after which
+ * performance returns to normal, but the cycle of degradation repeats.
  *
  * ROOT CAUSE:
  * A memory leak in the `cart-service` causes heap usage (`jvm.memory.heap.used`)
@@ -47,6 +47,23 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const SERVICE_NAME = 'cart-service';
 const CYCLE_DURATION_MS = 45 * 60 * 1000; // 45 minutes
 
+function getCycleProgress(timestamp: number, range: { from: Date }) {
+  const timeIntoCycle = (timestamp - range.from.getTime()) % CYCLE_DURATION_MS;
+  return timeIntoCycle / CYCLE_DURATION_MS;
+}
+
+function getLatency(progress: number) {
+  const baseLatency = 150;
+  const addedLatency = progress * 2000; // Max 2s added latency
+  return baseLatency + addedLatency;
+}
+
+function getHeapUsage(progress: number) {
+  // Climbs from 100MB to 900MB
+  const heapUsed = 100 + progress * 800;
+  return heapUsed * 1024 * 1024; // in bytes
+}
+
 const scenario: Scenario<ApmFields | LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
@@ -61,16 +78,9 @@ const scenario: Scenario<ApmFields | LogDocument> = async (runOptions) => {
 
       // Generate Traces and Metrics
       const apmEvents = timestamps.generator((timestamp, i) => {
-        const timeIntoCycle = (timestamp - range.from.getTime()) % CYCLE_DURATION_MS;
-        const percentageThroughCycle = timeIntoCycle / CYCLE_DURATION_MS;
-
-        // Latency increases as memory pressure grows
-        const baseLatency = 150;
-        const addedLatency = percentageThroughCycle * 2000; // Max 2s added latency
-        const duration = baseLatency + addedLatency;
-
-        // Memory usage follows a sawtooth pattern
-        const heapUsed = 100 + percentageThroughCycle * 800; // Climbs from 100MB to 900MB
+        const cycleProgress = getCycleProgress(timestamp, range);
+        const duration = getLatency(cycleProgress);
+        const heapUsed = getHeapUsage(cycleProgress);
 
         const transaction = cartService
           .transaction({ transactionName: 'POST /cart/add' })
@@ -80,13 +90,13 @@ const scenario: Scenario<ApmFields | LogDocument> = async (runOptions) => {
 
         const metrics = cartService
           .appMetrics({
-            'jvm.memory.heap.used': heapUsed * 1024 * 1024, // in bytes
+            'jvm.memory.heap.used': heapUsed,
           })
           .timestamp(timestamp);
 
-        // At the end of the cycle, simulate a crash
-        if (i % 540 < 50) {
-          // 540 = 45 minutes / 5 seconds per event
+        // Crash in the last 10% of the cycle
+        const isCrashing = i % 540 < 54; // 10% failure rate
+        if (isCrashing) {
           transaction.failure().errors(
             cartService
               .error({
@@ -102,7 +112,8 @@ const scenario: Scenario<ApmFields | LogDocument> = async (runOptions) => {
 
       // Generate Logs
       const crashLogEvents = timestamps.generator((timestamp, i) => {
-        if (i % 540 < 50) {
+        const isCrashing = i % 540 < 54;
+        if (isCrashing) {
           return log
             .create({ isLogsDb })
             .message('java.lang.OutOfMemoryError: Java heap space')
