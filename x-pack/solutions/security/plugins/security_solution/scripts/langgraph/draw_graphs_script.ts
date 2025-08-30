@@ -16,11 +16,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ChatModel } from '../../server/lib/siem_migrations/common/task/util/actions_client_chat';
 import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '../../server/assistant/tools/esql/graphs/generate_esql/generate_esql';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
-import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
-import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/task/util/esql_knowledge_base';
+import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 
 interface Drawable {
@@ -38,9 +39,9 @@ const createLlmInstance = () => {
   return mockLlm;
 };
 
-async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
-  const model = createLlmInstance();
-  const telemetryClient = {} as SiemMigrationTelemetryClient;
+async function getSiemRuleMigrationGraph(logger: Logger): Promise<Drawable> {
+  const model = createLlmInstance() as ChatModel;
+  const telemetryClient = {} as RuleMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
     model,
     esqlKnowledgeBase,
@@ -90,7 +91,7 @@ export const draw = async () => {
     outputFilename: '../../docs/generate_esql/img/generate_esql_graph.png',
   });
   await drawGraph({
-    getGraphAsync: getSiemMigrationGraph,
-    outputFilename: '../../docs/siem_migration/img/agent_graph.png',
+    getGraphAsync: getSiemRuleMigrationGraph,
+    outputFilename: '../../docs/siem_migration/img/rule_migration_agent_graph.png',
   });
 };
