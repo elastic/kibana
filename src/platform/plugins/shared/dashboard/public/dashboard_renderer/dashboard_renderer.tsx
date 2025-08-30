@@ -62,7 +62,10 @@ export function DashboardRenderer({
   }, [dashboardApi, locator]);
 
   useEffect(() => {
-    if (dashboardInternalApi) {
+    if (
+      dashboardInternalApi &&
+      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+    ) {
       dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
     }
   }, [dashboardInternalApi]);
