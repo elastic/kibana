@@ -145,7 +145,9 @@ export const useDashboardMenuItems = ({
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
         canSave: (isCurrentUserAuthor || isInEditAccessMode) && Boolean(hasUnsavedChanges),
+        accessControl,
         saveDashboard: saveFromShareModal,
+        changeAccessMode: dashboardApi.changeAccessMode,
       });
     },
     [
@@ -154,7 +156,9 @@ export const useDashboardMenuItems = ({
       lastSavedId,
       isInEditAccessMode,
       isCurrentUserAuthor,
+      accessControl,
       saveFromShareModal,
+      dashboardApi.changeAccessMode,
     ]
   );
 

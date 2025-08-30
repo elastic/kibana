@@ -31,13 +31,12 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
-import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
 import { AccessModeContainer } from '../../access_control';
-import type { AccessMode } from '../../access_control/types';
+import type { AccessControl, AccessMode } from '../../access_control/types';
 import type { SaveDashboardReturn } from '../../../services/dashboard_content_management_service/types';
 
 const showFilterBarId = 'showFilterBar';
@@ -49,7 +48,9 @@ export interface ShowShareModalProps {
   dashboardTitle?: string;
   anchorElement: HTMLElement;
   canSave: boolean;
+  accessControl?: AccessControl;
   saveDashboard: () => Promise<SaveDashboardReturn | undefined>;
+  changeAccessMode: (accessMode: AccessMode) => Promise<void>;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -67,19 +68,15 @@ export function ShowShareModal({
   savedObjectId,
   dashboardTitle,
   canSave,
+  accessControl,
   saveDashboard,
+  changeAccessMode,
 }: ShowShareModalProps) {
   if (!shareService) return;
 
   const handleChangeAccessMode = async (accessMode: AccessMode) => {
-    if (!savedObjectId) return;
-
     try {
-      const dashboardContentManagementService = getDashboardContentManagementService();
-      await dashboardContentManagementService.changeAccessMode({
-        ids: [savedObjectId],
-        accessMode,
-      });
+      await changeAccessMode(accessMode);
     } catch (error) {
       // TODO: Add proper error handling with toast notifications
       throw error;
@@ -329,7 +326,12 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
-      accessModeContainer: <AccessModeContainer onChangeAccessMode={handleChangeAccessMode} />,
+      accessModeContainer: (
+        <AccessModeContainer
+          accessControl={accessControl}
+          onChangeAccessMode={handleChangeAccessMode}
+        />
+      ),
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(

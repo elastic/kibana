@@ -11,5 +11,5 @@ export type AccessMode = 'default' | 'read_only';
 
 export interface AccessControl {
   accessMode?: AccessMode;
-  owner: string;
+  owner?: string;
 }

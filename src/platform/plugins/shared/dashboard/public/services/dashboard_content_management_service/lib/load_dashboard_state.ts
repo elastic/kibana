@@ -83,7 +83,7 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references, attributes, managed } = rawDashboardContent;
+  const { references, attributes, managed, accessControl } = rawDashboardContent;
 
   const {
     refreshInterval,
@@ -109,6 +109,7 @@ export const loadDashboardState = async ({
 
   return {
     managed,
+    accessControl,
     references,
     resolveMeta,
     dashboardInput: {

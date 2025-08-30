@@ -11,6 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
+import type { AccessControl, AccessMode } from '../../dashboard_app/access_control';
 import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import type { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import type {
@@ -49,6 +50,7 @@ export interface LoadDashboardReturn {
   newDashboardCreated?: boolean;
   dashboardId?: string;
   managed?: boolean;
+  accessControl?: AccessControl;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: DashboardState;
 
@@ -105,5 +107,5 @@ export interface FindDashboardsService {
  */
 export interface ChangeAccessModeProps {
   ids: string[];
-  accessMode: 'read_only' | 'default';
+  accessMode: AccessMode;
 }
