@@ -19,7 +19,7 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import type { DashboardLink, RuleLink } from '../../../../common/assets';
+import type { DashboardLink, RuleLink, QueryLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
@@ -33,19 +33,23 @@ export async function readStream({
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<Streams.all.GetResponse> {
-  const [streamDefinition, { [name]: dashboardsAndQueries }] = await Promise.all([
+  const [streamDefinition, { [name]: assets }] = await Promise.all([
     streamsClient.getStream(name),
     assetClient.getAssetLinks([name], ['dashboard', 'rule', 'query']),
   ]);
 
-  const [dashboardLinks, otherAssets] = partition(
-    dashboardsAndQueries,
-    (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
-  );
-
-  const [ruleLinks, queryLinks] = partition(
-    otherAssets,
-    (asset): asset is RuleLink => asset[ASSET_TYPE] === 'rule'
+  const [dashboardLinks, ruleLinks, queryLinks] = assets.reduce(
+    (acc, asset) => {
+      if (asset[ASSET_TYPE] === 'dashboard') {
+        acc[0].push(asset);
+      } else if (asset[ASSET_TYPE] === 'rule') {
+        acc[1].push(asset);
+      } else if (asset[ASSET_TYPE] === 'query') {
+        acc[2].push(asset);
+      }
+      return acc;
+    },
+    [[], [], []] as [DashboardLink[], RuleLink[], QueryLink[]]
   );
 
   const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);

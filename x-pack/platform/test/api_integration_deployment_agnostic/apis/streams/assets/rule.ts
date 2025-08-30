@@ -25,24 +25,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   const SPACE_ID = 'default';
-  const ARCHIVES = [
-    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
-    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
-    'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rules.json',
-  ];
+  const archive = 'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rules.json';
 
-  const RULE_ID_1 = '09cef989-3ded-4a1e-b2b0-53d491d13397';
-  const RULE_ID_2 = '312638da-43d1-4d6e-8fb8-9cae201cdd3a';
+  const FIRST_RULE_ASSET_LINKING = '09cef989-3ded-4a1e-b2b0-53d491d13397';
+  const SECOND_RULE_ASSET_LINKING = '312638da-43d1-4d6e-8fb8-9cae201cdd3a';
 
   describe('Asset links', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-
-      await indexDocument(esClient, 'logs', {
-        '@timestamp': '2024-01-01T00:00:10.000Z',
-        message: '2023-01-01T00:00:10.000Z error test',
-      });
     });
 
     after(async () => {
@@ -51,18 +42,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('after linking a rule', () => {
       before(async () => {
-        for (const archive of ARCHIVES) {
-          await kibanaServer.importExport.load(archive, { space: SPACE_ID });
-        }
+        await kibanaServer.importExport.load(archive, { space: SPACE_ID });
 
-        await linkRule(apiClient, 'logs', RULE_ID_1);
+        await linkRule(apiClient, 'logs', FIRST_RULE_ASSET_LINKING);
       });
 
       after(async () => {
-        await unlinkRule(apiClient, 'logs', RULE_ID_1);
-        for (const archive of ARCHIVES) {
-          await kibanaServer.importExport.unload(archive, { space: SPACE_ID });
-        }
+        await unlinkRule(apiClient, 'logs', FIRST_RULE_ASSET_LINKING);
+        await kibanaServer.importExport.unload(archive, { space: SPACE_ID });
       });
 
       it('lists the rule in the stream response', async () => {
@@ -85,11 +72,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('add second rule', () => {
         before(async () => {
-          await linkRule(apiClient, 'logs', RULE_ID_2);
+          await linkRule(apiClient, 'logs', SECOND_RULE_ASSET_LINKING);
         });
 
         after(async () => {
-          await unlinkRule(apiClient, 'logs', RULE_ID_2);
+          await unlinkRule(apiClient, 'logs', SECOND_RULE_ASSET_LINKING);
         });
 
         it('lists the second rule in the stream response', async () => {
@@ -110,8 +97,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.body.rules.length).to.eql(2);
         });
 
-        it('unlink one rule and keeps the other', async () => {
-          await unlinkRule(apiClient, 'logs', RULE_ID_1);
+        it('unlinking one rule keeps the other', async () => {
+          await unlinkRule(apiClient, 'logs', FIRST_RULE_ASSET_LINKING);
 
           const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
             params: { path: { name: 'logs' } },
@@ -139,7 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('recovers on write and lists the linked rule', async () => {
-          await linkRule(apiClient, 'logs', RULE_ID_1);
+          await linkRule(apiClient, 'logs', FIRST_RULE_ASSET_LINKING);
 
           const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
             params: { path: { name: 'logs' } },
@@ -152,18 +139,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after deleting the rule', () => {
         before(async () => {
-          await kibanaServer.importExport.unload(
-            'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rules.json',
-            { space: SPACE_ID }
-          );
+          await kibanaServer.importExport.unload(archive, { space: SPACE_ID });
         });
 
         after(async () => {
           // Reload the rule archive for other tests
-          await kibanaServer.importExport.load(
-            'x-pack/platform/test/api_integration/fixtures/kbn_archives/streams/rules.json',
-            { space: SPACE_ID }
-          );
+          await kibanaServer.importExport.load(archive, { space: SPACE_ID });
         });
 
         it('no longer lists the rule as a linked asset', async () => {
@@ -177,7 +158,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('on class stream that has not been touched yet', () => {
+    describe('on unmanaged Classic stream', () => {
       before(async () => {
         await esClient.indices.createDataStream({
           name: 'logs-testlogs-default',
