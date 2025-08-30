@@ -53,7 +53,13 @@ export const hasNodeDocumentsData = (
  */
 export const getNodeDocumentMode = (
   node: NodeViewModel
-): 'single-alert' | 'single-event' | 'entity' | 'grouped-events' | 'grouped-entities' | 'na' => {
+):
+  | 'single-alert'
+  | 'single-event'
+  | 'single-entity'
+  | 'grouped-events'
+  | 'grouped-entities'
+  | 'na' => {
   if (!hasNodeDocumentsData(node)) {
     return 'na';
   }
@@ -64,7 +70,7 @@ export const getNodeDocumentMode = (
   } else if (node.documentsData.length === 1 && node.documentsData[0].type === 'event') {
     return 'single-event';
   } else if (isEntityNode(node) && node.documentsData.length === 1) {
-    return 'entity';
+    return 'single-entity';
   } else if (isEntityNode(node) && node.documentsData.length > 1) {
     return 'grouped-entities';
   } else if (node.documentsData.length > 1) {
@@ -84,7 +90,7 @@ export const getSingleDocumentData = (
   const mode = getNodeDocumentMode(node);
   if (
     !hasNodeDocumentsData(node) ||
-    (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'entity')
+    (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'single-entity')
   ) {
     return undefined;
   }

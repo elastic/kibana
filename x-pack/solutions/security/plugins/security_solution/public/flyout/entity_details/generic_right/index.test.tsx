@@ -23,7 +23,10 @@ import type { GenericEntityPanelProps } from '.';
 import { GenericEntityPanel } from '.';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
-import { GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ } from './constants';
+import {
+  GENERIC_ENTITY_FLYOUT_FOOTER_DETAILS_LINK_TEST_SUBJ,
+  GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ,
+} from './constants';
 
 const mockProps: GenericEntityPanelProps = {
   entityDocId: 'entity_doc_id_test',
@@ -181,33 +184,27 @@ describe('GenericEntityPanel', () => {
     expect(queryByTestId('generic-right-flyout-error-prompt')).toBeInTheDocument();
   });
 
-  it('renders footer when not in preview mode', () => {
-    const { getByTestId } = render(
+  it(`renders footer without 'show full entity details' text when not in preview mode`, () => {
+    const { getByTestId, queryByTestId } = render(
       <TestProvidersWithUiSettings assetInventoryEnabled={true}>
         <GenericEntityPanel {...mockProps} isPreviewMode={false} />
       </TestProvidersWithUiSettings>
     );
 
     expect(getByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ)).toBeInTheDocument();
+    expect(
+      queryByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_DETAILS_LINK_TEST_SUBJ)
+    ).not.toBeInTheDocument();
   });
 
-  it('does not render footer when in preview mode', () => {
+  it(`render footer and 'show full entity details' text when in preview mode`, () => {
     const { queryByTestId } = render(
       <TestProvidersWithUiSettings assetInventoryEnabled={true}>
         <GenericEntityPanel {...mockProps} isPreviewMode={true} />
       </TestProvidersWithUiSettings>
     );
 
-    expect(queryByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ)).not.toBeInTheDocument();
-  });
-
-  it('does not render footer when asset inventory is disabled', () => {
-    const { queryByTestId } = render(
-      <TestProvidersWithUiSettings assetInventoryEnabled={false}>
-        <GenericEntityPanel {...mockProps} isPreviewMode={false} />
-      </TestProvidersWithUiSettings>
-    );
-
-    expect(queryByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ)).not.toBeInTheDocument();
+    expect(queryByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ)).toBeInTheDocument();
+    expect(queryByTestId(GENERIC_ENTITY_FLYOUT_FOOTER_DETAILS_LINK_TEST_SUBJ)).toBeInTheDocument();
   });
 });
