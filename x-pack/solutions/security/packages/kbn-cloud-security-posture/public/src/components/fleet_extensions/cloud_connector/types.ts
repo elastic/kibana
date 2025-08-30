@@ -12,7 +12,9 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudConnectorSecretVar } from '@kbn/fleet-plugin/public';
 import type { UpdatePolicy } from '../types';
+import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 
 export interface CloudConnectorConfig {
   provider: 'aws' | 'gcp' | 'azure';
@@ -20,7 +22,7 @@ export interface CloudConnectorConfig {
   description?: ReactNode;
 }
 
-export interface CloudConnectorFormProps {
+export interface NewCloudConnectorFormProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
@@ -29,7 +31,24 @@ export interface CloudConnectorFormProps {
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: string;
-  templateName: string;
+  templateName?: string;
+  credentials?: CloudConnectorCredentials;
+  setCredentials: (credentials: CloudConnectorCredentials) => void;
+}
+
+// Define the interface for connector options
+export interface CloudConnectorOption {
+  label: string;
+  value: string;
+  id: string;
+  roleArn?: string;
+  externalId?: CloudConnectorSecretVar;
+}
+
+// Interface for EuiComboBox options (only standard properties)
+export interface ComboBoxOption {
+  label: string;
+  value: string;
 }
 
 export interface AWSCloudConnectorFormProps {
@@ -38,11 +57,13 @@ export interface AWSCloudConnectorFormProps {
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
   isEditPage?: boolean;
-  hasInvalidRequiredVars?: boolean;
+  hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: string;
   isOrganization?: boolean;
-  templateName: string;
+  templateName?: string;
+  credentials?: CloudConnectorCredentials;
+  setCredentials: (credentials: CloudConnectorCredentials) => void;
 }
 
 export interface CloudFormationCloudCredentialsGuideProps {
@@ -58,10 +79,35 @@ export interface CloudConnectorField {
   id: string;
 }
 
-// Field name constants
-export const CLOUD_CONNECTOR_FIELD_NAMES = {
-  ROLE_ARN: 'role_arn',
-  EXTERNAL_ID: 'external_id',
-  AWS_ROLE_ARN: 'aws.role_arn',
-  AWS_EXTERNAL_ID: 'aws.credentials.external_id',
-} as const;
+export interface GetCloudConnectorRemoteRoleTemplateParams {
+  input: NewPackagePolicyInput;
+  cloud: Pick<
+    CloudSetup,
+    | 'isCloudEnabled'
+    | 'cloudId'
+    | 'cloudHost'
+    | 'deploymentUrl'
+    | 'serverless'
+    | 'isServerlessEnabled'
+  >;
+  packageInfo: PackageInfo;
+  templateName: string;
+}
+
+/**
+ * Updates input variables with current credentials
+ */
+export interface InputVar {
+  value?: string | undefined;
+  type?: string;
+  [key: string]: unknown;
+}
+
+export interface InputVars {
+  [key: string]: InputVar;
+}
+
+// Type alias for the actual vars type from Fleet
+export type PackagePolicyVars =
+  | Record<string, { value?: string; type?: string; [key: string]: unknown }>
+  | undefined;

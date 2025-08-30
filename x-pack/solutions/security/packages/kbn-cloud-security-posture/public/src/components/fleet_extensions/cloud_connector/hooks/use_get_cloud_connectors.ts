@@ -6,27 +6,15 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { CloudConnectorSO, CloudConnectorListOptions } from '@kbn/fleet-plugin/common/types';
-import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
-import type { HttpStart } from '@kbn/core/public';
-
-interface UseGetCloudConnectorsOptions {
-  options?: CloudConnectorListOptions;
-  enabled?: boolean;
-  http: HttpStart;
-}
-
-interface CloudConnectorsResponse {
-  items: CloudConnectorSO[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+import type { CloudConnectorSO, CloudConnectorListOptions } from '@kbn/fleet-plugin/public';
+import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const fetchCloudConnectors = async (
   http: HttpStart,
   options?: CloudConnectorListOptions
-): Promise<CloudConnectorsResponse> => {
+): Promise<CloudConnectorSO[]> => {
   const queryParams = new URLSearchParams();
 
   if (options?.page !== undefined) {
@@ -37,21 +25,14 @@ const fetchCloudConnectors = async (
     queryParams.append('perPage', options.perPage.toString());
   }
 
-  const url = `${CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN}${
-    queryParams.toString() ? `?${queryParams.toString()}` : ''
-  }`;
+  const url = `${CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN}`;
 
-  return http.get<CloudConnectorsResponse>(url);
+  return http.get<CloudConnectorSO>(url);
 };
 
-export const useGetCloudConnectors = ({
-  options,
-  enabled = true,
-  http,
-}: UseGetCloudConnectorsOptions) => {
-  return useQuery(['cloud-connectors', options], () => fetchCloudConnectors(http, options), {
-    enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+export const useGetCloudConnectors = () => {
+  const { http } = useKibana<CoreStart>().services;
+  return useQuery(['cloud-connectors'], () => fetchCloudConnectors(http), {
+    enabled: true,
   });
 };

@@ -21,6 +21,17 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
+export type {
+  CloudConnectorSO,
+  CloudConnectorListOptions,
+  CreateCloudConnectorRequest,
+  CloudConnectorVars,
+  CloudConnectorVarsRecord,
+  CloudProvider,
+  CloudConnectorSecretVar,
+  CloudConnectorSecretVarValue,
+  AwsCloudConnectorVars,
+} from './types';
 export { SetupTechnology } from './types';
 export {
   SetupTechnologySelector,
@@ -61,7 +72,7 @@ export type {
   UIExtensionsStorage,
 } from './types/ui_extensions';
 
-export { pagePathGetters, EPM_API_ROUTES } from './constants';
+export { pagePathGetters, EPM_API_ROUTES, CLOUD_CONNECTOR_API_ROUTES } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';

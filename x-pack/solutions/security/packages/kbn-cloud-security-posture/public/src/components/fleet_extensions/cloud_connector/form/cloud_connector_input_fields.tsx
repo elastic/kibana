@@ -11,8 +11,8 @@ import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { findVariableDef, fieldIsInvalid } from '../utils';
-import type { CloudConnectorField } from './types';
+import { findVariableDef, fieldIsInvalid } from '../../utils';
+import type { CloudConnectorField } from '../types';
 
 export const CloudConnectorInputFields = ({
   fields,

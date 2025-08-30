@@ -10,28 +10,16 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import { CLOUD_CONNECTOR_FIELD_NAMES } from './types';
+import type { GetCloudConnectorRemoteRoleTemplateParams, PackagePolicyVars } from './types';
+
+import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 import {
   AWS_SINGLE_ACCOUNT,
+  CLOUD_CONNECTOR_FIELD_NAMES,
   CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
 } from './constants';
-export interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyInput;
-  cloud: Pick<
-    CloudSetup,
-    | 'isCloudEnabled'
-    | 'cloudId'
-    | 'cloudHost'
-    | 'deploymentUrl'
-    | 'serverless'
-    | 'isServerlessEnabled'
-  >;
-  packageInfo: PackageInfo;
-  templateName: string;
-}
 
 const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
   if (!cloudHost) return undefined;
@@ -117,7 +105,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 export const updatePolicyWithAwsCloudConnectorCredentials = (
   packagePolicy: NewPackagePolicy,
   input: NewPackagePolicyInput,
-  credentials: Record<string, string>
+  credentials: Record<string, string | undefined>
 ): NewPackagePolicy => {
   if (!credentials) return packagePolicy;
 
@@ -175,4 +163,97 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
   ];
 
   return updatedPolicy;
+};
+
+/**
+ * Updates input variables with current credentials
+ * @param inputVars - The original input variables
+ * @param credentials - The current credentials to apply
+ * @returns Updated input variables with credentials applied
+ */
+export const updateInputVarsWithCredentials = (
+  inputVars: PackagePolicyVars | undefined,
+  credentials: CloudConnectorCredentials | undefined
+): PackagePolicyVars | undefined => {
+  if (!inputVars) return inputVars;
+
+  const updatedInputVars: PackagePolicyVars = { ...inputVars };
+
+  // Update role_arn fields
+  if (credentials?.roleArn !== undefined) {
+    if (updatedInputVars.role_arn) {
+      updatedInputVars.role_arn.value = credentials.roleArn;
+    }
+    if (updatedInputVars['aws.role_arn']) {
+      updatedInputVars['aws.role_arn'].value = credentials.roleArn;
+    }
+  } else {
+    // Clear role_arn fields when roleArn is undefined
+    if (updatedInputVars.role_arn) {
+      updatedInputVars.role_arn.value = undefined;
+    }
+    if (updatedInputVars['aws.role_arn']) {
+      updatedInputVars['aws.role_arn'].value = undefined;
+    }
+  }
+
+  // Update external_id fields
+  if (credentials?.externalId !== undefined) {
+    if (updatedInputVars.external_id) {
+      updatedInputVars.external_id.value = credentials.externalId;
+    }
+    if (updatedInputVars['aws.credentials.external_id']) {
+      updatedInputVars['aws.credentials.external_id'].value = credentials.externalId;
+    }
+  } else {
+    // Clear external_id fields when externalId is undefined
+    if (updatedInputVars.external_id) {
+      updatedInputVars.external_id.value = undefined;
+    }
+    if (updatedInputVars['aws.credentials.external_id']) {
+      updatedInputVars['aws.credentials.external_id'].value = undefined;
+    }
+  }
+
+  return updatedInputVars;
+};
+
+/**
+ * Updates policy inputs with new variables
+ * @param updatedPolicy - The policy to update
+ * @param inputVars - The variables to apply to the policy
+ * @returns Updated policy with new inputs
+ */
+export const updatePolicyInputs = (
+  updatedPolicy: NewPackagePolicy,
+  inputVars: PackagePolicyVars
+): NewPackagePolicy => {
+  if (!updatedPolicy.inputs || updatedPolicy.inputs.length === 0 || !inputVars) {
+    return updatedPolicy;
+  }
+
+  const updatedInputs = updatedPolicy.inputs.map((policyInput) => {
+    if (policyInput.enabled && policyInput.streams && policyInput.streams.length > 0) {
+      const updatedStreams = policyInput.streams.map((stream) => {
+        if (stream.enabled) {
+          return {
+            ...stream,
+            vars: inputVars,
+          };
+        }
+        return stream;
+      });
+
+      return {
+        ...policyInput,
+        streams: updatedStreams,
+      };
+    }
+    return policyInput;
+  });
+
+  return {
+    ...updatedPolicy,
+    inputs: updatedInputs,
+  };
 };

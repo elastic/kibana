@@ -15,3 +15,18 @@ export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
 export const AWS_CREDENTIALS_TYPE = {
   CLOUD_CONNECTORS: 'cloud_connectors',
 };
+
+export const TABS = {
+  NEW_CONNECTION: 'new-connection',
+  EXISTING_CONNECTION: 'existing-connection',
+} as const;
+
+export const CLOUD_FORMATION_EXTERNAL_DOC_URL =
+  'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html';
+
+export const CLOUD_CONNECTOR_FIELD_NAMES = {
+  ROLE_ARN: 'role_arn',
+  EXTERNAL_ID: 'external_id',
+  AWS_ROLE_ARN: 'aws.role_arn',
+  AWS_EXTERNAL_ID: 'aws.credentials.external_id',
+} as const;

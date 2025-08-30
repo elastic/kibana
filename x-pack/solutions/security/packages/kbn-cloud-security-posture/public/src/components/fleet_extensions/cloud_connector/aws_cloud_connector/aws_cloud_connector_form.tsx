@@ -9,14 +9,16 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
-import type { AWSCloudConnectorFormProps } from './types';
+import { type PackagePolicyVars, type AWSCloudConnectorFormProps } from '../types';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 import {
   updatePolicyWithAwsCloudConnectorCredentials,
   getCloudConnectorRemoteRoleTemplate,
-} from './utils';
-import { AwsInputVarFields } from '../aws_credentials_form/aws_input_var_fields';
+  updateInputVarsWithCredentials,
+} from '../utils';
+import { CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
+import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 
 export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
   input,
@@ -28,18 +30,26 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
   hasInvalidRequiredVars = false,
   isOrganization = false,
   templateName,
+  credentials,
+  setCredentials,
 }) => {
-  const cloudConnectorRemoteRoleTemplate = cloud
-    ? getCloudConnectorRemoteRoleTemplate({
-        input,
-        cloud,
-        packageInfo,
-        templateName,
-      })
-    : undefined;
+  const cloudConnectorRemoteRoleTemplate =
+    cloud && templateName
+      ? getCloudConnectorRemoteRoleTemplate({
+          input,
+          cloud,
+          packageInfo,
+          templateName,
+        })
+      : undefined;
   const inputVars = input.streams.find((i) => i.enabled)?.vars;
 
-  const fields = getAwsCloudConnectorsCredentialsFormOptions(inputVars);
+  // Update inputVars with current credentials using utility function or inputVars if no credentials are provided
+  const updatedInputVars = credentials
+    ? updateInputVarsWithCredentials(inputVars as PackagePolicyVars, credentials)
+    : inputVars;
+
+  const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);
 
   return (
     <>
@@ -64,15 +74,33 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
       <EuiSpacer size="m" />
 
       {fields && (
-        <AwsInputVarFields
+        <CloudConnectorInputFields
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            updatePolicy({
-              updatedPolicy: updatePolicyWithAwsCloudConnectorCredentials(newPolicy, input, {
-                [key]: value,
-              }),
-            });
+            // Update local credentials state if available
+            if (credentials) {
+              const updatedCredentials = { ...credentials };
+              if (
+                key === CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN ||
+                key === CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN
+              ) {
+                updatedCredentials.roleArn = value;
+              } else if (
+                key === CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID ||
+                key === CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID
+              ) {
+                updatedCredentials.externalId = value;
+              }
+              setCredentials(updatedCredentials);
+            } else {
+              // Fallback to old method
+              updatePolicy({
+                updatedPolicy: updatePolicyWithAwsCloudConnectorCredentials(newPolicy, input, {
+                  [key]: value,
+                }),
+              });
+            }
           }}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
         />

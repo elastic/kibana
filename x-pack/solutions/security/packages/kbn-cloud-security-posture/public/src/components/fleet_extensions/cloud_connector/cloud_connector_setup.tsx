@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiSpacer, EuiTabs, EuiTab, EuiText, EuiLink } from '@elastic/eui';
+import React, { useState, useEffect, useCallback } from 'react';
+import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
@@ -16,15 +16,13 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import { CloudConnectorForm } from './cloud_connector_form';
-import { ReusableCloudConnectorForm } from './reusable_cloud_connector_form';
+import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
+import { ReusableCloudConnectorForm } from './form/reusable_cloud_connector_form';
+import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
+import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
+import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from '../types';
-
-interface CloudConnectorTab {
-  id: string;
-  name: React.ReactNode;
-  content: React.ReactNode;
-}
+import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
 
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
@@ -51,11 +49,30 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 }) => {
   const isCloudConnectorReusableEnabled = true;
   const [selectedTabId, setSelectedTabId] = useState('new-connection');
-  const CLOUD_FORMATION_EXTERNAL_DOC_URL =
-    'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html';
+
+  const { data: cloudConnectors } = useGetCloudConnectors();
+  const cloudConnectorsCount = cloudConnectors?.length;
+
+  // Use the cloud connector setup hook
+  const {
+    newConnectionCredentials,
+    setNewConnectionCredentials,
+    existingConnectionCredentials,
+    setExistingConnectionCredentials,
+    updatePolicyWithNewCredentials,
+    updatePolicyWithExistingCredentials,
+  } = useCloudConnectorSetup(input, newPolicy, updatePolicy);
+
+  // Auto-select existing-connection tab when cloud connectors are available
+  useEffect(() => {
+    if (cloudConnectorsCount && cloudConnectorsCount > 0) {
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+    }
+  }, [cloudConnectorsCount]);
+
   const tabs: CloudConnectorTab[] = [
     {
-      id: 'new-connection',
+      id: TABS.NEW_CONNECTION,
       name: (
         <FormattedMessage
           id="securitySolutionPackages.cspmIntegration.cloudConnector.newConnectionTab"
@@ -89,7 +106,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             </EuiText>
           </div>
           <EuiSpacer size="l" />
-          <CloudConnectorForm
+          <NewCloudConnectorForm
             input={input}
             templateName={templateName}
             newPolicy={newPolicy}
@@ -99,12 +116,14 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             cloud={cloud}
             cloudProvider={cloudProvider}
+            credentials={newConnectionCredentials}
+            setCredentials={updatePolicyWithNewCredentials}
           />
         </>
       ),
     },
     {
-      id: 'existing-connection',
+      id: TABS.EXISTING_CONNECTION,
       name: (
         <FormattedMessage
           id="securitySolutionPackages.cspmIntegration.cloudConnector.existingConnectionTab"
@@ -114,27 +133,40 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       content: (
         <ReusableCloudConnectorForm
           input={input}
-          templateName={templateName}
           newPolicy={newPolicy}
-          packageInfo={packageInfo}
           updatePolicy={updatePolicy}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloud={cloud}
-          cloudProvider={cloudProvider}
+          credentials={existingConnectionCredentials}
+          setCredentials={updatePolicyWithExistingCredentials}
         />
       ),
     },
   ];
 
-  const onTabClick = (tab: { id: string }) => {
-    setSelectedTabId(tab.id);
-  };
+  const onTabClick = useCallback(
+    (tab: { id: string }) => {
+      setSelectedTabId(tab.id);
+
+      if (tab.id === TABS.NEW_CONNECTION && newConnectionCredentials.roleArn) {
+        updatePolicyWithNewCredentials(newConnectionCredentials);
+      } else if (
+        tab.id === TABS.EXISTING_CONNECTION &&
+        existingConnectionCredentials.cloudConnectorId
+      ) {
+        updatePolicyWithExistingCredentials(existingConnectionCredentials);
+      }
+    },
+    [
+      newConnectionCredentials,
+      existingConnectionCredentials,
+      updatePolicyWithNewCredentials,
+      updatePolicyWithExistingCredentials,
+    ]
+  );
 
   return (
     <>
       {!isCloudConnectorReusableEnabled && (
-        <CloudConnectorForm
+        <NewCloudConnectorForm
           input={input}
           templateName={templateName}
           newPolicy={newPolicy}
@@ -144,26 +176,18 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           cloud={cloud}
           cloudProvider={cloudProvider}
+          credentials={newConnectionCredentials}
+          setCredentials={updatePolicyWithNewCredentials}
         />
       )}
       {isCloudConnectorReusableEnabled && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiTabs>
-            {tabs.map((tab) => (
-              <EuiTab
-                key={tab.id}
-                onClick={() => onTabClick(tab)}
-                isSelected={tab.id === selectedTabId}
-                disabled={tab.id === 'existing-connection'}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiSpacer size="m" />
-          {tabs.find((tab) => tab.id === selectedTabId)?.content}
-        </>
+        <CloudConnectorTabs
+          tabs={tabs}
+          selectedTabId={selectedTabId}
+          onTabClick={onTabClick}
+          isEditPage={isEditPage}
+          cloudConnectorsCount={cloudConnectorsCount || 0}
+        />
       )}
     </>
   );
