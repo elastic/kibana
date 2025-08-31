@@ -12,12 +12,8 @@ export class MessageReader extends FileReaderBase {
   private _excludeLinesRegex: RegExp | null;
   private _multilineStartRegex: RegExp | null;
 
-  constructor(options: {
-    docLimit?: number;
-    excludeLinesPattern?: string;
-    multilineStartPattern?: string;
-  }) {
-    super(options);
+  constructor(options: { excludeLinesPattern?: string; multilineStartPattern?: string }) {
+    super();
 
     this._excludeLinesRegex =
       options.excludeLinesPattern === undefined ? null : new RegExp(options.excludeLinesPattern);

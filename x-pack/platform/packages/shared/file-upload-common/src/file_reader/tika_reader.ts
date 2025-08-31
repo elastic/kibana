@@ -9,8 +9,8 @@ import type { CreateDocsResponse, ImportDocTika } from './file_reader_base';
 import { FileReaderBase } from './file_reader_base';
 
 export class TikaReader extends FileReaderBase {
-  constructor(options?: { docLimit?: number }) {
-    super(options);
+  constructor() {
+    super();
   }
 
   public read(data: ArrayBuffer) {

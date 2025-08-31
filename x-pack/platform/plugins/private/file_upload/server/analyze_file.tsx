@@ -8,6 +8,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { NdjsonReader, MessageReader, TikaReader, FILE_FORMATS } from '@kbn/file-upload-common';
 import type {
+  IngestDocumentSimulation,
   IngestSimulateResponse,
   TextStructureFindStructureResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -48,7 +49,16 @@ export async function analyzeFile(
       const arrayBuffer = new Uint8Array(Buffer.from(data));
       const docs = reader.read(arrayBuffer).slice(0, PREVIEW_DOC_LIMIT);
       if (results.format === FILE_FORMATS.NDJSON) {
-        previewDocs = { docs: docs.map((doc: any) => ({ doc: { _source: JSON.parse(doc) } })) };
+        previewDocs = {
+          docs: docs.map((doc: any) => ({
+            doc: {
+              _id: '',
+              _index: '',
+              _ingest: { timestamp: '' },
+              _source: JSON.parse(doc),
+            } as IngestDocumentSimulation,
+          })),
+        };
       } else {
         previewDocs = await client.asInternalUser.ingest.simulate({
           pipeline,
@@ -103,7 +113,7 @@ function formatOverrides(overrides: InputOverrides) {
 function getReader(results: TextStructureFindStructureResponse) {
   switch (results.format) {
     case FILE_FORMATS.NDJSON:
-      return new NdjsonReader(results);
+      return new NdjsonReader();
     case FILE_FORMATS.DELIMITED:
       const options: {
         docLimit?: number;
@@ -118,7 +128,7 @@ function getReader(results: TextStructureFindStructureResponse) {
       }
       return new MessageReader(options);
     case FILE_FORMATS.TIKA:
-      return new TikaReader(results);
+      return new TikaReader();
     default:
       throw new Error(`Unknown format: ${results.format}`);
   }

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+// move this whole file to file-upload-common!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 import type { estypes } from '@elastic/elasticsearch';
+import type { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export interface InputOverrides {
@@ -21,6 +23,7 @@ export type FormattedOverrides = InputOverrides & {
 export interface AnalysisResult {
   results: FindFileStructureResponse;
   overrides?: FormattedOverrides;
+  preview?: IngestSimulateResponse;
 }
 
 export interface FindFileStructureResponse {
