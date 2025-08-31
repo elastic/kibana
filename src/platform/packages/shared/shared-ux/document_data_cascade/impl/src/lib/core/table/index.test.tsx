@@ -15,7 +15,7 @@ import {
   useDataCascadeActions,
   useDataCascadeState,
 } from '../../../store_provider';
-import { useTableHelper, useTableRowAdapter } from '.';
+import { useTableHelper, useAdaptedTableRows } from '.';
 import type { Row } from '@tanstack/react-table';
 
 describe('table', () => {
@@ -182,7 +182,7 @@ describe('table', () => {
         },
       });
 
-      const { result } = renderHook(() => useTableRowAdapter({ rowInstance: mockedRowInstance }));
+      const { result } = renderHook(() => useAdaptedTableRows({ rowInstance: mockedRowInstance }));
       expect(Object.keys(result.current)).toMatchInlineSnapshot(`
         Array [
           "rowId",
@@ -200,8 +200,8 @@ describe('table', () => {
           "rowToggleFn",
         ]
       `);
-      expect(result.current.rowToggleFn).toBe(expect.any(Function));
-      expect(result.current.rowSelectionFn).toBe(expect.any(Function));
+      expect(result.current.rowToggleFn).toStrictEqual(expect.any(Function));
+      expect(result.current.rowSelectionFn).toStrictEqual(expect.any(Function));
     });
   });
 });
