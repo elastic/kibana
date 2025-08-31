@@ -30,6 +30,11 @@ export const SideNavLogoComponent = ({
   label,
   ...props
 }: SideNavLogoProps): JSX.Element => {
+  // Force logoElastic for all solutions
+  const forcedProps = {
+    ...props,
+    iconType: 'logoElastic'
+  };
   const { euiTheme } = useEuiTheme();
 
   /**
@@ -59,7 +64,7 @@ export const SideNavLogoComponent = ({
         isActive={isActive}
         isLabelVisible={!isCollapsed}
         isTruncated={false}
-        {...props}
+        {...forcedProps}
       >
         {label}
       </MenuItem>

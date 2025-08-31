@@ -202,7 +202,7 @@ const Logo = ({
   };
 
   return (
-    <span css={logoCss.container} data-test-subj="nav-header-logo">
+    <span css={[logoCss.container, { display: 'none' }]} data-test-subj="nav-header-logo">
       {loadingCount === 0 ? (
         renderLogo()
       ) : (

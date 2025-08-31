@@ -7,9 +7,14 @@
 
 import type { PopoverAnchorPosition, WithEuiThemeProps } from '@elastic/eui';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeaderSectionItemButton,
+  EuiIcon,
   EuiPopover,
   EuiSkeletonRectangle,
+  EuiText,
+  EuiTextTruncate,
   withEuiTheme,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
@@ -196,12 +201,39 @@ class NavControlPopoverUI extends Component<Props, State> {
       return this.getButton(this.getAlignedLoadingSpinner(), 'loading spaces navigation');
     }
 
-    return this.getButton(
-      <Suspense fallback={this.getAlignedLoadingSpinner()}>
-        <LazySpaceAvatar space={activeSpace} size={'s'} />
-      </Suspense>,
-      (activeSpace as Space).name
+    // Map solution types to their properties
+    const getSolutionData = (solution: string | undefined) => {
+      const solutionMap = {
+        oblt: { name: 'Observability', icon: 'logoObservability' },
+        security: { name: 'Security', icon: 'logoSecurity' },
+        es: { name: 'Elasticsearch', icon: 'logoElasticsearch' },
+      };
+
+      return (
+        solutionMap[solution as keyof typeof solutionMap] || {
+          name: 'Classic',
+          icon: 'logoElasticStack',
+        }
+      );
+    };
+
+    const solutionData = getSolutionData(activeSpace.solution);
+    const solutionText = solutionData.name;
+
+    const buttonContent = (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={solutionData.icon} size="m" title={`Solution: ${solutionText}`} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <EuiTextTruncate width={120} text={(activeSpace as Space).name} truncation="end" />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
+
+    return this.getButton(buttonContent, `${(activeSpace as Space).name} - ${solutionText}`);
   };
 
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
@@ -217,6 +249,8 @@ class NavControlPopoverUI extends Component<Props, State> {
         data-test-subj="spacesNavSelector"
         title={linkTitle}
         onClick={this.toggleSpaceSelector}
+        textProps={false}
+        style={{ height: '32px' }}
       >
         {linkIcon}
         <p id="spacesNavDetails" hidden>
