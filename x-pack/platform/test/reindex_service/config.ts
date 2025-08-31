@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const esTestCluster = {
     ...xPackApiTestsConfig.get('esTestCluster'),
-    dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+    dataArchive: path.resolve(__dirname, './fixtures/data_archives/reindex_service.zip'),
   };
 
   return {
