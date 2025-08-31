@@ -48,14 +48,7 @@ export const ManageSpacesButton: React.FC<Props> = ({
       isDisabled={isDisabled}
       onClick={navigateToManageSpaces}
       data-test-subj="manageSpaces"
-      css={
-        fullWidth
-          ? { width: `100%` }
-          : css`
-              margin: ${euiTheme.size.m};
-              width: calc(100% - ${euiTheme.size.m} * 2);
-            `
-      }
+      fullWidth
     >
       <FormattedMessage
         id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"

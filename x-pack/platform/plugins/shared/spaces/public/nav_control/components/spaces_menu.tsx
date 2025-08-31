@@ -7,6 +7,9 @@
 
 import type { ExclusiveUnion, WithEuiThemeProps } from '@elastic/eui';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -119,9 +122,6 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
             defaultMessage: 'Spaces',
           })}
           id={this.props.id}
-          title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
-            defaultMessage: 'Change current space',
-          })}
           {...searchableProps}
           noMatchesMessage={noSpacesMessage}
           options={spaceOptions}
@@ -137,10 +137,46 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           {(list, search) => (
             <Fragment>
               <EuiPopoverTitle paddingSize="s">
-                {search ||
-                  i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
-                    defaultMessage: 'Spaces',
-                  })}
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    {search ||
+                      i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
+                        defaultMessage: 'Spaces',
+                      })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {i18n.translate('xpack.spaces.navControl.spacesMenu.solutionViewLabel', {
+                            defaultMessage: 'Solution view',
+                          })}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          title={i18n.translate(
+                            'xpack.spaces.navControl.spacesMenu.solutionViewTooltipTitle',
+                            {
+                              defaultMessage: 'Set per space',
+                            }
+                          )}
+                          content={i18n.translate(
+                            'xpack.spaces.navControl.spacesMenu.solutionViewTooltip',
+                            {
+                              defaultMessage:
+                                'Choose from Observability, Security, Elasticsearch, or Classic.',
+                            }
+                          )}
+                          type="info"
+                          size="s"
+                          color="subdued"
+                          position="right"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiPopoverTitle>
               {list}
             </Fragment>
