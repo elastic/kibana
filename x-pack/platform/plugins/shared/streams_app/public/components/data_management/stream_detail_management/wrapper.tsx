@@ -50,7 +50,7 @@ export function Wrapper({
   tabs: ManagementTabs;
   streamId: string;
   tab: string;
-  dataQualityController: DatasetQualityDetailsController | undefined;
+  dataQualityController?: DatasetQualityDetailsController;
 }) {
   const router = useStreamsAppRouter();
   const { definition, refresh: refreshDefinition } = useStreamDetail();
