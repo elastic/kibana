@@ -20,6 +20,10 @@ import {
   getGridHeaderPositioningStyle,
   getGridRowPositioningStyle,
 } from '../../lib/core/virtualizer';
+import {
+  useRegisterCascadeAccessibilityHelpers,
+  useTreeGridContainerARIAAttributes,
+} from '../../lib/core/accessibility';
 import { dataCascadeImplStyles, relativePosition, overflowYAuto } from './data_cascade_impl.styles';
 import type {
   DataCascadeImplProps,
@@ -76,6 +80,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   // The scrollable element for your list
   const scrollElementRef = useRef(null);
+  const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
 
   const styles = useMemo(() => dataCascadeImplStyles(euiTheme), [euiTheme]);
@@ -97,7 +102,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             alignItems="center"
             css={styles.cascadeHeaderWrapper}
           >
-            <EuiFlexItem>
+            <EuiFlexItem id="treegrid-label">
               <TableTitleSlot rows={tableRows} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -115,16 +120,28 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     }),
   });
 
-  const { activeStickyIndex, rowVirtualizer, virtualizedRowComputedTranslateValue } =
-    useRowVirtualizerHelper<G>({
-      rows,
-      overscan,
-      getScrollElement: () => scrollElementRef.current,
-      enableStickyGroupHeader,
-    });
+  const {
+    activeStickyIndex,
+    rowVirtualizer,
+    virtualizedRowComputedTranslateValue,
+    scrollToVirtualizedIndex,
+  } = useRowVirtualizerHelper<G>({
+    rows,
+    overscan,
+    getScrollElement: () => scrollElementRef.current,
+    enableStickyGroupHeader,
+  });
+
+  useRegisterCascadeAccessibilityHelpers<G>({
+    tableRows: rows,
+    tableWrapperElement: cascadeWrapperRef.current!,
+    scrollToRowIndex: scrollToVirtualizedIndex,
+  });
+
+  const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes();
 
   return (
-    <div data-test-subj="data-cascade" css={styles.container}>
+    <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
       <EuiAutoSizer>
         {(containerSize) => (
           <div ref={scrollElementRef} css={overflowYAuto} style={{ ...containerSize }}>
@@ -165,10 +182,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   style={{ height: rowVirtualizer.getTotalSize() }}
                 >
                   <div
-                    role="treegrid"
-                    aria-readonly="true"
-                    aria-multiselectable="false"
-                    aria-colcount={-1}
+                    {...treeGridContainerARIAAttributes}
+                    aria-labelledby="treegrid-label"
                     css={relativePosition}
                   >
                     {rowVirtualizer

@@ -15,7 +15,7 @@ import {
   useDataCascadeActions,
   useDataCascadeState,
 } from '../../../store_provider';
-import { useTableHelper, useTableRowAdapter } from '.';
+import { useTableHelper, useAdaptedTableRows } from '.';
 import type { Row } from '@tanstack/react-table';
 
 describe('table', () => {
@@ -182,7 +182,7 @@ describe('table', () => {
         },
       });
 
-      const { result } = renderHook(() => useTableRowAdapter({ rowInstance: mockedRowInstance }));
+      const { result } = renderHook(() => useAdaptedTableRows({ rowInstance: mockedRowInstance }));
       expect(Object.keys(result.current)).toMatchInlineSnapshot(`
         Array [
           "rowId",
