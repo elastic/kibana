@@ -305,10 +305,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   // Show empty state if no workflows exist and no filters are applied
   if (shouldShowWorkflowsEmptyState(workflows, search)) {
     return (
-      <WorkflowsEmptyState
-        onCreateWorkflow={onCreateWorkflow}
-        canCreateWorkflow={!!canCreateWorkflow}
-      />
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+        <EuiFlexItem grow={false}>
+          <WorkflowsEmptyState
+            onCreateWorkflow={onCreateWorkflow}
+            canCreateWorkflow={!!canCreateWorkflow}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
