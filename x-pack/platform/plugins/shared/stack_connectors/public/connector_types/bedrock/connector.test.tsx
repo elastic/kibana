@@ -8,7 +8,7 @@
 import React from 'react';
 import BedrockConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
@@ -52,7 +52,7 @@ describe('BedrockConnectorFields renders', () => {
     }));
   });
   test('Bedrock connector fields are rendered', async () => {
-    const { getAllByTestId } = render(
+    render(
       <ConnectorFormTestProvider connector={bedrockConnector}>
         <BedrockConnectorFields
           readOnly={false}
@@ -62,19 +62,21 @@ describe('BedrockConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(bedrockConnector.config.apiUrl);
-    expect(getAllByTestId('config.defaultModel-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.defaultModel-input')[0]).toHaveValue(
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+      bedrockConnector.config.apiUrl
+    );
+    expect(screen.getAllByTestId('config.defaultModel-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.defaultModel-input')[0]).toHaveValue(
       bedrockConnector.config.defaultModel
     );
-    expect(getAllByTestId('bedrock-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('bedrock-api-model-doc')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('bedrock-api-doc')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('bedrock-api-model-doc')[0]).toBeInTheDocument();
   });
 
   describe('Dashboard link', () => {
     it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
-      const { queryByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={bedrockConnector}>
           <BedrockConnectorFields
             readOnly={false}
@@ -83,34 +85,34 @@ describe('BedrockConnectorFields renders', () => {
           />
         </ConnectorFormTestProvider>
       );
-      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
     });
     it('Does not render if isEdit is true and dashboardUrl is null', async () => {
       mockDashboard.mockImplementation((id: string) => ({
         dashboardUrl: null,
       }));
-      const { queryByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={bedrockConnector}>
           <BedrockConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
     });
     it('Renders if isEdit is true and dashboardUrl is defined', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={bedrockConnector}>
           <BedrockConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-      expect(getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
+      expect(screen.getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
     });
     it('On click triggers redirect with correct saved object id', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={bedrockConnector}>
           <BedrockConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-      fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
+      fireEvent.click(screen.getByTestId('link-gen-ai-token-dashboard'));
       expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
     });
   });
@@ -123,7 +125,7 @@ describe('BedrockConnectorFields renders', () => {
     });
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={bedrockConnector} onSubmit={onSubmit}>
           <BedrockConnectorFields
             readOnly={false}
@@ -133,9 +135,7 @@ describe('BedrockConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
@@ -156,7 +156,7 @@ describe('BedrockConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <BedrockConnectorFields
             readOnly={false}
@@ -166,9 +166,8 @@ describe('BedrockConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });
@@ -189,7 +188,7 @@ describe('BedrockConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <BedrockConnectorFields
             readOnly={false}
@@ -199,14 +198,14 @@ describe('BedrockConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });

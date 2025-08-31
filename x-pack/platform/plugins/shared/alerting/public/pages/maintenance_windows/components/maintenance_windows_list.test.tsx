@@ -96,10 +96,10 @@ describe('MaintenanceWindowsList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={() => {}}
@@ -140,6 +140,7 @@ describe('MaintenanceWindowsList', () => {
   });
 
   test('it does NOT render action column in readonly', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={() => {}}
@@ -163,6 +164,7 @@ describe('MaintenanceWindowsList', () => {
   });
 
   test('it calls refreshData when user presses refresh button', async () => {
+    appMockRenderer = createAppMockRenderer();
     const refreshData = jest.fn();
     appMockRenderer.render(
       <MaintenanceWindowsList

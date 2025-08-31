@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import ParamsFields from './params';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
@@ -20,7 +20,7 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => ({
 describe('Inference Params Fields renders', () => {
   mockedIsInferenceEndpointExists.mockResolvedValue(true);
   test('all params fields are rendered', () => {
-    const { getByTestId } = render(
+    render(
       <ParamsFields
         actionParams={{
           subAction: SUB_ACTION.UNIFIED_COMPLETION,
@@ -43,8 +43,8 @@ describe('Inference Params Fields renders', () => {
         index={0}
       />
     );
-    expect(getByTestId('inference-bodyJsonEditor')).toBeInTheDocument();
-    expect(getByTestId('bodyJsonEditor')).toHaveProperty(
+    expect(screen.getByTestId('inference-bodyJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('bodyJsonEditor')).toHaveProperty(
       'value',
       `{\"messages\":[{\"role\":\"user\",\"content\":\"What is Elastic?\"}]}`
     );
@@ -142,7 +142,7 @@ describe('Inference Params Fields renders', () => {
   it('calls editAction function with the correct arguments ', () => {
     const editAction = jest.fn();
     const errors = {};
-    const { getByTestId } = render(
+    render(
       <ParamsFields
         actionParams={{
           subAction: SUB_ACTION.RERANK,
@@ -168,7 +168,7 @@ describe('Inference Params Fields renders', () => {
         }}
       />
     );
-    const jsonEditor = getByTestId('inputJsonEditor');
+    const jsonEditor = screen.getByTestId('inputJsonEditor');
     fireEvent.change(jsonEditor, { target: { value: `[\"apple\",\"banana\",\"tomato\"]` } });
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',

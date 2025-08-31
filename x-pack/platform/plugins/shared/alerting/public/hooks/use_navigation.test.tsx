@@ -40,11 +40,11 @@ let appMockRenderer: AppMockRenderer;
 describe('useNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   describe('useMaintenanceWindowsNavigation', () => {
     it('it calls getMaintenanceWindowsUrl with correct arguments', () => {
+      appMockRenderer = createAppMockRenderer();
       const { result } = renderHook(() => useMaintenanceWindowsNavigation(), {
         wrapper: appMockRenderer.AppWrapper,
       });
@@ -61,6 +61,7 @@ describe('useNavigation', () => {
     });
 
     it('it calls navigateToMaintenanceWindows with correct arguments', () => {
+      appMockRenderer = createAppMockRenderer();
       const { result } = renderHook(() => useMaintenanceWindowsNavigation(), {
         wrapper: appMockRenderer.AppWrapper,
       });
@@ -78,6 +79,7 @@ describe('useNavigation', () => {
 
   describe('useCreateMaintenanceWindowNavigation', () => {
     it('it calls navigateToCreateMaintenanceWindow with correct arguments', () => {
+      appMockRenderer = createAppMockRenderer();
       const { result } = renderHook(() => useCreateMaintenanceWindowNavigation(), {
         wrapper: appMockRenderer.AppWrapper,
       });
@@ -95,6 +97,7 @@ describe('useNavigation', () => {
 
   describe('useEditMaintenanceWindowNavigation', () => {
     it('it calls navigateToEditMaintenanceWindow with correct arguments', () => {
+      appMockRenderer = createAppMockRenderer();
       const { result } = renderHook(() => useEditMaintenanceWindowsNavigation(), {
         wrapper: appMockRenderer.AppWrapper,
       });

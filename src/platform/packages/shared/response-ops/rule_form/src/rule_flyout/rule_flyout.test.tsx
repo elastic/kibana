@@ -120,41 +120,41 @@ describe('ruleFlyout', () => {
   });
 
   test('omitting `initialStep` causes default behavior with step 1 selected', () => {
-    const { getByText } = render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
+    render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
 
-    expect(getByText('Current step is 1'));
-    expect(getByText('Step 2 is incomplete'));
-    expect(getByText('Step 3 is incomplete'));
+    expect(screen.getByText('Current step is 1'));
+    expect(screen.getByText('Step 2 is incomplete'));
+    expect(screen.getByText('Step 3 is incomplete'));
   });
 
   test('setting `initialStep` to `RuleFormStepId.DEFINITION` will make step 1 the current step', () => {
-    const { getByText } = render(
+    render(
       <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.DEFINITION} />
     );
 
-    expect(getByText('Current step is 1'));
-    expect(getByText('Step 2 is incomplete'));
-    expect(getByText('Step 3 is incomplete'));
+    expect(screen.getByText('Current step is 1'));
+    expect(screen.getByText('Step 2 is incomplete'));
+    expect(screen.getByText('Step 3 is incomplete'));
   });
 
   test('setting `initialStep` to `RuleFormStepId.ACTION` will make step 1 the current step', () => {
-    const { getByText } = render(
+    render(
       <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.ACTIONS} />
     );
 
-    expect(getByText('Step 1 is complete'));
-    expect(getByText('Current step is 2'));
-    expect(getByText('Step 3 is incomplete'));
+    expect(screen.getByText('Step 1 is complete'));
+    expect(screen.getByText('Current step is 2'));
+    expect(screen.getByText('Step 3 is incomplete'));
   });
 
   test('setting `initialStep` to `RuleFormStepId.DETAILS` will make step 1 the current step', () => {
-    const { getByText } = render(
+    render(
       <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.DETAILS} />
     );
 
-    expect(getByText('Step 1 is complete'));
-    expect(getByText('Step 2 is incomplete'));
-    expect(getByText('Current step is 3'));
+    expect(screen.getByText('Step 1 is complete'));
+    expect(screen.getByText('Step 2 is incomplete'));
+    expect(screen.getByText('Current step is 3'));
   });
 
   test('should call onSave when save button is pressed', async () => {

@@ -95,8 +95,8 @@ describe('Update Api Key', () => {
     expect(apiUpdateApiKeyCall).toHaveBeenLastCalledWith(expect.objectContaining({ ids: ['2'] }));
     await waitFor(() => {
       expect(setIsLoadingState).toBeCalledTimes(2);
-      expect(onUpdated).toHaveBeenCalled();
     });
+    expect(onUpdated).toHaveBeenCalled();
   });
 
   it('Failed to update an Api Key', async () => {
@@ -117,8 +117,9 @@ describe('Update Api Key', () => {
     expect(apiUpdateApiKeyCall).toHaveBeenLastCalledWith(expect.objectContaining({ ids: ['2'] }));
     await waitFor(() => {
       expect(setIsLoadingState).toBeCalledTimes(2);
-      expect(addError).toHaveBeenCalled();
-      expect(addError.mock.calls[0]).toMatchInlineSnapshot(`
+    });
+    expect(addError).toHaveBeenCalled();
+    expect(addError.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           500,
           Object {
@@ -126,6 +127,5 @@ describe('Update Api Key', () => {
           },
         ]
       `);
-    });
   });
 });

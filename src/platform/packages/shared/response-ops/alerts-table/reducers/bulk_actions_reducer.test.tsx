@@ -376,7 +376,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
           await userEvent.click(bulkActionsCells[1]);
           expect(
-            (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
+            (screen.queryByTestId('bulk-actions-header') as HTMLInputElement).checked
           ).toBeFalsy();
         });
       });
@@ -824,9 +824,9 @@ describe('AlertsDataGrid bulk actions', () => {
                 'bulk-actions-row-cell'
               ) as HTMLInputElement[];
               expect(bulkActionsCells[0].checked).toBeTruthy();
-              expect(bulkActionsCells[1].checked).toBeTruthy();
-              expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
             });
+            expect(bulkActionsCells[1].checked).toBeTruthy();
+            expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
 
             await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
@@ -860,9 +860,9 @@ describe('AlertsDataGrid bulk actions', () => {
                 'bulk-actions-row-cell'
               ) as HTMLInputElement[];
               expect(bulkActionsCells[0].checked).toBeTruthy();
-              expect(bulkActionsCells[1].checked).toBeTruthy();
-              expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
             });
+            expect(bulkActionsCells[1].checked).toBeTruthy();
+            expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
 
             await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
@@ -904,8 +904,8 @@ describe('AlertsDataGrid bulk actions', () => {
                 'bulk-actions-row-cell'
               ) as HTMLInputElement[];
               expect(bulkActionsCells[0].checked).toBeFalsy();
-              expect(bulkActionsCells[1].checked).toBeFalsy();
             });
+            expect(bulkActionsCells[1].checked).toBeFalsy();
           });
         });
       });

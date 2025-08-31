@@ -56,7 +56,7 @@ describe('useMuteAlertInstance', () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();
-      expect(addErrorMock).toHaveBeenCalled();
     });
+    expect(addErrorMock).toHaveBeenCalled();
   });
 });

@@ -184,7 +184,10 @@ describe('JsonEditor', () => {
     );
 
     await waitFor(() => {
-      expect(editAction.mock.calls).toMatchInlineSnapshot(`
+      expect(editAction.mock.calls[0]).toBeDefined();
+    });
+
+    expect(editAction.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
             "jsonEditorError",
@@ -193,6 +196,5 @@ describe('JsonEditor', () => {
           ],
         ]
       `);
-    });
   });
 });

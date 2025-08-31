@@ -107,21 +107,21 @@ describe('SlackActionFields renders', () => {
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledTimes(1);
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          secrets: {
-            token: 'some token',
-          },
-          config: {
-            allowedChannels: ['my-channel'],
-          },
-          id: 'test',
-          actionTypeId: '.slack',
-          name: 'slack',
-          isDeprecated: false,
+    });
+    expect(onSubmit).toBeCalledWith({
+      data: {
+        secrets: {
+          token: 'some token',
         },
-        isValid: true,
-      });
+        config: {
+          allowedChannels: ['my-channel'],
+        },
+        id: 'test',
+        actionTypeId: '.slack',
+        name: 'slack',
+        isDeprecated: false,
+      },
+      isValid: true,
     });
   });
 
@@ -149,7 +149,7 @@ describe('SlackActionFields renders', () => {
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledTimes(1);
-      expect(onSubmit).toBeCalledWith(expect.objectContaining({ isValid: false }));
     });
+    expect(onSubmit).toBeCalledWith(expect.objectContaining({ isValid: false }));
   });
 });

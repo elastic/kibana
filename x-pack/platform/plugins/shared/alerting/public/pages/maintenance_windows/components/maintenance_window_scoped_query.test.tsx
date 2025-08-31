@@ -41,10 +41,10 @@ describe('MaintenanceWindowScopedQuery', () => {
         },
       },
     });
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders correctly', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowScopedQuery
         ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}
@@ -58,6 +58,7 @@ describe('MaintenanceWindowScopedQuery', () => {
   });
 
   it('should hide the search bar if isEnabled is false', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowScopedQuery
         ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}
@@ -72,6 +73,7 @@ describe('MaintenanceWindowScopedQuery', () => {
   });
 
   it('should render loading if isLoading is true', () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MaintenanceWindowScopedQuery
         ruleTypeIds={['apm', '.es-query', 'siem.esqlRule']}

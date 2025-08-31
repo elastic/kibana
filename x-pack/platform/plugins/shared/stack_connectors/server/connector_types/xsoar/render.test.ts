@@ -31,9 +31,9 @@ const logger = loggingSystemMock.createLogger();
 
 describe('XSOAR - renderParameterTemplates', () => {
   it('should rendered subActionParams with variables', () => {
-    const result = renderParameterTemplates(logger, params, variables);
+    const view = renderParameterTemplates(logger, params, variables);
 
-    expect(result.subActionParams).toEqual({
+    expect(view.subActionParams).toEqual({
       name: `new incident - ${variables.alert.uuid}`,
       playbookId: 'playbook0',
       createInvestigation: true,
@@ -48,9 +48,9 @@ describe('XSOAR - renderParameterTemplates', () => {
       ...params,
       subActionParams: { ...params.subActionParams, isRuleSeverity: false },
     };
-    const result = renderParameterTemplates(logger, paramswithoutRuleSeverity, variables);
+    const view = renderParameterTemplates(logger, paramswithoutRuleSeverity, variables);
 
-    expect(result.subActionParams).toEqual({
+    expect(view.subActionParams).toEqual({
       name: `new incident - ${variables.alert.uuid}`,
       playbookId: 'playbook0',
       createInvestigation: true,
@@ -65,8 +65,8 @@ describe('XSOAR - renderParameterTemplates', () => {
     jest.spyOn(Mustache, 'render').mockImplementation(() => {
       throw new Error(errorMessage);
     });
-    const result = renderParameterTemplates(logger, params, variables);
-    expect(result.subActionParams).toEqual({
+    const view = renderParameterTemplates(logger, params, variables);
+    expect(view.subActionParams).toEqual({
       body: 'error rendering mustache template "": test error',
       createInvestigation: true,
       name: 'error rendering mustache template "new incident - {{alert.uuid}}": test error',

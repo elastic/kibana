@@ -131,7 +131,7 @@ describe('RuleStatusDropdown', () => {
   });
 
   test('renders read-only status control when isEditable is false', () => {
-    const wrapper = mountWithIntl(
+    render(
       <RuleStatusDropdown
         {...{
           ...props,
@@ -140,9 +140,8 @@ describe('RuleStatusDropdown', () => {
         isEditable={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdownReadonly"]').first().props().children).toBe(
-      'Enabled'
-    );
+
+    expect(screen.getByTestId('statusDropdownReadonly')).toHaveTextContent('Enabled');
   });
 
   describe('autoRecoverAlerts', () => {
@@ -182,7 +181,7 @@ describe('RuleStatusDropdown', () => {
       expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
       await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
 
-      expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
 
       await waitFor(() => {
         expect(disableRule).toHaveBeenCalledWith(false);

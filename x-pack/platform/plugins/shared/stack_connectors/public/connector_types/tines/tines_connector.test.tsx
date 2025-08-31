@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import { act, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
 import TinesConnectorFields from './tines_connector';
@@ -55,7 +55,7 @@ describe('TinesConnectorFields renders', () => {
     });
 
     it('should succeed validation when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -65,9 +65,7 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: actionConnector,
@@ -81,7 +79,7 @@ describe('TinesConnectorFields renders', () => {
         secrets: {},
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -91,9 +89,7 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},
@@ -107,7 +103,7 @@ describe('TinesConnectorFields renders', () => {
         config: { url: '' },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -117,9 +113,7 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},
@@ -133,7 +127,7 @@ describe('TinesConnectorFields renders', () => {
         config: { url: 'not a url' },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <TinesConnectorFields
             readOnly={false}
@@ -143,9 +137,7 @@ describe('TinesConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},

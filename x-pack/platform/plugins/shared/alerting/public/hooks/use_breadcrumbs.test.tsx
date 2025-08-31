@@ -45,10 +45,10 @@ let appMockRenderer: AppMockRenderer;
 describe('useBreadcrumbs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('set maintenance windows breadcrumbs', () => {
+    appMockRenderer = createAppMockRenderer();
     renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -59,6 +59,7 @@ describe('useBreadcrumbs', () => {
   });
 
   test('set create maintenance windows breadcrumbs', () => {
+    appMockRenderer = createAppMockRenderer();
     renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -74,6 +75,7 @@ describe('useBreadcrumbs', () => {
   });
 
   test('set edit maintenance windows breadcrumbs', () => {
+    appMockRenderer = createAppMockRenderer();
     renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit), {
       wrapper: appMockRenderer.AppWrapper,
     });

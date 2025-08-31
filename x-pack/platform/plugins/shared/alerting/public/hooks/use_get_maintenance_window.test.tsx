@@ -42,13 +42,12 @@ let appMockRenderer: AppMockRenderer;
 describe('useGetMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('should call onError if api fails', async () => {
     getMaintenanceWindow.mockRejectedValue('');
 
+    appMockRenderer = createAppMockRenderer();
     renderHook(() => useGetMaintenanceWindow('testId'), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -62,6 +61,7 @@ describe('useGetMaintenanceWindow', () => {
       scopedQuery: undefined,
     });
 
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useGetMaintenanceWindow('testId'), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -82,6 +82,7 @@ describe('useGetMaintenanceWindow', () => {
       scopedQuery: undefined,
     });
 
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useGetMaintenanceWindow('testId'), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -102,6 +103,7 @@ describe('useGetMaintenanceWindow', () => {
       scopedQuery: { filter: 'filter' },
     });
 
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useGetMaintenanceWindow('testId'), {
       wrapper: appMockRenderer.AppWrapper,
     });

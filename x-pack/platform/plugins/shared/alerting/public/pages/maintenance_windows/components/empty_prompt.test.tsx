@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-
+import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { EmptyPrompt } from './empty_prompt';
@@ -20,33 +20,31 @@ describe('EmptyPrompt', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(
-      <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks} />
-    );
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks} />);
 
-    expect(result.getByText('Create your first maintenance window')).toBeInTheDocument();
+    expect(screen.getByText('Create your first maintenance window')).toBeInTheDocument();
     expect(
-      result.getByText('Schedule a time period in which rule notifications cease.')
+      screen.getByText('Schedule a time period in which rule notifications cease.')
     ).toBeInTheDocument();
   });
 
   test('it renders an action button when showCreateButton is provided', () => {
-    const result = appMockRenderer.render(
-      <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks} />
-    );
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks} />);
 
-    expect(result.getByRole('button')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
   test('it does not render an action button when showCreateButton is not provided', () => {
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <EmptyPrompt showCreateButton={false} onClickCreate={handleClickCreate} docLinks={docLinks} />
     );
 
-    expect(result.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });

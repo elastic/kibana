@@ -8,20 +8,18 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { LabelWithTooltip } from './label_with_tooltip';
 
 describe('LabelWithTooltip', () => {
   it('renders label and tooltip content', async () => {
-    const { getByText } = render(
-      <LabelWithTooltip labelContent="Label" tooltipContent="Tooltip" />
-    );
-    const infoElement = getByText('Info');
+    render(<LabelWithTooltip labelContent="Label" tooltipContent="Tooltip" />);
+    const infoElement = screen.getByText('Info');
 
     fireEvent.mouseOver(infoElement);
     await waitFor(() => {
-      expect(getByText('Tooltip')).toBeInTheDocument();
+      expect(screen.getByText('Tooltip')).toBeInTheDocument();
     });
-    expect(getByText('Label')).toBeInTheDocument();
+    expect(screen.getByText('Label')).toBeInTheDocument();
   });
 });

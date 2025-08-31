@@ -52,11 +52,11 @@ describe('useArchiveMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    appMockRenderer = createAppMockRenderer();
     archiveMaintenanceWindow.mockResolvedValue(maintenanceWindow);
   });
 
   it('should call onSuccess if api succeeds', async () => {
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useArchiveMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -72,6 +72,7 @@ describe('useArchiveMaintenanceWindow', () => {
   it('should call onError if api fails', async () => {
     archiveMaintenanceWindow.mockRejectedValue('');
 
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useArchiveMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -86,6 +87,7 @@ describe('useArchiveMaintenanceWindow', () => {
   });
 
   it('should call onSuccess if api succeeds (unarchive)', async () => {
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useArchiveMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });
@@ -100,7 +102,7 @@ describe('useArchiveMaintenanceWindow', () => {
 
   it('should call onError if api fails (unarchive)', async () => {
     archiveMaintenanceWindow.mockRejectedValue('');
-
+    appMockRenderer = createAppMockRenderer();
     const { result } = renderHook(() => useArchiveMaintenanceWindow(), {
       wrapper: appMockRenderer.AppWrapper,
     });

@@ -255,8 +255,8 @@ describe('AlertDelete Modal', () => {
 
     await waitFor(() => {
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(i18n.ALERT_DELETE_SUCCESS);
-      expect(closeModalMock).toHaveBeenCalledTimes(1);
     });
+    expect(closeModalMock).toHaveBeenCalledTimes(1);
   });
 
   it('shows a warning toast when schedule returns a message', async () => {
@@ -287,8 +287,8 @@ describe('AlertDelete Modal', () => {
 
     await waitFor(() => {
       expect(notifications.toasts.addInfo).toHaveBeenCalledWith(`task is already running!`);
-      expect(closeModalMock).toHaveBeenCalledTimes(1);
     });
+    expect(closeModalMock).toHaveBeenCalledTimes(1);
   });
 
   it('doesnt include a threshold that has been activated and then deactivated', async () => {
@@ -325,8 +325,8 @@ describe('AlertDelete Modal', () => {
 
     await waitFor(() => {
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(i18n.ALERT_DELETE_SUCCESS);
-      expect(closeModalMock).toHaveBeenCalledTimes(1);
     });
+    expect(closeModalMock).toHaveBeenCalledTimes(1);
 
     expect(http.post).toHaveBeenCalledWith(
       '/internal/alerting/rules/settings/_alert_delete_schedule',

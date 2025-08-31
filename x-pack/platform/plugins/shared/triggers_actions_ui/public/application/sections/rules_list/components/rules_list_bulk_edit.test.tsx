@@ -176,15 +176,15 @@ describe('Rules list Bulk Edit', () => {
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-    expect(screen.queryByTestId('totalRulesCount')).toBeInTheDocument();
+    expect(screen.getByTestId('totalRulesCount')).toBeInTheDocument();
     expect(screen.queryByTestId('showBulkActionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
 
     expect(screen.queryByTestId('totalRulesCount')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('showBulkActionButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('selectAllRulesButton')).toBeInTheDocument();
+    expect(screen.getByTestId('showBulkActionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
   });
 
   it('selects all will select all items', async () => {
@@ -195,17 +195,17 @@ describe('Rules list Bulk Edit', () => {
     fireEvent.click(screen.getByTestId('selectAllRulesButton'));
 
     mockedRulesData.forEach((rule) => {
-      expect(screen.getByTestId(`checkboxSelectRow-${rule.id}`).closest('tr')).toHaveClass(
-        'euiTableRow-isSelected'
-      );
+      // check the checkbox instead of the row
+      const checkbox = screen.getByTestId(`checkboxSelectRow-${rule.id}`);
+      expect(checkbox).toBeChecked();
     });
 
     fireEvent.click(screen.getByTestId('showBulkActionButton'));
 
-    expect(screen.queryByTestId('ruleQuickEditButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('bulkDisable')).toBeInTheDocument();
-    expect(screen.queryByTestId('bulkEnable')).toBeInTheDocument();
-    expect(screen.queryByTestId('bulkDelete')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleQuickEditButton')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkDisable')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkEnable')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkDelete')).toBeInTheDocument();
   });
 
   it('does not render select all button if the user is not authorized', async () => {
@@ -215,7 +215,7 @@ describe('Rules list Bulk Edit', () => {
 
     fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
 
-    expect(screen.queryByTestId('showBulkActionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('showBulkActionButton')).toBeInTheDocument();
     expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
   });
 });

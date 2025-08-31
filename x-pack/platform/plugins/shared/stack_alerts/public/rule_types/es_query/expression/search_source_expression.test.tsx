@@ -289,36 +289,34 @@ describe('SearchSourceAlertTypeExpression', () => {
     );
   };
   test('should render correctly', async () => {
-    const result = setup(defaultSearchSourceExpressionParams);
+    setup(defaultSearchSourceExpressionParams);
 
-    await waitFor(() =>
-      expect(result.getByTestId('searchSourceLoadingSpinner')).toBeInTheDocument()
-    );
+    await screen.findByTestId('searchSourceLoadingSpinner');
 
-    expect(result.getByTestId('thresholdPopover')).toBeInTheDocument();
-    expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
+    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
   });
 
   test('should render chosen size field', async () => {
-    const result = await act(async () =>
+    await act(async () =>
       setup({
         ...defaultSearchSourceExpressionParams,
         size: 0,
       })
     );
 
-    expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
+    expect(screen.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
   });
 
   test('should disable Test Query button if data view is not selected yet', async () => {
-    const result = await act(async () =>
+    await act(async () =>
       setup({
         ...defaultSearchSourceExpressionParams,
         searchConfiguration: undefined,
       })
     );
 
-    expect(result.getByTestId('testQuery')).toBeDisabled();
+    expect(screen.getByTestId('testQuery')).toBeDisabled();
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {
@@ -432,11 +430,11 @@ describe('SearchSourceAlertTypeExpression', () => {
     (dataMock.search.searchSource.create as jest.Mock).mockImplementationOnce(() =>
       Promise.reject(new Error('Cant find searchSource'))
     );
-    const result = setup(defaultSearchSourceExpressionParams);
+    setup(defaultSearchSourceExpressionParams);
 
+    expect(screen.queryByText('Cant find searchSource')).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.queryByText('Cant find searchSource')).not.toBeInTheDocument();
-      expect(result.getByTestId('searchSourceLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByTestId('searchSourceLoadingSpinner')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Cant find searchSource')).toBeInTheDocument();

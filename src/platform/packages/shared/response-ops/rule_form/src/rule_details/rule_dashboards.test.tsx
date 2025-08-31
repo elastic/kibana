@@ -81,9 +81,9 @@ describe('RuleDashboards', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Related dashboards')).toBeInTheDocument();
-      expect(useRuleFormState).toHaveBeenCalled();
-      expect(useRuleFormDispatch).toHaveBeenCalled();
     });
+    expect(useRuleFormState).toHaveBeenCalled();
+    expect(useRuleFormDispatch).toHaveBeenCalled();
   });
 
   it('fetches and displays selected dashboard titles', async () => {
@@ -106,9 +106,9 @@ describe('RuleDashboards', () => {
     );
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
-      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
-      expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
+    expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
+    expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
   });
 
   it('dispatches selected dashboards on change', async () => {
@@ -132,15 +132,13 @@ describe('RuleDashboards', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
-      expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
-      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
-      expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
+    expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
+    expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
+    expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
 
     // Simulate selecting an option in the EuiComboBox
-    const inputWrap = screen
-      .getByTestId('ruleLinkedDashboards')
-      .querySelector('.euiComboBox__inputWrap');
+    const inputWrap = screen.getByTestId('comboBoxInput');
     if (inputWrap) {
       await userEvent.click(inputWrap);
     }
@@ -154,9 +152,9 @@ describe('RuleDashboards', () => {
           value: { dashboards: [{ id: '1' }, { id: '2' }] },
         },
       });
-      expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
-      expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
     });
+    expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
   });
 
   it('does not fetch dashboard list when combobox is not focused', async () => {
@@ -182,8 +180,8 @@ describe('RuleDashboards', () => {
 
     await waitFor(() => {
       expect(mockDashboardServiceProvider).toHaveBeenCalled();
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
     });
+    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
   });
 
   it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
@@ -210,15 +208,15 @@ describe('RuleDashboards', () => {
 
     // Assert that fetchDashboards was called with the correct search value
     // Wait for the next tick to allow state update and effect to run
+
     await waitFor(() => {
-      expect(searchInput).toHaveValue('Dashboard 1');
-
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: 100, text: 'Dashboard 1*' })
-      );
-
-      expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
       expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
     });
+    expect(searchInput).toHaveValue('Dashboard 1');
+    expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+
+    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 100, text: 'Dashboard 1*' })
+    );
   });
 });

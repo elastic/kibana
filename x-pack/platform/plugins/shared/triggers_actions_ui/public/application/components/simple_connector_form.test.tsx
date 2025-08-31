@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import type { RenderResult } from '@testing-library/react';
-import { act, render, screen } from '@testing-library/react';
+
+import { render, screen } from '@testing-library/react';
 import { FormTestProvider } from './test_utils';
 import type { ConfigFieldSchema, SecretsFieldSchema } from './simple_connector_form';
 import { SimpleConnectorForm } from './simple_connector_form';
 import userEvent from '@testing-library/user-event';
 
-const fillForm = async ({ getByTestId }: RenderResult) => {
-  await userEvent.type(getByTestId('config.url-input'), 'https://example.com', {
+const fillForm = async () => {
+  await userEvent.type(screen.getByTestId('config.url-input'), 'https://example.com', {
     delay: 10,
   });
 
-  await userEvent.type(getByTestId('config.test-config-input'), 'My text field', {
+  await userEvent.type(screen.getByTestId('config.test-config-input'), 'My text field', {
     delay: 10,
   });
 
-  await userEvent.type(getByTestId('secrets.username-input'), 'elastic', {
+  await userEvent.type(screen.getByTestId('secrets.username-input'), 'elastic', {
     delay: 10,
   });
 
-  await userEvent.type(getByTestId('secrets.password-input'), 'changeme', {
+  await userEvent.type(screen.getByTestId('secrets.password-input'), 'changeme', {
     delay: 10,
   });
 };
@@ -48,7 +48,7 @@ describe('SimpleConnectorForm', () => {
   });
 
   it('renders correctly', async () => {
-    const { getByText } = render(
+    render(
       <FormTestProvider onSubmit={onSubmit}>
         <SimpleConnectorForm
           isEdit={true}
@@ -59,13 +59,13 @@ describe('SimpleConnectorForm', () => {
       </FormTestProvider>
     );
 
-    expect(getByText('Url')).toBeInTheDocument();
-    expect(getByText('Test config')).toBeInTheDocument();
-    expect(getByText('Test help text')).toBeInTheDocument();
+    expect(screen.getByText('Url')).toBeInTheDocument();
+    expect(screen.getByText('Test config')).toBeInTheDocument();
+    expect(screen.getByText('Test help text')).toBeInTheDocument();
 
-    expect(getByText('Authentication')).toBeInTheDocument();
-    expect(getByText('Username')).toBeInTheDocument();
-    expect(getByText('Password')).toBeInTheDocument();
+    expect(screen.getByText('Authentication')).toBeInTheDocument();
+    expect(screen.getByText('Username')).toBeInTheDocument();
+    expect(screen.getByText('Password')).toBeInTheDocument();
   });
 
   describe('help text and default values', () => {
@@ -107,7 +107,7 @@ describe('SimpleConnectorForm', () => {
   });
 
   it('submits correctly', async () => {
-    const res = render(
+    render(
       <FormTestProvider onSubmit={onSubmit}>
         <SimpleConnectorForm
           isEdit={true}
@@ -118,11 +118,9 @@ describe('SimpleConnectorForm', () => {
       </FormTestProvider>
     );
 
-    await fillForm(res);
+    await fillForm();
 
-    await act(async () => {
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
-    });
+    await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
     expect(onSubmit).toHaveBeenCalledWith({
       data: {
@@ -148,7 +146,7 @@ describe('SimpleConnectorForm', () => {
     ];
 
     it.each(tests)('validates correctly %p', async (field, value) => {
-      const res = render(
+      render(
         <FormTestProvider onSubmit={onSubmit}>
           <SimpleConnectorForm
             isEdit={true}
@@ -159,16 +157,16 @@ describe('SimpleConnectorForm', () => {
         </FormTestProvider>
       );
 
-      await fillForm(res);
+      await fillForm();
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
