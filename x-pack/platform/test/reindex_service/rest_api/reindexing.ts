@@ -16,6 +16,7 @@ import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-serv
 import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

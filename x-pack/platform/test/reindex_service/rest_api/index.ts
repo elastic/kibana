@@ -7,6 +7,7 @@
 
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('upgrade assistant', function () {
     loadTestFile(require.resolve('./reindexing'));

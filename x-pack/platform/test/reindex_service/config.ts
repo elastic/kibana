@@ -8,27 +8,19 @@
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { EsVersion } from '@kbn/test';
 import path from 'node:path';
 
-export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/api_integration/config')
   );
   const xPackApiTestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const esVersion = EsVersion.getDefault();
-  const willRunEsv9 = esVersion.matchRange('9');
-
-  let esTestCluster = {
+  const esTestCluster = {
     ...xPackApiTestsConfig.get('esTestCluster'),
     dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
   };
-  if (willRunEsv9) {
-    log.info(`Detected ES version ${esVersion}; not loading data archive`);
-    esTestCluster = undefined;
-  }
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
@@ -39,7 +31,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
       supertest: kibanaAPITestsConfig.get('services.supertest'),
     },
     junit: {
-      reportName: 'X-Pack Upgrade Assistant Integration Tests',
+      reportName: 'X-Pack Reindex Service Integration Tests',
     },
     kbnTestServer: {
       ...xPackApiTestsConfig.get('kbnTestServer'),
