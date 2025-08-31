@@ -91,7 +91,6 @@ export interface WorkflowYAMLEditorProps {
   lastUpdatedAt?: Date;
   highlightStep?: string;
   stepExecutions?: EsWorkflowStepExecution[];
-  isExecutionsView?: boolean;
   'data-testid'?: string;
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
@@ -108,7 +107,6 @@ export const WorkflowYAMLEditor = ({
   lastUpdatedAt,
   highlightStep,
   stepExecutions,
-  isExecutionsView = false,
   onMount,
   onChange,
   onSave,
@@ -290,7 +288,7 @@ export const WorkflowYAMLEditor = ({
     }
 
     // Don't show alert dots when in executions view
-    if (!model || !yamlDocument || !isEditorMounted || isExecutionsView) {
+    if (!model || !yamlDocument || !isEditorMounted || readOnly) {
       return;
     }
 
@@ -377,7 +375,7 @@ export const WorkflowYAMLEditor = ({
 
     alertTriggerDecorationCollectionRef.current =
       editorRef.current?.createDecorationsCollection(decorations) ?? null;
-  }, [isEditorMounted, yamlDocument, isExecutionsView]);
+  }, [isEditorMounted, yamlDocument, readOnly]);
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
