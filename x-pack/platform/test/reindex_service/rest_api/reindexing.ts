@@ -231,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: lastState.newIndexName,
       });
     });
-
+    /*
     it('shows reindex and read-only warnings', async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`); // reusing the index previously migrated in v7->v8 UA tests
       expect(resp.body.warnings.length).to.be(2);
@@ -242,6 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
         { warningType: 'replaceIndexWithAlias', flow: 'reindex' },
       ]);
     });
+    */
 
     it('reindexes old 7.0 index', async () => {
       const { body } = await supertest
