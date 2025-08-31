@@ -938,7 +938,7 @@ describe('convertToWorkflowGraph', () => {
     });
   });
 
-  describe('step with retry', () => {
+  describe('on-failure configuration', () => {
     const workflowDefinition = {
       steps: [
         {
@@ -950,6 +950,7 @@ describe('convertToWorkflowGraph', () => {
               'max-attempts': 3,
               delay: '5s',
             },
+            continue: true,
           } as WorkflowOnFailure,
           with: {
             message: 'Hello from retry step',
@@ -962,19 +963,28 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
       expect(topsort).toEqual([
+        'continue_testRetryConnectorStep',
         'retry_testRetryConnectorStep',
         'testRetryConnectorStep',
         'exitRetry(retry_testRetryConnectorStep)',
+        'exitContinue(continue_testRetryConnectorStep)',
       ]);
     });
 
     it('should have correct edges for step with retry', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const edges = executionGraph.edges();
-      expect(edges).toEqual([
-        { v: 'retry_testRetryConnectorStep', w: 'testRetryConnectorStep' },
-        { v: 'testRetryConnectorStep', w: 'exitRetry(retry_testRetryConnectorStep)' },
-      ]);
+      expect(edges).toEqual(
+        expect.arrayContaining([
+          { v: 'continue_testRetryConnectorStep', w: 'retry_testRetryConnectorStep' },
+          { v: 'retry_testRetryConnectorStep', w: 'testRetryConnectorStep' },
+          { v: 'testRetryConnectorStep', w: 'exitRetry(retry_testRetryConnectorStep)' },
+          {
+            v: 'exitRetry(retry_testRetryConnectorStep)',
+            w: 'exitContinue(continue_testRetryConnectorStep)',
+          },
+        ])
+      );
     });
 
     it('should configure retry node correctly', () => {
@@ -988,6 +998,16 @@ describe('convertToWorkflowGraph', () => {
           'max-attempts': 3,
           delay: '5s',
         },
+      });
+    });
+
+    it('should configure continue node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const retryNode = executionGraph.node('continue_testRetryConnectorStep');
+      expect(retryNode).toEqual({
+        id: 'continue_testRetryConnectorStep',
+        type: 'enter-continue',
+        exitNodeId: 'exitContinue(continue_testRetryConnectorStep)',
       });
     });
   });
@@ -1133,6 +1153,48 @@ describe('convertToWorkflowGraph', () => {
         'exitForeach(foreach_testForeachConnectorStep)',
         'exitThen(testIfStep)',
         'exitCondition(testIfStep)',
+      ]);
+    });
+  });
+
+  describe('step level operations', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testForeachConnectorStep',
+          type: 'slack',
+          connectorId: 'slack',
+          if: 'false',
+          foreach: '["item1", "item2", "item3"]',
+          'on-failure': {
+            retry: {
+              'max-attempts': 10,
+              delay: '2s',
+            },
+            continue: true,
+          },
+          with: {
+            message: 'Hello from foreach nested step 1',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should have correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      expect(topsort).toEqual([
+        'continue_testForeachConnectorStep',
+        'retry_testForeachConnectorStep',
+        'if_testForeachConnectorStep',
+        'enterThen(if_testForeachConnectorStep)',
+        'foreach_testForeachConnectorStep',
+        'testForeachConnectorStep',
+        'exitForeach(foreach_testForeachConnectorStep)',
+        'exitThen(if_testForeachConnectorStep)',
+        'exitCondition(if_testForeachConnectorStep)',
+        'exitRetry(retry_testForeachConnectorStep)',
+        'exitContinue(continue_testForeachConnectorStep)',
       ]);
     });
   });

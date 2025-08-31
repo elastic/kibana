@@ -68,7 +68,7 @@ export const WorkflowRetrySchema = z.object({
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 export const WorkflowOnFailureSchema = z.object({
-  retry: WorkflowRetrySchema,
+  retry: WorkflowRetrySchema.optional(),
   'fallback-step': z.string().min(1).optional(),
   continue: z.boolean().optional(),
 });

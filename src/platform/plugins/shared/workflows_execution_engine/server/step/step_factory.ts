@@ -26,6 +26,7 @@ import {
   ExitIfNodeImpl,
 } from './if_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
+import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './continue_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
@@ -78,6 +79,10 @@ export class StepFactory {
         );
       case 'exit-retry':
         return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'enter-continue':
+        return new EnterContinueNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'exit-continue':
+        return new ExitContinueNodeImpl(this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,
