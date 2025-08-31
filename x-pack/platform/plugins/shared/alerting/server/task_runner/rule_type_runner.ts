@@ -29,10 +29,11 @@ import type {
   SanitizedRule,
 } from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, RuleExecutionStatusErrorReasons } from '../types';
-import type { AsyncSearchClient, ExecutorServices } from './get_executor_services';
+import type { ExecutorServices } from './get_executor_services';
 import type { TaskRunnerTimer } from './task_runner_timer';
 import { TaskRunnerTimerSpan } from './task_runner_timer';
 import type {
+  AsyncSearchClient,
   RuleRunnerErrorStackTraceLog,
   RuleTypeRunnerContext,
   TaskRunnerContext,
