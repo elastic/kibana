@@ -25,6 +25,7 @@ export interface ConnectorContract {
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   outputSchema: z.ZodType;
+  description?: string;
 }
 
 function generateStepSchemaForConnector(connector: ConnectorContract) {

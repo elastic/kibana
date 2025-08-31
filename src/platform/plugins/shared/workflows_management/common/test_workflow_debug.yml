@@ -1,0 +1,13 @@
+name: Test Workflow
+description: Debug workflow for testing autocomplete
+version: 1.0.0
+
+steps:
+  - name: search_step
+    type: 
+    # ^ Try typing here: "type: elasticsearch.search"
+    # This should trigger autocomplete with snippets
+    
+  - name: second_step  
+    type: elasticsearch.
+    # ^ Try typing here to test prefix matching

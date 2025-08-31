@@ -10,6 +10,7 @@
 import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { GENERATED_ELASTICSEARCH_CONNECTORS } from './generated_es_connectors';
 
 // Static connectors used for schema generation
 const staticConnectors: ConnectorContract[] = [
@@ -74,45 +75,7 @@ const staticConnectors: ConnectorContract[] = [
       })
     ),
   },
-  // Basic Elasticsearch actions as fallback
-  {
-    type: 'elasticsearch.search',
-    connectorIdRequired: false,
-    paramsSchema: z.object({
-      index: z.string().optional(),
-      query: z.any().optional(),
-      size: z.number().optional(),
-      from: z.number().optional(),
-      sort: z.any().optional(),
-    }),
-    outputSchema: z.object({
-      hits: z.object({
-        total: z.object({
-          value: z.number(),
-        }),
-        hits: z.array(z.any()),
-      }),
-    }),
-  },
-  {
-    type: 'elasticsearch.search.query',
-    connectorIdRequired: false,
-    paramsSchema: z.object({
-      index: z.string().optional(),
-      query: z.any().optional(),
-      size: z.number().optional(),
-      from: z.number().optional(),
-      sort: z.any().optional(),
-    }),
-    outputSchema: z.object({
-      hits: z.object({
-        total: z.object({
-          value: z.number(),
-        }),
-        hits: z.array(z.any()),
-      }),
-    }),
-  },
+  // Elasticsearch actions are now dynamically generated from Console definitions
   {
     type: 'kibana.cases.create',
     connectorIdRequired: false,
@@ -152,8 +115,40 @@ const staticConnectors: ConnectorContract[] = [
   },
 ];
 
+/**
+ * Elasticsearch Connector Generation
+ *
+ * This system provides ConnectorContract[] for all Elasticsearch APIs
+ * by using pre-generated definitions from Console's API specifications.
+ *
+ * Benefits:
+ * 1. **Schema Validation**: Zod schemas for all ES API parameters
+ * 2. **Autocomplete**: Monaco YAML editor gets full autocomplete via JSON Schema
+ * 3. **Comprehensive Coverage**: 568 Elasticsearch APIs supported
+ * 4. **Browser Compatible**: No file system access required
+ *
+ * The generated connectors include:
+ * - All Console API definitions converted to Zod schemas
+ * - Path parameters extracted from patterns (e.g., {index}, {id})
+ * - URL parameters with proper types (flags, enums, strings, numbers)
+ * - Proper ConnectorContract format for workflow execution
+ *
+ * To regenerate: run `node scripts/generate_es_connectors.js`
+ */
+function generateElasticsearchConnectors(): ConnectorContract[] {
+  // Return the pre-generated connectors (build-time generated, browser-safe)
+  return GENERATED_ELASTICSEARCH_CONNECTORS;
+}
+
+// Combine static connectors with dynamic Elasticsearch connectors
+export function getAllConnectors(): ConnectorContract[] {
+  const elasticsearchConnectors = generateElasticsearchConnectors();
+  return [...staticConnectors, ...elasticsearchConnectors];
+}
+
 export const getOutputSchemaForStepType = (stepType: string) => {
-  const connector = staticConnectors.find((c) => c.type === stepType);
+  const allConnectors = getAllConnectors();
+  const connector = allConnectors.find((c) => c.type === stepType);
   if (connector) {
     return connector.outputSchema;
   }
@@ -170,9 +165,9 @@ export const getOutputSchemaForStepType = (stepType: string) => {
   return z.any();
 };
 
-// Static schemas for initial load
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(staticConnectors, true);
+// Dynamic schemas that include all connectors (static + Elasticsearch)
+export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(getAllConnectors());
+export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(getAllConnectors(), true);
 
 // Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
 // TODO: replace with dynamic schema

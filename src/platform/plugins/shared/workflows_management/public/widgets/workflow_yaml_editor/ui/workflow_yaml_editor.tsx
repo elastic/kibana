@@ -34,11 +34,83 @@ import type { YamlValidationError } from '../model/types';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
-const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
-
 const useWorkflowJsonSchema = () => {
-  return jsonSchema;
+  // Generate JSON schema dynamically to include all current connectors
+  return useMemo(() => {
+    const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
+
+    // Post-process to improve type field descriptions in Monaco tooltips
+    const improvedSchema = improveTypeFieldDescriptions(jsonSchema);
+
+    return improvedSchema;
+  }, []);
 };
+
+/**
+ * Improve the JSON schema to show better tooltips for the type field
+ * Instead of showing all 568 connector types, show grouped descriptions
+ */
+function improveTypeFieldDescriptions(schema: any): any {
+  const processSchema = (obj: any, path: string[] = []): any => {
+    if (!obj || typeof obj !== 'object') return obj;
+
+    // Look for the type field in steps
+    if (obj.properties?.type && path.includes('steps')) {
+      // Remove enum/const values to prevent Monaco from suggesting them
+      delete obj.properties.type.enum;
+      delete obj.properties.type.const;
+      delete obj.properties.type.oneOf;
+
+      // Just define it as a string with a pattern
+      obj.properties.type = {
+        type: 'string',
+        description: 'Workflow connector type - use autocomplete for available options',
+        // Don't include enum values here
+      };
+    }
+
+    // Handle oneOf arrays that contain type definitions
+    if (obj.oneOf && Array.isArray(obj.oneOf) && path.includes('steps')) {
+      // Replace the complex oneOf with a simpler schema
+      return {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            description: 'Workflow connector type - use autocomplete for available options',
+            // No enum values
+          },
+          with: {
+            type: 'object',
+            description: 'Parameters for the connector',
+            additionalProperties: true,
+          },
+          name: {
+            type: 'string',
+            description: 'Optional step name',
+          },
+        },
+        required: ['type'],
+        additionalProperties: false,
+      };
+    }
+
+    // Recursively process
+    if (Array.isArray(obj)) {
+      return obj.map((item, index) => processSchema(item, [...path, index.toString()]));
+    } else if (obj && typeof obj === 'object') {
+      const result: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        result[key] = processSchema(value, [...path, key]);
+      }
+      return result;
+    }
+
+    return obj;
+  };
+
+  return processSchema(schema);
+}
 
 export interface WorkflowYAMLEditorProps {
   workflowId?: string;
@@ -275,6 +347,15 @@ export const WorkflowYAMLEditor = ({
         other: true,
         comments: false,
         strings: true,
+      },
+      suggest: {
+        snippetsPreventQuickSuggestions: false,
+        showSnippets: true,
+        // Add these to show suggestions after 1 character
+        triggerCharacters: true,
+        minWordLength: 1, // Show suggestions after 1 character
+        filterGraceful: true, // Better filtering
+        localityBonus: true, // Prioritize matches near cursor
       },
       formatOnType: true,
     }),
