@@ -75,6 +75,7 @@ jobs:
 
       - name: Get user info for commit author
         id: userinfo
+        if: steps.check_copilot.outputs.found == '1' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
