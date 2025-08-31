@@ -12,6 +12,19 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { WorkflowsEmptyState } from './workflows_empty_state';
 
+// Mock useKibana hook
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      http: {
+        basePath: {
+          prepend: (path: string) => `/mock-base-path${path}`,
+        },
+      },
+    },
+  }),
+}));
+
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
 };
@@ -53,8 +66,8 @@ describe('WorkflowsEmptyState', () => {
   it('renders the footer with documentation link', () => {
     renderWithIntl(<WorkflowsEmptyState />);
 
-    expect(screen.getByText('Want to learn more?')).toBeInTheDocument();
-    expect(screen.getByText('Read the docs')).toBeInTheDocument();
+    expect(screen.getByText('Need help?')).toBeInTheDocument();
+    expect(screen.getByText('Read documentation')).toBeInTheDocument();
   });
 
   it('renders the illustration image', () => {
@@ -63,6 +76,9 @@ describe('WorkflowsEmptyState', () => {
     const images = screen.getAllByRole('presentation');
     const mainImage = images.find((img) => img.tagName === 'IMG');
     expect(mainImage).toBeInTheDocument();
-    expect(mainImage).toHaveAttribute('src', '/plugins/workflowsManagement/assets/empty_state.svg');
+    expect(mainImage).toHaveAttribute(
+      'src',
+      '/mock-base-path/plugins/workflowsManagement/assets/empty_state.svg'
+    );
   });
 });
