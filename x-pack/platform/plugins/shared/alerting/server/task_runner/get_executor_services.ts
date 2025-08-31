@@ -11,13 +11,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { tap, map, lastValueFrom } from 'rxjs';
-import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '@kbn/search-types';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
 import type { WrappedScopedClusterClient } from '../lib/wrap_scoped_cluster_client';
@@ -33,7 +26,8 @@ import type {
   PublicRuleResultService,
 } from '../types';
 import { withAlertingSpan } from './lib';
-import type { TaskRunnerContext } from './types';
+import type { AsyncSearchClient, TaskRunnerContext } from './types';
+import { wrapAsyncSearchClient } from '../lib/wrap_async_search_client';
 
 interface GetExecutorServicesOpts {
   context: TaskRunnerContext;
@@ -45,26 +39,6 @@ interface GetExecutorServicesOpts {
   ruleData: { name: string; alertTypeId: string; id: string; spaceId: string };
   ruleTaskTimeout?: string;
 }
-
-export interface AsyncSearchClient<T extends AsyncSearchParams> {
-  getMetrics: () => {
-    numSearches: number;
-    esSearchDurationMs: number;
-    totalSearchDurationMs: number;
-  };
-  search: ({
-    request,
-    options,
-  }: {
-    request: IKibanaSearchRequest<T>;
-    options?: ISearchOptions;
-  }) => Promise<IKibanaSearchResponse>;
-}
-
-export type PublicAsyncSearchClient<T extends AsyncSearchParams> = Omit<
-  AsyncSearchClient<T>,
-  'getMetrics'
->;
 
 export interface ExecutorServices {
   ruleMonitoringService: PublicRuleMonitoringService;
@@ -128,44 +102,13 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     },
 
     getAsyncSearchClient: (strategy) => {
-      const start = Date.now();
-      let numSearches = 0;
-      let esSearchDurationMs = 0;
-      let totalSearchDurationMs = 0;
-
       const client = context.data.search.asScoped(fakeRequest);
-      return {
-        getMetrics: () => {
-          return {
-            numSearches,
-            esSearchDurationMs,
-            totalSearchDurationMs,
-          };
-        },
-        async search({ request, options }) {
-          return lastValueFrom(
-            client
-              .search(request, {
-                ...options,
-                strategy,
-                abortSignal: abortController.signal,
-              })
-              .pipe(
-                map((response) => {
-                  return response;
-                }),
-                tap((response) => {
-                  if (!isRunningResponse(response)) {
-                    const durationMs = Date.now() - start;
-                    numSearches++;
-                    esSearchDurationMs += response.rawResponse.took ?? 0;
-                    totalSearchDurationMs += durationMs;
-                  }
-                })
-              )
-          );
-        },
-      };
+
+      return wrapAsyncSearchClient({
+        strategy,
+        client,
+        abortController,
+      });
     },
   };
 };
