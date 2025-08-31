@@ -104,7 +104,7 @@ export class ReindexServiceServerPlugin
 
     return {
       cleanupReindexOperations: worker.cleanupReindexOperations.bind(worker),
-      getScopedClient: service.getScopedClient,
+      getScopedClient: service.getScopedClient.bind(service),
     };
   }
 
