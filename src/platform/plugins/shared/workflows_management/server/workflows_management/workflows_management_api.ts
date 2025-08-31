@@ -189,6 +189,7 @@ export class WorkflowsManagementApi {
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
+        yaml: workflowYaml,
         isTestRun: true,
       },
       context

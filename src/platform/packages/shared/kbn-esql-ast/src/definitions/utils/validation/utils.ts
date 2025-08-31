@@ -15,9 +15,11 @@ import { buildFunctionLookup } from '../functions';
 // has to be exported from this package
 export const getNoValidCallSignatureError = (fnName: string, givenTypes: string[]) => {
   const definition = buildFunctionLookup().get(fnName)!;
-  return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived (${givenTypes.join(
-    ', '
-  )}).\n\nExpected one of:\n  ${[...definition.signatures]
+  return `Invalid input types for ${fnName.toUpperCase()}.
+
+Received (${givenTypes.join(', ')}).
+
+Expected one of:\n  ${[...definition.signatures]
     .sort((a, b) => a.params.length - b.params.length)
     .map((sig) => `- (${buildSignatureTypes(sig)})`)
     .join('\n  ')}`;

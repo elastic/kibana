@@ -165,6 +165,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
 
+  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
+
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
     setHasChanges(false);
@@ -218,13 +220,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 <WorkflowYAMLEditor
                   workflowId={workflow?.id ?? 'unknown'}
                   filename={`${workflow?.id ?? 'unknown'}.yaml`}
-                  value={workflowYaml}
+                  value={yamlValue}
                   onChange={(v) => handleChange(v ?? '')}
                   lastUpdatedAt={workflow?.lastUpdatedAt}
                   hasChanges={hasChanges}
                   highlightStep={selectedStepId}
                   stepExecutions={execution?.stepExecutions}
-                  isExecutionsView={activeTab === 'executions'}
+                  readOnly={activeTab === 'executions'}
                 />
               </React.Suspense>
             </EuiFlexItem>
@@ -232,7 +234,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               <EuiFlexItem css={styles.workflowVisualEditorColumn}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <WorkflowVisualEditor
-                    workflowYaml={workflowYaml}
+                    workflowYaml={yamlValue}
                     workflowExecutionId={selectedExecutionId}
                   />
                 </React.Suspense>
@@ -245,7 +247,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             {workflow && (
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
-                workflowYaml={workflow.yaml}
+                workflowYaml={yamlValue}
               />
             )}
           </EuiFlexItem>
