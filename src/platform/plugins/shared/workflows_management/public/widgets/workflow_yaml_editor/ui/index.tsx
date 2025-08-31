@@ -20,7 +20,6 @@ import { useYamlValidation } from '../lib/use_yaml_validation';
 import { navigateToErrorPosition } from '../lib/utils';
 import type { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 

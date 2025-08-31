@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AtomicGraphNode } from '@kbn/workflows/types/execution/nodes/base';
 import type { StepImplementation } from '../step_base';
 import { ConnectorStepImpl } from '../connector_step';

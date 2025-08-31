@@ -11,13 +11,12 @@ import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
-import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MUSTACHE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { MarkerSeverity, getSeverityString } from './utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 // Removed workflow_context dependency
-import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 interface UseYamlValidationProps {

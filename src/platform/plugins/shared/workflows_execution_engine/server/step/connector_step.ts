@@ -118,7 +118,10 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     }
   }
 
-  private async executeInternalConnector(step: ConnectorStep, withInputs: Record<string, any>): Promise<RunStepResult> {
+  private async executeInternalConnector(
+    step: ConnectorStep,
+    withInputs: Record<string, any>
+  ): Promise<RunStepResult> {
     try {
       const request = withInputs.request;
       if (!request) {
@@ -137,21 +140,18 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       }
 
       // Log the execution
-      this.workflowLogger.logInfo(
-        `Internal connector step ${step.name} executed successfully`,
-        {
-          event: { action: step.type, outcome: 'success' },
-          tags: ['internal-connector', step.type],
-          kibana: {
-            step: {
-              name: step.name,
-              type: step.type,
-              method: request.method,
-              path: request.path,
-            },
+      this.workflowLogger.logInfo(`Internal connector step ${step.name} executed successfully`, {
+        event: { action: step.type, outcome: 'success' },
+        tags: ['internal-connector', step.type],
+        kibana: {
+          step: {
+            name: step.name,
+            type: step.type,
+            method: request.method,
+            path: request.path,
           },
-        }
-      );
+        },
+      });
 
       return {
         output: {
@@ -165,7 +165,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     } catch (error) {
       // Enhanced error handling for internal connector steps
       let errorMessage: string;
-      
+
       if (error && typeof error === 'object' && 'meta' in error) {
         // This is an ES ResponseError - extract meaningful information
         const esError = error as any;
@@ -175,12 +175,10 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         // Generic error handling
         errorMessage = error instanceof Error ? error.message : String(error);
       }
-      
+
       // Log the error
-      this.workflowLogger.logError(
-        `Internal connector step ${step.name} failed: ${errorMessage}`
-      );
-      
+      this.workflowLogger.logError(`Internal connector step ${step.name} failed: ${errorMessage}`);
+
       return {
         output: undefined,
         error: errorMessage,
@@ -190,19 +188,19 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
   private async executeElasticsearchRequest(request: any): Promise<any> {
     const startTime = Date.now();
-    
+
     try {
       const { method, path, headers, body, query } = request;
-      
+
       // Get ES client from context manager
       const esClient = this.contextManager.getEsClient();
       if (!esClient) {
         throw new Error('Elasticsearch client not available');
       }
-      
+
       // Build the request options following Kibana's established patterns
       const requestOptions: any = {
-        method: method, // Keep original case - ES expects GET, POST, etc.
+        method, // Keep original case - ES expects GET, POST, etc.
         path,
         headers: headers || {},
       };
@@ -232,7 +230,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         meta: true,
         maxRetries: 0,
       });
-      
+
       const executionTime = Date.now() - startTime;
 
       return {
@@ -243,18 +241,16 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       // Enhanced error handling for ES errors
       if (error && typeof error === 'object' && 'meta' in error) {
         // This is an ES ResponseError - extract meaningful information
         const esError = error as any;
         const errorDetails = this.extractElasticsearchErrorDetails(esError);
-        
+
         // Log the detailed error for debugging
-        this.workflowLogger.logError(
-          `Elasticsearch request failed: ${errorDetails.summary}`
-        );
-        
+        this.workflowLogger.logError(`Elasticsearch request failed: ${errorDetails.summary}`);
+
         throw new Error(errorDetails.summary);
       } else {
         // Generic error handling
@@ -274,30 +270,34 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       const meta = esError.meta;
       const body = meta?.body;
       const statusCode = meta?.statusCode || 500;
-      
+
       let summary = 'Elasticsearch request failed';
       let details = 'Unknown error';
       let rootCause = 'Unknown';
-      
+
       if (body) {
         if (body.error) {
           // Extract the main error type
           summary = body.error.type || body.error.reason || summary;
-          
+
           // Extract root cause if available
-          if (body.error.root_cause && Array.isArray(body.error.root_cause) && body.error.root_cause.length > 0) {
+          if (
+            body.error.root_cause &&
+            Array.isArray(body.error.root_cause) &&
+            body.error.root_cause.length > 0
+          ) {
             const firstRootCause = body.error.root_cause[0];
             rootCause = firstRootCause.reason || firstRootCause.type || 'Unknown';
           }
-          
+
           // Build detailed error message
           details = body.error.reason || body.error.type || 'No additional details available';
         }
       }
-      
+
       // Create a user-friendly summary
       const userFriendlySummary = `${summary}${rootCause !== 'Unknown' ? `: ${rootCause}` : ''}`;
-      
+
       return {
         summary: userFriendlySummary,
         details,
@@ -317,11 +317,11 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
   private async executeKibanaRequest(request: any): Promise<any> {
     const startTime = Date.now();
-    
+
     // For now, we'll use a simplified approach since Kibana's internal HTTP
     // routing is complex and requires proper router setup
     // TODO: Implement proper Kibana internal request handling
-    
+
     // Build the request URL
     let url = request.path;
     if (request.query) {

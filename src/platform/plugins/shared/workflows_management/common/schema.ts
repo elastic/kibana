@@ -11,7 +11,6 @@ import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
-
 // TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.
 
 const connectors: ConnectorContract[] = [

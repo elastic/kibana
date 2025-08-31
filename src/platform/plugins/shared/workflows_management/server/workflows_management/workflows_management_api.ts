@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
