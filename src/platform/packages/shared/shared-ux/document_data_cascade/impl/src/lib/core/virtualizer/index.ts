@@ -27,6 +27,8 @@ interface VirtualizerHelperReturn {
   rowVirtualizer: ReturnType<typeof useVirtualizer>;
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<number, number>;
+  scrollToVirtualizedIndex: (index: number) => void;
+  scrollToLastVirtualizedRow: () => void;
 }
 
 export const useRowVirtualizerHelper = <G extends GroupNode>({
@@ -94,6 +96,12 @@ export const useRowVirtualizerHelper = <G extends GroupNode>({
     },
     get virtualizedRowComputedTranslateValue() {
       return virtualizedRowComputedTranslateValueRef.current;
+    },
+    get scrollToVirtualizedIndex() {
+      return virtualizer.scrollToIndex;
+    },
+    get scrollToLastVirtualizedRow() {
+      return () => this.scrollToVirtualizedIndex(rows.length - 1);
     },
   };
 };
