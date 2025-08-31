@@ -13,7 +13,6 @@ import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/public';
 import { getIndexState } from '@kbn/upgrade-assistant-pkg-server';
 import { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
-import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
