@@ -26,20 +26,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          # Default to event branch
-          BRANCH="${{ github.event.pull_request.head.ref }}"
-          # If workflow_dispatch and pr_number is set, get branch from PR
+          BRANCH=""
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.pr_number }}" ]; then
-            BRANCH=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName -q '.headRefName')
+            BRANCH=$(gh pr view ${{ github.event.inputs.pr_number }} --repo elastic/kibana --json headRefName -q '.headRefName')
+          elif [ -n "${{ github.event.pull_request.head.ref }}" ]; then
+            BRANCH="${{ github.event.pull_request.head.ref }}"
           fi
-          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "Branch to checkout: $BRANCH"
 
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ env.BRANCH }}
+          ref: ${{ steps.setbranch.outputs.branch }}
 
       - name: Get PR number
         id: prnum
@@ -93,36 +93,29 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          # Default to workflow_dispatch actor
           USER_LOGIN="${{ github.actor }}"
           USER_EMAIL=""
           USER_NAME=""
-          # If PR event, get the user who labeled the PR
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             USER_LOGIN="${{ github.event.sender.login }}"
           fi
-          # Try to get user email and name from GitHub API
           USER_API=$(gh api users/$USER_LOGIN)
           USER_NAME=$(echo "$USER_API" | jq -r '.name // .login')
           USER_EMAIL=$(echo "$USER_API" | jq -r '.email')
-          # Fallback if email is not public
           if [ -z "$USER_EMAIL" ] || [ "$USER_EMAIL" = "null" ]; then
             USER_EMAIL="$USER_LOGIN@users.noreply.github.com"
           fi
-          echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
-          echo "USER_EMAIL=$USER_EMAIL" >> $GITHUB_ENV
+          echo "user_name=$USER_NAME" >> $GITHUB_OUTPUT
+          echo "user_email=$USER_EMAIL" >> $GITHUB_OUTPUT
           echo "Using author: $USER_NAME <$USER_EMAIL>"
-          echo "USER_LOGIN=$USER_LOGIN"
-          echo "USER_NAME=$USER_NAME"
-          echo "USER_EMAIL=$USER_EMAIL"
 
       - name: Squash and re-author commits as PR labeler or workflow actor
         if: steps.check_copilot.outputs.found == '1'
         env:
-          GIT_AUTHOR_NAME: ${{ env.USER_NAME }}
-          GIT_AUTHOR_EMAIL: ${{ env.USER_EMAIL }}
-          GIT_COMMITTER_NAME: ${{ env.USER_NAME }}
-          GIT_COMMITTER_EMAIL: ${{ env.USER_EMAIL }}
+          GIT_AUTHOR_NAME: ${{ steps.userinfo.outputs.user_name }}
+          GIT_AUTHOR_EMAIL: ${{ steps.userinfo.outputs.user_email }}
+          GIT_COMMITTER_NAME: ${{ steps.userinfo.outputs.user_name }}
+          GIT_COMMITTER_EMAIL: ${{ steps.userinfo.outputs.user_email }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -e
