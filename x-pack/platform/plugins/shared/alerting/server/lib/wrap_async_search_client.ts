@@ -6,7 +6,7 @@
  */
 
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { lastValueFrom, map, tap } from 'rxjs';
+import { catchError, lastValueFrom, tap, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { AsyncSearchClient } from '../task_runner/types';
 import type { AsyncSearchParams, AsyncSearchStrategies } from '../types';
@@ -42,8 +42,13 @@ export function wrapAsyncSearchClient<T extends AsyncSearchParams>({
             abortSignal: abortController.signal,
           })
           .pipe(
-            map((response) => {
-              return response;
+            catchError((error) => {
+              if (abortController.signal.aborted) {
+                return throwError(
+                  () => new Error('Search has been aborted due to cancelled execution')
+                );
+              }
+              return throwError(() => error);
             }),
             tap((response) => {
               if (!isRunningResponse(response)) {
