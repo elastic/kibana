@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import {
   usePlatform,
@@ -65,6 +66,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 }) => {
   const { platform, setPlatform } = usePlatform();
   const [showExtendedPlatforms, setShowExtendedPlatforms] = useState(false);
+
+  // Helper function to check if current integration is a cloudbeat integration
+  const isCloudBeatIntegration = 
+    cloudSecurityIntegration?.integrationType === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+    cloudSecurityIntegration?.integrationType === FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE ||
+    cloudSecurityIntegration?.integrationType === FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE;
 
   useEffect(() => {
     if (
@@ -124,7 +131,29 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
         defaultMessage:
-          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+          'This integration does not support macOS. Cloudbeat only works on Linux and Kubernetes platforms.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const windowsCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.windowsCallout', {
+        defaultMessage:
+          'This integration does not support Windows. Cloudbeat only works on Linux and Kubernetes platforms.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const rpmDebCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.rpmDebCallout', {
+        defaultMessage:
+          'This integration does not support RPM/DEB packages. Cloudbeat only works on Linux and Kubernetes platforms.',
       })}
       color="warning"
       iconType="warning"
@@ -208,19 +237,28 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           </EuiFilterGroup>
         )}
         <EuiSpacer size="m" />
-        {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && (
+        {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && 
+          !isCloudBeatIntegration && (
           <>
             {systemPackageCallout}
             <EuiSpacer size="m" />
           </>
         )}
-        {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
-          (cloudSecurityIntegration?.integrationType ===
-            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
-            cloudSecurityIntegration?.integrationType ===
-              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+        {['mac_aarch64', 'mac_x86_64'].includes(platform) && isCloudBeatIntegration && (
             <>
               {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {['windows', 'windows_msi'].includes(platform) && isCloudBeatIntegration && (
+            <>
+              {windowsCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && isCloudBeatIntegration && (
+            <>
+              {rpmDebCallout}
               <EuiSpacer size="m" />
             </>
           )}
