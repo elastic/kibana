@@ -6367,7 +6367,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
             type: string
         - description: The order to sort by.
           in: query
@@ -52029,7 +52029,12 @@ paths:
                                       items:
                                         type: string
                                       type: array
+                                    tags:
+                                      items:
+                                        type: string
+                                      type: array
                                   required:
+                                    - tags
                                     - members
                               required:
                                 - group
@@ -52284,7 +52289,12 @@ paths:
                       items:
                         type: string
                       type: array
+                    tags:
+                      items:
+                        type: string
+                      type: array
                   required:
+                    - tags
                     - members
               required:
                 - group
@@ -61660,8 +61670,6 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         timestamp:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         title:
@@ -61684,29 +61692,6 @@ components:
         - users
         - namespace
         - category
-    Security_AI_Assistant_API_ConversationSummary:
-      allOf:
-        - $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
-        - type: object
-          properties:
-            timestamp:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-              description: The timestamp summary was updated.
-              example: '2025-04-30T16:00:00Z'
-          required:
-            - timestamp
-    Security_AI_Assistant_API_ConversationSummaryBase:
-      type: object
-      properties:
-        semanticContent:
-          description: Summary text of the conversation over time.
-          example: This conversation covered how to configure the Security AI Assistant.
-          type: string
-        summarizedMessageIds:
-          description: The list of summarized messages.
-          items:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
-          type: array
     Security_AI_Assistant_API_ConversationUpdateProps:
       type: object
       properties:
@@ -61729,8 +61714,6 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
@@ -62316,6 +62299,7 @@ components:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
