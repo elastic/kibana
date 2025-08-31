@@ -3,8 +3,6 @@
 name: Reassign Copilot Commit
 
 on:
-  # pull_request:
-  #   types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -15,10 +13,13 @@ on:
         description: 'Branch to checkout (for debugging)'
         required: false
         type: string
+  pull_request:
+    types: [labeled]
 
 jobs:
   check-copilot-commits:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.label.name == 'revoke_copilot_commit')
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v4
