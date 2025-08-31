@@ -27,6 +27,7 @@ interface Props {
   isManaged?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
+  hasCloudbeatIntegration?: boolean;
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({
@@ -39,6 +40,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   isManaged = true,
   onCopy,
   rootIntegrations,
+  hasCloudbeatIntegration,
 }) => {
   return (
     <>
@@ -55,6 +57,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         isManaged={isManaged}
         enrollToken={enrollToken}
         fleetServerHost={fleetServerHost}
+        hasCloudbeatIntegration={hasCloudbeatIntegration}
       />
     </>
   );

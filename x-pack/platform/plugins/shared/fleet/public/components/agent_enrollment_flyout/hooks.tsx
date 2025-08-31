@@ -22,6 +22,7 @@ import {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_SECURITY_ASSET_PACKAGE,
+  FLEET_CLOUD_BEAT_PACKAGE,
 } from '../../../common';
 
 import {
@@ -211,6 +212,25 @@ const getCloudSecurityPackagePolicyFromAgentPolicy = (
       input.package?.name === FLEET_CLOUD_SECURITY_ASSET_PACKAGE
   );
 };
+
+export const getCloudbeatPackagePolicyFromAgentPolicy = (
+  agentPolicy?: AgentPolicy
+): PackagePolicy | undefined => {
+  return agentPolicy?.package_policies?.find(
+    (input) => input.package?.name === FLEET_CLOUD_BEAT_PACKAGE
+  );
+};
+
+export function useCloudbeatIntegration(agentPolicy?: AgentPolicy) {
+  const cloudbeatPackagePolicy = useMemo(() => {
+    return getCloudbeatPackagePolicyFromAgentPolicy(agentPolicy);
+  }, [agentPolicy]);
+
+  return { 
+    hasCloudbeatIntegration: Boolean(cloudbeatPackagePolicy),
+    cloudbeatPackagePolicy 
+  };
+}
 
 export function useGetCreateApiKey() {
   const core = useStartServices();
