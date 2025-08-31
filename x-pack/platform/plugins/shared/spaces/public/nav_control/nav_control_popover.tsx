@@ -221,15 +221,33 @@ class NavControlPopoverUI extends Component<Props, State> {
     const solutionText = solutionData.name;
 
     const buttonContent = (
+      // <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      //   <EuiFlexItem grow={false}>
+      //     <EuiIcon type={solutionData.icon} size="m" title={`Solution: ${solutionText}`} />
+      //   </EuiFlexItem>
+      //   <EuiFlexItem grow={false}>
+      //     <EuiText size="s">
+      //       <EuiTextTruncate width={120} text={(activeSpace as Space).name} truncation="end" />
+      //     </EuiText>
+      //   </EuiFlexItem>
+      // </EuiFlexGroup>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={solutionData.icon} size="m" title={`Solution: ${solutionText}`} />
+          <Suspense fallback={this.getAlignedLoadingSpinner()}>
+            <LazySpaceAvatar space={activeSpace} size={'s'} />
+          </Suspense>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <EuiTextTruncate width={120} text={(activeSpace as Space).name} truncation="end" />
-          </EuiText>
-        </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            {/* CURRENTLY: Solution icon */}
+            <EuiIcon type={solutionData.icon} size="m" title={`Solution: ${solutionText}`} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <EuiTextTruncate width={120} text={solutionText} truncation="end" />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     );
 
@@ -237,6 +255,8 @@ class NavControlPopoverUI extends Component<Props, State> {
   };
 
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
+    const { euiTheme } = this.props.theme;
+    
     return (
       <EuiHeaderSectionItemButton
         aria-controls={popoutContentId}
@@ -250,7 +270,12 @@ class NavControlPopoverUI extends Component<Props, State> {
         title={linkTitle}
         onClick={this.toggleSpaceSelector}
         textProps={false}
-        style={{ height: '32px' }}
+        style={{
+          height: euiTheme.size.xl,
+          paddingInlineStart: euiTheme.size.xs,
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          border: euiTheme.border.thin,
+        }}
       >
         {linkIcon}
         <p id="spacesNavDetails" hidden>

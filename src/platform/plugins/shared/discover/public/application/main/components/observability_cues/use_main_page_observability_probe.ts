@@ -48,11 +48,6 @@ const isLogsDataStream = (index: string): boolean => {
 
 
 const validateObservabilityHit = (hit: Record<string, any>): boolean => {
-  console.log('🔍 [Observability Hit Validation] Validating hit:', {
-    processorEvent: hit.fields?.['processor.event']?.[0],
-    timestamp: hit.fields?.['@timestamp'],
-    _index: hit._index
-  });
   
   // Check if the hit has the required basic fields
   const processorEvent = hit.fields?.['processor.event']?.[0];
@@ -62,10 +57,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
   const isValidEvent = processorEvent === 'span' || processorEvent === 'transaction' || processorEvent === 'error' || processorEvent === 'log';
   
   if (!isValidEvent || !timestamp) {
-    console.log('🔍 [Observability Hit Validation] Failed basic checks:', {
-      isValidEvent,
-      hasTimestamp: !!timestamp
-    });
     return false;
   }
 
@@ -75,7 +66,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
     const spanDurationUs = hit.fields?.['span.duration.us'];
     
     if (!spanId || !spanDurationUs) {
-      console.log('🔍 [Observability Hit Validation] Span missing required fields');
       return false;
     }
 
@@ -84,7 +74,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
     const isNumeric = typeof durationUs === 'number';
 
     if (!isNumeric) {
-      console.log('🔍 [Observability Hit Validation] Span duration not numeric');
       return false;
     }
   }
@@ -97,7 +86,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
     const transactionDurationUs = hit.fields?.['transaction.duration.us'];
     
     if (!transactionId || !transactionName || !transactionType || !transactionDurationUs) {
-      console.log('🔍 [Observability Hit Validation] Transaction missing required fields');
       return false;
     }
 
@@ -106,7 +94,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
     const isNumeric = typeof durationUs === 'number';
 
     if (!isNumeric) {
-      console.log('🔍 [Observability Hit Validation] Transaction duration not numeric');
       return false;
     }
   }
@@ -117,7 +104,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
     const hasMessage = hit.fields?.['message']?.[0] || hit.fields?.['event.original']?.[0];
     
     if (!hasMessage) {
-      console.log('🔍 [Observability Hit Validation] Error missing message field');
       return false;
     }
 
@@ -128,7 +114,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
                           hit.fields?.['cloud.provider']?.[0];
 
     if (!hasAttribution) {
-      console.log('🔍 [Observability Hit Validation] Error missing attribution');
       return false;
     }
   }
@@ -139,7 +124,6 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
     const hasMessage = hit.fields?.['message']?.[0] || hit.fields?.['event.original']?.[0];
     
     if (!hasMessage) {
-      console.log('🔍 [Observability Hit Validation] Log missing message field');
       return false;
     }
 
@@ -150,12 +134,10 @@ const validateObservabilityHit = (hit: Record<string, any>): boolean => {
                           hit.fields?.['cloud.provider']?.[0];
 
     if (!hasAttribution) {
-      console.log('🔍 [Observability Hit Validation] Log missing attribution');
       return false;
     }
   }
 
-  console.log('🔍 [Observability Hit Validation] Validation passed');
   return true;
 };
 
@@ -208,13 +190,10 @@ const buildObservabilityProbeQuery = (
 
 const validateObservabilityProbeResponse = (rawResponse: any): boolean => {
   const hits = rawResponse.hits?.hits || [];
-  console.log('🔍 [Observability Validation] Checking hits:', hits.length);
   if (hits.length === 0) {
-    console.log('🔍 [Observability Validation] No hits found');
     return false;
   }
   const isValid = validateObservabilityHit(hits[0]);
-  console.log('🔍 [Observability Validation] First hit validation result:', isValid);
   return isValid;
 };
 
@@ -239,12 +218,6 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
   const probeForObservabilityData = useCallback(async () => {
     if (!dataView || !cacheKey) return;
 
-    console.log('🔍 [Main Page Probe] Starting probe for data view:', {
-      title: dataView.title,
-      indexPattern: dataView.indexPattern,
-      name: dataView.name
-    });
-
     // Check cache first
     const cached = cacheRef.current.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
@@ -263,11 +236,9 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
     abortControllerRef.current = new AbortController();
 
     try {
-      console.log('🔍 [Main Page Probe] Building unified observability probe query...');
       // Single probe for all observability data
       const searchSource = services.data.search.searchSource.createEmpty();
       const probeQuery = buildObservabilityProbeQuery(dataView, query, filters, timeRange);
-      console.log('🔍 [Main Page Probe] Unified probe query:', JSON.stringify(probeQuery, null, 2));
 
       searchSource
         .setField('index', dataView)
@@ -306,11 +277,6 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
       );
 
       const hasObservabilityDataResult = validateObservabilityProbeResponse(response.rawResponse);
-      console.log('🔍 [Main Page Probe] Unified probe response:', {
-        hasObservabilityData: hasObservabilityDataResult,
-        hits: response.rawResponse.hits?.hits?.length || 0,
-        firstHit: response.rawResponse.hits?.hits?.[0]
-      });
 
       // Cache results
       cacheRef.current.set(cacheKey, { 
@@ -319,10 +285,6 @@ export const useMainPageObservabilityProbe = (): MainPageObservabilityProbeResul
       });
       
       setHasObservabilityData(hasObservabilityDataResult);
-      
-      console.log('🔍 [Main Page Probe] Final result:', {
-        hasObservabilityData: hasObservabilityDataResult
-      });
     } catch (err) {
       if (err.name === 'AbortError') {
         return; // Request was cancelled

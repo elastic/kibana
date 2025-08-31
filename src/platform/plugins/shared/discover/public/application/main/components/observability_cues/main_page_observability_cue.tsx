@@ -138,7 +138,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('showObservabilityTour', 'true');
 
-      console.log('Setting URL parameter:', currentUrl.toString());
+
 
       // Navigate to the new URL to trigger the tour modal
       window.location.href = currentUrl.toString();
