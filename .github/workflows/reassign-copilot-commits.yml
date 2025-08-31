@@ -89,12 +89,31 @@ jobs:
           # Find merge base
           MERGE_BASE=$(git merge-base origin/$BASE_BRANCH HEAD)
           echo "Merge base: $MERGE_BASE"
-          # Squash all commits since merge base
-          git reset --soft $MERGE_BASE
-          git commit -a -m "Squashed all commits and re-authored as niros1@gmail.com"
-          # Force push to current branch
-          git push --force-with-lease
-          echo "✅ All commits squashed and re-authored as niros1@gmail.com."
+            # Gather unique Copilot author emails from commits
+            COPILOT_EMAILS="github-actions[bot]@users.noreply.github.com copilot-bot@users.noreply.github.com copilot@github.com 198982749+Copilot@users.noreply.github.com"
+            COAUTHORS=""
+            for COMMIT in $(cat commits.txt); do
+              AUTHOR_NAME=$(git show -s --format='%an' $COMMIT)
+              AUTHOR_EMAIL=$(git show -s --format='%ae' $COMMIT)
+              for EMAIL in $COPILOT_EMAILS; do
+                if [ "$AUTHOR_EMAIL" = "$EMAIL" ]; then
+                  TRAILER="Co-authored-by: $AUTHOR_NAME <$AUTHOR_EMAIL>"
+                  if ! echo "$COAUTHORS" | grep -q "$TRAILER"; then
+                    COAUTHORS="$COAUTHORS\n$TRAILER"
+                  fi
+                fi
+              done
+            done
+            # Squash all commits since merge base
+            git reset --soft $MERGE_BASE
+            COMMIT_MSG="Squashed all commits and re-authored as niros1@gmail.com"
+            if [ -n "$COAUTHORS" ]; then
+              COMMIT_MSG="$COMMIT_MSG\n\n$(echo -e "$COAUTHORS" | grep Co-authored-by)"
+            fi
+            git commit -a -m "$COMMIT_MSG"
+            # Force push to current branch
+            git push --force-with-lease
+            echo "✅ All commits squashed, re-authored, and Copilot credited as co-author(s)."
 
       - name: Fail if Copilot is author and squash failed or not permitted
         if: steps.check_copilot.outputs.found == '1' && (failure() || cancelled())
