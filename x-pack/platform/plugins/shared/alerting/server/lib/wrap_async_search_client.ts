@@ -20,7 +20,6 @@ export function wrapAsyncSearchClient<T extends AsyncSearchParams>({
   client: IScopedSearchClient;
   abortController: AbortController;
 }): AsyncSearchClient<T> {
-  const start = Date.now();
   let numSearches = 0;
   let esSearchDurationMs = 0;
   let totalSearchDurationMs = 0;
@@ -34,6 +33,7 @@ export function wrapAsyncSearchClient<T extends AsyncSearchParams>({
       };
     },
     async search({ request, options }) {
+      const start = Date.now();
       return lastValueFrom(
         client
           .search(request, {
