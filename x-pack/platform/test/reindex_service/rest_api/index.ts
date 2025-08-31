@@ -9,6 +9,6 @@ import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('upgrade assistant', function () {
-    loadTestFile(require.resolve('./api_deprecations'));
+    loadTestFile(require.resolve('./reindexing'));
   });
 }

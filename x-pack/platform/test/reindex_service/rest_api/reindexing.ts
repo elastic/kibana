@@ -41,8 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     return lastState;
   };
 
-  describe.skip('reindexing', function () {
-    this.onlyEsVersion('8');
+  describe('reindexing', function () {
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
