@@ -66,7 +66,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     }) => {
-      onSave({
+      return onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
