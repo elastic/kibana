@@ -20,26 +20,29 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormattedRelative } from '@kbn/i18n-react';
-import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
-import { i18n } from '@kbn/i18n';
+import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
+import { getStatusLabel } from '../../../shared/translations';
+import { getExecutionStatusIcon } from '../../../shared/ui';
+import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { getExecutionStatusIcon } from '../../../shared/ui';
-import { getStatusLabel } from '../../../shared/translations';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
+  onCreateWorkflow?: () => void;
 }
 
-export function WorkflowList({ search, setSearch }: WorkflowListProps) {
+export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { euiTheme } = useEuiTheme();
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
@@ -297,6 +300,16 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
 
   if (error) {
     return <EuiText>Error loading workflows</EuiText>;
+  }
+
+  // Show empty state if no workflows exist and no filters are applied
+  if (shouldShowWorkflowsEmptyState(workflows, search)) {
+    return (
+      <WorkflowsEmptyState
+        onCreateWorkflow={onCreateWorkflow}
+        canCreateWorkflow={!!canCreateWorkflow}
+      />
+    );
   }
 
   const showStart = (search.page - 1) * search.limit + 1;
