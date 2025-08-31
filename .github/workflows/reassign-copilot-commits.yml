@@ -21,11 +21,25 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.label.name == 'revoke_copilot_commit')
     steps:
+      - name: Set branch to checkout
+        id: setbranch
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          # Default to event branch
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          # If workflow_dispatch and pr_number is set, get branch from PR
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.pr_number }}" ]; then
+            BRANCH=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName -q '.headRefName')
+          fi
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          echo "Branch to checkout: $BRANCH"
+
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.inputs.branch || github.head_ref || github.ref_name }}
+          ref: ${{ env.BRANCH }}
 
       - name: Get PR number
         id: prnum
