@@ -98,7 +98,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem tabIndex={-1}>
         {isPendingRowLeafDataFetch || !leafData ? (
           <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>

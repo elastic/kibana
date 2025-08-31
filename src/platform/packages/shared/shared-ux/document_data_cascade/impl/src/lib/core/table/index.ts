@@ -19,6 +19,7 @@ import {
   type Row,
 } from '@tanstack/react-table';
 export { flexRender } from '@tanstack/react-table';
+export type { Row } from '@tanstack/react-table';
 import type { LeafNode } from '../../../store_provider';
 import {
   useDataCascadeActions,
@@ -132,45 +133,54 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
   };
 };
 
-interface TableRowAdapterProps<G extends GroupNode> {
+interface TableRowAdapterArgs<G extends GroupNode> {
   rowInstance: Row<G>;
 }
 
-export function useTableRowAdapter<G extends GroupNode>({ rowInstance }: TableRowAdapterProps<G>) {
-  return useMemo(() => {
-    return {
-      rowId: rowInstance.id,
-      rowParentId: rowInstance.parentId,
-      get rowIsExpanded() {
-        return rowInstance.getIsExpanded();
-      },
-      get hasAllParentsExpanded() {
-        return rowInstance.getIsAllParentsExpanded();
-      },
-      get rowDepth() {
-        return rowInstance.depth;
-      },
-      get rowChildren() {
-        return rowInstance.subRows;
-      },
-      get rowChildrenCount() {
-        return this.rowChildren.length;
-      },
-      get rowVisibleCells() {
-        return rowInstance.getVisibleCells();
-      },
-      get rowIsSelected() {
-        return rowInstance.getIsSelected();
-      },
-      get rowHasSelectedChildren() {
-        return rowInstance.getIsSomeSelected();
-      },
-      get rowCanSelect() {
-        // maybe we also want to check if the row has children?
-        return rowInstance.getCanSelect();
-      },
-      rowSelectionFn: rowInstance.getToggleSelectedHandler(),
-      rowToggleFn: rowInstance.getToggleExpandedHandler(),
-    };
-  }, [rowInstance]);
+export function getAdaptedTableRows<G extends GroupNode>({ rowInstance }: TableRowAdapterArgs<G>) {
+  const toggleSelectedHandler = rowInstance.getToggleSelectedHandler();
+  const toggleExpandedHandler = rowInstance.getToggleExpandedHandler();
+
+  return {
+    rowId: rowInstance.id,
+    rowParentId: rowInstance.parentId,
+    get rowIsExpanded() {
+      return rowInstance.getIsExpanded();
+    },
+    get hasAllParentsExpanded() {
+      return rowInstance.getIsAllParentsExpanded();
+    },
+    get rowDepth() {
+      return rowInstance.depth;
+    },
+    get rowChildren() {
+      return rowInstance.subRows;
+    },
+    get rowChildrenCount() {
+      return this.rowChildren.length;
+    },
+    get rowVisibleCells() {
+      return rowInstance.getVisibleCells();
+    },
+    get rowIsSelected() {
+      return rowInstance.getIsSelected();
+    },
+    get rowHasSelectedChildren() {
+      return rowInstance.getIsSomeSelected();
+    },
+    get rowCanSelect() {
+      // maybe we also want to check if the row has children?
+      return rowInstance.getCanSelect();
+    },
+    rowSelectionFn: (...args: Parameters<typeof toggleSelectedHandler>) => {
+      toggleSelectedHandler(...args);
+    },
+    rowToggleFn: () => {
+      toggleExpandedHandler();
+    },
+  };
+}
+
+export function useAdaptedTableRows<G extends GroupNode>({ rowInstance }: TableRowAdapterArgs<G>) {
+  return useMemo(() => getAdaptedTableRows({ rowInstance }), [rowInstance]);
 }

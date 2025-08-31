@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
-import { flexRender, useTableRowAdapter } from '../../../lib/core/table';
+import { flexRender, useAdaptedTableRows } from '../../../lib/core/table';
 import {
   type LeafNode,
   type GroupNode,
@@ -26,6 +26,7 @@ import {
   useDataCascadeState,
 } from '../../../store_provider';
 import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
+import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
 import {
   styles as cascadeRowStyles,
   rootRowAttribute,
@@ -57,17 +58,21 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   const {
     rowIsExpanded,
     hasAllParentsExpanded,
-    rowChildren,
     rowDepth,
     rowId,
     rowParentId,
+    rowChildrenCount,
     rowToggleFn,
     rowSelectionFn,
     rowHasSelectedChildren,
     rowIsSelected,
     rowVisibleCells,
     rowCanSelect,
-  } = useTableRowAdapter<G>({ rowInstance });
+  } = useAdaptedTableRows<G>({ rowInstance });
+  const treeGridRowARIAAttributes = useTreeGridRowARIAAttributes<G>({
+    rowInstance,
+    virtualRowIndex: virtualRow.index,
+  });
 
   const isGroupNode = useMemo(() => {
     return currentGroupByColumns.length - 1 > rowDepth;
@@ -93,6 +98,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       if (!groupNodeData) {
         return;
       }
+
       actions.setRowGroupNodeData({
         id: rowId,
         data: groupNodeData,
@@ -104,43 +110,21 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     });
   }, [onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns, actions, rowId]);
 
-  const fetchCascadeRowGroupNodeData = useCallback(() => {
-    setRowGroupDataFetch(true);
-    fetchGroupNodeData().finally(() => {
-      setRowGroupDataFetch(false);
-    });
-  }, [fetchGroupNodeData]);
-
-  const onCascadeRowToggle = useCallback(() => {
-    rowToggleFn();
-
-    if (isGroupNode) {
-      // can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
-      fetchCascadeRowGroupNodeData();
-    }
-  }, [fetchCascadeRowGroupNodeData, isGroupNode, rowToggleFn]);
-
   const onCascadeRowExpand = useCallback(() => {}, []);
 
-  /**
-   * @description required ARIA props to ensure proper accessibility tree gets generated
-   * @see https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/
-   */
-  const rowARIAProps = useMemo(() => {
-    return {
-      id: rowId,
-      role: 'row',
-      'aria-expanded': rowIsExpanded,
-      'aria-level': rowDepth + 1,
-      ...(rowChildren.length > 0 && {
-        'aria-owns': rowChildren.map((row) => row.id).join(' '),
-      }),
-    };
-  }, [rowId, rowIsExpanded, rowDepth, rowChildren]);
+  useEffect(() => {
+    // fetch the data for the sub-rows
+    if (isGroupNode && rowIsExpanded && !Boolean(rowChildrenCount)) {
+      setRowGroupDataFetch(true);
+      fetchGroupNodeData().finally(() => {
+        setRowGroupDataFetch(false);
+      });
+    }
+  }, [rowIsExpanded, rowChildrenCount, isGroupNode, fetchGroupNodeData]);
 
   return (
     <div
-      {...rowARIAProps}
+      {...treeGridRowARIAAttributes}
       data-index={virtualRow.index}
       data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
       ref={innerRef}
@@ -195,7 +179,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                 <EuiFlexItem>
                   <EuiButtonIcon
                     iconType={rowIsExpanded ? 'arrowUp' : 'arrowDown'}
-                    onClick={onCascadeRowToggle}
+                    onClick={rowToggleFn}
                     aria-label={i18n.translate(
                       'sharedUXPackages.dataCascade.toggleRowButtonLabel',
                       {
