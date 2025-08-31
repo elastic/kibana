@@ -25,7 +25,6 @@ import {
 } from '../common';
 import type { WorkflowsManagementConfig } from './config';
 import { workflowSavedObjectType } from './saved_objects/workflow';
-import { SchedulerService } from './scheduler/scheduler_service';
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
@@ -49,12 +48,10 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private readonly logger: Logger;
   private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
-  private schedulerService: SchedulerService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
-  // TODO: replace with esClient promise from core
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -130,33 +127,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           },
         },
       });
-
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:run': {
-          title: 'Run Workflow',
-          description: 'Executes a workflow immediately',
-          timeout: '5m',
-          maxAttempts: 1,
-          createTaskRunner: ({ taskInstance }) => {
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
-                const { workflowsExecutionEngine } =
-                  pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
-
-                return workflowsExecutionEngine.executeWorkflow(
-                  taskInstance.params.workflow,
-                  taskInstance.params.context
-                );
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
     }
 
     // Register saved object types
@@ -180,6 +150,11 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.getUnsafeInternalClient());
 
+    const getWorkflowExecutionEngine = () =>
+      core
+        .getStartServices()
+        .then(([, pluginsStart]) => (pluginsStart as any).workflowsExecutionEngine);
+
     this.workflowsService = new WorkflowsService(
       esClientPromise,
       this.logger,
@@ -189,7 +164,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       WORKFLOWS_EXECUTION_LOGS_INDEX,
       this.config.logging.console
     );
-    this.api = new WorkflowsManagementApi(this.workflowsService, null, this.logger);
+    this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 
     // Register server side APIs
@@ -205,7 +180,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
-    // Initialize workflow task scheduler with the start contract
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
 
@@ -225,21 +199,9 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
-    this.logger.debug('Workflows Management: Creating scheduler service');
-    this.schedulerService = new SchedulerService(
-      this.logger,
-      this.workflowsService!,
-      plugins.taskManager
-    );
-    this.api!.setSchedulerService(this.schedulerService!);
-
     this.logger.debug('Workflows Management: Started');
 
-    return {
-      // TODO: use api abstraction instead of schedulerService methods directly
-      pushEvent: this.schedulerService!.pushEvent.bind(this.schedulerService),
-      runWorkflow: this.schedulerService!.runWorkflow.bind(this.schedulerService),
-    };
+    return {};
   }
 
   public stop() {}

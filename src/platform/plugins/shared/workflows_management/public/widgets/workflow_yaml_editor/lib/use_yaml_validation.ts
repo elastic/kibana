@@ -32,6 +32,7 @@ const SEVERITY_MAP = {
 };
 
 export interface UseYamlValidationResult {
+  error: Error | null;
   validationErrors: YamlValidationError[] | null;
   validateVariables: (
     editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor
@@ -48,6 +49,7 @@ export function useYamlValidation({
   workflowYamlSchema,
   onValidationErrors,
 }: UseYamlValidationProps): UseYamlValidationResult {
+  const [error, setError] = useState<Error | null>(null);
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
@@ -153,9 +155,9 @@ export function useYamlValidation({
 
         // Set markers on the model for the problems panel
         monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        setError(null);
+      } catch (e) {
+        setError(e as Error);
       }
     },
     [workflowYamlSchema]
@@ -194,6 +196,7 @@ export function useYamlValidation({
   );
 
   return {
+    error,
     validationErrors,
     validateVariables,
     handleMarkersChanged,

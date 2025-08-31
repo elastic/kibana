@@ -11,6 +11,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -21,10 +22,11 @@ import type {
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
-import type { SchedulerService } from '../scheduler/scheduler_service';
 import type { WorkflowsService } from './workflows_management_service';
+import type { LogSearchResult } from './lib/workflow_logger';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -38,6 +40,7 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
+  stepId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -63,61 +66,26 @@ export interface WorkflowExecutionLogsDto {
   offset: number;
 }
 
-// Decorator to add error logging to API methods
-function withErrorLogging<T extends any[], R>(
-  target: any,
-  propertyKey: string,
-  descriptor: TypedPropertyDescriptor<(...args: T) => Promise<R>>
-) {
-  const originalMethod = descriptor.value!;
-  
-  descriptor.value = async function(...args: T): Promise<R> {
-    const logger = (this as any).logger;
-    const methodName = propertyKey;
-    
-    // Debug: Check if logger is available
-    if (!logger) {
-      console.error(`No logger available for method ${methodName}`);
-    }
-    
-    try {
-      return await originalMethod.apply(this, args);
-    } catch (error) {
-      // Fallback to console.error if logger is not available
-      if (!logger) {
-        console.error(`WorkflowsManagementApi.${methodName} failed:`, {
-          error: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-          method: methodName,
-          errorDetails: error,
-        });
-      } else {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        
-        // Create a detailed message that will show in console (without stack trace)
-        const detailedMessage = `WorkflowsManagementApi.${methodName} failed: ${errorMessage}`;
-        
-        logger.error(detailedMessage, {
-          error: errorMessage,
-          stack: errorStack,
-          method: methodName,
-          errorDetails: error,
-          args: args.map(arg => {
-            // Sanitize args for logging (remove sensitive data)
-            if (typeof arg === 'object' && arg !== null) {
-              const { request, ...safeArgs } = arg as any;
-              return safeArgs;
-            }
-            return arg;
-          }),
-        });
-      }
-      throw error; // Re-throw the original error
-    }
-  };
-  
-  return descriptor;
+export interface GetStepExecutionParams {
+  executionId: string;
+  stepId: string;
+}
+
+export interface GetExecutionLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetStepLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  stepId: string;
 }
 
 export class WorkflowsManagementApi {
@@ -125,29 +93,20 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private schedulerService: SchedulerService | null = null,
-    private readonly logger: Logger
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
 
   public setSecurityService(securityService: any) {
     this.securityService = securityService;
   }
-
-  public setSchedulerService(schedulerService: SchedulerService) {
-    this.schedulerService = schedulerService;
-  }
-
-  @withErrorLogging
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
     return await this.workflowsService.searchWorkflows(params, spaceId);
   }
 
-  @withErrorLogging
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
     return await this.workflowsService.getWorkflow(id, spaceId);
   }
 
-  @withErrorLogging
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
@@ -156,7 +115,6 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.createWorkflow(workflow, spaceId, request);
   }
 
-  @withErrorLogging
   public async cloneWorkflow(
     workflow: WorkflowDetailDto,
     spaceId: string,
@@ -170,7 +128,6 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
-  @withErrorLogging
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
@@ -190,7 +147,6 @@ export class WorkflowsManagementApi {
     );
   }
 
-  @withErrorLogging
   public async deleteWorkflows(
     workflowIds: string[],
     spaceId: string,
@@ -198,29 +154,25 @@ export class WorkflowsManagementApi {
   ): Promise<void> {
     return await this.workflowsService.deleteWorkflows(workflowIds, spaceId, request);
   }
-
-  @withErrorLogging
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
-    return await this.schedulerService.runWorkflow(workflow, spaceId, inputs);
+    const context = {
+      ...inputs,
+      spaceId,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    return executeResponse.workflowExecutionId;
   }
-
-  @withErrorLogging
   public async testWorkflow(
     workflowYaml: string,
     inputs: Record<string, any>,
     spaceId: string,
     request?: KibanaRequest
   ): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
 
     if (parsedYaml.error) {
@@ -230,41 +182,25 @@ export class WorkflowsManagementApi {
     }
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
-
-    // Extract user information from the request if available
-    let userContext = null;
-    if (request && this.securityService) {
-      try {
-        const user = this.securityService.authc.getCurrentUser(request);
-        if (user) {
-          userContext = {
-            username: user.username,
-            full_name: user.full_name,
-            email: user.email,
-            profile_uid: user.profile_uid,
-            roles: user.roles,
-            metadata: user.metadata,
-          };
-        }
-      } catch (error) {
-        // If we can't get user info, continue without it
-      }
-    }
-
-    return await this.schedulerService.runWorkflow(
+    const context = {
+      ...inputs,
+      spaceId,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
         id: 'test-workflow',
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
+        yaml: workflowYaml,
+        isTestRun: true,
       },
-      spaceId,
-      inputs,
-      userContext
+      context
     );
+    return executeResponse.workflowExecutionId;
   }
 
-  @withErrorLogging
   public async getWorkflowExecutions(
     workflowId: string,
     spaceId: string
@@ -277,7 +213,6 @@ export class WorkflowsManagementApi {
     );
   }
 
-  @withErrorLogging
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string
@@ -285,12 +220,26 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
-  @withErrorLogging
   public async getWorkflowExecutionLogs(
     params: GetWorkflowExecutionLogsParams,
     spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
-    const result = await this.workflowsService.getExecutionLogs(params.executionId, spaceId);
+    let result: LogSearchResult;
+    if (params.stepId) {
+      result = await this.workflowsService.getStepLogs(
+        {
+          executionId: params.executionId,
+          stepId: params.stepId,
+          limit: params.limit,
+          offset: params.offset,
+          sortField: params.sortField,
+          sortOrder: params.sortOrder,
+        },
+        spaceId
+      );
+    } else {
+      result = await this.workflowsService.getExecutionLogs(params, spaceId);
+    }
 
     // Transform the logs to match our API format
     return {
@@ -324,12 +273,17 @@ export class WorkflowsManagementApi {
     };
   }
 
-  @withErrorLogging
+  public async getStepExecution(
+    params: GetStepExecutionParams,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    return await this.workflowsService.getStepExecution(params, spaceId);
+  }
+
   public async getWorkflowStats(spaceId: string) {
     return await this.workflowsService.getWorkflowStats(spaceId);
   }
 
-  @withErrorLogging
   public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
     return await this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
