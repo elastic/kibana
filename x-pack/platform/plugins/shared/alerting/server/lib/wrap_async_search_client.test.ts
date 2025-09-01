@@ -29,20 +29,6 @@ const fakeRequest = {
   },
 } as unknown as KibanaRequest;
 
-const mockDataClientSearchDefault = jest.fn().mockImplementation(
-  (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
-    of(
-      {
-        isRunning: true,
-        rawResponse: { took: 1, columns: [], values: [] },
-      },
-      {
-        isRunning: false,
-        rawResponse: { took: 100, columns: [], values: [] },
-      }
-    )
-);
-
 describe('wrapScopedClusterClient', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
