@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './types';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';
