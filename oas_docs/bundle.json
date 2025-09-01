@@ -41852,10 +41852,11 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status",
+        "summary": "Get remote synced integrations status",
         "tags": [
-          "CCR Remote synced integrations"
-        ]
+          "Fleet remote synced integrations"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
@@ -42047,10 +42048,11 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status by outputId",
+        "summary": "Get remote synced integrations status by outputId",
         "tags": [
-          "CCR Remote synced integrations"
-        ]
+          "Fleet remote synced integrations"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/service_tokens": {
@@ -49504,6 +49506,13 @@
                                                       "properties": {
                                                         "destination": {
                                                           "minLength": 1,
+                                                          "type": "string"
+                                                        },
+                                                        "status": {
+                                                          "enum": [
+                                                            "enabled",
+                                                            "disabled"
+                                                          ],
                                                           "type": "string"
                                                         },
                                                         "where": {
@@ -58534,9 +58543,16 @@
                                           "type": "string"
                                         },
                                         "type": "array"
+                                      },
+                                      "tags": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
                                       }
                                     },
                                     "required": [
+                                      "tags",
                                       "members"
                                     ],
                                     "type": "object"
@@ -58604,6 +58620,13 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "status": {
+                    "enum": [
+                      "enabled",
+                      "disabled"
+                    ],
+                    "type": "string"
+                  },
                   "stream": {
                     "additionalProperties": false,
                     "properties": {
@@ -58992,9 +59015,16 @@
                           "type": "string"
                         },
                         "type": "array"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
                       }
                     },
                     "required": [
+                      "tags",
                       "members"
                     ],
                     "type": "object"
@@ -61920,6 +61950,13 @@
                                       "properties": {
                                         "destination": {
                                           "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "status": {
+                                          "enum": [
+                                            "enabled",
+                                            "disabled"
+                                          ],
                                           "type": "string"
                                         },
                                         "where": {
@@ -65985,9 +66022,6 @@
       "name": "alerting"
     },
     {
-      "name": "CCR Remote synced integrations"
-    },
-    {
       "name": "connectors"
     },
     {
@@ -66025,6 +66059,9 @@
     },
     {
       "name": "Fleet proxies"
+    },
+    {
+      "name": "Fleet remote synced integrations"
     },
     {
       "name": "Fleet Server hosts"
