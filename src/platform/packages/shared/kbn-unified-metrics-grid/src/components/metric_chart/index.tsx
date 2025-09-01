@@ -9,82 +9,83 @@
 
 import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { useMetricDataQuery } from '../../hooks';
 import { ChartContent } from './chart_content';
 import { ChartHeader } from './chart_header';
-import type { MetricField } from '../../types';
 import { createESQLQuery } from '../../utils/create_esql_query';
 
 interface MetricChartProps {
   metric: MetricField;
   timeRange: { from?: string; to?: string };
   byDimension?: string;
-  dimensions?: Array<string>;
+  dimensions: string[];
   colorIndex?: number;
-  displayDensity?: 'normal' | 'compact' | 'row';
+  size?: 'm' | 's';
   filters?: Array<{ field: string; value: string }>;
-  headerActions?: {
-    hasExploreAction?: boolean;
-    hasMetricsInsightsAction?: boolean;
-  };
 }
 
-export const MetricChart: React.FC<MetricChartProps> = ({
+export const MetricChart = ({
   metric,
   timeRange,
   byDimension,
   dimensions = [],
   colorIndex,
-  displayDensity = 'normal',
+  size = 'm',
   filters = [],
-  headerActions,
-}) => {
-  // Hardcoded data for demo
-  const data = [
-    { x: Date.now() - 3600000, y: Math.random() * 100 },
-    { x: Date.now() - 1800000, y: Math.random() * 100 },
-    { x: Date.now(), y: Math.random() * 100 },
-  ];
-  const isSupported = true;
-  const hasDimensions = false;
-  const error = null;
-  const isLoading = false;
+}: MetricChartProps) => {
+  const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
+
+  const {
+    data: queryData,
+    isLoading,
+    error,
+  } = useMetricDataQuery({
+    metricName: isSupported ? metric.name : '',
+    timeRange,
+    instrument: metric.instrument,
+    index: metric.index,
+    dimensions,
+    filters,
+  });
+
+  const data = useMemo(() => queryData?.data || [], [queryData?.data]);
+  const hasDimensions = queryData?.hasDimensions || false;
 
   // Generate ESQL query using the same logic as the hook
   const esqlQuery = useMemo(() => {
     if (!isSupported) return '';
     return createESQLQuery({
       metricName: metric.name,
-      timeSeriesMetric: metric.timeSeriesMetric,
+      timeSeriesMetric: metric.instrument,
       index: metric.index,
       dimensions,
       filters,
     });
-  }, [isSupported, metric.name, metric.timeSeriesMetric, metric.index, dimensions, filters]);
+  }, [isSupported, metric.name, metric.instrument, metric.index, dimensions, filters]);
 
   return (
     <EuiPanel grow={false} hasBorder={true} style={{ width: '100%', minWidth: 0 }}>
       <ChartHeader
         title={metric.name}
         byDimension={byDimension}
-        esqlQuery={esqlQuery}
         metric={metric}
-        displayDensity={displayDensity}
-        hasExploreAction={headerActions?.hasExploreAction ?? true}
-        hasMetricsInsightsAction={headerActions?.hasMetricsInsightsAction ?? true}
+        size={size}
+        esqlQuery={esqlQuery}
       />
       <EuiSpacer size="m" />
       <ChartContent
         isLoading={isLoading}
-        error={error}
+        error={error as Error}
         data={data}
         metricName={metric.name}
         isSupported={isSupported}
         unit={metric.unit}
         hasDimensions={hasDimensions}
-        chartType="area"
+        chartType={metric.display}
         timeRange={timeRange}
         colorIndex={colorIndex}
-        displayDensity={displayDensity}
+        size={size}
       />
     </EuiPanel>
   );

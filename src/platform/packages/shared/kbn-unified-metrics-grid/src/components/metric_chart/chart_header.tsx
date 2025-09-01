@@ -17,49 +17,45 @@ import {
   EuiToolTip,
   EuiTextTruncate,
 } from '@elastic/eui';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { MetricField } from '../../types';
 import { MetricInsightsFlyout } from '../metric_flyout/metrics_insights_flyout';
 
 interface ChartHeaderProps {
   title: string;
   byDimension?: string;
-  esqlQuery: string;
   metric: MetricField;
-  displayDensity?: 'normal' | 'compact' | 'row';
-  hasExploreAction?: boolean;
-  hasMetricsInsightsAction?: boolean;
+  size?: 'm' | 's';
+  esqlQuery?: string;
 }
 
-export const ChartHeader: React.FC<ChartHeaderProps> = ({
+export const ChartHeader = ({
   title,
   byDimension,
-  esqlQuery,
   metric,
-  displayDensity = 'normal',
-  hasExploreAction = true,
-  hasMetricsInsightsAction = true,
-}) => {
+  size = 'm',
+  esqlQuery,
+}: ChartHeaderProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   // Get title sizes based on display density
   const getTitleSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xxs';
     }
     return 'xs';
   };
 
   const getSubtitleSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xxs';
     }
     return 'xs';
   };
 
   const getDescriptionSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xs';
     }
     return 's';
@@ -77,38 +73,34 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
 
   const actionIcons = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      {hasExploreAction && (
-        <EuiFlexItem data-test-subj="metricsChartExploreAction" grow={false}>
-          <EuiToolTip content="Explore">
-            <EuiButtonIcon
-              iconType="inspect"
-              size="s"
-              color="text"
-              aria-label={i18n.translate(
-                'metricsExperience.chartHeader.euiButtonIcon.exploreThisMetricLabel',
-                { defaultMessage: 'Explore this metric' }
-              )}
-              onClick={handleExplore}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {hasMetricsInsightsAction && (
-        <EuiFlexItem data-test-subj="metricsChartInsightsAction" grow={false}>
-          <EuiToolTip content="Metric insights" disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="sparkles"
-              size="s"
-              color="text"
-              aria-label={i18n.translate(
-                'metricsExperience.chartHeader.euiButtonIcon.metricInsightsLabel',
-                { defaultMessage: 'Metric insights' }
-              )}
-              onClick={handleInsights}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem data-test-subj="metricsChartExploreAction" grow={false}>
+        <EuiToolTip content="Explore">
+          <EuiButtonIcon
+            iconType="inspect"
+            size="s"
+            color="text"
+            aria-label={i18n.translate(
+              'metricsExperience.chartHeader.euiButtonIcon.exploreThisMetricLabel',
+              { defaultMessage: 'Explore this metric' }
+            )}
+            onClick={handleExplore}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem data-test-subj="metricsChartInsightsAction" grow={false}>
+        <EuiToolTip content="Metric insights" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="sparkles"
+            size="s"
+            color="text"
+            aria-label={i18n.translate(
+              'metricsExperience.chartHeader.euiButtonIcon.metricInsightsLabel',
+              { defaultMessage: 'Metric insights' }
+            )}
+            onClick={handleInsights}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
