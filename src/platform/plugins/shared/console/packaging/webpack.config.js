@@ -17,6 +17,7 @@ const ConsoleDefinitionsPlugin = require('./console-definitions-plugin');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
 const isProd = process.env.NODE_ENV === 'production';
+const BUILD_OUTPUT_DIR = process.env.BUILD_OUTPUT_DIR || path.resolve(__dirname, '../target');
 
 const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 
@@ -29,7 +30,7 @@ module.exports = [
     devtool: 'cheap-source-map',
     output: {
       libraryTarget: 'commonjs',
-      path: path.resolve(__dirname, '../target/react'),
+      path: path.resolve(BUILD_OUTPUT_DIR, 'react'),
       filename: 'index.js',
       chunkFilename: '[name].chunk.js',
       publicPath: 'auto',
@@ -222,7 +223,7 @@ module.exports = [
     plugins: [
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin({
-        cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../target/react/**/*')],
+        cleanOnceBeforeBuildPatterns: [path.resolve(BUILD_OUTPUT_DIR, 'react/**/*')],
       }),
       // new MonacoWebpackPlugin({}),
       new BundleAnalyzerPlugin(),
@@ -237,7 +238,7 @@ module.exports = [
     devtool: 'cheap-source-map',
     output: {
       libraryTarget: 'commonjs',
-      path: path.resolve(__dirname, '../target/server'),
+      path: path.resolve(BUILD_OUTPUT_DIR, 'server'),
       filename: 'index.js',
       publicPath: '',
     },
@@ -284,11 +285,11 @@ module.exports = [
     },
     plugins: [
       new CleanWebpackPlugin({
-        cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../target/server/**/*')],
+        cleanOnceBeforeBuildPatterns: [path.resolve(BUILD_OUTPUT_DIR, 'server/**/*')],
       }),
       new ConsoleDefinitionsPlugin({
         from: path.resolve(__dirname, 'server/console_definitions'),
-        to: path.resolve(__dirname, '../target/server/console_definitions'),
+        to: path.resolve(BUILD_OUTPUT_DIR, 'server/console_definitions'),
       }),
     ],
   },

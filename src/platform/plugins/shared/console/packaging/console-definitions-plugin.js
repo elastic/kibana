@@ -9,6 +9,7 @@
 
 const path = require('path');
 const fs = require('fs');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const typescript = require('typescript');
 
 /**

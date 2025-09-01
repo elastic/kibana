@@ -20,6 +20,7 @@ const createPackagingParsedRequestsProvider = () => {
   return (model: any) => {
     // Add null check for model
     if (!model) {
+      // eslint-disable-next-line no-console
       console.warn('Monaco editor model is null, creating fallback provider');
       return {
         getRequests: () => Promise.resolve([]),
@@ -34,10 +35,12 @@ const createPackagingParsedRequestsProvider = () => {
 // No manual registration needed - the Monaco Console integration will handle it
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 // import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
