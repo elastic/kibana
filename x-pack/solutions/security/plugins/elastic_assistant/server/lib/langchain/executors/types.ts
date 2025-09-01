@@ -14,6 +14,7 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type {
   ContentReferencesStore,
   ExecuteConnectorRequestBody,
+  InterruptValue,
   Message,
   Replacements,
   ScreenContext,
@@ -33,9 +34,12 @@ import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_d
 import type { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 
 export type OnLlmResponse = (
-  content: string,
-  traceData?: Message['traceData'],
-  isError?: boolean
+  args: {
+    content: string,
+    interruptValue?: InterruptValue
+    traceData?: Message['traceData'],
+    isError?: boolean
+  }
 ) => Promise<void>;
 
 export interface AssistantDataClients {

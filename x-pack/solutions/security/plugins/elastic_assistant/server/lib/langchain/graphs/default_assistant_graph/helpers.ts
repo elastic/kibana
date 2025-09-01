@@ -12,7 +12,7 @@ import type { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody, InterruptValue, TraceData } from '@kbn/elastic-assistant-common';
 import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -74,36 +74,47 @@ export const streamGraph = async ({
   } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
 
   let didEnd = false;
-  const handleStreamEnd = (finalResponse: string, isError = false) => {
+
+  const closeStream = (args: { errorMessage: string, isError: true } | { isError: false }) => {
     if (didEnd) {
       return;
     }
-    if (isError) {
+
+    if (args.isError) {
       telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
         actionTypeId: request.body.actionTypeId,
         model: request.body.model,
-        errorMessage: finalResponse,
+        errorMessage: args.errorMessage,
         assistantStreamingEnabled: true,
         isEnabledKnowledgeBase,
         errorLocation: 'handleStreamEnd',
       });
     }
-    if (onLlmResponse) {
-      onLlmResponse(
-        finalResponse,
-        {
-          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
-          traceId: streamingSpan?.ids?.['trace.id'],
-        },
-        isError
-      ).catch(() => {});
-    }
+
     streamEnd();
     didEnd = true;
+
     if ((streamingSpan && !streamingSpan?.outcome) || streamingSpan?.outcome === 'unknown') {
-      streamingSpan.outcome = isError ? 'failure' : 'success';
+      streamingSpan.outcome = args.isError ? 'failure' : 'success';
     }
     streamingSpan?.end();
+  }
+
+  const handleFinalContent = (args: { finalResponse: string, isError: boolean, interruptValue?: InterruptValue }) => {
+    if (onLlmResponse) {
+
+      onLlmResponse(
+        {
+          content: args.finalResponse,
+          interruptValue: args.interruptValue,
+          traceData: {
+            transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+            traceId: streamingSpan?.ids?.['trace.id'],
+          },
+          isError: args.isError
+        }
+      ).catch(() => { });
+    }
   };
 
   const stream = await assistantGraph.streamEvents(inputs, {
@@ -132,7 +143,7 @@ export const streamGraph = async ({
           !data.output.lc_kwargs?.tool_calls?.length &&
           !didEnd
         ) {
-          handleStreamEnd(data.output.content);
+          handleFinalContent({ finalResponse: data.output.content, isError: false });
         } else if (
           // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
           event === 'on_chat_model_end' &&
@@ -144,11 +155,14 @@ export const streamGraph = async ({
         }
       }
     }
+
+    closeStream({ isError: false });
   };
 
   pushStreamUpdate().catch((err) => {
     logger.error(`Error streaming graph: ${err}`);
-    handleStreamEnd(err.message, true);
+    handleFinalContent({ finalResponse: err.message, isError: true });
+    closeStream({ isError: true, errorMessage: err.message });
   });
 
   return responseWithHeaders;
@@ -210,7 +224,10 @@ export const invokeGraph = async ({
     const output = lastMessage.text;
     const conversationId = result.conversationId;
     if (onLlmResponse) {
-      await onLlmResponse(output, traceData);
+      await onLlmResponse({
+        "content": output,
+        traceData,
+      });
     }
 
     return { output, traceData, conversationId };

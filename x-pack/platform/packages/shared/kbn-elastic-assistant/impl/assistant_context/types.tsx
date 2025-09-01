@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiConfig, Message, Replacements, User } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, InterruptResumeValue, Message, Replacements, User } from '@kbn/elastic-assistant-common';
 import type { EuiCommentProps } from '@elastic/eui';
 
 export interface MessagePresentation {
@@ -93,3 +93,8 @@ export type GetAssistantMessages = (commentArgs: {
   systemPromptContent?: string;
   contentReferencesVisible: boolean;
 }) => EuiCommentProps[];
+
+export type ResumeGraphFunction = (
+  threadId: string,
+  resumeValue: InterruptResumeValue
+) => Promise<void>;

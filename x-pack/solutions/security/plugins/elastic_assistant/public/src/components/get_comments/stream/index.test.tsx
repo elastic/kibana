@@ -55,6 +55,8 @@ const testProps = {
   contentReferences: undefined,
   contentReferencesVisible: true,
   messageRole: 'assistant' as const,
+  resumeGraph: jest.fn(),
+  isLastInConversation: true,
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
@@ -130,6 +132,62 @@ describe('StreamComment', () => {
 
     expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
+
+  it('renders select interrupt', async () => {
+    const resumeFunction = jest.fn();
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          resumeGraph: resumeFunction,
+          content: 'User information requested',
+          interruptValue: {
+            "type": "SELECT_OPTION",
+            "threadId": "test-thread-id",
+            "options": [{
+              "value": "APPROVED",
+              "label": "Approved",
+              "buttonColor": "success"
+            }, {
+              "value": "REJECTED",
+              "label": "Rejected",
+              "buttonColor": "danger"
+            }],
+            "description": "Select an option"
+          }
+        }}
+      />
+    );
+
+    expect(screen.queryByText('Approved')).toBeInTheDocument();
+    expect(screen.queryByText('Rejected')).toBeInTheDocument();
+    expect(screen.getByTestId('select-option-interrupt')).toBeInTheDocument();
+    expect(screen.queryByText('User information requested')).toBeInTheDocument();
+    expect(screen.queryByText('Select an option')).toBeInTheDocument();
+  });
+
+  it('renders input interrupt', async () => {
+    const resumeFunction = jest.fn();
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          resumeGraph: resumeFunction,
+          content: 'User information requested',
+          interruptValue: {
+            "type": "INPUT_TEXT",
+            "threadId": "test-thread-id",
+            "description": "Input text"
+          }
+        }}
+      />
+    );
+
+    expect(screen.queryByText('Input text')).toBeInTheDocument();
+    expect(screen.getByTestId('input-text-interrupt')).toBeInTheDocument();
+    expect(screen.queryByText('User information requested')).toBeInTheDocument();
+  });
+
 
   it('renders cursor when content is loading', () => {
     render(<StreamComment {...testProps} isFetching={true} />);
