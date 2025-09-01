@@ -9,6 +9,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
 import type {
   TimefilterContract,
   SerializedSearchSourceFields,
@@ -163,7 +164,7 @@ export class ListControl extends Control<PhraseFilterManager> {
     this.lastQuery = query;
     let resp;
     try {
-      resp = await searchSource.fetch({ abortSignal });
+      resp = await lastValueFrom(searchSource.fetch$({ abortSignal }));
     } catch (error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;
@@ -182,9 +183,11 @@ export class ListControl extends Control<PhraseFilterManager> {
       return;
     }
 
-    const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket: any) => {
-      return bucket?.key;
-    });
+    const selectOptions = _.get(resp.rawResponse, 'aggregations.termsAgg.buckets', []).map(
+      (bucket: any) => {
+        return bucket?.key;
+      }
+    );
 
     if (selectOptions.length === 0 && !query) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
@@ -193,7 +196,7 @@ export class ListControl extends Control<PhraseFilterManager> {
 
     // TODO: terminated_early is missing from response definition.
     // https://github.com/elastic/elasticsearch-js/issues/1289
-    this.partialResults = (resp as any).terminated_early || resp.timed_out;
+    this.partialResults = (resp as any).terminated_early || resp.rawResponse.timed_out;
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';

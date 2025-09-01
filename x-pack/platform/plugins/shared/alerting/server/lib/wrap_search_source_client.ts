@@ -109,7 +109,7 @@ function wrapSearchSource<T extends ISearchSource | SearchSource>({
 
 function wrapCreate({ pureSearchSource, ...wrapParams }: WrapParams<ISearchSource>) {
   return function () {
-    const pureCreatedSearchSource = pureSearchSource.create();
+    const pureCreatedSearchSource = pureSearchSource.createCopy();
 
     return wrapSearchSource({
       ...wrapParams,

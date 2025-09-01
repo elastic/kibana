@@ -74,7 +74,7 @@ import {
   omit,
 } from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
-import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
+import { defer, EMPTY, from, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
@@ -302,13 +302,6 @@ export class SearchSource {
   }
 
   /**
-   * @deprecated Don't use.
-   */
-  create() {
-    return new SearchSource({}, this.dependencies);
-  }
-
-  /**
    * creates a copy of this search source (without its children)
    */
   createCopy() {
@@ -378,17 +371,6 @@ export class SearchSource {
     return this.inspectSearch(s$, options) as Observable<
       IKibanaSearchResponse<estypes.SearchResponse<T>>
     >;
-  }
-
-  /**
-   * Fetch this source and reject the returned Promise on error
-   * @deprecated Use the `fetch$` method instead
-   */
-  async fetch(
-    options: SearchSourceSearchOptions = {}
-  ): Promise<estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>> {
-    const r = await lastValueFrom(this.fetch$(options));
-    return r.rawResponse as estypes.SearchResponse<unknown>;
   }
 
   /**
