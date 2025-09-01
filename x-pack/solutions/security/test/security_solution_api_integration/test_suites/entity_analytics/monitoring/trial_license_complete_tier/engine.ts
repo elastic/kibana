@@ -45,6 +45,24 @@ export default ({ getService }: FtrProviderContext) => {
       },
     });
 
+  const addUsersToIndex = async (indexName: string, users: string[]) => {
+    const ops = users.flatMap((name) => [{ index: {} }, { user: { name, role: 'admin' } }]);
+    await es.bulk({
+      index: indexName,
+      body: ops,
+      refresh: true,
+    });
+  };
+
+  const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
+    await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+    await privMonUtils.waitForSyncTaskRun();
+    await waitForPrivMonUsersToBeSynced(expectedCount);
+    const res = await api.listPrivMonUsers({ query: {} });
+
+    return res.body;
+  };
+
   const waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
     let lastSeenLength = -1;
 
@@ -371,6 +389,15 @@ export default ({ getService }: FtrProviderContext) => {
         filter: {},
       };
 
+      const createEntitySource = async () => {
+        const response = await api.createEntitySource({ body: entitySource });
+        expect(response.status).toBe(200);
+
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
+        expect(names).toContain('StarWars');
+      };
+
       beforeEach(async () => {
         await createUserIndex(indexName);
         await enablePrivmonSetting(kibanaServer);
@@ -400,31 +427,15 @@ export default ({ getService }: FtrProviderContext) => {
           'Darth Vader',
         ];
 
-        const nameToOp = (name: string) => [{ index: {} }, { user: { name, role: 'admin' } }];
+        const repeatedUsers = Array.from({ length: 150 }).map(() => 'C-3PO');
 
-        const uniqueUserOps = uniqueUsernames.flatMap(nameToOp);
-        const repeatedUserOps = Array.from({ length: 150 }).flatMap(() => nameToOp('C-3PO'));
+        await addUsersToIndex(indexName, [...uniqueUsernames, ...repeatedUsers]);
+        await createEntitySource();
 
-        await es.bulk({
-          index: indexName,
-          body: [...uniqueUserOps, ...repeatedUserOps],
-          refresh: true,
-        });
+        const users = await scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
 
-        // register entity source
-        const response = await api.createEntitySource({ body: entitySource });
-        expect(response.status).toBe(200);
-
-        // default-monitoring-index should exist now
-        const sources = await api.listEntitySources({ query: {} });
-        const names = sources.body.map((s: any) => s.name);
-        expect(names).toContain('StarWars');
-        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-        await privMonUtils.waitForSyncTaskRun();
-        await waitForPrivMonUsersToBeSynced(uniqueUsernames.length);
         // Check if the users are indexed
-        const res = await api.listPrivMonUsers({ query: {} });
-        const userNames = res.body.map((u: any) => u.user.name);
+        const userNames = users.map((u: any) => u.user.name);
         expect(userNames).toContain('Luke Skywalker');
         expect(userNames).toContain('C-3PO');
         expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
