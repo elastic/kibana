@@ -31,7 +31,7 @@ class InMemoryStorage implements ContentStorage<any> {
 
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
-      const temp =  {
+      const temp = {
         data: {
           ...(await this.db.get(id)),
           options: forwardInResponse,
@@ -40,7 +40,6 @@ class InMemoryStorage implements ContentStorage<any> {
       console.log('InMemoryStorage storage get called with-----', JSON.stringify(temp, null, 2));
       return temp;
     }
-
 
     return {
       data: this.db.get(id),
