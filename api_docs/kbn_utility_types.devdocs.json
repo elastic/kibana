@@ -715,6 +715,31 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.RecursiveWritable",
+        "type": "Type",
+        "tags": [],
+        "label": "RecursiveWritable",
+        "description": [
+          "\n Makes an object with readonly properties mutable."
+        ],
+        "signature": [
+          "{ -readonly [K in keyof T]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursiveWritable",
+            "text": "RecursiveWritable"
+          },
+          "<T[K]>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-common.Serializable",
         "type": "Type",
         "tags": [],
