@@ -22,10 +22,69 @@ interface LabelNodeBadgesProps {
   analysis: DocumentAnalysisOutput;
 }
 
+const CountText: React.FC<{ testSubj: string; color: string; children: React.ReactNode }> = ({
+  testSubj,
+  color,
+  children,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiText
+      data-test-subj={testSubj}
+      size="xs"
+      color={color}
+      css={css`
+        font-weight: ${euiTheme.font.weight.medium};
+      `}
+    >
+      {children}
+    </EuiText>
+  );
+};
+
+const AlertIcon: React.FC<{ color: string }> = ({ color }) => (
+  <EuiIcon data-test-subj={TEST_SUBJ_ALERT_ICON} type="warningFilled" color={color} size="s" />
+);
+
+const EventBadge: React.FC<{ count: number }> = ({ count }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <RoundedBadge euiTheme={euiTheme}>
+      <CountText testSubj={TEST_SUBJ_EVENT_COUNT} color={euiTheme.colors.textHeading}>
+        {displayCount(count)}
+      </CountText>
+    </RoundedBadge>
+  );
+};
+
+const AlertCountBadge: React.FC<{ count: number; inverted?: boolean }> = ({ count, inverted }) => {
+  const { euiTheme } = useEuiTheme();
+  const bgColor = inverted ? euiTheme.colors.danger : undefined;
+  const iconColor = inverted ? euiTheme.colors.backgroundBasePlain : 'danger';
+  const textColor = inverted ? euiTheme.colors.textInverse : euiTheme.colors.textHeading;
+
+  return (
+    <RoundedBadge euiTheme={euiTheme} bgColor={bgColor}>
+      <AlertIcon color={iconColor} />
+      <CountText testSubj={TEST_SUBJ_ALERT_COUNT} color={textColor}>
+        {displayCount(count)}
+      </CountText>
+    </RoundedBadge>
+  );
+};
+
+const AlertIconBadge: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <RoundedBadge euiTheme={euiTheme}>
+      <AlertIcon color="danger" />
+    </RoundedBadge>
+  );
+};
+
 export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
   const { euiTheme } = useEuiTheme();
 
-  // Renders no badge
   if (analysis.isSingleEvent) {
     return null;
   }
@@ -39,97 +98,13 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
         gap: ${euiTheme.size.xs};
       `}
     >
-      {/* Renders white-background alert badge with icon only */}
-      {analysis.isSingleAlert && (
-        <RoundedBadge euiTheme={euiTheme}>
-          <EuiIcon
-            data-test-subj={TEST_SUBJ_ALERT_ICON}
-            type="warningFilled"
-            color="danger"
-            size="s"
-          />
-        </RoundedBadge>
-      )}
-
-      {/* Renders event badge with counter only */}
-      {analysis.isGroupOfEvents && (
-        <RoundedBadge euiTheme={euiTheme}>
-          <EuiText
-            data-test-subj={TEST_SUBJ_EVENT_COUNT}
-            size="xs"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-              color: ${euiTheme.colors.textHeading};
-            `}
-          >
-            {displayCount(analysis.eventsCount)}
-          </EuiText>
-        </RoundedBadge>
-      )}
-
-      {/* Renders white-background alert badge with warning icon and counter */}
-      {analysis.isGroupOfAlerts && (
-        <RoundedBadge
-          euiTheme={euiTheme}
-          css={css`
-            gap: ${euiTheme.size.xxs};
-          `}
-        >
-          <EuiIcon
-            data-test-subj={TEST_SUBJ_ALERT_ICON}
-            type="warningFilled"
-            color="danger"
-            size="s"
-          />
-          <EuiText
-            data-test-subj={TEST_SUBJ_ALERT_COUNT}
-            size="xs"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-              color: ${euiTheme.colors.textHeading};
-            `}
-          >
-            {displayCount(analysis.alertsCount)}
-          </EuiText>
-        </RoundedBadge>
-      )}
-
-      {/* Renders events badge and red-background alert badge with icon and counter */}
+      {analysis.isSingleAlert && <AlertIconBadge />}
+      {analysis.isGroupOfEvents && <EventBadge count={analysis.eventsCount} />}
+      {analysis.isGroupOfAlerts && <AlertCountBadge count={analysis.alertsCount} />}
       {analysis.isGroupOfEventsAndAlerts && (
         <>
-          {/* Events badge */}
-          <RoundedBadge euiTheme={euiTheme}>
-            <EuiText
-              data-test-subj={TEST_SUBJ_EVENT_COUNT}
-              size="xs"
-              css={css`
-                font-weight: ${euiTheme.font.weight.medium};
-                color: ${euiTheme.colors.textHeading};
-              `}
-            >
-              {displayCount(analysis.eventsCount)}
-            </EuiText>
-          </RoundedBadge>
-
-          {/* Alerts badge */}
-          <RoundedBadge euiTheme={euiTheme} bgColor={euiTheme.colors.danger}>
-            <EuiIcon
-              data-test-subj={TEST_SUBJ_ALERT_ICON}
-              type="warningFilled"
-              color={euiTheme.colors.backgroundBasePlain}
-              size="s"
-            />
-            <EuiText
-              data-test-subj={TEST_SUBJ_ALERT_COUNT}
-              size="xs"
-              css={css`
-                font-weight: ${euiTheme.font.weight.medium};
-                color: ${euiTheme.colors.textInverse};
-              `}
-            >
-              {displayCount(analysis.alertsCount)}
-            </EuiText>
-          </RoundedBadge>
+          <EventBadge count={analysis.eventsCount} />
+          <AlertCountBadge count={analysis.alertsCount} inverted />
         </>
       )}
     </div>
