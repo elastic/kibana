@@ -8,11 +8,11 @@
  */
 
 import type { EnterRetryNode } from '@kbn/workflows';
-import type { StepErrorCatcher, StepImplementation } from '../step_base';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { parseDuration } from '../../utils';
-import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
+import type { StepErrorCatcher, StepImplementation } from '../../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import { parseDuration } from '../../../utils';
+import type { WorkflowTaskManager } from '../../../workflow_task_manager/workflow_task_manager';
 
 export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher {
   private static readonly SHORT_DELAY_THRESHOLD = 1000 * 5; // 5 seconds

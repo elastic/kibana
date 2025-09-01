@@ -8,9 +8,9 @@
  */
 
 import type { ExitRetryNode } from '@kbn/workflows';
-import type { StepImplementation } from '../step_base';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { StepImplementation } from '../../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 
 export class ExitRetryNodeImpl implements StepImplementation {
   constructor(

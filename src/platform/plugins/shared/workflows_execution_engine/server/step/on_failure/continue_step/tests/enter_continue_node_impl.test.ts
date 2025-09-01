@@ -8,9 +8,9 @@
  */
 
 import type { EnterContinueNode } from '@kbn/workflows';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterContinueNodeImpl } from '../enter_continue_node_impl';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
 
 describe('EnterContinueNodeImpl', () => {
   let underTest: EnterContinueNodeImpl;
