@@ -18,9 +18,15 @@ import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
-import { DashboardMigration, DashboardMigrationTaskStats } from '../../dashboard_migration.gen';
+import {
+  DashboardMigration,
+  DashboardMigrationTaskExecutionSettings,
+  DashboardMigrationRetryFilter,
+  DashboardMigrationTaskStats,
+} from '../../dashboard_migration.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
 import {
+  LangSmithOptions,
   SiemMigrationResourceData,
   SiemMigrationResourceType,
   SiemMigrationResource,
@@ -134,6 +140,60 @@ export type GetDashboardMigrationStatsRequestParamsInput = z.input<
 
 export type GetDashboardMigrationStatsResponse = z.infer<typeof GetDashboardMigrationStatsResponse>;
 export const GetDashboardMigrationStatsResponse = DashboardMigrationTaskStats;
+
+export type StartDashboardsMigrationRequestParams = z.infer<
+  typeof StartDashboardsMigrationRequestParams
+>;
+export const StartDashboardsMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type StartDashboardsMigrationRequestParamsInput = z.input<
+  typeof StartDashboardsMigrationRequestParams
+>;
+
+export type StartDashboardsMigrationRequestBody = z.infer<
+  typeof StartDashboardsMigrationRequestBody
+>;
+export const StartDashboardsMigrationRequestBody = z.object({
+  /**
+   * Settings applicable to current dashboard migration task execution.
+   */
+  settings: DashboardMigrationTaskExecutionSettings,
+  langsmith_options: LangSmithOptions.optional(),
+  /**
+   * The optional indicator to retry the dashboard translation based on this filter criteria.
+   */
+  retry: DashboardMigrationRetryFilter.optional(),
+});
+export type StartDashboardsMigrationRequestBodyInput = z.input<
+  typeof StartDashboardsMigrationRequestBody
+>;
+
+export type StartDashboardsMigrationResponse = z.infer<typeof StartDashboardsMigrationResponse>;
+export const StartDashboardsMigrationResponse = z.object({
+  /**
+   * Indicates the migration has been started. `false` means the migration does not need to be started.
+   */
+  started: z.boolean(),
+});
+
+export type StopDashboardsMigrationRequestParams = z.infer<
+  typeof StopDashboardsMigrationRequestParams
+>;
+export const StopDashboardsMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type StopDashboardsMigrationRequestParamsInput = z.input<
+  typeof StopDashboardsMigrationRequestParams
+>;
+
+export type StopDashboardsMigrationResponse = z.infer<typeof StopDashboardsMigrationResponse>;
+export const StopDashboardsMigrationResponse = z.object({
+  /**
+   * Indicates the migration has been stopped.
+   */
+  stopped: z.boolean(),
+});
 
 export type UpsertDashboardMigrationResourcesRequestParams = z.infer<
   typeof UpsertDashboardMigrationResourcesRequestParams
