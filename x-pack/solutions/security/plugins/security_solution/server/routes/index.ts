@@ -138,5 +138,5 @@ export const initRoutes = (
 
   registerAssetInventoryRoutes({ router, logger });
 
-  registerSiemReadinessRoutes({ router, logger, getStartServices })
+  registerSiemReadinessRoutes({ router, logger })
 };
