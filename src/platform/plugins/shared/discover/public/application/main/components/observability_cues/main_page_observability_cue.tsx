@@ -262,7 +262,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
             backgroundSize: '64px',
             backgroundPosition: 'left 16px bottom -16px',
             backgroundRepeat: 'no-repeat',
-            '@media (max-width: 768px)': {
+            '@container (max-width: 920px)': {
               backgroundImage: 'none',
             },
           }}
@@ -276,7 +276,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
                 gutterSize="s"
                 css={{
                   paddingInlineStart: '88px',
-                  '@media (max-width: 768px)': {
+                  '@container (max-width: 920px)': {
                     paddingInlineStart: '0px',
                   },
                 }}

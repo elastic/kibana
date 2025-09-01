@@ -501,15 +501,21 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             spaces={spaces}
             history={history}
           />
-          <MainPageObservabilityCue 
-            demoCanManageSpaces={demoCanManageSpaces}
-            setDemoCanManageSpaces={setDemoCanManageSpaces}
-            demoIsTrial={demoIsTrial}
-            setDemoIsTrial={setDemoIsTrial}
-            demoHideFullCallout={demoHideFullCallout}
-            setDemoHideFullCallout={setDemoHideFullCallout}
-            onResetToClassic={handleResetToClassic}
-          />
+          <div
+            css={{
+              containerType: 'inline-size',
+            }}
+          >
+            <MainPageObservabilityCue 
+              demoCanManageSpaces={demoCanManageSpaces}
+              setDemoCanManageSpaces={setDemoCanManageSpaces}
+              demoIsTrial={demoIsTrial}
+              setDemoIsTrial={setDemoIsTrial}
+              demoHideFullCallout={demoHideFullCallout}
+              setDemoHideFullCallout={setDemoHideFullCallout}
+              onResetToClassic={handleResetToClassic}
+            />
+          </div>
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
