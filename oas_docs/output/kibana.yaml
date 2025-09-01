@@ -80,7 +80,6 @@ tags:
       description: Cases documentation
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
-  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -103,6 +102,14 @@ tags:
   - name: Fleet outputs
   - name: Fleet package policies
   - name: Fleet proxies
+  - name: Fleet remote synced integrations
+    description: |
+      Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
+      * Use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint on the management cluster to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
+      * Use the `/api/fleet/remote_synced_integrations/status` endpoint on the remote cluster to query the synchronization status of the installed integrations.
+    externalDocs:
+      description: Automatic integrations synchronization documentation
+      url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
   - name: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
@@ -26375,6 +26382,7 @@ paths:
                             - POLICY_CHANGE
                             - INPUT_ACTION
                             - MIGRATE
+                            - PRIVILEGE_LEVEL_CHANGE
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -42361,9 +42369,10 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Get CCR Remote synced integrations status by outputId
+      summary: Get remote synced integrations status by outputId
       tags:
-        - CCR Remote synced integrations
+        - Fleet remote synced integrations
+      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -42498,9 +42507,10 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Get CCR Remote synced integrations status
+      summary: Get remote synced integrations status
       tags:
-        - CCR Remote synced integrations
+        - Fleet remote synced integrations
+      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -63078,7 +63088,7 @@ paths:
                     ]
               schema:
                 items:
-                  - $ref: '#/components/schemas/Synthetics_getParameterResponse'
+                  $ref: '#/components/schemas/Synthetics_getParameterResponse'
                 type: array
           description: A successful response.
       summary: Get parameters
@@ -74225,8 +74235,6 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         timestamp:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         title:
@@ -74249,29 +74257,6 @@ components:
         - users
         - namespace
         - category
-    Security_AI_Assistant_API_ConversationSummary:
-      allOf:
-        - $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
-        - type: object
-          properties:
-            timestamp:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-              description: The timestamp summary was updated.
-              example: '2025-04-30T16:00:00Z'
-          required:
-            - timestamp
-    Security_AI_Assistant_API_ConversationSummaryBase:
-      type: object
-      properties:
-        semanticContent:
-          description: Summary text of the conversation over time.
-          example: This conversation covered how to configure the Security AI Assistant.
-          type: string
-        summarizedMessageIds:
-          description: The list of summarized messages.
-          items:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
-          type: array
     Security_AI_Assistant_API_ConversationUpdateProps:
       type: object
       properties:
@@ -74294,8 +74279,6 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummaryBase'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
@@ -83508,15 +83491,13 @@ components:
           type: number
         category_1_count:
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number

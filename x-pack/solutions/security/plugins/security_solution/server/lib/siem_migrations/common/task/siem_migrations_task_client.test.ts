@@ -20,8 +20,8 @@ import { createSiemMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import type { SiemMigrationDataStats } from '../data/types';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import type { SiemMigrationsClientDependencies, StoredSiemMigration } from '../types';
-
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { StoredRuleMigration } from '../../rules/types';
 
 jest.mock('./siem_migrations_task_runner');
 
@@ -278,7 +278,7 @@ describe('RuleMigrationsTaskClient', () => {
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,
-      } as unknown as StoredSiemMigration);
+      } as unknown as StoredRuleMigration);
 
       const client = new TestTaskClient(
         migrationsRunning,
@@ -298,7 +298,7 @@ describe('RuleMigrationsTaskClient', () => {
       } as SiemMigrationDataStats);
       data.migrations.get.mockResolvedValue({
         id: migrationId,
-      } as unknown as StoredSiemMigration);
+      } as unknown as StoredRuleMigration);
 
       const client = new TestTaskClient(
         migrationsRunning,
@@ -370,7 +370,7 @@ describe('RuleMigrationsTaskClient', () => {
         last_execution: {
           error: 'Test error',
         },
-      } as unknown as StoredSiemMigration);
+      } as unknown as StoredRuleMigration);
 
       const client = new TestTaskClient(
         migrationsRunning,

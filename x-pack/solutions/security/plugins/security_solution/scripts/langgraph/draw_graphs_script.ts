@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -16,6 +12,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { ElasticsearchClient, IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { DashboardMigrationsRetriever } from '../../server/lib/siem_migrations/dashboards/task/retrievers';
 import { getDashboardMigrationAgent } from '../../server/lib/siem_migrations/dashboards/task/agent';
 import type { DashboardMigrationTelemetryClient } from '../../server/lib/siem_migrations/dashboards/task/dashboard_migrations_telemetry_client';
@@ -33,7 +30,7 @@ interface Drawable {
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as InferenceChatModel;
 
 const esqlKnowledgeBase = {} as EsqlKnowledgeBase;
 const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
