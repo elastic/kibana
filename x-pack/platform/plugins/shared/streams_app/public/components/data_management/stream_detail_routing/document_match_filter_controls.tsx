@@ -11,9 +11,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   useStreamsRoutingSelector,
   type DocumentMatchFilterOptions,
@@ -32,6 +34,8 @@ export const DocumentMatchFilterControls = ({
   matchedDocumentPercentage,
   isDisabled = false,
 }: DocumentMatchFilterControlsProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const [selectedFilter, setSelectedFilter] = useState<DocumentMatchFilterOptions>(initialFilter);
 
   const isIdleState = useStreamsRoutingSelector((snapshot) => snapshot).matches({
@@ -55,46 +59,62 @@ export const DocumentMatchFilterControls = ({
     }
   }, [isIdleState, handleFilterChanged]);
 
+  const filterButtonCss = useMemo(
+    () => css`
+      background-color: transparent !important;
+      border: 0px !important;
+
+      &[aria-pressed='true']:not(:disabled) {
+        color: ${euiTheme.colors.textParagraph} !important;
+      }
+    `,
+    [euiTheme]
+  );
+
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="routingPreviewFilterControls">
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFilterGroup compressed fullWidth>
             <EuiFilterButton
-              data-test-subj="routingPreviewMatchedFilterButton"
               aria-label={i18n.translate(
                 'xpack.streams.streamDetail.preview.filter.matchedAriaLabel',
                 { defaultMessage: 'Filter for matched documents.' }
               )}
+              data-test-subj="routingPreviewMatchedFilterButton"
               hasActiveFilters={selectedFilter === 'matched'}
               onClick={() => handleFilterChanged('matched')}
+              isDisabled={isDisabled || isNaN(matchedDocumentPercentage)}
+              isSelected={selectedFilter === 'matched'}
+              badgeColor="success"
+              grow={false}
+              isToggle
               numActiveFilters={
                 isNaN(matchedDocumentPercentage) ? '' : `${matchedDocumentPercentage}%`
               }
-              isDisabled={isDisabled || isNaN(matchedDocumentPercentage)}
-              isToggle
-              badgeColor="success"
-              grow={false}
+              css={filterButtonCss}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.matched', {
                 defaultMessage: 'Matched',
               })}
             </EuiFilterButton>
             <EuiFilterButton
-              data-test-subj="routingPreviewUnmatchedFilterButton"
               aria-label={i18n.translate(
                 'xpack.streams.streamDetail.preview.filter.unmatchedAriaLabel',
                 { defaultMessage: 'Filter for unmatched documents.' }
               )}
+              data-test-subj="routingPreviewUnmatchedFilterButton"
               hasActiveFilters={selectedFilter === 'unmatched'}
               onClick={() => handleFilterChanged('unmatched')}
+              isDisabled={isDisabled || isNaN(matchedDocumentPercentage)}
+              isSelected={selectedFilter === 'unmatched'}
+              badgeColor="accent"
+              grow={false}
+              isToggle
               numActiveFilters={
                 isNaN(matchedDocumentPercentage) ? '' : `${100 - matchedDocumentPercentage}%`
               }
-              isDisabled={isDisabled || isNaN(matchedDocumentPercentage)}
-              isToggle
-              badgeColor="accent"
-              grow={false}
+              css={filterButtonCss}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.unmatched', {
                 defaultMessage: 'Unmatched',
@@ -102,7 +122,7 @@ export const DocumentMatchFilterControls = ({
             </EuiFilterButton>
           </EuiFilterGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="routingPreviewFilterControlsTooltip">
           <EuiIconTip
             aria-label={i18n.translate(
               'xpack.streams.streamRouting.previewMatchesTooltipAriaLabel',
