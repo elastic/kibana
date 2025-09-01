@@ -637,7 +637,6 @@ describe('convertToWorkflowGraph', () => {
           id: 'testForeachStep',
           type: 'enter-foreach',
           exitNodeId: 'exitForeach(testForeachStep)',
-          itemNodeIds: ['firstTestForeachConnectorStep', 'secondTestForeachConnectorStep'],
           configuration: {
             foreach: '["item1", "item2", "item3"]',
             name: 'testForeachStep',
@@ -754,7 +753,6 @@ describe('convertToWorkflowGraph', () => {
           id: 'foreach_testForeachConnectorStep',
           type: 'enter-foreach',
           exitNodeId: 'exitForeach(foreach_testForeachConnectorStep)',
-          itemNodeIds: ['testForeachConnectorStep'],
           configuration: {
             foreach: '["item1", "item2", "item3"]',
             name: 'foreach_testForeachConnectorStep',
@@ -785,13 +783,11 @@ describe('convertToWorkflowGraph', () => {
     });
   });
 
-  describe('on-failure configuration', () => {
-    const workflowDefinition = {
-      steps: [
-        {
-          name: 'testRetryConnectorStep',
-          type: 'slack',
-          connectorId: 'slack',
+  describe.each([
+    {
+      name: 'workflow level on-failure',
+      workflow: {
+        settings: {
           'on-failure': {
             retry: {
               'max-attempts': 3,
@@ -808,19 +804,58 @@ describe('convertToWorkflowGraph', () => {
             ],
             continue: true,
           } as WorkflowOnFailure,
-          with: {
-            message: 'Hello from retry step',
-          },
-        } as ConnectorStep,
-      ],
-    } as Partial<WorkflowYaml>;
+        },
+        steps: [
+          {
+            name: 'testRetryConnectorStep',
+            type: 'slack',
+            connectorId: 'slack',
+            with: {
+              message: 'Hello from retry step',
+            },
+          } as ConnectorStep,
+        ],
+      } as Partial<WorkflowYaml>,
+    },
+    {
+      name: 'step level on-failure',
+      workflow: {
+        steps: [
+          {
+            name: 'testRetryConnectorStep',
+            type: 'slack',
+            connectorId: 'slack',
+            'on-failure': {
+              retry: {
+                'max-attempts': 3,
+                delay: '5s',
+              },
+              fallback: [
+                {
+                  name: 'fallbackAction',
+                  type: 'console',
+                  with: {
+                    message: 'fallback log',
+                  },
+                } as ConnectorStep,
+              ],
+              continue: true,
+            } as WorkflowOnFailure,
+            with: {
+              message: 'Hello from retry step',
+            },
+          } as ConnectorStep,
+        ],
+      } as Partial<WorkflowYaml>,
+    },
+  ])('%s', (testCase) => {
+    const workflowDefinition = testCase.workflow;
 
     it('should have correct topological order for step with retry', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
 
       expect(topsort).toEqual([
-        'enterOnFailure(testRetryConnectorStep)',
         'enterContinue_testRetryConnectorStep',
         'enterTryBlock_testRetryConnectorStep',
         'enterNormalPath_testRetryConnectorStep',
@@ -833,7 +868,6 @@ describe('convertToWorkflowGraph', () => {
         'exitFallbackPath_testRetryConnectorStep',
         'exitTryBlock_testRetryConnectorStep',
         'exitContinue_testRetryConnectorStep',
-        'exitOnFailure(testRetryConnectorStep)',
       ]);
     });
 
@@ -842,14 +876,6 @@ describe('convertToWorkflowGraph', () => {
       const edges = executionGraph.edges();
       expect(edges).toEqual(
         expect.arrayContaining([
-          {
-            v: 'enterOnFailure(testRetryConnectorStep)',
-            w: 'enterContinue_testRetryConnectorStep',
-          },
-          {
-            v: 'exitContinue_testRetryConnectorStep',
-            w: 'exitOnFailure(testRetryConnectorStep)',
-          },
           {
             v: 'enterContinue_testRetryConnectorStep',
             w: 'enterTryBlock_testRetryConnectorStep',
@@ -994,6 +1020,8 @@ describe('convertToWorkflowGraph', () => {
       });
     });
   });
+
+  describe('on-failure configuration', () => {});
 
   describe('complex workflow', () => {
     const workflowDefinition = {
@@ -1177,7 +1205,6 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
       expect(topsort).toEqual([
-        'enterOnFailure(testForeachConnectorStep)',
         'enterContinue_testForeachConnectorStep',
         'enterTryBlock_testForeachConnectorStep',
         'enterNormalPath_testForeachConnectorStep',
@@ -1196,7 +1223,6 @@ describe('convertToWorkflowGraph', () => {
         'exitFallbackPath_testForeachConnectorStep',
         'exitTryBlock_testForeachConnectorStep',
         'exitContinue_testForeachConnectorStep',
-        'exitOnFailure(testForeachConnectorStep)',
       ]);
     });
   });

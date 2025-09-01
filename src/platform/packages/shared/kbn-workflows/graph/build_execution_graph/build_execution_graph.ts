@@ -20,6 +20,8 @@ import type {
   StepWithOnFailure,
   StepWithIfCondition,
   StepWithForeach,
+  WorkflowSettings,
+  WorkflowOnFailure,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -31,8 +33,6 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
-  EnterOnFailureNode,
-  ExitOnFailureNode,
   EnterRetryNode,
   ExitRetryNode,
   EnterContinueNode,
@@ -61,8 +61,7 @@ interface OnFailureStep extends BaseStep {
 }
 
 interface GraphBuildContext {
-  workflow: WorkflowYaml;
-  onFailureVisitedSteps: Set<string>;
+  settings: WorkflowSettings | undefined;
   stack: string[];
 }
 
@@ -72,37 +71,47 @@ function getNodeId(node: BaseStep): string {
   return (node as any).id || node.name;
 }
 
-function visitAbstractStep(
-  graph: graphlib.Graph,
-  previousStep: any,
-  currentStep: any,
-  context: GraphBuildContext
-): any {
-  const modifiedCurrentStep = handleStepLevelOperations(currentStep, context);
-  if ((modifiedCurrentStep as IfStep).type === 'if') {
-    return visitIfStep(graph, previousStep, modifiedCurrentStep, context);
+function visitAbstractStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+  if (
+    !context.stack.some((nodeId) => `onFailure_${getNodeId(currentStep)}`) && // check to prevent recursion when workflow level on-failure is defined
+    ((currentStep as StepWithOnFailure)['on-failure'] || context.settings?.['on-failure'])
+  ) {
+    return visitOnFailureStep(currentStep, context);
   }
 
-  if ((modifiedCurrentStep as ForEachStep).type === 'foreach') {
-    return visitForeachStep(graph, previousStep, modifiedCurrentStep, context);
+  if ((currentStep as StepWithIfCondition).if) {
+    return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
 
-  if ((modifiedCurrentStep as WaitStep).type === 'wait') {
-    return visitWaitStep(graph, previousStep, modifiedCurrentStep);
+  if ((currentStep as IfStep).type === 'if') {
+    return createIfGraph(currentStep, context);
   }
 
-  if ((modifiedCurrentStep as HttpStep).type === 'http') {
-    return visitHttpStep(graph, previousStep, modifiedCurrentStep);
+  if ((currentStep as StepWithForeach).foreach) {
+    return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
   }
 
-  if ((modifiedCurrentStep as OnFailureStep).type === 'on-failure') {
-    return visitOnFailureStep(graph, previousStep, modifiedCurrentStep as OnFailureStep, context);
+  if ((currentStep as ForEachStep).type === 'foreach') {
+    return createForeachGraph(currentStep, context);
   }
 
-  return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
+  if ((currentStep as WaitStep).type === 'wait') {
+    return visitWaitStep(currentStep);
+  }
+
+  if ((currentStep as HttpStep).type === 'http') {
+    return visitHttpStep(currentStep);
+  }
+
+  if ((currentStep as OnFailureStep).type === 'on-failure') {
+    return visitOnFailureStep(currentStep as OnFailureStep, context);
+  }
+
+  return visitAtomicStep(currentStep);
 }
 
-export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+export function visitWaitStep(currentStep: any): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
   const waitNode: WaitGraphNode = {
     id: getNodeId(currentStep),
     type: 'wait',
@@ -112,14 +121,11 @@ export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentS
   };
   graph.setNode(waitNode.id, waitNode);
 
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), waitNode.id);
-  }
-
-  return waitNode;
+  return graph;
 }
 
-export function visitHttpStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+export function visitHttpStep(currentStep: any): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
   const httpNode: HttpGraphNode = {
     id: getNodeId(currentStep),
     type: 'http',
@@ -129,14 +135,11 @@ export function visitHttpStep(graph: graphlib.Graph, previousStep: any, currentS
   };
   graph.setNode(httpNode.id, httpNode);
 
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), httpNode.id);
-  }
-
-  return httpNode;
+  return graph;
 }
 
-export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+export function visitAtomicStep(currentStep: any): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
   const atomicNode: AtomicGraphNode = {
     id: getNodeId(currentStep),
     type: 'atomic',
@@ -146,22 +149,14 @@ export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, curren
   };
   graph.setNode(atomicNode.id, atomicNode);
 
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), atomicNode.id);
-  }
-
-  return atomicNode;
+  return graph;
 }
 
-export function visitIfStep(
-  graph: graphlib.Graph,
-  previousStep: any,
-  currentStep: any,
-  context: GraphBuildContext
-): any {
-  const enterConditionNodeId = getNodeId(currentStep);
+function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const enterConditionNodeId = getNodeId(ifStep);
   const exitConditionNodeId = `exitCondition(${enterConditionNodeId})`;
-  const ifElseStep = currentStep as IfStep;
+  const ifElseStep = ifStep as IfStep;
   const trueSteps: BaseStep[] = ifElseStep.steps || [];
   const falseSteps: BaseStep[] = ifElseStep.else || [];
 
@@ -186,20 +181,15 @@ export function visitIfStep(
 
   graph.setNode(enterThenBranchNode.id, enterThenBranchNode);
   graph.setEdge(enterConditionNodeId, enterThenBranchNode.id);
-  let thenPreviousStep: any = enterThenBranchNode;
-  trueSteps.forEach((ifTrueCurrentStep: any) => {
-    const currentNode = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep, context);
-    graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(thenPreviousStep), getNodeId(currentNode));
-    thenPreviousStep = currentNode;
-  });
+
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen(${enterConditionNodeId})`,
     type: 'exit-condition-branch',
     startNodeId: enterThenBranchNode.id,
   };
+  const thenGraph = createStepsSequence(trueSteps, context);
+  insertGraphBetweenNodes(graph, thenGraph, enterThenBranchNode.id, exitThenBranchNode.id);
   graph.setNode(exitThenBranchNode.id, exitThenBranchNode);
-  graph.setEdge(getNodeId(thenPreviousStep), exitThenBranchNode.id);
   graph.setEdge(exitThenBranchNode.id, exitConditionNode.id);
 
   if (falseSteps?.length > 0) {
@@ -209,67 +199,72 @@ export function visitIfStep(
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
-    let elsePreviousStep: any = enterElseBranchNode;
-    falseSteps.forEach((ifFalseCurrentStep: any) => {
-      const currentNode = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep, context);
-      graph.setNode(getNodeId(currentNode), currentNode);
-      graph.setEdge(getNodeId(elsePreviousStep), getNodeId(currentNode));
-      elsePreviousStep = currentNode;
-    });
     const exitElseBranchNode: ExitConditionBranchNode = {
       id: `exitElse(${enterConditionNodeId})`,
       type: 'exit-condition-branch',
       startNodeId: enterElseBranchNode.id,
     };
+    const elseGraph = createStepsSequence(falseSteps, context);
+    insertGraphBetweenNodes(graph, elseGraph, enterElseBranchNode.id, exitElseBranchNode.id);
     graph.setNode(exitElseBranchNode.id, exitElseBranchNode);
-    graph.setEdge(getNodeId(elsePreviousStep), exitElseBranchNode.id);
     graph.setEdge(exitElseBranchNode.id, exitConditionNode.id);
   }
 
   graph.setNode(exitConditionNode.id, exitConditionNode);
   graph.setNode(enterConditionNodeId, conditionNode);
 
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), enterConditionNodeId);
-  }
-
-  return exitConditionNode;
+  return graph;
 }
 
-function visitOnFailureStep(
-  graph: graphlib.Graph,
-  previousStep: any,
-  currentStep: OnFailureStep,
+function createIfGraphForIfStepLevel(
+  stepWithIfCondition: StepWithIfCondition,
   context: GraphBuildContext
-): any {
-  const enterOnFailureNode: EnterOnFailureNode = {
-    id: `enterOnFailure(${getNodeId(currentStep)})`,
-    type: 'enter-on-failure',
-  };
-  const exitOnFailureNode: ExitOnFailureNode = {
-    id: `exitOnFailure(${getNodeId(currentStep)})`,
-    type: 'exit-on-failure',
-  };
-  graph.setNode(enterOnFailureNode.id, enterOnFailureNode);
-  graph.setNode(exitOnFailureNode.id, exitOnFailureNode);
+) {
+  const ifStep: IfStep = {
+    name: `if_${getNodeId(stepWithIfCondition as BaseStep)}`,
+    type: 'if',
+    condition: stepWithIfCondition.if,
+    steps: [omit(stepWithIfCondition, ['if'])],
+  } as IfStep;
+  return createIfGraph(ifStep, context);
+}
 
-  const fallbackGraph = createFallback(
-    getNodeId(currentStep),
-    currentStep.normalPathSteps,
-    currentStep.fallback,
-    currentStep.retry,
+function visitOnFailureStep(currentStep: BaseStep, context: GraphBuildContext): any {
+  const id = getNodeId(currentStep);
+  const onFailureKey = `onFailure_${id}`;
+
+  context.stack.push(onFailureKey);
+  let graph = createStepsSequence(
+    [
+      {
+        ...currentStep,
+        ['on-failure']: undefined, // Remove 'on-failure' to avoid infinite recursion
+      } as BaseStep,
+    ],
     context
   );
-  const continueGraph = createContinue(fallbackGraph, getNodeId(currentStep));
 
-  insertGraphBetweenNodes(graph, continueGraph, enterOnFailureNode.id, exitOnFailureNode.id);
+  const onFailureConfiguration = ((currentStep as StepWithOnFailure)['on-failure'] ||
+    context.settings?.['on-failure']) as WorkflowOnFailure;
 
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), enterOnFailureNode.id);
+  if (onFailureConfiguration?.retry) {
+    graph = createRetry(id, graph, onFailureConfiguration.retry);
   }
+
+  if (onFailureConfiguration.fallback?.length) {
+    graph = createFallback(id, graph, onFailureConfiguration.fallback, context);
+  }
+
+  if (onFailureConfiguration.continue) {
+    graph = createContinue(id, graph);
+  }
+
+  context.stack.pop();
+
+  return graph;
 }
 
-function createContinue(innerGraph: graphlib.Graph, id: string): graphlib.Graph {
+function createContinue(id: string, innerGraph: graphlib.Graph): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   const enterContinueNodeId = `enterContinue_${id}`;
   const exitNodeId = `exitContinue_${id}`;
@@ -288,7 +283,7 @@ function createContinue(innerGraph: graphlib.Graph, id: string): graphlib.Graph 
   return graph;
 }
 
-function createRetry(innerGraph: graphlib.Graph, id: string, retry: WorkflowRetry): graphlib.Graph {
+function createRetry(id: string, innerGraph: graphlib.Graph, retry: WorkflowRetry): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   const enterRetryNodeId = `enterRetry_${id}`;
   const exitNodeId = `exitRetry_${id}`;
@@ -309,12 +304,7 @@ function createRetry(innerGraph: graphlib.Graph, id: string, retry: WorkflowRetr
   return graph;
 }
 
-function createNormalPath(
-  id: string,
-  normalPathSteps: BaseStep[],
-  retry: WorkflowRetry,
-  context: GraphBuildContext
-): graphlib.Graph {
+function createNormalPath(id: string, normalPathGraph: graphlib.Graph): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   const enterNormalPathNodeId = `enterNormalPath_${id}`;
   const exitNormalPathNodeId = `exitNormalPath_${id}`;
@@ -333,9 +323,7 @@ function createNormalPath(
   graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
   graph.setNode(exitNormalPathNode.id, exitNormalPathNode);
 
-  const retryGraph = createRetry(createStepsSequence(normalPathSteps, context), id, retry);
-
-  insertGraphBetweenNodes(graph, retryGraph, enterNormalPathNode.id, exitNormalPathNode.id);
+  insertGraphBetweenNodes(graph, normalPathGraph, enterNormalPathNode.id, exitNormalPathNode.id);
   return graph;
 }
 
@@ -372,9 +360,8 @@ function createFallbackPath(
 
 function createFallback(
   id: string,
-  normalPathSteps: BaseStep[],
+  normalPathGraph: graphlib.Graph,
   fallbackPathSteps: BaseStep[],
-  retry: WorkflowRetry,
   context: GraphBuildContext
 ): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
@@ -396,7 +383,7 @@ function createFallback(
   };
   graph.setNode(exitTryBlockNodeId, exitTryBlockNode);
 
-  const normalPathGraphWithNodes = createNormalPath(id, normalPathSteps, retry, context);
+  const normalPathGraphWithNodes = createNormalPath(id, normalPathGraph);
   insertGraphBetweenNodes(graph, normalPathGraphWithNodes, enterTryBlockNodeId, exitTryBlockNodeId);
 
   const fallbackPathGraph = createFallbackPath(id, fallbackPathSteps, context);
@@ -407,12 +394,36 @@ function createFallback(
 
 function createStepsSequence(steps: BaseStep[], context: GraphBuildContext): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
-  let previousStep: any = null;
 
-  steps.forEach((step) => {
-    const currentStep = visitAbstractStep(graph, previousStep, step, context);
-    previousStep = currentStep;
-  });
+  let previousGraph: graphlib.Graph | null = null;
+
+  for (let i = 0; i < steps.length; i++) {
+    const currentGraph = visitAbstractStep(steps[i], context);
+    currentGraph.nodes().forEach((nodeId) => {
+      graph.setNode(nodeId, currentGraph.node(nodeId));
+    });
+    currentGraph.edges().forEach((edgeObj) => {
+      graph.setEdge(edgeObj.v, edgeObj.w);
+    });
+
+    if (previousGraph) {
+      const previousEndNodes = previousGraph!
+        .nodes()
+        .filter((nodeId) => previousGraph!.outEdges(nodeId)?.length === 0);
+
+      const currentStartNodes = currentGraph
+        .nodes()
+        .filter((nodeId) => currentGraph.inEdges(nodeId)?.length === 0);
+
+      previousEndNodes.forEach((endNode) => {
+        currentStartNodes.forEach((startNode) => {
+          graph.setEdge(endNode, startNode);
+        });
+      });
+    }
+
+    previousGraph = currentGraph;
+  }
 
   return graph;
 }
@@ -488,135 +499,56 @@ function connectTwoGraphs(firstGraph: graphlib.Graph, secondGraph: graphlib.Grap
   return graph;
 }
 
-function visitForeachStep(
-  graph: graphlib.Graph,
-  previousStep: any,
-  currentStep: any,
-  context: GraphBuildContext
-): any {
-  const enterForeachNodeId = getNodeId(currentStep);
-  const foreachStep = currentStep as ForEachStep;
-  const foreachNestedSteps: BaseStep[] = foreachStep.steps || [];
+function createForeachGraph(foreachStep: ForEachStep, context: GraphBuildContext): any {
+  const graph = new graphlib.Graph({ directed: true });
+  const enterForeachNodeId = getNodeId(foreachStep);
   const exitNodeId = `exitForeach(${enterForeachNodeId})`;
   const enterForeachNode: EnterForeachNode = {
     id: enterForeachNodeId,
     type: 'enter-foreach',
-    itemNodeIds: [],
     exitNodeId,
     configuration: {
       ...omit(foreachStep, ['steps']), // No need to include them as they will be represented in the graph
     },
   };
+  graph.setNode(enterForeachNodeId, enterForeachNode);
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
     id: exitNodeId,
     startNodeId: enterForeachNodeId,
   };
+  graph.setNode(exitNodeId, exitForeachNode);
+  const innerGraph = createStepsSequence(foreachStep.steps || [], context);
 
-  let previousNodeToLink: any = enterForeachNode;
-  foreachNestedSteps.forEach((step: any) => {
-    enterForeachNode.itemNodeIds.push(getNodeId(step));
-    const currentNode = visitAbstractStep(graph, previousNodeToLink, step, context);
-    graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(previousNodeToLink), getNodeId(currentNode));
-    previousNodeToLink = currentNode;
-  });
+  insertGraphBetweenNodes(graph, innerGraph, enterForeachNodeId, exitNodeId);
 
-  graph.setNode(exitForeachNode.id, exitForeachNode);
-  graph.setEdge(getNodeId(previousNodeToLink), exitForeachNode.id);
-  graph.setNode(enterForeachNodeId, enterForeachNode);
-
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), enterForeachNodeId);
-  }
-
-  return exitForeachNode;
+  return graph;
 }
 
-function handleOnFailure(currentStep: BaseStep): BaseStep {
-  /** !IMPORTANT!
-   * The order of operations is important here.
-   * The order affects what context will be available in the step if/foreach/etc operation.
-   */
-
-  const stepWithOnFailure = currentStep as StepWithOnFailure;
-  const onFailureConfig = stepWithOnFailure['on-failure']!;
-  return {
-    name: getNodeId(currentStep),
-    type: 'on-failure',
-    retry: stepWithOnFailure['on-failure']!.retry,
-    continue: stepWithOnFailure['on-failure']!.continue || false,
-    normalPathSteps: [omit(stepWithOnFailure, ['on-failure']) as BaseStep],
-    fallback: Array.isArray(onFailureConfig.fallback)
-      ? onFailureConfig.fallback
-      : [onFailureConfig.fallback],
-  } as OnFailureStep;
-}
-
-/**
- * Processes step-level operations for a given workflow step.
- *
- * This function handles conditional step-level operations (if, foreach, etc)
- * that are defined at the step level by wrapping the original step in appropriate
- * control flow steps.
- *
- * @param currentStep - The workflow step to process
- * @returns A potentially wrapped version of the input step that incorporates
- *          any step-level control flow operations (if/foreach)
- */
-function handleStepLevelOperations(currentStep: BaseStep, context: GraphBuildContext): BaseStep {
-  /** !IMPORTANT!
-   * The order of operations is important here.
-   * The order affects what context will be available in the step if/foreach/etc operation.
-   */
-
-  if ((currentStep as StepWithOnFailure)?.['on-failure']) {
-    return handleOnFailure(currentStep);
+function createForeachGraphForStepWithForeach(
+  stepWithForeach: StepWithForeach,
+  context: GraphBuildContext
+) {
+  if ((stepWithForeach as BaseStep).type === 'foreach') {
+    return createForeachGraph(stepWithForeach as ForEachStep, context);
   }
 
-  if ((currentStep as StepWithIfCondition).if) {
-    const stepWithIfCondition = currentStep as StepWithIfCondition;
-    const modifiedStep = omit(stepWithIfCondition, ['if']) as BaseStep;
-    return {
-      name: `if_${getNodeId(currentStep)}`,
-      type: 'if',
-      condition: stepWithIfCondition.if,
-      steps: [handleStepLevelOperations(modifiedStep, context)],
-    } as IfStep;
-  }
-
-  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
-  // when the step is already a foreach step
-  if ((currentStep as StepWithForeach).foreach && (currentStep as ForEachStep).type !== 'foreach') {
-    const stepWithForeach = currentStep as StepWithForeach;
-    const modifiedStep = omit(stepWithForeach, ['foreach']) as BaseStep;
-    return {
-      name: `foreach_${getNodeId(currentStep)}`,
-      type: 'foreach',
-      foreach: stepWithForeach.foreach,
-      steps: [handleStepLevelOperations(modifiedStep, context)],
-    } as ForEachStep;
-  }
-
-  return currentStep;
+  const foreachStep: ForEachStep = {
+    name: `foreach_${getNodeId(stepWithForeach as BaseStep)}`,
+    type: 'foreach',
+    foreach: stepWithForeach.foreach,
+    steps: [omit(stepWithForeach, ['foreach'])],
+  } as ForEachStep;
+  return createForeachGraph(foreachStep, context);
 }
 
 export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
   const context: GraphBuildContext = {
-    workflow: workflowSchema,
-    onFailureVisitedSteps: new Set<string>(),
+    settings: workflowSchema.settings,
     stack: [],
   };
-  let previousNode: any | null = null;
 
-  workflowSchema.steps.forEach((currentStep, index) => {
-    const transformedStep = handleStepLevelOperations(currentStep, context);
-    const currentNode = visitAbstractStep(graph, previousNode, transformedStep, context);
-    previousNode = currentNode;
-  });
-
-  return graph;
+  return createStepsSequence(workflowSchema.steps, context);
 }
 
 export function convertToSerializableGraph(graph: graphlib.Graph): any {
