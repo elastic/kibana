@@ -30,6 +30,8 @@ export class MigrationsStorage<T> {
     if (this.options?.customKey) {
       return this.options.customKey;
     }
+    // Previously, we use this class to store rules migrations settings only and now it will be a common storage for all kind of migrations.
+    // We can keep the `*.rules.*` as part of this key to make sure that previously stored settings are not lost and users can continue using them.
     return `siem_migrations.rules.${this.objectName}.${spaceId}`;
   }
 
