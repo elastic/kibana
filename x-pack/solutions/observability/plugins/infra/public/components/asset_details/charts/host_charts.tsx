@@ -31,7 +31,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
   ({ entityId, dataView, dateRange, metric, onShowAll, overview = false, schema }, ref) => {
     const { charts } = useHostCharts({
       metric,
-      dataViewId: dataView?.id,
+      dataViewId: dataView?.getIndexPattern(),
       overview,
       schema,
     });
