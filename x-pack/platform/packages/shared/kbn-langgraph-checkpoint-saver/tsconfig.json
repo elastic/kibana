@@ -17,7 +17,7 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core",
     "@kbn/core-logging-server-mocks",
-    "@kbn/data-stream-adapter",
-    "@kbn/core-saved-objects-utils-server"
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/index-adapter"
   ]
 }
