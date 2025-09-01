@@ -28,20 +28,6 @@ const toolTipAriaLabel = i18n.translate(
   }
 );
 
-const toolTipTitle = i18n.translate(
-  'securitySolutionPackages.csp.graph.countryFlags.toolTipTitle',
-  {
-    defaultMessage: 'Geolocation',
-  }
-);
-
-const openFlyoutText = i18n.translate(
-  'securitySolutionPackages.csp.graph.countryFlags.countryFlagsOverLimit',
-  {
-    defaultMessage: 'Open full details in flyout',
-  }
-);
-
 export interface CountryFlagsProps {
   countryCodes: string[];
 }
@@ -64,14 +50,6 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
           </EuiText>
         </li>
       ))}
-      {validCodes.length > MAX_COUNTRY_FLAGS_IN_TOOLTIP ? (
-        <>
-          <li>
-            <br />
-          </li>
-          <li>{openFlyoutText}</li>
-        </>
-      ) : null}
     </ul>
   );
 
@@ -100,12 +78,7 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
     ) : null;
 
   return (
-    <EuiToolTip
-      data-test-subj={TEST_SUBJ_TOOLTIP}
-      position="right"
-      title={toolTipTitle}
-      content={toolTipContent}
-    >
+    <EuiToolTip data-test-subj={TEST_SUBJ_TOOLTIP} position="right" content={toolTipContent}>
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
       <ToolTipButton aria-label={toolTipAriaLabel}>
         <RoundedBadge data-test-subj={TEST_SUBJ_BADGE} euiTheme={euiTheme}>

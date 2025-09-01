@@ -24,14 +24,6 @@ const toolTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.
   defaultMessage: 'Show IP address details',
 });
 
-const toolTipTitle = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipTitle', {
-  defaultMessage: 'IP Addresses',
-});
-
-const openFlyoutText = i18n.translate('securitySolutionPackages.csp.graph.ips.ipsOverLimit', {
-  defaultMessage: 'Open full details in flyout',
-});
-
 export interface IpsProps {
   ips: string[];
 }
@@ -51,14 +43,6 @@ export const Ips = ({ ips }: IpsProps) => {
           </EuiText>
         </li>
       ))}
-      {ips.length > MAX_IPS_IN_TOOLTIP ? (
-        <>
-          <li>
-            <br />
-          </li>
-          <li>{openFlyoutText}</li>
-        </>
-      ) : null}
     </ul>
   );
 
@@ -96,7 +80,6 @@ export const Ips = ({ ips }: IpsProps) => {
     <EuiToolTip
       data-test-subj={TEST_SUBJ_TOOLTIP}
       position="right"
-      title={ips.length > VISIBLE_IPS_LIMIT ? toolTipTitle : null}
       content={ips.length > VISIBLE_IPS_LIMIT ? toolTipContent : null}
     >
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
