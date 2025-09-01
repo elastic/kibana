@@ -46,5 +46,6 @@ export const getAgentPoliciesAsInternalUser = async ({
     status: agentPolicy.status,
     description: agentPolicy.description,
     namespace: agentPolicy.namespace,
+    spaceIds: agentPolicy.space_ids || [agentPolicy.namespace],
   }));
 };

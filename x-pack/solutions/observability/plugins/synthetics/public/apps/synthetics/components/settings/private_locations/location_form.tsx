@@ -109,7 +109,8 @@ export const LOCATION_NAME_LABEL = i18n.translate(
 const LOCATION_HELP_TEXT = i18n.translate(
   'xpack.synthetics.privateLocation.locationSpacesHelpText',
   {
-    defaultMessage: 'Select the spaces where this location will be available.',
+    defaultMessage:
+      'Available spaces are filtered based on the selected agent policy. You can select from the spaces that the agent policy has access to.',
   }
 );
 
