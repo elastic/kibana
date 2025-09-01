@@ -33,6 +33,8 @@ export const TEST_SUBJ_HANDLE = 'label-node-handle';
 export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
 export const TEST_SUBJ_HOVER_OUTLINE = 'label-node-hover-outline';
 
+const MAX_LABEL_LENGTH = 27;
+
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const {
     id,
@@ -61,7 +63,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const numAlerts = alertsCount ?? 0;
 
   const analysis = analyzeDocuments({ eventsCount: numEvents, alertsCount: numAlerts });
-  const shouldShowTooltip = numEvents > BADGES_LIMIT || numAlerts > BADGES_LIMIT;
+  const shouldShowTooltip =
+    text.length >= MAX_LABEL_LENGTH || numEvents > BADGES_LIMIT || numAlerts > BADGES_LIMIT;
 
   return (
     <>
