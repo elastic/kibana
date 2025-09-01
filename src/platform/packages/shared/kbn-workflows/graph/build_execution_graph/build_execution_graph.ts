@@ -44,22 +44,6 @@ import type {
   EnterFallbackPathNode,
   ExitFallbackPathNode,
 } from '../../types/execution';
-
-/**
- * TODO: We don't have primitives for OnFailureStep so far, but we may need it in the future.
- * For now, we only use it internally when building the graph from the workflow definition.
- * And only as a wrapper for steps that have 'on-failure' with 'retry' defined.
- */
-
-interface OnFailureStep extends BaseStep {
-  name: string;
-  type: 'on-failure';
-  retry: WorkflowRetry;
-  continue: boolean;
-  fallback: BaseStep[];
-  normalPathSteps: BaseStep[];
-}
-
 interface GraphBuildContext {
   settings: WorkflowSettings | undefined;
   stack: string[];
@@ -71,12 +55,16 @@ function getNodeId(node: BaseStep): string {
   return (node as any).id || node.name;
 }
 
-function visitAbstractStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): graphlib.Graph {
+  if ((currentStep as StepWithOnFailure)['on-failure']) {
+    return handleStepLevelOnFailure(currentStep, context);
+  }
+
   if (
     !context.stack.some((nodeId) => `onFailure_${getNodeId(currentStep)}`) && // check to prevent recursion when workflow level on-failure is defined
-    ((currentStep as StepWithOnFailure)['on-failure'] || context.settings?.['on-failure'])
+    context.settings?.['on-failure']
   ) {
-    return visitOnFailureStep(currentStep, context);
+    return handleWorkflowLevelOnFailure(currentStep, context);
   }
 
   if ((currentStep as StepWithIfCondition).if) {
@@ -84,7 +72,7 @@ function visitAbstractStep(currentStep: any, context: GraphBuildContext): graphl
   }
 
   if ((currentStep as IfStep).type === 'if') {
-    return createIfGraph(currentStep, context);
+    return createIfGraph(currentStep as IfStep, context);
   }
 
   if ((currentStep as StepWithForeach).foreach) {
@@ -92,19 +80,15 @@ function visitAbstractStep(currentStep: any, context: GraphBuildContext): graphl
   }
 
   if ((currentStep as ForEachStep).type === 'foreach') {
-    return createForeachGraph(currentStep, context);
+    return createForeachGraph(currentStep as ForEachStep, context);
   }
 
   if ((currentStep as WaitStep).type === 'wait') {
-    return visitWaitStep(currentStep);
+    return visitWaitStep(currentStep as WaitStep);
   }
 
   if ((currentStep as HttpStep).type === 'http') {
-    return visitHttpStep(currentStep);
-  }
-
-  if ((currentStep as OnFailureStep).type === 'on-failure') {
-    return visitOnFailureStep(currentStep as OnFailureStep, context);
+    return visitHttpStep(currentStep as HttpStep);
   }
 
   return visitAtomicStep(currentStep);
@@ -229,7 +213,11 @@ function createIfGraphForIfStepLevel(
   return createIfGraph(ifStep, context);
 }
 
-function visitOnFailureStep(currentStep: BaseStep, context: GraphBuildContext): any {
+function visitOnFailure(
+  currentStep: BaseStep,
+  onFailureConfiguration: WorkflowOnFailure,
+  context: GraphBuildContext
+): any {
   const id = getNodeId(currentStep);
   const onFailureKey = `onFailure_${id}`;
 
@@ -243,9 +231,6 @@ function visitOnFailureStep(currentStep: BaseStep, context: GraphBuildContext): 
     ],
     context
   );
-
-  const onFailureConfiguration = ((currentStep as StepWithOnFailure)['on-failure'] ||
-    context.settings?.['on-failure']) as WorkflowOnFailure;
 
   if (onFailureConfiguration?.retry) {
     graph = createRetry(id, graph, onFailureConfiguration.retry);
@@ -262,6 +247,14 @@ function visitOnFailureStep(currentStep: BaseStep, context: GraphBuildContext): 
   context.stack.pop();
 
   return graph;
+}
+
+function handleStepLevelOnFailure(step: BaseStep, context: GraphBuildContext): graphlib.Graph {
+  return visitOnFailure(step, (step as StepWithOnFailure)['on-failure']!, context);
+}
+
+function handleWorkflowLevelOnFailure(step: BaseStep, context: GraphBuildContext): graphlib.Graph {
+  return visitOnFailure(step, context.settings!['on-failure']!, context);
 }
 
 function createContinue(id: string, innerGraph: graphlib.Graph): graphlib.Graph {
@@ -334,6 +327,7 @@ function createFallbackPath(
 ): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   const enterFallbackPathNodeId = `enterFallbackPath_${id}`;
+  context.stack.push(enterFallbackPathNodeId);
   const exitFallbackPathNodeId = `exitFallbackPath_${id}`;
   const enterFallbackPathNode: EnterFallbackPathNode = {
     id: enterFallbackPathNodeId,
@@ -355,6 +349,7 @@ function createFallbackPath(
     enterFallbackPathNode.id,
     exitFallbackPathNode.id
   );
+  context.stack.pop();
   return graph;
 }
 
@@ -457,46 +452,6 @@ function insertGraphBetweenNodes(
   subGraph.edges().forEach((edgeObj) => {
     graph.setEdge(edgeObj.v, edgeObj.w);
   });
-}
-
-// TODO: Will be used later when we refactor visitors
-function connectTwoGraphs(firstGraph: graphlib.Graph, secondGraph: graphlib.Graph): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
-
-  // Copy all nodes and edges from the first graph
-  firstGraph.nodes().forEach((nodeId) => {
-    graph.setNode(nodeId, firstGraph.node(nodeId));
-  });
-  firstGraph.edges().forEach((edgeObj) => {
-    graph.setEdge(edgeObj.v, edgeObj.w);
-  });
-
-  // Copy all nodes and edges from the second graph
-  secondGraph.nodes().forEach((nodeId) => {
-    graph.setNode(nodeId, secondGraph.node(nodeId));
-  });
-  secondGraph.edges().forEach((edgeObj) => {
-    graph.setEdge(edgeObj.v, edgeObj.w);
-  });
-
-  // Find end nodes of the first graph (nodes with no outgoing edges)
-  const endNodesFirstGraph = firstGraph
-    .nodes()
-    .filter((nodeId) => firstGraph.outEdges(nodeId)?.length === 0);
-
-  // Find start nodes of the second graph (nodes with no incoming edges)
-  const startNodesSecondGraph = secondGraph
-    .nodes()
-    .filter((nodeId) => secondGraph.inEdges(nodeId)?.length === 0);
-
-  // Connect each end node of the first graph to each start node of the second graph
-  endNodesFirstGraph.forEach((endNode) => {
-    startNodesSecondGraph.forEach((startNode) => {
-      graph.setEdge(endNode, startNode);
-    });
-  });
-
-  return graph;
 }
 
 function createForeachGraph(foreachStep: ForEachStep, context: GraphBuildContext): any {
