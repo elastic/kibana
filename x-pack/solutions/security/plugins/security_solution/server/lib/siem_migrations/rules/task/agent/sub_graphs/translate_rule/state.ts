@@ -6,19 +6,19 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRulePartial,
   OriginalRule,
   RuleMigrationRule,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationResources } from '../../../retrievers/rule_resource_retriever';
+import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type { RuleMigrationIntegration } from '../../../../types';
 import type { TranslateRuleValidationErrors } from './types';
 
 export const translateRuleState = Annotation.Root({
   original_rule: Annotation<OriginalRule>(),
-  resources: Annotation<RuleMigrationResources>(),
+  resources: Annotation<MigrationResources>(),
   integration: Annotation<RuleMigrationIntegration>({
     reducer: (current, value) => value ?? current,
     default: () => ({} as RuleMigrationIntegration),
@@ -43,9 +43,9 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => ({ iterations: 0 } as TranslateRuleValidationErrors),
   }),
-  translation_result: Annotation<RuleTranslationResult>({
+  translation_result: Annotation<MigrationTranslationResult>({
     reducer: (current, value) => value ?? current,
-    default: () => RuleTranslationResult.UNTRANSLATABLE,
+    default: () => MigrationTranslationResult.UNTRANSLATABLE,
   }),
   comments: Annotation<RuleMigrationRule['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
