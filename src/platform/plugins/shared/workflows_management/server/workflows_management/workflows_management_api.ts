@@ -23,7 +23,6 @@ import type {
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import type { WorkflowsService } from './workflows_management_service';
 import type { LogSearchResult } from './lib/workflow_logger';
 
@@ -172,10 +171,7 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     spaceId: string
   ): Promise<string> {
-    const parsedYaml = parseWorkflowYamlToJSON(
-      workflowYaml,
-      this.workflowsService.workflowZodSchemaLoose!
-    );
+    const parsedYaml = this.workflowsService.parseWorkflowYamlToJSON(workflowYaml, { loose: true });
 
     if (parsedYaml.error) {
       // TODO: handle error properly

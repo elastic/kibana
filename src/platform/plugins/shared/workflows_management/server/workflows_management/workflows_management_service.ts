@@ -71,8 +71,8 @@ export class WorkflowsService {
   private security?: SecurityServiceStart;
 
   private connectorConfig: ConnectorConfig | null = null;
-  public workflowZodSchemaStrict: ZodSchema | null = null;
-  public workflowZodSchemaLoose: ZodSchema | null = null;
+  private workflowZodSchemaStrict: ZodSchema | null = null;
+  private workflowZodSchemaLoose: ZodSchema | null = null;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -322,7 +322,7 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto> {
     const baseSavedObjectsClient = await this.getSavedObjectsClient();
     const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, this.workflowZodSchemaLoose!);
+    const parsedYaml = this.parseWorkflowYamlToJSON(workflow.yaml, { loose: true });
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
@@ -396,7 +396,7 @@ export class WorkflowsService {
     let updateData: Partial<WorkflowSavedObjectAttributes>;
 
     if (yaml) {
-      const parsedYaml = parseWorkflowYamlToJSON(yaml, this.workflowZodSchemaLoose!);
+      const parsedYaml = this.parseWorkflowYamlToJSON(yaml, { loose: true });
       if (!parsedYaml.success) {
         throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
       }
@@ -863,5 +863,18 @@ export class WorkflowsService {
 
   public getConnectorConfig() {
     return this.connectorConfig;
+  }
+
+  public parseWorkflowYamlToJSON(yaml: string, { loose }: { loose: boolean }) {
+    if (loose) {
+      if (!this.workflowZodSchemaLoose) {
+        throw new Error('Loose workflow zod schema not initialized');
+      }
+      return parseWorkflowYamlToJSON(yaml, this.workflowZodSchemaLoose);
+    }
+    if (!this.workflowZodSchemaStrict) {
+      throw new Error('Strict workflow zod schema not initialized');
+    }
+    return parseWorkflowYamlToJSON(yaml, this.workflowZodSchemaStrict);
   }
 }
