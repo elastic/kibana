@@ -57,6 +57,17 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.ex
   }),
 });
 
+export const esqlValueSchema = schema.object({
+  /**
+   * Value
+   */
+  column: schema.string({
+    meta: {
+      description: 'Column to use',
+    },
+  }),
+});
+
 export const metricOperationSharedSchema = genericOperationOptionsSchema.extends({
   /**
    * Time scale
