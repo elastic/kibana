@@ -25,7 +25,6 @@ components:
         - id
         - title
         - eai:data
-        - updated
       properties:
         id:
           type: string
