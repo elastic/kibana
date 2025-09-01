@@ -22,7 +22,7 @@ import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export const getESQLQuery = ({
@@ -70,7 +70,11 @@ export function OpenErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: stri
   const {
     query: { rangeFrom, rangeTo, kuery },
     path: { groupId },
-  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/errors/{groupId}',
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
+    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
+  );
 
   const { data = { apmIndexSettings: [] } } = useFetcher(
     (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),

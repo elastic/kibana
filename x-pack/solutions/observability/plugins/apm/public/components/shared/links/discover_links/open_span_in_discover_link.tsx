@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -108,9 +108,12 @@ export function OpenSpanInDiscoverLink({
       data-test-subj={dataTestSubj}
       href={discoverHref}
     >
-      {i18n.translate('xpack.apm.openSpanInDiscoverLink.label', {
-        defaultMessage: 'Open in Discover',
-      })}
+      <EuiFlexGroup gutterSize="s">
+        <EuiIcon type="discoverApp" />
+        {i18n.translate('xpack.apm.openSpanInDiscoverLink.label', {
+          defaultMessage: 'Open in Discover',
+        })}
+      </EuiFlexGroup>
     </EuiLink>
   );
 }
