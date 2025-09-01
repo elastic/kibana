@@ -117,26 +117,17 @@ export const registerLookupIndexRoutes = (
     },
     async (requestHandlerContext, req, res) => {
       const { indexName } = req.query;
+      const indices: string[] = indexName ? indexName.split(',') : [];
 
       try {
         const core = await requestHandlerContext.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const { index: indexPrivileges = {} } = await esClient.security.hasPrivileges({
           index: [
-            // Check if the user has privileges to create, read and write to any index
             {
-              names: ['*'],
+              names: ['*', ...indices],
               privileges: ['create_index', 'read', 'write'],
             },
-            // Check if the user has privileges to create, read and write based on the index pattern
-            ...(indexName
-              ? [
-                  {
-                    names: [`${indexName}`],
-                    privileges: ['read', 'write', 'create_index'],
-                  },
-                ]
-              : []),
           ],
         });
 

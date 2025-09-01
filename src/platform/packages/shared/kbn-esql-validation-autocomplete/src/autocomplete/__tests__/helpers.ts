@@ -316,7 +316,6 @@ export function createCustomCallbackMocks(
       hasAtLeast: (requiredLevel: string) => customLicenseType === requiredLevel,
     })),
     getActiveProduct: jest.fn(() => customActiveProduct),
-    getCurrentAppId: jest.fn(async () => 'discover'),
   };
 }
 

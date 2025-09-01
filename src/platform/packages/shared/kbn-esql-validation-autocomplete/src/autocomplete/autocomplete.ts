@@ -267,12 +267,10 @@ async function getSuggestionsWithinCommandExpression(
     innerText,
     callbacks
   );
-  const appId = await callbacks?.getCurrentAppId?.();
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
-    appId,
   };
 
   // does it make sense to have a different context per command?
