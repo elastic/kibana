@@ -2052,6 +2052,8 @@
       "@kbn/spaces-test-plugin/*": ["x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin/*"],
       "@kbn/spaces-utils": ["src/platform/packages/shared/kbn-spaces-utils"],
       "@kbn/spaces-utils/*": ["src/platform/packages/shared/kbn-spaces-utils/*"],
+      "@kbn/split-button": ["src/platform/packages/private/kbn-split-button"],
+      "@kbn/split-button/*": ["src/platform/packages/private/kbn-split-button/*"],
       "@kbn/sse-example-plugin": ["examples/sse_example"],
       "@kbn/sse-example-plugin/*": ["examples/sse_example/*"],
       "@kbn/sse-utils": ["src/platform/packages/shared/kbn-sse-utils"],
