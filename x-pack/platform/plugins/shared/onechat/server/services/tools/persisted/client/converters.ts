@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolCreateParams, ToolTypeUpdateParams } from '../tool_provider';
+import type { ToolCreateParams, ToolTypeUpdateParams } from '../../tool_provider';
 import type { ToolProperties } from './storage';
 import type { ToolDocument, ToolPersistedDefinition } from './types';
 

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
-export { registerBuiltinTools } from './register_tools';
-export { createBuiltInToolSource } from './builtin_provider';
+export { createEsqlToolType } from './esql_tool_type';

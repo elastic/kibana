@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
-export { registerBuiltinTools } from './register_tools';
-export { createBuiltInToolSource } from './builtin_provider';
+import type { EsResourceType } from '@kbn/onechat-common';
+
+export interface SearchTarget {
+  type: EsResourceType;
+  name: string;
+}

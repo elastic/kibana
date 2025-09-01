@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
-export { registerBuiltinTools } from './register_tools';
-export { createBuiltInToolSource } from './builtin_provider';
+/**
+ * Represents the type of a "searchable" resource in the cluster.
+ * Searchable resources are indices, aliases and data streams
+ */
+export enum EsResourceType {
+  index = 'index',
+  alias = 'alias',
+  dataStream = 'data_stream',
+}

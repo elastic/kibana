@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { createEsqlToolTypeDefinition } from './esql_tools_provider';
+import { schema } from '@kbn/config-schema';
+
+export const configurationSchema = schema.object({
+  pattern: schema.string(),
+});
+
+export const configurationUpdateSchema = schema.object({
+  pattern: schema.maybe(schema.string()),
+});
