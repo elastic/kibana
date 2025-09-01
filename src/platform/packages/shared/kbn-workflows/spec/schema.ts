@@ -41,6 +41,18 @@ export const WorkflowOnFailureSchema = z.object({
   continue: z.boolean().optional(),
 });
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowOnFailureSchema.extend({
+    fallback: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
 
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
@@ -48,6 +60,19 @@ export const WorkflowSettingsSchema = z.object({
   timezone: z.string().optional(), // Should follow IANA TZ format
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
+
+export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean = false) {
+  const schema = WorkflowSettingsSchema.extend({
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial();
+  }
+
+  return schema;
+}
 
 /* --- Triggers --- */
 export const AlertRuleTriggerSchema = z.object({
@@ -140,19 +165,6 @@ export const HttpStepSchema = BaseStepSchema.extend({
   .merge(StepWithTimeoutSchema)
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
-
-export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
-  const schema = WorkflowOnFailureSchema.extend({
-    fallback: z.array(stepSchema).optional(),
-  });
-
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial();
-  }
-
-  return schema;
-}
 
 export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = HttpStepSchema.extend({
