@@ -22,6 +22,7 @@ export const getWithArtifactReadPrivilegesRole: () => Omit<Role, 'name'> = () =>
             'all',
             'blocklist_read',
             'trusted_applications_read',
+            'trusted_devices_read',
             'host_isolation_exceptions_read',
             'event_filters_read',
           ],
