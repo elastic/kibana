@@ -12,7 +12,8 @@ import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ToolResult } from '@kbn/onechat-common/tools';
+import { ToolResult, ToolResultType } from '@kbn/onechat-common/tools';
+import { extractTextContent } from '../../langchain';
 import { indexExplorer } from '../index_explorer';
 import { createNaturalLanguageSearchTool, createRelevanceSearchTool } from './inner_tools';
 import { getSearchPrompt } from './prompts';
@@ -133,9 +134,24 @@ export const createSearchToolGraph = ({
 };
 
 const extractToolResults = (message: BaseMessage): ToolResult[] => {
-  if (!isToolMessage(message) || !message.artifact || !Array.isArray(message.artifact.results)) {
-    throw new Error(`No artifact attached to tool message. Content was ${message.content}`);
+  if (!isToolMessage(message)) {
+    throw new Error(`Trying to extract tool results for non-tool result`);
   }
-
-  return message.artifact.results as ToolResult[];
+  if (message.artifact) {
+    if (!Array.isArray(message.artifact.results)) {
+      throw new Error(
+        `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
+          message.artifact
+        )}`
+      );
+    }
+    return message.artifact.results as ToolResult[];
+  } else {
+    const content = extractTextContent(message);
+    if (content.startsWith('Error:')) {
+      return [{ type: ToolResultType.error, data: { message: content } }];
+    } else {
+      throw new Error(`No artifact attached to tool message. Content was ${message.content}`);
+    }
+  }
 };
