@@ -68,13 +68,25 @@ export const toNavigationItems = (
   let deepestActiveItemId: string | undefined;
   let currentActiveItemIdLevel = -1;
 
+  const isActive = (navNode: ChromeProjectNavigationNode) =>
+    isActiveFromUrl(navNode.path, activeNodes, false);
+
   const maybeMarkActive = (navNode: ChromeProjectNavigationNode, level: number) => {
     if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
-      if (isActiveFromUrl(navNode.path, activeNodes, false)) {
+      if (isActive(navNode)) {
         deepestActiveItemId = navNode.id;
         currentActiveItemIdLevel = level;
       }
     }
+  };
+
+  const getTestSubj = (navNode: ChromeProjectNavigationNode): string => {
+    const { id, path, deepLink } = navNode;
+    return classnames(`nav-item`, `nav-item-${path}`, {
+      [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+      [`nav-item-id-${id}`]: id,
+      [`nav-item-isActive`]: isActive(navNode),
+    });
   };
 
   if (navigationTree.body.length === 1) {
@@ -114,6 +126,7 @@ export const toNavigationItems = (
     iconType: getIcon(logoNode),
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
+    'data-test-subj': logoNode ? getTestSubj(logoNode) : undefined,
   };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
@@ -398,15 +411,6 @@ const isRecentlyAccessedDefinition = (
 
 const filterEmpty = <T,>(arr: Array<T | null | undefined>): T[] =>
   arr.filter((item) => item !== null && item !== undefined) as T[];
-
-const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): string => {
-  const { id, path, deepLink } = navNode;
-  return classnames(`nav-item`, `nav-item-${path}`, {
-    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
-    [`nav-item-id-${id}`]: id,
-    [`nav-item-isActive`]: isActive,
-  });
-};
 
 const getIcon = (node: ChromeProjectNavigationNode | null): string => {
   if (node?.iconV2) {
