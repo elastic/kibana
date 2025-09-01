@@ -38,7 +38,7 @@ describe('startMigrationCheckComplete', () => {
       rules: {
         getMissingCapabilities: jest.fn().mockReturnValue([]),
         isAvailable: jest.fn().mockReturnValue(true),
-        getRuleMigrationsStats: jest.fn().mockReturnValue([
+        getMigrationsStats: jest.fn().mockReturnValue([
           {
             status: SiemMigrationTaskStatus.FINISHED,
           },
