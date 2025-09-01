@@ -933,7 +933,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(async (e) => {
+                    editor.onMouseDown(() => {
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
