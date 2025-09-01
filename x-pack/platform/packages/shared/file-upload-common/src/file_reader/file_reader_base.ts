@@ -27,13 +27,8 @@ export interface CreateDocsResponse<T extends ImportDoc> {
 }
 
 export abstract class FileReaderBase {
-  protected _docLimit: number | undefined;
   protected _docArray: ImportDoc[] = [];
   protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
-
-  constructor(options?: { docLimit?: number }) {
-    this._docLimit = options?.docLimit;
-  }
 
   public read(data: ArrayBuffer) {
     let docArray: ImportDoc[] = [];
