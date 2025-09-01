@@ -17092,7 +17092,8 @@
                               "UPDATE_TAGS",
                               "POLICY_CHANGE",
                               "INPUT_ACTION",
-                              "MIGRATE"
+                              "MIGRATE",
+                              "PRIVILEGE_LEVEL_CHANGE"
                             ],
                             "type": "string"
                           },
