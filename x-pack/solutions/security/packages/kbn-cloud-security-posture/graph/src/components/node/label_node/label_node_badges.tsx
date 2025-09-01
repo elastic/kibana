@@ -116,21 +116,19 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
             <EuiIcon
               data-test-subj={TEST_SUBJ_ALERT_ICON}
               type="warningFilled"
-              color="ghost"
+              color={euiTheme.colors.backgroundBasePlain}
               size="s"
             />
-            {analysis.alertsCount > 1 && (
-              <EuiText
-                data-test-subj={TEST_SUBJ_ALERT_COUNT}
-                size="xs"
-                css={css`
-                  font-weight: ${euiTheme.font.weight.medium};
-                  color: ${euiTheme.colors.textInverse};
-                `}
-              >
-                {displayCount(analysis.alertsCount)}
-              </EuiText>
-            )}
+            <EuiText
+              data-test-subj={TEST_SUBJ_ALERT_COUNT}
+              size="xs"
+              css={css`
+                font-weight: ${euiTheme.font.weight.medium};
+                color: ${euiTheme.colors.textInverse};
+              `}
+            >
+              {displayCount(analysis.alertsCount)}
+            </EuiText>
           </RoundedBadge>
         </>
       )}

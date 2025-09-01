@@ -52,31 +52,30 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
             gap: ${euiTheme.size.s};
           `}
         >
-          <RoundedBadge euiTheme={euiTheme} bgColor={euiTheme.colors.danger}>
+          <RoundedBadge euiTheme={euiTheme}>
             <EuiIcon
               type="warningFilled"
-              color="ghost"
+              color="danger"
               size="s"
               data-test-subj="label-node-tooltip-alert-icon"
             />
-            {analysis.alertsCount > 1 && (
-              <EuiText
-                data-test-subj="label-node-tooltip-alert-count"
-                size="m"
-                css={css`
-                  font-weight: ${euiTheme.font.weight.medium};
-                  color: ${euiTheme.colors.textInverse};
-                `}
-              >
-                {getAbbreviatedNumber(analysis.alertsCount)}
-              </EuiText>
-            )}
+
+            <EuiText
+              data-test-subj="label-node-tooltip-alert-count"
+              size="m"
+              css={css`
+                font-weight: ${euiTheme.font.weight.medium};
+                color: ${euiTheme.colors.textHeading};
+              `}
+            >
+              {getAbbreviatedNumber(analysis.alertsCount)}
+            </EuiText>
           </RoundedBadge>
           <EuiText
             size="s"
+            color="default"
             css={css`
               font-weight: ${euiTheme.font.weight.medium};
-              color: ${euiTheme.colors.textInverse};
             `}
           >
             {alertedEventsText}
@@ -92,7 +91,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
             gap: ${euiTheme.size.s};
           `}
         >
-          <RoundedBadge euiTheme={euiTheme} bgColor={euiTheme.colors.backgroundBasePlain}>
+          <RoundedBadge euiTheme={euiTheme}>
             <EuiText
               data-test-subj="label-node-tooltip-event-count"
               size="m"
@@ -106,9 +105,9 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
           </RoundedBadge>
           <EuiText
             size="s"
+            color="default"
             css={css`
               font-weight: ${euiTheme.font.weight.medium};
-              color: ${euiTheme.colors.textInverse};
             `}
           >
             {defaultEventsText}
