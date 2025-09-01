@@ -10,10 +10,9 @@
 import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
 import {
-  LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
-  LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
   LENS_RANGE_DEFAULT_INTERVAL,
 } from '../../schema/constants';
+import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps  } from './utils';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
 export function fromRangeOrHistogramLensApiToLensState(
@@ -24,10 +23,7 @@ export function fromRangeOrHistogramLensApiToLensState(
     return {
       operationType: 'range',
       dataType: 'string',
-      sourceField: options.field,
-      customLabel: label != null,
-      label: label ?? field,
-      isBucketed: true,
+      ...getLensStateBucketSharedProps(options),
       params: {
         type: 'range',
         maxBars: 'auto',
@@ -45,16 +41,13 @@ export function fromRangeOrHistogramLensApiToLensState(
   return {
     operationType: 'range',
     dataType: 'number',
-    sourceField: options.field,
-    customLabel: label != null,
-    label: label ?? field,
-    isBucketed: true,
+    ...getLensStateBucketSharedProps(options),
     params: {
       type: 'histogram',
-      maxBars: options.granularity ?? LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+      maxBars: options.granularity,
       ranges: [],
       format: fromFormatAPIToLensState(options.format),
-      includeEmptyRows: options.include_empty_rows ?? LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+      includeEmptyRows: options.include_empty_rows,
     },
   };
 }
@@ -65,8 +58,7 @@ export function fromRangeOrHistogramLensStateToAPI(
   if (column.params.type === 'range') {
     return {
       operation: 'range',
-      field: column.sourceField,
-      ...(column.label !== column.sourceField ? { label: column.label } : {}),
+      ...getLensAPIBucketSharedProps(column),
       ranges: column.params.ranges
         .filter(({ from, to }) => from != null || to != null)
         .map(({ from, to, label }) => ({
@@ -79,10 +71,9 @@ export function fromRangeOrHistogramLensStateToAPI(
   }
   return {
     operation: 'histogram',
-    field: column.sourceField,
-    include_empty_rows: column.params.includeEmptyRows ?? LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
-    granularity: column.params?.maxBars ?? LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-    ...(column.label !== column.sourceField ? { label: column.label } : {}),
+    include_empty_rows: Boolean(column.params.includeEmptyRows),
+    granularity: column.params?.maxBars,
+    ...getLensAPIBucketSharedProps(column),
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
 }

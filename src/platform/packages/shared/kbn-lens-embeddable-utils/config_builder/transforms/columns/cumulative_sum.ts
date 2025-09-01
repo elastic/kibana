@@ -15,13 +15,6 @@ import type { LensApiCumulativeSumOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
-function ofName(field?: string): string {
-  if (field == null || field === '') {
-    return `Cumulative sum of (incomplete)`;
-  }
-  return `Cumulative sum of ${field}`;
-}
-
 export const fromCumulativeSumAPItoLensState = (
   options: LensApiCumulativeSumOperation,
   ref: { id: string; field: string }
@@ -31,7 +24,7 @@ export const fromCumulativeSumAPItoLensState = (
   return {
     operationType: 'cumulative_sum',
     references: [ref.id],
-    ...getLensStateMetricSharedProps(options, ofName(ref.field)),
+    ...getLensStateMetricSharedProps(options),
     params: {
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
@@ -45,7 +38,7 @@ export const fromCumulativeSumLensStateToAPI = (
   return {
     operation: 'cumulative_sum',
     field: ref.sourceField,
-    ...getLensAPIMetricSharedProps(options, ofName(ref.sourceField)),
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 };

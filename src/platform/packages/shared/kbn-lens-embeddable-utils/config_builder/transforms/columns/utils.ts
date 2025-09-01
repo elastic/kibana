@@ -23,6 +23,7 @@ import type { LensApiAllOperations } from '../../schema';
 
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
 
+const LENS_DEFAULT_LABEL = '';
 export function getLensStateMetricSharedProps(
   options: {
     time_scale?: TimeScaleUnit;
@@ -31,7 +32,6 @@ export function getLensStateMetricSharedProps(
     filter?: { query: string; language: 'kuery' | 'lucene' };
     label?: string;
   },
-  defaultLabel: string = '',
   dataType: DataType = 'number'
 ) {
   return {
@@ -41,7 +41,7 @@ export function getLensStateMetricSharedProps(
     timeScale: options.time_scale,
     reducedTimeRange: options.reduced_time_range,
     timeShift: options.time_shift,
-    label: options.label ?? defaultLabel,
+    label: options.label ?? LENS_DEFAULT_LABEL,
     // @TODO improve this based on default label logic
     customLabel: options.label != null,
   };
@@ -55,17 +55,44 @@ export function getLensAPIMetricSharedProps(
     timeShift?: string;
     filter?: Query;
     label?: string;
-  },
-  defaultLabel: string = ''
-) {
+  }) {
   return {
-    ...(defaultLabel !== options.label ? { label: options.label } : {}),
+    ...(options.customLabel ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
     ...(options.filter ? { filter: fromFilterLensStateToAPI(options.filter) } : {}),
   };
 }
+
+export function getLensStateBucketSharedProps(
+  options: {
+    label?: string;
+    field: string;
+  }) {
+    return {
+      sourceField: options.field,
+      customLabel: options.label != null,
+      label: options.label ?? LENS_DEFAULT_LABEL,
+      isBucketed: true,
+    };
+}
+
+export function getLensAPIBucketSharedProps(
+  options: {
+    label?: string;
+    customLabel?: boolean;
+    sourceField: string;
+  }) {
+    return {
+      field: options.sourceField,
+      ...(options.customLabel ? { label: options.label } : {}),
+    };
+}
+
+/**
+ * Type guard to test if a given API column is of the specified operation type
+ */
 
 export function isAPIColumnOfType<C extends LensApiAllOperations>(
   type: C['operation'],

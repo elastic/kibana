@@ -15,6 +15,10 @@ import {
   LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
   LENS_TERMS_SIZE_DEFAULT,
+  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+  LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
+  LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+  
 } from './constants';
 import { formatSchema } from './format';
 
@@ -48,35 +52,33 @@ export const bucketDateHistogramOperationSchema = schema.object({
   /**
    * Suggested interval
    */
-  suggested_interval: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Suggested interval',
-      },
-    })
-  ),
+  suggested_interval: schema.string({
+    defaultValue: LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
+    meta: {
+      description: 'Suggested interval',
+    },
+  }),
   /**
    * Whether to use original time range
    */
-  use_original_time_rangeoverride_time_range: schema.maybe(
-    schema.boolean({
-      meta: {
-        description: 'Whether to use original time range',
-      },
-    })
-  ),
+  use_original_time_rangeoverride_time_range: schema.boolean({
+    defaultValue: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+    meta: {
+      description: 'Whether to use original time range',
+    },
+  }),
   /**
    * Whether to include empty rows
    */
-  include_empty_rows: schema.maybe(
-    schema.boolean({
-      meta: {
-        description: 'Whether to include empty rows',
-      },
-    })
-  ),
+  include_empty_rows: schema.boolean({
+    defaultValue: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+    meta: {
+      description: 'Whether to include empty rows',
+    },
+  }),
   drop_partial_intervals: schema.maybe(
     schema.boolean({
+      defaultValue: false,
       meta: {
         description: 'Whether to drop partial intervals',
       },

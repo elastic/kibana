@@ -47,21 +47,20 @@ const byteFormatSchema = schema.object({
   /**
    * Number of decimals
    */
-  decimals: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'Number of decimals',
-      },
-    })
-  ),
+  decimals: schema.number({
+    defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
+    meta: {
+      description: 'Number of decimals',
+    },
+  }),
   /**
    * Suffix
    */
   suffix: schema.maybe(
     schema.string({
-      meta: {
+    meta: {
         description: 'Suffix',
-      },
+    },
     })
   ),
 });
@@ -89,9 +88,9 @@ const durationFormatSchema = schema.object({
    */
   suffix: schema.maybe(
     schema.string({
-      meta: {
-        description: 'Suffix',
-      },
+    meta: {
+      description: 'Suffix',
+    },
     })
   ),
 });

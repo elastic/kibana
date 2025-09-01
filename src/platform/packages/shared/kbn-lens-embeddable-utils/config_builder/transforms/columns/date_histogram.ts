@@ -9,15 +9,7 @@
 
 import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
-import {
-  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
-  LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
-  LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
-} from '../../schema/constants';
-
-function ofName(field: string, interval: string = '1h'): string {
-  return `${field} per ${interval}`;
-}
+import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 
 export function fromDateHistogramLensApiToLensState(
   options: LensApiDateHistogramOperation
@@ -37,17 +29,13 @@ export function fromDateHistogramLensApiToLensState(
 
   return {
     operationType: 'date_histogram',
-    sourceField: field,
-    customLabel: label != null,
-    label: label ?? ofName(field, suggested_interval),
-    isBucketed: true,
     dataType: 'date',
+    ...getLensStateBucketSharedProps({ label, field }),
     params: {
-      interval: suggested_interval ?? LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
-      includeEmptyRows: include_empty_rows ?? LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+      interval: suggested_interval,
+      includeEmptyRows: include_empty_rows,
       dropPartials: Boolean(drop_partial_intervals),
-      ignoreTimeRange:
-        use_original_time_rangeoverride_time_range ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+      ignoreTimeRange: use_original_time_rangeoverride_time_range,
     },
   };
 }
@@ -57,11 +45,10 @@ export function fromDateHistogramLensStateToAPI(
 ): LensApiDateHistogramOperation {
   return {
     operation: 'date_histogram',
-    field: column.sourceField,
-    label: column.label,
+    ...getLensAPIBucketSharedProps(column),
     suggested_interval: column.params.interval,
-    use_original_time_rangeoverride_time_range: column.params.ignoreTimeRange,
-    include_empty_rows: column.params.includeEmptyRows,
-    drop_partial_intervals: column.params.dropPartials,
+    use_original_time_rangeoverride_time_range: Boolean(column.params.ignoreTimeRange),
+    include_empty_rows: Boolean(column.params.includeEmptyRows),
+    drop_partial_intervals: Boolean(column.params.dropPartials),
   };
 }

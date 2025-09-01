@@ -11,24 +11,13 @@ import type { StaticValueIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiStaticValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
-import { LENS_STATIC_VALUE_DEFAULT } from '../../schema/constants';
-
-function ofName(value?: number | string): string {
-  if (value == null || value === '' || Number.isNaN(value)) {
-    return `Static Value`;
-  }
-  return `Static value: ${value}`;
-}
 
 export const fromStaticValueAPItoLensState = (
   options: LensApiStaticValueOperation
 ): StaticValueIndexPatternColumn => {
   const { value, format } = options ?? {};
 
-  const { label, customLabel, dataType, isBucketed } = getLensStateMetricSharedProps(
-    options,
-    ofName(value)
-  );
+  const { label, customLabel, dataType, isBucketed } = getLensStateMetricSharedProps(options);
   return {
     operationType: 'static_value',
     label,
@@ -37,7 +26,7 @@ export const fromStaticValueAPItoLensState = (
     isBucketed,
     references: [],
     params: {
-      value: String(value != null ? value : LENS_STATIC_VALUE_DEFAULT),
+      value: String(value),
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
   };
@@ -48,8 +37,8 @@ export const fromStaticValueLensStateToAPI = (
 ): LensApiStaticValueOperation => {
   return {
     operation: 'static_value',
-    value: Number(options.params?.value) ?? LENS_STATIC_VALUE_DEFAULT,
-    ...getLensAPIMetricSharedProps(options, ofName(options.params.value)),
+    value: Number(options.params?.value),
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 };

@@ -15,22 +15,14 @@ import type {
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
-function ofName(name?: string): string {
-  if (name == null || name === '') {
-    return `Differences of (incomplete)`;
-  }
-  return `Differences of ${name}`;
-}
-
 export function fromDifferencesAPItoLensState(
   options: LensApiDifferencesOperation,
   ref: { id: string; field: string; label: string }
 ): DerivativeIndexPatternColumn {
-  const label = ofName(ref.label);
   return {
     operationType: 'differences',
     references: [ref.id],
-    ...getLensStateMetricSharedProps(options, label),
+    ...getLensStateMetricSharedProps(options),
     params: {
       ...(options.format ? { format: fromFormatAPIToLensState(options.format) } : {}),
     },
@@ -44,7 +36,7 @@ export function fromDifferencesLensStateToAPI(
 ): LensApiDifferencesOperation {
   return {
     operation: 'differences',
-    ...getLensAPIMetricSharedProps(column, ofName(refDefaultLabel)),
+    ...getLensAPIMetricSharedProps(column),
     of: ref,
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };

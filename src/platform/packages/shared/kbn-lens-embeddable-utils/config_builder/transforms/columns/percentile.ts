@@ -10,12 +10,7 @@
 import type { PercentileIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import type { LensApiPercentileOperation } from '../../schema/metric_ops';
-import { LENS_PERCENTILE_DEFAULT_VALUE } from '../../schema/constants';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
-
-function ofName(field: string, percentile: number = LENS_PERCENTILE_DEFAULT_VALUE): string {
-  return `${percentile}th Percentile of ${field}`;
-}
 
 export const fromPercentileAPItoLensState = (
   options: LensApiPercentileOperation
@@ -25,10 +20,10 @@ export const fromPercentileAPItoLensState = (
   return {
     operationType: 'percentile',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options, ofName(field, percentile)),
+    ...getLensStateMetricSharedProps(options),
     params: {
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
-      percentile: percentile ?? LENS_PERCENTILE_DEFAULT_VALUE,
+      percentile: percentile,
     },
   };
 };
@@ -39,11 +34,8 @@ export const fromPercentileLensStateToAPI = (
   return {
     operation: options.operationType,
     field: options.sourceField,
-    percentile: options.params.percentile ?? LENS_PERCENTILE_DEFAULT_VALUE,
-    ...getLensAPIMetricSharedProps(
-      options,
-      ofName(options.sourceField, options.params?.percentile)
-    ),
+    percentile: options.params.percentile,
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 };

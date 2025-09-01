@@ -11,14 +11,6 @@ import type { LastValueIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
-import { LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES } from '../../schema/constants';
-
-function ofName(field: string): string {
-  if (field === '') {
-    return `Last value of (empty)`;
-  }
-  return `Last value of ${field}`;
-}
 
 export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation
@@ -29,10 +21,10 @@ export const fromLastValueAPItoLensState = (
   return {
     operationType: 'last_value',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options, ofName(field)),
+    ...getLensStateMetricSharedProps(options),
     params: {
       sortField: sort_by,
-      showArrayValues: show_array_values ?? LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+      showArrayValues: show_array_values,
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
   };
@@ -45,8 +37,8 @@ export const fromLastValueLensStateToAPI = (
     operation: 'last_value',
     field: options.sourceField,
     sort_by: options.params.sortField,
-    show_array_values: options.params.showArrayValues ?? LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
-    ...getLensAPIMetricSharedProps(options, ofName(options.sourceField)),
+    show_array_values: options.params.showArrayValues,
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 };

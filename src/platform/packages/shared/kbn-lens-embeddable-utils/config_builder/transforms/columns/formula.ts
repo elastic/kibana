@@ -12,29 +12,17 @@ import type { LensApiFormulaOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
-function ofName(formula?: string): string {
-  if (formula == null || formula === '') {
-    return `Formula`;
-  }
-  return formula;
-}
-
 export const fromFormulaAPItoLensState = (
   options: LensApiFormulaOperation
 ): FormulaIndexPatternColumn => {
   const { formula, format } = options ?? {};
 
-  const { label, customLabel, dataType, isBucketed, reducedTimeRange, timeScale } =
-    getLensStateMetricSharedProps(options, ofName(formula));
+  const { filter, timeShift, ...sharedProps } =
+    getLensStateMetricSharedProps(options);
 
   return {
     operationType: 'formula',
-    label,
-    customLabel,
-    dataType,
-    isBucketed,
-    reducedTimeRange,
-    timeScale,
+    ...sharedProps,
     references: [],
     params: {
       formula: formula ?? '',
@@ -49,7 +37,7 @@ export const fromFormulaLensStateToAPI = (
   return {
     operation: 'formula',
     ...(options.params?.formula ? { formula: options.params.formula } : { formula: '' }),
-    ...getLensAPIMetricSharedProps(options, ofName(options.params.formula)),
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 };

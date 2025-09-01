@@ -9,14 +9,10 @@
 
 import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
-import { LENS_TERMS_MISSING_BUCKET_DEFAULT, LENS_TERMS_SIZE_DEFAULT } from '../../schema/constants';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState } from './format';
 import { isColumnOfReferableType } from './utils';
-
-function ofName(field: string, size: number): string {
-  return `Top ${size} values for ${field}`;
-}
+import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 
 function getOrderByValue(
   rankBy: LensApiTermsOperation['rank_by'],
@@ -67,14 +63,11 @@ export function fromTermsLensApiToLensState(
 
   return {
     operationType: 'terms',
-    sourceField: field,
-    customLabel: label != null,
-    label: label ?? ofName(field, size),
-    isBucketed: true,
     dataType: 'string',
+    ...getLensStateBucketSharedProps({ ...options, field }),
     params: {
       secondaryFields,
-      size: size || LENS_TERMS_SIZE_DEFAULT, // it cannot be 0 (zero)
+      size: size, // it cannot be 0 (zero)
       accuracyMode: Boolean(increase_accuracy),
       include: includes?.values ?? [],
       includeIsRegex: includes?.as_regex ?? false,
@@ -82,7 +75,7 @@ export function fromTermsLensApiToLensState(
       excludeIsRegex: excludes?.as_regex ?? false,
       otherBucket: Boolean(other_bucket),
       missingBucket:
-        other_bucket?.include_documents_without_field ?? LENS_TERMS_MISSING_BUCKET_DEFAULT,
+        other_bucket?.include_documents_without_field,
       orderBy: orderByConfig,
       orderDirection,
       orderAgg:
@@ -146,10 +139,11 @@ export function fromTermsLensStateToAPI(
   column: TermsIndexPatternColumn,
   columns: (LensApiAllMetricOperations & { id: string })[]
 ): LensApiTermsOperation {
+  const { field, label } = getLensAPIBucketSharedProps(column);
   return {
     operation: 'terms',
     fields: [column.sourceField].concat(column.params.secondaryFields ?? []),
-    ...(column.label !== column.sourceField ? { label: column.label } : {}),
+    label,
     size: column.params.size,
     ...(column.params.accuracyMode == null
       ? { increase_accuracy: column.params.accuracyMode }

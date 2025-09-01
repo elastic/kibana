@@ -12,10 +12,6 @@ import type { LensApiUniqueCountMetricOperation } from '../../schema/metric_ops'
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
-function ofName(field: string): string {
-  return `Unique Count of ${field}`;
-}
-
 export const fromUniqueCountAPItoLensState = (
   options: LensApiUniqueCountMetricOperation
 ): CardinalityIndexPatternColumn => {
@@ -24,7 +20,7 @@ export const fromUniqueCountAPItoLensState = (
   return {
     operationType: 'unique_count',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options, ofName(field)),
+    ...getLensStateMetricSharedProps(options),
     params: {
       format: fromFormatAPIToLensState(format),
       emptyAsNull: empty_as_null,
@@ -41,7 +37,7 @@ export const fromUniqueCountLensStateToAPI = (
     operation: 'unique_count',
     field: sourceField,
     empty_as_null: Boolean(emptyAsNull),
-    ...getLensAPIMetricSharedProps(options, ofName(options.sourceField)),
+    ...getLensAPIMetricSharedProps(options),
     ...(format ? { format: fromFormatLensStateToAPI(format) } : {}),
   };
 };

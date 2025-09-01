@@ -15,22 +15,12 @@ import type { LensApiCounterRateOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
-function ofName(field?: string): string {
-  if (field == null || field === '') {
-    return `Counter rate of (incomplete)`;
-  }
-  return `Counter rate of ${field}`;
-}
-
 export const fromCounterRateAPItoLensState = (
   options: LensApiCounterRateOperation,
   ref?: { id: string; field: string }
 ): CounterRateIndexPatternColumn => {
   const { format } = options ?? {};
-  const { reducedTimeRange, ...sharedProps } = getLensStateMetricSharedProps(
-    options,
-    ofName(ref?.field)
-  );
+  const { reducedTimeRange, ...sharedProps } = getLensStateMetricSharedProps(options);
   return {
     operationType: 'counter_rate',
     references: ref && ref.id ? [ref.id] : [],
@@ -46,10 +36,7 @@ export const fromCounterRateLensStateToAPI = (
   ref: FieldBasedIndexPatternColumn
 ): LensApiCounterRateOperation => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { reduced_time_range, ...sharedProps } = getLensAPIMetricSharedProps(
-    options,
-    ofName(ref.sourceField)
-  );
+  const { reduced_time_range, ...sharedProps } = getLensAPIMetricSharedProps(options);
   return {
     operation: 'counter_rate',
     field: ref.sourceField,

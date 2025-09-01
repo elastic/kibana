@@ -13,27 +13,18 @@ import type {
   LensApiFieldMetricOperations,
 } from '../../schema/metric_ops';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
-import { LENS_MOVING_AVERAGE_DEFAULT_WINDOW } from '../../schema/constants';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
-
-function ofName(name?: string): string {
-  if (name == null || name === '') {
-    return `Moving average of (incomplete)`;
-  }
-  return `Moving average of ${name}`;
-}
 
 export function fromMovingAverageAPItoLensState(
   options: LensApiMovingAverageOperation,
   ref: { id: string; field?: string; label?: string }
 ): MovingAverageIndexPatternColumn {
-  const label = ofName(ref.label);
   return {
     operationType: 'moving_average',
     references: [ref.id],
-    ...getLensStateMetricSharedProps(options, label),
+    ...getLensStateMetricSharedProps(options),
     params: {
-      window: options.window ?? LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
+      window: options.window,
       ...(options.format ? { format: fromFormatAPIToLensState(options.format) } : {}),
     },
   };
@@ -46,9 +37,9 @@ export function fromMovingAverageLensStateToAPI(
 ): LensApiMovingAverageOperation {
   return {
     operation: 'moving_average',
-    ...getLensAPIMetricSharedProps(column, ofName(refDefaultLabel)),
+    ...getLensAPIMetricSharedProps(column),
     of: ref,
-    window: column.params.window ?? LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
+    window: column.params.window,
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
 }

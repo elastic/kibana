@@ -26,7 +26,7 @@ export function fromFormatAPIToLensState(
     return {
       id: format.type,
       params: {
-        decimals: format.decimals ?? DEFAULT_FORMAT_PARAMS.decimals,
+        decimals: format.decimals,
         ...(format.suffix ? { suffix: format.suffix } : {}),
         ...(format.compact ? { compact: format.compact } : {}),
       },
@@ -36,7 +36,7 @@ export function fromFormatAPIToLensState(
     return {
       id: format.type,
       params: {
-        decimals: format.decimals ?? DEFAULT_FORMAT_PARAMS.decimals,
+        decimals: format.decimals,
         ...(format.suffix ? { suffix: format.suffix } : {}),
       },
     };
@@ -82,10 +82,7 @@ export function fromFormatLensStateToAPI(
   if (format.id === 'bits' || format.id === 'bytes') {
     return {
       type: format.id,
-      ...(format.params?.decimals != null &&
-      format.params.decimals !== DEFAULT_FORMAT_PARAMS.decimals
-        ? { decimals: format.params?.decimals }
-        : {}),
+      decimals: format.params?.decimals ?? DEFAULT_FORMAT_PARAMS.decimals,
       ...(format.params?.suffix ? { suffix: format.params.suffix } : {}),
     };
   }

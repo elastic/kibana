@@ -10,17 +10,19 @@
 import type { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiFiltersOperation } from '../../schema/bucket_ops';
 import { DEFAULT_FILTER, fromFilterLensStateToAPI } from './filter';
+import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 
 export function fromFiltersLensApiToLensState(
   options: LensApiFiltersOperation
 ): FiltersIndexPatternColumn {
   const { filters, label } = options;
 
+  const { sourceField, ...shared } = getLensStateBucketSharedProps({ label, field: '' });
+
   return {
-    label: label ?? 'Filters',
     dataType: 'string',
     operationType: 'filters',
-    isBucketed: true,
+    ...shared,
     params: {
       filters: (filters ?? []).map((filter) => ({
         input: filter.filter,
@@ -33,9 +35,10 @@ export function fromFiltersLensApiToLensState(
 export function fromFiltersLensStateToAPI(
   column: FiltersIndexPatternColumn
 ): LensApiFiltersOperation {
+  const { field, label } = getLensAPIBucketSharedProps({ ...column, sourceField: '' });
   return {
     operation: 'filters',
-    label: column.label,
+    label,
     filters: column.params.filters.map((filter) => ({
       filter: fromFilterLensStateToAPI(filter.input) ?? DEFAULT_FILTER,
       label: filter.label ?? '',

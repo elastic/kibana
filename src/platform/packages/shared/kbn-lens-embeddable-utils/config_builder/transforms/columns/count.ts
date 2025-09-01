@@ -14,13 +14,6 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 
 export type CountColumnParams = CountIndexPatternColumn['params'];
 
-function ofName(field?: string): string {
-  if (field == null) {
-    return `Count of Records`;
-  }
-  return `Count of ${field}`;
-}
-
 export const fromCountAPItoLensState = (
   options: LensApiCountMetricOperation
 ): CountIndexPatternColumn => {
@@ -30,7 +23,7 @@ export const fromCountAPItoLensState = (
   return {
     operationType: 'count',
     sourceField: field || '',
-    ...getLensStateMetricSharedProps(options, ofName(field)),
+    ...getLensStateMetricSharedProps(options),
     params: {
       emptyAsNull: empty_as_null,
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
@@ -45,7 +38,7 @@ export const fromCountLensStateToAPI = (
     operation: 'count',
     field: options.sourceField,
     empty_as_null: Boolean(options.params?.emptyAsNull),
-    ...getLensAPIMetricSharedProps(options, ofName(options.sourceField)),
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 };

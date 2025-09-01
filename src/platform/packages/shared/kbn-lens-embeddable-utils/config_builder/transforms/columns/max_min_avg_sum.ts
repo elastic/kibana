@@ -19,28 +19,6 @@ import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensStateMetricSharedProps, getLensAPIMetricSharedProps } from './utils';
 import type { LensApiMetricOperation, LensApiSumMetricOperation } from '../../schema/metric_ops';
 
-function ofName(
-  field: string,
-  operation: 'min' | 'max' | 'average' | 'sum' | 'median' | 'standard_deviation'
-): string {
-  switch (operation) {
-    case 'min':
-      return `Minimum of ${field}`;
-    case 'max':
-      return `Maximum of ${field}`;
-    case 'average':
-      return `Average of ${field}`;
-    case 'sum':
-      return `Sum of ${field}`;
-    case 'median':
-      return `Median of ${field}`;
-    case 'standard_deviation':
-      return `Standard Deviation of ${field}`;
-    default:
-      throw new Error(`Unknown operation: ${operation}`);
-  }
-}
-
 export function fromBasicMetricAPItoLensState(
   options: LensApiMetricOperation
 ):
@@ -54,7 +32,7 @@ export function fromBasicMetricAPItoLensState(
   return {
     operationType: options.operation,
     sourceField: field,
-    ...getLensStateMetricSharedProps(options, ofName(field, options.operation)),
+    ...getLensStateMetricSharedProps(options),
     params: {
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
@@ -69,7 +47,7 @@ export function fromSumMetricAPIToLensState(
   return {
     operationType: 'sum',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options, ofName(field, 'sum')),
+    ...getLensStateMetricSharedProps(options),
     params: {
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
@@ -87,7 +65,7 @@ export function fromBasicMetricLensStateToAPI(
   return {
     operation: options.operationType,
     field: options.sourceField,
-    ...getLensAPIMetricSharedProps(options, ofName(options.sourceField, options.operationType)),
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 }
@@ -99,7 +77,7 @@ export function fromSumMetricLensStateToAPI(
     operation: 'sum',
     field: options.sourceField,
     empty_as_null: Boolean(options.params?.emptyAsNull),
-    ...getLensAPIMetricSharedProps(options, ofName(options.sourceField, 'sum')),
+    ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };
 }
