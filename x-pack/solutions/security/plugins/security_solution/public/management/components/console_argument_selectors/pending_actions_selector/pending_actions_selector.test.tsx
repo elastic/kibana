@@ -371,7 +371,7 @@ describe('PendingActionsSelector', () => {
     });
 
     test('shows tooltip message for disabled actions', async () => {
-      // Mock privileges without kill process permission  
+      // Mock privileges without kill process permission
       const killProcessAction: ActionDetails = {
         ...mockActionDetails,
         id: 'action-kill-123',
