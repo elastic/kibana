@@ -9,20 +9,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiListGroupItemProps, RenderCellValue } from '@elastic/eui';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
-  EuiScreenReaderOnly,
-  EuiListGroupItemProps,
+  type EuiDataGridControlColumn,
   type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
-import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
+import type { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -40,7 +41,9 @@ import {
   DataTableScoreColumnHeader,
   DataTableTimeColumnHeader,
 } from './data_table_column_header';
-import { UnifiedDataTableProps } from './data_table';
+import type { UnifiedDataTableProps } from './data_table';
+import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
+import { isSortable } from '../hooks/use_sorting';
 
 export const getColumnDisplayName = (
   columnName: string,
@@ -63,24 +66,10 @@ export const getColumnDisplayName = (
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
+const DataTableSummaryColumnHeaderMemoized = React.memo(UnifiedDataTableSummaryColumnHeader);
 
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
-
-const openDetails = {
-  id: OPEN_DETAILS,
-  width: DEFAULT_CONTROL_COLUMN_WIDTH,
-  headerCellRender: () => (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('unifiedDataTable.controlColumnHeader', {
-          defaultMessage: 'Control column',
-        })}
-      </span>
-    </EuiScreenReaderOnly>
-  ),
-  rowCellRender: ExpandButton,
-};
 
 const getSelect = (rows: DataTableRecord[]) => ({
   id: SELECT_ROW,
@@ -95,11 +84,14 @@ export function getLeadControlColumns({
 }: {
   rows: DataTableRecord[];
   canSetExpandedDoc: boolean;
-}) {
-  if (!canSetExpandedDoc) {
-    return [getSelect(rows)];
-  }
-  return [openDetails, getSelect(rows)];
+}): {
+  leadColumns: EuiDataGridControlColumn[];
+  leadColumnsExtraContent: RenderCellValue[];
+} {
+  return {
+    leadColumns: [getSelect(rows)],
+    leadColumnsExtraContent: canSetExpandedDoc ? [ExpandButton] : [],
+  };
 }
 
 function buildEuiGridColumn({
@@ -210,14 +202,13 @@ function buildEuiGridColumn({
   }
 
   const columnType = dataViewField?.type;
+  const columnSchema = getSchemaByKbnType(columnType);
 
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(columnType),
+    schema: columnSchema,
     isSortable:
-      isSortEnabled &&
-      // TODO: would be great to have something like `sortable` flag for text based columns too
-      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
+      isSortEnabled && isSortable({ isPlainRecord, columnName, columnSchema, dataViewField }),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
@@ -266,6 +257,15 @@ function buildEuiGridColumn({
     visibleCellActions,
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
+
+  if (column.id === SOURCE_COLUMN) {
+    column.display = (
+      <DataTableSummaryColumnHeaderMemoized
+        columnDisplayName={columnDisplayName}
+        headerRowHeight={headerRowHeight}
+      />
+    );
+  }
 
   if (column.id === dataView.timeFieldName) {
     column.display = (

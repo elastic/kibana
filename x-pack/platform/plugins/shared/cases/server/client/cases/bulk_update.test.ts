@@ -32,6 +32,7 @@ describe('update', () => {
       },
     ],
   };
+
   const casesClientMock = createCasesClientMock();
   casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
@@ -52,7 +53,9 @@ describe('update', () => {
         saved_objects: [{ ...mockCases[0], attributes: { assignees: cases.cases[0].assignees } }],
       });
 
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('notifies an assignee', async () => {
@@ -436,7 +439,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`does not throw error when category is non empty string less than ${MAX_CATEGORY_LENGTH} characters`, async () => {
@@ -570,7 +575,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`does not throw error when title is non empty string less than ${MAX_TITLE_LENGTH} characters`, async () => {
@@ -705,7 +712,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`does not throw error when description is non empty string less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
@@ -847,7 +856,7 @@ describe('update', () => {
       const caseCommentsStats = new Map();
       caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2 });
       caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4 });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         caseCommentsStats
       );
     });
@@ -901,6 +910,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-1",
+            "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
@@ -945,6 +955,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-2",
+            "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
@@ -969,7 +980,9 @@ describe('update', () => {
         ]
       `);
 
-      expect(clientArgs.services.attachmentService.getter.getCaseCommentStats).toHaveBeenCalledWith(
+      expect(
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           caseIds: [mockCases[0].id, mockCases[1].id],
         })
@@ -989,7 +1002,9 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('does not throw error when tags array is empty', async () => {
@@ -1194,7 +1209,9 @@ describe('update', () => {
           customFields: defaultCustomFieldsConfiguration,
         },
       ]);
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('can update customFields', async () => {
@@ -1584,7 +1601,7 @@ describe('update', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      clientArgsMock.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+      clientArgsMock.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
     });
@@ -1804,7 +1821,7 @@ describe('update', () => {
           per_page: 10,
           page: 1,
         });
-        clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
           new Map()
         );
       });
@@ -1892,6 +1909,52 @@ describe('update', () => {
           `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized"`
         );
       });
+    });
+  });
+
+  describe('Metrics', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: mockCases,
+      });
+
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+    });
+
+    it('calculates metrics correctly', async () => {
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+      expect(updatedAttributes.time_to_acknowledge).toEqual(expect.any(Number));
+      expect(updatedAttributes.time_to_investigate).toEqual(expect.any(Number));
+      expect(updatedAttributes.time_to_resolve).toEqual(expect.any(Number));
     });
   });
 });

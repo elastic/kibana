@@ -7,13 +7,14 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AppPluginStartDependencies } from './types';
+import type { AppPluginStartDependencies } from './types';
+import { QueryRulesetDetailsForm } from './providers/query_ruleset_details_form';
 
 const queryClient = new QueryClient({});
 export const renderApp = async (
@@ -27,11 +28,13 @@ export const renderApp = async (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
-          <QueryClientProvider client={queryClient}>
-            <Router history={services.history}>
-              <QueryRulesRouter />
-            </Router>
-          </QueryClientProvider>
+          <QueryRulesetDetailsForm>
+            <QueryClientProvider client={queryClient}>
+              <Router history={services.history}>
+                <QueryRulesRouter />
+              </Router>
+            </QueryClientProvider>
+          </QueryRulesetDetailsForm>
         </I18nProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,

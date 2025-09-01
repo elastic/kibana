@@ -68,11 +68,11 @@ import type { BaseHit, SearchTypes } from '../../../../../common/detection_engin
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
-  BaseFieldsLatest,
+  DetectionAlertLatest,
   DetectionAlert,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
@@ -427,7 +427,13 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
+    return {
+      tuples,
+      remainingGap: moment.duration(0),
+      warningStatusMessage,
+      originalFrom,
+      originalTo,
+    };
   }
 
   const gap = getGapBetweenRuns({
@@ -469,6 +475,8 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    originalFrom,
+    originalTo,
   };
 };
 
@@ -672,7 +680,7 @@ export const addToSearchAfterReturn = ({
   next,
 }: {
   current: SearchAfterAndBulkCreateReturnType;
-  next: Omit<GenericBulkCreateResponse<BaseFieldsLatest>, 'alertsWereTruncated'>;
+  next: Omit<GenericBulkCreateResponse<DetectionAlertLatest>, 'alertsWereTruncated'>;
 }) => {
   current.success = current.success && next.success;
   current.createdSignalsCount += next.createdItemsCount;
@@ -899,16 +907,16 @@ export type RuleWithInMemorySuppression =
 
 export interface SequenceSuppressionTermsAndFieldsParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
-  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
-  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  shellAlert: WrappedAlert<EqlShellAlertLatest>;
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 }
 
 export type SequenceSuppressionTermsAndFieldsFactory = (
   shellAlert: WrappedEqlShellOptionalSubAlertsType,
-  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>,
   buildReasonMessage: BuildReasonMessage
-) => WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
-  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+) => WrappedAlert<EqlShellAlertLatest & SuppressionFieldsLatest> & {
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 };
 
 /**
@@ -929,10 +937,10 @@ export const buildShellAlertSuppressionTermsAndFields = ({
   sharedParams,
   shellAlert,
   buildingBlockAlerts,
-}: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
-  EqlShellFieldsLatest & SuppressionFieldsLatest
+}: SequenceSuppressionTermsAndFieldsParams): WrappedAlert<
+  EqlShellAlertLatest & SuppressionFieldsLatest
 > & {
-  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 } => {
   const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
     sharedParams;
@@ -969,12 +977,12 @@ export const buildShellAlertSuppressionTermsAndFields = ({
     [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
   };
 
-  merge<EqlShellFieldsLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
+  merge<EqlShellAlertLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
 
   return {
     _id: shellAlert._id,
     _index: shellAlert._index,
-    _source: shellAlert._source as EqlShellFieldsLatest & SuppressionFieldsLatest,
+    _source: shellAlert._source as EqlShellAlertLatest & SuppressionFieldsLatest,
     subAlerts: buildingBlockAlerts,
   };
 };

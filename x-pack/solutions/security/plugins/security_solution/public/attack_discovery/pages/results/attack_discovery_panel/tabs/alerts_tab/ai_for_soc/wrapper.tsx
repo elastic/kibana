@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import React, { memo, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { RUNTIME_FIELD_MAP } from '../../../../../../../detections/components/alert_summary/wrapper';
 import { Table } from './table';
+import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useFindRulesQuery } from '../../../../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useCreateDataView } from '../../../../../../../common/hooks/use_create_data_view';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../../../../common/constants';
 
 const DATAVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.aiForSocTableTab.dataViewError',
@@ -25,8 +26,6 @@ const DATAVIEW_ERROR = i18n.translate(
 export const ERROR_TEST_ID = 'attack-discovery-alert-error';
 export const SKELETON_TEST_ID = 'attack-discovery-alert-skeleton';
 export const CONTENT_TEST_ID = 'attack-discovery-alert-content';
-
-const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
 interface AiForSOCAlertsTabProps {
   /**
@@ -41,47 +40,23 @@ interface AiForSOCAlertsTabProps {
 
 /**
  * Component used in the Attack Discovery alerts table, only in the AI4DSOC tier.
- * It fetches rules, packages (integrations) and creates a local dataView.
+ * It fetches packages (integrations) and creates a local dataView.
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) => {
-  const { data } = useKibana().services;
-  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
-  const [dataViewLoading, setDataViewLoading] = useState<boolean>(true);
+  const spaceId = useSpaceId();
+  const dataViewSpec = useMemo(
+    () => ({
+      title: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+      runtimeFieldMap: RUNTIME_FIELD_MAP,
+    }),
+    [spaceId]
+  );
+
+  const { dataView, loading: dataViewLoading } = useCreateDataView({ dataViewSpec });
 
   // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
-
-  // Fetch all rules. For the AI for SOC effort, there should only be one rule per integration (which means for now 5-6 rules total)
-  const { data: ruleData, isLoading: ruleIsLoading } = useFindRulesQuery({});
-  const ruleResponse = useMemo(
-    () => ({
-      rules: ruleData?.rules || [],
-      isLoading: ruleIsLoading,
-    }),
-    [ruleData, ruleIsLoading]
-  );
-
-  useEffect(() => {
-    let dv: DataView;
-    const createDataView = async () => {
-      try {
-        dv = await data.dataViews.create(dataViewSpec);
-        setDataView(dv);
-        setDataViewLoading(false);
-      } catch (err) {
-        setDataViewLoading(false);
-      }
-    };
-    createDataView();
-
-    // clearing after leaving the page
-    return () => {
-      if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv.id);
-      }
-    };
-  }, [data.dataViews]);
 
   return (
     <EuiSkeletonRectangle
@@ -100,13 +75,7 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
           />
         ) : (
           <div data-test-subj={CONTENT_TEST_ID}>
-            <Table
-              dataView={dataView}
-              id={id}
-              packages={installedPackages}
-              query={query}
-              ruleResponse={ruleResponse}
-            />
+            <Table dataView={dataView} id={id} packages={installedPackages} query={query} />
           </div>
         )}
       </>

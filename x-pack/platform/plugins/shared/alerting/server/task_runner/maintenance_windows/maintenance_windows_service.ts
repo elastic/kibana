@@ -61,11 +61,11 @@ export class MaintenanceWindowsService {
 
     // Filter maintenance windows on current time
     const now = Date.now();
-    const currentlyActiveMaintenanceWindows = activeMaintenanceWindows.filter((mw) => {
-      return mw.events.some((event) => {
-        return new Date(event.gte).getTime() <= now && new Date(event.lte).getTime;
-      });
-    });
+    const currentlyActiveMaintenanceWindows = activeMaintenanceWindows.filter((mw) =>
+      mw.events.some(
+        (event) => new Date(event.gte).getTime() <= now && now <= new Date(event.lte).getTime()
+      )
+    );
 
     // Only look at maintenance windows for this rule category
     const maintenanceWindows = currentlyActiveMaintenanceWindows.filter(({ categoryIds }) => {

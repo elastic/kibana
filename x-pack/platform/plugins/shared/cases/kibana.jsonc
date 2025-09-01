@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/cases-plugin",
   "owner": [
-    "@elastic/response-ops"
+    "@elastic/kibana-cases"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -39,7 +39,8 @@
       "taskManager",
       "usageCollection",
       "spaces",
-      "serverless"
+      "serverless",
+      "inference"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -48,7 +49,8 @@
       "savedObjectsFinder"
     ],
     "extraPublicDirs": [
-      "common"
+      "common",
+      "public/client/attachment_framework/types"
     ]
   }
 }

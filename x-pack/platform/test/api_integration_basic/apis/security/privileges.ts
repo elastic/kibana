@@ -7,7 +7,8 @@
 
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { diff } from 'jest-diff';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -42,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
             observabilityCasesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCasesV3: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+            onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -55,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             siemV2: ['all', 'read', 'minimal_all', 'minimal_read'],
+            siemV3: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -76,15 +79,20 @@ export default function ({ getService }: FtrProviderContext) {
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
             aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
-            inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
-            entityManager: ['all', 'read', 'minimal_all', 'minimal_read'],
+            manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: [
+            'fleet-setup',
+            'ml_user',
+            'ml_admin',
+            'ml_apm_user',
+            'monitoring',
+            'reporting_user',
+          ],
         };
 
         await supertest
@@ -185,6 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
               'cases_assign',
             ],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+            onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -235,6 +244,35 @@ export default function ({ getService }: FtrProviderContext) {
               'actions_log_management_all',
               'actions_log_management_read',
               'all',
+              'global_artifact_management_all',
+              'blocklist_all',
+              'blocklist_read',
+              'endpoint_list_all',
+              'endpoint_list_read',
+              'event_filters_all',
+              'event_filters_read',
+              'host_isolation_all',
+              'host_isolation_exceptions_all',
+              'host_isolation_exceptions_read',
+              'minimal_all',
+              'minimal_read',
+              'policy_management_all',
+              'policy_management_read',
+              'process_operations_all',
+              'read',
+              'trusted_applications_all',
+              'trusted_applications_read',
+              'file_operations_all',
+              'execute_operations_all',
+              'scan_operations_all',
+              'workflow_insights_all',
+              'workflow_insights_read',
+            ],
+            siemV3: [
+              'actions_log_management_all',
+              'actions_log_management_read',
+              'all',
+              'global_artifact_management_all',
               'blocklist_all',
               'blocklist_read',
               'endpoint_list_all',
@@ -309,7 +347,15 @@ export default function ({ getService }: FtrProviderContext) {
             securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
-            dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
+            dataQuality: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'manage_rules',
+              'manage_alerts',
+            ],
+            manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
             apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
             discover: [
               'all',
@@ -379,15 +425,21 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'allFlappingSettings',
               'readFlappingSettings',
+              'allAlertDeleteSettings',
+              'readAlertDeleteSettings',
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
             aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
-            inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
-            entityManager: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
-          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: [
+            'fleet-setup',
+            'ml_user',
+            'ml_admin',
+            'ml_apm_user',
+            'monitoring',
+            'reporting_user',
+          ],
         };
 
         await supertest
@@ -396,13 +448,22 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200)
           .expect((res: any) => {
+            let errorPointerMessage = '';
             // when comparing privileges, the order of the privileges doesn't matter.
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
             const success = isEqualWith(res.body, expected, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
-                return isEqual(value.sort(), other.sort());
+                const isArrayEqual = isEqual(value.sort(), other.sort());
+
+                if (!isArrayEqual) {
+                  errorPointerMessage = `Received value for property [${String(
+                    key
+                  )}] does not match expected value:\n${diff(other, value)}`;
+                }
+
+                return isArrayEqual;
               }
 
               // Lodash types aren't correct, `undefined` should be supported as a return value here and it
@@ -412,7 +473,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             if (!success) {
               throw new Error(
-                `Expected ${util.inspect(res.body)} to equal ${util.inspect(expected)}`
+                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''}Expected ${util.inspect(
+                  res.body
+                )} to equal ${util.inspect(expected)}`
               );
             }
           })

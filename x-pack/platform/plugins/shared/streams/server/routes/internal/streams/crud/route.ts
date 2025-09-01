@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
-import { estypes } from '@elastic/elasticsearch';
-import { Streams, UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
-  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
+  effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
 }
 
@@ -33,11 +35,19 @@ export const listStreamsRoute = createServerRoute({
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const streams = await streamsClient.listStreamsWithDataStreamExistence();
-    const dataStreams = await scopedClusterClient.asCurrentUser.indices.getDataStream({
-      name: streams.filter(({ exists }) => exists).map(({ stream }) => stream.name),
-    });
+
+    const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
+
+    const dataStreams = await processAsyncInChunks(streamNames, (streamNamesChunk) =>
+      scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk })
+    );
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
+      if (Streams.GroupStream.Definition.is(stream)) {
+        acc.push({ stream });
+        return acc;
+      }
+
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
       acc.push({
         stream,
@@ -78,12 +88,17 @@ export const streamDetailRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
 
-    const indexPattern = Streams.GroupStream.Definition.is(streamEntity)
-      ? streamEntity.group.members.join(',')
-      : streamEntity.name;
+    if (Streams.GroupStream.Definition.is(streamEntity)) {
+      return {
+        details: {
+          count: 0,
+        },
+      };
+    }
+
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-      index: indexPattern,
+      index: streamEntity.name,
       track_total_hits: true,
       ignore_unavailable: true,
       query: {

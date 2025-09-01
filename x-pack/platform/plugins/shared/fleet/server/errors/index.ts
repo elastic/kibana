@@ -75,6 +75,7 @@ export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}
 export class PackageAlreadyInstalledError extends FleetError {}
+export class PackageRollbackError extends FleetError {}
 
 export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
@@ -120,6 +121,13 @@ export class PackagePolicyRequestError extends FleetError {}
 export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
 export class PackagePolicyOutputError extends FleetError {}
 export class PackagePolicyContentPackageError extends FleetError {}
+export class CustomPackagePolicyNotAllowedForAgentlessError extends FleetError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because custom packages are not allowed to be deployed as agentless. Please choose a different deployment mode.`
+    );
+  }
+}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {

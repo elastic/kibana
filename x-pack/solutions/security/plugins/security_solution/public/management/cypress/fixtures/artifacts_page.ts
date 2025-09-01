@@ -21,7 +21,7 @@ interface FormEditingDescription {
 export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
-  tabId: string;
+  tabId: keyof typeof ENDPOINT_ARTIFACT_LISTS;
   nextTabId: string;
   artifactName: string;
   privilegePrefix: string;
@@ -42,6 +42,10 @@ export interface ArtifactsFixtureType {
     os_types: string[];
   };
 }
+
+export const getArtifactsListTestDataForArtifact = (
+  artifact: keyof typeof ENDPOINT_ARTIFACT_LISTS
+) => getArtifactsListTestsData().find(({ tabId }) => tabId === artifact) as ArtifactsFixtureType;
 
 export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
   {
@@ -502,6 +506,118 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
       ],
       os_types: ['windows', 'linux', 'macos'],
+    },
+  },
+  {
+    title: 'Trusted devices',
+    pagePrefix: 'trustedDevicesList',
+    tabId: 'trustedDevices',
+    nextTabId: 'trustedApps',
+    artifactName: 'Trusted device name',
+    privilegePrefix: 'trusted_devices_',
+    create: {
+      formActions: [
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-nameTextField',
+          value: 'Trusted device name',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-descriptionField',
+          value: 'This is the trusted device description',
+        },
+        {
+          type: 'click',
+          selector: 'trustedDevices-form-osSelectField',
+        },
+        {
+          type: 'click',
+          customSelector: '[role="option"]:contains("Windows and Mac")',
+        },
+        {
+          type: 'click',
+          selector: 'trustedDevices-form-fieldSelect',
+        },
+        {
+          type: 'click',
+          customSelector: '[role="option"]:contains("Username")',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-valueField',
+          value: 'test-user',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'trustedDevicesList-card-criteriaConditions',
+          value: ' OSIS Windows, MacAND user.nameIS test-user',
+        },
+      ],
+    },
+    update: {
+      formActions: [
+        {
+          type: 'clear',
+          selector: 'trustedDevices-form-nameTextField',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-nameTextField',
+          value: 'Trusted device name edited',
+        },
+        {
+          type: 'clear',
+          selector: 'trustedDevices-form-descriptionField',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-descriptionField',
+          value: 'This is the trusted device description edited',
+        },
+        {
+          type: 'clear',
+          selector: 'trustedDevices-form-valueField',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-valueField',
+          value: 'updated-user',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'trustedDevicesList-card-criteriaConditions',
+          value: ' OSIS Windows, MacAND user.nameIS test-user',
+        },
+        {
+          selector: 'trustedDevicesList-card-header-title',
+          value: 'Trusted device name edited',
+        },
+        {
+          selector: 'trustedDevicesList-card-description',
+          value: 'This is the trusted device description edited',
+        },
+      ],
+    },
+    delete: {
+      confirmSelector: 'trustedDevicesList-deleteModal-submitButton',
+      card: 'trustedDevicesList-card',
+    },
+    urlPath: 'trusted_devices',
+    emptyState: 'trustedDevicesList-emptyState',
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      entries: [
+        {
+          field: 'user.name',
+          operator: 'included',
+          type: 'match',
+          value: 'test-user',
+        },
+      ],
+      os_types: ['windows', 'macos'],
     },
   },
 ];

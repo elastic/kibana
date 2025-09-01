@@ -8,11 +8,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
+import type { DragEndEvent } from '@dnd-kit/core';
 import {
   DndContext,
-  DragEndEvent,
   DragOverlay,
   KeyboardSensor,
   MeasuringStrategy,
@@ -28,17 +28,15 @@ import {
 } from '@dnd-kit/sortable';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ControlsLabelPosition } from '@kbn/controls-schemas';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import type { ControlLabelPosition } from '../../../common';
 import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlsInOrder } from '../init_controls_manager';
+import type { ControlsInOrder } from '../init_controls_manager';
 import type { ControlGroupApi } from '../types';
 import { ControlClone } from './control_clone';
 import { ControlRenderer } from './control_renderer';
-
-import './control_group.scss';
 
 interface Props {
   applySelections: () => void;
@@ -49,7 +47,7 @@ interface Props {
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => void;
   };
   hasUnappliedSelections: boolean;
-  labelPosition: ControlLabelPosition;
+  labelPosition: ControlsLabelPosition;
 }
 
 export function ControlGroup({
@@ -119,9 +117,7 @@ export function ControlGroup({
 
   return (
     <EuiPanel
-      css={css`
-        display: ${isInitialized ? 'none' : 'default'};
-      `}
+      css={styles.panel}
       borderRadius="m"
       paddingSize="none"
       color={draggingId ? 'success' : 'transparent'}
@@ -147,7 +143,13 @@ export function ControlGroup({
             }}
           >
             <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-              <EuiFlexGroup className="controlGroup" alignItems="center" gutterSize="s" wrap={true}>
+              <EuiFlexGroup
+                component="ul"
+                className="controlGroup"
+                alignItems="center"
+                gutterSize="s"
+                wrap={true}
+              >
                 {controlsInOrder.map(({ id, type }) => (
                   <ControlRenderer
                     key={id}
@@ -174,7 +176,7 @@ export function ControlGroup({
           </DndContext>
         </EuiFlexItem>
         {!autoApplySelections && (
-          <EuiFlexItem grow={false} className="controlGroup--endButtonGroup">
+          <EuiFlexItem grow={false} css={styles.autoApply}>
             {hasUnappliedSelections ? (
               ApplyButtonComponent
             ) : (
@@ -188,3 +190,11 @@ export function ControlGroup({
     </EuiPanel>
   );
 }
+
+const styles = {
+  panel: css({
+    display: 'flex',
+    alignItems: 'center',
+  }),
+  autoApply: css({ alignSelf: 'end' }),
+};

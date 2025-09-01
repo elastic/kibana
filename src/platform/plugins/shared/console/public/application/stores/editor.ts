@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reducer } from 'react';
-import { produce } from 'immer';
-import { identity } from 'fp-ts/function';
-import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
-import { TextObject } from '../../../common/text_object';
+import type { Reducer } from 'react';
+import { cloneDeep } from 'lodash';
+import type { DevToolsSettings } from '../../services';
+import { DEFAULT_SETTINGS } from '../../services';
+import type { TextObject } from '../../../common/text_object';
 import { SHELL_TAB_ID } from '../containers/main/constants';
-import { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
-import { RequestToRestore } from '../../types';
+import type { MonacoEditorActionsProvider } from '../containers/editor/monaco_editor_actions_provider';
+import type { RequestToRestore } from '../../types';
 
 export interface Store {
   ready: boolean;
@@ -27,18 +27,15 @@ export interface Store {
   customParsedRequestsProvider?: (model: any) => any;
 }
 
-export const initialValue: Store = produce<Store>(
-  {
-    ready: false,
-    settings: DEFAULT_SETTINGS,
-    currentTextObject: null,
-    currentView: SHELL_TAB_ID,
-    restoreRequestFromHistory: null,
-    fileToImport: null,
-    customParsedRequestsProvider: undefined,
-  },
-  identity
-);
+export const initialValue: Store = {
+  ready: false,
+  settings: DEFAULT_SETTINGS,
+  currentTextObject: null,
+  currentView: SHELL_TAB_ID,
+  restoreRequestFromHistory: null,
+  fileToImport: null,
+  customParsedRequestsProvider: undefined,
+};
 
 export type Action =
   | { type: 'setInputEditor'; payload: MonacoEditorActionsProvider }
@@ -49,46 +46,47 @@ export type Action =
   | { type: 'clearRequestToRestore' }
   | { type: 'setFileToImport'; payload: string | null };
 
-export const reducer: Reducer<Store, Action> = (state, action) =>
-  produce<Store>(state, (draft) => {
-    if (action.type === 'setInputEditor') {
-      if (action.payload) {
-        draft.ready = true;
-      }
-      return;
-    }
+export const reducer: Reducer<Store, Action> = (state, action) => {
+  const draft = cloneDeep(state);
 
-    if (action.type === 'updateSettings') {
-      draft.settings = action.payload;
-      return;
+  if (action.type === 'setInputEditor') {
+    if (action.payload) {
+      draft.ready = true;
     }
-
-    if (action.type === 'setCurrentTextObject') {
-      draft.currentTextObject = action.payload;
-      return;
-    }
-
-    if (action.type === 'setRequestToRestore') {
-      // Store the request and change the current view to the shell
-      draft.restoreRequestFromHistory = action.payload;
-      draft.currentView = SHELL_TAB_ID;
-      return;
-    }
-
-    if (action.type === 'setCurrentView') {
-      draft.currentView = action.payload;
-      return;
-    }
-
-    if (action.type === 'clearRequestToRestore') {
-      draft.restoreRequestFromHistory = null;
-      return;
-    }
-
-    if (action.type === 'setFileToImport') {
-      draft.fileToImport = action.payload;
-      return;
-    }
-
     return draft;
-  });
+  }
+
+  if (action.type === 'updateSettings') {
+    draft.settings = action.payload;
+    return draft;
+  }
+
+  if (action.type === 'setCurrentTextObject') {
+    draft.currentTextObject = action.payload;
+    return draft;
+  }
+
+  if (action.type === 'setRequestToRestore') {
+    // Store the request and change the current view to the shell
+    draft.restoreRequestFromHistory = action.payload;
+    draft.currentView = SHELL_TAB_ID;
+    return draft;
+  }
+
+  if (action.type === 'setCurrentView') {
+    draft.currentView = action.payload;
+    return draft;
+  }
+
+  if (action.type === 'clearRequestToRestore') {
+    draft.restoreRequestFromHistory = null;
+    return draft;
+  }
+
+  if (action.type === 'setFileToImport') {
+    draft.fileToImport = action.payload;
+    return draft;
+  }
+
+  return state;
+};

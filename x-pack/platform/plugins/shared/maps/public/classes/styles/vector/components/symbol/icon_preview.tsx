@@ -17,7 +17,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap } from '@kbn/mapbox-gl';
+import { maplibregl } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../symbol_utils';
 
@@ -181,7 +182,7 @@ export class IconPreview extends Component<Props, State> {
                     {i18n.translate('xpack.maps.customIconModal.elementPreviewTitle', {
                       defaultMessage: 'Render preview',
                     })}{' '}
-                    <EuiIcon color="subdued" type="questionInCircle" />
+                    <EuiIcon color="subdued" type="question" />
                   </>
                 </EuiToolTip>
               </h4>

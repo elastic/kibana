@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  useEuiTheme,
 } from '@elastic/eui';
+import { useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { CustomFieldPanel } from './custom_field_panel';
 import * as i18n from '../translations';
-import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
+import { StyledContextMenu } from '../styles';
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
@@ -28,6 +30,11 @@ export interface GroupSelectorProps {
   options: Array<{ key: string; label: string }>;
   title?: string;
   maxGroupingLevels?: number;
+  onOpenTracker?: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
 }
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
@@ -37,6 +44,7 @@ const GroupSelectorComponent = ({
   options,
   title = i18n.GROUP_BY,
   maxGroupingLevels = 1,
+  onOpenTracker,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isGroupSelected = useCallback(
@@ -108,7 +116,16 @@ const GroupSelectorComponent = ({
     [isGroupSelected, options]
   );
 
-  const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
+  const onButtonClick = useCallback(() => {
+    setIsPopoverOpen((currentVal) => {
+      const nextVal = !currentVal;
+      // Only tracks opening of Group by popup menu, not closing it
+      if (nextVal && onOpenTracker) {
+        onOpenTracker(METRIC_TYPE.CLICK, 'group_by_opened');
+      }
+      return nextVal;
+    });
+  }, [onOpenTracker]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const button = useMemo(() => {
@@ -123,7 +140,7 @@ const GroupSelectorComponent = ({
           return optionsTitle ? [optionsTitle, selection.label].join(', ') : selection.label;
         }, '');
     return (
-      <StyledEuiButtonEmpty
+      <EuiButtonEmpty
         data-test-subj="group-selector-dropdown"
         flush="both"
         iconSide="right"
@@ -134,7 +151,7 @@ const GroupSelectorComponent = ({
         size="xs"
       >
         {`${title}: ${buttonLabel}`}
-      </StyledEuiButtonEmpty>
+      </EuiButtonEmpty>
     );
   }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title]);
 

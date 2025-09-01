@@ -9,7 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { NumeralFormat } from './numeral';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 /** @public */
@@ -26,6 +27,7 @@ export class PercentFormat extends NumeralFormat {
   getParamDefaults = () => ({
     pattern: this.getConfig!(FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN),
     fractional: true,
+    alwaysShowSign: false,
   });
 
   textConvert: TextContextTypeConvert = (val: string | number) => {

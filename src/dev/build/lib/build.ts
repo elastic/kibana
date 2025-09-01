@@ -9,14 +9,15 @@
 
 import chalk from 'chalk';
 
-import { Config } from './config';
-import { Platform } from './platform';
+import type { Config } from './config';
+import type { Platform } from './platform';
 
 export class Build {
+  private buildDesc: string = '';
   private name = 'kibana';
   private logTag = chalk`{cyan [  kibana  ]}`;
 
-  constructor(private config: Config) {}
+  constructor(private config: Config, private bufferLogs = false) {}
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);
@@ -24,10 +25,11 @@ export class Build {
 
   resolvePathForPlatform(platform: Platform, ...args: string[]) {
     const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
+    const solution = platform.getSolution() ? `-${platform.getSolution()}` : '';
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana${variant}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `kibana${variant}${solution}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
@@ -35,14 +37,19 @@ export class Build {
   getPlatformArchivePath(platform: Platform) {
     const ext = platform.isWindows() ? 'zip' : 'tar.gz';
     const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
+    const solution = platform.getSolution() ? `-${platform.getSolution()}` : '';
     return this.config.resolveFromRepo(
       'target',
-      `${this.name}${variant}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
+      `${
+        this.name
+      }${variant}${solution}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 
-  getRootDirectory() {
-    return `${this.name}-${this.config.getBuildVersion()}`;
+  getRootDirectory(platform: Platform) {
+    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
+    const solution = platform.getSolution() ? `-${platform.getSolution()}` : '';
+    return `${this.name}${variant}${solution}-${this.config.getBuildVersion()}`;
   }
 
   getName() {
@@ -51,5 +58,17 @@ export class Build {
 
   getLogTag() {
     return this.logTag;
+  }
+
+  getBufferLogs() {
+    return this.bufferLogs;
+  }
+
+  setBuildDesc(desc: string) {
+    this.buildDesc = desc;
+  }
+
+  getBuildDesc() {
+    return this.buildDesc;
   }
 }

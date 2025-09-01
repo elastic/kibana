@@ -8,14 +8,16 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
+import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
-import { ServiceManager } from './services';
+import { registerUISettings } from './ui_settings';
 
 export class OnechatPlugin
   implements
@@ -40,13 +42,20 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const serviceSetups = this.serviceManager.setupServices();
+    const serviceSetups = this.serviceManager.setupServices({
+      logger: this.logger.get('services'),
+    });
+
+    registerFeatures({ features: pluginsSetup.features });
+
+    registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
+      pluginsSetup,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -65,30 +74,27 @@ export class OnechatPlugin
 
   start(
     { elasticsearch, security }: CoreStart,
-    { actions, inference }: OnechatStartDependencies
+    { inference }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
-      actions,
       inference,
     });
 
-    const { tools, runnerFactory } = startServices;
+    const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
       tools: {
-        registry: tools.registry.asPublicRegistry(),
+        getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
-        asScoped: ({ request }) => {
-          return {
-            registry: tools.registry.asScopedPublicRegistry({ request }),
-            execute: (args) => {
-              return runner.runTool({ ...args, request });
-            },
-          };
+      },
+      agents: {
+        getScopedClient: (args) => agents.getScopedClient(args),
+        execute: async (args) => {
+          return agents.execute(args);
         },
       },
     };

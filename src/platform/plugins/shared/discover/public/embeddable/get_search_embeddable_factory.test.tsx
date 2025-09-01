@@ -24,6 +24,7 @@ import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -204,7 +205,7 @@ describe('saved search embeddable', () => {
     beforeAll(() => {
       jest
         .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
-        .mockReturnValue(new BehaviorSubject('test'));
+        .mockReturnValue(new BehaviorSubject('test' as unknown as SolutionId));
     });
 
     afterAll(() => {
@@ -254,10 +255,18 @@ describe('saved search embeddable', () => {
     });
 
     it('should resolve data source profile when fetching', async () => {
+      const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager(
+        {
+          scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+        }
+      );
       const resolveDataSourceProfileSpy = jest.spyOn(
-        discoverServiceMock.profilesManager,
+        scopedProfilesManager,
         'resolveDataSourceProfile'
       );
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
         initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState

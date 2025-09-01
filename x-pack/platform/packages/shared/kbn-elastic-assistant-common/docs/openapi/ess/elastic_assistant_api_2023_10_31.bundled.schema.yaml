@@ -201,11 +201,39 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: >-
+            If true, additionally fetch all anonymization fields, otherwise
+            fetch only the provided page
+          in: query
+          name: all_data
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               example:
+                aggregations:
+                  anonymized:
+                    buckets:
+                      allowed:
+                        doc_count: 1
+                      anonymized:
+                        doc_count: 1
+                      denied:
+                        doc_count: 1
+                all:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
@@ -223,6 +251,37 @@ paths:
               schema:
                 type: object
                 properties:
+                  aggregations:
+                    type: object
+                    properties:
+                      field_status:
+                        type: object
+                        properties:
+                          buckets:
+                            type: object
+                            properties:
+                              allowed:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              anonymized:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              denied:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                  all:
+                    items:
+                      $ref: '#/components/schemas/AnonymizationFieldResponse'
+                    type: array
                   data:
                     items:
                       $ref: '#/components/schemas/AnonymizationFieldResponse'
@@ -329,6 +388,66 @@ paths:
         - Security AI Assistant API
         - Chat Complete API
   /api/security_ai_assistant/current_user/conversations:
+    delete:
+      description: This endpoint allows users to permanently delete all conversations.
+      operationId: DeleteAllConversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludedIds:
+                  description: Optional list of conversation IDs to delete.
+                  example:
+                    - abc123
+                    - def456
+                  items:
+                    type: string
+                  type: array
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                success: true
+              schema:
+                type: object
+                properties:
+                  failures:
+                    items:
+                      type: string
+                    type: array
+                  success:
+                    example: true
+                    type: boolean
+                  totalDeleted:
+                    example: 10
+                    type: number
+          description: >-
+            Indicates a successful call. The conversations were deleted
+            successfully.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    example: Bad Request
+                    type: string
+                  message:
+                    example: Invalid conversation ID
+                    type: string
+                  statusCode:
+                    example: 400
+                    type: number
+          description: Generic Error. This response indicates an issue with the request.
+      summary: Delete conversations
+      tags:
+        - Security AI Assistant API
+        - Conversation API
     post:
       description: >-
         Create a new Security AI Assistant conversation. This endpoint allows
@@ -469,6 +588,16 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: >-
+            Whether to return conversations that the current user owns. If true,
+            only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
@@ -1840,14 +1969,6 @@ components:
         - insights
       example: assistant
       type: string
-    ConversationConfidence:
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: high
-      type: string
     ConversationCreateProps:
       type: object
       properties:
@@ -1892,6 +2013,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -1908,8 +2032,6 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Replacements'
-        summary:
-          $ref: '#/components/schemas/ConversationSummary'
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
         title:
@@ -1928,32 +2050,10 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
-    ConversationSummary:
-      type: object
-      properties:
-        confidence:
-          $ref: '#/components/schemas/ConversationConfidence'
-          description: >-
-            How confident you are about this being a correct and useful
-            learning.
-          example: high
-        content:
-          description: Summary text of the conversation over time.
-          example: >-
-            This conversation covered how to configure the Security AI
-            Assistant.
-          type: string
-        public:
-          description: Define if summary is marked as publicly available.
-          example: true
-          type: boolean
-        timestamp:
-          $ref: '#/components/schemas/NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
     ConversationUpdateProps:
       type: object
       properties:
@@ -1976,12 +2076,14 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Replacements'
-        summary:
-          $ref: '#/components/schemas/ConversationSummary'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
       required:
         - id
     DeleteResponseFields:
@@ -2591,6 +2693,7 @@ components:
         'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
@@ -2610,6 +2713,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false
@@ -2631,6 +2737,9 @@ components:
         traceData:
           $ref: '#/components/schemas/TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content

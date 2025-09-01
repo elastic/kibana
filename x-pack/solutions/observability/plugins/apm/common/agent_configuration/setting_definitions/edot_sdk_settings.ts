@@ -21,15 +21,13 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.edot.deactivate_instrumentations.description',
       {
         defaultMessage:
-          'Comma-separated list of modules to disable instrumentation for.\n' +
-          'When instrumentation is disabled for a module, no spans will be collected for that module.\n' +
-          '\n' +
-          'The up-to-date list of modules for which instrumentation can be disabled is language specific ' +
-          'and can be found under the following links: ' +
-          '[opentelemetry/java/elastic](https://ela.st/otel-agent-instructions)',
+          'Comma-separated list of instrumentation names to disable. When an instrumentation is disabled, no telemetry will be collected for the library/module it instruments. ' +
+          'The list of supported instrumentation names is language specific:\n' +
+          '- [EDOT Java](https://ela.st/otel-agent-instructions): for example "akka-http,grpc"\n' +
+          '- [EDOT Node.js](https://ela.st/edot-node-disable-instrs): for example "net,dns,http"',
       }
     ),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'deactivate_all_instrumentations',
@@ -41,10 +39,10 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     description: i18n.translate(
       'xpack.apm.agentConfig.edot.deactivate_all_instrumentations.description',
       {
-        defaultMessage: 'No spans will be collected for any instrumentation modules.\n' + '\n',
+        defaultMessage: 'No spans will be collected for any instrumentation modules.',
       }
     ),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'logging_level',
@@ -55,7 +53,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       defaultMessage: 'Logging level',
     }),
     description: i18n.translate('xpack.apm.agentConfig.loggingLevel.description', {
-      defaultMessage: 'Sets the logging level for the agent',
+      defaultMessage: 'Sets the logging level for the agent.',
     }),
     options: [
       { text: 'trace', value: 'trace' },
@@ -66,7 +64,43 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       { text: 'fatal', value: 'fatal' },
       { text: 'off', value: 'off' },
     ],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/python/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/dotnet/elastic',
+    ],
+  },
+  {
+    key: 'opamp_polling_interval',
+    type: 'duration',
+    defaultValue: '30s',
+    min: '1s',
+    label: i18n.translate('xpack.apm.agentConfig.pollingInterval.label', {
+      defaultMessage: 'OpAMP HTTP polling interval',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.pollingInterval.description', {
+      defaultMessage:
+        'The default interval between checking the collector for new changes to config.\n' +
+        'Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery.',
+    }),
     includeAgents: ['opentelemetry/java/elastic'],
+  },
+  {
+    key: 'sampling_rate',
+    type: 'float',
+    defaultValue: '1.0',
+    label: i18n.translate('xpack.apm.agentConfig.samplingRate.label', {
+      defaultMessage: 'Sampling rate',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.samplingRate.description', {
+      defaultMessage:
+        'By default, the agent will sample every span in every trace (e.g. request to your service). ' +
+        'To reduce overhead and storage requirements, you can set the sampling rate to a value between 0.0 and 1.0. ' +
+        'Further details can be found in the [OpenTelemetry Sampling Concepts](https://opentelemetry.io/docs/concepts/sampling/) page.',
+    }),
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/python/elastic'],
   },
   {
     key: 'send_traces',

@@ -14,7 +14,6 @@ import {
   toCellActionContext,
   useAdditionalCellActions,
 } from './use_additional_cell_actions';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import React from 'react';
 import { createEsqlDataSource } from '../../../common/data_sources';
@@ -30,11 +29,16 @@ import {
   type DiscoverCellActionExecutionContext,
 } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { type ScopedProfilesManager } from '../profiles_manager';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { v4 as uuidv4 } from 'uuid';
+import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 
+let mockScopedProfilesManager: ScopedProfilesManager;
+let mockScopedEbtManager: ScopedDiscoverEBTManager;
 let mockUuid = 0;
 
-jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => (++mockUuid).toString() }));
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: jest.fn() }));
 
 const mockActions: Array<ActionDefinition<DiscoverCellActionExecutionContext>> = [];
 const mockTriggerActions: Record<string, string[]> = { [DISCOVER_CELL_ACTIONS_TRIGGER.id]: [] };
@@ -79,18 +83,31 @@ describe('useAdditionalCellActions', () => {
     return renderHook(useAdditionalCellActions, {
       initialProps,
       wrapper: ({ children }) => (
-        <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
+        <DiscoverTestProvider
+          services={discoverServiceMock}
+          scopedProfilesManager={mockScopedProfilesManager}
+          scopedEbtManager={mockScopedEbtManager}
+        >
+          {children}
+        </DiscoverTestProvider>
       ),
     });
   };
 
   beforeEach(() => {
-    discoverServiceMock.profilesManager = createContextAwarenessMocks().profilesManagerMock;
+    (uuidv4 as jest.Mock).mockImplementation(jest.requireActual('uuid').v4);
+    const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
+    discoverServiceMock.profilesManager = profilesManagerMock;
+    mockScopedEbtManager = scopedEbtManagerMock;
+    mockScopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
+      scopedEbtManager: mockScopedEbtManager,
+    });
+    (uuidv4 as jest.Mock).mockImplementation(() => (++mockUuid).toString());
   });
 
   afterEach(() => {
-    mockUuid = 0;
     jest.clearAllMocks();
+    mockUuid = 0;
   });
 
   it('should return metadata', async () => {
@@ -108,7 +125,7 @@ describe('useAdditionalCellActions', () => {
     expect(result.current.instanceId).toEqual('1');
     expect(mockActions).toHaveLength(1);
     expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['root-action-2']);
-    await act(() => discoverServiceMock.profilesManager.resolveDataSourceProfile({}));
+    await act(() => mockScopedProfilesManager.resolveDataSourceProfile({}));
     rerender(initialProps);
     expect(result.current.instanceId).toEqual('3');
     expect(mockActions).toHaveLength(2);
@@ -237,12 +254,12 @@ describe('createCellAction', () => {
         ...context,
         data: [
           {
-            field: new DataViewField({
-              name: 'test',
-              type: 'string',
-              aggregatable: true,
-              searchable: true,
-            }),
+            field: {
+              name: '',
+              type: '',
+              aggregatable: false,
+              searchable: false,
+            },
           },
         ],
         metadata: { instanceId: 'test', dataView: dataViewWithTimefieldMock },

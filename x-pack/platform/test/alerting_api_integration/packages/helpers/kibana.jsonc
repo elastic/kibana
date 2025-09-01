@@ -1,0 +1,10 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/alerting-api-integration-helpers",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

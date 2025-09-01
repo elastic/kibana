@@ -16,10 +16,8 @@ import {
   GetAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { convertAlertingRuleToSchedule } from './utils/convert_alerting_rule_to_schedule';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { performChecks } from '../../helpers';
-import { isFeatureAvailable } from './utils/is_feature_available';
 
 export const getAttackDiscoverySchedulesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -60,11 +58,6 @@ export const getAttackDiscoverySchedulesRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        // Check if scheduling feature available
-        if (!(await isFeatureAvailable(ctx))) {
-          return response.notFound();
-        }
-
         // Perform license and authenticated user
         const checkResponse = await performChecks({
           context: ctx,
@@ -87,9 +80,7 @@ export const getAttackDiscoverySchedulesRoute = (
             });
           }
 
-          const alertingRule = await dataClient.getSchedule(id);
-
-          const schedule = convertAlertingRuleToSchedule(alertingRule);
+          const schedule = await dataClient.getSchedule(id);
 
           return response.ok({ body: schedule });
         } catch (err) {

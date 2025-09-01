@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import moment, { unitOfTime } from 'moment';
+import type { FC } from 'react';
+import React from 'react';
+import type { unitOfTime } from 'moment';
+import moment from 'moment';
 
-import {
+import type {
   TooltipValue,
-  RectAnnotation,
   RectAnnotationDatum,
   RectAnnotationStyle,
   AnnotationTooltipFormatter,
 } from '@elastic/charts';
+import { RectAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { euiLightVars as lightEuiTheme, euiDarkVars as darkEuiTheme } from '@kbn/ui-theme';
@@ -154,7 +156,7 @@ const Prompt: AnnotationTooltipFormatter = () => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs" css={headerPartialCss}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="iInCircle" />
+        <EuiIcon type="info" />
       </EuiFlexItem>
       <EuiFlexItem>{partialDataText}</EuiFlexItem>
     </EuiFlexGroup>

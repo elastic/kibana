@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OpenTelemetryAgentName } from '../../types/agent_names';
+import type { OpenTelemetryAgentName } from '../../types/agent_names';
 import { Entity } from '../entity';
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 import { Instance } from './instance';
-import { OtelService, OtelServiceParams } from './otel';
+import type { OtelServiceParams } from './otel';
+import { OtelService } from './otel';
 
 export class Service extends Entity<ApmFields> {
   instance(instanceName: string) {
@@ -30,7 +31,7 @@ export function service(
 ): Service;
 
 export function service(
-  options: { name: string; environment: string } & (
+  options: { name: string; environment: string; agentVersion?: string } & (
     | { agentName: string }
     | { agentName: OpenTelemetryAgentName }
   )
@@ -38,16 +39,28 @@ export function service(
 
 export function service(
   ...args:
-    | [{ name: string; environment: string; agentName: string | OpenTelemetryAgentName }]
+    | [
+        {
+          name: string;
+          environment: string;
+          agentName: string | OpenTelemetryAgentName;
+          agentVersion?: string;
+        }
+      ]
     | [string, string, string]
 ) {
-  const [serviceName, environment, agentName] =
-    args.length === 1 ? [args[0].name, args[0].environment, args[0].agentName] : args;
+  const [serviceName, environment, agentName, agentVersion] =
+    args.length === 1
+      ? [args[0].name, args[0].environment, args[0].agentName, args[0].agentVersion]
+      : args;
 
   return new Service({
     'service.name': serviceName,
     'service.environment': environment,
     'agent.name': agentName,
+    ...(agentVersion && {
+      'agent.version': agentVersion,
+    }),
   });
 }
 

@@ -8,8 +8,9 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
 import {
@@ -142,10 +143,10 @@ export const createStateService = (
     currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
-    topPanelHeight: initialTopPanelHeight,
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     ...initialState,
+    topPanelHeight: initialState?.topPanelHeight ?? initialTopPanelHeight,
   });
 
   const updateState = (stateUpdate: Partial<UnifiedHistogramState>) => {

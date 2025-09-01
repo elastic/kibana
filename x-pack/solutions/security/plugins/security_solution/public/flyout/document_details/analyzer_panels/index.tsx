@@ -52,7 +52,7 @@ export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentI
 
   return (
     <FlyoutBody>
-      <div style={{ marginTop: '-15px' }}>
+      <div css={{ marginTop: '-15px' }}>
         <DetailsPanel
           resolverComponentInstanceID={resolverComponentInstanceID}
           nodeEventOnClick={openPreview}

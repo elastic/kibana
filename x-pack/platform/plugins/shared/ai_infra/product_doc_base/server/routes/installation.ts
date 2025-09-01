@@ -7,15 +7,20 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
-import {
-  INSTALLATION_STATUS_API_PATH,
-  INSTALL_ALL_API_PATH,
-  UNINSTALL_ALL_API_PATH,
+import { schema } from '@kbn/config-schema';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type {
   InstallationStatusResponse,
   PerformInstallResponse,
   UninstallResponse,
 } from '../../common/http_api/installation';
+import {
+  INSTALLATION_STATUS_API_PATH,
+  INSTALL_ALL_API_PATH,
+  UNINSTALL_ALL_API_PATH,
+} from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
+import type { ProductInstallState } from '../../common/install_status';
 
 export const registerInstallationRoutes = ({
   router,
@@ -27,7 +32,11 @@ export const registerInstallationRoutes = ({
   router.get(
     {
       path: INSTALLATION_STATUS_API_PATH,
-      validate: false,
+      validate: {
+        query: schema.object({
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+        }),
+      },
       options: {
         access: 'internal',
       },
@@ -39,11 +48,17 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { installClient, documentationManager } = getServices();
-      const installStatus = await installClient.getInstallationStatus();
-      const { status: overallStatus } = await documentationManager.getStatus();
+      const inferenceId = req.query?.inferenceId;
+      const installStatus = await installClient.getInstallationStatus({
+        inferenceId,
+      });
+      const { status: overallStatus } = await documentationManager.getStatus({
+        inferenceId,
+      });
 
       return res.ok<InstallationStatusResponse>({
         body: {
+          inferenceId,
           perProducts: installStatus,
           overall: overallStatus,
         },
@@ -54,7 +69,11 @@ export const registerInstallationRoutes = ({
   router.post(
     {
       path: INSTALL_ALL_API_PATH,
-      validate: false,
+      validate: {
+        body: schema.object({
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+        }),
+      },
       options: {
         access: 'internal',
         timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
@@ -68,18 +87,33 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const { documentationManager } = getServices();
 
+      const inferenceId = req.body?.inferenceId;
+
       await documentationManager.install({
         request: req,
         force: false,
         wait: true,
+        inferenceId,
       });
 
       // check status after installation in case of failure
-      const { status } = await documentationManager.getStatus();
+      const { status, installStatus } = await documentationManager.getStatus({
+        inferenceId,
+      });
 
+      let failureReason = null;
+      if (status === 'error' && installStatus) {
+        failureReason = Object.values(installStatus)
+          .filter(
+            (product: ProductInstallState) => product.status === 'error' && product.failureReason
+          )
+          .map((product: ProductInstallState) => product.failureReason)
+          .join('\n');
+      }
       return res.ok<PerformInstallResponse>({
         body: {
           installed: status === 'installed',
+          ...(failureReason ? { failureReason } : {}),
         },
       });
     }
@@ -88,7 +122,11 @@ export const registerInstallationRoutes = ({
   router.post(
     {
       path: UNINSTALL_ALL_API_PATH,
-      validate: false,
+      validate: {
+        body: schema.object({
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+        }),
+      },
       options: {
         access: 'internal',
       },
@@ -104,6 +142,7 @@ export const registerInstallationRoutes = ({
       await documentationManager.uninstall({
         request: req,
         wait: true,
+        inferenceId: req.body?.inferenceId,
       });
 
       return res.ok<UninstallResponse>({

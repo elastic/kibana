@@ -40,7 +40,7 @@ export const SaveTimelineCallout = memo(() => {
     <EuiCallOut
       title={SAVE_TIMELINE_CALLOUT_TITLE}
       color="danger"
-      iconType="iInCircle"
+      iconType="info"
       data-test-subj={SAVE_TIMELINE_CALLOUT_TEST_ID}
       css={css`
         margin-left: 50px;

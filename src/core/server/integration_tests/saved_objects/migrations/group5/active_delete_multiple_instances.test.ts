@@ -23,8 +23,8 @@ import {
   getUpToDateMigratorTestKit,
 } from '../kibana_migrator_test_kit.fixtures';
 import {
-  BASELINE_TEST_ARCHIVE_500K,
-  BASELINE_DOCUMENTS_PER_TYPE_500K,
+  BASELINE_TEST_ARCHIVE_LARGE,
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE,
 } from '../kibana_migrator_archive_utils';
 
 const PARALLEL_MIGRATORS = 6;
@@ -35,7 +35,7 @@ describe('multiple migrator instances running in parallel', () => {
     let esServer: TestElasticsearchUtils['es'];
     let esClient: ElasticsearchClient;
     beforeAll(async () => {
-      esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_500K });
+      esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
       esClient = await getEsClient();
       await unlink(defaultLogFilePath).catch(() => {});
 
@@ -48,11 +48,11 @@ describe('multiple migrator instances running in parallel', () => {
       const startTime = Date.now();
 
       const beforeCleanup = await getAggregatedTypesCount(esClient);
-      expect(beforeCleanup.server).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
-      expect(beforeCleanup.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
-      expect(beforeCleanup.deprecated).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
-      expect(beforeCleanup.complex).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
-      expect(beforeCleanup.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
+      expect(beforeCleanup.server).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
+      expect(beforeCleanup.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
+      expect(beforeCleanup.deprecated).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
+      expect(beforeCleanup.complex).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
+      expect(beforeCleanup.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
 
       const testKits = await Promise.all(
         new Array(PARALLEL_MIGRATORS)
@@ -89,10 +89,10 @@ describe('multiple migrator instances running in parallel', () => {
       // After cleanup
       const afterCleanup = await getAggregatedTypesCount(testKits[0].client);
       expect(afterCleanup.server).not.toBeDefined(); // 'server' is part of the REMOVED_TYPES
-      expect(afterCleanup.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K); // we keep 'basic' SOs
+      expect(afterCleanup.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE); // we keep 'basic' SOs
       expect(afterCleanup.deprecated).not.toBeDefined(); // 'deprecated' is no longer present in nextMinor's mappings
-      expect(afterCleanup.complex).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K / 2); // we excludeFromUpgrade half of them with a hook
-      expect(afterCleanup.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K); // 'task' SO are on a dedicated index
+      expect(afterCleanup.complex).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE / 2); // we excludeFromUpgrade half of them with a hook
+      expect(afterCleanup.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE); // 'task' SO are on a dedicated index
     });
 
     afterAll(async () => {

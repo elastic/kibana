@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TooltipTableColumn } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -17,7 +18,6 @@ import {
   Settings,
   Tooltip,
   TooltipTable,
-  TooltipTableColumn,
 } from '@elastic/charts';
 import {
   EuiCallOut,
@@ -32,7 +32,7 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { GetPreviewDataResponse } from '@kbn/slo-schema';
+import type { GetPreviewDataResponse } from '@kbn/slo-schema';
 import { map, max, min, values } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
@@ -40,7 +40,7 @@ import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
-import { CreateSLOForm } from '../../types';
+import type { CreateSLOForm } from '../../types';
 
 interface DataPreviewChartProps {
   formatPattern?: string;
@@ -287,23 +287,12 @@ export function DataPreviewChart({
                 })}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
-                timeAxisLayerCount={2}
                 gridLine={{ visible: true }}
-                style={{
-                  tickLine: { size: 0, padding: 4, visible: true },
-                  tickLabel: {
-                    alignment: {
-                      horizontal: Position.Left,
-                      vertical: Position.Bottom,
-                    },
-                    padding: 0,
-                    offset: { x: 0, y: 0 },
-                  },
-                }}
               />
 
               <LineSeries
                 id="All groups"
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor="date"
@@ -319,6 +308,7 @@ export function DataPreviewChart({
                 <LineSeries
                   key={group}
                   id={group}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor="date"

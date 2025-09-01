@@ -6,8 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolIdentifier, SerializedToolIdentifier } from '@kbn/onechat-common';
-import type { RunEventHandlerFn } from './events';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolEventHandlerFn } from './events';
+import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
 /**
  * Return type for tool invocation APIs.
@@ -15,11 +16,15 @@ import type { RunEventHandlerFn } from './events';
  * Wrapping the plain result to allow extending the shape later without
  * introducing breaking changes.
  */
-export interface RunToolReturn<TResult = unknown> {
+export interface RunToolReturn {
   /**
    * The result value as returned by the tool.
    */
-  result: TResult;
+  results: ToolResult[];
+  /**
+   * ID of this run
+   */
+  runId: string;
 }
 
 /**
@@ -34,14 +39,18 @@ export interface ScopedRunner {
    * Execute a tool.
    */
   runTool: ScopedRunToolFn;
+  /**
+   * Execute an agent
+   */
+  runAgent: ScopedRunAgentFn;
 }
 
 /**
  * Public onechat API to execute a tools.
  */
-export type ScopedRunToolFn = <TParams = Record<string, unknown>, TResult = unknown>(
+export type ScopedRunToolFn = <TParams = Record<string, unknown>>(
   params: ScopedRunnerRunToolsParams<TParams>
-) => Promise<RunToolReturn<TResult>>;
+) => Promise<RunToolReturn>;
 
 /**
  * Context bound to a run execution.
@@ -65,7 +74,7 @@ export interface RunContext {
  */
 export type RunContextStackEntry =
   /** tool invocation */
-  | { type: 'tool'; toolId: SerializedToolIdentifier }
+  | { type: 'tool'; toolId: string }
   /** agent invocation */
   | { type: 'agent'; agentId: string };
 
@@ -76,7 +85,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
   /**
    * ID of the tool to call.
    */
-  toolId: ToolIdentifier;
+  toolId: string;
   /**
    * Parameters to call the tool with.
    */
@@ -84,7 +93,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
   /**
    * Optional event handler.
    */
-  onEvent?: RunEventHandlerFn;
+  onEvent?: ToolEventHandlerFn;
   /**
    * The request that initiated that run.
    */
@@ -108,9 +117,9 @@ export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit
 /**
  * Public onechat API to execute a tools.
  */
-export type RunToolFn = <TParams = Record<string, unknown>, TResult = unknown>(
+export type RunToolFn = <TParams = Record<string, unknown>>(
   params: RunToolParams<TParams>
-) => Promise<RunToolReturn<TResult>>;
+) => Promise<RunToolReturn>;
 
 /**
  * Public onechat runner.
@@ -120,4 +129,8 @@ export interface Runner {
    * Execute a tool.
    */
   runTool: RunToolFn;
+  /**
+   * Execute an agent;
+   */
+  runAgent: RunAgentFn;
 }

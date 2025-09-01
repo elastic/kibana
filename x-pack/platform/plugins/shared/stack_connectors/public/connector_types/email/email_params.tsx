@@ -14,7 +14,7 @@ import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EmailActionParams } from '../types';
+import type { EmailActionParams } from '../types';
 
 const noop = () => {};
 
@@ -156,6 +156,7 @@ export const EmailParamsFields = ({
           )}
         >
           <EuiComboBox
+            autoFocus
             noSuggestions
             isInvalid={isCCInvalid}
             isLoading={isLoading}
@@ -199,6 +200,7 @@ export const EmailParamsFields = ({
           )}
         >
           <EuiComboBox
+            autoFocus
             noSuggestions
             isInvalid={isBCCInvalid}
             isDisabled={isDisabled}

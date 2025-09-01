@@ -12,8 +12,8 @@ import { getAttackDiscoverySchedulesRoute } from './get';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { getAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
-import { getInternalAttackDiscoveryScheduleMock } from '../../../__mocks__/attack_discovery_schedules.mock';
-import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
+import { getAttackDiscoveryScheduleMock } from '../../../__mocks__/attack_discovery_schedules.mock';
+import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
@@ -57,10 +57,9 @@ describe('getAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     getAttackDiscoverySchedulesRoute(server.router);
     getAttackDiscoverySchedule.mockResolvedValue(
-      getInternalAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock)
+      getAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock)
     );
   });
 
@@ -100,17 +99,6 @@ describe('getAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('Disabled feature flag', () => {
-    it('should return a 404 if scheduling feature is not registered', async () => {
-      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const response = await server.inject(
-        getAttackDiscoverySchedulesRequest('schedule-4'),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(404);
     });
   });
 });

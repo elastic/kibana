@@ -1811,6 +1811,120 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.SpanLinkDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanLinkDetails",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinkDetails.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinkDetails.spanId",
+            "type": "string",
+            "tags": [],
+            "label": "spanId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinkDetails.details",
+            "type": "Object",
+            "tags": [],
+            "label": "details",
+            "description": [],
+            "signature": [
+              "{ agentName: ",
+              {
+                "pluginId": "@kbn/elastic-agent-utils",
+                "scope": "common",
+                "docId": "kibKbnElasticAgentUtilsPluginApi",
+                "section": "def-common.AgentName",
+                "text": "AgentName"
+              },
+              "; serviceName: string; duration: number; environment: string; transactionId?: string | undefined; spanName?: string | undefined; spanSubtype?: string | undefined; spanType?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.SpanLinks",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanLinks",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinks.outgoingSpanLinks",
+            "type": "Array",
+            "tags": [],
+            "label": "outgoingSpanLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.SpanLinkDetails",
+                "text": "SpanLinkDetails"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinks.incomingSpanLinks",
+            "type": "Array",
+            "tags": [],
+            "label": "incomingSpanLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.SpanLinkDetails",
+                "text": "SpanLinkDetails"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.SpanRaw",
         "type": "Interface",
         "tags": [],
@@ -3198,6 +3312,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "DURATION",
+        "description": [],
+        "signature": [
+          "\"duration\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ELASTIC_PROFILER_STACK_TRACE_IDS",
         "type": "string",
         "tags": [],
@@ -3380,6 +3509,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ERROR_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"error.message\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ERROR_PAGE_URL",
         "type": "string",
         "tags": [],
@@ -3479,6 +3623,36 @@
           "\"unknown\" | \"success\" | \"failure\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/event_outcome.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.EXCEPTION_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"exception.message\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.EXCEPTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"exception.type\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3719,6 +3893,21 @@
           "\"_index\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KIND",
+        "type": "string",
+        "tags": [],
+        "label": "KIND",
+        "description": [],
+        "signature": [
+          "\"kind\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4476,6 +4665,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_EVENT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_EVENT_NAME",
+        "description": [],
+        "signature": [
+          "\"event_name\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.OTEL_SPAN_LINKS",
         "type": "string",
         "tags": [],
@@ -5199,6 +5403,36 @@
           "StackframeBase & { line: Line & { context: string; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/stackframe.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.STATUS_CODE",
+        "type": "string",
+        "tags": [],
+        "label": "STATUS_CODE",
+        "description": [],
+        "signature": [
+          "\"status.code\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.StatusCode",
+        "type": "Type",
+        "tags": [],
+        "label": "StatusCode",
+        "description": [],
+        "signature": [
+          "\"Error\" | \"Ok\" | \"Unset\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/otel/status_code.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

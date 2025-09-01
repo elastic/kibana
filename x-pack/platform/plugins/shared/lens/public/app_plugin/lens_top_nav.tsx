@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import { EuiCallOut, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiCallOut, euiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializedStyles, css } from '@emotion/react';
-import { LENS_APP_LOCATOR } from '../../common/locator/locator';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LENS_APP_NAME } from '../../common/constants';
-import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import type { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
+import type { LensAppState } from '../state_management';
 import {
   setState,
   useLensSelector,
   useLensDispatch,
-  LensAppState,
   switchAndCleanDatasource,
   selectIsManaged,
 } from '../state_management';
@@ -40,12 +43,8 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import {
-  DEFAULT_LENS_LAYOUT_DIMENSIONS,
-  ShareableConfiguration,
-  getLocatorParams,
-  getShareURL,
-} from './share_action';
+import type { ShareableConfiguration } from './share_action';
+import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
 function getSaveButtonMeta({
@@ -216,11 +215,30 @@ function getLensTopNavConfig(options: {
     disableButton: false,
   });
 
+  if (actions.export.visible) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.shareTitle', {
+        defaultMessage: 'Export',
+      }),
+      iconType: 'download',
+      iconOnly: true,
+      run: actions.export.execute,
+      testId: 'lnsApp_exportButton',
+      description: i18n.translate('xpack.lens.app.shareTitleAria', {
+        defaultMessage: 'Export visualization',
+      }),
+      disableButton: !actions.export.enabled,
+      tooltip: actions.export.tooltip,
+    });
+  }
+
   if (actions.share.visible) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.shareTitle', {
         defaultMessage: 'Share',
       }),
+      iconType: 'share',
+      iconOnly: true,
       run: actions.share.execute,
       testId: 'lnsApp_shareButton',
       description: i18n.translate('xpack.lens.app.shareTitleAria', {
@@ -322,7 +340,6 @@ export const LensTopNavMenu = ({
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
-    notifications,
   } = useKibana<LensAppServices>().services;
 
   const {
@@ -465,6 +482,11 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
   ]);
 
+  const hasShareIntegration = useMemo(() => {
+    if (!share) return false;
+    return share.availableIntegrations('lens', 'export').length > 0;
+  }, [share]);
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
@@ -571,6 +593,188 @@ export const LensTopNavMenu = ({
     );
 
     const showShareMenu = csvEnabled || shareUrlEnabled;
+
+    const shareExecutor = async (anchorElement: HTMLElement, asExport?: boolean) => {
+      if (!share) {
+        return;
+      }
+
+      if (visualization.activeId == null || !visualizationMap[visualization.activeId]) {
+        return;
+      }
+
+      const activeVisualization = visualizationMap[visualization.activeId];
+
+      const configuration: ShareableConfiguration = {
+        filters,
+        query,
+        activeDatasourceId,
+        datasourceStates,
+        datasourceMap,
+        visualizationMap,
+        visualization,
+        currentDoc,
+        adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
+      };
+
+      const { shareURL: shareLocatorParams, reporting: reportingLocatorParams } = getLocatorParams(
+        data,
+        configuration,
+        isCurrentStateDirty
+      );
+
+      const datasourceLayers = getDatasourceLayers(
+        datasourceStates,
+        datasourceMap,
+        dataViews.indexPatterns
+      );
+
+      const exportDatatables =
+        activeVisualization.getExportDatatables?.(
+          visualization.state,
+          datasourceLayers,
+          activeData
+        ) ?? [];
+      const datatables =
+        exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
+      const sharingData = {
+        datatables,
+        csvEnabled,
+        reportingDisabled: !csvEnabled,
+        title: title || defaultLensTitle,
+        locatorParams: {
+          id: LENS_APP_LOCATOR,
+          params: reportingLocatorParams,
+        },
+        layout: {
+          dimensions:
+            activeVisualization.getReportingLayout?.(visualization.state) ??
+            DEFAULT_LENS_LAYOUT_DIMENSIONS,
+        },
+      };
+
+      share.toggleShareContextMenu({
+        asExport,
+        anchorElement,
+        allowShortUrl: false,
+        objectId: currentDoc?.savedObjectId,
+        objectType: 'lens',
+        objectTypeMeta: {
+          title: i18n.translate('xpack.lens.app.shareModal.title', {
+            defaultMessage: 'Share this Lens visualization',
+          }),
+          config: {
+            link: {
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  title={
+                    <FormattedMessage
+                      id="xpack.lens.app.shareModal.draftModeCallout.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
+                    defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
+                  />
+                </EuiCallOut>
+              ),
+              delegatedShareUrlHandler: async () => {
+                const { shareableUrl, savedObjectURL } = getShareURL(
+                  shortUrlService,
+                  shareLocatorParams,
+                  { application, data },
+                  configuration,
+                  shareUrlEnabled
+                );
+
+                return !currentDoc?.savedObjectId ? (await shareableUrl)! : savedObjectURL.href;
+              },
+              // disable the menu if both shortURL permission and the visualization has not been saved
+              // TODO: improve here the disabling state with more specific checks
+              disabled: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
+            },
+            embed: {
+              disabled: true,
+              showPublicUrlSwitch: () => false,
+            },
+            integration: {
+              export: {
+                csvDownloadLens: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate(
+                        'xpack.lens.app.exports.csvDownloadLens.warning.title',
+                        {
+                          defaultMessage: 'Unsaved changes',
+                        }
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.lens.app.exports.csvDownloadLens.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage:
+                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                imageReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('xpack.lens.app.exports.imageReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'xpack.lens.app.exports.imageReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage:
+                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                pdfReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('xpack.lens.app.exports.pdfReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'xpack.lens.app.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage:
+                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+              },
+            },
+          },
+        },
+        sharingData,
+        // only want to know about changes when savedObjectURL.href
+        isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+      });
+    };
+
     const baseMenuEntries = getLensTopNavConfig({
       isByValueMode: getIsByValueMode(),
       savingToLibraryPermitted,
@@ -582,6 +786,19 @@ export const LensTopNavMenu = ({
       contextFromEmbeddable,
       actions: {
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
+        export: {
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          visible: hasShareIntegration,
+          enabled: showShareMenu,
+          tooltip: () => {
+            if (!showShareMenu) {
+              return i18n.translate('xpack.lens.app.exportButtonDisabledWarning', {
+                defaultMessage: 'The visualization has no data to export.',
+              });
+            }
+          },
+          execute: (anchorElement) => shareExecutor(anchorElement, true),
+        },
         share: {
           visible: true,
           enabled: showShareMenu,
@@ -592,122 +809,7 @@ export const LensTopNavMenu = ({
               });
             }
           },
-          execute: async (anchorElement) => {
-            if (!share) {
-              return;
-            }
-
-            if (visualization.activeId == null || !visualizationMap[visualization.activeId]) {
-              return;
-            }
-
-            const activeVisualization = visualizationMap[visualization.activeId];
-
-            const configuration: ShareableConfiguration = {
-              filters,
-              query,
-              activeDatasourceId,
-              datasourceStates,
-              datasourceMap,
-              visualizationMap,
-              visualization,
-              currentDoc,
-              adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
-            };
-
-            const { shareURL: shareLocatorParams, reporting: reportingLocatorParams } =
-              getLocatorParams(data, configuration, isCurrentStateDirty);
-
-            const datasourceLayers = getDatasourceLayers(
-              datasourceStates,
-              datasourceMap,
-              dataViews.indexPatterns
-            );
-
-            const exportDatatables =
-              activeVisualization.getExportDatatables?.(
-                visualization.state,
-                datasourceLayers,
-                activeData
-              ) ?? [];
-            const datatables =
-              exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
-            const sharingData = {
-              datatables,
-              csvEnabled,
-              reportingDisabled: !csvEnabled,
-              title: title || defaultLensTitle,
-              locatorParams: {
-                id: LENS_APP_LOCATOR,
-                params: reportingLocatorParams,
-              },
-              layout: {
-                dimensions:
-                  activeVisualization.getReportingLayout?.(visualization.state) ??
-                  DEFAULT_LENS_LAYOUT_DIMENSIONS,
-              },
-            };
-
-            share.toggleShareContextMenu({
-              anchorElement,
-              allowShortUrl: false,
-              objectId: currentDoc?.savedObjectId,
-              objectType: 'lens',
-              objectTypeMeta: {
-                title: i18n.translate('xpack.lens.app.shareModal.title', {
-                  defaultMessage: 'Share this Lens visualization',
-                }),
-                config: {
-                  link: {
-                    draftModeCallOut: (
-                      <EuiCallOut
-                        color="warning"
-                        title={
-                          <FormattedMessage
-                            id="xpack.lens.app.shareModal.draftModeCallout.title"
-                            defaultMessage="Unsaved changes"
-                          />
-                        }
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
-                          defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
-                        />
-                      </EuiCallOut>
-                    ),
-                    delegatedShareUrlHandler: async () => {
-                      const { shareableUrl, savedObjectURL } = getShareURL(
-                        shortUrlService,
-                        shareLocatorParams,
-                        { application, data },
-                        configuration,
-                        shareUrlEnabled,
-                        isCurrentStateDirty
-                      );
-
-                      return !currentDoc?.savedObjectId
-                        ? (await shareableUrl)!
-                        : savedObjectURL.href;
-                    },
-                    // disable the menu if both shortURL permission and the visualization has not been saved
-                    // TODO: improve here the disabling state with more specific checks
-                    disabled: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
-                  },
-                  embed: {
-                    disabled: true,
-                    showPublicUrlSwitch: () => false,
-                  },
-                },
-              },
-              sharingData,
-              // only want to know about changes when savedObjectURL.href
-              isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
-              onClose: () => {
-                anchorElement?.focus();
-              },
-              toasts: notifications.toasts,
-            });
-          },
+          execute: shareExecutor,
         },
         saveAndReturn: {
           visible: showSaveAndReturn,
@@ -737,6 +839,7 @@ export const LensTopNavMenu = ({
                   returnToOrigin: true,
                   ...(contextFromEmbeddable && { newDescription: initialContext.description }),
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
+                  onTitleDuplicate: noop, // Title can never change from this action
                 },
                 {
                   saveToLibrary: Boolean(initialInput?.savedObjectId),
@@ -818,7 +921,7 @@ export const LensTopNavMenu = ({
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
   }, [
     initialContext,
-    initialInput,
+    initialInput?.savedObjectId,
     isLinkedToOriginatingApp,
     initialContextIsEmbedded,
     activeData,
@@ -828,15 +931,12 @@ export const LensTopNavMenu = ({
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
+    hasShareIntegration,
     layerMetaInfo,
     additionalMenuEntries,
-    lensInspector,
-    title,
     share,
     visualization,
     visualizationMap,
-    shortUrlService,
-    data,
     filters,
     query,
     activeDatasourceId,
@@ -844,9 +944,13 @@ export const LensTopNavMenu = ({
     datasourceMap,
     currentDoc,
     adHocDataViews,
+    data,
     isCurrentStateDirty,
     dataViews.indexPatterns,
+    title,
     defaultLensTitle,
+    shortUrlService,
+    lensInspector,
     onAppLeave,
     runSave,
     setIsSaveModalVisible,
@@ -857,7 +961,6 @@ export const LensTopNavMenu = ({
     uiSettings,
     isOnTextBasedMode,
     lensStore,
-    notifications.toasts,
     startServices,
   ]);
 
@@ -921,7 +1024,7 @@ export const LensTopNavMenu = ({
       // by Redux Toolkit. `filterManager.setFilters` will then try to modify
       // the query's filters, which will throw an error. To avoid this, we need
       // to clone the filters before passing them to `filterManager.setFilters`.
-      const savedQueryFilters = cloneDeep(newSavedQuery.attributes.filters || []);
+      const savedQueryFilters = structuredClone(newSavedQuery.attributes.filters || []);
       const globalFilters = data.query.filterManager.getGlobalFilters();
       data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
       dispatchSetState({

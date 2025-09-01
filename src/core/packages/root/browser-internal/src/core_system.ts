@@ -25,6 +25,7 @@ import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { FeatureFlagsService } from '@kbn/core-feature-flags-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-browser-internal';
 import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
@@ -38,11 +39,13 @@ import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
+import { PricingService } from '@kbn/core-pricing-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
+import { CoreInjectionService } from '@kbn/core-di-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -89,8 +92,10 @@ export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly featureFlags: FeatureFlagsService;
   private readonly injectedMetadata: InjectedMetadataService;
+  private readonly injection: CoreInjectionService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
+  private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly settings: SettingsService;
@@ -111,6 +116,7 @@ export class CoreSystem {
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -144,12 +150,14 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.injection = new CoreInjectionService();
     this.featureFlags = new FeatureFlagsService(this.coreContext);
     this.security = new SecurityService(this.coreContext);
     this.userProfile = new UserProfileService(this.coreContext);
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
+    this.httpRateLimiter = new HttpRateLimiterService();
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
@@ -166,6 +174,7 @@ export class CoreSystem {
     this.deprecations = new DeprecationsService();
     this.executionContext = new ExecutionContextService();
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
+    this.pricing = new PricingService();
     this.coreApp = new CoreAppsService(this.coreContext);
     this.customBranding = new CustomBrandingService();
 
@@ -254,6 +263,8 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
+      this.httpRateLimiter.setup({ fatalErrors: this.fatalErrorsSetup, http });
+      const injection = this.injection.setup();
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });
@@ -272,6 +283,7 @@ export class CoreSystem {
         featureFlags,
         http,
         injectedMetadata,
+        injection,
         notifications,
         theme,
         uiSettings,
@@ -307,6 +319,7 @@ export class CoreSystem {
       const security = this.security.start();
       const userProfile = this.userProfile.start();
       const injectedMetadata = this.injectedMetadata.start();
+      const injection = this.injection.start();
       const uiSettings = this.uiSettings.start();
       const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
@@ -316,6 +329,7 @@ export class CoreSystem {
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
+      this.httpRateLimiter.start();
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
@@ -358,6 +372,8 @@ export class CoreSystem {
         rendering,
       });
 
+      const featureFlags = await this.featureFlags.start();
+
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -369,6 +385,8 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
+        analytics,
+        featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -384,7 +402,7 @@ export class CoreSystem {
         userProfile,
       });
 
-      const featureFlags = await this.featureFlags.start();
+      const pricing = await this.pricing.start({ http });
 
       const core: InternalCoreStart = {
         analytics,
@@ -398,6 +416,7 @@ export class CoreSystem {
         savedObjects,
         i18n,
         injectedMetadata,
+        injection,
         notifications,
         overlays,
         uiSettings,
@@ -408,6 +427,7 @@ export class CoreSystem {
         security,
         userProfile,
         rendering,
+        pricing,
       };
 
       await this.plugins.start(core);
@@ -425,7 +445,10 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
-      this.rendering.renderCore({ chrome, application, overlays }, coreUiTargetDomElement);
+      this.rendering.renderCore(
+        { chrome, application, overlays, featureFlags },
+        coreUiTargetDomElement
+      );
 
       performance.mark(KBN_LOAD_MARKS, {
         detail: LOAD_START_DONE,

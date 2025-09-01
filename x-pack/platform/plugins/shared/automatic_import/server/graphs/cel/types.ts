@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CelInputState, ChatModels } from '../../types';
+import type { CelInputState, ChatModels } from '../../types';
 
 export interface CelInputBaseNodeParams {
   state: CelInputState;

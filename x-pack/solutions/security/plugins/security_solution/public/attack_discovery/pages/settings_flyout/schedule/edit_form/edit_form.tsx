@@ -8,6 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
@@ -39,10 +41,11 @@ export interface FormState {
 export interface FormProps {
   initialValue: AttackDiscoveryScheduleSchema;
   onChange: (state: FormState) => void;
+  onFormMutated?: () => void;
 }
 
 export const EditForm: React.FC<FormProps> = React.memo((props) => {
-  const { initialValue, onChange } = props;
+  const { initialValue, onChange, onFormMutated } = props;
   const {
     triggersActionsUi: { actionTypeRegistry },
   } = useKibana().services;
@@ -72,8 +75,9 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     (newSettings: AlertsSelectionSettings) => {
       setSettings(newSettings);
       setFieldValue('alertsSelectionSettings', newSettings);
+      onFormMutated?.();
     },
-    [setFieldValue]
+    [onFormMutated, setFieldValue]
   );
 
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
@@ -84,8 +88,9 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     (selectedConnectorId: string) => {
       setConnectorId(selectedConnectorId);
       setFieldValue('connectorId', selectedConnectorId);
+      onFormMutated?.();
     },
-    [setFieldValue]
+    [onFormMutated, setFieldValue]
   );
 
   const { settingsView } = useSettingsView({
@@ -94,7 +99,6 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     onSettingsChanged,
     settings,
     showConnectorSelector: false,
-    stats: null,
   });
 
   const messageVariables = useMemo(() => {
@@ -137,7 +141,13 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
             path="actions"
             component={RuleActionsField}
             componentProps={{
+              ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
               messageVariables,
+              defaultRuleFrequency: {
+                notifyWhen: RuleNotifyWhen.ACTIVE,
+                throttle: null,
+                summary: false,
+              },
             }}
           />
         </EuiFlexItem>

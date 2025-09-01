@@ -156,7 +156,7 @@ export function getTraceListColumns({
             {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
               defaultMessage: 'Impact',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),

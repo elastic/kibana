@@ -73,7 +73,7 @@ export function TryItButton({
           button={
             <EuiButtonIcon
               data-test-subj="apmPopoverButton"
-              iconType="iInCircle"
+              iconType="info"
               aria-label={i18n.translate(
                 'xpack.apm.tryItButton.euiButtonIcon.tryItHelperButtonLabel',
                 { defaultMessage: 'Try it helper button' }

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFormRowProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,7 +16,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiFormRowProps,
   EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -43,12 +43,15 @@ import { merge } from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewsContract, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-plugin/public';
+import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
-import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
+import type { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -67,7 +70,9 @@ import {
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+
+const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -197,7 +202,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    * Than the currently selected data view need to load the data view from the id to display the filter
    * correctly
    * @param dataViewId
-   * @private
+   * @internal
    */
   private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
     try {
@@ -239,6 +244,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         </EuiButtonEmpty>
       </EuiFlexItem>
     );
+
     return (
       <div>
         <EuiPopoverTitle paddingSize="s">
@@ -252,12 +258,12 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         </EuiPopoverTitle>
 
         {this.state.isLoadingDataView ? (
-          <div className="globalFilterItem__editorForm">
+          <div css={editorFormStyle}>
             <EuiLoadingSpinner />
           </div>
         ) : (
           <EuiForm>
-            <div className="globalFilterItem__editorForm">
+            <div css={editorFormStyle}>
               {this.renderIndexPatternInput()}
 
               {this.state.isCustomEditorOpen

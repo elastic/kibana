@@ -6,41 +6,43 @@
  */
 
 import type { Readable } from 'stream';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type {
   ActionDetails,
-  KillProcessActionOutputContent,
-  ResponseActionParametersWithProcessData,
-  SuspendProcessActionOutputContent,
+  ResponseActionScriptsApiResponse,
+  EndpointActionData,
   GetProcessesActionOutputContent,
+  KillProcessActionOutputContent,
+  LogsEndpointActionResponse,
+  ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionExecuteOutputContent,
+  ResponseActionParametersWithProcessData,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
+  ResponseActionScanOutputContent,
+  ResponseActionScanParameters,
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
-  EndpointActionData,
-  LogsEndpointActionResponse,
+  SuspendProcessActionOutputContent,
   UploadedFileInfo,
-  ResponseActionScanOutputContent,
-  ResponseActionScanParameters,
-  ResponseActionRunScriptOutputContent,
-  ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
-  IsolationRouteRequestBody,
-  UnisolationRouteRequestBody,
-  GetProcessesRequestBody,
-  ResponseActionGetFileRequestBody,
-  ExecuteActionRequestBody,
-  UploadActionApiRequestBody,
   BaseActionRequestBody,
-  ScanActionRequestBody,
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
   KillProcessRequestBody,
-  SuspendProcessRequestBody,
+  ResponseActionGetFileRequestBody,
   RunScriptActionRequestBody,
+  ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 
-type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
+export type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
   T,
   // We don't need agent type in the Response Action client because each client is initialized for only 1 agent type
   'agent_type'
@@ -136,6 +138,13 @@ export interface ResponseActionsClient {
   processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
 
   /**
+   * Retrieves a list of all custom scripts for a given agent type - ** not a Response Action **
+   */
+  getCustomScripts: (
+    options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
+  ) => Promise<ResponseActionScriptsApiResponse>;
+
+  /**
    * Retrieve a file for download
    * @param actionId
    * @param fileId
@@ -154,6 +163,7 @@ export interface ResponseActionsClient {
    * @param actionRequest
    * @param options
    */
+
   scan: (
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions
@@ -177,5 +187,5 @@ export interface ResponseActionsClient {
  */
 export type ResponseActionsClientMethods = keyof Omit<
   ResponseActionsClient,
-  'processPendingActions' | 'getFileInfo' | 'getFileDownload'
+  'processPendingActions' | 'getFileInfo' | 'getFileDownload' | 'getCustomScripts'
 >;

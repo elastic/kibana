@@ -40,6 +40,10 @@ jest.mock('../../services/app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
     start: jest.fn(),
+    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false }),
+    getLogger: jest.fn().mockReturnValue({
+      debug: jest.fn(),
+    }),
   },
 }));
 
@@ -107,6 +111,9 @@ describe('SyncIntegrationsTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
+      config: {
+        taskInterval: '1m',
+      },
     });
   });
 
@@ -137,7 +144,7 @@ describe('SyncIntegrationsTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
@@ -145,6 +152,15 @@ describe('SyncIntegrationsTask', () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
       esClient.indices.exists.mockResolvedValue(true);
+      esClient.indices.getMapping.mockResolvedValue({
+        'fleet-synced-integrations': {
+          mappings: {
+            _meta: {
+              version: '1.0',
+            },
+          },
+        },
+      });
       esClient.cluster.getComponentTemplate.mockResolvedValue({
         component_templates: [
           {

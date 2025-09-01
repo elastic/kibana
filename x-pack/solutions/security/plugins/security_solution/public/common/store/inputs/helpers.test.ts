@@ -758,6 +758,7 @@ describe('Inputs', () => {
           query: { query: '', language: 'kuery' },
           filters: [],
         },
+        valueReport: state.valueReport,
         socTrends: state.socTrends,
       });
     });

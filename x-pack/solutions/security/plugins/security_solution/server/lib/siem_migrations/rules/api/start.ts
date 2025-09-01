@@ -14,11 +14,11 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from './util/audit';
-import { authz } from './util/authz';
-import { getRetryFilter } from './util/retry';
-import { withLicense } from './util/with_license';
-import { createTracersCallbacks } from './util/tracing';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from '../../common/api/util/authz';
+import { getRetryFilter } from '../../common/api/util/retry';
+import { withLicense } from '../../common/api/util/with_license';
+import { createTracersCallbacks } from '../../common/api/util/tracing';
 import { withExistingMigration } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStartRoute = (
@@ -47,11 +47,17 @@ export const registerSiemRuleMigrationsStartRoute = (
             const migrationId = req.params.migration_id;
             const {
               langsmith_options: langsmithOptions,
-              connector_id: connectorId,
+              settings: {
+                connector_id: connectorId,
+                skip_prebuilt_rules_matching: skipPrebuiltRulesMatching = false,
+              },
               retry,
             } = req.body;
 
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const ctx = await context.resolve([
                 'core',
@@ -66,7 +72,7 @@ export const registerSiemRuleMigrationsStartRoute = (
                 return res.badRequest({ body: `Connector with id ${connectorId} not found` });
               }
 
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
               if (retry) {
                 const { updated } = await ruleMigrationsClient.task.updateToRetry(
                   migrationId,
@@ -82,7 +88,7 @@ export const registerSiemRuleMigrationsStartRoute = (
               const { exists, started } = await ruleMigrationsClient.task.start({
                 migrationId,
                 connectorId,
-                invocationConfig: { callbacks },
+                invocationConfig: { callbacks, configurable: { skipPrebuiltRulesMatching } },
               });
 
               if (!exists) {
@@ -95,7 +101,7 @@ export const registerSiemRuleMigrationsStartRoute = (
             } catch (error) {
               logger.error(error);
               await siemMigrationAuditLogger.logStart({ migrationId, error });
-              return res.badRequest({ body: error.message });
+              return res.customError({ statusCode: 500, body: error.message });
             }
           }
         )

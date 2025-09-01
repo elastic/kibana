@@ -28,7 +28,8 @@ import {
   getExceptionListSchemaMock,
   getTrustedAppsListSchemaMock,
 } from '../../../common/schemas/response/exception_list_schema.mock';
-import { ExtensionPointStorage, ExtensionPointStorageClientInterface } from '../extension_points';
+import type { ExtensionPointStorageClientInterface } from '../extension_points';
+import { ExtensionPointStorage } from '../extension_points';
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import { DATE_NOW, ID, _VERSION } from '../../../common/constants.mock';
 
@@ -67,6 +68,7 @@ export class ExceptionListClientMock extends ExceptionListClient {
       missing_exception_lists_count: 0,
     },
   });
+  public findExceptionListsItemPointInTimeFinder = jest.fn().mockReturnValue(Promise.resolve());
 }
 
 export const getExceptionListClientMock = (

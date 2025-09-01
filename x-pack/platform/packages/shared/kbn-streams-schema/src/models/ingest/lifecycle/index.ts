@@ -40,16 +40,19 @@ export type IngestStreamLifecycle =
   | IngestStreamLifecycleILM
   | IngestStreamLifecycleInherit;
 
-export type WiredIngestStreamEffectiveLifecycle = IngestStreamLifecycle & { from: string };
+export type WiredIngestStreamEffectiveLifecycle = (
+  | IngestStreamLifecycleDSL
+  | IngestStreamLifecycleILM
+) & { from: string };
 
-export type UnwiredIngestStreamEffectiveLifecycle =
+export type ClassicIngestStreamEffectiveLifecycle =
   | IngestStreamLifecycle
   | IngestStreamLifecycleError
   | IngestStreamLifecycleDisabled;
 
 export type IngestStreamEffectiveLifecycle =
   | WiredIngestStreamEffectiveLifecycle
-  | UnwiredIngestStreamEffectiveLifecycle;
+  | ClassicIngestStreamEffectiveLifecycle;
 
 const dslLifecycleSchema = z.object({
   dsl: z.object({ data_retention: z.optional(NonEmptyString) }),
@@ -65,14 +68,14 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
   inheritLifecycleSchema,
 ]);
 
-export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngestStreamEffectiveLifecycle> =
+export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngestStreamEffectiveLifecycle> =
   z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
-  ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
+  z.union([dslLifecycleSchema, ilmLifecycleSchema]).and(z.object({ from: NonEmptyString }));
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
-  z.union([unwiredIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);
+  z.union([classicIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);
 
 export const isDslLifecycle = createIsNarrowSchema(
   ingestStreamEffectiveLifecycleSchema,
@@ -80,7 +83,7 @@ export const isDslLifecycle = createIsNarrowSchema(
 );
 
 export const isErrorLifecycle = createIsNarrowSchema(
-  unwiredIngestStreamEffectiveLifecycleSchema,
+  classicIngestStreamEffectiveLifecycleSchema,
   errorLifecycleSchema
 );
 

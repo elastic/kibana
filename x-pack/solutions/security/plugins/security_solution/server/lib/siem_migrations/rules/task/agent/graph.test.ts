@@ -9,7 +9,7 @@ import type { ActionsClientChatOpenAI } from '@kbn/langchain/server/language_mod
 import { loggerMock } from '@kbn/logging-mocks';
 import type { NodeResponse } from '../__mocks__/mocks';
 import { SiemMigrationFakeLLM, MockSiemMigrationTelemetryClient } from '../__mocks__/mocks';
-import { MockEsqlKnowledgeBase } from '../util/__mocks__/mocks';
+import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks';
 import { MockRuleMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getRuleMigrationAgent } from './graph';
 
@@ -219,7 +219,7 @@ describe('getRuleMigrationAgent', () => {
     it('integration found and full translation results', async () => {
       mockEsqlKnowledgeBase.translate.mockResolvedValue(mockFullNlToEsqlResponse);
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
-      mockRetriever.integrations.getIntegrations.mockResolvedValue([mockIntegrationResult]);
+      mockRetriever.integrations.search.mockResolvedValue([mockIntegrationResult]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',

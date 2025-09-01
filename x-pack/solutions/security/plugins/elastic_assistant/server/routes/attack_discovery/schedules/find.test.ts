@@ -13,10 +13,10 @@ import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { findAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
 import {
-  getInternalFindAttackDiscoverySchedulesMock,
-  getInternalAttackDiscoveryScheduleMock,
+  getAttackDiscoveryScheduleMock,
+  getFindAttackDiscoverySchedulesMock,
 } from '../../../__mocks__/attack_discovery_schedules.mock';
-import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
@@ -60,11 +60,10 @@ describe('findAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     findAttackDiscoverySchedulesRoute(server.router);
     findAttackDiscoverySchedule.mockResolvedValue(
-      getInternalFindAttackDiscoverySchedulesMock([
-        getInternalAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock),
+      getFindAttackDiscoverySchedulesMock([
+        getAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock),
       ])
     );
   });
@@ -108,17 +107,6 @@ describe('findAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('Disabled feature flag', () => {
-    it('should return a 404 if scheduling feature is not registered', async () => {
-      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const response = await server.inject(
-        findAttackDiscoverySchedulesRequest(),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(404);
     });
   });
 });

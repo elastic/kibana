@@ -44,3 +44,19 @@ export const DroppableContainer = (theme: EuiThemeComputed<{}>) =>
   css({
     backgroundColor: theme.colors.backgroundBaseSubdued,
   });
+
+export const QueryRuleFlyoutBody = css({
+  '.euiFlyoutBody__overflowContent': {
+    height: '100%',
+    padding: 0,
+  },
+});
+
+export const QueryRuleFlyoutPanel = css({
+  height: '100%',
+});
+
+export const QueryRuleFlyoutRightPanel = (theme: EuiThemeComputed<{}>) =>
+  css({
+    borderLeft: `1px solid ${theme.colors.lightShade}`,
+  });

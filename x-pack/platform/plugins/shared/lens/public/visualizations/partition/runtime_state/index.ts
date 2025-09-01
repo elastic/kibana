@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
-
-import { PieVisualizationState } from '../../../../common/types';
-import { GeneralDatasourceStates } from '../../../state_management';
+import type { PieVisualizationState } from '../../../../common/types';
+import type { GeneralDatasourceStates } from '../../../state_management';
 
 import { getRuntimeConverters } from './converters';
 
@@ -18,6 +16,6 @@ export function convertToRuntimeState(
 ): PieVisualizationState {
   return getRuntimeConverters(datasourceStates).reduce(
     (newState, fn) => fn(newState),
-    cloneDeep(state)
+    structuredClone(state)
   );
 }

@@ -12,18 +12,71 @@ import React from 'react';
 import { QueryRulesetDetail } from './query_ruleset_detail';
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../../common/__fixtures__/query_rules_ruleset';
 
+jest.mock('../../hooks/use_fetch_ruleset_exists', () => ({
+  useFetchQueryRulesetExist: jest.fn(() => ({
+    data: { exists: false },
+    isLoading: false,
+    isError: false,
+  })),
+}));
+
+jest.mock('./use_query_ruleset_detail_state', () => ({
+  useQueryRulesetDetailState: jest.fn(() => ({
+    queryRuleset: MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
+    rules: [
+      ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE.rules.map((rule) => ({
+        ...rule,
+        criteria: Array.isArray(rule.criteria) ? rule.criteria : [rule.criteria],
+      })),
+    ],
+
+    setNewRules: jest.fn(),
+    updateRule: jest.fn(),
+  })),
+}));
+
 jest.mock('../../hooks/use_fetch_query_ruleset', () => ({
   useFetchQueryRuleset: jest.fn(() => ({
     data: {
       ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
     },
     isLoading: false,
-    error: null,
+    isError: false,
+    isInitialLoading: false,
   })),
 }));
 
 jest.mock('react-router-dom', () => ({
   useParams: jest.fn(() => ({ rulesetId: MOCK_QUERY_RULESET_RESPONSE_FIXTURE.ruleset_id })),
+}));
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        navigateToUrl: jest.fn(),
+        getUrlForApp: jest.fn().mockReturnValue('/app/test'),
+      },
+      http: {
+        basePath: {
+          prepend: jest.fn().mockImplementation((path) => `/base${path}`),
+        },
+      },
+      overlays: {
+        openConfirm: jest.fn().mockResolvedValue(true),
+      },
+      history: {
+        block: jest.fn().mockReturnValue(jest.fn()),
+        listen: jest.fn().mockReturnValue(jest.fn()),
+      },
+      console: {},
+      share: {},
+    },
+  }),
+}));
+
+jest.mock('@kbn/unsaved-changes-prompt', () => ({
+  useUnsavedChangesPrompt: jest.fn(),
 }));
 
 describe('Query rule detail', () => {

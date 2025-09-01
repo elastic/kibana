@@ -11,12 +11,13 @@ import type { Alert } from '@kbn/alerting-types';
 import { CellValue } from './render_cell';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY, TIMESTAMP } from '@kbn/rule-data-utils';
 import { BADGE_TEST_ID } from './kibana_alert_severity_cell_renderer';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID } from './kibana_alert_related_integrations_cell_renderer';
 import { INTEGRATION_ICON_TEST_ID } from '../common/integration_icon';
+import { RELATED_INTEGRATION } from '../../../constants';
 
 const packages: PackageListItem[] = [
   {
@@ -164,9 +165,9 @@ describe('CellValue', () => {
     const alert: Alert = {
       _id: '_id',
       _index: '_index',
-      [ALERT_RULE_PARAMETERS]: [{ related_integrations: { package: ['splunk'] } }],
+      [RELATED_INTEGRATION]: 'splunk',
     };
-    const columnId = ALERT_RULE_PARAMETERS;
+    const columnId = 'relatedIntegration';
     const schema = 'unknown';
 
     const { getByTestId } = render(

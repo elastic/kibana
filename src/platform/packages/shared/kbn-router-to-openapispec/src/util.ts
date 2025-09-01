@@ -17,8 +17,9 @@ import {
   type RouterRoute,
   type RouteValidatorConfig,
 } from '@kbn/core-http-server';
-import { CustomOperationObject, KnownParameters } from './type';
+import type { CustomOperationObject, KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { Env } from './generate_oas';
 
 const tagPrefix = 'oas-tag:';
 const extractTag = (tag: string) => {
@@ -183,7 +184,8 @@ export const getXsrfHeaderForMethod = (
 
 export const setXState = (
   availability: RouteConfigOptions<RouteMethod>['availability'],
-  operation: CustomOperationObject
+  operation: CustomOperationObject,
+  env: Env
 ): void => {
   if (availability) {
     let state = '';
@@ -194,7 +196,7 @@ export const setXState = (
     } else if (availability.stability === 'beta') {
       state = 'Beta';
     }
-    if (availability.since) {
+    if (!env.serverless && availability.since) {
       state = state ? `${state}; added in ${availability.since}` : `Added in ${availability.since}`;
     }
     operation['x-state'] = state;

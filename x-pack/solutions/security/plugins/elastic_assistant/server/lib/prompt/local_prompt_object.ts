@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Prompt } from '@kbn/security-ai-prompts';
+import type { Prompt } from '@kbn/security-ai-prompts';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -26,6 +26,25 @@ import {
   DEFEND_INSIGHTS,
   ALERT_SUMMARY_500,
   ALERT_SUMMARY_SYSTEM_PROMPT,
+  RULE_ANALYSIS,
+  DATA_QUALITY_ANALYSIS,
+  ALERT_EVALUATION,
+  starterPromptTitle1,
+  starterPromptDescription1,
+  starterPromptIcon1,
+  starterPromptPrompt1,
+  starterPromptDescription2,
+  starterPromptTitle2,
+  starterPromptIcon2,
+  starterPromptPrompt2,
+  starterPromptDescription3,
+  starterPromptTitle3,
+  starterPromptIcon3,
+  starterPromptPrompt3,
+  starterPromptDescription4,
+  starterPromptTitle4,
+  starterPromptIcon4,
+  starterPromptPrompt4,
 } from './prompts';
 
 export const promptGroupId = {
@@ -33,6 +52,7 @@ export const promptGroupId = {
   aiAssistant: 'aiAssistant',
   defendInsights: {
     incompatibleAntivirus: 'defendInsights-incompatibleAntivirus',
+    policyResponseFailure: 'defendInsights-policyResponseFailure',
   },
   aiForSoc: 'aiForSoc',
 };
@@ -61,6 +81,41 @@ export const promptDictionary = {
   defendInsightsIncompatibleAntivirusEventsEndpointId:
     'defendInsights-incompatibleAntivirusEventsEndpointId',
   defendInsightsIncompatibleAntivirusEventsValue: 'defendInsights-incompatibleAntivirusEventsValue',
+  defendInsightsPolicyResponseFailureDefault: `defendInsights-policyResponseFailureDefault`,
+  defendInsightsPolicyResponseFailureRefine: `defendInsights-policyResponseFailureRefine`,
+  defendInsightsPolicyResponseFailureContinue: `defendInsights-policyResponseFailureContinue`,
+  defendInsightsPolicyResponseFailureGroup: 'defendInsights-policyResponseFailureGroup',
+  defendInsightsPolicyResponseFailureEvents: 'defendInsights-policyResponseFailureEvents',
+  defendInsightsPolicyResponseFailureEventsId: 'defendInsights-policyResponseFailureEventsId',
+  defendInsightsPolicyResponseFailureEventsEndpointId:
+    'defendInsights-policyResponseFailureEventsEndpointId',
+  defendInsightsPolicyResponseFailureEventsValue: 'defendInsights-policyResponseFailureEventsValue',
+  defendInsightsPolicyResponseFailureRemediation: 'defendInsights-policyResponseFailureRemediation',
+  defendInsightsPolicyResponseFailureRemediationMessage:
+    'defendInsights-policyResponseFailureRemediationMessage',
+  defendInsightsPolicyResponseFailureRemediationLink:
+    'defendInsights-policyResponseFailureRemediationLink',
+  // context prompts
+  alertEvaluation: `alertEvaluation`,
+  dataQualityAnalysis: 'dataQualityAnalysis',
+  ruleAnalysis: 'ruleAnalysis',
+  // starter prompts
+  starterPromptDescription1: 'starterPromptDescription1',
+  starterPromptTitle1: 'starterPromptTitle1',
+  starterPromptIcon1: 'starterPromptIcon1',
+  starterPromptPrompt1: 'starterPromptPrompt1',
+  starterPromptDescription2: 'starterPromptDescription2',
+  starterPromptTitle2: 'starterPromptTitle2',
+  starterPromptIcon2: 'starterPromptIcon2',
+  starterPromptPrompt2: 'starterPromptPrompt2',
+  starterPromptDescription3: 'starterPromptDescription3',
+  starterPromptTitle3: 'starterPromptTitle3',
+  starterPromptIcon3: 'starterPromptIcon3',
+  starterPromptPrompt3: 'starterPromptPrompt3',
+  starterPromptDescription4: 'starterPromptDescription4',
+  starterPromptTitle4: 'starterPromptTitle4',
+  starterPromptIcon4: 'starterPromptIcon4',
+  starterPromptPrompt4: 'starterPromptPrompt4',
 };
 
 export const localPrompts: Prompt[] = [
@@ -246,6 +301,83 @@ export const localPrompts: Prompt[] = [
     },
   },
   {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureDefault,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.DEFAULT,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRefine,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REFINE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureContinue,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.CONTINUE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureGroup,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.GROUP,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEvents,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEventsId,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEventsEndpointId,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS_ENDPOINT_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureEventsValue,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.EVENTS_VALUE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRemediation,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REMEDIATION,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRemediationMessage,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REMEDIATION_MESSAGE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsPolicyResponseFailureRemediationLink,
+    promptGroupId: promptGroupId.defendInsights.policyResponseFailure,
+    prompt: {
+      default: DEFEND_INSIGHTS.POLICY_RESPONSE_FAILURE.REMEDIATION_LINK,
+    },
+  },
+  {
     promptId: promptDictionary.alertSummary,
     promptGroupId: promptGroupId.aiForSoc,
     prompt: {
@@ -258,5 +390,106 @@ export const localPrompts: Prompt[] = [
     prompt: {
       default: ALERT_SUMMARY_SYSTEM_PROMPT,
     },
+  },
+  {
+    promptId: promptDictionary.alertEvaluation,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: ALERT_EVALUATION,
+    },
+  },
+  {
+    promptId: promptDictionary.dataQualityAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: DATA_QUALITY_ANALYSIS,
+    },
+  },
+  {
+    promptId: promptDictionary.ruleAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: RULE_ANALYSIS,
+    },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt4 },
   },
 ];

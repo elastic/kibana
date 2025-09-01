@@ -18,8 +18,8 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../../../common/types';
-import { StepProps } from '..';
+import type { SlmPolicyPayload } from '../../../../../../common/types';
+import type { StepProps } from '..';
 
 import {
   IndicesAndDataStreamsField,
@@ -152,7 +152,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             flush="right"
             href={docLinks.links.snapshotRestore.createSnapshot}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.docsButtonLabel"

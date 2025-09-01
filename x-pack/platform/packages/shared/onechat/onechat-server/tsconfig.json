@@ -15,11 +15,12 @@
   ],
   "kbn_references": [
     "@kbn/inference-langchain",
-    "@kbn/inference-plugin",
     "@kbn/zod",
     "@kbn/utility-types",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
     "@kbn/onechat-common",
+    "@kbn/inference-common",
+    "@kbn/logging",
   ]
 }

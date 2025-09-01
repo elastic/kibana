@@ -38,19 +38,12 @@ components:
           properties:
             name:
               type: string
-
+            is_privileged:
+              type: boolean
+              description: Indicates if the user is privileged.
         labels:
           type: object
           properties:
-            monitoring:
-              type: object
-              properties:
-                privileged_users:
-                  type: string
-                  enum:
-                    - monitored
-                    - deleted
-
             sources:
               type: array
               items:
@@ -58,7 +51,7 @@ components:
                   - csv
                   - index_sync
                   - api
-            source_indices:
+            source_ids:
               type: array
               items:
                 type: string

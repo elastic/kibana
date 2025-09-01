@@ -133,6 +133,14 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Number of agents enrolled that use this output type as monitoring output',
         },
       },
+      sync_integrations: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Boolean field, indicates if remote sync integrations feature is enabled on the remote elasticsearch output',
+          optional: true,
+        },
+      },
     },
   },
   agents_per_privileges: {
@@ -192,6 +200,58 @@ export const fleetAgentsSchema: RootSchema<any> = {
 export const fleetUsagesSchema: RootSchema<any> = {
   agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
   agents: {
+    properties: {
+      total_enrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents, in any state',
+        },
+      },
+      healthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in a healthy state',
+        },
+      },
+      unhealthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an unhealthy state',
+        },
+      },
+      updating: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an updating state',
+        },
+      },
+      offline: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
+      total_all_statuses: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of agents in any state, both enrolled and inactive',
+        },
+      },
+    },
+  },
+  agentless_agents: {
     properties: {
       total_enrolled: {
         type: 'long',
@@ -309,6 +369,10 @@ export const fleetUsagesSchema: RootSchema<any> = {
         name: { type: 'keyword' },
         version: { type: 'keyword' },
         enabled: { type: 'boolean' },
+        agent_based: {
+          type: 'boolean',
+          _meta: { description: 'true if package is agent-based', optional: true },
+        },
       },
     },
   },

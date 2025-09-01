@@ -7,21 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAst,
-  ESQLAstItem,
-  ESQLAstTimeseriesCommand,
-  ESQLAstQueryExpression,
-  ESQLColumn,
-  ESQLMessage,
-  ESQLSingleAstItem,
-  ESQLSource,
+import {
+  type ESQLAst,
+  type ESQLAstQueryExpression,
+  type ESQLColumn,
+  type ESQLSource,
+  type ESQLCommand,
+  type FunctionDefinition,
+  Walker,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
-import { FunctionDefinition } from '../definitions/types';
-import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
-import { getMessageFromId } from './errors';
-import type { ESQLPolicy, ReferenceMaps } from './types';
+import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
@@ -31,9 +27,10 @@ export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst)
   const metadataFields: ESQLColumn[] = [];
 
   if (firstCommand.name === 'ts') {
-    const timeseries = firstCommand as ESQLAstTimeseriesCommand;
+    const timeseries = firstCommand as ESQLCommand<'ts'>;
+    const tsSources = timeseries.args as ESQLSource[];
 
-    sources.push(...timeseries.sources);
+    sources.push(...tsSources);
   } else if (firstCommand.name === 'from') {
     const fromSources = mutate.commands.from.sources.list(firstCommand as any);
     const fromMetadataColumns = [...mutate.commands.from.metadata.list(firstCommand as any)].map(
@@ -72,19 +69,6 @@ export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {
     .join(', ')} | keep ${policies.flatMap(({ enrichFields }) => enrichFields).join(', ')}`;
 }
 
-export function buildQueryForFieldsForStringSources(queryString: string, ast: ESQLAst) {
-  // filter out the query until the last GROK or DISSECT command
-  const lastCommandIndex =
-    ast.length - [...ast].reverse().findIndex(({ name }) => ['grok', 'dissect'].includes(name));
-  // we're sure it's not -1 because we check the commands chain before calling this function
-  const nextCommandIndex = Math.min(lastCommandIndex + 1, ast.length - 1);
-  const customQuery = queryString.substring(0, ast[nextCommandIndex].location.min).trimEnd();
-  if (customQuery[customQuery.length - 1] === '|') {
-    return customQuery.substring(0, customQuery.length - 1);
-  }
-  return customQuery;
-}
-
 /**
  * Returns the maximum and minimum number of parameters allowed by a function
  *
@@ -105,38 +89,10 @@ export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
 }
 
 /**
- * We only want to report one message when any number of the elements in an array argument is of the wrong type
+ * Collects all 'enrich' commands from a list of ESQL commands.
+ * @param commands - The list of ESQL commands to search through.
+ * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
+ * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
  */
-export function collapseWrongArgumentTypeMessages(
-  messages: ESQLMessage[],
-  arg: ESQLAstItem[],
-  funcName: string,
-  argType: string,
-  parentCommand: string,
-  references: ReferenceMaps
-) {
-  if (!messages.some(({ code }) => code === 'wrongArgumentType')) {
-    return messages;
-  }
-
-  // Replace the individual "wrong argument type" messages with a single one for the whole array
-  messages = messages.filter(({ code }) => code !== 'wrongArgumentType');
-
-  messages.push(
-    getMessageFromId({
-      messageId: 'wrongArgumentType',
-      values: {
-        name: funcName,
-        argType,
-        value: `(${getAllArrayValues(arg).join(', ')})`,
-        givenType: `(${getAllArrayTypes(arg, parentCommand, references).join(', ')})`,
-      },
-      locations: {
-        min: (arg[0] as ESQLSingleAstItem).location.min,
-        max: (arg[arg.length - 1] as ESQLSingleAstItem).location.max,
-      },
-    })
-  );
-
-  return messages;
-}
+export const getEnrichCommands = (commands: ESQLCommand[]): ESQLCommand[] =>
+  Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];

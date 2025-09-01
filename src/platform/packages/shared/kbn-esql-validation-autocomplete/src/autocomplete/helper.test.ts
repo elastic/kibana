@@ -7,49 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '@kbn/esql-ast';
-import { joinIndices, timeseriesIndices } from '../__tests__/helpers';
-
-import {
-  buildPartialMatcher,
-  getOverlapRange,
-  getQueryForFields,
-  specialIndicesToSuggestions,
-} from './helper';
-
-describe('getOverlapRange', () => {
-  it('should return the overlap range', () => {
-    expect(getOverlapRange('IS N', 'IS NOT NULL')).toEqual({ start: 0, end: 4 });
-    expect(getOverlapRange('I', 'IS NOT NULL')).toEqual({ start: 0, end: 1 });
-    expect(getOverlapRange('j', 'IS NOT NULL')).toBeUndefined();
-  });
-
-  it('full query', () => {
-    expect(getOverlapRange('FROM index | WHERE field IS N', 'IS NOT NULL')).toEqual({
-      start: 25,
-      end: 29,
-    });
-  });
-});
-
-describe('buildPartialMatcher', () => {
-  it('should build a partial matcher', () => {
-    const str = 'is NoT nulL';
-    const matcher = buildPartialMatcher(str);
-
-    for (let i = 0; i < str.length; i++) {
-      expect(matcher.test(str.slice(0, i + 1))).toEqual(true);
-    }
-
-    expect(matcher.test('not')).toEqual(false);
-    expect(matcher.test('is null')).toEqual(false);
-    expect(matcher.test('is not nullz')).toEqual(false);
-  });
-});
+import { EDITOR_MARKER, parse } from '@kbn/esql-ast';
+import { getQueryForFields } from './helper';
 
 describe('getQueryForFields', () => {
   const assert = (query: string, expected: string) => {
     const { root } = parse(query);
+
+    // Simulate removing the editor marker from the AST
+    // As things are set up today, the marker will be there in the query
+    // string but will be removed from the AST...
+    const lastCommand = root.commands[root.commands.length - 1];
+    if (lastCommand.name === 'eval') {
+      lastCommand.args = lastCommand.args.filter(
+        (arg) => Array.isArray(arg) || arg.name !== EDITOR_MARKER
+      );
+    }
 
     const result = getQueryForFields(query, root);
 
@@ -64,45 +37,31 @@ describe('getQueryForFields', () => {
   it('should convert FORK branches into vanilla queries', () => {
     const query = `FROM index
     | EVAL foo = 1
-    | FORK (STATS field1 | EVAL esql_editor_marker)`;
+    | FORK (STATS field1 | EVAL ${EDITOR_MARKER})`;
     assert(query, 'FROM index | EVAL foo = 1 | STATS field1');
 
     const query2 = `FROM index 
     | EVAL foo = 1
-    | FORK (STATS field1) (LIMIT 10) (WHERE field1 == 1 | EVAL esql_editor_marker)`;
+    | FORK (STATS field1) (LIMIT 10) (WHERE field1 == 1 | EVAL ${EDITOR_MARKER})`;
     assert(query2, 'FROM index | EVAL foo = 1 | WHERE field1 == 1');
+  });
+
+  it('should convert multiple EVAL expressions into separate EVAL commands', () => {
+    const query = `FROM index
+    | EVAL foo = 1, bar = foo + 1, baz = ${EDITOR_MARKER}`;
+    assert(query, 'FROM index | EVAL foo = 1 | EVAL bar = foo + 1');
+
+    const query2 = `FROM index
+    | EVAL foo = 1, bar = foo + 1, baz = bar + 1, ${EDITOR_MARKER}`;
+    assert(query2, 'FROM index | EVAL foo = 1 | EVAL bar = foo + 1 | EVAL baz = bar + 1');
+
+    const query3 = `FROM index
+    | EVAL foo = 1, ${EDITOR_MARKER}`;
+    assert(query3, 'FROM index | EVAL foo = 1');
   });
 
   it('should return empty string if non-FROM source command', () => {
     assert('ROW field1 = 1', '');
     assert('SHOW INFO', '');
-  });
-});
-
-describe('specialIndicesToSuggestions()', () => {
-  test('converts join indices to suggestions', () => {
-    const suggestions = specialIndicesToSuggestions(joinIndices);
-    const labels = suggestions.map((s) => s.label);
-
-    expect(labels).toEqual([
-      'join_index',
-      'join_index_with_alias',
-      'lookup_index',
-      'join_index_alias_1',
-      'join_index_alias_2',
-    ]);
-  });
-
-  test('converts timeseries indices to suggestions', () => {
-    const suggestions = specialIndicesToSuggestions(timeseriesIndices);
-    const labels = suggestions.map((s) => s.label);
-
-    expect(labels).toEqual([
-      'timeseries_index',
-      'timeseries_index_with_alias',
-      'time_series_index',
-      'timeseries_index_alias_1',
-      'timeseries_index_alias_2',
-    ]);
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import path from 'node:path';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
@@ -42,8 +42,9 @@ export const registerImportRoute = (
         summary: `Import saved objects`,
         tags: ['oas-tag:saved objects'],
         access: 'public',
-        description:
-          'Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.',
+        description: `Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
+
+Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.`,
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',

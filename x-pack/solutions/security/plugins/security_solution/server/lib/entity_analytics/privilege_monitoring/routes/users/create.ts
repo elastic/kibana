@@ -11,8 +11,14 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { CreatePrivMonUserRequestBody } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { CreatePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -38,10 +44,18 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         const siemResponse = buildSiemResponse(response);
 
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
           const secSol = await context.securitySolution;
-          const body = await secSol
-            .getPrivilegeMonitoringDataClient()
-            .createUser(request.body, 'api');
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const config = secSol.getConfig();
+          const maxUsersAllowed =
+            config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+          const crudService = createPrivilegedUsersCrudService(dataClient);
+
+          const body = await crudService.create(request.body, 'api', maxUsersAllowed);
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

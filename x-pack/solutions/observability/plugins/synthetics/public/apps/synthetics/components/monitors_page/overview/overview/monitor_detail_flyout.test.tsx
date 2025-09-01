@@ -108,7 +108,7 @@ describe('Monitor Detail Flyout', () => {
         },
       }
     );
-    getByText(testErrorText);
+    getByText(testErrorText, { exact: false });
   });
 
   it('renders loading state while fetching', () => {

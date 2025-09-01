@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/page-attachment-schema",
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

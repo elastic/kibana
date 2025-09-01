@@ -16,8 +16,8 @@ import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
-
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { trace } from '@opentelemetry/api';
 import {
   RunActionParamsSchema,
   RunApiResponseSchema,
@@ -221,6 +221,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | RunActionRawResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('gemini.raw_request', body);
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
@@ -256,6 +258,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     { body, model: reqModel, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('gemini.raw_request', body);
+
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const token = await this.getAccessToken();
@@ -330,7 +335,12 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     const res = await this.runApi(
       {
         body: JSON.stringify({
-          ...formatGeminiPayload({ maxOutputTokens, messages, temperature, systemInstruction }),
+          ...formatGeminiPayload({
+            maxOutputTokens,
+            messages,
+            temperature,
+            systemInstruction,
+          }),
           tools,
         }),
         model,
@@ -455,5 +465,6 @@ const formatGeminiPayload = ({
     }
     previousRole = correctRole;
   }
+
   return payload;
 };

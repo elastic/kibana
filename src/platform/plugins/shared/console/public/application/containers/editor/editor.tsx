@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { TextObject } from '../../../../common/text_object';
+import type { TextObject } from '../../../../common/text_object';
 
 import {
   EditorContentSpinner,

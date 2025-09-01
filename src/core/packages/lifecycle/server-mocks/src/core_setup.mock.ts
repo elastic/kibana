@@ -31,6 +31,9 @@ import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { createCoreStartMock } from './core_start.mock';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
@@ -83,6 +86,9 @@ export function createCoreSetupMock({
       onSetup: jest.fn(),
       onStart: jest.fn(),
     },
+    pricing: pricingServiceMock.createSetupContract(),
+    injection: injectionServiceMock.createSetupContract(),
+    dataStreams: dataStreamServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),

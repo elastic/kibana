@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@kbn/esql-ast';
-import { createMapFromList, isSourceItem, nonNullable } from '../shared/helpers';
+import { isSource, type ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata, ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import { createMapFromList, nonNullable } from '../shared/helpers';
 import {
   getFieldsByTypeHelper,
   getPolicyHelper,
@@ -16,11 +17,10 @@ import {
 } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import {
-  buildQueryForFieldsForStringSources,
   buildQueryForFieldsFromSource,
   buildQueryForFieldsInPolicies,
+  getEnrichCommands,
 } from './helpers';
-import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,
@@ -52,7 +52,8 @@ export async function retrievePolicies(
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
-  if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
+  const enrichCommands = getEnrichCommands(commands);
+  if (!callbacks || !enrichCommands.length) {
     return new Map();
   }
 
@@ -82,12 +83,12 @@ export async function retrievePoliciesFields(
   if (!callbacks) {
     return new Map();
   }
-  const enrichCommands = commands.filter(({ name }) => name === 'enrich');
+  const enrichCommands = getEnrichCommands(commands);
   if (!enrichCommands.length) {
     return new Map();
   }
   const policyNames = enrichCommands
-    .map(({ args }) => (isSourceItem(args[0]) ? args[0].name : undefined))
+    .map(({ args }) => (isSource(args[0]) ? args[0].name : undefined))
     .filter(nonNullable);
   if (!policyNames.every((name) => policies.has(name))) {
     return new Map();
@@ -96,17 +97,5 @@ export async function retrievePoliciesFields(
   const customQuery = buildQueryForFieldsInPolicies(
     policyNames.map((name) => policies.get(name)) as ESQLPolicy[]
   );
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
-}
-
-export async function retrieveFieldsFromStringSources(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLFieldWithMetadata>> {
-  if (!callbacks) {
-    return new Map();
-  }
-  const customQuery = buildQueryForFieldsForStringSources(queryString, commands);
   return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }

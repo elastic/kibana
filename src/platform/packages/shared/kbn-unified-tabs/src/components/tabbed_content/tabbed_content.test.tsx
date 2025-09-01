@@ -156,7 +156,11 @@ describe('TabbedContent', () => {
 
     screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
 
-    const duplicatedTab = { ...NEW_TAB, label: `${firstTab.label} (copy)` };
+    const duplicatedTab = {
+      ...NEW_TAB,
+      label: `${firstTab.label} (copy)`,
+      duplicatedFromId: firstTab.id,
+    };
 
     await waitFor(() => {
       expect(onChanged).toHaveBeenCalledWith({

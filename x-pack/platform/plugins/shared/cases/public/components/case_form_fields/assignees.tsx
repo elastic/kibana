@@ -182,6 +182,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
         data-test-subj="caseAssignees"
       >
         <EuiComboBox
+          isInvalid={isInvalid}
           fullWidth
           async
           isLoading={isLoading}

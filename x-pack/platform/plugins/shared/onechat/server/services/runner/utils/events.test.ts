@@ -5,55 +5,25 @@
  * 2.0.
  */
 
-import { createEventEmitter, createNoopEventEmitter, convertInternalEvent } from './events';
-import type { InternalRunEvent, RunContext } from '@kbn/onechat-server';
+import { createToolEventEmitter, createAgentEventEmitter } from './events';
+import type { InternalToolEvent, RunContext } from '@kbn/onechat-server';
+import { ChatEventType, type MessageChunkEvent } from '@kbn/onechat-common';
 
 describe('Event utilities', () => {
-  describe('createEventEmitter', () => {
-    it('should emit events with context metadata', () => {
+  describe('createToolEventEmitter', () => {
+    it('should emit events ', () => {
       const mockEventHandler = jest.fn();
       const context: RunContext = {
         runId: 'test-run-id',
         stack: [],
       };
 
-      const emitter = createEventEmitter({
+      const emitter = createToolEventEmitter({
         eventHandler: mockEventHandler,
         context,
       });
 
-      const testEvent: InternalRunEvent = {
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: { baz: 'qux' },
-      };
-
-      emitter.emit(testEvent);
-
-      expect(mockEventHandler).toHaveBeenCalledWith({
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: {
-          baz: 'qux',
-          runId: 'test-run-id',
-          stack: [],
-        },
-      });
-    });
-
-    it('should handle events without meta data', () => {
-      const mockEventHandler = jest.fn();
-      const context: RunContext = {
-        runId: 'test-run-id',
-        stack: [],
-      };
-
-      const emitter = createEventEmitter({
-        eventHandler: mockEventHandler,
-        context,
-      });
-
-      const testEvent: InternalRunEvent = {
+      const testEvent: InternalToolEvent = {
         type: 'test-event',
         data: { foo: 'bar' },
       };
@@ -63,75 +33,57 @@ describe('Event utilities', () => {
       expect(mockEventHandler).toHaveBeenCalledWith({
         type: 'test-event',
         data: { foo: 'bar' },
-        meta: {
-          runId: 'test-run-id',
-          stack: [],
-        },
       });
     });
   });
 
-  describe('createNoopEventEmitter', () => {
-    it('should create an emitter that does nothing', () => {
-      const emitter = createNoopEventEmitter();
+  describe('createAgentEventEmitter', () => {
+    it('should emit events directly to the event handler when provided', () => {
+      const mockEventHandler = jest.fn();
+      const context: RunContext = {
+        runId: 'test-run-id',
+        stack: [],
+      };
+
+      const emitter = createAgentEventEmitter({
+        eventHandler: mockEventHandler,
+        context,
+      });
+
+      const testEvent: MessageChunkEvent = {
+        type: ChatEventType.messageChunk,
+        data: {
+          message_id: 'test-message-id',
+          text_chunk: 'test message',
+        },
+      };
+
+      emitter.emit(testEvent);
+
+      expect(mockEventHandler).toHaveBeenCalledWith(testEvent);
+    });
+
+    it('should create a noop emitter when no event handler is provided', () => {
+      const context: RunContext = {
+        runId: 'test-run-id',
+        stack: [],
+      };
+
+      const emitter = createAgentEventEmitter({
+        eventHandler: undefined,
+        context,
+      });
+
+      const testEvent: MessageChunkEvent = {
+        type: ChatEventType.messageChunk,
+        data: {
+          message_id: 'test-message-id',
+          text_chunk: 'test message',
+        },
+      };
+
       // This should not throw
-      emitter.emit({ type: 'test-event', data: {} });
-    });
-  });
-
-  describe('convertInternalEvent', () => {
-    it('should convert internal event to public event with context', () => {
-      const context: RunContext = {
-        runId: 'test-run-id',
-        stack: [],
-      };
-
-      const internalEvent: InternalRunEvent = {
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: { baz: 'qux' },
-      };
-
-      const publicEvent = convertInternalEvent({
-        event: internalEvent,
-        context,
-      });
-
-      expect(publicEvent).toEqual({
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: {
-          baz: 'qux',
-          runId: 'test-run-id',
-          stack: [],
-        },
-      });
-    });
-
-    it('should handle events without meta data', () => {
-      const context: RunContext = {
-        runId: 'test-run-id',
-        stack: [],
-      };
-
-      const internalEvent: InternalRunEvent = {
-        type: 'test-event',
-        data: { foo: 'bar' },
-      };
-
-      const publicEvent = convertInternalEvent({
-        event: internalEvent,
-        context,
-      });
-
-      expect(publicEvent).toEqual({
-        type: 'test-event',
-        data: { foo: 'bar' },
-        meta: {
-          runId: 'test-run-id',
-          stack: [],
-        },
-      });
+      emitter.emit(testEvent);
     });
   });
 });

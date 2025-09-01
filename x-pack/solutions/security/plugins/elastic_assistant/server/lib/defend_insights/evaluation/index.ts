@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { asyncForEach } from '@kbn/std';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/prompts/incompatible_antivirus';
-import { runDefendInsightsEvaluations } from './run_evaluations';
-import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
-import { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
-import { DefendInsightsGraphMetadata } from '../../langchain/graphs';
+
+import type { DefendInsightsGraphMetadata } from '../../langchain/graphs';
+import type { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/prompts';
+import type { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
 import { getLlmType } from '../../../routes/utils';
+import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
+import { runDefendInsightsEvaluations } from './run_evaluations';
 
 interface ConnectorWithPrompts extends Connector {
   prompts: DefendInsightsCombinedPrompts;
@@ -35,6 +38,8 @@ export const evaluateDefendInsights = async ({
   connectorTimeout,
   datasetName,
   esClient,
+  kbDataClient,
+  esClientInternalUser,
   evaluationId,
   evaluatorConnectorId,
   langSmithApiKey,
@@ -50,6 +55,8 @@ export const evaluateDefendInsights = async ({
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient;
+  esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   langSmithApiKey: string | undefined;
@@ -91,12 +98,14 @@ export const evaluateDefendInsights = async ({
         temperature: 0, // zero temperature for defend insights, because we want structured JSON output
         timeout: connectorTimeout,
         traceOptions,
+        model: connector.config?.defaultModel,
       });
 
       const graph = getDefaultDefendInsightsGraph({
         insightType: DefendInsightType.Enum.incompatible_antivirus, // TODO: parameterize
         endpointIds: [], // Empty endpointIds, because we are seeding the graph with the dataset
         esClient,
+        kbDataClient: kbDataClient || null,
         llm,
         logger,
         size,
@@ -122,5 +131,11 @@ export const evaluateDefendInsights = async ({
       langSmithApiKey,
       logger,
     });
+  });
+
+  await createOrUpdateEvaluationResults({
+    evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+    esClientInternalUser,
+    logger,
   });
 };

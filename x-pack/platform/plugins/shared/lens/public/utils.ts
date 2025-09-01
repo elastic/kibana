@@ -5,23 +5,24 @@
  * 2.0.
  */
 import { set } from '@kbn/safer-lodash-set';
-import { uniq, cloneDeep } from 'lodash';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { emptyTitleText } from '@kbn/visualization-ui-components';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { ISearchStart } from '@kbn/data-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { DateRange } from '../common/types';
-import type { LensDocument } from './persistence/saved_object_store';
-import {
+import type { DateRange } from '../common/types';
+import type { LensDocument } from './persistence';
+import type {
   Datasource,
   DatasourceMap,
   Visualization,
@@ -29,13 +30,10 @@ import {
   IndexPatternRef,
   DraggedField,
   DragDropOperation,
-  isOperation,
   UserMessage,
   TriggerEvent,
-  isLensBrushEvent,
-  isLensMultiFilterEvent,
-  isLensFilterEvent,
 } from './types';
+import { isOperation, isLensBrushEvent, isLensMultiFilterEvent, isLensFilterEvent } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
@@ -160,20 +158,22 @@ export function extractReferencesFromState({
   datasourceStates: DatasourceStates;
   visualizationState: unknown;
   activeVisualization?: Visualization;
-}): SavedObjectReference[] {
-  const references: SavedObjectReference[] = [];
+}): Reference[] {
+  const references: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-    references.push(...savedObjectReferences);
+    const { references: persistableReferences } = datasource.getPersistableState(
+      datasourceStates[id].state
+    );
+    references.push(...persistableReferences);
   });
 
   if (activeVisualization?.getPersistableState) {
-    const { savedObjectReferences } = activeVisualization.getPersistableState(
+    const { references: persistableReferences } = activeVisualization.getPersistableState(
       visualizationState,
       activeDatasourceId ? activeDatasources[activeDatasourceId] : undefined,
       activeDatasourceId ? datasourceStates[activeDatasourceId] : undefined
     );
-    references.push(...savedObjectReferences);
+    references.push(...persistableReferences);
   }
   return references;
 }
@@ -191,7 +191,7 @@ export function getIndexPatternsIds({
   visualizationState: unknown;
   activeVisualization?: Visualization;
 }): string[] {
-  const references: SavedObjectReference[] = extractReferencesFromState({
+  const references = extractReferencesFromState({
     activeDatasourceId,
     activeDatasources,
     datasourceStates,
@@ -287,7 +287,7 @@ export function renewIDs<T = unknown>(
   forRenewIds: string[],
   getNewId: (id: string) => string | undefined
 ): T {
-  obj = cloneDeep(obj);
+  obj = structuredClone(obj);
   const recursiveFn = (
     item: Serializable,
     parent?: Record<string, Serializable> | Serializable[],

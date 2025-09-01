@@ -20,6 +20,7 @@ import {
   EuiButton,
   EuiForm,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { FleetProxy } from '../../../../types';
@@ -42,11 +43,13 @@ export const FleetProxyFlyout: React.FunctionComponent<FleetProxyFlyoutProps> = 
   const form = useFleetProxyForm(fleetProxy, onClose);
   const { inputs } = form;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             {fleetProxy ? (
               <FormattedMessage
                 id="xpack.fleet.settings.fleetProxyFlyout.editTitle"

@@ -79,7 +79,8 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   durationMs: number;
   toolsInvoked: {
     AlertCountsTool?: number;
-    NaturalLanguageESQLTool?: number;
+    GenerateESQLTool?: number;
+    AskAboutESQLTool?: number;
     KnowledgeBaseRetrievalTool?: number;
     KnowledgeBaseWriteTool?: number;
     OpenAndAcknowledgedAlertsTool?: number;
@@ -139,7 +140,14 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
             optional: true,
           },
         },
-        NaturalLanguageESQLTool: {
+        GenerateESQLTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AskAboutESQLTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',
@@ -243,9 +251,10 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
-interface AttackDiscoveryScheduleInfo {
+export interface AttackDiscoveryScheduleInfo {
   id: string;
   interval: string;
+  actions: string[];
 }
 
 const scheduleInfoSchema: SchemaValue<AttackDiscoveryScheduleInfo | undefined> = {
@@ -260,6 +269,18 @@ const scheduleInfoSchema: SchemaValue<AttackDiscoveryScheduleInfo | undefined> =
       type: 'keyword',
       _meta: {
         description: 'Attack discovery schedule interval',
+      },
+    },
+    actions: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Action type',
+        },
+      },
+      _meta: {
+        description: 'Actions used within the schedule',
       },
     },
   },
@@ -281,7 +302,7 @@ interface AttackDiscoverySuccessTelemetryEvent {
   isDefaultDateRange: boolean;
   model?: string;
   provider?: string;
-  schedule?: AttackDiscoveryScheduleInfo;
+  scheduleInfo?: AttackDiscoveryScheduleInfo;
 }
 
 export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySuccessTelemetryEvent> = {
@@ -364,7 +385,7 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: true,
       },
     },
-    schedule: scheduleInfoSchema,
+    scheduleInfo: scheduleInfoSchema,
   },
 };
 
@@ -373,7 +394,7 @@ interface AttackDiscoveryErrorTelemetryEvent {
   errorMessage: string;
   model?: string;
   provider?: string;
-  schedule?: AttackDiscoveryScheduleInfo;
+  scheduleInfo?: AttackDiscoveryScheduleInfo;
 }
 
 export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTelemetryEvent> = {
@@ -407,7 +428,7 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTel
         optional: true,
       },
     },
-    schedule: scheduleInfoSchema,
+    scheduleInfo: scheduleInfoSchema,
   },
 };
 
@@ -610,6 +631,83 @@ export type ElasticAssistantTelemetryEvents =
   | AttackDiscoveryErrorTelemetryEvent
   | AttackDiscoverySuccessTelemetryEvent;
 
+// Conversation sharing
+
+export const CONVERSATION_SHARED_SUCCESS_EVENT: EventTypeOpts<{
+  sharing: 'private' | 'shared' | 'restricted';
+  total?: number;
+}> = {
+  eventType: 'conversation_shared_success',
+  schema: {
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Whether the conversation was shared privately, shared with all users in the space, or restricted to selected users in the space',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'If restricted, how many users can access',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const CONVERSATION_SHARED_ERROR_EVENT: EventTypeOpts<{
+  sharing: 'private' | 'shared' | 'restricted';
+  errorMessage: string;
+}> = {
+  eventType: 'conversation_shared_error',
+  schema: {
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Whether the conversation was shared privately, shared with all users in the space, or restricted to selected users in the space',
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message',
+      },
+    },
+  },
+};
+// only reported when a non-owner accesses a shared conversation
+export const SHARED_CONVERSATION_ACCESSED_EVENT: EventTypeOpts<{
+  sharing: 'private' | 'shared' | 'restricted';
+}> = {
+  eventType: 'shared_conversation_accessed',
+  schema: {
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Whether the conversation was shared privately, shared with all users in the space, or restricted to selected users in the space',
+      },
+    },
+  },
+};
+
+export const CONVERSATION_DUPLICATED_EVENT: EventTypeOpts<{
+  isSourceConversationOwner: boolean;
+}> = {
+  eventType: 'conversation_duplicated',
+  schema: {
+    isSourceConversationOwner: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Whether the conversation being duplicated is owned by the user duplicating it',
+      },
+    },
+  },
+};
+
 export const events: Array<EventTypeOpts<ElasticAssistantTelemetryEvents>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
@@ -621,4 +719,8 @@ export const events: Array<EventTypeOpts<ElasticAssistantTelemetryEvents>> = [
   ATTACK_DISCOVERY_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
   DEFEND_INSIGHT_ERROR_EVENT,
+  CONVERSATION_DUPLICATED_EVENT,
+  CONVERSATION_SHARED_SUCCESS_EVENT,
+  CONVERSATION_SHARED_ERROR_EVENT,
+  SHARED_CONVERSATION_ACCESSED_EVENT,
 ];

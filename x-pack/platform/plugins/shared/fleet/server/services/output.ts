@@ -38,7 +38,7 @@ import type {
   PolicySecretReference,
 } from '../types';
 import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
@@ -83,7 +83,10 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
-import { canEnableSyncIntegrations } from './setup/fleet_synced_integrations';
+import {
+  canEnableSyncIntegrations,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from './setup/fleet_synced_integrations';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -149,13 +152,13 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
   if (outputId) {
     if (isDefault) {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
     }
   } else {
     if (isDefault) {
-      agentPoliciesKuery = `not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
       return;
     }
@@ -368,15 +371,18 @@ async function updateAgentPoliciesDataOutputId(
   }
 }
 
-function validateRemoteSyncIntegrationsCanBeEnabled(output: Partial<NewOutput>) {
-  if (
-    output.type === outputType.RemoteElasticsearch &&
-    (output.sync_integrations === true || output.sync_uninstalled_integrations === true) &&
-    !canEnableSyncIntegrations()
-  ) {
+async function remoteSyncIntegrationsCheck(
+  esClient: ElasticsearchClient,
+  output: Partial<NewOutput>
+) {
+  const syncIntegrationsEnabled =
+    output.type === outputType.RemoteElasticsearch && output.sync_integrations === true;
+  if (syncIntegrationsEnabled && !canEnableSyncIntegrations()) {
     throw new OutputUnauthorizedError(
       'Remote sync integrations require at least an Enterprise license.'
     );
+  } else if (syncIntegrationsEnabled) {
+    await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
   }
 }
 
@@ -692,7 +698,7 @@ class OutputService {
       }
     }
 
-    validateRemoteSyncIntegrationsCanBeEnabled(output);
+    await remoteSyncIntegrationsCheck(esClient, output);
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
@@ -1118,7 +1124,7 @@ class OutputService {
         updateData.shipper = null;
       }
     }
-    validateRemoteSyncIntegrationsCanBeEnabled(data);
+    await remoteSyncIntegrationsCheck(esClient, data);
 
     // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {

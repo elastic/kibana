@@ -14,8 +14,14 @@ import type {
   KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
+  AttackDiscoveryPostRequestBody,
+  ConversationCreateProps,
+  ConversationUpdateProps,
+  PerformKnowledgeBaseEntryBulkActionRequestBody,
+  PostEvaluateRequestBodyInput,
 } from '@kbn/elastic-assistant-common';
 import {
+  ELASTIC_USERS_SUGGEST_URL,
   ATTACK_DISCOVERY,
   ATTACK_DISCOVERY_BY_CONNECTOR_ID,
   ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
@@ -24,9 +30,6 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
-  AttackDiscoveryPostRequestBody,
-  ConversationCreateProps,
-  ConversationUpdateProps,
   DEFEND_INSIGHTS,
   DEFEND_INSIGHTS_BY_ID,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
@@ -43,20 +46,19 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
-  PerformKnowledgeBaseEntryBulkActionRequestBody,
-  PostEvaluateRequestBodyInput,
+  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
   getCreateConversationSchemaMock,
+  getDeleteAllConversationsSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
-import {
+import type {
   AnonymizationFieldCreateProps,
   AnonymizationFieldUpdateProps,
   AlertSummaryCreateProps,
@@ -68,12 +70,6 @@ import {
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
 };
-
-export const getGetKnowledgeBaseIndicesRequest = () =>
-  requestMock.create({
-    method: 'get',
-    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  });
 
 export const getGetKnowledgeBaseStatusRequest = (resource?: string) =>
   requestMock.create({
@@ -166,6 +162,19 @@ export const getCurrentUserPromptsRequest = () =>
     path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   });
 
+export const getSuggestUsersRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: ELASTIC_USERS_SUGGEST_URL,
+  });
+
+export const getCurrentUserSecurityAIPromptsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+    query: { prompt_group_id: 'aiAssistant', prompt_ids: ['systemPrompt'] },
+  });
+
 export const getCurrentUserAlertSummaryRequest = () =>
   requestMock.create({
     method: 'get',
@@ -184,6 +193,13 @@ export const getDeleteConversationRequest = (id: string = '04128c15-0d1b-4716-a4
     method: 'delete',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
     params: { id },
+  });
+
+export const getDeleteAllConversationsRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+    body: getDeleteAllConversationsSchemaMock(),
   });
 
 export const getCreateConversationRequest = () =>

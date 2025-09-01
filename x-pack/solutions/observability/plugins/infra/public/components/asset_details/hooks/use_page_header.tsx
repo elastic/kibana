@@ -16,17 +16,15 @@ import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { capitalize, isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
+import { useProfilingPluginSetting } from '../../../hooks/use_profiling_integration_setting';
 import { CreateAlertRuleButton } from '../../shared/alerts/links/create_alert_rule_button';
 import { LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
-import { useEntitySummary } from './use_entity_summary';
-import { isMetricsSignal } from '../utils/get_data_stream_types';
-import { useDatePickerContext } from './use_date_picker';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -91,18 +89,18 @@ export const useTemplateHeaderBreadcrumbs = () => {
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
       nodeDetails: (
-        <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
+        <LinkToNodeDetails entityId={entity.id} entityName={entity.name} entityType={entity.type} />
       ),
       alertRule: (
         <CreateAlertRuleButton data-test-subj="infraAssetDetailsPageHeaderCreateAlertsRuleButton" />
       ),
     }),
-    [asset.id, asset.name, asset.type]
+    [entity.id, entity.name, entity.type]
   );
 
   const rightSideItems = useMemo(
@@ -113,16 +111,18 @@ const useRightSideItems = (links?: LinkOptions[]) => {
   return { rightSideItems };
 };
 
-const useFeatureFlagTabs = () => {
+const useConditionalTabs = () => {
+  const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
   const { featureFlags } = usePluginConfig();
-  const isProfilingEnabled = useProfilingIntegrationSetting();
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
-      [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
-      [ContentTabIds.PROFILING]: isProfilingEnabled,
+      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled),
+      [ContentTabIds.PROFILING]: Boolean(isProfilingPluginEnabled),
+      [ContentTabIds.ANOMALIES]: isTopbarMenuVisible,
     }),
-    [featureFlags.osqueryEnabled, isProfilingEnabled]
+    [featureFlags.osqueryEnabled, isProfilingPluginEnabled, isTopbarMenuVisible]
   );
 
   const isTabEnabled = useCallback(
@@ -137,34 +137,9 @@ const useFeatureFlagTabs = () => {
   };
 };
 
-const useMetricsTabs = () => {
-  const { asset } = useAssetDetailsRenderPropsContext();
-  const { dateRange } = useDatePickerContext();
-  const { dataStreams } = useEntitySummary({
-    entityType: asset.type,
-    entityId: asset.id,
-    from: dateRange.from,
-    to: dateRange.to,
-  });
-
-  const isMetrics = isMetricsSignal(dataStreams);
-
-  const hasMetricsTab = useCallback(
-    (tabItem: Tab) => {
-      return isMetrics || tabItem.id !== ContentTabIds.METRICS;
-    },
-    [isMetrics]
-  );
-
-  return {
-    hasMetricsTab,
-  };
-};
-
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
-  const { isTabEnabled } = useFeatureFlagTabs();
-  const { hasMetricsTab } = useMetricsTabs();
+  const { isTabEnabled } = useConditionalTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {
@@ -175,18 +150,16 @@ const useTabs = (tabs: Tab[]) => {
 
   const tabEntries: TabItem[] = useMemo(
     () =>
-      tabs
-        .filter((tab) => isTabEnabled(tab) && hasMetricsTab(tab))
-        .map(({ name, ...tab }) => {
-          return {
-            ...tab,
-            'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
-            onClick: () => onTabClick(tab.id),
-            isSelected: tab.id === activeTabId,
-            label: name,
-          };
-        }),
-    [activeTabId, isTabEnabled, hasMetricsTab, onTabClick, tabs]
+      tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
+        return {
+          ...tab,
+          'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
+          onClick: () => onTabClick(tab.id),
+          isSelected: tab.id === activeTabId,
+          label: name,
+        };
+      }),
+    [activeTabId, isTabEnabled, onTabClick, tabs]
   );
 
   return { tabEntries };

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { act, fireEvent } from '@testing-library/react';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { render } from '../../helpers/test_helper';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
@@ -64,7 +64,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.NOT_INSTALLED,
+            inferenceModelState: InferenceModelState.NOT_INSTALLED,
             enabled: true,
           },
           loading: true,
@@ -86,7 +86,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.NOT_INSTALLED,
+            inferenceModelState: InferenceModelState.NOT_INSTALLED,
             enabled: true,
           },
           loading: false,
@@ -104,12 +104,53 @@ describe('KnowledgeBaseTab', () => {
     });
   });
 
+  describe('when the knowledge base is re-indexing', () => {
+    beforeEach(() => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            inferenceModelState: InferenceModelState.READY,
+            enabled: true,
+            isReIndexing: true,
+          },
+        },
+        isInstalling: false,
+        install: jest.fn(),
+      });
+    });
+
+    it('should show a warning callout while re-indexing is in progress', async () => {
+      const { getByTestId, queryByTestId, rerender } = render(<KnowledgeBaseTab />);
+      expect(getByTestId('knowledgeBaseReindexingCallOut')).toBeInTheDocument();
+
+      // Re-indexing completed
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            inferenceModelState: InferenceModelState.READY,
+            enabled: true,
+            isReIndexing: false,
+          },
+        },
+        isInstalling: false,
+        install: jest.fn(),
+      });
+
+      await act(async () => {
+        rerender(<KnowledgeBaseTab />);
+      });
+
+      // Callout is no longer shown
+      expect(queryByTestId('knowledgeBaseReindexingCallOut')).not.toBeInTheDocument();
+    });
+  });
+
   describe('when the knowledge base is installed and ready', () => {
     beforeEach(() => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.READY,
+            inferenceModelState: InferenceModelState.READY,
             enabled: true,
           },
         },
@@ -165,8 +206,6 @@ describe('KnowledgeBaseTab', () => {
             public: false,
             text: 'bar',
             role: 'user_entry',
-            confidence: 'high',
-            is_correction: false,
             labels: expect.any(Object),
           },
         });

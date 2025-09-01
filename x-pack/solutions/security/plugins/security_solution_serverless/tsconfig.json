@@ -34,7 +34,6 @@
     "@kbn/cloud-plugin",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/security-solution-features",
-    "@kbn/cases-plugin",
     "@kbn/fleet-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
@@ -48,5 +47,6 @@
     "@kbn/dev-utils",
     "@kbn/inference-common",
     "@kbn/ai-assistant-icon",
+    "@kbn/core-application-browser",
   ]
 }

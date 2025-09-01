@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
@@ -38,6 +38,7 @@ export enum AppMenuActionId {
   new = 'new',
   open = 'open',
   share = 'share',
+  export = 'export',
   alerts = 'alerts',
   inspect = 'inspect',
   createRule = 'createRule',

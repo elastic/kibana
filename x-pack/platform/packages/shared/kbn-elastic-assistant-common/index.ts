@@ -6,6 +6,7 @@
  */
 
 // Schema constants
+
 export * from './impl/schemas';
 
 export { defaultAssistantFeatures } from './impl/capabilities';
@@ -33,6 +34,8 @@ export {
   contentReferenceBlock,
   removeContentReferences,
   pruneContentReferences,
+  enrichDocument,
+  sanitizeMessages,
 } from './impl/content_references';
 
 export type {
@@ -42,6 +45,13 @@ export type {
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
+export {
+  getIsConversationOwner,
+  getCurrentConversationOwner,
+  getConversationSharedState,
+  ConversationSharedState,
+} from './impl/utils/sharing_helpers';
+
 export * from './constants';
 
 /** currently the same shape as "fields" property in the ES response */
@@ -70,7 +80,17 @@ export {
 export { getAttackDiscoveryLoadingMessage } from './impl/utils/get_attack_discovery_loading_message';
 
 export {
+  getAttackChainMarkdown,
+  getAttackDiscoveryMarkdown,
+  getAttackDiscoveryMarkdownFields,
+  getMarkdownFields,
+  getMarkdownWithOriginalValues,
+} from './impl/utils/get_attack_discovery_markdown';
+
+export {
+  getOriginalAlertIds,
   getTacticLabel,
   getTacticMetadata,
   replaceNewlineLiterals,
+  transformInternalReplacements,
 } from './impl/utils/attack_discovery_helpers';

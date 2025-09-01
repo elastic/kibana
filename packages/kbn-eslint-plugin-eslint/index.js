@@ -21,5 +21,7 @@ module.exports = {
     no_unsafe_console: require('./rules/no_unsafe_console'),
     no_unsafe_hash: require('./rules/no_unsafe_hash'),
     require_kibana_feature_privileges_naming: require('./rules/require_kibana_feature_privileges_naming'),
+    no_deprecated_imports: require('./rules/no_deprecated_imports'),
+    deployment_agnostic_test_context: require('./rules/deployment_agnostic_test_context'),
   },
 };

@@ -101,7 +101,7 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
         &nbsp;
         <EuiIconTip
           size="s"
-          type="questionInCircle"
+          type="question"
           content={
             <FormattedMessage
               id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"

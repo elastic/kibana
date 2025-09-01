@@ -8,41 +8,34 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import type {
   HttpSetup,
   NotificationsStart,
   CoreTheme,
   DocLinksStart,
   CoreStart,
+  ApplicationStart,
 } from '@kbn/core/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiWindowEvent } from '@elastic/eui';
-import { ObjectStorageClient } from '../../../../common/types';
+import type { ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
 import { loadActiveApi } from '../../../lib/kb';
-import {
-  getAutocompleteInfo,
-  AutocompleteInfo,
-  History,
-  Settings,
-  Storage,
-  createHistory,
-  createSettings,
-  getStorage,
-} from '../../../services';
+import type { AutocompleteInfo, History, Settings, Storage } from '../../../services';
+import { getAutocompleteInfo, createHistory, createSettings, getStorage } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import {
+import type {
   MetricsTracker,
   EmbeddableConsoleDependencies,
   ConsoleStartServices,
 } from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
-import { EsHostService } from '../../lib/es_host_service';
+import type { EsHostService } from '../../lib/es_host_service';
 
 import {
   ServicesContextProvider,
@@ -65,6 +58,7 @@ interface ConsoleDependencies extends ConsoleStartServices {
   storage: Storage;
   theme$: Observable<CoreTheme>;
   trackUiMetric: MetricsTracker;
+  application: ApplicationStart;
 }
 
 const loadDependencies = async (
@@ -118,7 +112,7 @@ interface ConsoleWrapperProps
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+  const { core, dataViews, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -167,6 +161,10 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             objectStorageClient,
             http,
             autocompleteInfo,
+            application: startServices.application,
+            dataViews,
+            data,
+            licensing,
           },
           config: {
             isDevMode,

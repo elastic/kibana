@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
-  const comboBox = getService('comboBox');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('dashboard - add a value type ES|QL control', function () {
@@ -77,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(valuesQueryEditorValue).to.contain('FROM logstash-* | STATS BY geo.dest');
 
       // create the control
+      await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await testSubjects.click('saveEsqlControlsFlyoutButton');
       await dashboard.waitForRenderComplete();
 
@@ -110,7 +110,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await header.waitUntilLoadingHasFinished();
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'AO');
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('AO');
       await dashboard.waitForRenderComplete();
 
       const tableContent = await testSubjects.getVisibleText('lnsTableCellContent');
@@ -121,6 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const firstId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.editExistingControl(firstId);
 
+      await esql.waitESQLEditorLoaded();
       await esql.setEsqlEditorQuery('FROM logstash-*');
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');

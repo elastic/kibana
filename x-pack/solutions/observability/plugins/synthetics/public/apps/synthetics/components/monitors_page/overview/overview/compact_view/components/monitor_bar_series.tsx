@@ -12,8 +12,8 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HistogramPoint } from '../../../../../../../../../common/runtime_types/monitor';
-import { ClientPluginsStart } from '../../../../../../../../plugin';
+import type { HistogramPoint } from '../../../../../../../../../common/runtime_types/monitor';
+import type { ClientPluginsStart } from '../../../../../../../../plugin';
 const seriesHasDownValues = (series: HistogramPoint[] | null): boolean => {
   return series ? series.some((point) => !!point.down) : false;
 };
@@ -65,6 +65,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
           })}
           timeZone="local"
           xAccessor={0}
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yAccessors={[1]}
           yScaleType={ScaleType.Linear}

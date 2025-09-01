@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { PutSLOSettingsParams, sloSettingsSchema } from '@kbn/slo-schema';
-import {
-  DEFAULT_STALE_SLO_THRESHOLD_HOURS,
-  SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../common/constants';
+import type { PutSLOSettingsParams } from '@kbn/slo-schema';
+import { sloSettingsSchema } from '@kbn/slo-schema';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../common/constants';
 import { getSLOSummaryIndices } from '../../common/get_slo_summary_indices';
-import { SLOSettings, StoredSLOSettings } from '../domain/models';
+import type { SLOSettings, StoredSLOSettings } from '../domain/models';
 import { SO_SLO_SETTINGS_TYPE, sloSettingsObjectId } from '../saved_objects/slo_settings';
 
 export const getSloSettings = async (
@@ -61,8 +59,11 @@ export const getSummaryIndices = async (
   settings: StoredSLOSettings
 ): Promise<{ indices: string[] }> => {
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
-  if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-    return { indices: [SUMMARY_DESTINATION_INDEX_PATTERN] };
+  // If remote clusters are not used, we don't need to fetch the remote cluster info
+  if (useAllRemoteClusters || (!useAllRemoteClusters && selectedRemoteClusters.length === 0)) {
+    return {
+      indices: getSLOSummaryIndices(settings),
+    };
   }
 
   const clustersByName = await esClient.cluster.remoteInfo();

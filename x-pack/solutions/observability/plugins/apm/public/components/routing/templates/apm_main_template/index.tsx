@@ -5,20 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { isLogsSignal } from '../../../../utils/get_signal_type';
-import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
-import { KibanaEnvironmentContext } from '../../../../context/kibana_environment_context/kibana_environment_context';
-import { getPathForFeedback } from '../../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
@@ -27,13 +21,9 @@ import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_gr
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { EntitiesInventoryCallout } from './entities_inventory_callout';
-import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
-const APM_FEEDBACK_LINK = 'https://ela.st/services-feedback';
-const APM_NEW_EXPERIENCE_FEEDBACK_LINK = 'https://ela.st/entity-services-feedback';
 
 /*
  * This template contains:
@@ -69,13 +59,9 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const kibanaEnvironment = useContext(KibanaEnvironmentContext);
   const { http, docLinks, observabilityShared, application } = services;
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = kibanaEnvironment;
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
-  const { serviceEntitySummary } = useApmServiceContext();
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -95,14 +81,9 @@ export function ApmMainTemplate({
     [application?.capabilities.savedObjectsManagement.edit]
   );
 
-  const hasLogsData = serviceEntitySummary?.dataStreamTypes
-    ? serviceEntitySummary?.dataStreamTypes?.length > 0 &&
-      isLogsSignal(serviceEntitySummary.dataStreamTypes)
-    : false;
-
-  const shouldBypassNoDataScreen =
-    bypassNoDataScreenPaths.some((path) => location.pathname.includes(path)) ||
-    (isEntityCentricExperienceEnabled && hasLogsData);
+  const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
+    location.pathname.includes(path)
+  );
 
   const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } = useFetcher(
     (callApmApi) => {
@@ -135,34 +116,10 @@ export function ApmMainTemplate({
     noDataConfig,
   });
 
-  const sanitizedPath = getPathForFeedback(window.location.pathname);
-
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
     ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
-    <FeatureFeedbackButton
-      data-test-subj="infraApmFeedbackLink"
-      formUrl={
-        isEntityCentricExperienceEnabled && sanitizedPath.includes('service')
-          ? APM_NEW_EXPERIENCE_FEEDBACK_LINK
-          : APM_FEEDBACK_LINK
-      }
-      kibanaVersion={kibanaVersion}
-      isCloudEnv={isCloudEnv}
-      isServerlessEnv={isServerlessEnv}
-      sanitizedPath={sanitizedPath}
-    />,
   ];
-
-  const [dismissedEntitiesInventoryCallout, setdismissedEntitiesInventoryCallout] = useLocalStorage(
-    `apm.dismissedEntitiesInventoryCallout`,
-    false
-  );
-
-  const showEntitiesInventoryCallout =
-    !dismissedEntitiesInventoryCallout &&
-    isEntityCentricExperienceEnabled &&
-    selectedNavButton !== undefined;
 
   return (
     <EnvironmentsContextProvider>
@@ -175,13 +132,6 @@ export function ApmMainTemplate({
           pageTitle: pageHeader?.pageTitle ?? pageTitle,
           children: (
             <EuiFlexGroup direction="column">
-              {showEntitiesInventoryCallout ? (
-                <EntitiesInventoryCallout
-                  onDismiss={() => {
-                    setdismissedEntitiesInventoryCallout(true);
-                  }}
-                />
-              ) : null}
               {showServiceGroupsNav && selectedNavButton && (
                 <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
               )}

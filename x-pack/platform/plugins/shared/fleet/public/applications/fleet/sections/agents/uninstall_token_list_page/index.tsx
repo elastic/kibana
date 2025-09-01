@@ -48,7 +48,7 @@ const TextField = ({ text, dataTestSubj }: { text: string; dataTestSubj?: string
 );
 
 const ViewUninstallCommandButton = ({ onClick }: { onClick: () => void }) => (
-  <EuiToolTip content={VIEW_UNINSTALL_COMMAND_LABEL}>
+  <EuiToolTip content={VIEW_UNINSTALL_COMMAND_LABEL} disableScreenReaderOutput>
     <EuiButtonIcon
       data-test-subj="uninstallTokensViewCommandButton"
       aria-label={VIEW_UNINSTALL_COMMAND_LABEL}
@@ -195,7 +195,7 @@ export const UninstallTokenListPage = () => {
         />
 
         <EuiToolTip content={SEARCH_BY_POLICY_ID_OR_NAME_HINT}>
-          <EuiIcon type="iInCircle" />
+          <EuiIcon type="info" />
         </EuiToolTip>
       </EuiFlexGroup>
 

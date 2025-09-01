@@ -9,6 +9,7 @@ import { find } from 'lodash/fp';
 import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
 import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
@@ -17,7 +18,9 @@ import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_
 import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
 import { getField } from '../../shared/utils';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
@@ -40,14 +43,21 @@ export const AnalyzerPreview: React.FC = () => {
     getFieldsData,
     scopeId,
     eventId,
-    isPreview,
+    isRulePreview,
   } = useDocumentDetailsContext();
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
-  const documentId = isPreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
+  const documentId = isRulePreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
 
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
+
   const index = find({ category: 'kibana', field: RULE_INDICES }, data);
-  const indices = index?.values ?? selectedPatterns; // adding sourcerer indices for non-alert documents
+  const indices = index?.values ?? securityDefaultPatterns; // adding sourcerer indices for non-alert documents
 
   const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
     isActiveTimeline: isActiveTimeline(scopeId),

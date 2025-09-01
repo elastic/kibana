@@ -8,11 +8,8 @@
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import {
-  LazyExpressionInput,
-  ExpressionInputProps,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import type { ExpressionInputProps } from '@kbn/presentation-util-plugin/public';
+import { LazyExpressionInput, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 interface Props extends Omit<ExpressionInputProps, 'height'> {
   /** Optional string for displaying error messages */

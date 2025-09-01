@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
-import { TaskCost } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import type { TaskRunnerFactory } from './task_runner';
 import type {
   RuleType,
@@ -71,6 +71,9 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'alerts'
+    | 'priority'
+    | 'internallyManaged'
+    | 'autoRecoverAlerts'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -274,20 +277,18 @@ export class RuleTypeRegistry {
       }
     }
 
-    // validate cancelAlertsOnTimeout if set
-    if (
-      ruleType.cancelAlertsOnRuleTimeout === false &&
-      (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
-    ) {
-      throw new Error(
-        i18n.translate('xpack.alerting.ruleTypeRegistry.register.cancelAlertsOnTimeoutError', {
-          defaultMessage:
-            'Rule type "{id}" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.',
-          values: {
-            id: ruleType.id,
-          },
-        })
-      );
+    if (ruleType.priority) {
+      if (![TaskPriority.Normal, TaskPriority.NormalLongRunning].includes(ruleType.priority)) {
+        throw new Error(
+          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidPriorityRuleTypeError', {
+            defaultMessage: 'Rule type "{id}" has invalid priority: {errorMessage}.',
+            values: {
+              id: ruleType.id,
+              errorMessage: ruleType.priority,
+            },
+          })
+        );
+      }
     }
 
     const normalizedRuleType = augmentActionGroupsWithReserved<
@@ -312,6 +313,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
+        priority: ruleType.priority,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
         createTaskRunner: (context: RunContext) =>
@@ -421,7 +423,10 @@ export class RuleTypeRegistry {
         ).isValid,
         hasAlertsMappings: !!_ruleType.alerts,
         ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
+        ...(_ruleType.priority ? { priority: _ruleType.priority } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,
+        autoRecoverAlerts: _ruleType.autoRecoverAlerts,
+        internallyManaged: _ruleType.internallyManaged,
       };
 
       ruleTypesMap.set(ruleType.id, ruleType);
@@ -432,6 +437,25 @@ export class RuleTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
+  }
+
+  public getFilteredTypes({
+    excludeInternallyManaged = false,
+    categories,
+  }: {
+    excludeInternallyManaged?: boolean;
+    categories: string[];
+  }): string[] {
+    return [...this.ruleTypes.keys()].filter((id) => {
+      const ruleType = this.get(id);
+      if (excludeInternallyManaged && ruleType.internallyManaged) {
+        return false;
+      }
+      if (categories && categories.length > 0) {
+        return categories.includes(ruleType.category);
+      }
+      return true;
+    });
   }
 }
 

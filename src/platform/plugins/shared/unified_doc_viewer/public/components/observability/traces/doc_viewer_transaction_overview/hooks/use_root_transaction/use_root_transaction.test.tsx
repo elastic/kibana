@@ -12,7 +12,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 import { RootTransactionProvider, useRootTransactionContext } from '.';
-import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
+import {
+  SERVICE_NAME_FIELD,
+  SPAN_ID_FIELD,
+  TRANSACTION_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
+  TRANSACTION_NAME_FIELD,
+} from '@kbn/discover-utils';
 
 jest.mock('../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
@@ -25,6 +31,12 @@ jest.mock('rxjs', () => {
     lastValueFrom: jest.fn(),
   };
 });
+
+jest.mock('../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: () => ({
+    indexes: { apm: { traces: 'test-index' } },
+  }),
+}));
 
 const mockSearch = jest.fn();
 const mockAddDanger = jest.fn();
@@ -52,9 +64,7 @@ beforeEach(() => {
 
 describe('useRootTransaction hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <RootTransactionProvider traceId="test-trace" indexPattern="test-index">
-      {children}
-    </RootTransactionProvider>
+    <RootTransactionProvider traceId="test-trace">{children}</RootTransactionProvider>
   );
 
   it('should start with loading true and transaction as null', async () => {
@@ -69,6 +79,9 @@ describe('useRootTransaction hook', () => {
   it('should update transaction when data is fetched successfully', async () => {
     const transactionName = 'Test Transaction';
     const transactionDuration = 1;
+    const spanId = 'spanId';
+    const transactionId = 'transactionId';
+    const serviceName = 'serviceName';
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
@@ -77,6 +90,9 @@ describe('useRootTransaction hook', () => {
               fields: {
                 [TRANSACTION_NAME_FIELD]: transactionName,
                 [TRANSACTION_DURATION_FIELD]: transactionDuration,
+                [SPAN_ID_FIELD]: spanId,
+                [TRANSACTION_ID_FIELD]: transactionId,
+                [SERVICE_NAME_FIELD]: serviceName,
               },
             },
           ],
@@ -90,6 +106,9 @@ describe('useRootTransaction hook', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.transaction?.duration).toBe(transactionDuration);
+    expect(result.current.transaction?.[SPAN_ID_FIELD]).toBe(spanId);
+    expect(result.current.transaction?.[TRANSACTION_ID_FIELD]).toBe(transactionId);
+    expect(result.current.transaction?.[SERVICE_NAME_FIELD]).toBe(serviceName);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 

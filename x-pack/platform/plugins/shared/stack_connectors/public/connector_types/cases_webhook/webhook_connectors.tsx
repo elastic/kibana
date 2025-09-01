@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,7 +16,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiStepsHorizontal,
-  EuiStepStatus,
 } from '@elastic/eui';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -177,7 +177,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
       <UpdateStep readOnly={readOnly} display={currentStep === 4} />
       <EuiFlexGroup alignItems="flexStart" justifyContent="flexStart" direction="rowReverse">
         {currentStep < 4 && (
-          <EuiFlexItem grow={false} style={{ minWidth: 160 }}>
+          <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
             <EuiButton
               data-test-subj="casesWebhookNext"
               fill
@@ -190,7 +190,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFlexItem>
         )}
         {currentStep > 1 && (
-          <EuiFlexItem grow={false} style={{ minWidth: 160 }}>
+          <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
             <EuiButton
               data-test-subj="casesWebhookBack"
               iconSide="left"

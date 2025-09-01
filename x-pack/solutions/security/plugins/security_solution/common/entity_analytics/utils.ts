@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_ALERTS_INDEX } from '../constants';
 import { EntityType } from './types';
 
 const ENTITY_ANALYTICS_ENTITY_TYPES = [EntityType.user, EntityType.host, EntityType.service];
@@ -23,3 +24,5 @@ export const getEnabledEntityTypes = (genericDefinitionEnabled: boolean): Entity
 
   return entities;
 };
+
+export const getAlertsIndex = (spaceId = 'default') => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;

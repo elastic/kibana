@@ -6,12 +6,16 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
-import { type CreateRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  type CreateRuleMigrationResponse,
+  CreateRuleMigrationRequestBody,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from './util/audit';
-import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -26,18 +30,23 @@ export const registerSiemRuleMigrationsCreateRoute = (
     .addVersion(
       {
         version: '1',
-        // no request body or params to validate
-        validate: false,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(CreateRuleMigrationRequestBody),
+          },
+        },
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             await siemMigrationAuditLogger.logCreateMigration();
-
-            const migrationId = await ruleMigrationsClient.data.migrations.create();
+            const migrationId = await ruleMigrationsClient.data.migrations.create(req.body.name);
 
             return res.ok({ body: { migration_id: migrationId } });
           } catch (error) {

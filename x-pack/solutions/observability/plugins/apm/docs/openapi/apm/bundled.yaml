@@ -253,7 +253,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/service_object'
+              $ref: '#/components/schemas/delete_service_object'
             examples:
               deleteAgentConfigurationRequest1:
                 $ref: '#/components/examples/agent_configuration_intake_object_delete_request1'
@@ -1052,6 +1052,14 @@ components:
           $ref: '#/components/schemas/service_object'
         settings:
           $ref: '#/components/schemas/settings_object'
+    delete_service_object:
+      type: object
+      description: Service
+      required:
+        - service
+      properties:
+        service:
+          $ref: '#/components/schemas/service_object'
     delete_agent_configurations_response:
       type: object
       properties:

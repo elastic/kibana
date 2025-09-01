@@ -8,6 +8,7 @@
 import { PREFIX } from '../test_ids';
 
 export const FLYOUT_PREVIEW_LINK_TEST_ID = `${PREFIX}PreviewLink` as const;
+export const FLYOUT_LINK_TEST_ID = `${PREFIX}Link` as const;
 
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;

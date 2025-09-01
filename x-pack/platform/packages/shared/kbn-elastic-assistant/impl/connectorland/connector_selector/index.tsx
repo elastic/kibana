@@ -16,9 +16,9 @@ import {
 import { css } from '@emotion/css';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
-import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';
@@ -32,6 +32,7 @@ import { AddConnectorModal } from '../add_connector_modal';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
+  fullWidth?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   onConnectorSelectionChange: (connector: AIConnector) => void;
@@ -50,6 +51,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
   ({
     isDisabled = false,
     isOpen = false,
+    fullWidth = false,
     displayFancy,
     selectedConnectorId,
     onConnectorSelectionChange,
@@ -209,6 +211,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             compressed={true}
             data-test-subj="connector-selector"
             disabled={localIsDisabled}
+            fullWidth={fullWidth}
             hasDividers={true}
             isOpen={modalForceOpen}
             onChange={onChange}

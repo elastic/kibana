@@ -11,18 +11,19 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { Status } from '../../../../../common/types/api';
-import {
-  ConvertConnectorApiLogic,
+import type {
   ConvertConnectorApiLogicArgs,
   ConvertConnectorApiLogicResponse,
 } from '../../../../api/connector/convert_connector_api_logic';
+import { ConvertConnectorApiLogic } from '../../../../api/connector/convert_connector_api_logic';
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
-import { IndexViewLogic } from '../../index_view_logic';
-import { Actions } from '../../../../api/api_logic/create_api_logic';
+import type { IndexViewLogic } from '../../index_view_logic';
+import type { Actions } from '../../../../api/api_logic/create_api_logic';
 
 interface ConvertConnectorValues {
   connectorId: typeof IndexViewLogic.values.connectorId;

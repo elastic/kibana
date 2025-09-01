@@ -14,12 +14,13 @@ export type {
   DashboardState,
 } from './types';
 
-export type {
-  DashboardPanelMap,
-  DashboardPanelState,
-  DashboardSectionMap,
-  DashboardSectionState,
-} from './dashboard_container/types';
+export {
+  getReferencesForPanelId,
+  getReferencesForControls,
+  prefixReferencesFromPanel,
+} from './reference_utils';
 
-export { type InjectExtractDeps } from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';
-export { isDashboardSection } from './lib/dashboard_panel_converters';
+export { migrateLegacyQuery } from './migrate_legacy_query';
+export { cleanFiltersForSerialize } from './clean_filters_for_serialize';
+export { isDashboardSection } from './is_dashboard_section';
+export { isDashboardPanel } from './is_dashboard_panel';

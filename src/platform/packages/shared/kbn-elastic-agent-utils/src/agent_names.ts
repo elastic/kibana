@@ -73,7 +73,13 @@ export const OPEN_TELEMETRY_AGENT_NAMES: OpenTelemetryAgentName[] = [
   'otlp/webjs',
 ];
 
-export const EDOT_AGENT_NAMES: OpenTelemetryAgentName[] = ['opentelemetry/java/elastic'];
+export const EDOT_AGENT_NAMES: OpenTelemetryAgentName[] = [
+  'opentelemetry/java/elastic',
+  'opentelemetry/nodejs/elastic',
+  'opentelemetry/python/elastic',
+  'opentelemetry/php/elastic',
+  'opentelemetry/dotnet/elastic',
+];
 
 export type JavaAgentName = 'java' | 'opentelemetry/java' | 'otlp/java';
 export const JAVA_AGENT_NAMES: JavaAgentName[] = ['java', 'opentelemetry/java', 'otlp/java'];

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '@kbn/index-management-plugin/common';
 import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
 
 export const rollupToggleExtension = {

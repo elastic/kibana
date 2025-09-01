@@ -38,6 +38,8 @@ import type {
   CasesPublicStartDependencies,
 } from './types';
 import { registerSystemActions } from './components/system_actions';
+import { registerAnalytics } from './analytics';
+import { useRemoveAlertFromCaseModal } from './components/case_view/use_remove_alert_from_case_modal';
 
 /**
  * @public
@@ -117,6 +119,8 @@ export class CasesUiPlugin
 
     registerSystemActions(plugins.triggersActionsUi);
 
+    registerAnalytics({ analyticsService: core.analytics });
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -194,6 +198,7 @@ export class CasesUiPlugin
         useCasesAddToNewCaseFlyout,
         useCasesAddToExistingCaseModal,
         useIsAddToCaseOpen,
+        useRemoveAlertFromCaseModal,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

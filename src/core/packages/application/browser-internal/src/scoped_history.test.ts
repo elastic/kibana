@@ -8,7 +8,8 @@
  */
 
 import { CoreScopedHistory as ScopedHistory } from './scoped_history';
-import { createMemoryHistory, History } from 'history';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
 import type { ConfirmHandler } from './navigation_confirm';
 
 describe('ScopedHistory', () => {

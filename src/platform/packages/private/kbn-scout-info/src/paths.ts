@@ -17,6 +17,10 @@ export const SCOUT_SERVERS_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'servers');
 
 // Reporting
 export const SCOUT_REPORT_OUTPUT_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'reports');
+export const SCOUT_TEST_CONFIG_STATS_PATH = path.resolve(
+  SCOUT_OUTPUT_ROOT,
+  'test_config_stats.json'
+);
 
 // Scout playwright configs
 export const SCOUT_PLAYWRIGHT_CONFIGS_PATH = path.resolve(

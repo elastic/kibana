@@ -88,7 +88,20 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/search-api-keys-components",
+        "id": "def-public.Status",
+        "type": "Enum",
+        "tags": [],
+        "label": "Status",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": []
   },

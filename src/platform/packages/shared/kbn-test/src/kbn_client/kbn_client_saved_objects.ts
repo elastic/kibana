@@ -14,7 +14,8 @@ import type {
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
 
-import { KbnClientRequester, uriencode } from './kbn_client_requester';
+import type { KbnClientRequester } from './kbn_client_requester';
+import { uriencode } from './kbn_client_requester';
 
 type MigrationVersion = Record<string, string>;
 
@@ -107,9 +108,11 @@ const STANDARD_LIST_TYPES = [
   'cases-connector-mappings',
   // synthetics based objects
   'synthetics-monitor',
+  'synthetics-monitor-multi-space',
   'uptime-dynamic-settings',
   'synthetics-privates-locations',
   'synthetics-private-location',
+  'synthetics-param',
 
   'osquery-saved-query',
   'osquery-pack',

@@ -33,7 +33,10 @@
     "@kbn/core-plugins-contracts-server",
     "@kbn/core-security-server",
     "@kbn/core-user-profile-server",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/core-pricing-server",
+    "@kbn/core-di",
+    "@kbn/core-data-streams-server",
   ],
   "exclude": [
     "target/**/*",

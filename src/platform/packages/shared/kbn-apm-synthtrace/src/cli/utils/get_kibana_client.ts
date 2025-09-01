@@ -8,11 +8,27 @@
  */
 
 import { KibanaClient } from '../../lib/shared/base_kibana_client';
-import { Logger } from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
 
-export function getKibanaClient({ target, logger }: { target: string; logger: Logger }) {
+export function getKibanaClient({
+  target,
+  username,
+  password,
+  logger,
+}: {
+  target: string;
+  username?: string;
+  password?: string;
+  logger: Logger;
+}) {
+  const url = new URL(target);
+  if (username && password) {
+    url.username = username;
+    url.password = password;
+  }
+
   const kibanaClient = new KibanaClient({
-    target,
+    target: url.toString(),
   });
 
   return kibanaClient;

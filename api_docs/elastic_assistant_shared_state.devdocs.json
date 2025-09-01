@@ -1,0 +1,105 @@
+{
+  "id": "elasticAssistantSharedState",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "elasticAssistantSharedState",
+      "id": "def-public.ElasticAssistantSharedStatePublicPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ElasticAssistantSharedStatePublicPluginStart",
+      "description": [],
+      "signature": [
+        "{ comments: { registerActions: (actions: ",
+        {
+          "pluginId": "@kbn/elastic-assistant-shared-state",
+          "scope": "public",
+          "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+          "section": "def-public.CommentServiceActions",
+          "text": "CommentServiceActions"
+        },
+        ") => () => void; getActions$: () => ",
+        "Observable",
+        "<",
+        {
+          "pluginId": "@kbn/elastic-assistant-shared-state",
+          "scope": "public",
+          "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+          "section": "def-public.CommentServiceActions",
+          "text": "CommentServiceActions"
+        },
+        "[]>; }; promptContexts: { setPromptContext: (promptContext: Record<string, ",
+        {
+          "pluginId": "@kbn/elastic-assistant",
+          "scope": "public",
+          "docId": "kibKbnElasticAssistantPluginApi",
+          "section": "def-public.PromptContextTemplate",
+          "text": "PromptContextTemplate"
+        },
+        ">) => () => void; getPromptContext$: () => ",
+        "Observable",
+        "<Record<string, ",
+        {
+          "pluginId": "@kbn/elastic-assistant",
+          "scope": "public",
+          "docId": "kibKbnElasticAssistantPluginApi",
+          "section": "def-public.PromptContextTemplate",
+          "text": "PromptContextTemplate"
+        },
+        ">>; }; assistantContextValue: { setAssistantContextValue: (assistantContextValue: ",
+        "UseAssistantContext",
+        ") => () => void; getAssistantContextValue$: () => ",
+        "Observable",
+        "<",
+        "UseAssistantContext",
+        " | undefined>; }; augmentMessageCodeBlocks: { registerAugmentMessageCodeBlocks: (augmentMessageCodeBlocks: ",
+        {
+          "pluginId": "@kbn/elastic-assistant-shared-state",
+          "scope": "public",
+          "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+          "section": "def-public.AugmentMessageCodeBlocks",
+          "text": "AugmentMessageCodeBlocks"
+        },
+        ") => () => void; getAugmentMessageCodeBlocks$: () => ",
+        "Observable",
+        "<",
+        {
+          "pluginId": "@kbn/elastic-assistant-shared-state",
+          "scope": "public",
+          "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+          "section": "def-public.AugmentMessageCodeBlocks",
+          "text": "AugmentMessageCodeBlocks"
+        },
+        ">; }; signalIndex: { setSignalIndex: (signalIndex: string | undefined) => () => void; getSignalIndex$: () => ",
+        "Observable",
+        "<string | undefined>; }; }"
+      ],
+      "path": "x-pack/solutions/security/plugins/elastic_assistant_shared_state/public/plugin.tsx",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

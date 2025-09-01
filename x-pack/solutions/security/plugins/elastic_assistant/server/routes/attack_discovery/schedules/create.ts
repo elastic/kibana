@@ -11,16 +11,13 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES,
-  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   CreateAttackDiscoverySchedulesRequestBody,
   CreateAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { convertAlertingRuleToSchedule } from './utils/convert_alerting_rule_to_schedule';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { performChecks } from '../../helpers';
-import { isFeatureAvailable } from './utils/is_feature_available';
 
 export const createAttackDiscoverySchedulesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -61,11 +58,6 @@ export const createAttackDiscoverySchedulesRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        // Check if scheduling feature available
-        if (!(await isFeatureAvailable(ctx))) {
-          return response.notFound();
-        }
-
         // Perform license and authenticated user
         const checkResponse = await performChecks({
           context: ctx,
@@ -77,8 +69,6 @@ export const createAttackDiscoverySchedulesRoute = (
           return checkResponse.response;
         }
 
-        const { actions = [], enabled = false, ...restScheduleAttributes } = request.body;
-
         try {
           const dataClient = await assistantContext.getAttackDiscoverySchedulingDataClient();
           if (!dataClient) {
@@ -88,15 +78,7 @@ export const createAttackDiscoverySchedulesRoute = (
             });
           }
 
-          const alertingRule = await dataClient.createSchedule({
-            actions,
-            alertTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-            consumer: 'siem',
-            enabled,
-            tags: [],
-            ...restScheduleAttributes,
-          });
-          const schedule = convertAlertingRuleToSchedule(alertingRule);
+          const schedule = await dataClient.createSchedule(request.body);
 
           return response.ok({ body: schedule });
         } catch (err) {

@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { DatatableRow } from '@kbn/expressions-plugin/common';
-import { FormattedColumns } from '../types';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import type { FormattedColumns } from '../types';
 
 export const createTableVisCell =
   (rows: DatatableRow[], formattedColumns: FormattedColumns, autoFitRowToContent?: boolean) =>
@@ -30,7 +30,7 @@ export const createTableVisCell =
          */
         dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="tbvChartCellContent"
-        className={autoFitRowToContent ? '' : 'tbvChartCellContent'}
+        className={autoFitRowToContent ? '' : 'tbvChartCellContent eui-textTruncate'}
       />
     );
 

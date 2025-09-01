@@ -29,6 +29,6 @@
     "@kbn/utility-types",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-render",
+    "@kbn/dashboard-plugin"
   ]
 }

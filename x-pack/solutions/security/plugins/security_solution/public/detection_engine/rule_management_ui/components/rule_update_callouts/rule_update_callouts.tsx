@@ -53,7 +53,7 @@ export const RuleUpdateCallouts = ({
     <EuiFlexGroup direction="column">
       {shouldDisplayUpdateRulesCallout && (
         <MiniCallout
-          iconType={'iInCircle'}
+          iconType={'info'}
           data-test-subj="prebuilt-rules-update-callout"
           title={getUpdateRulesCalloutTitle(updateCallOutOnClick)}
         />
@@ -62,7 +62,7 @@ export const RuleUpdateCallouts = ({
         <MiniCallout
           color="success"
           data-test-subj="prebuilt-rules-new-callout"
-          iconType={'iInCircle'}
+          iconType={'info'}
           title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
         />
       )}

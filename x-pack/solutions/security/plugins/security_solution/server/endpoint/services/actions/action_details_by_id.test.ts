@@ -39,6 +39,9 @@ describe('When using `getActionDetailsById()', () => {
     actionResponses = createActionResponsesEsSearchResultsMock();
 
     applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
+    (
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it('should return expected output', async () => {
@@ -178,5 +181,20 @@ describe('When using `getActionDetailsById()', () => {
         isCompleted: true,
       })
     );
+  });
+
+  it('should not validate against spaces when `bypassSpaceValidation` is `true`', async () => {
+    // @ts-expect-error
+    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+    (
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
+    await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      bypassSpaceValidation: true,
+    });
+
+    expect(
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace
+    ).not.toHaveBeenCalled();
   });
 });

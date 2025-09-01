@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useSendMessage } from '../context/send_message_context';
+import { queryKeys } from '../query_keys';
+import { newConversationId } from '../utils/new_conversation';
+import { useConversationId } from './use_conversation_id';
+import { useIsSendingMessage } from './use_is_sending_message';
+import { useOnechatServices } from './use_onechat_service';
+
+const useConversation = () => {
+  const conversationId = useConversationId();
+  const { conversationsService } = useOnechatServices();
+  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+  const isSendingMessage = useIsSendingMessage();
+  const { data: conversation } = useQuery({
+    queryKey,
+    // Disable query if we are on a new conversation or if there is a message currently being sent
+    // Otherwise a refetch will overwrite our optimistic updates
+    enabled: Boolean(conversationId) && !isSendingMessage,
+    queryFn: () => {
+      if (!conversationId) {
+        return Promise.reject(new Error('Invalid conversation id'));
+      }
+      return conversationsService.get({ conversationId });
+    },
+  });
+
+  return { conversation };
+};
+
+export const useAgentId = () => {
+  const { conversation } = useConversation();
+  return conversation?.agent_id;
+};
+
+export const useConversationTitle = () => {
+  const { conversation } = useConversation();
+  return conversation?.title ?? '';
+};
+
+export const useConversationRounds = () => {
+  const { conversation } = useConversation();
+  const { pendingMessage, error } = useSendMessage();
+
+  const conversationRounds = useMemo(() => {
+    const rounds = conversation?.rounds ?? [];
+    if (Boolean(error) && pendingMessage) {
+      return [
+        ...rounds,
+        { input: { message: pendingMessage }, response: { message: '' }, steps: [] },
+      ];
+    }
+    return rounds;
+  }, [conversation?.rounds, error, pendingMessage]);
+
+  return conversationRounds;
+};
+
+export const useHasActiveConversation = () => {
+  const conversationId = useConversationId();
+  const conversationRounds = useConversationRounds();
+  return Boolean(conversationId || conversationRounds.length > 0);
+};

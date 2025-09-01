@@ -900,8 +900,13 @@ describe('Ad Hoc Task Runner', () => {
     expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
       'abc',
-      { refresh: false, namespace: undefined }
+      { refresh: true, namespace: undefined }
     );
+
+    // Verify that updateGaps was called after delete
+    const deleteCallOrder = internalSavedObjectsRepository.delete.mock.invocationCallOrder[0];
+    const updateGapsCallOrder = mockUpdateGaps.mock.invocationCallOrder[0];
+    expect(updateGapsCallOrder).toBeGreaterThan(deleteCallOrder);
 
     expect(mockUpdateGaps).toHaveBeenCalledWith({
       ruleId: RULE_ID,
@@ -981,7 +986,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1043,7 +1048,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1105,7 +1110,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1169,7 +1174,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1326,7 +1331,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1402,7 +1407,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule1.runAt,
         backfillInterval: schedule1.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(4);
+      expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
@@ -1418,6 +1423,10 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1475,7 +1484,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         mockedAdHocRunSO.id,
-        { namespace: undefined, refresh: false }
+        { namespace: undefined, refresh: true }
       );
 
       testAlertingEventLogCalls({
@@ -1484,7 +1493,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule2.runAt,
         backfillInterval: schedule2.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(4);
+      expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
@@ -1500,6 +1509,10 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });

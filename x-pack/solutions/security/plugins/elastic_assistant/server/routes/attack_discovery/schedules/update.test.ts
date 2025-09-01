@@ -6,15 +6,15 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { UpdateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
+import type { UpdateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 import { updateAttackDiscoverySchedulesRoute } from './update';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { updateAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
-import { getInternalAttackDiscoveryScheduleMock } from '../../../__mocks__/attack_discovery_schedules.mock';
-import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
+import { getAttackDiscoveryScheduleMock } from '../../../__mocks__/attack_discovery_schedules.mock';
+import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
@@ -58,10 +58,9 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     updateAttackDiscoverySchedulesRoute(server.router);
     updateAttackDiscoverySchedule.mockResolvedValue(
-      getInternalAttackDiscoveryScheduleMock(mockRequestBody)
+      getAttackDiscoveryScheduleMock(mockRequestBody)
     );
   });
 
@@ -101,17 +100,6 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('Disabled feature flag', () => {
-    it('should return a 404 if scheduling feature is not registered', async () => {
-      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
-      const response = await server.inject(
-        updateAttackDiscoverySchedulesRequest('schedule-4', mockRequestBody),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(404);
     });
   });
 });

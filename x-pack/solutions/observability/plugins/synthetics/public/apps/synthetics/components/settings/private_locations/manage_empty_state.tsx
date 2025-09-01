@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { EmptyLocations } from './empty_locations';
 import { selectAgentPolicies } from '../../../state/agent_policies';
@@ -15,14 +16,14 @@ import { selectAgentPolicies } from '../../../state/agent_policies';
 export const ManageEmptyState: FC<
   PropsWithChildren<{
     privateLocations: PrivateLocation[];
-    setIsAddingNew?: (val: boolean) => void;
+    setIsFlyoutOpen?: (val: boolean) => void;
     showNeedAgentPolicy?: boolean;
     showEmptyLocations?: boolean;
   }>
 > = ({
   children,
   privateLocations,
-  setIsAddingNew,
+  setIsFlyoutOpen,
   showNeedAgentPolicy = true,
   showEmptyLocations = true,
 }) => {
@@ -33,7 +34,7 @@ export const ManageEmptyState: FC<
   }
 
   if (privateLocations.length === 0 && showEmptyLocations) {
-    return <EmptyLocations setIsAddingNew={setIsAddingNew} />;
+    return <EmptyLocations setIsFlyoutOpen={setIsFlyoutOpen} />;
   }
 
   return <>{children}</>;

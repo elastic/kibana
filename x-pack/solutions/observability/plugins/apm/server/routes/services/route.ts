@@ -15,7 +15,7 @@ import {
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
-import { isEmpty, mergeWith, uniq } from 'lodash';
+import { mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -73,8 +73,6 @@ import type { ServiceTransactionTypesResponse } from './get_service_transaction_
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import type { ServiceThroughputResponse } from './get_throughput';
 import { getThroughput } from './get_throughput';
-import { getServiceEntitySummary } from '../entities/services/get_service_entity_summary';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -283,32 +281,19 @@ const serviceAgentRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceAgentResponse> => {
-    const { request, plugins } = resources;
-    const entityManagerStart = await plugins.entityManager.start();
-
     const apmEventClient = await getApmEventClient(resources);
-    const entityManagerClient = await entityManagerStart.getScopedClient({ request });
     const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const [apmServiceAgent, serviceEntitySummary] = await Promise.all([
-      getServiceAgent({
-        serviceName,
-        apmEventClient,
-        start,
-        end,
-      }),
-      getServiceEntitySummary({
-        serviceName,
-        entityManagerClient,
-        environment: ENVIRONMENT_ALL.value,
-      }),
-    ]);
+    const apmServiceAgent = await getServiceAgent({
+      serviceName,
+      apmEventClient,
+      start,
+      end,
+    });
 
-    return isEmpty(apmServiceAgent)
-      ? { agentName: serviceEntitySummary?.agentName }
-      : apmServiceAgent;
+    return apmServiceAgent;
   },
 });
 

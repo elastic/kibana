@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-
 import {
   EuiButton,
   EuiModal,
@@ -20,6 +19,7 @@ import {
   EuiRadioGroup,
   EuiSpacer,
   EuiCode,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -90,6 +90,7 @@ function OptIntoRulesStep({
   continueButtonClick: (buttonId: string) => void;
 }) {
   const [radioIdSelected, setRadioIdSelected] = useState('create-alerts');
+  const modalTitleId = useGeneratedHtmlId();
 
   const onChange = (optionId: string) => {
     setRadioIdSelected(optionId);
@@ -111,9 +112,9 @@ function OptIntoRulesStep({
   ];
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.monitoring.alerts.modal.title"
             defaultMessage="Create rules"
@@ -191,10 +192,12 @@ export function WatcherMigrationStep({
   closeModal: () => void;
   createButtonClick: () => void;
 }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.monitoring.alerts.modal.migration.title"
             defaultMessage="Migrate Elasticsearch Watches before continuing"

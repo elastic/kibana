@@ -19,12 +19,12 @@ import {
   DraggableBucketContainer,
   isQueryValid,
 } from '@kbn/visualization-ui-components';
-import { IndexPattern } from '../../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import { TermsIndexPatternColumn } from '../terms';
+import type { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
 
@@ -76,6 +76,7 @@ export const filtersOperation: OperationDefinition<
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   input: 'none',
+  scale: () => 'ordinal',
   isTransferable: () => true,
 
   getDefaultLabel: () => filtersLabel,
@@ -108,7 +109,6 @@ export const filtersOperation: OperationDefinition<
       label: filtersLabel,
       dataType: 'string',
       operationType: OPERATION_NAME,
-      scale: 'ordinal',
       isBucketed: true,
       params,
     };

@@ -8,8 +8,9 @@
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../../constants';
-import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
 export const getTranslationResultNode = (): GraphNode => {
@@ -27,17 +28,20 @@ export const getTranslationResultNode = (): GraphNode => {
     let translationResult;
 
     if (!query) {
-      translationResult = RuleTranslationResult.UNTRANSLATABLE;
+      translationResult = MigrationTranslationResult.UNTRANSLATABLE;
     } else {
       if (query.startsWith('FROM logs-*')) {
-        elasticRule.query = query.replace('FROM logs-*', 'FROM [indexPattern]');
-        translationResult = RuleTranslationResult.PARTIAL;
+        elasticRule.query = query.replace(
+          'FROM logs-*',
+          `FROM ${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}`
+        );
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else if (state.validation_errors?.esql_errors) {
-        translationResult = RuleTranslationResult.PARTIAL;
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else if (query.match(/\[(macro|lookup):.*?\]/)) {
-        translationResult = RuleTranslationResult.PARTIAL;
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else {
-        translationResult = RuleTranslationResult.FULL;
+        translationResult = MigrationTranslationResult.FULL;
       }
     }
 
