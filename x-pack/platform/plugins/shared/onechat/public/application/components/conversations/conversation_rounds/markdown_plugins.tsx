@@ -77,7 +77,7 @@ export function getVisualizationHandler({
       return <p>Unable to find visualization for tool result ID: {toolResultId}</p>;
     }
 
-    const { result, query } = toolResult.data;
+    const { columns, query } = toolResult.data;
 
     if (!query) {
       return <p>Unable to find query for tool result ID: {toolResultId}</p>;
@@ -88,7 +88,7 @@ export function getVisualizationHandler({
         lens={startDependencies.lens}
         dataViews={startDependencies.dataViews}
         esqlQuery={query}
-        esqlResult={result}
+        esqlColumns={columns}
         preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
       />
     );

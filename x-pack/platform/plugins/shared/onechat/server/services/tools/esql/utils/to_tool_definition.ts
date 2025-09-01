@@ -8,8 +8,9 @@
 import type { EsqlToolConfig } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
-import { ToolResultType, getToolResultId } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import { getToolResultId } from '@kbn/onechat-server/src/tools';
 import type { ToolPersistedDefinition } from '../../client';
 import type { InternalToolDefinition } from '../../tool_provider';
 
@@ -37,12 +38,13 @@ export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<
       return {
         results: [
           {
-            toolResultId: getToolResultId(),
+            tool_result_id: getToolResultId(),
             type: ToolResultType.tabularData,
             data: {
               source: 'esql',
               query: configuration.query,
-              result,
+              columns: result.columns,
+              values: result.values,
             },
           },
         ],

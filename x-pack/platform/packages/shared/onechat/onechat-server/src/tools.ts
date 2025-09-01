@@ -12,6 +12,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import { randomInt } from 'crypto';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
@@ -163,4 +164,9 @@ export interface ToolProviderGetOptions {
  */
 export interface ToolProviderListOptions {
   request: KibanaRequest;
+}
+
+const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+export function getToolResultId(len = 4): string {
+  return Array.from({ length: len }, () => charset[randomInt(charset.length)]).join('');
 }

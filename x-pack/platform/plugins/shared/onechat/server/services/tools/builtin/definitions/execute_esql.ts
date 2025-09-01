@@ -8,8 +8,9 @@
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/steps/execute_esql';
-import { ToolResultType, getToolResultId } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { getToolResultId } from '@kbn/onechat-server/src/tools';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
@@ -42,12 +43,13 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
             },
           },
           {
-            toolResultId: getToolResultId(),
+            tool_result_id: getToolResultId(),
             type: ToolResultType.tabularData,
             data: {
               source: 'esql',
               query: esqlQuery,
-              result,
+              columns: result.columns,
+              values: result.values,
             },
           },
         ],

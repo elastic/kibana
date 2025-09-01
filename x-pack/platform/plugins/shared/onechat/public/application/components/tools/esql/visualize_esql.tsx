@@ -22,7 +22,7 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 interface VisualizeESQLProps {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
-  esqlResult: TabularDataResult['data']['result'] | undefined;
+  esqlColumns: TabularDataResult['data']['columns'] | undefined;
   esqlQuery: string;
   preferredChartType?: ChartType;
   errorMessages?: string[];
@@ -31,11 +31,11 @@ interface VisualizeESQLProps {
 export function VisualizeESQL({
   lens,
   dataViews,
-  esqlResult,
+  esqlColumns,
   esqlQuery,
   preferredChartType,
 }: VisualizeESQLProps) {
-  const columns = esqlResult?.columns.map((column) => {
+  const columns = esqlColumns?.map((column) => {
     return {
       id: column.name,
       name: column.name,

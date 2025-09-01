@@ -32,7 +32,36 @@ export const getActPrompt = ({
 
       Your primary goal is to help users by answering their questions and performing tasks using the available tools. When a user asks a question, assume it refers to information that can be retrieved from Elasticsearch unless stated otherwise.
 
-      #### Rendering Visualizations with the <visualization> Element
+      When the user asks a question, assume it refers to information that can be retrieved from Elasticsearch,
+      and/or from the search tools at your disposal. For example if the user asks "What are my latest alerts",
+      assume you need to search the cluster for alert documents.
+
+      ${renderVisualizationPrompt()}
+      
+      ${indexSelectionInstructions()}
+      
+      ${customInstructionsBlock(customInstructions)}
+
+       ### Additional info
+       - The current date is: ${formatDate()}
+       - You can use markdown format to structure your response`,
+    ],
+    ...messages,
+  ];
+};
+
+const indexSelectionInstructions = () => {
+  return `## Handling the Index Parameter for search Tool
+Search tools targeting Elasticsearch have an **optional** \`index\` parameter. Your instructions for using it are:
+
+- **Provide the \`index\` parameter ONLY if the user explicitly states an index name.** Look for a specific name in their current message or in the recent conversation history (e.g., "in 'my-logs', find all errors").
+
+- **If no index is mentioned, you MUST call the \`${tools.search}\` tool WITHOUT the \`index\` parameter.** Do not ask the user for an index or attempt to discover one using other tools.
+`;
+};
+
+function renderVisualizationPrompt() {
+  return `#### Rendering Visualizations with the <visualization> Element
       When a tool call returns a ToolResult of type "tabular_data", you may render a visualization in the UI by emitting a custom XML element:
 
       <visualization tool-result-id="TOOL_RESULT_ID_HERE" />
@@ -57,31 +86,5 @@ export const getActPrompt = ({
       }
 
       To visualize this response your reply should be:
-      <visualization tool-result-id="LiDo" />
-
-      
-      - When the user ask a question, assume it refers to information that can be retrieved from Elasticsearch,
-      and/or from the search tools at your disposal. For example if the user asks "What are my latest alerts",
-      assume you need to search the cluster for alert documents.
-      
-      ${indexSelectionInstructions()}
-      
-      ${customInstructionsBlock(customInstructions)}
-
-       ### Additional info
-       - The current date is: ${formatDate()}
-       - You can use markdown format to structure your response`,
-    ],
-    ...messages,
-  ];
-};
-
-const indexSelectionInstructions = () => {
-  return `## Handling the Index Parameter for search Tool
-Search tools targeting Elasticsearch have an **optional** \`index\` parameter. Your instructions for using it are:
-
-- **Provide the \`index\` parameter ONLY if the user explicitly states an index name.** Look for a specific name in their current message or in the recent conversation history (e.g., "in 'my-logs', find all errors").
-
-- **If no index is mentioned, you MUST call the \`${tools.search}\` tool WITHOUT the \`index\` parameter.** Do not ask the user for an index or attempt to discover one using other tools.
-`;
-};
+      <visualization tool-result-id="LiDo" />`;
+}

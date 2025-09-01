@@ -32,7 +32,7 @@ const useConversation = () => {
     },
   });
 
-  return useMemo(() => ({ conversation }), [conversation]);
+  return { conversation };
 };
 
 export const useAgentId = () => {

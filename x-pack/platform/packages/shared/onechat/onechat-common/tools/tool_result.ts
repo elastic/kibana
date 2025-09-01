@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { randomInt } from 'crypto';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 
@@ -37,10 +36,8 @@ export interface TabularDataResult {
   data: {
     source?: 'esql';
     query: string;
-    result: {
-      columns: EsqlEsqlColumnInfo[];
-      values: FieldValue[][];
-    };
+    columns: EsqlEsqlColumnInfo[];
+    values: FieldValue[][];
   };
 }
 
@@ -69,8 +66,3 @@ export type ToolResult =
   | QueryResult
   | OtherResult
   | ErrorResult;
-
-const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-export function getToolResultId(len = 4): string {
-  return Array.from({ length: len }, () => charset[randomInt(charset.length)]).join('');
-}
