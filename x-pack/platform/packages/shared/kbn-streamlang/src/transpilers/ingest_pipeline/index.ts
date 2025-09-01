@@ -27,6 +27,7 @@ export const transpile = (
   );
 
   return {
+    field_access_pattern: 'flexible',
     processors,
   };
 };

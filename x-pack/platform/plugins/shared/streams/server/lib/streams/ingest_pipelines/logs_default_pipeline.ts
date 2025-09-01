@@ -20,12 +20,6 @@ export const getLogsDefaultPipelineProcessors = (isServerless?: boolean) => [
       ignore_missing_pipeline: true,
     },
   },
-  {
-    dot_expander: {
-      field: '*',
-      ignore_failure: true,
-    },
-  },
   isServerless
     ? {
         // This is a placeholder for the ECS migration - since it's not yet exposed on serverless, we need to handle it via painless script.
@@ -103,18 +97,4 @@ export const getLogsDefaultPipelineProcessors = (isServerless?: boolean) => [
         // Later on this will be replaced by the /logs endpoint
         normalize_for_stream: {},
       },
-  {
-    dot_expander: {
-      path: 'resource.attributes',
-      field: '*',
-      ignore_failure: true,
-    },
-  },
-  {
-    dot_expander: {
-      path: 'attributes',
-      field: '*',
-      ignore_failure: true,
-    },
-  },
 ];

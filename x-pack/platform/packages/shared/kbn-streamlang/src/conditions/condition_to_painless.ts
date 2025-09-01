@@ -18,9 +18,9 @@ import { BINARY_OPERATORS } from '../../types/conditions';
 // Utility: get the field name from a filter condition
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (typeof conditionOrField === 'string') {
-    return `relevant_fields['${conditionOrField}']`;
+    return `$('${conditionOrField}', null)`;
   }
-  return `relevant_fields['${conditionOrField.field}']`;
+  return `$('${conditionOrField.field}', null)`;
 }
 
 function encodeValue(value: string | number | boolean) {
@@ -255,8 +255,6 @@ export function conditionToPainless(condition: Condition): string {
     fieldDefinitions = generateFieldDefinitions(fields);
   }
   return `
-  def relevant_fields = [:];
-  ${fieldDefinitions}
   try {
   if (${conditionToStatement(condition)}) {
     return true;
