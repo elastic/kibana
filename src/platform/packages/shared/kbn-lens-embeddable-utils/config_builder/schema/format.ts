@@ -58,9 +58,9 @@ const byteFormatSchema = schema.object({
    */
   suffix: schema.maybe(
     schema.string({
-    meta: {
+      meta: {
         description: 'Suffix',
-    },
+      },
     })
   ),
 });
@@ -88,9 +88,9 @@ const durationFormatSchema = schema.object({
    */
   suffix: schema.maybe(
     schema.string({
-    meta: {
-      description: 'Suffix',
-    },
+      meta: {
+        description: 'Suffix',
+      },
     })
   ),
 });

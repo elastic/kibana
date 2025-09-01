@@ -18,7 +18,6 @@ import {
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
-  
 } from './constants';
 import { formatSchema } from './format';
 

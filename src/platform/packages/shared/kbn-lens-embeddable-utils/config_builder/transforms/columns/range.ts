@@ -9,10 +9,8 @@
 
 import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
-import {
-  LENS_RANGE_DEFAULT_INTERVAL,
-} from '../../schema/constants';
-import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps  } from './utils';
+import { LENS_RANGE_DEFAULT_INTERVAL } from '../../schema/constants';
+import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
 export function fromRangeOrHistogramLensApiToLensState(
