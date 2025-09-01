@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import type { MetricField } from '../../types';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { TabTitleAndDescription } from './tab_title_and_description';
 
 interface EsqlQueryTabProps {

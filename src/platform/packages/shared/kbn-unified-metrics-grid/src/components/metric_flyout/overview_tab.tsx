@@ -10,8 +10,8 @@
 import { EuiBadge, EuiText, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DimensionBadges } from './dimension_badges';
-import type { MetricField } from '../../types';
 import { categorizeDimensions } from '../../utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
 
@@ -118,7 +118,7 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
                 },
               ]
             : []),
-          ...(metric.timeSeriesMetric
+          ...(metric.instrument
             ? [
                 {
                   title: (
@@ -131,7 +131,7 @@ export const OverviewTab = ({ metric }: OverviewTabProps) => {
                       <EuiSpacer size="xs" />
                     </EuiText>
                   ),
-                  description: <EuiBadge>{metric.timeSeriesMetric}</EuiBadge>,
+                  description: <EuiBadge>{metric.instrument}</EuiBadge>,
                 },
               ]
             : []),

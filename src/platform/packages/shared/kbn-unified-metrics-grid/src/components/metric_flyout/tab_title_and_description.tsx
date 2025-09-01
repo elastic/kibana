@@ -15,7 +15,7 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import React from 'react';
-import type { MetricField } from '../../types';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 
 interface OverviewTabProps {
   metric: MetricField;

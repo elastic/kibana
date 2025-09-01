@@ -25,13 +25,13 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
-import type { MetricField } from '../../types';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from '../../hooks/use_flyout_a11y';
 
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
-  esqlQuery: string;
+  esqlQuery?: string;
   isOpen: boolean;
   onClose: () => void;
 }

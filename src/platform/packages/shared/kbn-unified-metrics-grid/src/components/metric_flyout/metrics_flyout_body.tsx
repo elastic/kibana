@@ -10,8 +10,8 @@
 import React, { useState } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { OverviewTab } from './overview_tab';
-import type { MetricField } from '../../types';
 import { EsqlQueryTab } from './esql_query_tab';
 
 const tabIds = {
@@ -42,7 +42,7 @@ const tabs = [
 
 interface MetricFlyoutBodyProps {
   metric: MetricField;
-  esqlQuery: string;
+  esqlQuery?: string;
 }
 
 export const MetricFlyoutBody = ({ metric, esqlQuery }: MetricFlyoutBodyProps) => {
