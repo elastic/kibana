@@ -60,11 +60,12 @@ describe('constants', () => {
     expect(OKTA_ADMIN_ROLES).toContain('API Access Management Administrator');
     expect(OKTA_ADMIN_ROLES).toContain('Group Membership Administrator');
     expect(OKTA_ADMIN_ROLES).toContain('Read-only Administrator');
-    expect(OKTA_ADMIN_ROLES.length).toBeGreaterThan(0);
+    expect(OKTA_ADMIN_ROLES.length).toBe(10);
   });
 
   it('should have correct AD_ADMIN_ROLES', () => {
     expect(AD_ADMIN_ROLES).toEqual(['Domain Admins', 'Enterprise Admins']);
+    expect(AD_ADMIN_ROLES.length).toBe(2);
   });
 
   it('should have correct INTEGRATION_MATCHERS_DETAILED', () => {
