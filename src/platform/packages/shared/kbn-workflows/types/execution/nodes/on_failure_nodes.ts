@@ -38,35 +38,48 @@ export const ExitRetryNodeSchema = z.object({
 });
 export type ExitRetryNode = z.infer<typeof ExitRetryNodeSchema>;
 
-export const EnterOnFailureZoneNodeSchema = z.object({
+export const EnterTryBlockNodeSchema = z.object({
   id: z.string(),
-  type: z.literal('enter-on-failure-zone'),
+  type: z.literal('enter-try-block'),
   enterNormalPathNodeId: z.string(),
-  exitNormalPathNodeId: z.string(),
-  enterFallbackPathNodeId: z.string(),
-  exitFallbackPathNodeId: z.string(),
   exitNodeId: z.string(),
 });
-export type EnterOnFailureZoneNode = z.infer<typeof EnterOnFailureZoneNodeSchema>;
+export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;
 
-export const ExitOnFailureZoneNodeSchema = z.object({
+export const ExitTryBlockNodeSchema = z.object({
   id: z.string(),
-  type: z.literal('exit-on-failure-zone'),
+  type: z.literal('exit-try-block'),
   enterNodeId: z.string(),
 });
-export type ExitOnFailureZoneNode = z.infer<typeof ExitOnFailureZoneNodeSchema>;
+export type ExitTryBlockNode = z.infer<typeof ExitTryBlockNodeSchema>;
 
-export const EnterPathNodeSchema = z.object({
+export const EnterNormalPathNodeSchema = z.object({
   id: z.string(),
-  type: z.union([z.literal('enter-normal-path'), z.literal('enter-failure-path')]),
-  enterNodeId: z.string(),
+  type: z.literal('enter-normal-path'),
+  enterZoneNodeId: z.string(),
+  enterFailurePathNodeId: z.string(),
 });
-export type EnterPathNode = z.infer<typeof EnterPathNodeSchema>;
+export type EnterNormalPathNode = z.infer<typeof EnterNormalPathNodeSchema>;
 
-export const ExitPathNodeSchema = z.object({
+export const ExitNormalPathNodeSchema = z.object({
   id: z.string(),
-  type: z.union([z.literal('exit-normal-path'), z.literal('exit-failure-path')]),
+  type: z.literal('exit-normal-path'),
   exitOnFailureZoneNodeId: z.string(),
   enterNodeId: z.string(),
 });
-export type ExitPathNode = z.infer<typeof ExitPathNodeSchema>;
+export type ExitNormalPathNode = z.infer<typeof ExitNormalPathNodeSchema>;
+
+export const EnterFallbackPathNodeSchema = z.object({
+  id: z.string(),
+  type: z.literal('enter-fallback-path'),
+  enterZoneNodeId: z.string(),
+});
+export type EnterFallbackPathNode = z.infer<typeof EnterFallbackPathNodeSchema>;
+
+export const ExitFallbackPathNodeSchema = z.object({
+  id: z.string(),
+  type: z.literal('exit-fallback-path'),
+  exitOnFailureZoneNodeId: z.string(),
+  enterNodeId: z.string(),
+});
+export type ExitFallbackPathNode = z.infer<typeof ExitFallbackPathNodeSchema>;

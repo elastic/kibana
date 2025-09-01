@@ -46,18 +46,27 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
-    try {
-      const step = this.step;
+    // TODO: remove this random failure logic
+    // Generate a random value from 1 to 100 for potential use in steps
+    if (this.step.name.includes('random') && this.step.name.includes('fail')) {
+      const getRandomValue = () => Math.floor(Math.random() * 100) + 1;
+      const randomValue = getRandomValue();
 
-      // Evaluate optional 'if' condition
-      const shouldRun = await this.evaluateCondition(step.if);
-      if (!shouldRun) {
+      if (randomValue % 2 === 0) {
+        throw new Error(`Failing step due to random value: ${randomValue}`);
+      }
+
+      if (!this.step.type) {
         return {
-          input: undefined,
-          output: undefined,
-          error: undefined,
+          input: withInputs,
+          output: {},
+          error: null,
         };
       }
+    }
+
+    try {
+      const step = this.step;
 
       // Parse step type and determine if it's a sub-action
       const [stepType, subActionName] = step.type.includes('.')
