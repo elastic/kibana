@@ -16,7 +16,6 @@ import { useRootTransactionContext } from '../../hooks/use_root_transaction';
 import { useTransactionLatencyChart } from '../../hooks/use_transaction_latency_chart';
 import { Section } from '../../../components/section';
 import { FieldWithoutActions } from '../../../components/field_without_actions';
-// import { SimilarSpans } from '../../../components/similar_spans';
 
 export interface TransactionDurationSummaryProps {
   transactionDuration: number;
@@ -44,92 +43,74 @@ export function TransactionDurationSummary({
     serviceName,
   });
 
-  const datatest = latencyChartData
-    ? {
-        spanDistributionChartData: latencyChartData.transactionDistributionChartData,
-        percentileThresholdValue: latencyChartData.percentileThresholdValue,
-      }
-    : { spanDistributionChartData: [], percentileThresholdValue: 0 };
-
   return (
-    <>
-      {/* <SimilarSpans
-        latencyChart={{
-          data: datatest,
-          loading: latencyChartLoading,
-          hasError: latencyChartHasError,
-        }}
-        spanDuration={transactionDuration}
-        isOtelSpan={false}
-      /> */}
-      <Section
-        title={i18n.translate(
-          'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.title',
-          {
-            defaultMessage: 'Duration',
-          }
-        )}
-        subtitle={i18n.translate(
-          'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.description',
-          {
-            defaultMessage: 'Time taken to complete this transaction from start to finish.',
-          }
-        )}
-      >
-        <>
-          <FieldWithoutActions
-            label={i18n.translate(
-              'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.duration.title',
-              {
-                defaultMessage: 'Duration',
-              }
-            )}
-          >
-            <EuiText size="xs">
-              <Duration
-                duration={transactionDuration}
-                parent={{
-                  type: 'trace',
-                  duration: rootTransaction?.duration,
-                  loading: rootTransactionLoading,
-                }}
-                size="xs"
+    <Section
+      title={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.title',
+        {
+          defaultMessage: 'Duration',
+        }
+      )}
+      subtitle={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.description',
+        {
+          defaultMessage: 'Time taken to complete this transaction from start to finish.',
+        }
+      )}
+    >
+      <>
+        <FieldWithoutActions
+          label={i18n.translate(
+            'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.duration.title',
+            {
+              defaultMessage: 'Duration',
+            }
+          )}
+        >
+          <EuiText size="xs">
+            <Duration
+              duration={transactionDuration}
+              parent={{
+                type: 'trace',
+                duration: rootTransaction?.duration,
+                loading: rootTransactionLoading,
+              }}
+              size="xs"
+            />
+          </EuiText>
+        </FieldWithoutActions>
+        <EuiHorizontalRule margin="xs" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <h3>
+                {i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
+                  {
+                    defaultMessage: 'Latency',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
+
+            {(latencyChartLoading || latencyChartData) && (
+              <DurationDistributionChart
+                data={latencyChartData?.transactionDistributionChartData ?? []}
+                markerValue={latencyChartData?.percentileThresholdValue ?? 0}
+                markerCurrentEvent={transactionDuration}
+                hasData={!!latencyChartData}
+                loading={latencyChartLoading}
+                hasError={latencyChartHasError}
+                eventType={ProcessorEvent.transaction}
+                showAxisTitle={false}
+                showLegend={false}
+                dataTestSubPrefix="docViewerTransactionOverview"
               />
-            </EuiText>
-          </FieldWithoutActions>
-          <EuiHorizontalRule margin="xs" />
-
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="xxxs">
-                <h3>
-                  {i18n.translate(
-                    'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
-                    {
-                      defaultMessage: 'Latency',
-                    }
-                  )}
-                </h3>
-              </EuiTitle>
-
-              {(latencyChartLoading || latencyChartData) && (
-                <DurationDistributionChart
-                  data={latencyChartData?.transactionDistributionChartData ?? []}
-                  markerValue={latencyChartData?.percentileThresholdValue ?? 0}
-                  markerCurrentEvent={transactionDuration}
-                  hasData={!!latencyChartData}
-                  loading={latencyChartLoading}
-                  hasError={latencyChartHasError}
-                  eventType={ProcessorEvent.transaction}
-                  showAxisTitle={false}
-                  showLegend={false}
-                  dataTestSubPrefix="docViewerTransactionOverview"
-                />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      </Section>
-    </>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    </Section>
   );
 }
