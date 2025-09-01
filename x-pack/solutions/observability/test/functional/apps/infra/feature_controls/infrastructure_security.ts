@@ -94,6 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
         });
 
+        // here
         it(`shows Wafflemap`, async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
