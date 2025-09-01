@@ -1169,7 +1169,7 @@
         "@elastic/ecs"
       ],
       "reviewers": [
-        "team:kibana-core"
+        "team:obs-ux-logs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -1177,7 +1177,7 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "Team:Core"
+        "Team:obs-ux-logs"
       ],
       "enabled": true
     },
