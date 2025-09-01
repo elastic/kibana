@@ -39575,9 +39575,6 @@ paths:
       tags:
         - Fleet remote synced integrations
       x-state: Generally available; added in 9.1.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
   /api/fleet/remote_synced_integrations/status:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
@@ -39706,9 +39703,6 @@ paths:
       tags:
         - Fleet remote synced integrations
       x-state: Generally available; added in 9.1.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
   /api/fleet/service_tokens:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'

@@ -37519,9 +37519,6 @@ paths:
       summary: Create a service token
       tags:
         - Fleet service tokens
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/fleet/settings:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read.'
