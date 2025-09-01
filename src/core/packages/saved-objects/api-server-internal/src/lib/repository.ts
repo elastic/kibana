@@ -63,6 +63,7 @@ import {
   type IndexMapping,
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { SearchClient } from '@kbn/core-saved-objects-api-server/src/search_client';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import type { RepositoryHelpers } from './apis/helpers';
@@ -328,6 +329,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       },
       this.apiExecutionContext
     );
+  }
+
+  /** TODO(@jloleysens) */
+  getSearchClient() {
+    return {
+      search: this.client.search.bind(this.client),
+      openPointInTime: this.client.openPointInTime.bind(this.client),
+      closePointInTime: this.client.closePointInTime.bind(this.client),
+    } as SearchClient;
   }
 
   /**
