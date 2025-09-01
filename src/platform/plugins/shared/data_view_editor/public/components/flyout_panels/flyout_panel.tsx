@@ -10,7 +10,7 @@
 import type { CSSProperties } from 'react';
 import React, { useState, useLayoutEffect, useCallback, createContext, useContext } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, useEuiMaxBreakpoint, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
@@ -117,13 +117,14 @@ export const useFlyoutPanelContext = (): Context => {
 };
 
 const componentStyles = {
-  flyoutColumn: css({
-    height: '100%',
-    overflow: 'hidden',
-    ['@media only screen and (max-width: 767px)']: {
-      height: 'auto',
-    },
-  }),
+  flyoutColumn: () =>
+    css({
+      height: '100%',
+      overflow: 'hidden',
+      [useEuiMaxBreakpoint('m')]: {
+        height: 'auto',
+      },
+    }),
   flyoutPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: '100%',
