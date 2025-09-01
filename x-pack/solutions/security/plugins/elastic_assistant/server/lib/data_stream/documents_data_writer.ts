@@ -112,7 +112,6 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
       } as WriterBulkResponse;
     }
   };
-
   getFilterByUser = (authenticatedUser: AuthenticatedUser) => ({
     filter: {
       bool: {
@@ -153,6 +152,63 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
       },
     },
   });
+  getFilterByConversationUser = (authenticatedUser: AuthenticatedUser) => ({
+    filter: {
+      bool: {
+        should: [
+          {
+            bool: {
+              must: [
+                {
+                  exists: { field: 'created_by' },
+                },
+                {
+                  bool: {
+                    should: [
+                      // Match on users.id if profile_uid exists
+                      ...(authenticatedUser.profile_uid
+                        ? [{ term: { 'created_by.id': authenticatedUser.profile_uid } }]
+                        : []),
+                      // Always try to match on users.name
+                      { term: { 'created_by.name': authenticatedUser.username } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              must: [
+                // legacy conversation without created_by field have users array we can match against
+                { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
+                {
+                  nested: {
+                    path: 'users',
+                    query: {
+                      bool: {
+                        should: [
+                          // Match on users.id if profile_uid exists
+                          ...(authenticatedUser.profile_uid
+                            ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
+                            : []),
+                          // Always try to match on users.name
+                          { term: { 'users.name': authenticatedUser.username } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  });
 
   private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
     documentsToUpdate: TUpdateParams[],
@@ -163,7 +219,9 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
-
+    const isConversationUpdate = this.options.index.includes(
+      '.kibana-elastic-ai-assistant-conversation'
+    );
     const responseToUpdate = await this.options.esClient.search({
       query: {
         bool: {
@@ -180,7 +238,11 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           ],
-          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
+          ...(authenticatedUser
+            ? isConversationUpdate
+              ? this.getFilterByConversationUser(authenticatedUser)
+              : this.getFilterByUser(authenticatedUser)
+            : {}),
         },
       },
       _source: false,
@@ -200,16 +262,20 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           _id: document.id,
           _index: responseToUpdate?.hits.hits.find((c) => c._id === document.id)?._index,
           _source: true,
+          retry_on_conflict: 3,
         },
       },
       getUpdateScript(document, updatedAt),
     ]);
   };
 
-  private getDeletedocumentsQuery = async (
+  private getDeleteDocumentsQuery = async (
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
+    const isConversationUpdate = this.options.index.includes(
+      '.kibana-elastic-ai-assistant-conversation'
+    );
     const responseToDelete = await this.options.esClient.search({
       query: {
         bool: {
@@ -226,7 +292,11 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           ],
-          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
+          ...(authenticatedUser
+            ? isConversationUpdate
+              ? this.getFilterByConversationUser(authenticatedUser)
+              : this.getFilterByUser(authenticatedUser)
+            : {}),
         },
       },
       _source: false,
@@ -259,7 +329,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
     const documentDeletedBody =
       params.documentsToDelete && params.documentsToDelete.length > 0
-        ? await this.getDeletedocumentsQuery(params.documentsToDelete, params.authenticatedUser)
+        ? await this.getDeleteDocumentsQuery(params.documentsToDelete, params.authenticatedUser)
         : [];
 
     const documentUpdatedBody =

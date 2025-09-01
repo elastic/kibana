@@ -84,7 +84,11 @@ import {
   getAgentTemplateAssetsMapCache,
   setAgentTemplateAssetsMapCache,
 } from './cache';
-import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
+import {
+  shouldIncludePackageWithDatastreamTypes,
+  filterOutExcludedDataStreamTypes,
+  shouldIncludePolicyTemplateWithDatastreamTypes,
+} from './exclude_datastreams_helper';
 
 export { getFile } from '../registry';
 
@@ -185,7 +189,9 @@ export async function getPackages(
     });
   }
 
-  packageList = filterOutExcludedDataStreamTypes(packageList);
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  packageList = filterOutExcludedDataStreamTypes(packageList, excludeDataStreamTypes);
 
   if (!excludeInstallStatus) {
     return packageList;
@@ -203,29 +209,6 @@ export async function getPackages(
   });
 
   return packageListWithoutStatus as PackageList;
-}
-
-function filterOutExcludedDataStreamTypes(
-  packageList: Array<Installable<any>>
-): Array<Installable<any>> {
-  const excludeDataStreamTypes =
-    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
-  if (excludeDataStreamTypes.length > 0) {
-    // filter out packages where all data streams have excluded types e.g. metrics
-    return packageList.reduce((acc, pkg) => {
-      const shouldInclude = shouldIncludePackageWithDatastreamTypes(pkg, excludeDataStreamTypes);
-      if (shouldInclude) {
-        // filter out excluded data stream types
-        const filteredDataStreams =
-          pkg.data_streams?.filter(
-            (dataStream: any) => !excludeDataStreamTypes.includes(dataStream.type)
-          ) ?? [];
-        acc.push({ ...pkg, data_streams: filteredDataStreams });
-      }
-      return acc;
-    }, []);
-  }
-  return packageList;
 }
 
 interface GetInstalledPackagesOptions {
@@ -582,6 +565,7 @@ export async function getPackageInfo({
       'Package is not compatible with the current project data stream types'
     );
   }
+
   const updated = {
     ...packageInfo,
     ...additions,
@@ -610,6 +594,16 @@ function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | 
       (acc: RegistryPolicyTemplate[], policyTemplate: RegistryPolicyTemplate) => {
         const policyTemplateIntegrationTemplate =
           policyTemplate as RegistryPolicyIntegrationTemplate;
+
+        const shouldIncludePolicyTemplate = shouldIncludePolicyTemplateWithDatastreamTypes(
+          packageInfo,
+          policyTemplate,
+          excludeDataStreamTypes
+        );
+        if (!shouldIncludePolicyTemplate) {
+          return acc;
+        }
+
         if (policyTemplateIntegrationTemplate.inputs) {
           const filteredInputs = policyTemplateIntegrationTemplate.inputs.filter((input: any) => {
             const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
