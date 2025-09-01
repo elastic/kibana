@@ -35,7 +35,7 @@ import {
   right,
 } from '../utils';
 import { ApiExecutionContext } from '../types';
-import { GetBulkOperationErrorRawResponse } from '../utils/internal_utils';
+import { GetBulkOperationErrorRawResponse, isMgetError } from '../utils/internal_utils';
 
 export type ChangeAccessControlActionType = 'changeOwnership' | 'changeAccessMode';
 
@@ -357,7 +357,3 @@ export const changeObjectAccessControl = async (
     ),
   };
 };
-
-function isMgetError(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.MgetMultiGetError {
-  return Boolean(doc && 'error' in doc);
-}

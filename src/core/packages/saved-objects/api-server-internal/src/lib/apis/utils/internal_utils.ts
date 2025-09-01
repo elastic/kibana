@@ -298,3 +298,9 @@ export const errorContent = (error: DecoratedError) => error.output.payload;
 export function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
 }
+
+export function isMgetError(
+  doc?: estypes.MgetResponseItem<unknown>
+): doc is estypes.MgetMultiGetError {
+  return Boolean(doc && 'error' in doc);
+}
