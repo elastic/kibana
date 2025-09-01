@@ -2117,13 +2117,13 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.17.0":
-  version "8.19.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.19.0.tgz#7fef627e41151cb16771ffad1a9005e100a9d17c"
-  integrity sha512-bBCP78nYTNYmy0zngTM9cSpflMZScXeahC8hirtsSZ03UiywDqefEEmsQcEihb0Mw08PjFYbdx8TznHqDnRULg==
+"@elastic/elasticsearch@8.17.0":
+  version "8.17.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.17.0.tgz#0214265bc04a3fe0d23a410b8d08b28217aac540"
+  integrity sha512-FZ+gQUrPsMpQ2RRIXwTmCoUeFCEausMhp4eQOyxT9j1cwGXHJrhelR6jffM1SC95kQUkB7+TcTq7oQ+bG2BQ9g==
   dependencies:
-    "@elastic/transport" "^8.9.6"
-    apache-arrow "18.x - 19.x"
+    "@elastic/transport" "^8.9.1"
+    apache-arrow "^18.0.0"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.6.3":
@@ -2452,7 +2452,7 @@
     unzip-stream "^0.3.4"
     yaml "^2.2.2"
 
-"@elastic/transport@^8.3.1", "@elastic/transport@^8.9.6":
+"@elastic/transport@^8.3.1", "@elastic/transport@^8.9.1":
   version "8.9.6"
   resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.9.6.tgz#f17eb2d042ea8fa2836dab56ed2446ca117146b1"
   integrity sha512-v71jgmZtgPg2ouXF5KTPxU1a6z7YYc8nazAS7jLySteC/vrShs1OJh6oEEeo5oDc19MYUofV/JV1h5vqJVBXOw==
@@ -13933,7 +13933,7 @@ anymatch@^3.0.0, anymatch@^3.0.3, anymatch@^3.1.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-"apache-arrow@18.x - 19.x":
+apache-arrow@^18.0.0:
   version "18.0.0"
   resolved "https://registry.yarnpkg.com/apache-arrow/-/apache-arrow-18.0.0.tgz#a187bd55318a7a68b6ff09835d05e89e019eba2e"
   integrity sha512-gFlPaqN9osetbB83zC29AbbZqGiCuFH1vyyPseJ+B7SIbfBtESV62mMT/CkiIt77W6ykC/nTWFzTXFs0Uldg4g==
