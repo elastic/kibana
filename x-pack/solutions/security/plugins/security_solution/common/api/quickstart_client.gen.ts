@@ -410,6 +410,11 @@ import type {
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
+  StartDashboardsMigrationRequestParamsInput,
+  StartDashboardsMigrationRequestBodyInput,
+  StartDashboardsMigrationResponse,
+  StopDashboardsMigrationRequestParamsInput,
+  StopDashboardsMigrationResponse,
   UpsertDashboardMigrationResourcesRequestParamsInput,
   UpsertDashboardMigrationResourcesRequestBodyInput,
   UpsertDashboardMigrationResourcesResponse,
@@ -2686,6 +2691,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Starts a SIEM dashboards migration using the migration id provided
+   */
+  async startDashboardsMigration(props: StartDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartDashboardsMigration`);
+    return this.kbnClient
+      .request<StartDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/start',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -2711,6 +2735,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Stops a running SIEM dashboards migration using the migration id provided
+   */
+  async stopDashboardsMigration(props: StopDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopDashboardsMigration`);
+    return this.kbnClient
+      .request<StopDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stop',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3260,12 +3302,19 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface StartDashboardsMigrationProps {
+  params: StartDashboardsMigrationRequestParamsInput;
+  body: StartDashboardsMigrationRequestBodyInput;
+}
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;
   body: StartRuleMigrationRequestBodyInput;
+}
+export interface StopDashboardsMigrationProps {
+  params: StopDashboardsMigrationRequestParamsInput;
 }
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;

@@ -158,7 +158,7 @@ export const RunScriptParamsSchema = schema.object({
 });
 
 export const CancelParamsSchema = schema.object({
-  comment: schema.maybe(schema.string({ minLength: 1 })),
+  comment: schema.string({ minLength: 1 }),
   actionId: schema.string({ minLength: 1 }),
 });
 

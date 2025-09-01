@@ -11,7 +11,6 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { Stream } from 'stream';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
@@ -54,7 +53,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointSecrets
 > {
   private readonly oAuthToken: OAuthTokenManager;
-  private readonly experimentalFeatures: ExperimentalFeatures;
 
   private readonly urls: {
     machines: string;
@@ -63,8 +61,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   };
 
   constructor(
-    params: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>,
-    experimentalFeatures: ExperimentalFeatures
+    params: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>
   ) {
     super(params);
     this.oAuthToken = new OAuthTokenManager({
@@ -78,7 +75,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       machineActions: `${this.config.apiUrl}/api/machineactions`,
       libraryFiles: `${this.config.apiUrl}/api/libraryfiles`,
     };
-    this.experimentalFeatures = experimentalFeatures;
 
     this.registerSubActions();
   }
@@ -129,13 +125,11 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       method: 'runScript',
       schema: RunScriptParamsSchema,
     });
-    if (this.experimentalFeatures.microsoftDefenderEndpointCancelOn) {
-      this.registerSubAction({
-        name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
-        method: 'cancelAction',
-        schema: CancelParamsSchema,
-      });
-    }
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+      method: 'cancelAction',
+      schema: CancelParamsSchema,
+    });
 
     this.registerSubAction({
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
