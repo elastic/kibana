@@ -99,7 +99,7 @@ describe('metric visualization', () => {
     secondaryAlign: 'right',
     primaryPosition: 'bottom',
     titleWeight: 'bold',
-    iconAlign: 'left',
+    iconAlign: 'right',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
     secondaryLabelPosition: 'before',
@@ -516,7 +516,7 @@ describe('metric visualization', () => {
                   "static-color",
                 ],
                 "iconAlign": Array [
-                  "left",
+                  "right",
                 ],
                 "inspectorTableId": Array [
                   "first",
@@ -604,7 +604,7 @@ describe('metric visualization', () => {
                   "static-color",
                 ],
                 "iconAlign": Array [
-                  "left",
+                  "right",
                 ],
                 "inspectorTableId": Array [
                   "first",
@@ -947,7 +947,7 @@ describe('metric visualization', () => {
                 "static-color",
               ],
               "iconAlign": Array [
-                "left",
+                "right",
               ],
               "inspectorTableId": Array [
                 "first",
@@ -1214,7 +1214,7 @@ describe('metric visualization', () => {
       Object {
         "applyColorTo": "background",
         "icon": "empty",
-        "iconAlign": "left",
+        "iconAlign": "right",
         "layerId": "first",
         "layerType": "data",
         "primaryAlign": "right",

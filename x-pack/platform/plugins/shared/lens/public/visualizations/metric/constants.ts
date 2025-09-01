@@ -41,6 +41,10 @@ type MetricStateOptinalsWithDefault = Pick<
 
 type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 
+export const legacyMetricStateDefaults: Pick<MetricStateDefaults, 'iconAlign'> = {
+  iconAlign: 'left',
+};
+
 /** Defaults for select optional Metric vis state options */
 export const metricStateDefaults: MetricStateDefaults = {
   titlesTextAlign: 'left',

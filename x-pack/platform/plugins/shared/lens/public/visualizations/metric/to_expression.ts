@@ -22,7 +22,7 @@ import type { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import type { MetricVisualizationState } from './types';
-import { metricStateDefaults } from './constants';
+import { legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import {
   getColorMode,
   getDefaultConfigForMode,
@@ -169,6 +169,17 @@ export const toExpression = (
       ? state.secondaryTrend
       : getDefaultConfigForMode(secondaryDynamicColorMode);
 
+  const hasMetricIcon = hasIcon(state.icon);
+  // If an icon is present but no iconAlign is set (legacy state), default to 'left' alignment;
+  // otherwise, use the configured or default alignment
+  let iconAlign: 'right' | 'left';
+  if (hasMetricIcon) {
+    // Legacy: If iconAlign is missing, default to 'left'
+    iconAlign = state.iconAlign ?? legacyMetricStateDefaults.iconAlign;
+  } else {
+    iconAlign = metricStateDefaults.iconAlign;
+  }
+
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
@@ -197,12 +208,12 @@ export const toExpression = (
     titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
     primaryAlign: state.primaryAlign ?? metricStateDefaults.primaryAlign,
     secondaryAlign: state.secondaryAlign ?? metricStateDefaults.secondaryAlign,
-    iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
+    iconAlign,
     valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
     primaryPosition: state.primaryPosition ?? metricStateDefaults.primaryPosition,
     titleWeight: state.titleWeight ?? metricStateDefaults.titleWeight,
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
-    icon: hasIcon(state.icon) ? state.icon : undefined,
+    icon: hasMetricIcon ? state.icon : undefined,
     palette:
       isMetricNumeric && state.palette?.params
         ? [

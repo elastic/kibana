@@ -17,6 +17,7 @@ import { ToolbarPopover } from '../../../shared_components';
 import type { MetricVisualizationState, ValueFontMode } from '../types';
 import {
   METRIC_LAYOUT_BY_POSITION,
+  legacyMetricStateDefaults,
   metricStateDefaults,
   type MetricLayoutWithDefault,
 } from '../constants';
@@ -120,12 +121,16 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
 
       {hasIcon && (
         <IconAlignmentOption
-          value={state.iconAlign ?? metricStateDefaults.iconAlign}
+          // Use 'left' as the legacy default if iconAlign is not set
+          value={state.iconAlign ?? legacyMetricStateDefaults.iconAlign}
           onChange={(newIconAlign) => {
-            setState({
-              ...state,
-              iconAlign: newIconAlign,
-            });
+            const prevIconAlign = state.iconAlign ?? legacyMetricStateDefaults.iconAlign;
+            if (prevIconAlign !== newIconAlign) {
+              setState({
+                ...state,
+                iconAlign: newIconAlign,
+              });
+            }
           }}
         />
       )}

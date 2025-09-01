@@ -41,7 +41,12 @@ import { CollapseSetting } from '../../shared_components/collapse_setting';
 import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorMode, getDefaultConfigForMode, getSecondaryLabelSelected } from './helpers';
-import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID, metricStateDefaults } from './constants';
+import {
+  SECONDARY_DEFAULT_STATIC_COLOR,
+  GROUP_ID,
+  metricStateDefaults,
+  legacyMetricStateDefaults,
+} from './constants';
 
 export type SupportingVisType = 'panel' | 'bar' | 'trendline';
 
@@ -838,11 +843,12 @@ function PrimaryMetricEditor(props: SubProps) {
             }
 
             // If icon is set but iconAlign is missing, set legacy align
+            // same check as in x-pack/platform/plugins/shared/lens/public/visualizations/metric/to_expression.ts
             if (state.icon && !state.iconAlign) {
               setState({
                 ...state,
                 icon: newIcon,
-                iconAlign: 'left',
+                iconAlign: legacyMetricStateDefaults.iconAlign,
               });
               return;
             }

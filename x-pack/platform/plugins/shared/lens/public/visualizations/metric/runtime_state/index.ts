@@ -7,28 +7,25 @@
 
 import type { MetricVisualizationState } from '../types';
 
-/**
- * Checks if the given MetricVisualizationState contains any legacy properties
- * that require migration to the latest state shape.
- */
-const hasLegacyStateProperties = (state: MetricVisualizationState) => {
-  return (
-    typeof state.secondaryPrefix !== 'undefined' || typeof state.valuesTextAlign !== 'undefined'
-  );
-};
-
 export const convertToRunTimeState = (state: MetricVisualizationState) => {
-  if (hasLegacyStateProperties(state)) {
-    // Remove legacy properties from the state
-    const { secondaryPrefix, valuesTextAlign, ...restState } = state;
+  // Remove legacy state properties if they exist
+  const { secondaryPrefix, valuesTextAlign, ...restState } = state;
+  let newState = { ...restState };
 
-    return {
-      ...restState,
-      secondaryLabel:
-        secondaryPrefix && !state.secondaryLabel ? secondaryPrefix : state.secondaryLabel,
+  if (valuesTextAlign) {
+    newState = {
+      ...newState,
       primaryAlign: state.primaryAlign ?? valuesTextAlign,
       secondaryAlign: state.secondaryAlign ?? valuesTextAlign,
     };
   }
-  return state;
+
+  if (secondaryPrefix && !newState.secondaryLabel) {
+    newState = {
+      ...newState,
+      secondaryLabel: secondaryPrefix,
+    };
+  }
+
+  return newState;
 };
