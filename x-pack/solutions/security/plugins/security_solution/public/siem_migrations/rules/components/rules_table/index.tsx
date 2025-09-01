@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
@@ -36,7 +36,7 @@ import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
@@ -117,7 +117,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const tableSelection: EuiTableSelectionType<RuleMigrationRule> = useMemo(
       () => ({
         selectable: (item: RuleMigrationRule) => {
-          return !item.elastic_rule?.id && item.translation_result === RuleTranslationResult.FULL;
+          return (
+            !item.elastic_rule?.id && item.translation_result === MigrationTranslationResult.FULL
+          );
         },
         selectableMessage: (selectable: boolean, item: RuleMigrationRule) => {
           if (selectable) {
@@ -252,7 +254,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         const canMigrationRuleBeInstalled =
           !isRulesLoading &&
           !migrationRule.elastic_rule?.id &&
-          migrationRule.translation_result === RuleTranslationResult.FULL;
+          migrationRule.translation_result === MigrationTranslationResult.FULL;
         return (
           <EuiFlexGroup>
             <EuiFlexItem>

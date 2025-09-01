@@ -24,7 +24,35 @@ describe('RENAME', () => {
       expect(rename).toMatchObject({
         type: 'command',
         name: 'rename',
-        args: [{}],
+        args: [
+          {
+            type: 'function',
+            name: 'as',
+            args: [{}, {}],
+          },
+        ],
+      });
+    });
+
+    it('supports assignment syntax', () => {
+      const src = `
+        FROM employees
+        | KEEP first_name, last_name, still_hired
+        | RENAME still_hired = employed`;
+      const { ast, errors } = EsqlQuery.fromSrc(src);
+      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
+
+      expect(errors.length).toBe(0);
+      expect(rename).toMatchObject({
+        type: 'command',
+        name: 'rename',
+        args: [
+          {
+            type: 'function',
+            name: '=',
+            args: [{}, {}],
+          },
+        ],
       });
     });
   });
