@@ -39704,15 +39704,11 @@ paths:
                   - attributes
       summary: Get remote synced integrations status
       tags:
-<<<<<<< HEAD
-        - CCR Remote synced integrations
-=======
         - Fleet remote synced integrations
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
->>>>>>> ebb81fc8cbc ([Fleet] remove sync integrations APIs in serverless (#233482))
   /api/fleet/service_tokens:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
