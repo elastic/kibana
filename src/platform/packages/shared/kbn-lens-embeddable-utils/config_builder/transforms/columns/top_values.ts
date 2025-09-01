@@ -67,15 +67,14 @@ export function fromTermsLensApiToLensState(
     ...getLensStateBucketSharedProps({ ...options, field }),
     params: {
       secondaryFields,
-      size: size, // it cannot be 0 (zero)
+      size, // it cannot be 0 (zero)
       accuracyMode: Boolean(increase_accuracy),
       include: includes?.values ?? [],
       includeIsRegex: includes?.as_regex ?? false,
       exclude: excludes?.values ?? [],
       excludeIsRegex: excludes?.as_regex ?? false,
       otherBucket: Boolean(other_bucket),
-      missingBucket:
-        other_bucket?.include_documents_without_field,
+      missingBucket: other_bucket?.include_documents_without_field,
       orderBy: orderByConfig,
       orderDirection,
       orderAgg:

@@ -23,7 +23,7 @@ export const fromPercentileAPItoLensState = (
     ...getLensStateMetricSharedProps(options),
     params: {
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
-      percentile: percentile,
+      percentile,
     },
   };
 };
