@@ -57,40 +57,12 @@ export const IndexName: FC = () => {
       setIsLoading(false);
       return;
     }
-    validateIndexName(indexNameValue).then(() => {
+    setIndexName(indexNameValue).then(() => {
       setIsInitialized(true);
     });
   });
 
-  const validateIndexName = useCallback(
-    async (value: string): Promise<boolean> => {
-      setIsLoading(true);
-      const indexExists = await fileUpload.checkIndexExists(value);
-      setIsLoading(false);
-      if (indexExists) {
-        setIndexValidationStatus(STATUS.FAILED);
-        setError([
-          i18n.translate('indexEditor.indexName.alreadyExistsError', {
-            defaultMessage: 'Index name already exists',
-          }),
-        ]);
-        return false;
-      }
-      setIndexValidationStatus(STATUS.COMPLETED);
-      setFileUploadIndexName(value);
-      setError([]);
-      return true;
-    },
-    [fileUpload, setFileUploadIndexName, setIndexValidationStatus]
-  );
-
-  if (!isInitialized) {
-    return null; // or a loading spinner
-  }
-
-  const startWithEditOpen = error.length > 0 || !indexNameValue;
-
-  const validateOnType = (value: string) => {
+  const hasIndexNameCharsErrors = (value: string) => {
     if (INDEX_NAME_INVALID_START_CHARS.some((char) => value.startsWith(char))) {
       setError([
         i18n.translate('indexEditor.indexName.invalidStartCharError', {
@@ -98,7 +70,7 @@ export const IndexName: FC = () => {
           values: { chars: INDEX_NAME_INVALID_START_CHARS.join(', ') },
         }),
       ]);
-      return;
+      return true;
     }
 
     if (INDEX_NAME_INVALID_CHARS.some((char) => value.includes(char))) {
@@ -108,9 +80,58 @@ export const IndexName: FC = () => {
           values: { chars: INDEX_NAME_INVALID_CHARS.join(', ') },
         }),
       ]);
-      return;
+      return true;
     }
+
+    return false;
   };
+
+  const setIndexName = useCallback(
+    async (value: string): Promise<boolean> => {
+      setIsLoading(true);
+
+      const hasCharErrors = hasIndexNameCharsErrors(value);
+      if (hasCharErrors) {
+        setIsLoading(false);
+        return false;
+      }
+
+      const indexExists = await fileUpload.checkIndexExists(value);
+
+      if (indexExists) {
+        setIsLoading(false);
+        setError([
+          i18n.translate('indexEditor.indexName.alreadyExistsError', {
+            defaultMessage: 'Index name already exists',
+          }),
+        ]);
+        setIndexValidationStatus(STATUS.FAILED);
+        return false;
+      }
+
+      if (!isIndexCreated) {
+        indexUpdateService.setIndexName(value);
+      }
+      setIndexValidationStatus(STATUS.COMPLETED);
+      setFileUploadIndexName(value);
+      setError([]);
+      setIsLoading(false);
+      return true;
+    },
+    [
+      fileUpload,
+      setFileUploadIndexName,
+      setIndexValidationStatus,
+      indexUpdateService,
+      isIndexCreated,
+    ]
+  );
+
+  if (!isInitialized) {
+    return null; // or a loading spinner
+  }
+
+  const startWithEditOpen = error.length > 0 || !indexNameValue;
 
   return (
     <EuiInlineEditTitle
@@ -138,7 +159,7 @@ export const IndexName: FC = () => {
           autoFocus: true,
           onChange: (e) => {
             setError([]);
-            validateOnType(e.target.value);
+            hasIndexNameCharsErrors(e.target.value);
           },
           'data-test-subj': 'indexNameInput',
         },
@@ -150,27 +171,7 @@ export const IndexName: FC = () => {
         'data-test-subj': 'indexNameReadMode',
       }}
       onSave={async (value) => {
-        if (error.length) {
-          return false;
-        }
-
-        setIsLoading(true);
-        const indexExists = await fileUpload.checkIndexExists(value);
-        setIsLoading(false);
-        if (!indexExists) {
-          setIndexValidationStatus(STATUS.COMPLETED);
-          indexUpdateService.setIndexName(value);
-          setFileUploadIndexName(value);
-          setError([]);
-          return true;
-        }
-        setError([
-          i18n.translate('indexEditor.indexName.alreadyExistsError', {
-            defaultMessage: 'Index name already exists',
-          }),
-        ]);
-        setIndexValidationStatus(STATUS.FAILED);
-        return false;
+        return await setIndexName(value);
       }}
     />
   );
