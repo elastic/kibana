@@ -28,7 +28,12 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
+import {
+  countAlertsForID,
+  flattenCaseSavedObject,
+  countUserAttachments,
+  countEventsForID,
+} from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -281,6 +286,7 @@ export const resolve = async (
         savedObject: resolvedSavedObject,
         comments: theComments.saved_objects,
         totalComment: theComments.total,
+        totalEvents: countEventsForID({ comments: theComments }),
         totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
       }),
     };

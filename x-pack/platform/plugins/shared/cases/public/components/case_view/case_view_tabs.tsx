@@ -215,10 +215,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
               name: EVENTS_TAB,
               badge: (
                 <EventsBadge
-                  totalEvents={
-                    caseData.comments.filter((comment) => comment.type === AttachmentType.event)
-                      .length
-                  }
+                  totalEvents={caseData.totalEvents}
                   activeTab={activeTab}
                   euiTheme={euiTheme}
                 />

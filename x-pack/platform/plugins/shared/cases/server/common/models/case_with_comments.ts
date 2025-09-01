@@ -164,7 +164,7 @@ export class CaseCommentModel {
     refresh: RefreshSetting;
   }): Promise<CaseCommentModel> {
     try {
-      const { totalComments, totalAlerts } = await this.getAttachmentStats();
+      const { totalComments, totalAlerts, totalEvents } = await this.getAttachmentStats();
 
       const updatedCase = await this.params.services.caseService.patchCase({
         originalCase: this.caseInfo,
@@ -174,6 +174,7 @@ export class CaseCommentModel {
           updated_by: { ...this.params.user },
           total_comments: totalComments,
           total_alerts: totalAlerts,
+          total_events: totalEvents,
         },
         refresh,
       });
@@ -203,10 +204,12 @@ export class CaseCommentModel {
 
     const totalComments = attachmentStats.get(this.caseInfo.id)?.userComments ?? 0;
     const totalAlerts = attachmentStats.get(this.caseInfo.id)?.alerts ?? 0;
+    const totalEvents = attachmentStats.get(this.caseInfo.id)?.events ?? 0;
 
     return {
       totalComments,
       totalAlerts,
+      totalEvents,
     };
   }
 

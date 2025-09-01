@@ -124,17 +124,20 @@ export const flattenCaseSavedObject = ({
   comments = [],
   totalComment = comments.length,
   totalAlerts = 0,
+  totalEvents = 0,
 }: {
   savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<AttachmentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
+  totalEvents?: number;
 }): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   totalAlerts,
+  totalEvents,
   ...savedObject.attributes,
 });
 
@@ -364,6 +367,19 @@ export const countAlertsForID = ({
   id: string;
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
+};
+
+/**
+ * Counts total events in a single case.
+ */
+export const countEventsForID = ({
+  comments,
+}: {
+  comments: SavedObjectsFindResponse<AttachmentAttributes>;
+}): number | undefined => {
+  return comments.saved_objects.filter(
+    (savedObject) => savedObject.attributes.type === AttachmentType.event
+  ).length;
 };
 
 /**
