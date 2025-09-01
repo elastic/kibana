@@ -27,6 +27,7 @@ interface ActionButton {
 interface Metrics {
   data: React.ReactNode;
   subtitle: string | string[] | React.ReactNode;
+  'data-test-subj'?: string;
 }
 
 interface BaseMetricCardProps {
@@ -87,12 +88,20 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
         <>
           <EuiFlexItem>
             <EuiText size="m">
-              <h3>{metric.data}</h3>
+              <h3 data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric`}>
+                {metric.data}
+              </h3>
             </EuiText>
           </EuiFlexItem>
           {metric.subtitle && (
             <EuiFlexItem>
-              <EuiText size="s" color="subdued">
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj={
+                  metric['data-test-subj'] && `${metric['data-test-subj']}-metric-subtitle`
+                }
+              >
                 {Array.isArray(metric.subtitle) ? metric.subtitle.join(' · ') : metric.subtitle}
               </EuiText>
             </EuiFlexItem>
@@ -107,12 +116,22 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
           <EuiFlexGroup key={index} direction="column" gutterSize="s">
             <EuiFlexItem>
               <EuiText size="m">
-                <h3>{metric.data}</h3>
+                <h3
+                  data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric`}
+                >
+                  {metric.data}
+                </h3>
               </EuiText>
             </EuiFlexItem>
             {metric.subtitle && (
               <EuiFlexItem>
-                <EuiText size="s" color="subdued">
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  data-test-subj={
+                    metric['data-test-subj'] && `${metric['data-test-subj']}-metric-subtitle`
+                  }
+                >
                   {Array.isArray(metric.subtitle) ? metric.subtitle.join(' · ') : metric.subtitle}
                 </EuiText>
               </EuiFlexItem>

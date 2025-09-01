@@ -158,6 +158,7 @@ export const RetentionCard = ({
           (isDslLifecycle(lifecycle) && getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention)) ??
           '∞',
         subtitle: subtitles,
+        'data-test-subj': 'retention',
       },
     ];
   };
@@ -175,6 +176,7 @@ export const RetentionCard = ({
       {
         data: isIlmLifecycle(lifecycle) ? <IlmLink lifecycle={lifecycle} /> : '',
         subtitle: subtitles,
+        'data-test-subj': 'retention',
       },
     ];
   };

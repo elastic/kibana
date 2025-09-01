@@ -41,6 +41,7 @@ export const IngestionCard = ({
           defaultMessage: 'Daily Average',
         }
       ),
+      'data-test-subj': 'ingestion-daily',
     },
     {
       data: (
@@ -57,6 +58,7 @@ export const IngestionCard = ({
           defaultMessage: 'Monthly Average',
         }
       ),
+      'data-test-subj': 'ingestion-monthly',
     },
   ];
 

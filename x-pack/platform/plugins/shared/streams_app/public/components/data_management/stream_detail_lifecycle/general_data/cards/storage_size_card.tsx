@@ -49,6 +49,7 @@ export const StorageSizeCard = ({
             : `${formatNumber(stats.totalDocs, '0,0')} documents`}
         </PrivilegesWarningIconWrapper>
       ),
+      'data-test-subj': 'storageSize',
     },
   ];
 
