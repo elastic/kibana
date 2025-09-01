@@ -17,6 +17,8 @@ import { PlatformSelector } from '../platform_selector';
 import { RootPrivilegesCallout } from './root_privileges_callout';
 import { UnprivilegedInfo } from './unprivileged_info';
 
+import { FipsIntegrationsCallout } from './fips_integrations_callout';
+
 interface Props {
   installCommand: CommandsByPlatform;
   isK8s: K8sMode | undefined;
@@ -27,6 +29,7 @@ interface Props {
   isManaged?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
+  policyHasFipsAgents?: boolean;
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({
@@ -39,10 +42,12 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   isManaged = true,
   onCopy,
   rootIntegrations,
+  policyHasFipsAgents,
 }) => {
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
+      <FipsIntegrationsCallout policyHasFipsAgents={Boolean(policyHasFipsAgents)} />
       <RootPrivilegesCallout rootIntegrations={rootIntegrations} />
       <UnprivilegedInfo />
       <PlatformSelector
