@@ -21,6 +21,8 @@ import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
 import { CspSecurityCommonProvider } from './security_common';
+import { BenchmarkPagePageProvider } from './csp_benchmark_page';
+import { FindingsPageProvider } from './csp_findings_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -40,4 +42,6 @@ export const pageObjects = {
   cloudPostureDashboard: CspDashboardPageProvider,
   cisAddIntegration: AddCisIntegrationFormPageProvider,
   cspSecurity: CspSecurityCommonProvider,
+  cspBenchmarkPage: BenchmarkPagePageProvider,
+  cspFindingsPage: FindingsPageProvider,
 };
