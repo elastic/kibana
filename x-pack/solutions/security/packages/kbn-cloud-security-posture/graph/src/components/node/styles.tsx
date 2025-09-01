@@ -346,7 +346,12 @@ export const getStackNodeStyle = (size: {
   height: size.height,
 });
 
-export const RoundedBadge = styled.div<{
+interface RoundedBadgeProps extends PropsWithChildren {
+  bgColor?: string;
+  'data-test-subj'?: string;
+}
+
+const ThemedRoundedBadge = styled.div<{
   euiTheme: EuiThemeComputed;
   bgColor?: string;
 }>`
@@ -364,6 +369,19 @@ export const RoundedBadge = styled.div<{
 
   font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
 `;
+
+export const RoundedBadge = ({
+  bgColor,
+  'data-test-subj': dataTestSubj,
+  children,
+}: RoundedBadgeProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <ThemedRoundedBadge euiTheme={euiTheme} bgColor={bgColor} data-test-subj={dataTestSubj}>
+      {children}
+    </ThemedRoundedBadge>
+  );
+};
 
 export const ToolTipButton = (props: PropsWithChildren) => {
   const { euiTheme } = useEuiTheme();

@@ -31,9 +31,74 @@ interface LabelNodeTooltipProps {
   analysis: DocumentAnalysisOutput;
 }
 
+const CountText: React.FC<{ testSubj: string; children: React.ReactNode }> = ({
+  testSubj,
+  children,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiText
+      data-test-subj={testSubj}
+      size="m"
+      css={css`
+        font-weight: ${euiTheme.font.weight.medium};
+        color: ${euiTheme.colors.textHeading};
+      `}
+    >
+      {children}
+    </EuiText>
+  );
+};
+
+const Section: React.FC<{ testSubj: string; badge: React.ReactNode; label: string }> = ({
+  testSubj,
+  badge,
+  label,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      data-test-subj={testSubj}
+      css={css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+      `}
+    >
+      {badge}
+      <EuiText
+        size="s"
+        color="ghost"
+        css={css`
+          font-weight: ${euiTheme.font.weight.medium};
+        `}
+      >
+        {label}
+      </EuiText>
+    </div>
+  );
+};
+
+const AlertBadge: React.FC<{ count: number }> = ({ count }) => (
+  <RoundedBadge>
+    <EuiIcon
+      type="warningFilled"
+      color="danger"
+      size="s"
+      data-test-subj="label-node-tooltip-alert-icon"
+    />
+    <CountText testSubj="label-node-tooltip-alert-count">{getAbbreviatedNumber(count)}</CountText>
+  </RoundedBadge>
+);
+
+const EventBadge: React.FC<{ count: number }> = ({ count }) => (
+  <RoundedBadge>
+    <CountText testSubj="label-node-tooltip-event-count">{getAbbreviatedNumber(count)}</CountText>
+  </RoundedBadge>
+);
+
 export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => {
   const { euiTheme } = useEuiTheme();
-
   return (
     <div
       css={css`
@@ -44,75 +109,18 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
       `}
     >
       {analysis.alertsCount > 0 && (
-        <div
-          data-test-subj="label-node-tooltip-alert-section"
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: ${euiTheme.size.s};
-          `}
-        >
-          <RoundedBadge euiTheme={euiTheme}>
-            <EuiIcon
-              type="warningFilled"
-              color="danger"
-              size="s"
-              data-test-subj="label-node-tooltip-alert-icon"
-            />
-
-            <EuiText
-              data-test-subj="label-node-tooltip-alert-count"
-              size="m"
-              css={css`
-                font-weight: ${euiTheme.font.weight.medium};
-                color: ${euiTheme.colors.textHeading};
-              `}
-            >
-              {getAbbreviatedNumber(analysis.alertsCount)}
-            </EuiText>
-          </RoundedBadge>
-          <EuiText
-            size="s"
-            color="default"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
-          >
-            {alertedEventsText}
-          </EuiText>
-        </div>
+        <Section
+          testSubj="label-node-tooltip-alert-section"
+          badge={<AlertBadge count={analysis.alertsCount} />}
+          label={alertedEventsText}
+        />
       )}
       {analysis.eventsCount > 0 && (
-        <div
-          data-test-subj="label-node-tooltip-event-section"
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: ${euiTheme.size.s};
-          `}
-        >
-          <RoundedBadge euiTheme={euiTheme}>
-            <EuiText
-              data-test-subj="label-node-tooltip-event-count"
-              size="m"
-              css={css`
-                font-weight: ${euiTheme.font.weight.medium};
-                color: ${euiTheme.colors.textHeading};
-              `}
-            >
-              {getAbbreviatedNumber(analysis.eventsCount)}
-            </EuiText>
-          </RoundedBadge>
-          <EuiText
-            size="s"
-            color="default"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
-          >
-            {defaultEventsText}
-          </EuiText>
-        </div>
+        <Section
+          testSubj="label-node-tooltip-event-section"
+          badge={<EventBadge count={analysis.eventsCount} />}
+          label={defaultEventsText}
+        />
       )}
     </div>
   );

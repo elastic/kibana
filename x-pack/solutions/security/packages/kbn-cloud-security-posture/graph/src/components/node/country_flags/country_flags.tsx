@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getCountryFlag, getCountryName } from './country_codes';
@@ -33,8 +33,6 @@ export interface CountryFlagsProps {
 }
 
 export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const validCodes = countryCodes.filter((code) => getCountryFlag(code) !== null);
 
   if (validCodes.length === 0) {
@@ -81,7 +79,7 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
     <EuiToolTip data-test-subj={TEST_SUBJ_TOOLTIP} position="right" content={toolTipContent}>
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
       <ToolTipButton aria-label={toolTipAriaLabel}>
-        <RoundedBadge data-test-subj={TEST_SUBJ_BADGE} euiTheme={euiTheme}>
+        <RoundedBadge data-test-subj={TEST_SUBJ_BADGE}>
           {visibleFlags}
           {counter}
         </RoundedBadge>

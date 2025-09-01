@@ -49,7 +49,7 @@ const AlertIcon: React.FC<{ color: string }> = ({ color }) => (
 const EventBadge: React.FC<{ count: number }> = ({ count }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <RoundedBadge euiTheme={euiTheme}>
+    <RoundedBadge>
       <CountText testSubj={TEST_SUBJ_EVENT_COUNT} color={euiTheme.colors.textHeading}>
         {displayCount(count)}
       </CountText>
@@ -64,7 +64,7 @@ const AlertCountBadge: React.FC<{ count: number; inverted?: boolean }> = ({ coun
   const textColor = inverted ? euiTheme.colors.textInverse : euiTheme.colors.textHeading;
 
   return (
-    <RoundedBadge euiTheme={euiTheme} bgColor={bgColor}>
+    <RoundedBadge bgColor={bgColor}>
       <AlertIcon color={iconColor} />
       <CountText testSubj={TEST_SUBJ_ALERT_COUNT} color={textColor}>
         {displayCount(count)}
@@ -73,15 +73,11 @@ const AlertCountBadge: React.FC<{ count: number; inverted?: boolean }> = ({ coun
   );
 };
 
-const AlertIconBadge: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <RoundedBadge euiTheme={euiTheme}>
-      <AlertIcon color="danger" />
-    </RoundedBadge>
-  );
-};
-
+const AlertIconBadge: React.FC = () => (
+  <RoundedBadge>
+    <AlertIcon color="danger" />
+  </RoundedBadge>
+);
 export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
   const { euiTheme } = useEuiTheme();
 
