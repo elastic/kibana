@@ -25,6 +25,7 @@ const classicStreamManagementSubTabs = [
   'lifecycle',
   'significantEvents',
   'schemaEditor',
+  'references',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];

@@ -183,7 +183,7 @@ export class Greeting {
 
 ### HTTP Routing
 The HTTP routes can be registered declaratively using the `Route` token from `@kbn/core-di-server`.
-All the routes should be bound explicitly in the request [scope](https://inversify.io/docs/fundamentals/binding/#scope).
+All the explicit routes bindings should be bound in the request [scope](https://inversify.io/docs/fundamentals/binding/#scope).
 
 The DI service will register a wrapper that dynamically instantiates the bound route handler.
 In this case, an isolated scope is created that should inherit all the plugin's services and global services from other plugins.
@@ -229,7 +229,6 @@ class GreetingRoute {
 }
 
 export const module = new ContainerModule(({ bind }) => {
-  bind(GreetingRoute).toSelf().inRequestScope();
   bind(Route).toConstantValue(GreetingRoute);
 });
 ```
@@ -267,7 +266,6 @@ class HelloWorldApplication {
 }
 
 export const module = new ContainerModule(({ bind }) => {
-  bind(HelloWorldApplication).toSelf().inRequestScope();
   bind(Application).toConstantValue(HelloWorldApplication);
 });
 ```
