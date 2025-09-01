@@ -15,7 +15,7 @@ import { USER_AVATAR_ITEM_TEST_ID } from '../../../../../../common/components/us
 import { useBulkGetUserProfiles } from '../../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { type RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SIEM_MIGRATIONS_ASSISTANT_USER,
 } from '../../../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
@@ -63,7 +63,7 @@ export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ migrationRule
             />
           ),
           event:
-            migrationRule.translation_result === RuleTranslationResult.UNTRANSLATABLE
+            migrationRule.translation_result === MigrationTranslationResult.UNTRANSLATABLE
               ? i18n.COMMENT_EVENT_UNTRANSLATABLE
               : i18n.COMMENT_EVENT_TRANSLATED,
           timestamp: moment(createdAt).format('ll'), // Date formats https://momentjs.com/docs/#/displaying/format/
