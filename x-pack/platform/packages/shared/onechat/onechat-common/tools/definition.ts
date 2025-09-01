@@ -19,6 +19,10 @@ export enum ToolType {
    * Tools based on ES|QL templates
    */
   esql = 'esql',
+  /**
+   * Index search tools
+   */
+  index_search = 'index_search',
 }
 
 /**
