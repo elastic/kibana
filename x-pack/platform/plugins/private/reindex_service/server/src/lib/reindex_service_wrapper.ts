@@ -186,22 +186,25 @@ export class ReindexServiceWrapper {
           errors: [],
         };
 
-        await asyncForEach(reindexJobs, async ({ indexName, newIndexName, settings }) => {
-          try {
-            const result = await reindexOrResume({
-              indexName,
-              newIndexName,
-              settings,
-              reindexOptions: { enqueue: true },
-            });
-            results.enqueued.push(result);
-          } catch (e) {
-            results.errors.push({
-              indexName,
-              message: e.message,
-            });
+        await asyncForEach(
+          reindexJobs,
+          async ({ indexName, newIndexName, settings, reindexOptions }) => {
+            try {
+              const result = await reindexOrResume({
+                indexName,
+                newIndexName,
+                settings,
+                reindexOptions: { ...reindexOptions, enqueue: true },
+              });
+              results.enqueued.push(result);
+            } catch (e) {
+              results.errors.push({
+                indexName,
+                message: e.message,
+              });
+            }
           }
-        });
+        );
         return results;
       },
       hasRequiredPrivileges: reindexService.hasRequiredPrivileges.bind(reindexService),

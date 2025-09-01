@@ -13,6 +13,7 @@ import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assist
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
+import { reindexSchema } from './reindex_indices';
 
 export function registerBatchReindexIndicesRoutes({
   router,
@@ -71,9 +72,7 @@ export function registerBatchReindexIndicesRoutes({
       },
       validate: {
         body: schema.object({
-          indexNames: schema.arrayOf(
-            schema.object({ indexName: schema.string(), newIndexName: schema.string() })
-          ),
+          indices: schema.arrayOf(reindexSchema),
         }),
       },
     },
@@ -82,14 +81,14 @@ export function registerBatchReindexIndicesRoutes({
         savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
-      const { indexNames } = request.body;
+      const { indices } = request.body;
 
       const reindexService = (await getReindexService()).getScopedClient({
         savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
         dataClient: esClient,
         request,
       });
-      const results = await reindexService.addToBatch(indexNames);
+      const results = await reindexService.addToBatch(indices);
 
       return response.ok({ body: results });
     })

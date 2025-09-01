@@ -265,7 +265,10 @@ export class ApiService {
   }
 
   public async startReindexTask(reindexArgs: Omit<ReindexArgs, 'reindexOptions'>) {
-    return this.reindexService!.startReindex(reindexArgs);
+    return this.reindexService!.startReindex({
+      ...reindexArgs,
+      reindexOptions: { enqueue: true, deleteOldIndex: true },
+    });
   }
   public async cancelReindexTask(indexName: string) {
     return this.reindexService!.cancelReindex(indexName);

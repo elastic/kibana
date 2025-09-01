@@ -25,8 +25,11 @@ export interface ReindexArgs {
   newIndexName: string;
   reindexOptions?: {
     enqueue?: boolean;
+    deleteOldIndex?: boolean;
   };
   settings?: IndexSettings;
 }
 
-export type BatchReindexArgs = Omit<ReindexArgs, 'reindexOptions'>;
+export type BatchReindexArgs = Omit<ReindexArgs, 'reindexOptions'> & {
+  reindexOptions?: Omit<ReindexArgs['reindexOptions'], 'enqueue'>;
+};

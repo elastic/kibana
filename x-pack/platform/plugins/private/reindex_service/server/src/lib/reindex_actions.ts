@@ -23,6 +23,10 @@ import { ReindexStatus, ReindexStep } from '../../../common';
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
 
+export type CreateReindexOpArgs = Omit<ReindexArgs, 'reindexOptions'> & {
+  reindexOptions?: ReindexOptions;
+};
+
 /**
  * A collection of utility functions pulled out out of the ReindexService to make testing simpler.
  * This is NOT intended to be used by any other code.
@@ -38,9 +42,7 @@ export interface ReindexActions {
     newIndexName,
     settings,
     reindexOptions,
-  }: Omit<ReindexArgs, 'reindexOptions'> & {
-    reindexOptions?: ReindexOptions;
-  }): Promise<ReindexSavedObject>;
+  }: CreateReindexOpArgs): Promise<ReindexSavedObject>;
 
   /**
    * Deletes a reindexOp.
