@@ -128,18 +128,17 @@ export const performBulkCreate = async <T>(
       );
     }
 
-    const accessControlToWrite = setAccessControl({
-      typeSupportsAccessControl,
-      createdBy,
-      accessMode,
-    });
     return right({
       method,
       object: {
         ...object,
         id,
         managed: setManaged({ optionsManaged, objectManaged }),
-        accessControl: accessControlToWrite,
+        accessControl: setAccessControl({
+          typeSupportsAccessControl,
+          createdBy,
+          accessMode,
+        }),
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
     }) as ExpectedResult;
