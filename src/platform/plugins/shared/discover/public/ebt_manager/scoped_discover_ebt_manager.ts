@@ -220,7 +220,7 @@ export class ScopedDiscoverEBTManager {
         fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
       );
 
-      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = categorizedFields;
+      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [...new Set(categorizedFields)];
     }
 
     this.reportEvent(QUERY_FIELDS_USAGE_EVENT_TYPE, eventData);
@@ -250,9 +250,7 @@ export class ScopedDiscoverEBTManager {
         ? getKqlFieldNamesFromExpression(embeddedQueryString)
         : [];
 
-      const esqlAndEmbeddedQueryCombined = [...esqlColumns, ...embeddedQueryColumns];
-
-      const fieldNames = [...new Set(esqlAndEmbeddedQueryCombined)];
+      const fieldNames = [...esqlColumns, ...embeddedQueryColumns];
 
       if (fieldNames.length === 0) {
         return;
@@ -270,7 +268,7 @@ export class ScopedDiscoverEBTManager {
         return;
       }
 
-      const extractedFieldNames = [...new Set(getKqlFieldNamesFromExpression(query.query))];
+      const extractedFieldNames = getKqlFieldNamesFromExpression(query.query);
 
       // we discarded an empty query earlier, so if we're getting an empty array here it's a full text search
       const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
