@@ -17,9 +17,12 @@ export const useTrainedModelPageUrl = () => {
 
   useEffect(() => {
     const fetchMlTrainedModelPageUrl = async () => {
-      const result = await ml.managementLocator?.getUrl(undefined, 'trained_models');
-      if (result?.url) {
-        setTrainedModelPageUrl(result.url);
+      const managementLocator = await ml.getManagementLocator?.();
+      if (managementLocator) {
+        const result = await managementLocator.getUrl(undefined, 'trained_models');
+        if (result?.url) {
+          setTrainedModelPageUrl(result.url);
+        }
       }
     };
 
