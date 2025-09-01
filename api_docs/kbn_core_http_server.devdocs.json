@@ -3457,6 +3457,10 @@
                 "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
               {
+                "plugin": "globalSearch",
+                "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_get_route.ts"
               },
@@ -3551,10 +3555,6 @@
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/cross_cluster_replication/register_stats_route.ts"
-              },
-              {
-                "plugin": "globalSearch",
-                "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
@@ -6305,6 +6305,10 @@
                 "path": "x-pack/platform/plugins/private/reindex_service/server/src/routes/batch_reindex_indices.ts"
               },
               {
+                "plugin": "globalSearch",
+                "path": "x-pack/platform/plugins/shared/global_search/server/routes/find.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
@@ -6399,10 +6403,6 @@
               {
                 "plugin": "crossClusterReplication",
                 "path": "x-pack/platform/plugins/private/cross_cluster_replication/server/routes/api/follower_index/register_create_route.ts"
-              },
-              {
-                "plugin": "globalSearch",
-                "path": "x-pack/platform/plugins/shared/global_search/server/routes/find.ts"
               },
               {
                 "plugin": "graph",
@@ -8191,6 +8191,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/users/change_password.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/di/server-internal/src/modules/http.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16617,6 +16621,10 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/enable.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/users/suggest.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
               },
@@ -16863,6 +16871,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/init.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/schedule_now.ts"
               },
               {
                 "plugin": "securitySolution",

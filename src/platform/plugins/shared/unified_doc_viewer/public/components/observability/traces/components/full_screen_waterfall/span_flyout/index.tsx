@@ -27,19 +27,13 @@ import { isSpanHit } from '../helpers/is_span';
 const flyoutId = 'spanDetailFlyout';
 
 export interface SpanFlyoutProps {
-  tracesIndexPattern: string;
   spanId: string;
   dataView: DocViewRenderProps['dataView'];
   onCloseFlyout: () => void;
 }
 
-export const SpanFlyout = ({
-  tracesIndexPattern,
-  spanId,
-  dataView,
-  onCloseFlyout,
-}: SpanFlyoutProps) => {
-  const { span, docId, loading } = useSpan({ indexPattern: tracesIndexPattern, spanId });
+export const SpanFlyout = ({ spanId, dataView, onCloseFlyout }: SpanFlyoutProps) => {
+  const { span, docId, loading } = useSpan({ spanId });
   const { euiTheme } = useEuiTheme();
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
     if (!span || !docId) return null;
@@ -92,7 +86,6 @@ export const SpanFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SpanFlyoutBody
-          tracesIndexPattern={tracesIndexPattern}
           hit={documentAsHit}
           dataView={dataView}
           loading={loading}

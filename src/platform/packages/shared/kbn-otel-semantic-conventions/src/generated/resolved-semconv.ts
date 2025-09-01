@@ -11,7 +11,6 @@
  * OpenTelemetry semantic conventions field definitions.
  *
  * This file is auto-generated. Do not edit manually.
- * Generated on: 2025-08-27T19:57:01.748Z
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 132
  * Metric groups: 347
@@ -1525,7 +1524,7 @@ export const semconvFlat = {
     description:
       'The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
     type: 'keyword',
-    example: 'C:cmdotecol --config="my directoryconfig.yaml"',
+    example: 'C:\\cmd\\otecol --config="my directory\\config.yaml"',
   },
   'process.command_args': {
     name: 'process.command_args',
