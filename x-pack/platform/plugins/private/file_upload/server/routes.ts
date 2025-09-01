@@ -548,4 +548,47 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         }
       }
     );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/index_searchable Check if an index is searchable
+   * @apiName CheckIndexSearchable
+   * @apiDescription Check if an index is searchable
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/index_searchable',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({ index: schema.string(), expectedCount: schema.number() }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { index, expectedCount } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+
+          const { count } = await esClient.asCurrentUser.count({ index });
+          const isSearchable = count >= expectedCount;
+
+          return response.ok({
+            body: { isSearchable },
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
 }
