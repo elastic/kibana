@@ -196,6 +196,15 @@ xpack.screenshotting.networkPolicy:
   rules: [ { allow: true, host: "elastic.co", protocol: "https:" } ]
 ```
 
+Example of a baseline configuration for disallowing all requests to external paths:
+```yaml
+xpack.screenshotting.networkPolicy:
+  rules: [ { allow: true, host: "localhost:5601", protocol: "http:" } ]
+```
+::::{note}
+Typically, Chromium will connect to {{kib}} on a local interface, but this may be different based on the environment and specific [headless browser connection settings](#reporting-kibana-server-settings).
+::::
+
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
 
 ```yaml
