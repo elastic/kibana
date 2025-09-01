@@ -82,7 +82,6 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.get(ctx, contentId, options);
-      console.log('content crud get-----');
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,

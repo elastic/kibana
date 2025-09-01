@@ -69,7 +69,6 @@ export function savedObjectToItem(
       getTagNamesFromReferences
     );
     const references = transformReferencesOut(savedObject.references ?? []);
-
     return {
       item: {
         id,

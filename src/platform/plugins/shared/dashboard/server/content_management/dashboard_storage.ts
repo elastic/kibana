@@ -17,7 +17,6 @@ import { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
-import { TypeOf } from '@kbn/config-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
@@ -33,11 +32,6 @@ import type {
   DashboardSearchOptions,
   DashboardItem,
 } from './latest';
-import {
-  dashboardAttributesSchemaResponse,
-  dashboardResponseMetaSchema,
-  dashboardGetResultSchema,
-} from './v1/cm_services';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -201,15 +195,11 @@ export class DashboardStorage {
     }
 
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
-    console.log('get dashboard response---', response);
     const validationError = transforms.get.out.result.validate(response);
-    console.log('00--------------');
     if (validationError) {
       if (this.throwOnResultValidationError) {
-        console.log('dashboard_storage Get validationError---', validationError);
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
-        console.log('dashboard_storage Get validationError 2---', validationError);
         this.logger.warn(`Invalid response. ${validationError.message}`);
       }
     }
@@ -225,10 +215,8 @@ export class DashboardStorage {
     );
 
     if (resultError) {
-      console.log(`resultError--------`, JSON.stringify(resultError));
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-    console.log('get dashboard result---', value.item);
     return value;
   }
 
@@ -292,11 +280,9 @@ export class DashboardStorage {
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
-    console.log('dashboard_storage Create item---', JSON.stringify(item));
     const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
-        console.log('dashboard_storage Create validationError---', validationError);
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
         this.logger.warn(`Invalid response. ${validationError.message}`);
@@ -312,7 +298,6 @@ export class DashboardStorage {
       { validate: false } // validation is done above
     );
     if (resultError) {
-      console.log('dashboard_storage Create resultError---', resultError);
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
 
@@ -336,8 +321,6 @@ export class DashboardStorage {
       DashboardAttributes
     >(data);
     if (dataError) {
-      console.error('dashboard_storage Data error in update:', data);
-      console.log('dashboard_storage Data error in update:', dataError);
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 

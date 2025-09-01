@@ -14,8 +14,6 @@ import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-manageme
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import { contentType } from 'mime-types';
-import { strictObject } from '@kbn/zod';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
