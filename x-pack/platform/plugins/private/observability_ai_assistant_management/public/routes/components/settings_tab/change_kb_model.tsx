@@ -335,7 +335,7 @@ export function ChangeKbModel({
                                 }
                               )
                             : i18n.translate(
-                                'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocInstalledLabel',
+                                'xpack.observabilityAiAssistantManagement.knowledgeBase.stateInstalled',
                                 {
                                   defaultMessage: 'Installed',
                                 }
