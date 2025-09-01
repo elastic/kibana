@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 export interface PromptObservableState {
   chunks: string[];
   message?: string;

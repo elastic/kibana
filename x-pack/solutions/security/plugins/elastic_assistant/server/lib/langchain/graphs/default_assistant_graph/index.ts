@@ -247,7 +247,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     newMessages,
     threadId,
-    resumeValue
+    resumeValue,
   });
 
   const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {
@@ -307,7 +307,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       inputs,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       logger,
-      resumeValue: resumeValue,
+      resumeValue,
       onLlmResponse,
       request,
       telemetry,

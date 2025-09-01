@@ -10,7 +10,11 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { Document } from 'langchain/document';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { knowledgeBaseReference, contentReferenceBlock, typedInterrupt } from '@kbn/elastic-assistant-common';
+import {
+  knowledgeBaseReference,
+  contentReferenceBlock,
+  typedInterrupt,
+} from '@kbn/elastic-assistant-common';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
@@ -78,22 +82,20 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
     if (kbDataClient == null) return null;
 
     return tool(
-      async (input, {configurable}) => {
-         const result = typedInterrupt(
-          {
-            type: "SELECT_OPTION",
-            description: `Trying to access user knowledge base`,
-            options: [
-              { label: "Reject", value: "REJECT", buttonColor: "danger" },
-              { label: "Approve", value: "APPROVE", buttonColor: "success" },
-            ],
-            threadId: configurable.thread_id
-          }
-        )
-        if (result.value === "APPROVE") {
+      async (input, { configurable }) => {
+        const result = typedInterrupt({
+          type: 'SELECT_OPTION',
+          description: `Trying to access user knowledge base`,
+          options: [
+            { label: 'Reject', value: 'REJECT', buttonColor: 'danger' },
+            { label: 'Approve', value: 'APPROVE', buttonColor: 'success' },
+          ],
+          threadId: configurable.thread_id,
+        });
+        if (result.value === 'APPROVE') {
           // proceed to execute the tool logic
         } else {
-          throw new Error(`User did not give permission to access their knowledge base`)
+          throw new Error(`User did not give permission to access their knowledge base`);
         }
         logger.debug(
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`

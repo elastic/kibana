@@ -70,8 +70,9 @@ export const useChatSend = ({
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
   const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
 
-  const handleResumeGraph: ResumeGraphFunction = useCallback(async (threadId, resumeValue) => {
-    if (!currentConversation?.apiConfig) {
+  const handleResumeGraph: ResumeGraphFunction = useCallback(
+    async (threadId, resumeValue) => {
+      if (!currentConversation?.apiConfig) {
         toasts?.addError(
           new Error('The conversation needs a connector configured in order to send a message.'),
           {
@@ -83,7 +84,7 @@ export const useChatSend = ({
         return;
       }
       const apiConfig = currentConversation.apiConfig;
-      debugger
+      debugger;
 
       const rawResponse = await sendMessage({
         apiConfig,
@@ -91,11 +92,11 @@ export const useChatSend = ({
         conversationId: currentConversation.id,
         replacements: currentConversation.replacements,
         threadId,
-        resumeValue
+        resumeValue,
       });
 
       assistantTelemetry?.reportAssistantMessageSent({
-        role: "user",
+        role: 'user',
         actionTypeId: apiConfig.actionTypeId,
         model: apiConfig.model,
         provider: apiConfig.provider,
@@ -108,7 +109,7 @@ export const useChatSend = ({
         ...currentConversation,
         messages: [...currentConversation.messages, responseMessage],
       });
-      
+
       assistantTelemetry?.reportAssistantMessageSent({
         role: responseMessage.role,
         actionTypeId: apiConfig.actionTypeId,

@@ -50,28 +50,23 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
 
     return tool(
       async (input, { configurable, toolCall }) => {
-
-        let adjustedQuestion: string | undefined = undefined;
-        const isApproved = typedInterrupt(
-          {
-            type: "SELECT_OPTION",
-            options: [
-              { label: "Rejected", value: "REJECTED", buttonColor: "danger" },
-              { label: "Approved", value: "APPROVED", buttonColor: "success" },
-            ],
-            description: "Do you want to adjust the search term?",
+        let adjustedQuestion: string | undefined;
+        const isApproved = typedInterrupt({
+          type: 'SELECT_OPTION',
+          options: [
+            { label: 'Rejected', value: 'REJECTED', buttonColor: 'danger' },
+            { label: 'Approved', value: 'APPROVED', buttonColor: 'success' },
+          ],
+          description: 'Do you want to adjust the search term?',
+          threadId: configurable.thread_id,
+        });
+        if (isApproved.value === 'APPROVED') {
+          adjustedQuestion = typedInterrupt({
+            type: 'INPUT_TEXT',
+            description: `Which term would you like to use instead?`,
             threadId: configurable.thread_id,
-          }
-        )
-        if (isApproved.value === "APPROVED") {
-          adjustedQuestion = typedInterrupt(
-            {
-              type: "INPUT_TEXT",
-              description: `Which term would you like to use instead?`,
-              threadId: configurable.thread_id,
-              placeholder: 'Enter new search term...'
-            }
-          ).value
+            placeholder: 'Enter new search term...',
+          }).value;
         }
 
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
@@ -120,8 +115,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         // TODO: Token pruning
         const result = JSON.stringify(citedDocs).substring(0, 20000);
 
-
-        return result
+        return result;
       },
       {
         name: toolDetails.name,

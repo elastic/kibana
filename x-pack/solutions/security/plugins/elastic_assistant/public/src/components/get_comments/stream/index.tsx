@@ -7,7 +7,12 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MessageRole, InterruptResumeValue, InterruptValue } from '@kbn/elastic-assistant-common';
+import type {
+  MessageRole,
+  InterruptResumeValue,
+  InterruptValue,
+} from '@kbn/elastic-assistant-common';
+import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -16,7 +21,6 @@ import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
 import { InterruptFactory } from '../typed_interrupt';
-import { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 interface Props {
   abortStream: () => void;
@@ -34,8 +38,8 @@ interface Props {
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
   messageRole: MessageRole;
-  interruptValue?: InterruptValue
-  interruptResumeValue?: InterruptResumeValue
+  interruptValue?: InterruptValue;
+  interruptResumeValue?: InterruptResumeValue;
   resumeGraph: ResumeGraphFunction;
 }
 
@@ -57,7 +61,7 @@ export const StreamComment = ({
   messageRole,
   interruptValue,
   interruptResumeValue,
-  resumeGraph
+  resumeGraph,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
@@ -111,8 +115,8 @@ export const StreamComment = ({
     if (!isControlsEnabled) {
       return;
     }
-    if(!isLastMessage){
-      return
+    if (!isLastMessage) {
+      return;
     }
     if (isAnythingLoading && reader) {
       return <StopGeneratingButton onClick={stopStream} />;
@@ -126,7 +130,14 @@ export const StreamComment = ({
     );
   }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream, isLastMessage]);
 
-  const footer = <InterruptFactory interruptValue={interruptValue} resumeGraph={resumeGraph} interruptResumeValue={interruptResumeValue} isLastMessage={isLastMessage} />;
+  const footer = (
+    <InterruptFactory
+      interruptValue={interruptValue}
+      resumeGraph={resumeGraph}
+      interruptResumeValue={interruptResumeValue}
+      isLastMessage={isLastMessage}
+    />
+  );
 
   return (
     <MessagePanel

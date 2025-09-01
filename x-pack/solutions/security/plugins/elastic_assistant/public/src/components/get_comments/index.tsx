@@ -67,7 +67,7 @@ export const getComments: GetComments =
     setIsStreaming,
     systemPromptContent,
     contentReferencesVisible,
-    resumeGraph
+    resumeGraph,
   }) => {
     if (!currentConversation) return [];
 

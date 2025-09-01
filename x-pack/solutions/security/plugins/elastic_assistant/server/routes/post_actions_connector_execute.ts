@@ -36,7 +36,7 @@ import {
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
-import { OnLlmResponse } from '../lib/langchain/executors/types';
+import type { OnLlmResponse } from '../lib/langchain/executors/types';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -81,7 +81,7 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
-        let onLlmResponse : OnLlmResponse | undefined;
+        let onLlmResponse: OnLlmResponse | undefined;
 
         const coreContext = await context.core;
         const inferenceChatModelDisabled =
@@ -106,7 +106,7 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          if(request.body.resumeValue && request.body.threadId === undefined) {
+          if (request.body.resumeValue && request.body.threadId === undefined) {
             throw new Error('threadId is required when resumeValue is provided');
           }
 
@@ -146,9 +146,12 @@ export const postActionsConnectorExecuteRoute = (
             disabled: request.query.content_references_disabled,
           });
 
-          onLlmResponse = async (
-            {content, traceData = {} , isError = false, interruptValue  }
-          ): Promise<void> => {
+          onLlmResponse = async ({
+            content,
+            traceData = {},
+            isError = false,
+            interruptValue,
+          }): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
                 content,
@@ -158,7 +161,7 @@ export const postActionsConnectorExecuteRoute = (
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
-                interruptValue: interruptValue,
+                interruptValue,
                 messageContent: prunedContent,
                 replacements: latestReplacements,
                 isError,
@@ -236,7 +239,7 @@ export const postActionsConnectorExecuteRoute = (
             await onLlmResponse({
               content: error.message,
               traceData: {},
-              isError: true
+              isError: true,
             });
           }
 

@@ -290,7 +290,7 @@ const AssistantComponent: React.FC<Props> = ({
     isLoading: isLoadingChatSend,
     setUserPrompt,
     userPrompt,
-    handleResumeGraph
+    handleResumeGraph,
   } = useChatSend({
     currentConversation,
     http,
@@ -380,7 +380,7 @@ const AssistantComponent: React.FC<Props> = ({
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
-            resumeGraph: handleResumeGraph
+            resumeGraph: handleResumeGraph,
           })}
           // Avoid comments going off the flyout
           css={css`

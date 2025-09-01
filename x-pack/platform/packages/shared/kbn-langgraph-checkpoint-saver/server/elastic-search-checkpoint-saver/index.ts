@@ -166,33 +166,33 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
             {
               bool: {
                 should: [
-                  { term: { "thread_id": threadId } },
-                  { term: { "thread_id.keyword": threadId } }
+                  { term: { thread_id: threadId } },
+                  { term: { 'thread_id.keyword': threadId } },
                 ],
-                minimum_should_match: 1
-              }
+                minimum_should_match: 1,
+              },
             },
             {
               bool: {
                 should: [
-                  { term: { "checkpoint_ns": checkpointNs } },
-                  { term: { "checkpoint_ns.keyword": checkpointNs } }
+                  { term: { checkpoint_ns: checkpointNs } },
+                  { term: { 'checkpoint_ns.keyword': checkpointNs } },
                 ],
-                minimum_should_match: 1
-              }
+                minimum_should_match: 1,
+              },
             },
             {
               bool: {
                 should: [
-                  { term: { "checkpoint_id": doc.checkpoint_id } },
-                  { term: { "checkpoint_id.keyword": doc.checkpoint_id } }
+                  { term: { checkpoint_id: doc.checkpoint_id } },
+                  { term: { 'checkpoint_id.keyword': doc.checkpoint_id } },
                 ],
-                minimum_should_match: 1
-              }
-            }
-          ]
-        }
-      }
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
     });
 
     const checkpoint = (await this.serde.loadsTyped(
@@ -231,12 +231,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       parentConfig:
         doc.parent_checkpoint_id != null
           ? {
-            configurable: {
-              thread_id: threadId,
-              checkpoint_ns: checkpointNs,
-              checkpoint_id: doc.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: threadId,
+                checkpoint_ns: checkpointNs,
+                checkpoint_id: doc.parent_checkpoint_id,
+              },
+            }
           : undefined,
     };
   }
@@ -250,8 +250,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     config: RunnableConfig,
     options?: CheckpointListOptions
   ): AsyncGenerator<CheckpointTuple> {
-
-    console.log("list", JSON.stringify({ config, options }, null, 2))
+    console.log('list', JSON.stringify({ config, options }, null, 2));
     const { limit, before } = options ?? {};
     const mustClauses = [];
 
@@ -285,7 +284,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       },
     });
 
-    console.log(result)
+    console.log(result);
 
     for await (const hit of result.hits.hits) {
       const source = hit._source;
@@ -312,12 +311,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         metadata,
         parentConfig: source.parent_checkpoint_id
           ? {
-            configurable: {
-              thread_id: source.thread_id,
-              checkpoint_ns: source.checkpoint_ns,
-              checkpoint_id: source.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: source.thread_id,
+                checkpoint_ns: source.checkpoint_ns,
+                checkpoint_id: source.parent_checkpoint_id,
+              },
+            }
           : undefined,
       };
     }
@@ -369,7 +368,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     await this.client.update({
       index: this.checkpointIndex,
       id: compositeId,
-      doc: doc,
+      doc,
       doc_as_upsert: true,
       refresh: this.refreshPolicy,
     });
@@ -448,9 +447,13 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       );
 
       if (result.errors) {
-        this.logger.error(`Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`);
+        this.logger.error(
+          `Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`
+        );
 
-        throw new Error(`Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`);
+        throw new Error(
+          `Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`
+        );
       }
     }
   }

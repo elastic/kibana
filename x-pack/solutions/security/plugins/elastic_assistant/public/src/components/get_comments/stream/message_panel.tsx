@@ -25,9 +25,12 @@ export function MessagePanel(props: Props) {
           <FailedToLoadResponse />
         </span>
       ) : null}
-      {props.footer && <>          
-      <EuiSpacer size="m" />
-        {props.footer}</>}
+      {props.footer && (
+        <>
+          <EuiSpacer size="m" />
+          {props.footer}
+        </>
+      )}
       {props.controls ? (
         <>
           <EuiSpacer size="m" />

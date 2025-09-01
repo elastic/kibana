@@ -89,7 +89,8 @@ export const appendConversationMessages = async ({
         attempt++;
         if (attempt < maxRetries) {
           logger.warn(
-            `Version conflict detected, retrying appendConversationMessages (attempt ${attempt + 1
+            `Version conflict detected, retrying appendConversationMessages (attempt ${
+              attempt + 1
             }) for conversation ID: ${existingConversation.id}`
           );
           await new Promise((resolve) => setTimeout(resolve, 100 * attempt)); // Exponential backoff
@@ -134,20 +135,20 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       role: message.role,
       ...(message.metadata
         ? {
-          metadata: {
-            content_references: message.metadata.contentReferences,
-            interrupt_value: message.metadata.interruptValue,
-            interrupt_resume_value: message.metadata.interruptResumeValue,
-          },
-        }
+            metadata: {
+              content_references: message.metadata.contentReferences,
+              interrupt_value: message.metadata.interruptValue,
+              interrupt_resume_value: message.metadata.interruptResumeValue,
+            },
+          }
         : {}),
       ...(message.traceData
         ? {
-          trace_data: {
-            trace_id: message.traceData.traceId,
-            transaction_id: message.traceData.transactionId,
-          },
-        }
+            trace_data: {
+              trace_id: message.traceData.traceId,
+              transaction_id: message.traceData.transactionId,
+            },
+          }
         : {}),
     })),
   };

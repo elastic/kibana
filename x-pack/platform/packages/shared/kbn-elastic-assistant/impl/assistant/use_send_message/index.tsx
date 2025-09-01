@@ -27,7 +27,7 @@ interface ResumeGraphProps {
   conversationId: string;
   replacements: Replacements;
   threadId: string;
-  resumeValue: InterruptResumeValue
+  resumeValue: InterruptResumeValue;
 }
 
 type InvokeGraphProps = SendMessageProps | ResumeGraphProps;
@@ -51,7 +51,7 @@ export const useSendMessage = (): UseSendMessage => {
       const threadId = 'threadId' in args ? args.threadId : undefined;
       const resumeValue = 'resumeValue' in args ? args.resumeValue : undefined;
 
-      debugger
+      debugger;
       try {
         return await fetchConnectorExecuteAction({
           conversationId: args.conversationId,
@@ -60,8 +60,8 @@ export const useSendMessage = (): UseSendMessage => {
           assistantStreamingEnabled,
           http: args.http,
           message: messages,
-          threadId: threadId,
-          resumeValue: resumeValue,
+          threadId,
+          resumeValue,
           replacements: args.replacements,
           signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,

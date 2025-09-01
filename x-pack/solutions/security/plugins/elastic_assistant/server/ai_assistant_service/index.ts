@@ -30,6 +30,7 @@ import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_service
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
@@ -72,7 +73,6 @@ import {
   ANONYMIZATION_FIELDS_RESOURCE,
 } from './constants';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
-import { IndexPatternAdapter } from '@kbn/index-adapter';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -107,7 +107,7 @@ export type CreateDataStream = (params: {
     | 'prompts'
     | 'attackDiscovery'
     | 'defendInsights'
-    | 'alertSummary'
+    | 'alertSummary';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -116,9 +116,7 @@ export type CreateDataStream = (params: {
 }) => DataStreamSpacesAdapter;
 
 export type CreateIndexPattern = (params: {
-  resource:
-    | 'checkpoints'
-    | 'checkpointWrites';
+  resource: 'checkpoints' | 'checkpointWrites';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -260,19 +258,17 @@ export class AIAssistantService {
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines && {
-            template: {
-              settings: {
-                'index.default_pipeline':
-                  this.resourceNames.pipelines[
-                    resource as keyof typeof this.resourceNames.pipelines
-                  ],
-              },
-            },
-          }),
+        template: {
+          settings: {
+            'index.default_pipeline':
+              this.resourceNames.pipelines[resource as keyof typeof this.resourceNames.pipelines],
+          },
+        },
+      }),
     });
 
     return newIndexPattern;
-  }
+  };
 
   private createDataStream: CreateDataStream = ({
     resource,

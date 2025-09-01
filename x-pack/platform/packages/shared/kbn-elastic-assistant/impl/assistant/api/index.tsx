@@ -60,7 +60,7 @@ export const fetchConnectorExecuteAction = async ({
   traceOptions,
   screenContext,
   threadId,
-  resumeValue
+  resumeValue,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const isStream = assistantStreamingEnabled;
 
