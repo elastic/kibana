@@ -38,7 +38,7 @@ const indexEntry: EsKnowledgeBaseEntrySchema = {
   ],
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],
@@ -60,7 +60,7 @@ export const documentEntry: EsDocumentEntry = {
   text: 'test',
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],
@@ -160,7 +160,7 @@ export const getKnowledgeBaseEntryMock = (
   global: false,
   users: [
     {
-      name: 'my_username',
+      name: 'elastic',
       id: 'my_profile_uid',
     },
   ],
