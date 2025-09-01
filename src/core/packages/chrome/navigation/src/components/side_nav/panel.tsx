@@ -8,7 +8,8 @@
  */
 
 import { EuiPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
-import React, { ReactNode, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 
 import { useRovingIndex } from '../../utils/use_roving_index';
@@ -37,8 +38,9 @@ export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
         className="side_panel"
         css={css`
           ${useEuiOverflowScroll('y')}
-          border-right: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+          border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
           height: 100%;
+          scroll-padding-top: 44px; /* account for fixed header when scrolling to elements */
         `}
         color="subdued"
         // > For instance, only plain or transparent panels can have a border and/or shadow.

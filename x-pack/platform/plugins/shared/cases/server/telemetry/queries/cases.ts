@@ -22,6 +22,7 @@ import type {
   CaseAggregationResult,
   AttachmentAggregationResult,
   FileAttachmentAggregationResults,
+  CasesTelemetryWithAlertsAggsByOwnerResults,
 } from '../types';
 import {
   findValueInBuckets,
@@ -70,15 +71,23 @@ export const getCasesTelemetryData = async ({
   logger,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['cases']> => {
   try {
-    const [casesRes, commentsRes, totalAlertsRes, totalConnectorsRes, latestDates, filesRes] =
-      await Promise.all([
-        getCasesSavedObjectTelemetry(savedObjectsClient),
-        getCommentsSavedObjectTelemetry(savedObjectsClient),
-        getAlertsTelemetry(savedObjectsClient),
-        getConnectorsTelemetry(savedObjectsClient),
-        getLatestCasesDates({ savedObjectsClient, logger }),
-        getFilesTelemetry(savedObjectsClient),
-      ]);
+    const [
+      casesRes,
+      casesWithAlertsRes,
+      commentsRes,
+      totalAlertsRes,
+      totalConnectorsRes,
+      latestDates,
+      filesRes,
+    ] = await Promise.all([
+      getCasesSavedObjectTelemetry(savedObjectsClient),
+      getCasesWithAlertsByOwner(savedObjectsClient),
+      getCommentsSavedObjectTelemetry(savedObjectsClient),
+      getAlertsTelemetry(savedObjectsClient),
+      getConnectorsTelemetry(savedObjectsClient),
+      getLatestCasesDates({ savedObjectsClient, logger }),
+      getFilesTelemetry(savedObjectsClient),
+    ]);
 
     const aggregationsBuckets = getAggregationsBuckets({
       aggs: casesRes.aggregations,
@@ -125,18 +134,21 @@ export const getCasesTelemetryData = async ({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'securitySolution',
       }),
       obs: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'observability',
       }),
       main: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'cases',
       }),
     };
@@ -161,6 +173,7 @@ const getCasesSavedObjectTelemetry = async (
         aggs: {
           ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
           ...getAssigneesAggregations(),
+          ...getStatusAggregation(),
         },
       },
     }),
@@ -176,16 +189,12 @@ const getCasesSavedObjectTelemetry = async (
       ...caseByOwnerAggregationQuery,
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
       ...getAssigneesAggregations(),
+      ...getStatusAggregation(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
       syncAlerts: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.syncAlerts` },
-      },
-      status: {
-        terms: {
-          field: `${CASE_SAVED_OBJECT}.attributes.status`,
-        },
       },
       users: {
         cardinality: {
@@ -229,6 +238,14 @@ const getAssigneesAggregations = () => ({
           },
         },
       },
+    },
+  },
+});
+
+const getStatusAggregation = () => ({
+  status: {
+    terms: {
+      field: `${CASE_SAVED_OBJECT}.attributes.status`,
     },
   },
 });
@@ -375,6 +392,34 @@ const getConnectorsTelemetry = async (
         referenceType: 'cases',
         agg: 'cardinality',
       }),
+    },
+  });
+};
+
+const getCasesWithAlertsByOwner = async (
+  savedObjectsClient: TelemetrySavedObjectsClient
+): Promise<SavedObjectsFindResponse<unknown, CasesTelemetryWithAlertsAggsByOwnerResults>> => {
+  return savedObjectsClient.find<unknown, CasesTelemetryWithAlertsAggsByOwnerResults>({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
+    filter: getOnlyAlertsCommentsFilter(),
+    aggs: {
+      by_owner: {
+        terms: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`,
+          size: 3,
+          include: ['securitySolution', 'observability', 'cases'],
+        },
+        aggs: {
+          ...getReferencesAggregationQuery({
+            savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+            referenceType: 'cases',
+            agg: 'cardinality',
+          }),
+        },
+      },
     },
   });
 };

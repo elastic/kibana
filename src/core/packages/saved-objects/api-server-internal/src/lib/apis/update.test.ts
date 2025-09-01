@@ -15,20 +15,20 @@ import type { estypes } from '@elastic/elasticsearch';
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
-  SavedObjectsRawDocSource,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  SavedObjectsSerializer,
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectsSecurityExtension,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_ISOLATED_TYPE,

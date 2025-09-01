@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { ApplicationUsageTracker } from '@kbn/analytics';
-import { UsageCollectionSetup } from '.';
+import type { ApplicationUsageTracker } from '@kbn/analytics';
+import type { UsageCollectionSetup } from '.';
 import { ApplicationUsageContext } from './components/track_application_view';
 
 export type Setup = jest.Mocked<UsageCollectionSetup>;

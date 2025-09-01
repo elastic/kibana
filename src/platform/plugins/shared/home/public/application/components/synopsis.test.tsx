@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Synopsis, SynopsisProps } from './synopsis';
+import type { SynopsisProps } from './synopsis';
+import { Synopsis } from './synopsis';
 
 const defaultProps: SynopsisProps = {
   id: 'tutorial',

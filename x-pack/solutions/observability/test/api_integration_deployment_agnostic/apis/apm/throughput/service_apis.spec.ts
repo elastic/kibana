@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import type { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';

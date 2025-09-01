@@ -11,6 +11,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
+import type { Observable } from 'rxjs';
 import {
   catchError,
   defer,
@@ -19,7 +20,6 @@ import {
   from,
   map,
   merge as mergeOperator,
-  Observable,
   of,
   shareReplay,
   switchMap,
@@ -29,25 +29,28 @@ import {
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
-import {
+import type {
   ChatCompleteResponse,
   FunctionCallingMode,
   InferenceClient,
-  ToolChoiceType,
 } from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
+import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
-import {
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
+} from '../../../common/conversation_complete';
+import {
   createConversationNotFoundError,
   StreamingChatResponseEventType,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { CompatibleJSONSchema } from '../../../common/functions/types';
+import type { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type Instruction,
   type Conversation,
@@ -58,9 +61,8 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
@@ -70,8 +72,8 @@ import { convertInferenceEventsToStreamingEvents } from './operators/convert_inf
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 import { warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { addAnonymizationData } from './operators/add_anonymization_data';
@@ -480,6 +482,8 @@ export class ObservabilityAIAssistantClient {
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      temperature: 0.25,
+      maxRetries: 1,
       metadata: {
         connectorTelemetry: {
           pluginId: 'observability_ai_assistant',
@@ -498,8 +502,6 @@ export class ObservabilityAIAssistantClient {
       return defer(() =>
         this.dependencies.inferenceClient.chatComplete({
           ...options,
-          temperature: 0.25,
-          maxRetries: 0,
           stream: true,
         })
       ).pipe(
@@ -520,8 +522,6 @@ export class ObservabilityAIAssistantClient {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
         messages: convertMessagesForInference(messages, this.dependencies.logger),
-        temperature: 0.25,
-        maxRetries: 0,
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }

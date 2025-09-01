@@ -316,6 +316,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           display="rowCompressed"
         >
           <EuiRadioGroup
+            name="linkToType"
             options={getLinkToOptions()}
             idSelected={type}
             onChange={onTypeChange}

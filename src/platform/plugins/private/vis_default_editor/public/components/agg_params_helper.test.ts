@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggGroupNames, BUCKET_TYPES, IAggConfig, IAggType } from '@kbn/data-plugin/public';
+import type { IAggConfig, IAggType } from '@kbn/data-plugin/public';
+import { AggGroupNames, BUCKET_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
@@ -17,8 +18,8 @@ import {
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
-import { EditorConfig } from './utils';
-import { EditorVisState } from './sidebar/state/reducers';
+import type { EditorConfig } from './utils';
+import type { EditorVisState } from './sidebar/state/reducers';
 import { groupAndSortBy } from '../utils';
 
 jest.mock('../utils', () => ({

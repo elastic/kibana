@@ -9,11 +9,11 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import {
+import type {
   EnrichedDeprecationInfo,
   ReindexAction,
-  ReindexStatus,
 } from '../../../../../../../../../common/types';
+import { ReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexFlyoutStep } from './reindex_step';

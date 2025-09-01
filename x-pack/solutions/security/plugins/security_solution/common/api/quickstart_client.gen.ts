@@ -273,6 +273,7 @@ import type {
 } from './entity_analytics/privilege_monitoring/engine/delete.gen';
 import type { DisableMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/disable.gen';
 import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
+import type { ScheduleMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/schedule_now.gen';
 import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
 import type {
   CreateEntitySourceRequestBodyInput,
@@ -398,8 +399,21 @@ import type {
   CreateDashboardMigrationDashboardsRequestBodyInput,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationResourcesRequestQueryInput,
+  GetDashboardMigrationResourcesRequestParamsInput,
+  GetDashboardMigrationResourcesResponse,
+  GetDashboardMigrationResourcesMissingRequestParamsInput,
+  GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
+  StartDashboardsMigrationRequestParamsInput,
+  StartDashboardsMigrationRequestBodyInput,
+  StartDashboardsMigrationResponse,
+  StopDashboardsMigrationRequestParamsInput,
+  StopDashboardsMigrationResponse,
+  UpsertDashboardMigrationResourcesRequestParamsInput,
+  UpsertDashboardMigrationResourcesRequestBodyInput,
+  UpsertDashboardMigrationResourcesResponse,
 } from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   CreateRuleMigrationRequestBodyInput,
@@ -1088,8 +1102,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Download a file from an endpoint.
-   */
+    * Download a file from an endpoint. 
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+    */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
     return this.kbnClient
@@ -1106,8 +1124,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get information for the specified file using the file ID.
-   */
+    * Get information for the specified file using the file ID.
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+    */
   async endpointFileInfo(props: EndpointFileInfoProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileInfo`);
     return this.kbnClient
@@ -1472,6 +1494,44 @@ finalize it.
     return this.kbnClient
       .request<GetDashboardMigrationResponse>({
         path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves resources for an existing SIEM dashboards migration
+   */
+  async getDashboardMigrationResources(props: GetDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResources`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies missing resources from all the dashboards of an existing SIEM dashboard migration
+   */
+  async getDashboardMigrationResourcesMissing(props: GetDashboardMigrationResourcesMissingProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResourcesMissing`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesMissingResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources/missing',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2500,6 +2560,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async scheduleMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
+    return this.kbnClient
+      .request<ScheduleMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/schedule_now',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
    */
@@ -2599,6 +2671,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Starts a SIEM dashboards migration using the migration id provided
+   */
+  async startDashboardsMigration(props: StartDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartDashboardsMigration`);
+    return this.kbnClient
+      .request<StartDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/start',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -2624,6 +2715,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Stops a running SIEM dashboards migration using the migration id provided
+   */
+  async stopDashboardsMigration(props: StopDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopDashboardsMigration`);
+    return this.kbnClient
+      .request<StopDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stop',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2814,6 +2923,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Creates or updates resources for an existing SIEM dashboards migration
+   */
+  async upsertDashboardMigrationResources(props: UpsertDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertDashboardMigrationResources`);
+    return this.kbnClient
+      .request<UpsertDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Creates or updates resources for an existing SIEM rules migration
    */
   async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
@@ -2984,6 +3112,13 @@ export interface GetAssetCriticalityRecordProps {
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
 }
+export interface GetDashboardMigrationResourcesProps {
+  query: GetDashboardMigrationResourcesRequestQueryInput;
+  params: GetDashboardMigrationResourcesRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesMissingProps {
+  params: GetDashboardMigrationResourcesMissingRequestParamsInput;
+}
 export interface GetDashboardMigrationStatsProps {
   params: GetDashboardMigrationStatsRequestParamsInput;
 }
@@ -3144,12 +3279,19 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface StartDashboardsMigrationProps {
+  params: StartDashboardsMigrationRequestParamsInput;
+  body: StartDashboardsMigrationRequestBodyInput;
+}
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;
   body: StartRuleMigrationRequestBodyInput;
+}
+export interface StopDashboardsMigrationProps {
+  params: StopDashboardsMigrationRequestParamsInput;
 }
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
@@ -3192,6 +3334,10 @@ export interface UpdateWorkflowInsightProps {
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface UpsertDashboardMigrationResourcesProps {
+  params: UpsertDashboardMigrationResourcesRequestParamsInput;
+  body: UpsertDashboardMigrationResourcesRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

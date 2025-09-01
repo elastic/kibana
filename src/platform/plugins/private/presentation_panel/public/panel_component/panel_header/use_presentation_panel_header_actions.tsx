@@ -18,8 +18,8 @@ import {
   panelBadgeTrigger,
   panelNotificationTrigger,
 } from '../../panel_actions';
-import { AnyApiAction } from '../../panel_actions/types';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import type { AnyApiAction } from '../../panel_actions/types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
 const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];
 

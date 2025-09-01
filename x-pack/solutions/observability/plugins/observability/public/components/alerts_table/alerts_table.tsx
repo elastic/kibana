@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import { ObservabilityPublicStart } from '../..';
+import type { ObservabilityPublicStart } from '../..';
 import AlertActions from '../alert_actions/alert_actions';
 import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
-import {
+import type {
   GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
@@ -56,7 +56,7 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
         config,
       }}
       renderCellValue={AlertsTableCellValue}
-      renderActionsCell={AlertActions}
+      renderActionsCell={props.renderActionsCell ?? AlertActions}
       actionsColumnWidth={120}
       renderFlyoutHeader={AlertsFlyoutHeader}
       renderFlyoutBody={AlertsFlyoutBody}

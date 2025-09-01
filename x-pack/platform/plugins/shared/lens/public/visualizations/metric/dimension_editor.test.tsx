@@ -11,20 +11,19 @@ import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { DataType } from '../../types';
-import { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from './types';
+import type { Props, SupportingVisType } from './dimension_editor';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   DimensionEditorDataExtraComponent,
-  Props,
-  SupportingVisType,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { GROUP_ID } from './constants';
 import { getDefaultConfigForMode } from './helpers';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>

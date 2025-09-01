@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ContentPackIncludedObjects, isIncludeAll } from '@kbn/content-packs-schema';
+import type { ContentPackIncludedObjects } from '@kbn/content-packs-schema';
+import { isIncludeAll } from '@kbn/content-packs-schema';
 
 export function hasSelectedObjects(includedObjects: ContentPackIncludedObjects): boolean {
   return (

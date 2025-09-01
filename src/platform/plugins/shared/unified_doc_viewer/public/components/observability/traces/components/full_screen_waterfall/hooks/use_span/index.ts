@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { SPAN_ID_FIELD } from '@kbn/discover-utils';
 import { useState, useEffect } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
+import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 
 interface UseSpanParams {
   spanId?: string;
-  indexPattern: string;
 }
 
 interface GetTransactionParams {
@@ -54,7 +54,9 @@ async function getSpanData({ spanId, indexPattern, data, signal }: GetTransactio
   );
 }
 
-export const useSpan = ({ spanId, indexPattern }: UseSpanParams) => {
+export const useSpan = ({ spanId }: UseSpanParams) => {
+  const { indexes } = useDataSourcesContext();
+  const indexPattern = indexes.apm.traces;
   const { data, core } = getUnifiedDocViewerServices();
   const [span, setSpan] = useState<Record<PropertyKey, any> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -73,9 +75,11 @@ export const useSpan = ({ spanId, indexPattern }: UseSpanParams) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getSpanData({ spanId, indexPattern, data, signal });
-        setSpan(result.rawResponse.hits.hits[0]?.fields ?? null);
-        setDocId(result.rawResponse.hits.hits[0]?._id ?? null);
+        const result = indexPattern
+          ? await getSpanData({ spanId, indexPattern, data, signal })
+          : undefined;
+        setSpan(result?.rawResponse.hits.hits[0]?.fields ?? null);
+        setDocId(result?.rawResponse.hits.hits[0]?._id ?? null);
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;

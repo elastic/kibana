@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CategoricalColor, Color, ColorCode, GradientColor, LoopColor } from './colors';
-import { ColorRule, RuleOthers } from './rules';
+import type { CategoricalColor, Color, ColorCode, GradientColor, LoopColor } from './colors';
+import type { ColorRule, RuleOthers } from './rules';
 
 /**
  * An assignment is the connection link between a rule and a color

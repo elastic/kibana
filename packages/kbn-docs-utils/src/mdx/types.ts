@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { ApiStats, PluginApi, PluginOrPackage } from '../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ApiStats, PluginApi, PluginOrPackage } from '../types';
 
 export interface WritePluginDocsOpts {
   doc: PluginApi;
