@@ -22,6 +22,7 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     name: workflowDefinition.name,
     description: workflowDefinition.description,
     tags: workflowDefinition.tags ?? [],
+    inputs: workflowDefinition.inputs ?? [],
     enabled: workflowDefinition.enabled,
     definition: workflowDefinition,
     deleted_at: null,
