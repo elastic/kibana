@@ -62,6 +62,13 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
         });
       });
 
@@ -84,6 +91,13 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
         });
       });
 
@@ -106,6 +120,13 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
         });
       });
 

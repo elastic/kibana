@@ -57,6 +57,13 @@ export default {
                 serviceName,
                 fallbackToTransactions: false,
                 serviceAgentStatus: FETCH_STATUS.SUCCESS,
+                indexSettings: [
+                  {
+                    configurationName: 'span',
+                    defaultValue: 'traces-*',
+                    savedValue: 'traces-*, apm-*',
+                  },
+                ],
               }}
             >
               <StoryComponent />
