@@ -19,6 +19,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   // Failing: See https://github.com/elastic/kibana/issues/233044
+  // Failing: See https://github.com/elastic/kibana/issues/233044
   describe.skip('Diagnostics: Index pattern settings', () => {
     describe('When data is ingested', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
