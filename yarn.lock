@@ -3606,20 +3606,20 @@
   resolved "https://registry.yarnpkg.com/@inversifyjs/common/-/common-1.5.2.tgz#6836287fef1c25dddbdf6af345a33a6d6caf6835"
   integrity sha512-WlzR9xGadABS9gtgZQ+luoZ8V6qm4Ii6RQfcfC9Ho2SOlE6ZuemFo7PKJvKI0ikm8cmKbU8hw5UK6E4qovH21w==
 
-"@inversifyjs/container@1.12.1":
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/@inversifyjs/container/-/container-1.12.1.tgz#6c1b142365074c5cd8766b0ec90092f02a7cddf4"
-  integrity sha512-E64SnmsJhbKA6idh/8zJNsBhMX52tjBrlFGfDfrNf63YLjF3hfOXqobWY/6Xln1jGxX79F7Z+WHrn4xNF12lzA==
+"@inversifyjs/container@1.12.6":
+  version "1.12.6"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/container/-/container-1.12.6.tgz#205176e5f9b19970373d90a46a0a60aba8360b98"
+  integrity sha512-P0RWN5tkLPZG6HMa4zQCpiMfyzjI5JHJc/ZlHPcyXLO9FIrmB0sXi6Oa4ic3+GEO/L/mz+a5k8RRCsa7mQ94eg==
   dependencies:
     "@inversifyjs/common" "1.5.2"
-    "@inversifyjs/core" "6.0.1"
+    "@inversifyjs/core" "7.2.0"
     "@inversifyjs/plugin" "0.2.0"
     "@inversifyjs/reflect-metadata-utils" "1.3.0"
 
-"@inversifyjs/core@6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@inversifyjs/core/-/core-6.0.1.tgz#be7e9ea30b5a94fb33214217066d51f6c797d977"
-  integrity sha512-i0T9eSdYSZCx9b3izzlC3NIuHV03RQ1vwEa3vXgvk2vPIgW11DqMQefEVmxVx1pQZoS1EOK3ENZfHqZ/omWlzg==
+"@inversifyjs/core@7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@inversifyjs/core/-/core-7.2.0.tgz#d34d1b6a9072df9cf6f0c02a9694635ef4042ba5"
+  integrity sha512-rOmtf31TGTeO5BNZhobV0hoV5F0yGwVJFm8mWyoLJbemOH1ugZRMYlVyKXvSDZfMCi/MSU4EEasSi/NFaq4qeA==
   dependencies:
     "@inversifyjs/common" "1.5.2"
     "@inversifyjs/prototype-utils" "0.1.2"
@@ -9170,55 +9170,55 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
-"@moonrepo/cli@~1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.39.4.tgz#5288db9b5c3b612b338396008d32f25e61098941"
-  integrity sha512-VqBrT4QJ+wFXwgpbwgqYOdqmtvpYBbYmZic/FFy9qzOKoyb+0gs2SXrrbLQlMfFKinJBy6g5fzPhCstw5i5b7Q==
+"@moonrepo/cli@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.38.6.tgz#d01438576bdfad796ed4579a2e502f4039ab26cd"
+  integrity sha512-RUXfZA4kDwgk9eTw75Hmmca7AfebJ1RUrYmNmZxnYFc7N9oGBAkevcRbAL58hM3gRA1hl1Vgkm/MbP5L5X2+ww==
   dependencies:
-    detect-libc "^2.0.4"
+    detect-libc "^2.0.3"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "1.39.4"
-    "@moonrepo/core-linux-arm64-musl" "1.39.4"
-    "@moonrepo/core-linux-x64-gnu" "1.39.4"
-    "@moonrepo/core-linux-x64-musl" "1.39.4"
-    "@moonrepo/core-macos-arm64" "1.39.4"
-    "@moonrepo/core-macos-x64" "1.39.4"
-    "@moonrepo/core-windows-x64-msvc" "1.39.4"
+    "@moonrepo/core-linux-arm64-gnu" "1.38.6"
+    "@moonrepo/core-linux-arm64-musl" "1.38.6"
+    "@moonrepo/core-linux-x64-gnu" "1.38.6"
+    "@moonrepo/core-linux-x64-musl" "1.38.6"
+    "@moonrepo/core-macos-arm64" "1.38.6"
+    "@moonrepo/core-macos-x64" "1.38.6"
+    "@moonrepo/core-windows-x64-msvc" "1.38.6"
 
-"@moonrepo/core-linux-arm64-gnu@1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.39.4.tgz#e643047f520b22ca99d5996576b70d1d0625d550"
-  integrity sha512-/WeOIlIaZ9jex62/0r6THi2cDxMmayt3us7vKhuqky0GAu27saRWkcIQyCP8aEtDaGd4tH7c6MgfDHKy4mVx9g==
+"@moonrepo/core-linux-arm64-gnu@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.38.6.tgz#348105f02049c79dce4fce786207e364303e991d"
+  integrity sha512-uWATtiZi6Tc3kOIOKoikmFPeVb5hMtbCgSfZd7+B1wHc89KJvF3mOy6xsY3497Koro5OK6mhKuOkO3tDPZYwfw==
 
-"@moonrepo/core-linux-arm64-musl@1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.39.4.tgz#033cab4aa34b49dd5402c12d0ab373fd75f4636d"
-  integrity sha512-AXbPCfJh+w1j3O4xpQ21DJ/PwxSA6rM5uaANrUOJVg5E+IEwin/yNC+zk/mZpsIiVngtJNDt1BkPEnEdKzcGvw==
+"@moonrepo/core-linux-arm64-musl@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.38.6.tgz#c9c13258bca42b7e1e4d252ee38aaad56820b7a5"
+  integrity sha512-HRg9llpxr2EkIVKf4ppY8fkjUvm4fmYTLS9p/hryYuOlRF59GazraK+dxh+Cy1dhagWYkYo18JkvtdE7MkhfVw==
 
-"@moonrepo/core-linux-x64-gnu@1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.39.4.tgz#dbb215890f4e13e9da0838edd7746e4f41eba268"
-  integrity sha512-nLrl+vnvKcxLXpKTjc+tVKVRRgUoOxnJafVLjgQBK9qpwtBMd/ZwfcwCi0TN4b5g4Nqj6n+T+yewuI7g72Zm0w==
+"@moonrepo/core-linux-x64-gnu@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.38.6.tgz#459d7b50bd1d2c8ee9d4e5225e8c3df167da620e"
+  integrity sha512-s/O6MewtUK3l7APwjF/aY9ls78ErJTZCl15Jaogc96jqCRGeNWuyX3+Awt6asmztUMkOXUily8R4Z7RggFDIbA==
 
-"@moonrepo/core-linux-x64-musl@1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.39.4.tgz#94facfc28d485717970adce7678d70d227030313"
-  integrity sha512-dByM7EgvN1JOAIN5bpqBYQrh9PY9qKSe3AdOznG1EXCFx3oMZYSpITRIjex52VI7aVhRH+bxvr2RM/Po17zIYQ==
+"@moonrepo/core-linux-x64-musl@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.38.6.tgz#3f24e85eb763ebab12127fb93b6710700f3821f3"
+  integrity sha512-bAoOAmyKijraUkFPDzkoGAMBxiI3J8fRhgruUAsdHfNRAyDvZOYdKajHTMi5wzsoz1Wm85yscR01bFaMbybLQg==
 
-"@moonrepo/core-macos-arm64@1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.39.4.tgz#77a9d2ce9ac9c5351c1878c380a1b7e3d07d64cc"
-  integrity sha512-HJkMcEMd0ptqqYvDEk8NnOFhtdQjTQNfFwBJ7fz0ZXUCTQls+SEk2HMVqrOSMGBX7QjgW/LeoIE450eXJxAo6g==
+"@moonrepo/core-macos-arm64@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.38.6.tgz#03bbb2d169c171e3051d553e839bd55e208f998a"
+  integrity sha512-RNqlu5K0kTlZ24qxn5X1qKj0FpW9vothNRbsm2GdCXxNp4Wl4GVL9cJRhb1SpCORC698x+OAS2O/u1wPIeN+rA==
 
-"@moonrepo/core-macos-x64@1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.39.4.tgz#760f278d21f1d909f75498d5fe71c8e8b9405cca"
-  integrity sha512-V4xV+RNJ8CTjUry1APPlBP4ww2A0QucLkR2KTGRxyR5n+TdvLhq7aVbWo//b1lIsaMcoYzkAmkA1ZVw0nu6weA==
+"@moonrepo/core-macos-x64@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.38.6.tgz#864396872089c2fccde6f328a1dec4672eec28ad"
+  integrity sha512-mN7QmeEwjj1D97sYX3PmmEpQCsCa/O46hrAJdsd/5O0m4GH5uilMLJoBUa5L2T4kyF7N7TdR0AcRDC9dh2u5Sw==
 
-"@moonrepo/core-windows-x64-msvc@1.39.4":
-  version "1.39.4"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.39.4.tgz#8e53a4e6ca50c5412a4c9e11c512ab2d829e0f49"
-  integrity sha512-7mwI1a5MFs9OIEDvAQ/OA/TyHXrCr7D6nRlK803vOEsR8vqWHY+hiz+C8hERA43XM7Boo3kK5uUqqCOkhdn6kg==
+"@moonrepo/core-windows-x64-msvc@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.38.6.tgz#5f7d80ff4856e9eb4de30be915db4426584d631e"
+  integrity sha512-BWHpCySOIo4YEy9RhJfjauTI7F/imJ8/+GS2Q1yUszVP5BdxzYw5VamO/pVqFBCGQw7BRqi0U+qIUb4uu3nkxw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -18286,7 +18286,7 @@ detect-libc@^1.0.3:
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==
 
-detect-libc@^2.0.0, detect-libc@^2.0.1, detect-libc@^2.0.2, detect-libc@^2.0.4:
+detect-libc@^2.0.0, detect-libc@^2.0.1, detect-libc@^2.0.2, detect-libc@^2.0.3:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.4.tgz#f04715b8ba815e53b4d8109655b6508a6865a7e8"
   integrity sha512-3UDv+G9CsCKO1WKMGw9fwq/SWJYbI0c5Y7LU1AXYoDdbhE2AHQ6N6Nb34sG8Fj7T5APy8qXDCKuuIHd1BR0tVA==
@@ -22172,14 +22172,14 @@ invariant@^2.1.0, invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
-inversify@^7.7.0:
-  version "7.7.0"
-  resolved "https://registry.yarnpkg.com/inversify/-/inversify-7.7.0.tgz#e25fab3547377a7cf966e80acb58c2ace2ff7e26"
-  integrity sha512-CLw7WbwULppLMNp6jPliwLbapnf996Bdju3VvtW0wrfI0LTuxv0h9uqrFh1RE3QO23+r4JK0hCarETJjDN4LFw==
+inversify@^7.9.0:
+  version "7.9.0"
+  resolved "https://registry.yarnpkg.com/inversify/-/inversify-7.9.0.tgz#f4a8ddc44298fbeaae32ed6520551ed7f96f62cc"
+  integrity sha512-bq5om1H9i5wXUoWfoubnNnSpD8Aw+uci6sH751M4RZHPKdccuniRNFO6pQf5AsPdO/Tcy4WPFx8FxaETsaQlhw==
   dependencies:
     "@inversifyjs/common" "1.5.2"
-    "@inversifyjs/container" "1.12.1"
-    "@inversifyjs/core" "6.0.1"
+    "@inversifyjs/container" "1.12.6"
+    "@inversifyjs/core" "7.2.0"
 
 invert-kv@^1.0.0:
   version "1.0.0"

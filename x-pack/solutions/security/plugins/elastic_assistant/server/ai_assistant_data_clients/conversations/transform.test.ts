@@ -21,10 +21,6 @@ const userAsUser = {
 
 const getEsConversationMock = (): EsConversationSchema => {
   return {
-    summary: {
-      '@timestamp': '2025-08-19T13:26:01.746Z',
-      semantic_content: 'Very nice demo semantic content 4.',
-    },
     '@timestamp': '2025-08-19T10:49:52.884Z',
     updated_at: '2025-08-19T13:26:01.746Z',
     api_config: {
@@ -120,10 +116,6 @@ describe('transforms', () => {
         users: [userAsUser],
         title: 'Viewing the Number of Open Alerts in Elastic Security',
         category: 'assistant',
-        summary: {
-          timestamp: '2025-08-19T13:26:01.746Z',
-          semanticContent: 'Very nice demo semantic content 4.',
-        },
         apiConfig: { actionTypeId: '.gen-ai', connectorId: 'gpt-4-1' },
         messages: [
           {
@@ -162,10 +154,6 @@ describe('transforms', () => {
           users: [userAsUser],
           title: 'Viewing the Number of Open Alerts in Elastic Security',
           category: 'assistant',
-          summary: {
-            timestamp: '2025-08-19T13:26:01.746Z',
-            semanticContent: 'Very nice demo semantic content 4.',
-          },
           apiConfig: { actionTypeId: '.gen-ai', connectorId: 'gpt-4-1' },
           messages: [
             {
@@ -207,10 +195,6 @@ describe('transforms', () => {
           users: [userAsUser],
           title: 'Viewing the Number of Open Alerts in Elastic Security',
           category: 'assistant',
-          summary: {
-            timestamp: '2025-08-19T13:26:01.746Z',
-            semanticContent: 'Very nice demo semantic content 4.',
-          },
           apiConfig: { actionTypeId: '.gen-ai', connectorId: 'gpt-4-1' },
           messages: [
             {
@@ -255,10 +239,6 @@ describe('transforms', () => {
         'apiConfig.defaultSystemPromptId',
         'apiConfig.model',
         'apiConfig.provider',
-        'summary',
-        'summary.timestamp',
-        'summary.semanticContent',
-        'summary.summarizedMessageIds',
       ];
       const sourceNames = transformFieldNamesToSourceScheme(fields);
       expect(sourceNames).toEqual([
@@ -269,10 +249,6 @@ describe('transforms', () => {
         'api_config.default_system_prompt_id',
         'api_config.model',
         'api_config.provider',
-        'summary',
-        'summary.@timestamp',
-        'summary.semantic_content',
-        'summary.summarized_message_ids',
       ]);
     });
   });

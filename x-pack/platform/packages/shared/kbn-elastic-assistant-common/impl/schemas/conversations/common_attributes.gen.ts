@@ -232,14 +232,6 @@ export type ConversationCategoryEnum = typeof ConversationCategory.enum;
 export const ConversationCategoryEnum = ConversationCategory.enum;
 
 /**
- * The conversation confidence.
- */
-export type ConversationConfidence = z.infer<typeof ConversationConfidence>;
-export const ConversationConfidence = z.enum(['low', 'medium', 'high']);
-export type ConversationConfidenceEnum = typeof ConversationConfidence.enum;
-export const ConversationConfidenceEnum = ConversationConfidence.enum;
-
-/**
  * AI assistant conversation message.
  */
 export type Message = z.infer<typeof Message>;
@@ -306,28 +298,6 @@ export const ApiConfig = z.object({
   model: z.string().optional(),
 });
 
-export type ConversationSummaryBase = z.infer<typeof ConversationSummaryBase>;
-export const ConversationSummaryBase = z.object({
-  /**
-   * Summary text of the conversation over time.
-   */
-  semanticContent: z.string().optional(),
-  /**
-   * The list of summarized messages.
-   */
-  summarizedMessageIds: z.array(NonEmptyString).optional(),
-});
-
-export type ConversationSummary = z.infer<typeof ConversationSummary>;
-export const ConversationSummary = ConversationSummaryBase.merge(
-  z.object({
-    /**
-     * The timestamp summary was updated.
-     */
-    timestamp: NonEmptyTimestamp,
-  })
-);
-
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
 export const ErrorSchema = z
   .object({
@@ -350,7 +320,6 @@ export const ConversationResponse = z.object({
    * The conversation category.
    */
   category: ConversationCategory,
-  summary: ConversationSummary.optional(),
   timestamp: NonEmptyTimestamp.optional(),
   /**
    * The last time conversation was updated.
@@ -403,7 +372,6 @@ export const ConversationUpdateProps = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
-  summary: ConversationSummaryBase.optional(),
   /**
    * Exclude from last conversation storage.
    */
