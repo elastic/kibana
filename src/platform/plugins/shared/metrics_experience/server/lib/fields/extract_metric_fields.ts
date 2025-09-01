@@ -8,8 +8,21 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import { FILTER_OUT_EXACT_FIELDS_FOR_CONTENT } from '@kbn/discover-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+
+// copied from @kbn/discover-utils to avoid cyclic dependency
+const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT = [
+  '_id',
+  '_index',
+  '_source',
+  '_size',
+  '_doc_count',
+  '_field_names',
+  '_ignored',
+  '_routing',
+  '_meta',
+  '_tier',
+];
 
 export function extractMetricFields(
   fields: Record<string, Record<string, FieldCapsFieldCapability>>

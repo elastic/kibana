@@ -6,15 +6,26 @@
  */
 
 import * as React from 'react';
-import { shallow } from 'enzyme';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ForLastExpression } from './for_the_last';
 
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+};
+
 describe('for the last expression', () => {
-  it('renders with defined options', () => {
+  it('renders with defined options', async () => {
+    const user = userEvent.setup();
     const onChangeWindowSize = jest.fn();
     const onChangeWindowUnit = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <ForLastExpression
         errors={{ timeWindowSize: [] }}
         timeWindowSize={5}
@@ -23,29 +34,38 @@ describe('for the last expression', () => {
         onChangeWindowUnit={onChangeWindowUnit}
       />
     );
-    expect(wrapper.find('[data-test-subj="timeWindowSizeNumber"]').length > 0).toBeTruthy();
+
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent('5 minutes');
+
+    await user.click(screen.getByTestId('forLastExpression'));
+
+    expect(screen.getByTestId('timeWindowSizeNumber')).toBeInTheDocument();
+    expect(screen.getByTestId('timeWindowUnitSelect')).toBeInTheDocument();
   });
 
-  it('renders with default timeWindowSize and timeWindowUnit', () => {
+  it('renders with default timeWindowSize and timeWindowUnit', async () => {
+    const user = userEvent.setup();
     const onChangeWindowSize = jest.fn();
     const onChangeWindowUnit = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <ForLastExpression
         errors={{ timeWindowSize: [] }}
         onChangeWindowSize={onChangeWindowSize}
         onChangeWindowUnit={onChangeWindowUnit}
       />
     );
-    wrapper.simulate('click');
-    expect(wrapper.find('[value=""]').length > 0).toBeTruthy();
-    expect(wrapper.find('[value="s"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.contains(
-        <FormattedMessage
-          id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
-          defaultMessage="For the last"
-        />
-      )
-    ).toBeTruthy();
+
+    expect(screen.getByTestId('forLastExpression')).toHaveTextContent('? seconds');
+
+    await user.click(screen.getByTestId('forLastExpression'));
+
+    expect(screen.getByText('For the last')).toBeInTheDocument();
+
+    const numberInput = screen.getByTestId('timeWindowSizeNumber') as HTMLInputElement;
+    const selectInput = screen.getByTestId('timeWindowUnitSelect') as HTMLSelectElement;
+
+    expect(numberInput.value).toBe('');
+    expect(selectInput.value).toBe('s');
   });
 });
