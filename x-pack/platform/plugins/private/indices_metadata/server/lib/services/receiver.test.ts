@@ -405,6 +405,19 @@ describe('Indices Metadata - MetadataReceiver', () => {
             store: {
               size_in_bytes: 1024000,
             },
+            indexing: {
+              index_failed: 5,
+              index_failed_due_to_version_conflict: 2,
+            },
+          },
+          primaries: {
+            docs: {
+              count: 250,
+              deleted: 5,
+            },
+            store: {
+              size_in_bytes: 512000,
+            },
           },
         },
       },
@@ -426,9 +439,17 @@ describe('Indices Metadata - MetadataReceiver', () => {
         filter_path: [
           'indices.*.total.search.query_total',
           'indices.*.total.search.query_time_in_millis',
+
           'indices.*.total.docs.count',
           'indices.*.total.docs.deleted',
           'indices.*.total.store.size_in_bytes',
+
+          'indices.*.primaries.docs.count',
+          'indices.*.primaries.docs.deleted',
+          'indices.*.primaries.store.size_in_bytes',
+
+          'indices.*.total.indexing.index_failed',
+          'indices.*.total.indexing.index_failed_due_to_version_conflict',
         ],
       });
 
@@ -440,6 +461,11 @@ describe('Indices Metadata - MetadataReceiver', () => {
           docs_count: 500,
           docs_deleted: 10,
           docs_total_size_in_bytes: 1024000,
+          index_failed: 5,
+          index_failed_due_to_version_conflict: 2,
+          docs_count_primaries: 250,
+          docs_deleted_primaries: 5,
+          docs_total_size_in_bytes_primaries: 512000,
         },
       ]);
     });
@@ -499,6 +525,143 @@ describe('Indices Metadata - MetadataReceiver', () => {
       const iterator = receiver.getIndicesStats(['test-index-1'], 10);
       await expect(iterator.next()).rejects.toThrow('Elasticsearch error');
       expect(logger.error).toHaveBeenCalledWith('Error fetching indices stats', { error });
+    });
+
+    it('should handle response with missing primaries data', async () => {
+      const mockResponseWithoutPrimaries = {
+        indices: {
+          'test-index-1': {
+            total: {
+              search: {
+                query_total: 100,
+                query_time_in_millis: 1000,
+              },
+              docs: {
+                count: 500,
+                deleted: 10,
+              },
+              store: {
+                size_in_bytes: 1024000,
+              },
+              indexing: {
+                index_failed: 5,
+                index_failed_due_to_version_conflict: 2,
+              },
+            },
+          },
+        },
+      };
+
+      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockResponseWithoutPrimaries);
+
+      const results = [];
+      for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
+        results.push(stat);
+      }
+
+      expect(results).toEqual([
+        {
+          index_name: 'test-index-1',
+          query_total: 100,
+          query_time_in_millis: 1000,
+          docs_count: 500,
+          docs_deleted: 10,
+          docs_total_size_in_bytes: 1024000,
+          index_failed: 5,
+          index_failed_due_to_version_conflict: 2,
+          docs_count_primaries: undefined,
+          docs_deleted_primaries: undefined,
+          docs_total_size_in_bytes_primaries: undefined,
+        },
+      ]);
+    });
+
+    it('should handle response with missing indexing failure data', async () => {
+      const mockResponseWithoutIndexingFailures = {
+        indices: {
+          'test-index-1': {
+            total: {
+              search: {
+                query_total: 100,
+                query_time_in_millis: 1000,
+              },
+              docs: {
+                count: 500,
+                deleted: 10,
+              },
+              store: {
+                size_in_bytes: 1024000,
+              },
+            },
+            primaries: {
+              docs: {
+                count: 250,
+                deleted: 5,
+              },
+              store: {
+                size_in_bytes: 512000,
+              },
+            },
+          },
+        },
+      };
+
+      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockResponseWithoutIndexingFailures);
+
+      const results = [];
+      for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
+        results.push(stat);
+      }
+
+      expect(results).toEqual([
+        {
+          index_name: 'test-index-1',
+          query_total: 100,
+          query_time_in_millis: 1000,
+          docs_count: 500,
+          docs_deleted: 10,
+          docs_total_size_in_bytes: 1024000,
+          index_failed: undefined,
+          index_failed_due_to_version_conflict: undefined,
+          docs_count_primaries: 250,
+          docs_deleted_primaries: 5,
+          docs_total_size_in_bytes_primaries: 512000,
+        },
+      ]);
+    });
+
+    it('should continue processing when receiver methods return empty results', async () => {
+      const mockResponseMinimalData = {
+        indices: {
+          'test-index-1': {
+            total: {},
+            primaries: {},
+          },
+        },
+      };
+
+      (esClient.indices.stats as jest.Mock).mockResolvedValue(mockResponseMinimalData);
+
+      const results = [];
+      for await (const stat of receiver.getIndicesStats(['test-index-1'], 10)) {
+        results.push(stat);
+      }
+
+      expect(results).toEqual([
+        {
+          index_name: 'test-index-1',
+          query_total: undefined,
+          query_time_in_millis: undefined,
+          docs_count: undefined,
+          docs_deleted: undefined,
+          docs_total_size_in_bytes: undefined,
+          index_failed: undefined,
+          index_failed_due_to_version_conflict: undefined,
+          docs_count_primaries: undefined,
+          docs_deleted_primaries: undefined,
+          docs_total_size_in_bytes_primaries: undefined,
+        },
+      ]);
     });
   });
 
