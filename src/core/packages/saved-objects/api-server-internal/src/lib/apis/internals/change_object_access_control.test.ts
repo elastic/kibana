@@ -12,7 +12,7 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
+import type {
   ISavedObjectsSecurityExtension,
   SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-server';

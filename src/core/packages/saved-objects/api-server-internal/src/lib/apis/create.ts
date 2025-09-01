@@ -21,7 +21,7 @@ import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformCreateParams<T = unknown> {
