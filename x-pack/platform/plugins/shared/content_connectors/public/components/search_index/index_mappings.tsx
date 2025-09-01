@@ -28,10 +28,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
-import './index_mappings.scss';
 import { docLinks } from '../shared/doc_links';
 import type { AccessControlSelectorOption } from './access_control_index_selector/access_control_index_selector';
 import { AccessControlIndexSelector } from './access_control_index_selector/access_control_index_selector';
@@ -73,7 +73,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {shouldShowAccessControlSwitch && (
-              <EuiFlexItem grow={false} className="enterpriseSearchMappingsSelector">
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  width: 100%;
+                `}
+              >
                 <AccessControlIndexSelector
                   fullWidth
                   onChange={setSelectedIndexType}
