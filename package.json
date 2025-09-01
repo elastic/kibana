@@ -460,6 +460,7 @@
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/platform/plugins/shared/dashboard_enhanced",
     "@kbn/dashboard-markdown": "link:src/platform/plugins/shared/dashboard_markdown",
     "@kbn/dashboard-plugin": "link:src/platform/plugins/shared/dashboard",
+    "@kbn/dashboards-selector": "link:src/platform/packages/shared/dashboards/dashboards-selector",
     "@kbn/data-forge": "link:x-pack/platform/packages/shared/kbn-data-forge",
     "@kbn/data-grid-in-table-search": "link:src/platform/packages/shared/kbn-data-grid-in-table-search",
     "@kbn/data-plugin": "link:src/platform/plugins/shared/data",
