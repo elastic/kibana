@@ -58,7 +58,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          COMMITS=$(gh pr view $PR_NUMBER --json commits -q '.commits[].oid')
+          COMMITS=$(gh pr view $PR_NUMBER --repo elastic/kibana --json commits -q '.commits[].oid')
           COMMITS_CSV=$(echo "$COMMITS" | paste -sd, -)
           echo "COMMITS=$COMMITS_CSV" >> $GITHUB_ENV
           echo "$COMMITS" > commits.txt
@@ -121,7 +121,7 @@ jobs:
           set -e
           echo "⚠️ Copilot is the author of one or more commits. Attempting to squash and re-author all commits as $GIT_AUTHOR_NAME <$GIT_AUTHOR_EMAIL>."
           # Get the base branch (assume PR is up to date with base)
-          BASE_BRANCH=$(gh pr view $PR_NUMBER --json baseRefName -q '.baseRefName')
+          BASE_BRANCH=$(gh pr view $PR_NUMBER --repo elastic/kibana --json baseRefName -q '.baseRefName')
           echo "Base branch: $BASE_BRANCH"
           # Find merge base
           MERGE_BASE=$(git merge-base origin/$BASE_BRANCH HEAD)
