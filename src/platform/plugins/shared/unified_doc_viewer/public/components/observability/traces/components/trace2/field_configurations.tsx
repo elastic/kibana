@@ -12,9 +12,9 @@ import { TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { TraceIdLink } from '../trace_id_link';
 
-// This is currently kind of a duplication of what we have in:
+// TODO This is currently kind of a duplication of what we have in:
 // src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/resources/get_field_configuration.tsx
-// that will be removed as part of the refactor
+// that will be removed once all the overview is changed
 
 export const traceFieldConfigurations = {
   [TRACE_ID]: {
