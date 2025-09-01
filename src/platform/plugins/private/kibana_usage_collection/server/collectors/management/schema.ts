@@ -696,4 +696,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable diagnostic mode',
     },
   },
+  'genAiSettings:defaultAIConnector': {
+    type: 'keyword',
+    _meta: {
+      description: 'Default AI connector',
+    },
+  },
+  'genAiSettings:defaultAIConnectorOnly': {
+    type: 'boolean',
+    _meta: {
+      description: 'Restrict to default AI connector only',
+    },
+  },
 };
