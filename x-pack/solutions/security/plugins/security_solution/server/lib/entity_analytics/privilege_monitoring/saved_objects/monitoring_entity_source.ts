@@ -32,6 +32,16 @@ export class MonitoringEntitySourceDescriptorClient {
     return { ...created, id };
   }
 
+  async bulkCreate(sources: CreateMonitoringEntitySource[]) {
+    const createdSources = await this.dependencies.soClient.bulkCreate(
+      sources.map((source) => ({
+        type: monitoringEntitySourceTypeName,
+        attributes: { ...source },
+      }))
+    );
+    return createdSources;
+  }
+
   async update(
     monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }
   ): Promise<MonitoringEntitySource> {

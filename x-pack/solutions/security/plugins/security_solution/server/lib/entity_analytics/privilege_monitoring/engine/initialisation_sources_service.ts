@@ -48,7 +48,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
     const existing = await client.findAll({});
     // create all sources, if none exist already
     if (existing.length === 0) {
-      await Promise.all(requiredInitSources.map((attrs) => client.create(attrs)));
+      await client.bulkCreate(requiredInitSources);
       dataClient.log('debug', `Created all ${requiredInitSources.length} default sources`);
       return;
     }
