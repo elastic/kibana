@@ -25,7 +25,6 @@ const useCases = {
   'Multiple alerts': { eventsCount: 0, alertsCount: 2 },
   'Hundreds of events': { eventsCount: 120, alertsCount: 0 },
   'Hundreds of alerts': { eventsCount: 0, alertsCount: 120 },
-  'One event and one alert': { eventsCount: 1, alertsCount: 1 },
   'Multiple events and alerts': { eventsCount: 2, alertsCount: 2 },
   'Hundreds of events and alerts': { eventsCount: 120, alertsCount: 120 },
   'Millions of events and alerts': { eventsCount: 1_200_000, alertsCount: 1_200_000 },
