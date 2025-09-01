@@ -11,10 +11,8 @@ import { Client as ESClient } from '@elastic/elasticsearch';
 import { ElasticSearchSaver } from '..';
 import type { Checkpoint, CheckpointTuple } from '@langchain/langgraph-checkpoint';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { Subject } from 'rxjs';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { uuid6 } from '@langchain/langgraph-checkpoint';
-import { IndexPatternAdapter } from '@kbn/index-adapter';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -82,87 +80,64 @@ describe('ElasticSearchSaver', () => {
 
   async function setupIndices(esClient: ESClient): Promise<void> {
     // Set up checkpoints index
-    const defaultCheckpointIndex = new IndexPatternAdapter('checkpoints', {
-      kibanaVersion: '9.2.0',
-      totalFieldsLimit: 2500,
+    const checkpointIndexName = `checkpoints-${DEFAULT_NAMESPACE_STRING}`;
+    await esClient.indices.create({
+      index: checkpointIndexName,
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          thread_id: { type: 'keyword' },
+          checkpoint_ns: { type: 'keyword' },
+          checkpoint_id: { type: 'keyword' },
+          parent_checkpoint_id: { type: 'keyword' },
+          type: { type: 'keyword' },
+          checkpoint: { type: 'binary' },
+          metadata: { type: 'binary' },
+        },
+      },
     });
-
-    defaultCheckpointIndex.setComponentTemplate({
-      name: `component-template-checkpoints`,
-      fieldMap: ElasticSearchSaver.checkpointsFieldMap,
-    });
-
-    defaultCheckpointIndex.setIndexTemplate({
-      name: `checkpoints`,
-      componentTemplateRefs: [`component-template-checkpoints`],
-    });
-
-    defaultCheckpointIndex.install({
-      esClient,
-      logger: mockLogger,
-      pluginStop$: new Subject<void>(),
-    });
-
-    await defaultCheckpointIndex.createIndex(DEFAULT_NAMESPACE_STRING);
 
     // Set up checkpoint-writes index
-    const defaultCheckpointWritesIndex = new IndexPatternAdapter('checkpoint-writes', {
-      kibanaVersion: '9.2.0',
-      totalFieldsLimit: 2500,
+    const checkpointWritesIndexName = `checkpoint-writes-${DEFAULT_NAMESPACE_STRING}`;
+    await esClient.indices.create({
+      index: checkpointWritesIndexName,
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          thread_id: { type: 'keyword' },
+          checkpoint_ns: { type: 'keyword' },
+          checkpoint_id: { type: 'keyword' },
+          task_id: { type: 'keyword' },
+          idx: { type: 'unsigned_long' },
+          channel: { type: 'keyword' },
+          type: { type: 'keyword' },
+          value: { type: 'binary' },
+        },
+      },
     });
-
-    defaultCheckpointWritesIndex.setComponentTemplate({
-      name: `component-template-checkpoint-writes`,
-      fieldMap: ElasticSearchSaver.checkpointWritesFieldMap,
-    });
-
-    defaultCheckpointWritesIndex.setIndexTemplate({
-      name: `checkpoint-writes`,
-      componentTemplateRefs: [`component-template-checkpoint-writes`],
-    });
-
-    defaultCheckpointWritesIndex.install({
-      esClient,
-      logger: mockLogger,
-      pluginStop$: new Subject<void>(),
-    });
-
-    await defaultCheckpointWritesIndex.createIndex(DEFAULT_NAMESPACE_STRING);
   }
 
   async function deleteIndices(indexPattern: string) {
-    try {
-      // Use indices.get to find indices matching the pattern
-      const response = await client.indices
-        .get({
-          index: indexPattern,
-          allow_no_indices: true,
-          expand_wildcards: 'all',
-        })
-        .catch(() => ({}));
-
-      const indexNames = Object.keys(response);
-
-      if (indexNames.length === 0) {
-        console.log(`No indices matching pattern ${indexPattern} found`);
-        return;
-      }
-
-      // Delete indices by their specific names
-      await client.indices.delete({
-        index: indexNames.join(','),
+    // Use indices.get to find indices matching the pattern
+    const response = await client.indices
+      .get({
+        index: indexPattern,
         allow_no_indices: true,
-      });
+        expand_wildcards: 'all',
+      })
+      .catch(() => ({}));
 
-      console.log(`Indices ${indexNames.join(', ')} deleted successfully`);
-    } catch (err) {
-      // If the error is about no indices found, that's okay
-      if (err.message?.includes('index_not_found_exception') || err.message?.includes('404')) {
-        console.log(`No indices matching pattern ${indexPattern} found`);
-        return;
-      }
-      console.error(`Error deleting indices matching pattern ${indexPattern}:`, err);
+    const indexNames = Object.keys(response);
+
+    if (indexNames.length === 0) {
+      return;
     }
+
+    // Delete indices by their specific names
+    await client.indices.delete({
+      index: indexNames.join(','),
+      allow_no_indices: true,
+    });
   }
 
   beforeEach(async () => {
