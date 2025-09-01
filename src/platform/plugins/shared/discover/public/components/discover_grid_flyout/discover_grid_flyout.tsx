@@ -187,7 +187,15 @@ export function DiscoverGridFlyout({
   const banner = useMemo(() => {
     // Only show banner if not in Observability view and feature is enabled
     if (solutionType !== 'oblt' && isApmFeatureEnabled) {
-      return <FlyoutCue document={actualHit} demoCanManageSpaces={demoCanManageSpaces} demoIsTrial={demoIsTrial} />;
+      return (
+        <div
+          css={{
+            containerType: 'inline-size',
+          }}
+        >
+          <FlyoutCue document={actualHit} demoCanManageSpaces={demoCanManageSpaces} demoIsTrial={demoIsTrial} />
+        </div>
+      );
     }
 
     return null;

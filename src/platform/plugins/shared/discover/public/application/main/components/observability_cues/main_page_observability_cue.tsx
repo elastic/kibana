@@ -62,8 +62,6 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
   const filters = useAppStateSelector((state) => state.filters);
   const timeRange = useAppStateSelector((state) => state.time);
 
-
-
   // Check if we should show the tour modal (after switching from cue)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -250,76 +248,77 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
 
       {/* Only render the callout in Classic view */}
       {shouldRenderCallout && (
-        <EuiThemeProvider colorMode="dark">
-          <EuiPanel
-            borderRadius="none"
-            paddingSize="s"
-            hasShadow={false}
-            hasBorder
-            css={{
-              backgroundImage: `url("${services.addBasePath(
-                '/plugins/discover/assets/illustration-feature-packed-box-128.svg'
-              )}")`,
-              backgroundSize: '64px',
-              backgroundPosition: 'left 16px bottom -16px',
-              backgroundRepeat: 'no-repeat',
-              '@media (max-width: 768px)': {
-                backgroundImage: 'none',
-              },
-            }}
-          >
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  responsive={false}
-                  alignItems="center"
-                  justifyContent="flexStart"
-                  gutterSize="s"
-                  css={{
-                    paddingInlineStart: '88px',
-                    '@media (max-width: 768px)': {
-                      paddingInlineStart: '0px',
-                    },
-                  }}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon color="success" type="apmApp" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <span>
-                      <strong>Observability data detected</strong>. {getCalloutMessage()}
-                    </span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="success"
-                      onClick={handleDismiss}
-                      aria-label="Dismiss"
-                      size="s"
-                    >
-                      Maybe later
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={handleSwitchToObservability}
-                      data-test-subj="obsMainPageCueSwitchBtn"
-                      size="s"
-                      color="success"
-                      fill
-                    >
-                      Try Observability
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiThemeProvider>
+        // <EuiThemeProvider colorMode="dark">
+        <EuiPanel
+          color="primary"
+          borderRadius="none"
+          paddingSize="s"
+          hasShadow={false}
+          hasBorder
+          css={{
+            backgroundImage: `url("${services.addBasePath(
+              '/plugins/discover/assets/illustration-feature-packed-box-128.svg'
+            )}")`,
+            backgroundSize: '64px',
+            backgroundPosition: 'left 16px bottom -16px',
+            backgroundRepeat: 'no-repeat',
+            '@media (max-width: 768px)': {
+              backgroundImage: 'none',
+            },
+          }}
+        >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                responsive={false}
+                alignItems="center"
+                justifyContent="flexStart"
+                gutterSize="s"
+                css={{
+                  paddingInlineStart: '88px',
+                  '@media (max-width: 768px)': {
+                    paddingInlineStart: '0px',
+                  },
+                }}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiIcon color="text" type="apmApp" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <strong>Observability data detected</strong>. {getCalloutMessage()}
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="primary"
+                    onClick={handleDismiss}
+                    aria-label="Dismiss"
+                    size="s"
+                  >
+                    Maybe later
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSwitchToObservability}
+                    data-test-subj="obsMainPageCueSwitchBtn"
+                    size="s"
+                    color="primary"
+                    fill
+                  >
+                    Try Observability
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        // </EuiThemeProvider>
       )}
 
       {/* Tour Modal - render regardless of solution type */}
@@ -337,5 +336,3 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
     </>
   );
 };
-
-

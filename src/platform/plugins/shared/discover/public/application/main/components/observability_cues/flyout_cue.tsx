@@ -215,10 +215,10 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({
         return null;
       }
 
-            // Check data stream context
+      // Check data stream context
       const hasLogsDataStream = fields?.['data_stream.type']?.[0] === 'logs';
       const hasEventDataset = source?.event?.dataset || fields?.['event.dataset']?.[0];
-      
+
       // For both log and error events, only allow logs data streams
       const hasValidDataStream = hasLogsDataStream || hasEventDataset;
 
@@ -258,62 +258,84 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({
   }
 
   return (
-    <EuiThemeProvider colorMode="dark">
-      <EuiPanel
-        borderRadius="none"
-        paddingSize="s"
-        hasShadow={false}
-        hasBorder
-      >
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon color="success" type="apmApp" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span>
-                  <strong>
-                    {documentType === 'span'
-                      ? 'Span'
-                      : documentType === 'transaction'
-                      ? 'Transaction'
-                      : documentType === 'log'
-                      ? 'Log'
-                      : 'Unknown'}{' '}
-                    data detected
-                  </strong>
-                  {/* . {getBannerMessage()} */}
-                </span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="success"
-                  iconType="cross"
-                  onClick={handleDismiss}
-                  aria-label="Dismiss"
-                  size="s"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={handleSwitchToObservability}
-                  data-test-subj="obsFlyoutSpanCueSwitchBtn"
-                  size="s"
-                  color="success"
-                  fill
-                >
-                  Try Observability
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiThemeProvider>
+    // <EuiThemeProvider colorMode="dark">
+    <EuiPanel
+      color="primary"
+      borderRadius="none"
+      paddingSize="s"
+      hasShadow={false}
+      hasBorder
+      css={{
+        backgroundImage: `url("${services.addBasePath(
+          '/plugins/discover/assets/illustration-feature-packed-box-128.svg'
+        )}")`,
+        backgroundSize: '64px',
+        backgroundPosition: 'left 16px bottom -16px',
+        backgroundRepeat: 'no-repeat',
+        '@container (max-width: 460px)': {
+          backgroundImage: 'none',
+        },
+      }}
+    >
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexStart"
+            gutterSize="s"
+            css={{
+              paddingInlineStart: '88px',
+              '@container (max-width: 460px)': {
+                paddingInlineStart: '0px',
+              },
+            }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon color="text" type="apmApp" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>
+                <strong>
+                  {documentType === 'span'
+                    ? 'Span'
+                    : documentType === 'transaction'
+                    ? 'Transaction'
+                    : documentType === 'log'
+                    ? 'Log'
+                    : 'Unknown'}{' '}
+                  data detected
+                </strong>
+                {/* . {getBannerMessage()} */}
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                color="primary"
+                iconType="cross"
+                onClick={handleDismiss}
+                aria-label="Dismiss"
+                size="s"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={handleSwitchToObservability}
+                data-test-subj="obsFlyoutSpanCueSwitchBtn"
+                size="s"
+                color="primary"
+                fill
+              >
+                Try Observability
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+    // </EuiThemeProvider>
   );
 };
