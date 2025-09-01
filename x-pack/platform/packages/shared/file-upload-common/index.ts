@@ -22,6 +22,10 @@ export type {
   HasImportPermission,
   PreviewTikaResponse,
   InitializeImportResponse,
+  ImportConfig,
+  ImportResults,
+  CreateDocsResponse,
+  ImportFactoryOptions,
 } from './src/types';
 
 export {

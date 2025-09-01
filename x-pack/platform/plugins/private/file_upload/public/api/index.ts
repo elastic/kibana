@@ -10,9 +10,10 @@ import type {
   HasImportPermission,
   PreviewTikaResponse,
   AnalysisResult,
+  ImportFactoryOptions,
 } from '@kbn/file-upload-common';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import type { IImporter, ImportFactoryOptions } from '../importer';
+import type { IImporter } from '../importer';
 import type {
   getMaxBytes,
   getMaxBytesFormatted,

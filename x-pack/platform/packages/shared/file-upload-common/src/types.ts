@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ReactNode } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -191,4 +194,29 @@ export interface PreviewTikaResponse {
   creator_tool?: string;
   content: string;
   content_length: number;
+}
+
+export interface ImportConfig {
+  settings: IndicesIndexSettings;
+  mappings: MappingTypeMapping;
+  pipeline: IngestPipeline;
+}
+
+export interface ImportResults {
+  success: boolean;
+  failures?: ImportFailure[];
+  docCount?: number;
+  error?: any;
+}
+
+export interface CreateDocsResponse<T extends ImportDoc> {
+  success: boolean;
+  remainder: number;
+  docs: T[];
+  error?: any;
+}
+
+export interface ImportFactoryOptions {
+  excludeLinesPattern?: string;
+  multilineStartPattern?: string;
 }

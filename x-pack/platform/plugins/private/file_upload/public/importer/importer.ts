@@ -23,10 +23,11 @@ import type {
   ImportResponse,
   IngestPipeline,
   IngestPipelineWrapper,
+  ImportResults,
 } from '@kbn/file-upload-common';
 import { getHttp } from '../kibana_services';
 
-import type { IImporter, ImportResults } from './types';
+import type { IImporter } from './types';
 import { callImportRoute, callInitializeImportRoute } from './routes';
 
 const CHUNK_SIZE = 5000;

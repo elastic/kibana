@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ImportFactoryOptions } from '@kbn/file-upload-common';
 import { MessageReader } from '@kbn/file-upload-common';
 import { Importer } from './importer';
-import type { ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {
   protected _reader: MessageReader;

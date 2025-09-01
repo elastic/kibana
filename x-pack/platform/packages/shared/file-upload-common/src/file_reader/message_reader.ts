@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ImportFactoryOptions } from '../..';
 import type { CreateDocsResponse, ImportDocMessage } from './file_reader_base';
 import { FileReaderBase } from './file_reader_base';
 
@@ -12,7 +13,7 @@ export class MessageReader extends FileReaderBase {
   private _excludeLinesRegex: RegExp | null;
   private _multilineStartRegex: RegExp | null;
 
-  constructor(options: { excludeLinesPattern?: string; multilineStartPattern?: string }) {
+  constructor(options: ImportFactoryOptions) {
     super();
 
     this._excludeLinesRegex =
