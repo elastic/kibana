@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SplunkXmlDashboardParser } from '../../../../lib/parsers/splunk/splunk_xml_dashboard_parser';
+import { SplunkXmlDashboardParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml';
 import type { GraphNode } from '../../types';
 
 export const getParseOriginalDashboardNode = (): GraphNode => {
