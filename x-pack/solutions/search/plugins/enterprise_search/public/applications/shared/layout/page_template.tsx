@@ -23,8 +23,8 @@ import { KibanaLogic } from '../kibana';
 import type { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import './page_template.scss';
 import { EndpointsHeaderAction } from './endpoints_header_action';
+import * as Styles from './styles';
 
 /*
  * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
@@ -86,6 +86,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
     <KibanaPageTemplate
       {...pageTemplateProps}
       className={classNames('enterpriseSearchPageTemplate', className)}
+      css={Styles.enterpriseSearchPageTemplate}
       mainProps={{
         ...pageTemplateProps.mainProps,
         className: classNames(
