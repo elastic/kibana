@@ -30,9 +30,7 @@ import {
   skipWhile,
   startWith,
   switchMap,
-  takeWhile,
   tap,
-  timer,
   withLatestFrom,
   catchError,
   exhaustMap,
@@ -48,9 +46,6 @@ import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
-const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
-
-const UNDO_EMIT_MS = 500; // 0.5 seconds
 
 const DOCS_PER_FETCH = 1000;
 
@@ -95,7 +90,6 @@ interface DeleteDocAction {
 type Action =
   | { type: 'add-doc'; payload: DocUpdate }
   | DeleteDocAction
-  | { type: 'undo' }
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
   | { type: 'add-column' }
   | { type: 'edit-column'; payload: ColumnUpdate }
@@ -285,8 +279,6 @@ export class IndexUpdateService {
             updatedAcc.push(action);
           }
           return updatedAcc;
-        case 'undo':
-          return acc.slice(0, -1); // remove last
         case 'saved':
           // Clear the buffer after save
           return [];
@@ -369,19 +361,6 @@ export class IndexUpdateService {
     }),
     startWith(new Map() as PendingSave),
     shareReplay({ bufferSize: 1, refCount: true })
-  );
-
-  // Observable to track the number of milliseconds left to allow undo of the last change
-  public readonly undoTimer$: Observable<number> = this.bufferState$.pipe(
-    skipWhile(() => !this.isIndexCreated()),
-    switchMap((updates) =>
-      updates.length > 0
-        ? timer(0, UNDO_EMIT_MS).pipe(
-            map((elapsed) => Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0)),
-            takeWhile((remaining) => remaining > 0, true)
-          )
-        : of(0)
-    )
   );
 
   public readonly dataView$: Observable<DataView> = combineLatest([
@@ -797,10 +776,6 @@ export class IndexUpdateService {
     this._refreshSubject$.next(Date.now());
   }
 
-  public setIsFetching(isFetching: boolean) {
-    this._isFetching$.next(isFetching);
-  }
-
   public setIsSaving(isSaving: boolean) {
     this._isSaving$.next(isSaving);
   }
@@ -903,11 +878,6 @@ export class IndexUpdateService {
       bulkResponse,
       bulkOperations: operations,
     };
-  }
-
-  /** Cancel the latest update operation */
-  public undo() {
-    this.addAction('undo');
   }
 
   public addNewColumn() {
