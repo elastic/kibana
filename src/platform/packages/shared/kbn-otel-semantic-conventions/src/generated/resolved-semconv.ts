@@ -36,17 +36,17 @@ export const semconvFlat = {
     description: 'Time when the event occurred. UNIX Epoch time in nanoseconds.',
     type: 'date_nanos',
   },
-  'observed_timestamp': {
+  observed_timestamp: {
     name: 'observed_timestamp',
     description: 'Time when the event was observed by the collection system.',
     type: 'date_nanos',
   },
-  'severity_number': {
+  severity_number: {
     name: 'severity_number',
     description: 'Numerical value of the severity.',
     type: 'long',
   },
-  'severity_text': {
+  severity_text: {
     name: 'severity_text',
     description: 'The severity text (also known as log level).',
     type: 'keyword',
@@ -61,22 +61,22 @@ export const semconvFlat = {
     description: 'A value containing the body of the log record (structured format).',
     type: 'flattened',
   },
-  'dropped_attributes_count': {
+  dropped_attributes_count: {
     name: 'dropped_attributes_count',
     description: 'Number of attributes that were discarded due to limits.',
     type: 'long',
   },
-  'trace_id': {
+  trace_id: {
     name: 'trace_id',
     description: 'A unique identifier for a trace.',
     type: 'keyword',
   },
-  'span_id': {
+  span_id: {
     name: 'span_id',
     description: 'A unique identifier for a span within a trace.',
     type: 'keyword',
   },
-  'event_name': {
+  event_name: {
     name: 'event_name',
     description: 'A unique identifier of event category/type.',
     type: 'keyword',
@@ -111,54 +111,55 @@ export const semconvFlat = {
     description: 'The Schema URL for the resource.',
     type: 'keyword',
   },
-  'start_timestamp': {
+  start_timestamp: {
     name: 'start_timestamp',
     description: 'StartTimeUnixNano is the time when the cumulative metric was reset.',
     type: 'date_nanos',
   },
-  'unit': {
+  unit: {
     name: 'unit',
     description: 'Unit in which the metric value is reported.',
     type: 'keyword',
   },
-  'trace_state': {
+  trace_state: {
     name: 'trace_state',
-    description: 'Tracestate represents tracing-system specific context in a list of key value pairs.',
+    description:
+      'Tracestate represents tracing-system specific context in a list of key value pairs.',
     type: 'keyword',
   },
-  'parent_span_id': {
+  parent_span_id: {
     name: 'parent_span_id',
-    description: 'The span_id of this span\'s parent span.',
+    description: "The span_id of this span's parent span.",
     type: 'keyword',
   },
-  'name': {
+  name: {
     name: 'name',
-    description: 'A description of the span\'s operation.',
+    description: "A description of the span's operation.",
     type: 'keyword',
   },
-  'kind': {
+  kind: {
     name: 'kind',
     description: 'Distinguishes between spans generated in a particular context.',
     type: 'keyword',
   },
-  'duration': {
+  duration: {
     name: 'duration',
     description: 'Duration of the span in nanoseconds (end_time - start_time).',
     type: 'long',
   },
-  'dropped_events_count': {
+  dropped_events_count: {
     name: 'dropped_events_count',
     description: 'Number of events that were discarded due to limits.',
     type: 'long',
   },
-  'links': {
+  links: {
     name: 'links',
     description: 'Links to other spans.',
     type: 'object',
   },
   'links.trace_id': {
     name: 'links.trace_id',
-    description: 'A unique identifier of the linked span\'s trace.',
+    description: "A unique identifier of the linked span's trace.",
     type: 'keyword',
   },
   'links.span_id': {
@@ -181,12 +182,12 @@ export const semconvFlat = {
     description: 'Number of link attributes that were discarded due to limits.',
     type: 'long',
   },
-  'dropped_links_count': {
+  dropped_links_count: {
     name: 'dropped_links_count',
     description: 'Number of links that were discarded due to limits.',
     type: 'long',
   },
-  'status': {
+  status: {
     name: 'status',
     description: 'An optional final status for the span.',
     type: 'object',
@@ -203,7 +204,8 @@ export const semconvFlat = {
   },
   'geo.locality.name': {
     name: 'geo.locality.name',
-    description: 'Locality name. Represents the name of a city, town, village, or similar populated place.',
+    description:
+      'Locality name. Represents the name of a city, town, village, or similar populated place.',
     type: 'keyword',
     example: 'Montreal',
   },
@@ -214,25 +216,29 @@ export const semconvFlat = {
   },
   'geo.country.iso_code': {
     name: 'geo.country.iso_code',
-    description: 'Two-letter ISO Country Code ([ISO 3166-1 alpha2](https://wikipedia.org/wiki/ISO_3166-1#Codes)).',
+    description:
+      'Two-letter ISO Country Code ([ISO 3166-1 alpha2](https://wikipedia.org/wiki/ISO_3166-1#Codes)).',
     type: 'keyword',
     example: 'CA',
   },
   'geo.location.lon': {
     name: 'geo.location.lon',
-    description: 'Longitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
+    description:
+      'Longitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
     type: 'double',
     example: '-73.61483',
   },
   'geo.location.lat': {
     name: 'geo.location.lat',
-    description: 'Latitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
+    description:
+      'Latitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
     type: 'double',
     example: '45.505918',
   },
   'geo.postal_code': {
     name: 'geo.postal_code',
-    description: 'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
     type: 'keyword',
     example: '94040',
   },
@@ -298,7 +304,8 @@ export const semconvFlat = {
   },
   'system.process.status': {
     name: 'system.process.status',
-    description: 'The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)',
+    description:
+      'The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)',
     type: 'keyword',
     example: 'running',
   },
@@ -310,7 +317,8 @@ export const semconvFlat = {
   },
   'client.address': {
     name: 'client.address',
-    description: 'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    description:
+      'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
     type: 'keyword',
     example: 'client.example.com',
   },
@@ -400,7 +408,8 @@ export const semconvFlat = {
   },
   'webengine.description': {
     name: 'webengine.description',
-    description: 'Additional description of the web engine (e.g. detailed version and edition information).',
+    description:
+      'Additional description of the web engine (e.g. detailed version and edition information).',
     type: 'keyword',
     example: 'WildFly Full 21.0.0.Final (WildFly Core 13.0.1.Final) - 2.2.2.Final',
   },
@@ -412,7 +421,8 @@ export const semconvFlat = {
   },
   'signalr.transport': {
     name: 'signalr.transport',
-    description: '[SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)',
+    description:
+      '[SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)',
     type: 'keyword',
     example: 'web_sockets',
   },
@@ -442,7 +452,8 @@ export const semconvFlat = {
   },
   'db.query.parameter': {
     name: 'db.query.parameter',
-    description: 'A database query parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+    description:
+      'A database query parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
     type: 'keyword',
     example: 'someval',
   },
@@ -460,7 +471,8 @@ export const semconvFlat = {
   },
   'db.operation.parameter': {
     name: 'db.operation.parameter',
-    description: 'A database operation parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+    description:
+      'A database operation parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
     type: 'keyword',
     example: 'someval',
   },
@@ -484,7 +496,8 @@ export const semconvFlat = {
   },
   'db.system.name': {
     name: 'db.system.name',
-    description: 'The database management system (DBMS) product as identified by the client instrumentation.',
+    description:
+      'The database management system (DBMS) product as identified by the client instrumentation.',
     type: 'keyword',
   },
   'db.client.connection.state': {
@@ -495,7 +508,8 @@ export const semconvFlat = {
   },
   'db.client.connection.pool.name': {
     name: 'db.client.connection.pool.name',
-    description: 'The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn\'t provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.',
+    description:
+      "The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.",
     type: 'keyword',
     example: 'myDataSource',
   },
@@ -519,29 +533,34 @@ export const semconvFlat = {
   },
   'code.function.name': {
     name: 'code.function.name',
-    description: 'The method or function fully-qualified name without arguments. The value should fit the natural representation of the language runtime, which is also likely the same used within `code.stacktrace` attribute value. This attribute MUST NOT be used on the Profile signal since the data is already captured in \'message Function\'. This constraint is imposed to prevent redundancy and maintain data integrity.',
+    description:
+      "The method or function fully-qualified name without arguments. The value should fit the natural representation of the language runtime, which is also likely the same used within `code.stacktrace` attribute value. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
     type: 'keyword',
     example: 'com.example.MyHttpService.serveRequest',
   },
   'code.file.path': {
     name: 'code.file.path',
-    description: 'The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in \'message Function\'. This constraint is imposed to prevent redundancy and maintain data integrity.',
+    description:
+      "The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
     type: 'keyword',
     example: '/',
   },
   'code.line.number': {
     name: 'code.line.number',
-    description: 'The line number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in \'message Line\'. This constraint is imposed to prevent redundancy and maintain data integrity.',
+    description:
+      "The line number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
     type: 'long',
   },
   'code.column.number': {
     name: 'code.column.number',
-    description: 'The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in \'message Line\'. This constraint is imposed to prevent redundancy and maintain data integrity.',
+    description:
+      "The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
     type: 'long',
   },
   'code.stacktrace': {
     name: 'code.stacktrace',
-    description: 'A stacktrace as a string in the natural representation for the language runtime. The representation is identical to [`exception.stacktrace`](/docs/exceptions/exceptions-spans.md#stacktrace-representation). This attribute MUST NOT be used on the Profile signal since the data is already captured in \'message Location\'. This constraint is imposed to prevent redundancy and maintain data integrity.',
+    description:
+      "A stacktrace as a string in the natural representation for the language runtime. The representation is identical to [`exception.stacktrace`](/docs/exceptions/exceptions-spans.md#stacktrace-representation). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Location'. This constraint is imposed to prevent redundancy and maintain data integrity.",
     type: 'keyword',
     example: 'a',
   },
@@ -594,7 +613,8 @@ export const semconvFlat = {
   },
   'server.address': {
     name: 'server.address',
-    description: 'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    description:
+      'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
     type: 'keyword',
     example: 'example.com',
   },
@@ -606,13 +626,15 @@ export const semconvFlat = {
   },
   'host.id': {
     name: 'host.id',
-    description: 'Unique host ID. For Cloud, this must be the instance_id assigned by the cloud provider. For non-containerized systems, this should be the `machine-id`. See the table below for the sources to use to determine the `machine-id` based on operating system.',
+    description:
+      'Unique host ID. For Cloud, this must be the instance_id assigned by the cloud provider. For non-containerized systems, this should be the `machine-id`. See the table below for the sources to use to determine the `machine-id` based on operating system.',
     type: 'keyword',
     example: 'fdbf79e8af94cb7f9e8df36789187052',
   },
   'host.name': {
     name: 'host.name',
-    description: 'Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
+    description:
+      'Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
     type: 'keyword',
     example: 'opentelemetry-test',
   },
@@ -641,7 +663,8 @@ export const semconvFlat = {
   },
   'host.image.version': {
     name: 'host.image.version',
-    description: 'The version string of the VM image or host OS as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    description:
+      'The version string of the VM image or host OS as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
     type: 'keyword',
     example: '0.1',
   },
@@ -671,7 +694,8 @@ export const semconvFlat = {
   },
   'host.cpu.model.id': {
     name: 'host.cpu.model.id',
-    description: 'Model identifier. It provides more granular information about the CPU, distinguishing it from other CPUs within the same family.',
+    description:
+      'Model identifier. It provides more granular information about the CPU, distinguishing it from other CPUs within the same family.',
     type: 'keyword',
     example: '6',
   },
@@ -695,7 +719,8 @@ export const semconvFlat = {
   },
   'peer.service': {
     name: 'peer.service',
-    description: 'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
+    description:
+      'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
     type: 'keyword',
     example: 'A',
   },
@@ -703,7 +728,7 @@ export const semconvFlat = {
     name: 'browser.brands',
     description: 'Array of brand name and version separated by a space',
     type: 'keyword',
-    example: ' Not A;Brand 99,Chromium 99,Chrome 99',
+    example: 'Not A;Brand 99,Chromium 99,Chrome 99',
   },
   'browser.platform': {
     name: 'browser.platform',
@@ -730,7 +755,8 @@ export const semconvFlat = {
   },
   'aspnetcore.rate_limiting.result': {
     name: 'aspnetcore.rate_limiting.result',
-    description: 'Rate-limiting result, shows whether the lease was acquired or contains a rejection reason',
+    description:
+      'Rate-limiting result, shows whether the lease was acquired or contains a rejection reason',
     type: 'keyword',
     example: 'acquired',
   },
@@ -742,7 +768,8 @@ export const semconvFlat = {
   },
   'aspnetcore.diagnostics.handler.type': {
     name: 'aspnetcore.diagnostics.handler.type',
-    description: 'Full type name of the [`IExceptionHandler`](https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) implementation that handled the exception.',
+    description:
+      'Full type name of the [`IExceptionHandler`](https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) implementation that handled the exception.',
     type: 'keyword',
     example: 'Contoso.MyHandler',
   },
@@ -861,35 +888,41 @@ export const semconvFlat = {
   },
   'rpc.connect_rpc.error_code': {
     name: 'rpc.connect_rpc.error_code',
-    description: 'The [error codes](https://connectrpc.com//docs/protocol/#error-codes) of the Connect request. Error codes are always string values.',
+    description:
+      'The [error codes](https://connectrpc.com//docs/protocol/#error-codes) of the Connect request. Error codes are always string values.',
     type: 'keyword',
   },
   'rpc.connect_rpc.request.metadata': {
     name: 'rpc.connect_rpc.request.metadata',
-    description: 'Connect request metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
+    description:
+      'Connect request metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
     type: 'keyword',
     example: '1.2.3.4,1.2.3.5',
   },
   'rpc.connect_rpc.response.metadata': {
     name: 'rpc.connect_rpc.response.metadata',
-    description: 'Connect response metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
+    description:
+      'Connect response metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
     type: 'keyword',
     example: 'attribute_value',
   },
   'rpc.grpc.status_code': {
     name: 'rpc.grpc.status_code',
-    description: 'The gRPC status code of the last gRPC requests performed in scope of this export call.',
+    description:
+      'The gRPC status code of the last gRPC requests performed in scope of this export call.',
     type: 'keyword',
   },
   'rpc.grpc.request.metadata': {
     name: 'rpc.grpc.request.metadata',
-    description: 'gRPC request metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
+    description:
+      'gRPC request metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
     type: 'keyword',
     example: '1.2.3.4,1.2.3.5',
   },
   'rpc.grpc.response.metadata': {
     name: 'rpc.grpc.response.metadata',
-    description: 'gRPC response metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
+    description:
+      'gRPC response metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
     type: 'keyword',
     example: 'attribute_value',
   },
@@ -907,31 +940,36 @@ export const semconvFlat = {
   },
   'rpc.jsonrpc.request_id': {
     name: 'rpc.jsonrpc.request_id',
-    description: '`id` property of request or response. Since protocol allows id to be int, string, `null` or missing (for notifications), value is expected to be cast to string for simplicity. Use empty string in case of `null` value. Omit entirely if this is a notification.',
+    description:
+      '`id` property of request or response. Since protocol allows id to be int, string, `null` or missing (for notifications), value is expected to be cast to string for simplicity. Use empty string in case of `null` value. Omit entirely if this is a notification.',
     type: 'keyword',
     example: '10',
   },
   'rpc.jsonrpc.version': {
     name: 'rpc.jsonrpc.version',
-    description: 'Protocol version as in `jsonrpc` property of request/response. Since JSON-RPC 1.0 doesn\'t specify this, the value can be omitted.',
+    description:
+      "Protocol version as in `jsonrpc` property of request/response. Since JSON-RPC 1.0 doesn't specify this, the value can be omitted.",
     type: 'keyword',
-    example: '2.0',
+    example: '2',
   },
   'rpc.method': {
     name: 'rpc.method',
-    description: 'The name of the (logical) method being called, must be equal to the $method part in the span name.',
+    description:
+      'The name of the (logical) method being called, must be equal to the $method part in the span name.',
     type: 'keyword',
     example: 'e',
   },
   'rpc.service': {
     name: 'rpc.service',
-    description: 'The full (logical) name of the service being called, including its package name, if applicable.',
+    description:
+      'The full (logical) name of the service being called, including its package name, if applicable.',
     type: 'keyword',
     example: 'm',
   },
   'rpc.system': {
     name: 'rpc.system',
-    description: 'A string identifying the remoting system. See below for a list of well-known identifiers.',
+    description:
+      'A string identifying the remoting system. See below for a list of well-known identifiers.',
     type: 'keyword',
   },
   'rpc.message.type': {
@@ -941,7 +979,8 @@ export const semconvFlat = {
   },
   'rpc.message.id': {
     name: 'rpc.message.id',
-    description: 'MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.',
+    description:
+      'MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.',
     type: 'long',
   },
   'rpc.message.compressed_size': {
@@ -956,13 +995,15 @@ export const semconvFlat = {
   },
   'enduser.id': {
     name: 'enduser.id',
-    description: 'Unique identifier of an end user in the system. It maybe a username, email address, or other identifier.',
+    description:
+      'Unique identifier of an end user in the system. It maybe a username, email address, or other identifier.',
     type: 'keyword',
     example: 'username',
   },
   'enduser.pseudo.id': {
     name: 'enduser.pseudo.id',
-    description: 'Pseudonymous identifier of an end user. This identifier should be a random value that is not directly linked or associated with the end user\'s actual identity.',
+    description:
+      "Pseudonymous identifier of an end user. This identifier should be a random value that is not directly linked or associated with the end user's actual identity.",
     type: 'keyword',
     example: 'QdH5CAWJgqVT4rOr0qtumf',
   },
@@ -986,7 +1027,8 @@ export const semconvFlat = {
   },
   'cassandra.consistency.level': {
     name: 'cassandra.consistency.level',
-    description: 'The consistency level of the query. Based on consistency values from [CQL](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html).',
+    description:
+      'The consistency level of the query. Based on consistency values from [CQL](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html).',
     type: 'keyword',
   },
   'cassandra.query.idempotent': {
@@ -1002,7 +1044,8 @@ export const semconvFlat = {
   },
   'cassandra.speculative_execution.count': {
     name: 'cassandra.speculative_execution.count',
-    description: 'The number of times a query was speculatively executed. Not set or `0` if the query was not executed speculatively.',
+    description:
+      'The number of times a query was speculatively executed. Not set or `0` if the query was not executed speculatively.',
     type: 'long',
     example: '0',
   },
@@ -1014,19 +1057,22 @@ export const semconvFlat = {
   },
   'user_agent.original': {
     name: 'user_agent.original',
-    description: 'Value of the [HTTP User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#field.user-agent) header sent by the client.',
+    description:
+      'Value of the [HTTP User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#field.user-agent) header sent by the client.',
     type: 'keyword',
     example: 'CERN-LineMode/2.15 libwww/2.17b3',
   },
   'user_agent.name': {
     name: 'user_agent.name',
-    description: 'Name of the user-agent extracted from original. Usually refers to the browser\'s name.',
+    description:
+      "Name of the user-agent extracted from original. Usually refers to the browser's name.",
     type: 'keyword',
     example: 'Safari',
   },
   'user_agent.version': {
     name: 'user_agent.version',
-    description: 'Version of the user-agent extracted from original. Usually refers to the browser\'s version',
+    description:
+      "Version of the user-agent extracted from original. Usually refers to the browser's version",
     type: 'keyword',
     example: '14.1.2',
   },
@@ -1038,7 +1084,8 @@ export const semconvFlat = {
   },
   'user_agent.os.version': {
     name: 'user_agent.os.version',
-    description: 'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    description:
+      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
     type: 'keyword',
     example: '14.2.1',
   },
@@ -1054,7 +1101,8 @@ export const semconvFlat = {
   },
   'os.description': {
     name: 'os.description',
-    description: 'Human readable (not intended to be parsed) OS version information, like e.g. reported by `ver` or `lsb_release -a` commands.',
+    description:
+      'Human readable (not intended to be parsed) OS version information, like e.g. reported by `ver` or `lsb_release -a` commands.',
     type: 'keyword',
     example: 'Microsoft Windows [Version 10.0.18363.778]',
   },
@@ -1066,7 +1114,8 @@ export const semconvFlat = {
   },
   'os.version': {
     name: 'os.version',
-    description: 'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    description:
+      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
     type: 'keyword',
     example: '14.2.1',
   },
@@ -1089,13 +1138,15 @@ export const semconvFlat = {
   },
   'azure.service.request.id': {
     name: 'azure.service.request.id',
-    description: 'The unique identifier of the service request. It\'s generated by the Azure service and returned with the response.',
+    description:
+      "The unique identifier of the service request. It's generated by the Azure service and returned with the response.",
     type: 'keyword',
     example: '00000000-0000-0000-0000-000000000000',
   },
   'azure.resource_provider.namespace': {
     name: 'azure.resource_provider.namespace',
-    description: '[Azure Resource Provider Namespace](https://learn.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) as recognized by the client.',
+    description:
+      '[Azure Resource Provider Namespace](https://learn.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) as recognized by the client.',
     type: 'keyword',
     example: 'Microsoft.Storage',
   },
@@ -1123,7 +1174,8 @@ export const semconvFlat = {
   },
   'azure.cosmosdb.operation.contacted_regions': {
     name: 'azure.cosmosdb.operation.contacted_regions',
-    description: 'List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.',
+    description:
+      'List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.',
     type: 'keyword',
     example: 'North Central US,Australia East,Australia Southeast',
   },
@@ -1135,7 +1187,8 @@ export const semconvFlat = {
   },
   'azure.cosmosdb.consistency.level': {
     name: 'azure.cosmosdb.consistency.level',
-    description: 'Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).',
+    description:
+      'Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).',
     type: 'keyword',
     example: 'Eventual',
   },
@@ -1159,19 +1212,22 @@ export const semconvFlat = {
   },
   'feature_flag.context.id': {
     name: 'feature_flag.context.id',
-    description: 'The unique identifier for the flag evaluation context. For example, the targeting key.',
+    description:
+      'The unique identifier for the flag evaluation context. For example, the targeting key.',
     type: 'keyword',
     example: '5157782b-2203-4c80-a857-dbbd5e7761db',
   },
   'feature_flag.version': {
     name: 'feature_flag.version',
-    description: 'The version of the ruleset used during the evaluation. This may be any stable value which uniquely identifies the ruleset.',
+    description:
+      'The version of the ruleset used during the evaluation. This may be any stable value which uniquely identifies the ruleset.',
     type: 'keyword',
     example: '1',
   },
   'feature_flag.set.id': {
     name: 'feature_flag.set.id',
-    description: 'The identifier of the [flag set](https://openfeature.dev/specification/glossary/#flag-set) to which the feature flag belongs.',
+    description:
+      'The identifier of the [flag set](https://openfeature.dev/specification/glossary/#flag-set) to which the feature flag belongs.',
     type: 'keyword',
     example: 'proj-1',
   },
@@ -1215,7 +1271,7 @@ export const semconvFlat = {
     name: 'file.accessed',
     description: 'Time when the file was last accessed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
   },
   'file.attributes': {
     name: 'file.attributes',
@@ -1227,17 +1283,18 @@ export const semconvFlat = {
     name: 'file.created',
     description: 'Time when the file was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
   },
   'file.changed': {
     name: 'file.changed',
     description: 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
   },
   'file.directory': {
     name: 'file.directory',
-    description: 'Directory where the file is located. It should include the drive letter, when appropriate.',
+    description:
+      'Directory where the file is located. It should include the drive letter, when appropriate.',
     type: 'keyword',
     example: '/home/user',
   },
@@ -1281,7 +1338,7 @@ export const semconvFlat = {
     name: 'file.modified',
     description: 'Time when the file content was last modified, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
   },
   'file.name': {
     name: 'file.name',
@@ -1303,7 +1360,8 @@ export const semconvFlat = {
   },
   'file.path': {
     name: 'file.path',
-    description: 'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+    description:
+      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
     type: 'keyword',
     example: '/home/alice/example.png',
   },
@@ -1320,7 +1378,8 @@ export const semconvFlat = {
   },
   'exception.type': {
     name: 'exception.type',
-    description: 'The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.',
+    description:
+      'The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.',
     type: 'keyword',
     example: 'java.net.ConnectException',
   },
@@ -1332,7 +1391,8 @@ export const semconvFlat = {
   },
   'exception.stacktrace': {
     name: 'exception.stacktrace',
-    description: 'A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.',
+    description:
+      'A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.',
     type: 'keyword',
     example: 'E',
   },
@@ -1356,7 +1416,8 @@ export const semconvFlat = {
   },
   'url.full': {
     name: 'url.full',
-    description: 'Absolute URL describing a network resource according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986)',
+    description:
+      'Absolute URL describing a network resource according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986)',
     type: 'keyword',
     example: 'https://www.foo.bar/search?q=OpenTelemetry#SemConv',
   },
@@ -1392,25 +1453,29 @@ export const semconvFlat = {
   },
   'url.scheme': {
     name: 'url.scheme',
-    description: 'The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.',
+    description:
+      'The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.',
     type: 'keyword',
     example: 'http',
   },
   'url.subdomain': {
     name: 'url.subdomain',
-    description: 'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
     type: 'keyword',
     example: 'east',
   },
   'url.template': {
     name: 'url.template',
-    description: 'The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).',
+    description:
+      'The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).',
     type: 'keyword',
     example: '/users/{id}',
   },
   'url.top_level_domain': {
     name: 'url.top_level_domain',
-    description: 'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is `com`.',
+    description:
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is `com`.',
     type: 'keyword',
     example: 'com',
   },
@@ -1440,37 +1505,43 @@ export const semconvFlat = {
   },
   'cloudevents.event_id': {
     name: 'cloudevents.event_id',
-    description: 'The [event_id](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id) uniquely identifies the event.',
+    description:
+      'The [event_id](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id) uniquely identifies the event.',
     type: 'keyword',
     example: '123e4567-e89b-12d3-a456-426614174000',
   },
   'cloudevents.event_source': {
     name: 'cloudevents.event_source',
-    description: 'The [source](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1) identifies the context in which an event happened.',
+    description:
+      'The [source](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1) identifies the context in which an event happened.',
     type: 'keyword',
     example: 'https://github.com/cloudevents',
   },
   'cloudevents.event_spec_version': {
     name: 'cloudevents.event_spec_version',
-    description: 'The [version of the CloudEvents specification](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#specversion) which the event uses.',
+    description:
+      'The [version of the CloudEvents specification](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#specversion) which the event uses.',
     type: 'keyword',
     example: '1',
   },
   'cloudevents.event_type': {
     name: 'cloudevents.event_type',
-    description: 'The [event_type](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type) contains a value describing the type of event related to the originating occurrence.',
+    description:
+      'The [event_type](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type) contains a value describing the type of event related to the originating occurrence.',
     type: 'keyword',
     example: 'com.github.pull_request.opened',
   },
   'cloudevents.event_subject': {
     name: 'cloudevents.event_subject',
-    description: 'The [subject](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#subject) of the event in the context of the event producer (identified by source).',
+    description:
+      'The [subject](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#subject) of the event in the context of the event producer (identified by source).',
     type: 'keyword',
     example: 'm',
   },
   'android.os.api_level': {
     name: 'android.os.api_level',
-    description: 'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
+    description:
+      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
     type: 'keyword',
     example: '33',
   },
@@ -1494,9 +1565,11 @@ export const semconvFlat = {
   },
   'cicd.pipeline.run.url.full': {
     name: 'cicd.pipeline.run.url.full',
-    description: 'The [URL](https://wikipedia.org/wiki/URL) of the pipeline run, providing the complete address in order to locate and identify the pipeline run.',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline run, providing the complete address in order to locate and identify the pipeline run.',
     type: 'keyword',
-    example: 'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763?pr=1075',
+    example:
+      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763?pr=1075',
   },
   'cicd.pipeline.run.state': {
     name: 'cicd.pipeline.run.state',
@@ -1506,7 +1579,8 @@ export const semconvFlat = {
   },
   'cicd.pipeline.task.name': {
     name: 'cicd.pipeline.task.name',
-    description: 'The human readable name of a task within a pipeline. Task here most closely aligns with a [computing process](https://wikipedia.org/wiki/Pipeline_(computing)) in a pipeline. Other terms for tasks include commands, steps, and procedures.',
+    description:
+      'The human readable name of a task within a pipeline. Task here most closely aligns with a [computing process](https://wikipedia.org/wiki/Pipeline_(computing)) in a pipeline. Other terms for tasks include commands, steps, and procedures.',
     type: 'keyword',
     example: 'Run GoLang Linter',
   },
@@ -1518,9 +1592,11 @@ export const semconvFlat = {
   },
   'cicd.pipeline.task.run.url.full': {
     name: 'cicd.pipeline.task.run.url.full',
-    description: 'The [URL](https://wikipedia.org/wiki/URL) of the pipeline task run, providing the complete address in order to locate and identify the pipeline task run.',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline task run, providing the complete address in order to locate and identify the pipeline task run.',
     type: 'keyword',
-    example: 'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763/job/26920038674?pr=1075',
+    example:
+      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763/job/26920038674?pr=1075',
   },
   'cicd.pipeline.task.run.result': {
     name: 'cicd.pipeline.task.run.result',
@@ -1560,7 +1636,8 @@ export const semconvFlat = {
   },
   'cicd.worker.url.full': {
     name: 'cicd.worker.url.full',
-    description: 'The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.',
     type: 'keyword',
     example: 'https://cicd.example.org/worker/abc123',
   },
@@ -1589,19 +1666,22 @@ export const semconvFlat = {
   },
   'cloud.region': {
     name: 'cloud.region',
-    description: 'The geographical region within a cloud provider. When associated with a resource, this attribute specifies the region where the resource operates. When calling services or APIs deployed on a cloud, this attribute identifies the region where the called destination is deployed.',
+    description:
+      'The geographical region within a cloud provider. When associated with a resource, this attribute specifies the region where the resource operates. When calling services or APIs deployed on a cloud, this attribute identifies the region where the called destination is deployed.',
     type: 'keyword',
     example: 'us-central1',
   },
   'cloud.resource_id': {
     name: 'cloud.resource_id',
-    description: 'Cloud provider-specific native identifier of the monitored cloud resource (e.g. an [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) on AWS, a [fully qualified resource ID](https://learn.microsoft.com/rest/api/resources/resources/get-by-id) on Azure, a [full resource name](https://google.aip.dev/122#full-resource-names) on GCP)',
+    description:
+      'Cloud provider-specific native identifier of the monitored cloud resource (e.g. an [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) on AWS, a [fully qualified resource ID](https://learn.microsoft.com/rest/api/resources/resources/get-by-id) on Azure, a [full resource name](https://google.aip.dev/122#full-resource-names) on GCP)',
     type: 'keyword',
     example: 'arn:aws:lambda:REGION:ACCOUNT_ID:function:my-function',
   },
   'cloud.availability_zone': {
     name: 'cloud.availability_zone',
-    description: 'Cloud regions often have multiple, isolated locations known as zones to increase availability. Availability zone represents the zone where the resource is running.',
+    description:
+      'Cloud regions often have multiple, isolated locations known as zones to increase availability. Availability zone represents the zone where the resource is running.',
     type: 'keyword',
     example: 'us-east-1c',
   },
@@ -1612,7 +1692,8 @@ export const semconvFlat = {
   },
   'otel.status_code': {
     name: 'otel.status_code',
-    description: 'Name of the code, either "OK" or "ERROR". MUST NOT be set if the status code is UNSET.',
+    description:
+      'Name of the code, either "OK" or "ERROR". MUST NOT be set if the status code is UNSET.',
     type: 'keyword',
   },
   'otel.status_description': {
@@ -1628,7 +1709,8 @@ export const semconvFlat = {
   },
   'otel.span.parent.origin': {
     name: 'otel.span.parent.origin',
-    description: 'Determines whether the span has a parent span, and if so, [whether it is a remote parent](https://opentelemetry.io/docs/specs/otel/trace/api/#isremote)',
+    description:
+      'Determines whether the span has a parent span, and if so, [whether it is a remote parent](https://opentelemetry.io/docs/specs/otel/trace/api/#isremote)',
     type: 'keyword',
   },
   'otel.scope.name': {
@@ -1639,7 +1721,8 @@ export const semconvFlat = {
   },
   'otel.scope.version': {
     name: 'otel.scope.version',
-    description: 'The version of the instrumentation scope - (`InstrumentationScope.Version` in OTLP).',
+    description:
+      'The version of the instrumentation scope - (`InstrumentationScope.Version` in OTLP).',
     type: 'keyword',
     example: '1.0.0',
   },
@@ -1657,7 +1740,8 @@ export const semconvFlat = {
   },
   'otel.component.name': {
     name: 'otel.component.name',
-    description: 'A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.',
+    description:
+      'A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.',
     type: 'keyword',
     example: 'otlp_grpc_span_exporter/0',
   },
@@ -1675,7 +1759,8 @@ export const semconvFlat = {
   },
   'hw.parent': {
     name: 'hw.parent',
-    description: 'Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)',
+    description:
+      'Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)',
     type: 'keyword',
     example: 'dellStorage_perc_0',
   },
@@ -1744,7 +1829,8 @@ export const semconvFlat = {
   },
   'hw.battery.chemistry': {
     name: 'hw.battery.chemistry',
-    description: 'Battery [chemistry](https://schemas.dmtf.org/wbem/cim-html/2.31.0/CIM_Battery.html), e.g. Lithium-Ion, Nickel-Cadmium, etc.',
+    description:
+      'Battery [chemistry](https://schemas.dmtf.org/wbem/cim-html/2.31.0/CIM_Battery.html), e.g. Lithium-Ion, Nickel-Cadmium, etc.',
     type: 'keyword',
     example: 'Li-ion',
   },
@@ -1810,7 +1896,8 @@ export const semconvFlat = {
   },
   'hw.physical_disk.smart_attribute': {
     name: 'hw.physical_disk.smart_attribute',
-    description: '[S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute of the physical disk',
+    description:
+      '[S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute of the physical disk',
     type: 'keyword',
     example: 'Spin Retry Count',
   },
@@ -1822,7 +1909,8 @@ export const semconvFlat = {
   },
   'zos.smf.id': {
     name: 'zos.smf.id',
-    description: 'The System Management Facility (SMF) Identifier uniquely identified a z/OS system within a SYSPLEX or mainframe environment and is used for system and performance analysis.',
+    description:
+      'The System Management Facility (SMF) Identifier uniquely identified a z/OS system within a SYSPLEX or mainframe environment and is used for system and performance analysis.',
     type: 'keyword',
     example: 'SYS1',
   },
@@ -1834,7 +1922,8 @@ export const semconvFlat = {
   },
   'app.installation.id': {
     name: 'app.installation.id',
-    description: 'A unique identifier representing the installation of an application on a specific device',
+    description:
+      'A unique identifier representing the installation of an application on a specific device',
     type: 'keyword',
     example: '2ab2916d-a51f-4ac8-80ee-45ac31a28092',
   },
@@ -1870,7 +1959,8 @@ export const semconvFlat = {
   },
   'app.widget.id': {
     name: 'app.widget.id',
-    description: 'An identifier that uniquely differentiates this widget from other widgets in the same application.',
+    description:
+      'An identifier that uniquely differentiates this widget from other widgets in the same application.',
     type: 'keyword',
     example: 'f9bc787d-ff05-48ad-90e1-fca1d46130b3',
   },
@@ -1900,7 +1990,8 @@ export const semconvFlat = {
   },
   'faas.instance': {
     name: 'faas.instance',
-    description: 'The execution environment ID as a string, that will be potentially reused for other invocations to the same function/function version.',
+    description:
+      'The execution environment ID as a string, that will be potentially reused for other invocations to the same function/function version.',
     type: 'keyword',
     example: '2021/06/28/[$LATEST]2f399eb14537447da05ab2a2e39309de',
   },
@@ -1939,23 +2030,27 @@ export const semconvFlat = {
   },
   'faas.time': {
     name: 'faas.time',
-    description: 'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
+    description:
+      'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
     type: 'keyword',
   },
   'faas.cron': {
     name: 'faas.cron',
-    description: 'A string containing the schedule period as [Cron Expression](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm).',
+    description:
+      'A string containing the schedule period as [Cron Expression](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm).',
     type: 'keyword',
     example: '0',
   },
   'faas.coldstart': {
     name: 'faas.coldstart',
-    description: 'A boolean that is true if the serverless function is executed for the first time (aka cold-start).',
+    description:
+      'A boolean that is true if the serverless function is executed for the first time (aka cold-start).',
     type: 'boolean',
   },
   'faas.document.collection': {
     name: 'faas.document.collection',
-    description: 'The name of the source on which the triggering operation was performed. For example, in Cloud Storage or S3 corresponds to the bucket name, and in Cosmos DB to the database name.',
+    description:
+      'The name of the source on which the triggering operation was performed. For example, in Cloud Storage or S3 corresponds to the bucket name, and in Cosmos DB to the database name.',
     type: 'keyword',
     example: 'myBucketName',
   },
@@ -1966,12 +2061,14 @@ export const semconvFlat = {
   },
   'faas.document.time': {
     name: 'faas.document.time',
-    description: 'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
+    description:
+      'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
     type: 'keyword',
   },
   'faas.document.name': {
     name: 'faas.document.name',
-    description: 'The document name/table subjected to the operation. For example, in Cloud Storage or S3 is the name of the file, and in Cosmos DB the table name.',
+    description:
+      'The document name/table subjected to the operation. For example, in Cloud Storage or S3 is the name of the file, and in Cosmos DB the table name.',
     type: 'keyword',
     example: 'myFile.txt',
   },
@@ -1995,13 +2092,15 @@ export const semconvFlat = {
   },
   'process.session_leader.pid': {
     name: 'process.session_leader.pid',
-    description: 'The PID of the process\'s session leader. This is also the session ID (SID) of the process.',
+    description:
+      "The PID of the process's session leader. This is also the session ID (SID) of the process.",
     type: 'long',
     example: '14',
   },
   'process.group_leader.pid': {
     name: 'process.group_leader.pid',
-    description: 'The PID of the process\'s group leader. This is also the process group ID (PGID) of the process.',
+    description:
+      "The PID of the process's group leader. This is also the process group ID (PGID) of the process.",
     type: 'long',
     example: '23',
   },
@@ -2019,37 +2118,43 @@ export const semconvFlat = {
   },
   'process.executable.build_id.htlhash': {
     name: 'process.executable.build_id.htlhash',
-    description: 'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
+    description:
+      'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
     type: 'keyword',
     example: '600DCAFE4A110000F2BF38C493F5FB92',
   },
   'process.executable.name': {
     name: 'process.executable.name',
-    description: 'The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.',
+    description:
+      'The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.',
     type: 'keyword',
     example: 'otelcol',
   },
   'process.executable.path': {
     name: 'process.executable.path',
-    description: 'The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.',
+    description:
+      'The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.',
     type: 'keyword',
     example: '/usr/bin/cmd/otelcol',
   },
   'process.command': {
     name: 'process.command',
-    description: 'The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`.',
+    description:
+      'The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`.',
     type: 'keyword',
     example: 'cmd/otelcol',
   },
   'process.command_line': {
     name: 'process.command_line',
-    description: 'The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
+    description:
+      'The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
     type: 'keyword',
     example: 'C:\\cmd\\otecol --config="my directory\\config.yaml"',
   },
   'process.command_args': {
     name: 'process.command_args',
-    description: 'All the command arguments (including the command/executable itself) as received by the process. On Linux-based systems (and some other Unixoid systems supporting procfs), can be set according to the list of null-delimited strings extracted from `proc/[pid]/cmdline`. For libc-based executables, this would be the full argv vector passed to `main`. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
+    description:
+      'All the command arguments (including the command/executable itself) as received by the process. On Linux-based systems (and some other Unixoid systems supporting procfs), can be set according to the list of null-delimited strings extracted from `proc/[pid]/cmdline`. For libc-based executables, this would be the full argv vector passed to `main`. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
     type: 'keyword',
     example: 'cmd/otecol,--config=config.yaml',
   },
@@ -2109,13 +2214,15 @@ export const semconvFlat = {
   },
   'process.runtime.version': {
     name: 'process.runtime.version',
-    description: 'The version of the runtime of this process, as returned by the runtime without modification.',
+    description:
+      'The version of the runtime of this process, as returned by the runtime without modification.',
     type: 'keyword',
     example: '1',
   },
   'process.runtime.description': {
     name: 'process.runtime.description',
-    description: 'An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.',
+    description:
+      'An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.',
     type: 'keyword',
     example: 'E',
   },
@@ -2129,13 +2236,13 @@ export const semconvFlat = {
     name: 'process.creation.time',
     description: 'The date and time the process was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 09:25:34 GMT+0000 (Coordinated Universal Time)',
+    example: 'Tue Nov 21 2023 10:25:34 GMT+0100 (Central European Standard Time)',
   },
   'process.exit.time': {
     name: 'process.exit.time',
     description: 'The date and time the process exited, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 09:26:12 GMT+0000 (Coordinated Universal Time)',
+    example: 'Tue Nov 21 2023 10:26:12 GMT+0100 (Central European Standard Time)',
   },
   'process.exit.code': {
     name: 'process.exit.code',
@@ -2156,17 +2263,20 @@ export const semconvFlat = {
   },
   'process.context_switch_type': {
     name: 'process.context_switch_type',
-    description: 'Specifies whether the context switches for this data point were voluntary or involuntary.',
+    description:
+      'Specifies whether the context switches for this data point were voluntary or involuntary.',
     type: 'keyword',
   },
   'process.paging.fault_type': {
     name: 'process.paging.fault_type',
-    description: 'The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.',
+    description:
+      'The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.',
     type: 'keyword',
   },
   'process.environment_variable': {
     name: 'process.environment_variable',
-    description: 'Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.',
+    description:
+      'Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.',
     type: 'keyword',
     example: 'ubuntu',
   },
@@ -2184,7 +2294,7 @@ export const semconvFlat = {
   },
   'user.full_name': {
     name: 'user.full_name',
-    description: 'User\'s full name',
+    description: "User's full name",
     type: 'keyword',
     example: 'Albert Einstein',
   },
@@ -2226,7 +2336,8 @@ export const semconvFlat = {
   },
   'artifact.filename': {
     name: 'artifact.filename',
-    description: 'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
+    description:
+      'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
     type: 'keyword',
     example: 'golang-binary-amd64-v0.1.0',
   },
@@ -2238,13 +2349,15 @@ export const semconvFlat = {
   },
   'artifact.purl': {
     name: 'artifact.purl',
-    description: 'The [Package URL](https://github.com/package-url/purl-spec) of the [package artifact](https://slsa.dev/spec/v1.0/terminology#package-model) provides a standard way to identify and locate the packaged artifact.',
+    description:
+      'The [Package URL](https://github.com/package-url/purl-spec) of the [package artifact](https://slsa.dev/spec/v1.0/terminology#package-model) provides a standard way to identify and locate the packaged artifact.',
     type: 'keyword',
     example: 'pkg:github/package-url/purl-spec@1209109710924',
   },
   'artifact.hash': {
     name: 'artifact.hash',
-    description: 'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), often found in checksum.txt on a release of the artifact and used to verify package integrity.',
+    description:
+      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), often found in checksum.txt on a release of the artifact and used to verify package integrity.',
     type: 'keyword',
     example: '9ff4c52759e2c4ac70b7d517bc7fcdc1cda631ca0045271ddd1b192544f8a3e9',
   },
@@ -2256,19 +2369,22 @@ export const semconvFlat = {
   },
   'artifact.attestation.filename': {
     name: 'artifact.attestation.filename',
-    description: 'The provenance filename of the built attestation which directly relates to the build artifact filename. This filename SHOULD accompany the artifact at publish time. See the [SLSA Relationship](https://slsa.dev/spec/v1.0/distributing-provenance#relationship-between-artifacts-and-attestations) specification for more information.',
+    description:
+      'The provenance filename of the built attestation which directly relates to the build artifact filename. This filename SHOULD accompany the artifact at publish time. See the [SLSA Relationship](https://slsa.dev/spec/v1.0/distributing-provenance#relationship-between-artifacts-and-attestations) specification for more information.',
     type: 'keyword',
     example: 'golang-binary-amd64-v0.1.0.attestation',
   },
   'artifact.attestation.hash': {
     name: 'artifact.attestation.hash',
-    description: 'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), of the built attestation. Some envelopes in the [software attestation space](https://github.com/in-toto/attestation/tree/main/spec) also refer to this as the **digest**.',
+    description:
+      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), of the built attestation. Some envelopes in the [software attestation space](https://github.com/in-toto/attestation/tree/main/spec) also refer to this as the **digest**.',
     type: 'keyword',
     example: '1b31dfcd5b7f9267bf2ff47651df1cfb9147b9e4df1f335accf65b4cda498408',
   },
   'destination.address': {
     name: 'destination.address',
-    description: 'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    description:
+      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
     type: 'keyword',
     example: 'destination.example.com',
   },
@@ -2280,19 +2396,22 @@ export const semconvFlat = {
   },
   'gcp.client.service': {
     name: 'gcp.client.service',
-    description: 'Identifies the Google Cloud service for which the official client library is intended.',
+    description:
+      'Identifies the Google Cloud service for which the official client library is intended.',
     type: 'keyword',
     example: 'appengine',
   },
   'gcp.cloud_run.job.execution': {
     name: 'gcp.cloud_run.job.execution',
-    description: 'The name of the Cloud Run [execution](https://cloud.google.com/run/docs/managing/job-executions) being run for the Job, as set by the [`CLOUD_RUN_EXECUTION`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
+    description:
+      'The name of the Cloud Run [execution](https://cloud.google.com/run/docs/managing/job-executions) being run for the Job, as set by the [`CLOUD_RUN_EXECUTION`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
     type: 'keyword',
     example: 'job-name-xxxx',
   },
   'gcp.cloud_run.job.task_index': {
     name: 'gcp.cloud_run.job.task_index',
-    description: 'The index for a task within an execution as provided by the [`CLOUD_RUN_TASK_INDEX`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
+    description:
+      'The index for a task within an execution as provided by the [`CLOUD_RUN_TASK_INDEX`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
     type: 'long',
     example: '0',
   },
@@ -2348,19 +2467,22 @@ export const semconvFlat = {
   },
   'gcp.gce.instance.name': {
     name: 'gcp.gce.instance.name',
-    description: 'The instance name of a GCE instance. This is the value provided by `host.name`, the visible name of the instance in the Cloud Console UI, and the prefix for the default hostname of the instance as defined by the [default internal DNS name](https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names).',
+    description:
+      'The instance name of a GCE instance. This is the value provided by `host.name`, the visible name of the instance in the Cloud Console UI, and the prefix for the default hostname of the instance as defined by the [default internal DNS name](https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names).',
     type: 'keyword',
     example: 'instance-1',
   },
   'gcp.gce.instance.hostname': {
     name: 'gcp.gce.instance.hostname',
-    description: 'The hostname of a GCE instance. This is the full value of the default or [custom hostname](https://cloud.google.com/compute/docs/instances/custom-hostname-vm).',
+    description:
+      'The hostname of a GCE instance. This is the full value of the default or [custom hostname](https://cloud.google.com/compute/docs/instances/custom-hostname-vm).',
     type: 'keyword',
     example: 'my-host1234.example.com',
   },
   'gen_ai.provider.name': {
     name: 'gen_ai.provider.name',
-    description: 'The Generative AI provider as identified by the client or server instrumentation.',
+    description:
+      'The Generative AI provider as identified by the client or server instrumentation.',
     type: 'keyword',
   },
   'gen_ai.request.model': {
@@ -2443,7 +2565,8 @@ export const semconvFlat = {
   },
   'gen_ai.response.finish_reasons': {
     name: 'gen_ai.response.finish_reasons',
-    description: 'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
+    description:
+      'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
     type: 'keyword',
     example: 'stop',
   },
@@ -2467,7 +2590,8 @@ export const semconvFlat = {
   },
   'gen_ai.conversation.id': {
     name: 'gen_ai.conversation.id',
-    description: 'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
+    description:
+      'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
     type: 'keyword',
     example: 'conv_5j66UpCpwteGg4YSxUnt7lPY',
   },
@@ -2537,73 +2661,26 @@ export const semconvFlat = {
   },
   'gen_ai.system_instructions': {
     name: 'gen_ai.system_instructions',
-    description: 'The system message or instructions provided to the GenAI model separately from the chat history.',
+    description:
+      'The system message or instructions provided to the GenAI model separately from the chat history.',
     type: 'keyword',
-    example: '[
-  {
-    "type": "text",
-    "content": "You are an Agent that greet users, always use greetings tool to respond"
-  }
-]
-',
+    example:
+      '[{"type":"text","content":"You are an Agent that greet users, always use greetings tool to respond"}]',
   },
   'gen_ai.input.messages': {
     name: 'gen_ai.input.messages',
     description: 'The chat history provided to the model as an input.',
     type: 'keyword',
-    example: '[
-  {
-    "role": "user",
-    "parts": [
-      {
-        "type": "text",
-        "content": "Weather in Paris?"
-      }
-    ]
-  },
-  {
-    "role": "assistant",
-    "parts": [
-      {
-        "type": "tool_call",
-        "id": "call_VSPygqKTWdrhaFErNvMV18Yl",
-        "name": "get_weather",
-        "arguments": {
-          "location": "Paris"
-        }
-      }
-    ]
-  },
-  {
-    "role": "tool",
-    "parts": [
-      {
-        "type": "tool_call_response",
-        "id": " call_VSPygqKTWdrhaFErNvMV18Yl",
-        "result": "rainy, 57°F"
-      }
-    ]
-  }
-]
-',
+    example:
+      '[{"role":"user","parts":[{"type":"text","content":"Weather in Paris?"}]},{"role":"assistant","parts":[{"type":"tool_call","id":"call_VSPygqKTWdrhaFErNvMV18Yl","name":"get_weather","arguments":{"location":"Paris"}}]},{"role":"tool","parts":[{"type":"tool_call_response","id":" call_VSPygqKTWdrhaFErNvMV18Yl","result":"rainy, 57°F"}]}]',
   },
   'gen_ai.output.messages': {
     name: 'gen_ai.output.messages',
-    description: 'Messages returned by the model where each message represents a specific model response (choice, candidate).',
+    description:
+      'Messages returned by the model where each message represents a specific model response (choice, candidate).',
     type: 'keyword',
-    example: '[
-  {
-    "role": "assistant",
-    "parts": [
-      {
-        "type": "text",
-        "content": "The weather in Paris is currently rainy with a temperature of 57°F."
-      }
-    ],
-    "finish_reason": "stop"
-  }
-]
-',
+    example:
+      '[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]',
   },
   'gen_ai.evaluation.name': {
     name: 'gen_ai.evaluation.name',
@@ -2627,7 +2704,8 @@ export const semconvFlat = {
     name: 'gen_ai.evaluation.explanation',
     description: 'A free-form explanation for the assigned score provided by the evaluator.',
     type: 'keyword',
-    example: 'The response is factually accurate but lacks sufficient detail to fully address the question.',
+    example:
+      'The response is factually accurate but lacks sufficient detail to fully address the question.',
   },
   'opentracing.ref_type': {
     name: 'opentracing.ref_type',
@@ -2670,61 +2748,71 @@ export const semconvFlat = {
   },
   'oci.manifest.digest': {
     name: 'oci.manifest.digest',
-    description: 'The digest of the OCI image manifest. For container images specifically is the digest by which the container image is known.',
+    description:
+      'The digest of the OCI image manifest. For container images specifically is the digest by which the container image is known.',
     type: 'keyword',
     example: 'sha256:e4ca62c0d62f3e886e684806dfe9d4e0cda60d54986898173c1083856cfda0f4',
   },
   'vcs.repository.url.full': {
     name: 'vcs.repository.url.full',
-    description: 'The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
+    description:
+      'The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
     type: 'keyword',
     example: 'https://github.com/opentelemetry/open-telemetry-collector-contrib',
   },
   'vcs.repository.name': {
     name: 'vcs.repository.name',
-    description: 'The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.',
+    description:
+      'The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.',
     type: 'keyword',
     example: 'semantic-conventions',
   },
   'vcs.ref.base.name': {
     name: 'vcs.ref.base.name',
-    description: 'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
+    description:
+      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
     type: 'keyword',
     example: 'my-feature-branch',
   },
   'vcs.ref.base.type': {
     name: 'vcs.ref.base.type',
-    description: 'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
     type: 'keyword',
     example: 'branch',
   },
   'vcs.ref.base.revision': {
     name: 'vcs.ref.base.revision',
-    description: 'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
+    description:
+      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
     type: 'keyword',
     example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
   },
   'vcs.ref.head.name': {
     name: 'vcs.ref.head.name',
-    description: 'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
+    description:
+      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
     type: 'keyword',
     example: 'my-feature-branch',
   },
   'vcs.ref.head.type': {
     name: 'vcs.ref.head.type',
-    description: 'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
     type: 'keyword',
     example: 'branch',
   },
   'vcs.ref.head.revision': {
     name: 'vcs.ref.head.revision',
-    description: 'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
+    description:
+      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
     type: 'keyword',
     example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
   },
   'vcs.ref.type': {
     name: 'vcs.ref.type',
-    description: 'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
     type: 'keyword',
     example: 'branch',
   },
@@ -2742,13 +2830,15 @@ export const semconvFlat = {
   },
   'vcs.change.title': {
     name: 'vcs.change.title',
-    description: 'The human readable title of the change (pull request/merge request/changelist). This title is often a brief summary of the change and may get merged in to a ref as the commit summary.',
+    description:
+      'The human readable title of the change (pull request/merge request/changelist). This title is often a brief summary of the change and may get merged in to a ref as the commit summary.',
     type: 'keyword',
     example: 'Fixes broken thing',
   },
   'vcs.change.id': {
     name: 'vcs.change.id',
-    description: 'The ID of the change (pull request/merge request/changelist) if applicable. This is usually a unique (within repository) identifier generated by the VCS system.',
+    description:
+      'The ID of the change (pull request/merge request/changelist) if applicable. This is usually a unique (within repository) identifier generated by the VCS system.',
     type: 'keyword',
     example: '123',
   },
@@ -2772,7 +2862,8 @@ export const semconvFlat = {
   },
   'source.address': {
     name: 'source.address',
-    description: 'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    description:
+      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
     type: 'keyword',
     example: 'source.example.com',
   },
@@ -2790,7 +2881,8 @@ export const semconvFlat = {
   },
   'mainframe.lpar.name': {
     name: 'mainframe.lpar.name',
-    description: 'Name of the logical partition that hosts a systems with a mainframe operating system.',
+    description:
+      'Name of the logical partition that hosts a systems with a mainframe operating system.',
     type: 'keyword',
     example: 'LPAR01',
   },
@@ -2866,7 +2958,8 @@ export const semconvFlat = {
   },
   'aws.request_id': {
     name: 'aws.request_id',
-    description: 'The AWS request ID as returned in the response headers `x-amzn-requestid`, `x-amzn-request-id` or `x-amz-request-id`.',
+    description:
+      'The AWS request ID as returned in the response headers `x-amzn-requestid`, `x-amzn-request-id` or `x-amz-request-id`.',
     type: 'keyword',
     example: '79b9da39-b7ae-508a-a6bc-864b2829c622',
   },
@@ -2886,13 +2979,15 @@ export const semconvFlat = {
     name: 'aws.dynamodb.consumed_capacity',
     description: 'The JSON-serialized value of each item in the `ConsumedCapacity` response field.',
     type: 'keyword',
-    example: '{ "CapacityUnits": number, "GlobalSecondaryIndexes": { "string" : { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number } }, "LocalSecondaryIndexes": { "string" : { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number } }, "ReadCapacityUnits": number, "Table": { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number }, "TableName": "string", "WriteCapacityUnits": number }',
+    example:
+      '{ "CapacityUnits": number, "GlobalSecondaryIndexes": { "string" : { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number } }, "LocalSecondaryIndexes": { "string" : { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number } }, "ReadCapacityUnits": number, "Table": { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number }, "TableName": "string", "WriteCapacityUnits": number }',
   },
   'aws.dynamodb.item_collection_metrics': {
     name: 'aws.dynamodb.item_collection_metrics',
     description: 'The JSON-serialized value of the `ItemCollectionMetrics` response field.',
     type: 'keyword',
-    example: '{ "string" : [ { "ItemCollectionKey": { "string" : { "B": blob, "BOOL": boolean, "BS": [ blob ], "L": [ "AttributeValue" ], "M": { "string" : "AttributeValue" }, "N": "string", "NS": [ "string" ], "NULL": boolean, "S": "string", "SS": [ "string" ] } }, "SizeEstimateRangeGB": [ number ] } ] }',
+    example:
+      '{ "string" : [ { "ItemCollectionKey": { "string" : { "B": blob, "BOOL": boolean, "BS": [ blob ], "L": [ "AttributeValue" ], "M": { "string" : "AttributeValue" }, "N": "string", "NS": [ "string" ], "NULL": boolean, "S": "string", "SS": [ "string" ] } }, "SizeEstimateRangeGB": [ number ] } ] }',
   },
   'aws.dynamodb.provisioned_read_capacity': {
     name: 'aws.dynamodb.provisioned_read_capacity',
@@ -2943,15 +3038,19 @@ export const semconvFlat = {
   },
   'aws.dynamodb.global_secondary_indexes': {
     name: 'aws.dynamodb.global_secondary_indexes',
-    description: 'The JSON-serialized value of each item of the `GlobalSecondaryIndexes` request field',
+    description:
+      'The JSON-serialized value of each item of the `GlobalSecondaryIndexes` request field',
     type: 'keyword',
-    example: '{ "IndexName": "string", "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" }, "ProvisionedThroughput": { "ReadCapacityUnits": number, "WriteCapacityUnits": number } }',
+    example:
+      '{ "IndexName": "string", "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" }, "ProvisionedThroughput": { "ReadCapacityUnits": number, "WriteCapacityUnits": number } }',
   },
   'aws.dynamodb.local_secondary_indexes': {
     name: 'aws.dynamodb.local_secondary_indexes',
-    description: 'The JSON-serialized value of each item of the `LocalSecondaryIndexes` request field.',
+    description:
+      'The JSON-serialized value of each item of the `LocalSecondaryIndexes` request field.',
     type: 'keyword',
-    example: '{ "IndexArn": "string", "IndexName": "string", "IndexSizeBytes": number, "ItemCount": number, "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" } }',
+    example:
+      '{ "IndexArn": "string", "IndexName": "string", "IndexSizeBytes": number, "ItemCount": number, "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" } }',
   },
   'aws.dynamodb.exclusive_start_table': {
     name: 'aws.dynamodb.exclusive_start_table',
@@ -2996,42 +3095,50 @@ export const semconvFlat = {
   },
   'aws.dynamodb.attribute_definitions': {
     name: 'aws.dynamodb.attribute_definitions',
-    description: 'The JSON-serialized value of each item in the `AttributeDefinitions` request field.',
+    description:
+      'The JSON-serialized value of each item in the `AttributeDefinitions` request field.',
     type: 'keyword',
-    example: '{ "AttributeName": "string", "AttributeType": "string" }',
+    example: '{"AttributeName":"string","AttributeType":"string"}',
   },
   'aws.dynamodb.global_secondary_index_updates': {
     name: 'aws.dynamodb.global_secondary_index_updates',
-    description: 'The JSON-serialized value of each item in the `GlobalSecondaryIndexUpdates` request field.',
+    description:
+      'The JSON-serialized value of each item in the `GlobalSecondaryIndexUpdates` request field.',
     type: 'keyword',
-    example: '{ "Create": { "IndexName": "string", "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" }, "ProvisionedThroughput": { "ReadCapacityUnits": number, "WriteCapacityUnits": number } }',
+    example:
+      '{ "Create": { "IndexName": "string", "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" }, "ProvisionedThroughput": { "ReadCapacityUnits": number, "WriteCapacityUnits": number } }',
   },
   'aws.ecs.container.arn': {
     name: 'aws.ecs.container.arn',
-    description: 'The Amazon Resource Name (ARN) of an [ECS container instance](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_instances.html).',
+    description:
+      'The Amazon Resource Name (ARN) of an [ECS container instance](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_instances.html).',
     type: 'keyword',
     example: 'arn:aws:ecs:us-west-1:123456789123:container/32624152-9086-4f0e-acae-1a75b14fe4d9',
   },
   'aws.ecs.cluster.arn': {
     name: 'aws.ecs.cluster.arn',
-    description: 'The ARN of an [ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html).',
+    description:
+      'The ARN of an [ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html).',
     type: 'keyword',
     example: 'arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster',
   },
   'aws.ecs.launchtype': {
     name: 'aws.ecs.launchtype',
-    description: 'The [launch type](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html) for an ECS task.',
+    description:
+      'The [launch type](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html) for an ECS task.',
     type: 'keyword',
   },
   'aws.ecs.task.arn': {
     name: 'aws.ecs.task.arn',
-    description: 'The ARN of a running [ECS task](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-account-settings.html#ecs-resource-ids).',
+    description:
+      'The ARN of a running [ECS task](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-account-settings.html#ecs-resource-ids).',
     type: 'keyword',
     example: 'arn:aws:ecs:us-west-1:123456789123:task/10838bed-421f-43ef-870a-f43feacbbb5b',
   },
   'aws.ecs.task.family': {
     name: 'aws.ecs.task.family',
-    description: 'The family name of the [ECS task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html) used to create the ECS task.',
+    description:
+      'The family name of the [ECS task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html) used to create the ECS task.',
     type: 'keyword',
     example: 'opentelemetry-family',
   },
@@ -3075,29 +3182,34 @@ export const semconvFlat = {
     name: 'aws.log.stream.arns',
     description: 'The ARN(s) of the AWS log stream(s).',
     type: 'keyword',
-    example: 'arn:aws:logs:us-west-1:123456789012:log-group:/aws/my/group:log-stream:logs/main/10838bed-421f-43ef-870a-f43feacbbb5b',
+    example:
+      'arn:aws:logs:us-west-1:123456789012:log-group:/aws/my/group:log-stream:logs/main/10838bed-421f-43ef-870a-f43feacbbb5b',
   },
   'aws.lambda.invoked_arn': {
     name: 'aws.lambda.invoked_arn',
-    description: 'The full invoked ARN as provided on the `Context` passed to the function (`Lambda-Runtime-Invoked-Function-Arn` header on the `/runtime/invocation/next` applicable).',
+    description:
+      'The full invoked ARN as provided on the `Context` passed to the function (`Lambda-Runtime-Invoked-Function-Arn` header on the `/runtime/invocation/next` applicable).',
     type: 'keyword',
     example: 'arn:aws:lambda:us-east-1:123456:function:myfunction:myalias',
   },
   'aws.lambda.resource_mapping.id': {
     name: 'aws.lambda.resource_mapping.id',
-    description: 'The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It\'s contents are read by Lambda and used to trigger a function. This isn\'t available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.',
+    description:
+      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
     type: 'keyword',
     example: '587ad24b-03b9-4413-8202-bbd56b36e5b7',
   },
   'aws.s3.bucket': {
     name: 'aws.s3.bucket',
-    description: 'The S3 bucket name the request refers to. Corresponds to the `--bucket` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
+    description:
+      'The S3 bucket name the request refers to. Corresponds to the `--bucket` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
     type: 'keyword',
     example: 'some-bucket-name',
   },
   'aws.s3.key': {
     name: 'aws.s3.key',
-    description: 'The S3 object key the request refers to. Corresponds to the `--key` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
+    description:
+      'The S3 object key the request refers to. Corresponds to the `--key` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
     type: 'keyword',
     example: 'someFile.yml',
   },
@@ -3121,25 +3233,29 @@ export const semconvFlat = {
   },
   'aws.s3.part_number': {
     name: 'aws.s3.part_number',
-    description: 'The part number of the part being uploaded in a multipart-upload operation. This is a positive integer between 1 and 10,000.',
+    description:
+      'The part number of the part being uploaded in a multipart-upload operation. This is a positive integer between 1 and 10,000.',
     type: 'long',
     example: '3456',
   },
   'aws.sqs.queue.url': {
     name: 'aws.sqs.queue.url',
-    description: 'The URL of the AWS SQS Queue. It\'s a unique identifier for a queue in Amazon Simple Queue Service (SQS) and is used to access the queue and perform actions on it.',
+    description:
+      "The URL of the AWS SQS Queue. It's a unique identifier for a queue in Amazon Simple Queue Service (SQS) and is used to access the queue and perform actions on it.",
     type: 'keyword',
     example: 'https://sqs.us-east-1.amazonaws.com/123456789012/MyQueue',
   },
   'aws.sns.topic.arn': {
     name: 'aws.sns.topic.arn',
-    description: 'The ARN of the AWS SNS Topic. An Amazon SNS [topic](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html) is a logical access point that acts as a communication channel.',
+    description:
+      'The ARN of the AWS SNS Topic. An Amazon SNS [topic](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html) is a logical access point that acts as a communication channel.',
     type: 'keyword',
     example: 'arn:aws:sns:us-east-1:123456789012:mystack-mytopic-NZJ5JSMVGFIE',
   },
   'aws.kinesis.stream_name': {
     name: 'aws.kinesis.stream_name',
-    description: 'The name of the AWS Kinesis [stream](https://docs.aws.amazon.com/streams/latest/dev/introduction.html) the request refers to. Corresponds to the `--stream-name` parameter of the Kinesis [describe-stream](https://docs.aws.amazon.com/cli/latest/reference/kinesis/describe-stream.html) operation.',
+    description:
+      'The name of the AWS Kinesis [stream](https://docs.aws.amazon.com/streams/latest/dev/introduction.html) the request refers to. Corresponds to the `--stream-name` parameter of the Kinesis [describe-stream](https://docs.aws.amazon.com/cli/latest/reference/kinesis/describe-stream.html) operation.',
     type: 'keyword',
     example: 'some-stream-name',
   },
@@ -3163,19 +3279,22 @@ export const semconvFlat = {
   },
   'aws.bedrock.guardrail.id': {
     name: 'aws.bedrock.guardrail.id',
-    description: 'The unique identifier of the AWS Bedrock Guardrail. A [guardrail](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) helps safeguard and prevent unwanted behavior from model responses or user messages.',
+    description:
+      'The unique identifier of the AWS Bedrock Guardrail. A [guardrail](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) helps safeguard and prevent unwanted behavior from model responses or user messages.',
     type: 'keyword',
     example: 'sgi5gkybzqak',
   },
   'aws.bedrock.knowledge_base.id': {
     name: 'aws.bedrock.knowledge_base.id',
-    description: 'The unique identifier of the AWS Bedrock Knowledge base. A [knowledge base](https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html) is a bank of information that can be queried by models to generate more relevant responses and augment prompts.',
+    description:
+      'The unique identifier of the AWS Bedrock Knowledge base. A [knowledge base](https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html) is a bank of information that can be queried by models to generate more relevant responses and augment prompts.',
     type: 'keyword',
     example: 'XFWUPB9PAW',
   },
   'test.suite.name': {
     name: 'test.suite.name',
-    description: 'The human readable name of a [test suite](https://wikipedia.org/wiki/Test_suite).',
+    description:
+      'The human readable name of a [test suite](https://wikipedia.org/wiki/Test_suite).',
     type: 'keyword',
     example: 'TestSuite1',
   },
@@ -3187,7 +3306,8 @@ export const semconvFlat = {
   },
   'test.case.name': {
     name: 'test.case.name',
-    description: 'The fully qualified human readable name of the [test case](https://wikipedia.org/wiki/Test_case).',
+    description:
+      'The fully qualified human readable name of the [test case](https://wikipedia.org/wiki/Test_case).',
     type: 'keyword',
     example: 'org.example.TestCase1.test1',
   },
@@ -3223,13 +3343,15 @@ export const semconvFlat = {
   },
   'k8s.node.label': {
     name: 'k8s.node.label',
-    description: 'The label placed on the Node, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    description:
+      'The label placed on the Node, the `<key>` being the label name, the value being the label value, even if the value is empty.',
     type: 'keyword',
     example: 'arm64',
   },
   'k8s.node.annotation': {
     name: 'k8s.node.annotation',
-    description: 'The annotation placed on the Node, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    description:
+      'The annotation placed on the Node, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
     type: 'keyword',
     example: '0',
   },
@@ -3241,13 +3363,15 @@ export const semconvFlat = {
   },
   'k8s.namespace.label': {
     name: 'k8s.namespace.label',
-    description: 'The label placed on the Namespace, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    description:
+      'The label placed on the Namespace, the `<key>` being the label name, the value being the label value, even if the value is empty.',
     type: 'keyword',
     example: 'default',
   },
   'k8s.namespace.annotation': {
     name: 'k8s.namespace.annotation',
-    description: 'The annotation placed on the Namespace, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    description:
+      'The annotation placed on the Namespace, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
     type: 'keyword',
     example: '0',
   },
@@ -3265,25 +3389,29 @@ export const semconvFlat = {
   },
   'k8s.pod.label': {
     name: 'k8s.pod.label',
-    description: 'The label placed on the Pod, the `<key>` being the label name, the value being the label value.',
+    description:
+      'The label placed on the Pod, the `<key>` being the label name, the value being the label value.',
     type: 'keyword',
     example: 'my-app',
   },
   'k8s.pod.annotation': {
     name: 'k8s.pod.annotation',
-    description: 'The annotation placed on the Pod, the `<key>` being the annotation name, the value being the annotation value.',
+    description:
+      'The annotation placed on the Pod, the `<key>` being the annotation name, the value being the annotation value.',
     type: 'keyword',
     example: 'true',
   },
   'k8s.container.name': {
     name: 'k8s.container.name',
-    description: 'The name of the Container from Pod specification, must be unique within a Pod. Container runtime usually uses different globally unique name (`container.name`).',
+    description:
+      'The name of the Container from Pod specification, must be unique within a Pod. Container runtime usually uses different globally unique name (`container.name`).',
     type: 'keyword',
     example: 'redis',
   },
   'k8s.container.restart_count': {
     name: 'k8s.container.restart_count',
-    description: 'Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.',
+    description:
+      'Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.',
     type: 'long',
   },
   'k8s.container.status.last_terminated_reason': {
@@ -3306,13 +3434,15 @@ export const semconvFlat = {
   },
   'k8s.replicaset.label': {
     name: 'k8s.replicaset.label',
-    description: 'The label placed on the ReplicaSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    description:
+      'The label placed on the ReplicaSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
     type: 'keyword',
     example: 'guestbook',
   },
   'k8s.replicaset.annotation': {
     name: 'k8s.replicaset.annotation',
-    description: 'The annotation placed on the ReplicaSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    description:
+      'The annotation placed on the ReplicaSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
     type: 'keyword',
     example: '0',
   },
@@ -3354,13 +3484,15 @@ export const semconvFlat = {
   },
   'k8s.deployment.label': {
     name: 'k8s.deployment.label',
-    description: 'The label placed on the Deployment, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    description:
+      'The label placed on the Deployment, the `<key>` being the label name, the value being the label value, even if the value is empty.',
     type: 'keyword',
     example: 'guestbook',
   },
   'k8s.deployment.annotation': {
     name: 'k8s.deployment.annotation',
-    description: 'The annotation placed on the Deployment, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    description:
+      'The annotation placed on the Deployment, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
     type: 'keyword',
     example: '1',
   },
@@ -3378,13 +3510,15 @@ export const semconvFlat = {
   },
   'k8s.statefulset.label': {
     name: 'k8s.statefulset.label',
-    description: 'The label placed on the StatefulSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    description:
+      'The label placed on the StatefulSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
     type: 'keyword',
     example: 'guestbook',
   },
   'k8s.statefulset.annotation': {
     name: 'k8s.statefulset.annotation',
-    description: 'The annotation placed on the StatefulSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    description:
+      'The annotation placed on the StatefulSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
     type: 'keyword',
     example: '1',
   },
@@ -3402,13 +3536,15 @@ export const semconvFlat = {
   },
   'k8s.daemonset.label': {
     name: 'k8s.daemonset.label',
-    description: 'The label placed on the DaemonSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    description:
+      'The label placed on the DaemonSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
     type: 'keyword',
     example: 'guestbook',
   },
   'k8s.daemonset.annotation': {
     name: 'k8s.daemonset.annotation',
-    description: 'The annotation placed on the DaemonSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    description:
+      'The annotation placed on the DaemonSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
     type: 'keyword',
     example: '1',
   },
@@ -3462,13 +3598,15 @@ export const semconvFlat = {
   },
   'k8s.job.label': {
     name: 'k8s.job.label',
-    description: 'The label placed on the Job, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    description:
+      'The label placed on the Job, the `<key>` being the label name, the value being the label value, even if the value is empty.',
     type: 'keyword',
     example: 'ci',
   },
   'k8s.job.annotation': {
     name: 'k8s.job.annotation',
-    description: 'The annotation placed on the Job, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    description:
+      'The annotation placed on the Job, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
     type: 'keyword',
     example: '1',
   },
@@ -3486,13 +3624,15 @@ export const semconvFlat = {
   },
   'k8s.cronjob.label': {
     name: 'k8s.cronjob.label',
-    description: 'The label placed on the CronJob, the `<key>` being the label name, the value being the label value.',
+    description:
+      'The label placed on the CronJob, the `<key>` being the label name, the value being the label value.',
     type: 'keyword',
     example: 'weekly',
   },
   'k8s.cronjob.annotation': {
     name: 'k8s.cronjob.annotation',
-    description: 'The cronjob annotation placed on the CronJob, the `<key>` being the annotation name, the value being the annotation value.',
+    description:
+      'The cronjob annotation placed on the CronJob, the `<key>` being the annotation name, the value being the annotation value.',
     type: 'keyword',
     example: '4',
   },
@@ -3528,13 +3668,15 @@ export const semconvFlat = {
   },
   'k8s.container.status.state': {
     name: 'k8s.container.status.state',
-    description: 'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstate-v1-core)',
+    description:
+      'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstate-v1-core)',
     type: 'keyword',
     example: 'terminated',
   },
   'k8s.container.status.reason': {
     name: 'k8s.container.status.reason',
-    description: 'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstateterminated-v1-core)',
+    description:
+      'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstateterminated-v1-core)',
     type: 'keyword',
     example: 'ContainerCreating',
   },
@@ -3546,7 +3688,8 @@ export const semconvFlat = {
   },
   'k8s.storageclass.name': {
     name: 'k8s.storageclass.name',
-    description: 'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.',
+    description:
+      'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.',
     type: 'keyword',
     example: 'gold.storageclass.storage.k8s.io',
   },
@@ -3576,7 +3719,8 @@ export const semconvFlat = {
   },
   'service.version': {
     name: 'service.version',
-    description: 'The version string of the service API or implementation. The format is not defined by these conventions.',
+    description:
+      'The version string of the service API or implementation. The format is not defined by these conventions.',
     type: 'keyword',
     example: '2.0.0',
   },
@@ -3600,7 +3744,8 @@ export const semconvFlat = {
   },
   'network.carrier.icc': {
     name: 'network.carrier.icc',
-    description: 'The ISO 3166-1 alpha-2 2-character country code associated with the mobile carrier network.',
+    description:
+      'The ISO 3166-1 alpha-2 2-character country code associated with the mobile carrier network.',
     type: 'keyword',
     example: 'D',
   },
@@ -3624,7 +3769,8 @@ export const semconvFlat = {
   },
   'network.connection.subtype': {
     name: 'network.connection.subtype',
-    description: 'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection.',
+    description:
+      'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection.',
     type: 'keyword',
     example: 'L',
   },
@@ -3660,7 +3806,8 @@ export const semconvFlat = {
   },
   'network.protocol.name': {
     name: 'network.protocol.name',
-    description: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.',
+    description:
+      '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.',
     type: 'keyword',
     example: 'http',
   },
@@ -3672,13 +3819,15 @@ export const semconvFlat = {
   },
   'network.transport': {
     name: 'network.transport',
-    description: '[OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).',
+    description:
+      '[OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).',
     type: 'keyword',
     example: 'tcp',
   },
   'network.type': {
     name: 'network.type',
-    description: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.',
+    description:
+      '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.',
     type: 'keyword',
     example: 'ipv4',
   },
@@ -3715,7 +3864,7 @@ export const semconvFlat = {
     name: 'heroku.release.creation_timestamp',
     description: 'Time and date the release was created',
     type: 'keyword',
-    example: 'Sun Oct 23 2022 18:00:42 GMT+0000 (Coordinated Universal Time)',
+    example: 'Sun Oct 23 2022 20:00:42 GMT+0200 (Central European Summer Time)',
   },
   'heroku.release.commit': {
     name: 'heroku.release.commit',
@@ -3731,49 +3880,57 @@ export const semconvFlat = {
   },
   'elasticsearch.node.name': {
     name: 'elasticsearch.node.name',
-    description: 'Represents the human-readable identifier of the node/instance to which a request was routed.',
+    description:
+      'Represents the human-readable identifier of the node/instance to which a request was routed.',
     type: 'keyword',
     example: 'instance-0000000001',
   },
   'tls.cipher': {
     name: 'tls.cipher',
-    description: 'String indicating the [cipher](https://datatracker.ietf.org/doc/html/rfc5246#appendix-A.5) used during the current connection.',
+    description:
+      'String indicating the [cipher](https://datatracker.ietf.org/doc/html/rfc5246#appendix-A.5) used during the current connection.',
     type: 'keyword',
     example: 'TLS_RSA_WITH_3DES_EDE_CBC_SHA',
   },
   'tls.client.certificate': {
     name: 'tls.client.certificate',
-    description: 'PEM-encoded stand-alone certificate offered by the client. This is usually mutually-exclusive of `client.certificate_chain` since this value also exists in that list.',
+    description:
+      'PEM-encoded stand-alone certificate offered by the client. This is usually mutually-exclusive of `client.certificate_chain` since this value also exists in that list.',
     type: 'keyword',
     example: 'MII...',
   },
   'tls.client.certificate_chain': {
     name: 'tls.client.certificate_chain',
-    description: 'Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.',
+    description:
+      'Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.',
     type: 'keyword',
     example: 'MII...,MI...',
   },
   'tls.client.hash.md5': {
     name: 'tls.client.hash.md5',
-    description: 'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    description:
+      'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
     type: 'keyword',
     example: '0F76C7F2C55BFD7D8E8B8F4BFBF0C9EC',
   },
   'tls.client.hash.sha1': {
     name: 'tls.client.hash.sha1',
-    description: 'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    description:
+      'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
     type: 'keyword',
     example: '9E393D93138888D288266C2D915214D1D1CCEB2A',
   },
   'tls.client.hash.sha256': {
     name: 'tls.client.hash.sha256',
-    description: 'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    description:
+      'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
     type: 'keyword',
     example: '0687F666A054EF17A08E2F2162EAB4CBC0D265E1D7875BE74BF3C712CA92DAF0',
   },
   'tls.client.issuer': {
     name: 'tls.client.issuer',
-    description: 'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
+    description:
+      'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
     type: 'keyword',
     example: 'CN=Example Root CA, OU=Infrastructure Team, DC=example, DC=com',
   },
@@ -3787,13 +3944,13 @@ export const semconvFlat = {
     name: 'tls.client.not_after',
     description: 'Date/Time indicating when client certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
   },
   'tls.client.not_before': {
     name: 'tls.client.not_before',
     description: 'Date/Time indicating when client certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
   },
   'tls.client.subject': {
     name: 'tls.client.subject',
@@ -3815,66 +3972,77 @@ export const semconvFlat = {
   },
   'tls.established': {
     name: 'tls.established',
-    description: 'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
+    description:
+      'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
     type: 'boolean',
     example: 'true',
   },
   'tls.next_protocol': {
     name: 'tls.next_protocol',
-    description: 'String indicating the protocol being tunneled. Per the values in the [IANA registry](https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids), this string should be lower case.',
+    description:
+      'String indicating the protocol being tunneled. Per the values in the [IANA registry](https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids), this string should be lower case.',
     type: 'keyword',
     example: 'http/1.1',
   },
   'tls.protocol.name': {
     name: 'tls.protocol.name',
-    description: 'Normalized lowercase protocol name parsed from original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
+    description:
+      'Normalized lowercase protocol name parsed from original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
     type: 'keyword',
   },
   'tls.protocol.version': {
     name: 'tls.protocol.version',
-    description: 'Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
+    description:
+      'Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
     type: 'keyword',
     example: '1.2',
   },
   'tls.resumed': {
     name: 'tls.resumed',
-    description: 'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
+    description:
+      'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
     type: 'boolean',
     example: 'true',
   },
   'tls.server.certificate': {
     name: 'tls.server.certificate',
-    description: 'PEM-encoded stand-alone certificate offered by the server. This is usually mutually-exclusive of `server.certificate_chain` since this value also exists in that list.',
+    description:
+      'PEM-encoded stand-alone certificate offered by the server. This is usually mutually-exclusive of `server.certificate_chain` since this value also exists in that list.',
     type: 'keyword',
     example: 'MII...',
   },
   'tls.server.certificate_chain': {
     name: 'tls.server.certificate_chain',
-    description: 'Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.',
+    description:
+      'Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.',
     type: 'keyword',
     example: 'MII...,MI...',
   },
   'tls.server.hash.md5': {
     name: 'tls.server.hash.md5',
-    description: 'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    description:
+      'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
     type: 'keyword',
     example: '0F76C7F2C55BFD7D8E8B8F4BFBF0C9EC',
   },
   'tls.server.hash.sha1': {
     name: 'tls.server.hash.sha1',
-    description: 'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    description:
+      'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
     type: 'keyword',
     example: '9E393D93138888D288266C2D915214D1D1CCEB2A',
   },
   'tls.server.hash.sha256': {
     name: 'tls.server.hash.sha256',
-    description: 'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    description:
+      'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
     type: 'keyword',
     example: '0687F666A054EF17A08E2F2162EAB4CBC0D265E1D7875BE74BF3C712CA92DAF0',
   },
   'tls.server.issuer': {
     name: 'tls.server.issuer',
-    description: 'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
+    description:
+      'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
     type: 'keyword',
     example: 'CN=Example Root CA, OU=Infrastructure Team, DC=example, DC=com',
   },
@@ -3888,13 +4056,13 @@ export const semconvFlat = {
     name: 'tls.server.not_after',
     description: 'Date/Time indicating when server certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
   },
   'tls.server.not_before': {
     name: 'tls.server.not_before',
     description: 'Date/Time indicating when server certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
   },
   'tls.server.subject': {
     name: 'tls.server.subject',
@@ -3904,7 +4072,8 @@ export const semconvFlat = {
   },
   'messaging.batch.message_count': {
     name: 'messaging.batch.message_count',
-    description: 'The number of messages sent, received, or processed in the scope of the batching operation.',
+    description:
+      'The number of messages sent, received, or processed in the scope of the batching operation.',
     type: 'long',
     example: '0',
   },
@@ -3940,23 +4109,27 @@ export const semconvFlat = {
   },
   'messaging.destination.anonymous': {
     name: 'messaging.destination.anonymous',
-    description: 'A boolean that is true if the message destination is anonymous (could be unnamed or have auto-generated name).',
+    description:
+      'A boolean that is true if the message destination is anonymous (could be unnamed or have auto-generated name).',
     type: 'boolean',
   },
   'messaging.destination.temporary': {
     name: 'messaging.destination.temporary',
-    description: 'A boolean that is true if the message destination is temporary and might not exist anymore after messages are processed.',
+    description:
+      'A boolean that is true if the message destination is temporary and might not exist anymore after messages are processed.',
     type: 'boolean',
   },
   'messaging.destination.partition.id': {
     name: 'messaging.destination.partition.id',
-    description: 'The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.',
+    description:
+      'The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.',
     type: 'keyword',
     example: '1',
   },
   'messaging.message.conversation_id': {
     name: 'messaging.message.conversation_id',
-    description: 'The conversation ID identifying the conversation to which the message belongs, represented as a string. Sometimes called "Correlation ID".',
+    description:
+      'The conversation ID identifying the conversation to which the message belongs, represented as a string. Sometimes called "Correlation ID".',
     type: 'keyword',
     example: 'M',
   },
@@ -3967,7 +4140,8 @@ export const semconvFlat = {
   },
   'messaging.message.id': {
     name: 'messaging.message.id',
-    description: 'A value used by the messaging system as an identifier for the message, represented as a string.',
+    description:
+      'A value used by the messaging system as an identifier for the message, represented as a string.',
     type: 'keyword',
     example: '4',
   },
@@ -3994,7 +4168,8 @@ export const semconvFlat = {
   },
   'messaging.kafka.message.key': {
     name: 'messaging.kafka.message.key',
-    description: 'Message keys in Kafka are used for grouping alike messages to ensure they\'re processed on the same partition. They differ from `messaging.message.id` in that they\'re not unique. If the key is `null`, the attribute MUST NOT be set.',
+    description:
+      "Message keys in Kafka are used for grouping alike messages to ensure they're processed on the same partition. They differ from `messaging.message.id` in that they're not unique. If the key is `null`, the attribute MUST NOT be set.",
     type: 'keyword',
     example: 'm',
   },
@@ -4031,12 +4206,14 @@ export const semconvFlat = {
   },
   'messaging.rocketmq.message.delivery_timestamp': {
     name: 'messaging.rocketmq.message.delivery_timestamp',
-    description: 'The timestamp in milliseconds that the delay message is expected to be delivered to consumer.',
+    description:
+      'The timestamp in milliseconds that the delay message is expected to be delivered to consumer.',
     type: 'long',
   },
   'messaging.rocketmq.message.group': {
     name: 'messaging.rocketmq.message.group',
-    description: 'It is essential for FIFO message. Messages that belong to the same message group are always processed one by one within the same consumer group.',
+    description:
+      'It is essential for FIFO message. Messages that belong to the same message group are always processed one by one within the same consumer group.',
     type: 'keyword',
     example: 'm',
   },
@@ -4059,13 +4236,15 @@ export const semconvFlat = {
   },
   'messaging.rocketmq.namespace': {
     name: 'messaging.rocketmq.namespace',
-    description: 'Namespace of RocketMQ resources, resources in different namespaces are individual.',
+    description:
+      'Namespace of RocketMQ resources, resources in different namespaces are individual.',
     type: 'keyword',
     example: 'm',
   },
   'messaging.gcp_pubsub.message.ordering_key': {
     name: 'messaging.gcp_pubsub.message.ordering_key',
-    description: 'The ordering key for a given message. If the attribute is not present, the message does not have an ordering key.',
+    description:
+      'The ordering key for a given message. If the attribute is not present, the message does not have an ordering key.',
     type: 'keyword',
     example: 'o',
   },
@@ -4092,27 +4271,32 @@ export const semconvFlat = {
   },
   'messaging.servicebus.message.enqueued_time': {
     name: 'messaging.servicebus.message.enqueued_time',
-    description: 'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
+    description:
+      'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
     type: 'long',
   },
   'messaging.servicebus.disposition_status': {
     name: 'messaging.servicebus.disposition_status',
-    description: 'Describes the [settlement type](https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement#peeklock).',
+    description:
+      'Describes the [settlement type](https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement#peeklock).',
     type: 'keyword',
   },
   'messaging.eventhubs.message.enqueued_time': {
     name: 'messaging.eventhubs.message.enqueued_time',
-    description: 'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
+    description:
+      'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
     type: 'long',
   },
   'http.request.body.size': {
     name: 'http.request.body.size',
-    description: 'The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
+    description:
+      'The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
     type: 'long',
   },
   'http.request.header': {
     name: 'http.request.header',
-    description: 'HTTP request headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
+    description:
+      'HTTP request headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
     type: 'keyword',
     example: 'application/json',
   },
@@ -4130,28 +4314,33 @@ export const semconvFlat = {
   },
   'http.request.resend_count': {
     name: 'http.request.resend_count',
-    description: 'The ordinal number of request resending attempt (for any reason, including redirects).',
+    description:
+      'The ordinal number of request resending attempt (for any reason, including redirects).',
     type: 'long',
   },
   'http.request.size': {
     name: 'http.request.size',
-    description: 'The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any.',
+    description:
+      'The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any.',
     type: 'long',
   },
   'http.response.body.size': {
     name: 'http.response.body.size',
-    description: 'The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
+    description:
+      'The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
     type: 'long',
   },
   'http.response.header': {
     name: 'http.response.header',
-    description: 'HTTP response headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
+    description:
+      'HTTP response headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
     type: 'keyword',
     example: 'application/json',
   },
   'http.response.size': {
     name: 'http.response.size',
-    description: 'The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any.',
+    description:
+      'The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any.',
     type: 'long',
   },
   'http.response.status_code': {
@@ -4162,7 +4351,8 @@ export const semconvFlat = {
   },
   'http.route': {
     name: 'http.route',
-    description: 'The matched route, that is, the path template in the format used by the respective server framework.',
+    description:
+      'The matched route, that is, the path template in the format used by the respective server framework.',
     type: 'keyword',
     example: '/users/:userID?',
   },
@@ -4180,7 +4370,8 @@ export const semconvFlat = {
   },
   'container.id': {
     name: 'container.id',
-    description: 'Container ID. Usually a UUID, as for example used to [identify Docker containers](https://docs.docker.com/engine/containers/run/#container-identification). The UUID might be abbreviated.',
+    description:
+      'Container ID. Usually a UUID, as for example used to [identify Docker containers](https://docs.docker.com/engine/containers/run/#container-identification). The UUID might be abbreviated.',
     type: 'keyword',
     example: 'a3bf90e006b2',
   },
@@ -4192,13 +4383,15 @@ export const semconvFlat = {
   },
   'container.runtime.version': {
     name: 'container.runtime.version',
-    description: 'The version of the runtime of this process, as returned by the runtime without modification.',
+    description:
+      'The version of the runtime of this process, as returned by the runtime without modification.',
     type: 'keyword',
     example: '1',
   },
   'container.runtime.description': {
     name: 'container.runtime.description',
-    description: 'A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.',
+    description:
+      'A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.',
     type: 'keyword',
     example: 'docker://19.3.1 - CRI: 1.22.0',
   },
@@ -4210,7 +4403,8 @@ export const semconvFlat = {
   },
   'container.image.tags': {
     name: 'container.image.tags',
-    description: 'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
+    description:
+      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
     type: 'keyword',
     example: 'v1.27.1,3.5.7-0',
   },
@@ -4224,7 +4418,8 @@ export const semconvFlat = {
     name: 'container.image.repo_digests',
     description: 'Repo digests of the container image as provided by the container runtime.',
     type: 'keyword',
-    example: 'example@sha256:afcc7f1ac1b49db317a7196c902e61c6c3c4607d63599ee1a82d702d249a0ccb,internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578',
+    example:
+      'example@sha256:afcc7f1ac1b49db317a7196c902e61c6c3c4607d63599ee1a82d702d249a0ccb,internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578',
   },
   'container.command': {
     name: 'container.command',
@@ -4234,13 +4429,15 @@ export const semconvFlat = {
   },
   'container.command_line': {
     name: 'container.command_line',
-    description: 'The full command run by the container as a single string representing the full command.',
+    description:
+      'The full command run by the container as a single string representing the full command.',
     type: 'keyword',
     example: 'otelcontribcol --config config.yaml',
   },
   'container.command_args': {
     name: 'container.command_args',
-    description: 'All the command arguments (including the command/executable itself) run by the container.',
+    description:
+      'All the command arguments (including the command/executable itself) run by the container.',
     type: 'keyword',
     example: 'otelcontribcol,--config,config.yaml',
   },
@@ -4252,19 +4449,22 @@ export const semconvFlat = {
   },
   'container.csi.plugin.name': {
     name: 'container.csi.plugin.name',
-    description: 'The name of the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin used by the volume.',
+    description:
+      'The name of the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin used by the volume.',
     type: 'keyword',
     example: 'pd.csi.storage.gke.io',
   },
   'container.csi.volume.id': {
     name: 'container.csi.volume.id',
-    description: 'The unique volume ID returned by the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin.',
+    description:
+      'The unique volume ID returned by the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin.',
     type: 'keyword',
     example: 'projects/my-gcp-project/zones/my-gcp-zone/disks/my-gcp-disk',
   },
   'security_rule.category': {
     name: 'security_rule.category',
-    description: 'A categorization value keyword used by the entity using the rule for detection of this event',
+    description:
+      'A categorization value keyword used by the entity using the rule for detection of this event',
     type: 'keyword',
     example: 'Attempted Information Leak',
   },
@@ -4276,7 +4476,8 @@ export const semconvFlat = {
   },
   'security_rule.license': {
     name: 'security_rule.license',
-    description: 'Name of the license under which the rule used to generate this event is made available.',
+    description:
+      'Name of the license under which the rule used to generate this event is made available.',
     type: 'keyword',
     example: 'Apache 2.0',
   },
@@ -4288,19 +4489,22 @@ export const semconvFlat = {
   },
   'security_rule.reference': {
     name: 'security_rule.reference',
-    description: 'Reference URL to additional information about the rule used to generate this event.',
+    description:
+      'Reference URL to additional information about the rule used to generate this event.',
     type: 'keyword',
     example: 'https://en.wikipedia.org/wiki/DNS_over_TLS',
   },
   'security_rule.ruleset.name': {
     name: 'security_rule.ruleset.name',
-    description: 'Name of the ruleset, policy, group, or parent category in which the rule used to generate this event is a member.',
+    description:
+      'Name of the ruleset, policy, group, or parent category in which the rule used to generate this event is a member.',
     type: 'keyword',
     example: 'Standard_Protocol_Filters',
   },
   'security_rule.uuid': {
     name: 'security_rule.uuid',
-    description: 'A rule ID that is unique within the scope of a set or group of agents, observers, or other entities using the rule for detection of this event.',
+    description:
+      'A rule ID that is unique within the scope of a set or group of agents, observers, or other entities using the rule for detection of this event.',
     type: 'keyword',
     example: '550e8400-e29b-41d4-a716-446655440000',
   },
@@ -4334,13 +4538,15 @@ export const semconvFlat = {
   },
   'deployment.environment.name': {
     name: 'deployment.environment.name',
-    description: 'Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).',
+    description:
+      'Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).',
     type: 'keyword',
     example: 'staging',
   },
   'metrics.otel.sdk.span.live': {
     name: 'metrics.otel.sdk.span.live',
-    description: 'The number of created spans with `recording=true` for which the end operation has not been called yet.',
+    description:
+      'The number of created spans with `recording=true` for which the end operation has not been called yet.',
     type: 'double',
   },
   'metrics.otel.sdk.span.started': {
@@ -4355,22 +4561,26 @@ export const semconvFlat = {
   },
   'metrics.otel.sdk.processor.span.queue.capacity': {
     name: 'metrics.otel.sdk.processor.span.queue.capacity',
-    description: 'The maximum number of spans the queue of a given instance of an SDK span processor can hold.',
+    description:
+      'The maximum number of spans the queue of a given instance of an SDK span processor can hold.',
     type: 'double',
   },
   'metrics.otel.sdk.processor.span.processed': {
     name: 'metrics.otel.sdk.processor.span.processed',
-    description: 'The number of spans for which the processing has finished, either successful or failed.',
+    description:
+      'The number of spans for which the processing has finished, either successful or failed.',
     type: 'double',
   },
   'metrics.otel.sdk.exporter.span.inflight': {
     name: 'metrics.otel.sdk.exporter.span.inflight',
-    description: 'The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    description:
+      'The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
     type: 'double',
   },
   'metrics.otel.sdk.exporter.span.exported': {
     name: 'metrics.otel.sdk.exporter.span.exported',
-    description: 'The number of spans for which the export has finished, either successful or failed.',
+    description:
+      'The number of spans for which the export has finished, either successful or failed.',
     type: 'double',
   },
   'metrics.otel.sdk.log.created': {
@@ -4380,37 +4590,44 @@ export const semconvFlat = {
   },
   'metrics.otel.sdk.processor.log.queue.size': {
     name: 'metrics.otel.sdk.processor.log.queue.size',
-    description: 'The number of log records in the queue of a given instance of an SDK log processor.',
+    description:
+      'The number of log records in the queue of a given instance of an SDK log processor.',
     type: 'double',
   },
   'metrics.otel.sdk.processor.log.queue.capacity': {
     name: 'metrics.otel.sdk.processor.log.queue.capacity',
-    description: 'The maximum number of log records the queue of a given instance of an SDK Log Record processor can hold.',
+    description:
+      'The maximum number of log records the queue of a given instance of an SDK Log Record processor can hold.',
     type: 'double',
   },
   'metrics.otel.sdk.processor.log.processed': {
     name: 'metrics.otel.sdk.processor.log.processed',
-    description: 'The number of log records for which the processing has finished, either successful or failed.',
+    description:
+      'The number of log records for which the processing has finished, either successful or failed.',
     type: 'double',
   },
   'metrics.otel.sdk.exporter.log.inflight': {
     name: 'metrics.otel.sdk.exporter.log.inflight',
-    description: 'The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    description:
+      'The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
     type: 'double',
   },
   'metrics.otel.sdk.exporter.log.exported': {
     name: 'metrics.otel.sdk.exporter.log.exported',
-    description: 'The number of log records for which the export has finished, either successful or failed.',
+    description:
+      'The number of log records for which the export has finished, either successful or failed.',
     type: 'double',
   },
   'metrics.otel.sdk.exporter.metric_data_point.inflight': {
     name: 'metrics.otel.sdk.exporter.metric_data_point.inflight',
-    description: 'The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    description:
+      'The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
     type: 'double',
   },
   'metrics.otel.sdk.exporter.metric_data_point.exported': {
     name: 'metrics.otel.sdk.exporter.metric_data_point.exported',
-    description: 'The number of metric data points for which the export has finished, either successful or failed.',
+    description:
+      'The number of metric data points for which the export has finished, either successful or failed.',
     type: 'double',
   },
   'metrics.otel.sdk.metric_reader.collection.duration': {
@@ -4455,7 +4672,8 @@ export const semconvFlat = {
   },
   'metrics.hw.physical_disk.smart': {
     name: 'metrics.hw.physical_disk.smart',
-    description: 'Value of the corresponding [S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute.',
+    description:
+      'Value of the corresponding [S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute.',
     type: 'double',
   },
   'metrics.hw.cpu.speed': {
@@ -4505,12 +4723,14 @@ export const semconvFlat = {
   },
   'metrics.hw.host.heating_margin': {
     name: 'metrics.hw.host.heating_margin',
-    description: 'By how many degrees Celsius the temperature of the physical host can be increased, before reaching a warning threshold on one of the internal sensors.',
+    description:
+      'By how many degrees Celsius the temperature of the physical host can be increased, before reaching a warning threshold on one of the internal sensors.',
     type: 'double',
   },
   'metrics.hw.host.power': {
     name: 'metrics.hw.host.power',
-    description: 'Instantaneous power consumed by the entire physical host in Watts (`hw.host.energy` is preferred).',
+    description:
+      'Instantaneous power consumed by the entire physical host in Watts (`hw.host.energy` is preferred).',
     type: 'double',
   },
   'metrics.hw.tape_drive.operations': {
@@ -4575,12 +4795,12 @@ export const semconvFlat = {
   },
   'metrics.faas.invoke_duration': {
     name: 'metrics.faas.invoke_duration',
-    description: 'Measures the duration of the function\'s logic execution.',
+    description: "Measures the duration of the function's logic execution.",
     type: 'double',
   },
   'metrics.faas.init_duration': {
     name: 'metrics.faas.init_duration',
-    description: 'Measures the duration of the function\'s initialization, such as a cold start.',
+    description: "Measures the duration of the function's initialization, such as a cold start.",
     type: 'double',
   },
   'metrics.faas.coldstarts': {
@@ -4625,7 +4845,8 @@ export const semconvFlat = {
   },
   'metrics.process.cpu.utilization': {
     name: 'metrics.process.cpu.utilization',
-    description: 'Difference in process.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.',
+    description:
+      'Difference in process.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.',
     type: 'double',
   },
   'metrics.process.memory.usage': {
@@ -4685,7 +4906,8 @@ export const semconvFlat = {
   },
   'metrics.gen_ai.server.request.duration': {
     name: 'metrics.gen_ai.server.request.duration',
-    description: 'Generative AI server request duration such as time-to-last byte or last output token.',
+    description:
+      'Generative AI server request duration such as time-to-last byte or last output token.',
     type: 'double',
   },
   'metrics.gen_ai.server.time_per_output_token': {
@@ -4755,7 +4977,8 @@ export const semconvFlat = {
   },
   'metrics.kestrel.queued_requests': {
     name: 'metrics.kestrel.queued_requests',
-    description: 'Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.',
+    description:
+      'Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.',
     type: 'double',
   },
   'metrics.kestrel.upgraded_connections': {
@@ -4800,22 +5023,26 @@ export const semconvFlat = {
   },
   'metrics.vcs.change.count': {
     name: 'metrics.vcs.change.count',
-    description: 'The number of changes (pull requests/merge requests/changelists) in a repository, categorized by their state (e.g. open or merged).',
+    description:
+      'The number of changes (pull requests/merge requests/changelists) in a repository, categorized by their state (e.g. open or merged).',
     type: 'double',
   },
   'metrics.vcs.change.duration': {
     name: 'metrics.vcs.change.duration',
-    description: 'The time duration a change (pull request/merge request/changelist) has been in a given state.',
+    description:
+      'The time duration a change (pull request/merge request/changelist) has been in a given state.',
     type: 'double',
   },
   'metrics.vcs.change.time_to_approval': {
     name: 'metrics.vcs.change.time_to_approval',
-    description: 'The amount of time since its creation it took a change (pull request/merge request/changelist) to get the first approval.',
+    description:
+      'The amount of time since its creation it took a change (pull request/merge request/changelist) to get the first approval.',
     type: 'double',
   },
   'metrics.vcs.change.time_to_merge': {
     name: 'metrics.vcs.change.time_to_merge',
-    description: 'The amount of time since its creation it took a change (pull request/merge request/changelist) to get merged into the target(base) ref.',
+    description:
+      'The amount of time since its creation it took a change (pull request/merge request/changelist) to get merged into the target(base) ref.',
     type: 'double',
   },
   'metrics.vcs.repository.count': {
@@ -4830,17 +5057,20 @@ export const semconvFlat = {
   },
   'metrics.vcs.ref.lines_delta': {
     name: 'metrics.vcs.ref.lines_delta',
-    description: 'The number of lines added/removed in a ref (branch) relative to the ref from the `vcs.ref.base.name` attribute.',
+    description:
+      'The number of lines added/removed in a ref (branch) relative to the ref from the `vcs.ref.base.name` attribute.',
     type: 'double',
   },
   'metrics.vcs.ref.revisions_delta': {
     name: 'metrics.vcs.ref.revisions_delta',
-    description: 'The number of revisions (commits) a ref (branch) is ahead/behind the branch from the `vcs.ref.base.name` attribute.',
+    description:
+      'The number of revisions (commits) a ref (branch) is ahead/behind the branch from the `vcs.ref.base.name` attribute.',
     type: 'double',
   },
   'metrics.vcs.ref.time': {
     name: 'metrics.vcs.ref.time',
-    description: 'Time a ref (branch) created from the default branch (trunk) has existed. The `ref.type` attribute will always be `branch`.',
+    description:
+      'Time a ref (branch) created from the default branch (trunk) has existed. The `ref.type` attribute will always be `branch`.',
     type: 'double',
   },
   'metrics.vcs.contributor.count': {
@@ -4855,17 +5085,20 @@ export const semconvFlat = {
   },
   'metrics.cpython.gc.collected_objects': {
     name: 'metrics.cpython.gc.collected_objects',
-    description: 'The total number of objects collected inside a generation since interpreter start.',
+    description:
+      'The total number of objects collected inside a generation since interpreter start.',
     type: 'double',
   },
   'metrics.cpython.gc.uncollectable_objects': {
     name: 'metrics.cpython.gc.uncollectable_objects',
-    description: 'The total number of objects which were found to be uncollectable inside a generation since interpreter start.',
+    description:
+      'The total number of objects which were found to be uncollectable inside a generation since interpreter start.',
     type: 'double',
   },
   'metrics.azure.cosmosdb.client.operation.request_charge': {
     name: 'metrics.azure.cosmosdb.client.operation.request_charge',
-    description: '[Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation.',
+    description:
+      '[Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation.',
     type: 'double',
   },
   'metrics.azure.cosmosdb.client.active_instance.count': {
@@ -4890,7 +5123,8 @@ export const semconvFlat = {
   },
   'metrics.k8s.pod.cpu.usage': {
     name: 'metrics.k8s.pod.cpu.usage',
-    description: 'Pod\'s CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.',
+    description:
+      "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.k8s.pod.memory.usage': {
@@ -4940,17 +5174,17 @@ export const semconvFlat = {
   },
   'metrics.k8s.pod.volume.inode.count': {
     name: 'metrics.k8s.pod.volume.inode.count',
-    description: 'The total inodes in the filesystem of the Pod\'s volume.',
+    description: "The total inodes in the filesystem of the Pod's volume.",
     type: 'double',
   },
   'metrics.k8s.pod.volume.inode.used': {
     name: 'metrics.k8s.pod.volume.inode.used',
-    description: 'The inodes used by the filesystem of the Pod\'s volume.',
+    description: "The inodes used by the filesystem of the Pod's volume.",
     type: 'double',
   },
   'metrics.k8s.pod.volume.inode.free': {
     name: 'metrics.k8s.pod.volume.inode.free',
-    description: 'The free inodes in the filesystem of the Pod\'s volume.',
+    description: "The free inodes in the filesystem of the Pod's volume.",
     type: 'double',
   },
   'metrics.k8s.container.status.state': {
@@ -4960,7 +5194,8 @@ export const semconvFlat = {
   },
   'metrics.k8s.container.status.reason': {
     name: 'metrics.k8s.container.status.reason',
-    description: 'Describes the number of K8s containers that are currently in a state for a given reason.',
+    description:
+      'Describes the number of K8s containers that are currently in a state for a given reason.',
     type: 'double',
   },
   'metrics.k8s.node.uptime': {
@@ -5000,7 +5235,8 @@ export const semconvFlat = {
   },
   'metrics.k8s.node.cpu.usage': {
     name: 'metrics.k8s.node.cpu.usage',
-    description: 'Node\'s CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.',
+    description:
+      "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.k8s.node.filesystem.available': {
@@ -5040,7 +5276,8 @@ export const semconvFlat = {
   },
   'metrics.k8s.deployment.available_pods': {
     name: 'metrics.k8s.deployment.available_pods',
-    description: 'Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment.',
+    description:
+      'Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment.',
     type: 'double',
   },
   'metrics.k8s.replicaset.desired_pods': {
@@ -5050,7 +5287,8 @@ export const semconvFlat = {
   },
   'metrics.k8s.replicaset.available_pods': {
     name: 'metrics.k8s.replicaset.available_pods',
-    description: 'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replicaset.',
+    description:
+      'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replicaset.',
     type: 'double',
   },
   'metrics.k8s.replicationcontroller.desired_pods': {
@@ -5060,7 +5298,8 @@ export const semconvFlat = {
   },
   'metrics.k8s.replicationcontroller.available_pods': {
     name: 'metrics.k8s.replicationcontroller.available_pods',
-    description: 'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller.',
+    description:
+      'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller.',
     type: 'double',
   },
   'metrics.k8s.statefulset.desired_pods': {
@@ -5075,32 +5314,38 @@ export const semconvFlat = {
   },
   'metrics.k8s.statefulset.current_pods': {
     name: 'metrics.k8s.statefulset.current_pods',
-    description: 'The number of replica pods created by the statefulset controller from the statefulset version indicated by currentRevision.',
+    description:
+      'The number of replica pods created by the statefulset controller from the statefulset version indicated by currentRevision.',
     type: 'double',
   },
   'metrics.k8s.statefulset.updated_pods': {
     name: 'metrics.k8s.statefulset.updated_pods',
-    description: 'Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision.',
+    description:
+      'Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision.',
     type: 'double',
   },
   'metrics.k8s.hpa.desired_pods': {
     name: 'metrics.k8s.hpa.desired_pods',
-    description: 'Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.',
+    description:
+      'Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.',
     type: 'double',
   },
   'metrics.k8s.hpa.current_pods': {
     name: 'metrics.k8s.hpa.current_pods',
-    description: 'Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.',
+    description:
+      'Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.',
     type: 'double',
   },
   'metrics.k8s.hpa.max_pods': {
     name: 'metrics.k8s.hpa.max_pods',
-    description: 'The upper limit for the number of replica pods to which the autoscaler can scale up.',
+    description:
+      'The upper limit for the number of replica pods to which the autoscaler can scale up.',
     type: 'double',
   },
   'metrics.k8s.hpa.min_pods': {
     name: 'metrics.k8s.hpa.min_pods',
-    description: 'The lower limit for the number of replica pods to which the autoscaler can scale down.',
+    description:
+      'The lower limit for the number of replica pods to which the autoscaler can scale down.',
     type: 'double',
   },
   'metrics.k8s.hpa.metric.target.cpu.value': {
@@ -5120,22 +5365,26 @@ export const semconvFlat = {
   },
   'metrics.k8s.daemonset.current_scheduled_nodes': {
     name: 'metrics.k8s.daemonset.current_scheduled_nodes',
-    description: 'Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod.',
+    description:
+      'Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod.',
     type: 'double',
   },
   'metrics.k8s.daemonset.desired_scheduled_nodes': {
     name: 'metrics.k8s.daemonset.desired_scheduled_nodes',
-    description: 'Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod).',
+    description:
+      'Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod).',
     type: 'double',
   },
   'metrics.k8s.daemonset.misscheduled_nodes': {
     name: 'metrics.k8s.daemonset.misscheduled_nodes',
-    description: 'Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod.',
+    description:
+      'Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod.',
     type: 'double',
   },
   'metrics.k8s.daemonset.ready_nodes': {
     name: 'metrics.k8s.daemonset.ready_nodes',
-    description: 'Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.',
+    description:
+      'Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.',
     type: 'double',
   },
   'metrics.k8s.job.active_pods': {
@@ -5215,112 +5464,134 @@ export const semconvFlat = {
   },
   'metrics.k8s.container.restart.count': {
     name: 'metrics.k8s.container.restart.count',
-    description: 'Describes how many times the container has restarted (since the last counter reset).',
+    description:
+      'Describes how many times the container has restarted (since the last counter reset).',
     type: 'double',
   },
   'metrics.k8s.container.ready': {
     name: 'metrics.k8s.container.ready',
-    description: 'Indicates whether the container is currently marked as ready to accept traffic, based on its readiness probe (1 = ready, 0 = not ready).',
+    description:
+      'Indicates whether the container is currently marked as ready to accept traffic, based on its readiness probe (1 = ready, 0 = not ready).',
     type: 'double',
   },
   'metrics.k8s.resourcequota.cpu.limit.hard': {
     name: 'metrics.k8s.resourcequota.cpu.limit.hard',
-    description: 'The CPU limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The CPU limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.cpu.limit.used': {
     name: 'metrics.k8s.resourcequota.cpu.limit.used',
-    description: 'The CPU limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The CPU limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.cpu.request.hard': {
     name: 'metrics.k8s.resourcequota.cpu.request.hard',
-    description: 'The CPU requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The CPU requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.cpu.request.used': {
     name: 'metrics.k8s.resourcequota.cpu.request.used',
-    description: 'The CPU requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The CPU requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.memory.limit.hard': {
     name: 'metrics.k8s.resourcequota.memory.limit.hard',
-    description: 'The memory limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The memory limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.memory.limit.used': {
     name: 'metrics.k8s.resourcequota.memory.limit.used',
-    description: 'The memory limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The memory limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.memory.request.hard': {
     name: 'metrics.k8s.resourcequota.memory.request.hard',
-    description: 'The memory requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The memory requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.memory.request.used': {
     name: 'metrics.k8s.resourcequota.memory.request.used',
-    description: 'The memory requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The memory requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.hugepage_count.request.hard': {
     name: 'metrics.k8s.resourcequota.hugepage_count.request.hard',
-    description: 'The huge page requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The huge page requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.hugepage_count.request.used': {
     name: 'metrics.k8s.resourcequota.hugepage_count.request.used',
-    description: 'The huge page requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The huge page requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.storage.request.hard': {
     name: 'metrics.k8s.resourcequota.storage.request.hard',
-    description: 'The storage requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The storage requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.storage.request.used': {
     name: 'metrics.k8s.resourcequota.storage.request.used',
-    description: 'The storage requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The storage requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.persistentvolumeclaim_count.hard': {
     name: 'metrics.k8s.resourcequota.persistentvolumeclaim_count.hard',
-    description: 'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.persistentvolumeclaim_count.used': {
     name: 'metrics.k8s.resourcequota.persistentvolumeclaim_count.used',
-    description: 'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.ephemeral_storage.request.hard': {
     name: 'metrics.k8s.resourcequota.ephemeral_storage.request.hard',
-    description: 'The sum of local ephemeral storage requests in the namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The sum of local ephemeral storage requests in the namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.ephemeral_storage.request.used': {
     name: 'metrics.k8s.resourcequota.ephemeral_storage.request.used',
-    description: 'The sum of local ephemeral storage requests in the namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The sum of local ephemeral storage requests in the namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.ephemeral_storage.limit.hard': {
     name: 'metrics.k8s.resourcequota.ephemeral_storage.limit.hard',
-    description: 'The sum of local ephemeral storage limits in the namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The sum of local ephemeral storage limits in the namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.ephemeral_storage.limit.used': {
     name: 'metrics.k8s.resourcequota.ephemeral_storage.limit.used',
-    description: 'The sum of local ephemeral storage limits in the namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The sum of local ephemeral storage limits in the namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.object_count.hard': {
     name: 'metrics.k8s.resourcequota.object_count.hard',
-    description: 'The object count limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    description:
+      'The object count limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
     type: 'double',
   },
   'metrics.k8s.resourcequota.object_count.used': {
     name: 'metrics.k8s.resourcequota.object_count.used',
-    description: 'The object count limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    description:
+      'The object count limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
   'metrics.messaging.attributes': {
@@ -5365,7 +5636,8 @@ export const semconvFlat = {
   },
   'metrics.container.cpu.usage': {
     name: 'metrics.container.cpu.usage',
-    description: 'Container\'s CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.',
+    description:
+      "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.container.memory.usage': {
@@ -5515,7 +5787,8 @@ export const semconvFlat = {
   },
   'metrics.system.cpu.logical.count': {
     name: 'metrics.system.cpu.logical.count',
-    description: 'Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking.',
+    description:
+      'Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking.',
     type: 'double',
   },
   'metrics.system.cpu.time': {
@@ -5525,7 +5798,8 @@ export const semconvFlat = {
   },
   'metrics.system.cpu.utilization': {
     name: 'metrics.system.cpu.utilization',
-    description: 'For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.',
+    description:
+      'For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.',
     type: 'double',
   },
   'metrics.system.cpu.frequency': {
@@ -5605,7 +5879,7 @@ export const semconvFlat = {
   },
   'metrics.system.filesystem.usage': {
     name: 'metrics.system.filesystem.usage',
-    description: 'Reports a filesystem\'s space usage across different states.',
+    description: "Reports a filesystem's space usage across different states.",
     type: 'double',
   },
   'metrics.system.filesystem.utilization': {
@@ -5655,12 +5929,14 @@ export const semconvFlat = {
   },
   'metrics.system.linux.memory.available': {
     name: 'metrics.system.linux.memory.available',
-    description: 'An estimate of how much memory is available for starting new applications, without causing swapping.',
+    description:
+      'An estimate of how much memory is available for starting new applications, without causing swapping.',
     type: 'double',
   },
   'metrics.system.linux.memory.slab.usage': {
     name: 'metrics.system.linux.memory.slab.usage',
-    description: 'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
+    description:
+      'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
     type: 'double',
   },
   'metrics.signalr.server.connection.duration': {
@@ -5680,7 +5956,8 @@ export const semconvFlat = {
   },
   'metrics.db.client.connection.count': {
     name: 'metrics.db.client.connection.count',
-    description: 'The number of connections that are currently in state described by the `state` attribute.',
+    description:
+      'The number of connections that are currently in state described by the `state` attribute.',
     type: 'double',
   },
   'metrics.db.client.connection.idle.max': {
@@ -5705,7 +5982,8 @@ export const semconvFlat = {
   },
   'metrics.db.client.connection.timeouts': {
     name: 'metrics.db.client.connection.timeouts',
-    description: 'The number of connection timeouts that have occurred trying to obtain a connection from the pool.',
+    description:
+      'The number of connection timeouts that have occurred trying to obtain a connection from the pool.',
     type: 'double',
   },
   'metrics.db.client.connection.create_time': {
@@ -5745,7 +6023,8 @@ export const semconvFlat = {
   },
   'metrics.jvm.memory.used_after_last_gc': {
     name: 'metrics.jvm.memory.used_after_last_gc',
-    description: 'Measure of memory used, as measured after the most recent garbage collection event on this pool.',
+    description:
+      'Measure of memory used, as measured after the most recent garbage collection event on this pool.',
     type: 'double',
   },
   'metrics.jvm.gc.duration': {
@@ -5805,22 +6084,26 @@ export const semconvFlat = {
   },
   'metrics.dotnet.gc.collections': {
     name: 'metrics.dotnet.gc.collections',
-    description: 'The number of garbage collections that have occurred since the process has started.',
+    description:
+      'The number of garbage collections that have occurred since the process has started.',
     type: 'double',
   },
   'metrics.dotnet.gc.heap.total_allocated': {
     name: 'metrics.dotnet.gc.heap.total_allocated',
-    description: 'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
+    description:
+      'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
     type: 'double',
   },
   'metrics.dotnet.gc.last_collection.memory.committed_size': {
     name: 'metrics.dotnet.gc.last_collection.memory.committed_size',
-    description: 'The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.',
+    description:
+      'The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.',
     type: 'double',
   },
   'metrics.dotnet.gc.last_collection.heap.size': {
     name: 'metrics.dotnet.gc.last_collection.heap.size',
-    description: 'The managed GC heap size (including fragmentation), as observed during the latest garbage collection.',
+    description:
+      'The managed GC heap size (including fragmentation), as observed during the latest garbage collection.',
     type: 'double',
   },
   'metrics.dotnet.gc.last_collection.heap.fragmentation.size': {
@@ -5835,22 +6118,26 @@ export const semconvFlat = {
   },
   'metrics.dotnet.jit.compiled_il.size': {
     name: 'metrics.dotnet.jit.compiled_il.size',
-    description: 'Count of bytes of intermediate language that have been compiled since the process has started.',
+    description:
+      'Count of bytes of intermediate language that have been compiled since the process has started.',
     type: 'double',
   },
   'metrics.dotnet.jit.compiled_methods': {
     name: 'metrics.dotnet.jit.compiled_methods',
-    description: 'The number of times the JIT compiler (re)compiled methods since the process has started.',
+    description:
+      'The number of times the JIT compiler (re)compiled methods since the process has started.',
     type: 'double',
   },
   'metrics.dotnet.jit.compilation.time': {
     name: 'metrics.dotnet.jit.compilation.time',
-    description: 'The amount of time the JIT compiler has spent compiling methods since the process has started.',
+    description:
+      'The amount of time the JIT compiler has spent compiling methods since the process has started.',
     type: 'double',
   },
   'metrics.dotnet.monitor.lock_contentions': {
     name: 'metrics.dotnet.monitor.lock_contentions',
-    description: 'The number of times there was contention when trying to acquire a monitor lock since the process has started.',
+    description:
+      'The number of times there was contention when trying to acquire a monitor lock since the process has started.',
     type: 'double',
   },
   'metrics.dotnet.thread_pool.thread.count': {
@@ -5860,12 +6147,14 @@ export const semconvFlat = {
   },
   'metrics.dotnet.thread_pool.work_item.count': {
     name: 'metrics.dotnet.thread_pool.work_item.count',
-    description: 'The number of work items that the thread pool has completed since the process has started.',
+    description:
+      'The number of work items that the thread pool has completed since the process has started.',
     type: 'double',
   },
   'metrics.dotnet.thread_pool.queue.length': {
     name: 'metrics.dotnet.thread_pool.queue.length',
-    description: 'The number of work items that are currently queued to be processed by the thread pool.',
+    description:
+      'The number of work items that are currently queued to be processed by the thread pool.',
     type: 'double',
   },
   'metrics.dotnet.timer.count': {
@@ -5895,7 +6184,8 @@ export const semconvFlat = {
   },
   'metrics.aspnetcore.rate_limiting.active_request_leases': {
     name: 'metrics.aspnetcore.rate_limiting.active_request_leases',
-    description: 'Number of requests that are currently active on the server that hold a rate limiting lease.',
+    description:
+      'Number of requests that are currently active on the server that hold a rate limiting lease.',
     type: 'double',
   },
   'metrics.aspnetcore.rate_limiting.request_lease.duration': {
@@ -5910,7 +6200,8 @@ export const semconvFlat = {
   },
   'metrics.aspnetcore.rate_limiting.queued_requests': {
     name: 'metrics.aspnetcore.rate_limiting.queued_requests',
-    description: 'Number of requests that are currently queued, waiting to acquire a rate limiting lease.',
+    description:
+      'Number of requests that are currently queued, waiting to acquire a rate limiting lease.',
     type: 'double',
   },
   'metrics.aspnetcore.rate_limiting.requests': {
@@ -5925,12 +6216,14 @@ export const semconvFlat = {
   },
   'metrics.aspnetcore.memory_pool.allocated': {
     name: 'metrics.aspnetcore.memory_pool.allocated',
-    description: 'Total number of bytes allocated by the memory pool. Allocation occurs when a memory rental request exceeds the available pooled memory.',
+    description:
+      'Total number of bytes allocated by the memory pool. Allocation occurs when a memory rental request exceeds the available pooled memory.',
     type: 'double',
   },
   'metrics.aspnetcore.memory_pool.evicted': {
     name: 'metrics.aspnetcore.memory_pool.evicted',
-    description: 'Total number of bytes evicted from the memory pool. Eviction occurs when idle pooled memory is reclaimed.',
+    description:
+      'Total number of bytes evicted from the memory pool. Eviction occurs when idle pooled memory is reclaimed.',
     type: 'double',
   },
   'metrics.aspnetcore.memory_pool.rented': {
@@ -5950,7 +6243,8 @@ export const semconvFlat = {
   },
   'metrics.aspnetcore.authentication.forbids': {
     name: 'metrics.aspnetcore.authentication.forbids',
-    description: 'The total number of times an authenticated user attempts to access a resource they are not permitted to access.',
+    description:
+      'The total number of times an authenticated user attempts to access a resource they are not permitted to access.',
     type: 'double',
   },
   'metrics.aspnetcore.authentication.sign_ins': {
@@ -5985,7 +6279,8 @@ export const semconvFlat = {
   },
   'metrics.aspnetcore.identity.user.check_password_attempts': {
     name: 'metrics.aspnetcore.identity.user.check_password_attempts',
-    description: 'The number of check password attempts. Only checks whether the password is valid and not whether the user account is in a state that can log in.',
+    description:
+      'The number of check password attempts. Only checks whether the password is valid and not whether the user account is in a state that can log in.',
     type: 'double',
   },
   'metrics.aspnetcore.identity.user.verify_token_attempts': {
@@ -6000,7 +6295,8 @@ export const semconvFlat = {
   },
   'metrics.aspnetcore.identity.sign_in.authenticate.duration': {
     name: 'metrics.aspnetcore.identity.sign_in.authenticate.duration',
-    description: 'The duration of authenticate attempts. The authenticate metrics is recorded by sign in methods such as PasswordSignInAsync and TwoFactorSignInAsync.',
+    description:
+      'The duration of authenticate attempts. The authenticate metrics is recorded by sign in methods such as PasswordSignInAsync and TwoFactorSignInAsync.',
     type: 'double',
   },
   'metrics.aspnetcore.identity.sign_in.two_factor_clients_remembered': {
@@ -6015,7 +6311,8 @@ export const semconvFlat = {
   },
   'metrics.aspnetcore.identity.sign_in.check_password_attempts': {
     name: 'metrics.aspnetcore.identity.sign_in.check_password_attempts',
-    description: 'The total number of check password attempts. Checks that the account is in a state that can log in and that the password is valid using the UserManager.CheckPasswordAsync method.',
+    description:
+      'The total number of check password attempts. Checks that the account is in a state that can log in and that the password is valid using the UserManager.CheckPasswordAsync method.',
     type: 'double',
   },
   'metrics.aspnetcore.identity.sign_in.sign_ins': {
@@ -6115,7 +6412,8 @@ export const semconvFlat = {
   },
   'metrics.go.schedule.duration': {
     name: 'metrics.go.schedule.duration',
-    description: 'The time goroutines have spent in the scheduler in a runnable state before actually running.',
+    description:
+      'The time goroutines have spent in the scheduler in a runnable state before actually running.',
     type: 'double',
   },
   'metrics.go.config.gogc': {
@@ -6160,7 +6458,8 @@ export const semconvFlat = {
   },
   'metrics.http.client.open_connections': {
     name: 'metrics.http.client.open_connections',
-    description: 'Number of outbound HTTP connections that are currently active or idle on the client.',
+    description:
+      'Number of outbound HTTP connections that are currently active or idle on the client.',
     type: 'double',
   },
   'metrics.http.client.connection.duration': {
@@ -6195,7 +6494,8 @@ export const semconvFlat = {
   },
   'metrics.cicd.system.errors': {
     name: 'metrics.cicd.system.errors',
-    description: 'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
+    description:
+      'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
     type: 'double',
   },
 } as const;
