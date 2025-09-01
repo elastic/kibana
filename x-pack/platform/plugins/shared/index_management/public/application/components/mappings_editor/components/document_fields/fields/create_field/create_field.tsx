@@ -17,8 +17,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { TrainedModelStat } from '@kbn/ml-common-types/trained_models';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import React, { useEffect, useRef } from 'react';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
