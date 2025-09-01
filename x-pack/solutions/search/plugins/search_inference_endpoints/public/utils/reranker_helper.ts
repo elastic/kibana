@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) => {
   const {

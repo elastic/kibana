@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 
 import { docLinks } from '../common/doc_links';
 import { SearchHomepage } from './embeddable';
 import { initQueryClient } from './services/query_client';
-import {
+import type {
   SearchHomepageAppInfo,
   SearchHomepageAppPluginStartDependencies,
   SearchHomepagePluginSetup,

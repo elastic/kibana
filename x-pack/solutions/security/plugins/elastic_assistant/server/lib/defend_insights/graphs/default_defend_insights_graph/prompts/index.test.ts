@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import {
-  DefendInsightsCombinedPrompts,
-  getIncompatibleAntivirusPrompt,
-} from './incompatible_antivirus';
-import { getDefendInsightsPrompt } from '.';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+
+import type { DefendInsightsCombinedPrompts } from '.';
+import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
+import { getPolicyResponseFailurePrompt } from './policy_response_failure';
+import { getDefendInsightsPrompt } from '.';
 
 jest.mock('./incompatible_antivirus', () => ({
   getIncompatibleAntivirusPrompt: jest.fn(),
+}));
+
+jest.mock('./policy_response_failure', () => ({
+  getPolicyResponseFailurePrompt: jest.fn(),
 }));
 
 describe('getDefendInsightsPrompt', () => {
@@ -48,6 +52,28 @@ describe('getDefendInsightsPrompt', () => {
     });
 
     expect(getIncompatibleAntivirusPrompt).toHaveBeenCalledWith(mockArgs);
+    expect(result).toBe(mockResponse);
+  });
+
+  it('should call getPolicyResponseFailurePrompt for policy_response_failure type', async () => {
+    const mockResponse: DefendInsightsCombinedPrompts = {
+      default: 'default prompt',
+      refine: 'refine prompt',
+      continue: 'continue prompt',
+      group: 'group value',
+      events: 'events value',
+      eventsId: 'events id',
+      eventsEndpointId: 'endpoint id',
+      eventsValue: 'events value content',
+    };
+    (getPolicyResponseFailurePrompt as jest.Mock).mockResolvedValue(mockResponse);
+
+    const result = await getDefendInsightsPrompt({
+      type: DefendInsightType.Enum.policy_response_failure,
+      ...mockArgs,
+    });
+
+    expect(getPolicyResponseFailurePrompt).toHaveBeenCalledWith(mockArgs);
     expect(result).toBe(mockResponse);
   });
 

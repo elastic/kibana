@@ -8,16 +8,14 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiBadge,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiSpacer,
   EuiIcon,
   formatDate,
 } from '@elastic/eui';
@@ -28,10 +26,12 @@ import {
 
 interface WorkflowExecutionLogsTableProps {
   executionId: string;
+  stepId?: string;
 }
 
 export const WorkflowExecutionLogsTable: React.FC<WorkflowExecutionLogsTableProps> = ({
   executionId,
+  stepId,
 }) => {
   const {
     data: logsData,
@@ -40,6 +40,7 @@ export const WorkflowExecutionLogsTable: React.FC<WorkflowExecutionLogsTableProp
     refetch,
   } = useWorkflowExecutionLogs({
     executionId,
+    stepId,
     limit: 100, // Get more logs without pagination
     offset: 0,
     enabled: true,
@@ -140,13 +141,5 @@ export const WorkflowExecutionLogsTable: React.FC<WorkflowExecutionLogsTableProp
     );
   }
 
-  return (
-    <div>
-      <EuiTitle size="xs">
-        <h3>Execution Logs</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiBasicTable columns={columns} items={logsData.logs} responsiveBreakpoint={false} />
-    </div>
-  );
+  return <EuiBasicTable columns={columns} items={logsData.logs} responsiveBreakpoint={false} />;
 };

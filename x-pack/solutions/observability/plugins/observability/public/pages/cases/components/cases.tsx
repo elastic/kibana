@@ -7,15 +7,15 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CasesPermissions } from '@kbn/cases-plugin/common';
+import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import { ObservabilityAlertsTable } from '../../..';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
+import { CasesAlertsTable } from './cases_alerts_table';
 
 export interface CasesProps {
   permissions: CasesPermissions;
@@ -25,13 +25,7 @@ export function Cases({ permissions }: CasesProps) {
   const {
     application: { navigateToUrl },
     cases,
-    data,
     http,
-    notifications,
-    fieldFormats,
-    application,
-    licensing,
-    settings,
   } = useKibana().services;
 
   const { observabilityRuleTypeRegistry } = usePluginContext();
@@ -82,21 +76,7 @@ export function Cases({ permissions }: CasesProps) {
         }}
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
-        renderAlertsTable={(props) => (
-          <ObservabilityAlertsTable
-            {...props}
-            services={{
-              data,
-              http,
-              notifications,
-              fieldFormats,
-              application,
-              licensing,
-              cases,
-              settings,
-            }}
-          />
-        )}
+        renderAlertsTable={(props) => <CasesAlertsTable {...props} />}
       />
 
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (

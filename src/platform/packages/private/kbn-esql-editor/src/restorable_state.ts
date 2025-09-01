@@ -8,7 +8,7 @@
  */
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
-import { HistoryTabId } from './types';
+import type { HistoryTabId } from './types';
 
 export interface ESQLEditorRestorableState {
   editorHeight: number;

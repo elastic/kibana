@@ -25,16 +25,15 @@ import {
   APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
   APP_LOGS_COUNT_INDEX_PRIVILEGES,
 } from '../../../../../common/constants';
-import { WithPrivileges, MissingPrivileges, GlobalFlyout } from '../../../../shared_imports';
+import type { MissingPrivileges } from '../../../../shared_imports';
+import { WithPrivileges, GlobalFlyout } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { loadLogsCheckpoint } from '../../../lib/logs_checkpoint';
 import type { OverviewStepProps } from '../../types';
 import { useDeprecationLogging } from '../../es_deprecation_logs';
 import { DiscoverExternalLinks } from '../../es_deprecation_logs/fix_deprecation_logs/external_links';
-import {
-  EsDeprecationLogsFlyout,
-  EsDeprecationLogsFlyoutProps,
-} from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
+import type { EsDeprecationLogsFlyoutProps } from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
+import { EsDeprecationLogsFlyout } from '../../es_deprecation_logs/fix_deprecation_logs/es_deprecation_logs_flyout';
 
 const i18nTexts = {
   logsStepTitle: i18n.translate('xpack.upgradeAssistant.overview.logsStep.title', {

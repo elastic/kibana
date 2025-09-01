@@ -27,6 +27,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
 import {
   LoadingStatus,
+  TabsBarVisibility,
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
   type TabState,
@@ -78,6 +79,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
+  tabsBarVisibility: TabsBarVisibility.default,
   tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
 };
 
@@ -146,6 +148,10 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
+    },
+
+    setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
+      state.tabsBarVisibility = action.payload;
     },
 
     setExpandedDoc: (

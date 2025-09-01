@@ -25,26 +25,17 @@
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
-    "@kbn/security-solution-plugin",
-    "@kbn/spaces-plugin",
     "@kbn/test",
     "@kbn/ftr-common-functional-services",
     "@kbn/expect",
     "@kbn/rule-data-utils",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/es-query",
-    "@kbn/core-http-common",
     "@kbn/dataset-quality-plugin",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/data-quality-plugin",
-    "@kbn/openapi-common",
-    "@kbn/securitysolution-lists-common",
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/securitysolution-endpoint-exceptions-common",
-    "@kbn/osquery-plugin",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/ml-string-hash"
+    "@kbn/ml-string-hash",
   ]
 }

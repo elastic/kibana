@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatEditorFactory } from '../types';
+import type { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
-import { DateFormatEditorFormatParams } from './date';
+import type { DateFormatEditorFormatParams } from './date';
 
 export type { DateFormatEditor } from './date';
 export const dateFormatEditorFactory: FieldFormatEditorFactory<DateFormatEditorFormatParams> = () =>

@@ -8,8 +8,8 @@
  */
 
 import moment from 'moment';
-import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
-import {
+import type { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
+import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindResult,

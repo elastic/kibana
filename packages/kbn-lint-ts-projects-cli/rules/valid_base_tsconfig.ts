@@ -10,7 +10,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { TsProject } from '@kbn/ts-projects';
+import type { TsProject } from '@kbn/ts-projects';
 import { setExtends } from '@kbn/json-ast';
 
 import { TsProjectRule } from '@kbn/repo-linter';

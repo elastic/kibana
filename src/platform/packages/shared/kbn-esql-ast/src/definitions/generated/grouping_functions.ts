@@ -1543,7 +1543,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      license: 'PLATINUM',
+      license: 'platinum',
       returnType: 'keyword',
     },
     {
@@ -1554,12 +1554,12 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      license: 'PLATINUM',
+      license: 'platinum',
       returnType: 'keyword',
     },
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
-  license: 'PLATINUM',
+  license: 'platinum',
   observabilityTier: 'COMPLETE',
   examples: ['FROM sample_data\n| STATS count=COUNT() BY category=CATEGORIZE(message)'],
 };

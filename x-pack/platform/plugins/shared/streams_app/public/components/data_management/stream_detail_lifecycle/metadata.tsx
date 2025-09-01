@@ -12,7 +12,8 @@ import {
   isIlmLifecycle,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
@@ -33,10 +34,10 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { LifecycleEditAction } from './modal';
+import type { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
+import type { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatIngestionRate } from './helpers/format_bytes';
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 

@@ -6,13 +6,13 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { areFiltersEmpty } from '../common/utils';
 import { getStatsOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
-import { MonitorFilters } from '../monitors_overview/types';
+import type { MonitorFilters } from '../monitors_overview/types';
 import { setOverviewPageStateAction } from '../../synthetics/state';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewStatus } from '../../synthetics/components/monitors_page/overview/overview/overview_status';

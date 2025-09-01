@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
-
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   DEFEND_INSIGHTS,
@@ -17,13 +15,10 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import { buildResponse } from '../../lib/build_response';
-import { CallbackIds, ElasticAssistantRequestHandlerContext } from '../../types';
-import {
-  isDefendInsightsEnabled,
-  runExternalCallbacks,
-  updateDefendInsightsLastViewedAt,
-} from './helpers';
+import { CallbackIds } from '../../types';
+import { runExternalCallbacks, updateDefendInsightsLastViewedAt } from './helpers';
 
 export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -59,20 +54,11 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
         const logger: Logger = assistantContext.logger;
 
         try {
-          const isEnabled = isDefendInsightsEnabled({
-            request,
-            logger,
-            assistantContext,
-          });
-          if (!isEnabled) {
-            return response.notFound();
-          }
-
           if (!ctx.licensing.license.hasAtLeast('enterprise')) {
             return response.forbidden({
               body: {
                 message:
-                  'Your license does not support Defend Workflows. Please upgrade your license.',
+                  'Your license does not support Automatic Troubleshooting. Please upgrade your license.',
               },
             });
           }

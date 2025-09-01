@@ -11,12 +11,10 @@ import {
 } from '../../../public/application/components/mappings_editor/shared_imports';
 import { findTestSubject, registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import {
-  SelectInferenceId,
-  SelectInferenceIdProps,
-} from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import type { SelectInferenceIdProps } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
 import React from 'react';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 const mockDispatch = jest.fn();
 const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';

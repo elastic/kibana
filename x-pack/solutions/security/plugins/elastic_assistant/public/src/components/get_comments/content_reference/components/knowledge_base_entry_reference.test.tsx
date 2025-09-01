@@ -76,7 +76,7 @@ describe('KnowledgeBaseEntryReference', () => {
     fireEvent.click(screen.getByTestId('knowledgeBaseEntryReferenceLink'));
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('management', {
-      path: 'kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=entry-123',
+      path: 'ai/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=entry-123',
       openInNewTab: true,
     });
   });
