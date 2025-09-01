@@ -15,32 +15,30 @@ import { EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { from, where } from '@kbn/esql-composer';
 import { SPAN_ID } from '@kbn/apm-types';
-import type { ApmPluginStartDeps } from '../../../../plugin';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export const getESQLQuery = ({
   params,
-  apmIndexSettings,
+  indexSettings,
 }: {
   params: {
     kuery?: string;
     spanId?: string;
   };
-  apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
+  indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
 }) => {
-  if (!apmIndexSettings || apmIndexSettings?.length === 0) {
+  if (!indexSettings || indexSettings?.length === 0) {
     return null;
   }
 
   const { kuery, spanId } = params;
 
-  const tracesIndices = apmIndexSettings
+  const tracesIndices = indexSettings
     .filter((indexSetting) => ['span', 'transaction'].includes(indexSetting.configurationName))
     .map((indexSetting) => indexSetting.savedValue ?? indexSetting.defaultValue);
   const dedupedIndices = Array.from(new Set(tracesIndices)).join(',');
@@ -68,7 +66,7 @@ export function OpenSpanInDiscoverLink({
   spanId: string;
 }) {
   const { share } = useApmPluginContext();
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const { indexSettings } = useApmServiceContext();
 
   const {
     query: { rangeFrom, rangeTo, kuery },
@@ -79,11 +77,6 @@ export function OpenSpanInDiscoverLink({
     '/traces/explorer/waterfall'
   );
 
-  const { data = { apmIndexSettings: [] } } = useFetcher(
-    (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
-    [services.apmSourcesAccess]
-  );
-
   const params = {
     kuery,
     spanId,
@@ -91,7 +84,7 @@ export function OpenSpanInDiscoverLink({
 
   const esqlQuery = getESQLQuery({
     params,
-    apmIndexSettings: data.apmIndexSettings,
+    indexSettings,
   });
 
   if (!esqlQuery) {

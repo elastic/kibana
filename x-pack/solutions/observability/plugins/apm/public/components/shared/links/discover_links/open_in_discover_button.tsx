@@ -9,7 +9,6 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { from, where } from '@kbn/esql-composer';
 import {
@@ -22,8 +21,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-types';
-import type { ApmPluginStartDeps } from '../../../../plugin';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -34,7 +31,7 @@ import {
 
 const getESQLQuery = ({
   params,
-  apmIndexSettings,
+  indexSettings,
 }: {
   params: {
     serviceName?: string;
@@ -49,9 +46,9 @@ const getESQLQuery = ({
     spanId?: string;
     errorGroupId?: string;
   };
-  apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
+  indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
 }) => {
-  if (!apmIndexSettings || apmIndexSettings?.length === 0) {
+  if (!indexSettings || indexSettings?.length === 0) {
     return null;
   }
 
@@ -67,7 +64,7 @@ const getESQLQuery = ({
     spanName,
   } = params;
 
-  const tracesIndices = apmIndexSettings
+  const tracesIndices = indexSettings
     .filter((indexSetting) => ['span', 'transaction'].includes(indexSetting.configurationName))
     .map((indexSetting) => indexSetting.savedValue ?? indexSetting.defaultValue);
   const dedupedIndices = Array.from(new Set(tracesIndices)).join(',');
@@ -126,8 +123,7 @@ const getESQLQuery = ({
 
 export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
   const { share } = useApmPluginContext();
-  const { serviceName } = useApmServiceContext();
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const { serviceName, indexSettings } = useApmServiceContext();
 
   const { query: queryParams } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
@@ -148,11 +144,6 @@ export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
   const sampleRangeTo = 'sampleRangeTo' in queryParams ? queryParams.sampleRangeTo : undefined;
   const dependencyName = 'dependencyName' in queryParams ? queryParams.dependencyName : undefined;
 
-  const { data = { apmIndexSettings: [] } } = useFetcher(
-    (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
-    [services.apmSourcesAccess]
-  );
-
   const params = {
     serviceName,
     kuery,
@@ -167,7 +158,7 @@ export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
 
   const esqlQuery = getESQLQuery({
     params,
-    apmIndexSettings: data.apmIndexSettings,
+    indexSettings,
   });
 
   if (!esqlQuery) {
