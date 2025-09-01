@@ -148,7 +148,6 @@ export const layoutGraph = (
       };
     }
 
-    // Fallback for unknown node types
     return {
       ...node,
       position: { x, y },
