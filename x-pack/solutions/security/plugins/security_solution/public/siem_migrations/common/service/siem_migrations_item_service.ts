@@ -20,8 +20,9 @@ export abstract class SiemMigrationsItemService {
   protected readonly core: CoreStart;
   protected readonly plugins: StartPluginsDependencies;
 
-  public connectorIdStorage = new SiemMigrationsStorage<string>('connectorId');
-  public traceOptionsStorage = new SiemMigrationsStorage<TraceOptions>('traceOptions', undefined, {
+  // passing `rules` for backward compatibility
+  public connectorIdStorage = new SiemMigrationsStorage<string>('connectorId', 'rules');
+  public traceOptionsStorage = new SiemMigrationsStorage<TraceOptions>('traceOptions', 'rules', {
     customKey: NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY,
     storageType: 'session',
   });

@@ -37,9 +37,12 @@ jest.mock('../api', () => ({
   addDashboardsToDashboardMigration: jest.fn(),
 }));
 
-jest.mock('../../common/service/capabilities', () => ({
-  getMissingCapabilitiesChecker: jest.fn(() => []),
-}));
+jest.mock('../../common/service/capabilities', () => {
+  return {
+    ...jest.requireActual('../../common/service/capabilities'),
+    getMissingCapabilitiesChecker: jest.fn(() => []),
+  };
+});
 
 const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as jest.MockedFunction<
   typeof getMissingCapabilitiesChecker
@@ -193,7 +196,7 @@ describe('SiemDashboardMigrationsService', () => {
   });
 
   describe('startDashboardMigration', () => {
-    it.only('should notify and not start migration if missing capabilities exist', async () => {
+    it('should notify and not start migration if missing capabilities exist', async () => {
       mockGetMissingCapabilitiesChecker.mockReturnValue(() => [
         { capability: 'cap', description: 'desc' },
       ]);
@@ -284,7 +287,7 @@ describe('SiemDashboardMigrationsService', () => {
   });
 
   describe('Polling behavior', () => {
-    it.only('should poll and send a success toast when a migration finishes', async () => {
+    it('should poll and send a success toast when a migration finishes', async () => {
       jest.useFakeTimers();
       const runningMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.RUNNING };
       const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
@@ -348,6 +351,9 @@ describe('SiemDashboardMigrationsService', () => {
         .mockResolvedValue([finishedMigration])
         .mockResolvedValueOnce([interruptedMigration]);
       jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+      mockGetMissingCapabilitiesChecker.mockReturnValue(() => [
+        { capability: 'cap', description: 'desc' },
+      ]);
       service.startPolling();
       await Promise.resolve();
       jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);

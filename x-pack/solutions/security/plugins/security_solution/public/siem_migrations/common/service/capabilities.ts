@@ -66,6 +66,8 @@ export const requiredSiemMigrationCapabilities: Record<CapabilitiesLevel, Missin
   all: allCapabilities,
 };
 
+console.log({ requiredSiemMigrationCapabilities });
+
 export const getMissingCapabilitiesChecker = (
   _requiredCapabilities: Record<
     CapabilitiesLevel,
