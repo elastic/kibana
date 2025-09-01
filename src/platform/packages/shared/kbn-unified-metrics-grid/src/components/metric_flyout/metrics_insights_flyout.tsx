@@ -74,7 +74,7 @@ export const MetricInsightsFlyout = ({
       size={flyoutWidth}
       onKeyDown={onKeyDown}
       pushMinBreakpoint="xl"
-      data-test-subj="metricViewerFlyout"
+      data-test-subj="metricsExperienceFlyout"
       aria-label={i18n.translate(
         'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
         { defaultMessage: 'Metric Insights Flyout' }
@@ -95,7 +95,7 @@ export const MetricInsightsFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiTitle
               size="xs"
-              data-test-subj="docViewerRowDetailsTitle"
+              data-test-subj="metricsExperienceFlyoutRowDetailsTitle"
               css={css`
                 white-space: nowrap;
               `}

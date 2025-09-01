@@ -25,7 +25,7 @@ export const TabTitleAndDescription = ({ metric }: OverviewTabProps) => {
   return (
     <>
       <EuiSpacer />
-      <EuiDescriptionList data-test-subj="metricFlyoutSummaryItem" compressed>
+      <EuiDescriptionList data-test-subj="metricsExperienceFlyoutSummaryItem" compressed>
         <EuiTitle size="s" id="metric-flyout-title">
           <h2>
             <strong>{metric.name}</strong>
