@@ -20,7 +20,7 @@ import {
   OBSERVABLES_TAB,
   SIMILAR_CASES_TAB,
 } from './translations';
-import { AttachmentType, type CaseUI } from '../../../common';
+import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
@@ -268,7 +268,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       features.alerts.isExperimental,
       features.events.enabled,
       caseData.totalAlerts,
-      caseData.comments,
+      caseData.totalEvents,
       activeTab,
       euiTheme,
       isLoadingFiles,
