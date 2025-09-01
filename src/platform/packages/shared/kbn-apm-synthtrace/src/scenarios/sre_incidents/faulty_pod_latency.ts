@@ -20,15 +20,30 @@
  * High disk I/O (`system.diskio.read.bytes`) on the host serving
  * `user-profile-pod-3`, causing degraded performance for that specific pod.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in the APM UI and view the `user-profile-service`. Observe the high
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI for the 'user-profile-service'. Observe the high
  *    latency anomaly in the main transaction chart.
- * 2. Group the latency chart by `kubernetes.pod.name`. This will clearly
- *    isolate `user-profile-pod-3` as the source of the latency.
- * 3. Pivot to the Logs Explorer, filtering for `kubernetes.pod.name : "user-profile-pod-3"`.
- *    Notice the recurring "High I/O wait detected" warning logs.
- * 4. Pivot to the Infrastructure UI and view the host for `user-profile-pod-3`.
- *    Correlate the APM latency spike with a spike in the "Disk I/O" metric on the host.
+ * 2. In the "Transactions" tab, group the latency chart by 'kubernetes.pod.name'.
+ *    This will clearly isolate 'user-profile-pod-3' as the source of the latency.
+ * 3. From the service overview, select the "Metrics" tab and view host metrics.
+ *    Correlate the APM latency spike with a spike in the "Disk I/O" metric.
+ * 4. Pivot to Discover, ensuring the logs data view is selected. Filter for
+ *    'kubernetes.pod.name : "user-profile-pod-3"' to see the recurring
+ *    "High I/O wait detected" warning logs.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view, filtering for
+ *    'service.name: "user-profile-service"'.
+ * 2. Create a Lens visualization (Line Chart) plotting the 95th percentile of
+ *    'transaction.duration.us' over time. Observe the significant latency spike.
+ * 3. Add a "break down by" dimension to the chart using the 'kubernetes.pod.name'
+ *    field. This will isolate 'user-profile-pod-3' as the sole source of latency.
+ * 4. Pivot to the 'logs-*' data view in Discover. Filter for
+ *    'kubernetes.pod.name: "user-profile-pod-3"'. Find the "High I/O wait detected"
+ *    warning logs.
+ * 5. On a Dashboard, correlate the APM latency chart from Lens with a metrics chart
+ *    from the 'metrics-*' data view, plotting the max 'system.diskio.read.bytes'
+ *    for 'user-profile-pod-3'. The two spikes will align perfectly.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Why is the user-profile-service slow?"

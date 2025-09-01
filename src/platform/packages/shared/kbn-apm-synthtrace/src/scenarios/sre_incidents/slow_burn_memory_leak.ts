@@ -21,14 +21,29 @@
  * A memory leak in the `cart-service` causes heap usage (`jvm.memory.heap.used`)
  * to climb steadily until it triggers a fatal `java.lang.OutOfMemoryError`.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in APM for the `cart-service`. Observe the repeating pattern of
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI for the 'cart-service'. Observe the repeating pattern of
  *    gradually increasing latency followed by a sharp drop (indicating a restart).
- * 2. View the JVM metrics for the service. Observe the classic "sawtooth" pattern
- *    for `jvm.memory.heap.used` that correlates with the latency pattern.
- * 3. Filter logs for the `cart-service` in the Logs Explorer.
- * 4. Find the `java.lang.OutOfMemoryError` log message that occurs at the peak
+ * 2. From the service overview, select the "Metrics" tab. Observe the classic
+ *    "sawtooth" pattern for 'jvm.memory.heap.used' that correlates with the latency.
+ * 3. Pivot to Discover, ensuring the logs data view is selected. Filter for
+ *    'service.name: "cart-service"' and 'log.level: "error"'.
+ * 4. Find the 'java.lang.OutOfMemoryError' log message that occurs at the peak
  *    of each memory usage spike.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. On a Dashboard, create a Lens chart using the 'metrics-apm.internal-*' data
+ *    view. Plot the average 'jvm.memory.heap.used' for the 'cart-service'. This
+ *    will reveal the characteristic "sawtooth" pattern of a memory leak.
+ * 2. Add a second Lens chart to the dashboard using the 'traces-apm-*' data view.
+ *    Plot the 95th percentile of 'transaction.duration.us'. Observe that the
+ *    latency pattern perfectly mirrors the memory usage pattern.
+ * 3. Add a third visualization to the dashboard: a Data Table from the 'logs-*'
+ *    data view, filtered for 'service.name: "cart-service"' and
+ *    'log.level: "error"'.
+ * 4. The table will show the 'java.lang.OutOfMemoryError' messages, and selecting
+ *    a log entry will highlight the corresponding timestamp on the other charts,
+ *    showing it occurs exactly at the peak of the memory usage and latency.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Why does the cart-service keep restarting?"

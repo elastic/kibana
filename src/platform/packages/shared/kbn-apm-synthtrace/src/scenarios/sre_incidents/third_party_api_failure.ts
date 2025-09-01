@@ -21,13 +21,29 @@
  * The external `shipping-rates-api.com` dependency begins returning
  * `HTTP 503 Service Unavailable` errors, causing all checkout transactions to fail.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in the APM Service Map. Observe that the `checkout-service` is red.
- * 2. View the Dependencies tab in APM. Note that `shipping-rates-api.com` has a
- *    high error rate and impact score.
- * 3. Inspect a failed trace from the `checkout-service`. The trace waterfall will
- *    show a red external HTTP span to `shipping-rates-api.com`.
- * 4. Click the failed span to see the `http.response.status_code: 503` in the metadata.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM Service Map. Observe that the 'checkout-service' is red and
+ *    the external dependency 'shipping-rates-api.com' is also red.
+ * 2. Click on the 'checkout-service' and go to the "Dependencies" tab. Note that
+ *    'shipping-rates-api.com' has a high error rate and impact score.
+ * 3. Inspect a failed trace from the 'checkout-service'. The trace waterfall will
+ *    show a red external HTTP span to 'shipping-rates-api.com'.
+ * 4. Click the failed span to see the 'http.response.status_code: 503' in the metadata.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view. Filter for
+ *    'service.name: "checkout-service"' and 'transaction.result: "failure"'.
+ * 2. Inspect a failed document and find the 'trace.id'. Use this ID to view the
+ *    full trace.
+ * 3. Sort the trace documents by '@timestamp'. You will see a span with
+ *    'span.type: "external"' and 'url.domain: "shipping-rates-api.com"' that has
+ *    'transaction.result: "failure"'.
+ * 4. Examine this external span document. The field 'http.response.status_code'
+ *    will be '503', identifying the failing external dependency as the root cause.
+ * 5. Alternatively, in Lens, create a Data Table. Use "Top values of 'url.domain'"
+ *    as the primary dimension and "Count of documents" as the metric. Filter for
+ *    'span.type: "external"' and 'transaction.result: "failure"'. This will list
+ *    all failing external dependencies, with 'shipping-rates-api.com' at the top.
  *
  * AI ASSISTANT QUESTIONS:
  * - "What is the root cause of the errors in the checkout-service?"

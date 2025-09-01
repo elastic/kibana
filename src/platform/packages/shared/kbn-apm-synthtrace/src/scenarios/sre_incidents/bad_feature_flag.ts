@@ -23,15 +23,32 @@
  * to send invalid credentials to the downstream `recommendation-service`, resulting
  * in `401 Unauthorized` errors (obfuscated as `500` errors to the client).
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in APM for the `product-service`. Observe the low overall error rate.
- * 2. Group the transaction charts by `user.tier`. This will reveal that the error
- *    rate for `premium` users is high, while it's low for `standard` users.
- * 3. Inspect a failed trace for a `premium` user. Note the failed HTTP call to the
- *    `recommendation-service` with a `500` status code.
- * 4. Pivot to the logs for the `recommendation-service`. Filter for `warn` level
- *    logs and discover the "Authentication failed... Invalid token provided" message,
- *    revealing the true root cause.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI, viewing the `product-service`. Observe the low overall
+ *    error rate in the main overview.
+ * 2. In the "Transactions" tab, group the charts by 'user.tier'. This will reveal
+ *    that the error rate for 'premium' users is high, while it's low for 'standard' users.
+ * 3. Click on a failed transaction trace for a 'premium' user. In the trace waterfall,
+ *    note the failed HTTP call to the 'recommendation-service' with a '500' status code.
+ * 4. From the trace view, select the option to view related logs. This will pivot
+ *    to Discover, pre-filtered for the current trace. Remove the trace filter and
+ *    add filters for 'service.name: "recommendation-service"' and 'log.level: "warn"'
+ *    to discover the "Authentication failed... Invalid token provided" message.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover, using the 'traces-apm-*' data view. Filter for
+ *    'service.name: "product-service"' and observe a low overall error rate.
+ * 2. Create a Lens visualization (e.g., a Bar Chart) to group the transaction
+ *    count by 'transaction.result'. This confirms the low failure count.
+ * 3. Add a "break down by" using the 'labels.user.tier' field. This immediately
+ *    reveals that nearly all failures are attributed to the 'premium' user tier.
+ * 4. Pivot back to Discover, adding 'labels.user.tier: "premium"' and
+ *    'transaction.result: "failure"' to the query. Inspecting a failed document
+ *    shows an error message related to the 'recommendation-service'.
+ * 5. Switch to the 'logs-*' data view in Discover. A query for
+ *    'service.name: "recommendation-service"' and 'log.level: "warn"' will uncover
+ *    the "Authentication failed... Invalid token provided" message, identifying the
+ *    true root cause.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Are there any errors affecting premium users in the product-service?"

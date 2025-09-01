@@ -21,13 +21,27 @@
  * The canary version (`service.version: '1.1.0'`) has a bug that causes
  * higher latency and a 20% error rate, while the stable version remains healthy.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in APM for the `shipping-service`. Observe a slight increase in latency
- *    and errors coinciding with a deployment annotation.
- * 2. Group the latency and error rate charts by `service.version`.
- * 3. Observe that `v1.1.0` is performing much worse than `v1.0.0`.
- * 4. Filter traces for `service.version: "1.1.0"` and `event.outcome: "failure"`
- *    to inspect a failed trace and find the root cause.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI for the 'shipping-service'. Observe a slight increase in
+ *    latency and errors coinciding with a deployment annotation on the timeline.
+ * 2. In the "Transactions" tab, group the latency and error rate charts by 'service.version'.
+ * 3. Observe that version '1.1.0' is performing much worse than '1.0.0'.
+ * 4. Filter the whole UI for 'service.version: "1.1.0"' and 'transaction.result: "failure"'
+ *    to inspect a failed trace and find the root cause error.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view, filtering for
+ *    'service.name: "shipping-service"'.
+ * 2. Create a Lens visualization (Line Chart) plotting the average
+ *    'transaction.duration.us' on the Y-axis and '@timestamp' on the X-axis.
+ *    Observe the increase in latency.
+ * 3. Add a "break down by" dimension to the chart, using the 'service.version'
+ *    field. This will render two series, clearly showing that version '1.1.0'
+ *    is the source of the high latency.
+ * 4. To analyze the errors, create a new Lens Bar Chart. Use "Count of documents"
+ *    on the Y-axis and break down by 'service.version'. Then, add a filter for
+ *    'transaction.result: "failure"'. This will show that all failures are
+ *    coming from version '1.1.0'.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Did the latest deployment of the shipping-service cause a regression?"

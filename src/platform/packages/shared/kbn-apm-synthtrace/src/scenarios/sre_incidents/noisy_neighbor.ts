@@ -19,14 +19,30 @@
  * The `batch-processing-service` monopolizes host CPU (`system.cpu.total.norm.pct`),
  * starving the critical `payment-service` of resources and causing high latency.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in APM for the `payment-service` and confirm the high latency spike.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI for the 'payment-service' and confirm the high latency spike.
  * 2. Inspect a slow trace and observe that time is spent "in-process" with no slow
- *    downstream spans. Note the `host.name`.
- * 3. Pivot to the Infrastructure UI for the affected host.
- * 4. Correlate the latency spike with the host's CPU utilization, which spiked to 95%.
- * 5. Inspect the processes on the host to identify the `batch-processing-service`
+ *    downstream spans. Note the 'host.name' from the trace metadata.
+ * 3. Pivot to the Infrastructure UI and select the "Hosts" view. Find the affected
+ *    host.
+ * 4. On the host details page, correlate the latency spike with the host's CPU
+ *    utilization, which spiked to 95%.
+ * 5. In the "Processes" tab for the host, identify the 'batch-processing-service'
  *    as the top CPU consumer.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view. Filter for
+ *    'service.name: "payment-service"' and note the high values for
+ *    'transaction.duration.us'. Note the 'host.name' for the affected service.
+ * 2. In a Dashboard, create a Lens time series chart of the 95th percentile of
+ *    'transaction.duration.us' for the 'payment-service'.
+ * 3. Add a second chart to the dashboard. Using the 'metrics-*' data view, plot
+ *    the max 'system.cpu.total.norm.pct', filtering by the correct 'host.name'.
+ *    The latency spike in the first chart will perfectly correlate with the CPU
+ *    spike in the second.
+ * 4. To find the culprit, create a third Lens chart (Top Values) showing the max
+ *    'system.process.cpu.total.norm.pct' broken down by 'process.name'. This will
+ *    clearly show the 'batch-processing-service' as the top CPU consumer.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Why is the payment-service so slow?"

@@ -20,14 +20,30 @@
  * ROOT CAUSE:
  * A slow DB query in the `inventory-service` causing a timeout error.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in APM, view the `frontend-web` service, and observe the high latency and errors.
- * 2. Examine a failed trace and follow the waterfall. Notice the long duration of the
- *    downstream call to `product-recommendation`.
- * 3. Drill into the `product-recommendation` service. Observe that its call to the
- *    `inventory-service` is the source of the high latency.
- * 4. Drill into the `inventory-service`. In a failed trace, find the `db.postgresql`
- *    span for `SELECT * FROM products` and note its extremely long duration.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM Service Map. Observe that the 'frontend-web' service is red,
+ *    indicating a high error rate.
+ * 2. Click on the 'frontend-web' service to go to its overview page. Note the high
+ *    latency and error rate.
+ * 3. Examine a failed trace sample. The trace waterfall shows a long-duration call
+ *    to 'product-recommendation'.
+ * 4. Click the 'product-recommendation' span and select "View service". Repeat the
+ *    process, observing that its call to 'inventory-service' is the source of latency.
+ * 5. In the 'inventory-service' trace, find the 'db.postgresql' span for
+ *    'SELECT * FROM products' and note its extremely long duration and timeout error.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view. Filter for
+ *    'service.name: "frontend-web"' and 'transaction.result: "failure"'.
+ * 2. Create a Lens visualization (e.g., Line Chart) plotting the average
+ *    'transaction.duration.us' over time. Observe the dramatic spike in latency.
+ * 3. Back in Discover, inspect a failed trace document. Find the 'trace.id' and
+ *    use it to view all documents for that trace ('trace.id: "..."').
+ * 4. Sort the trace documents by '@timestamp'. Follow the chain of events from
+ *    'frontend-web' -> 'product-recommendation' -> 'inventory-service'.
+ * 5. Notice the extremely long duration of the 'db.postgresql' span within the
+ *    'inventory-service'. The associated error message, "PostgreSQL query timed out",
+ *    pinpoints the root cause.
  *
  * AI ASSISTANT QUESTIONS:
  * - "What's causing the errors in the frontend-web service?"

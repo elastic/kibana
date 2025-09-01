@@ -22,13 +22,27 @@
  * The host `billing-host-01` runs out of disk space, with the
  * `system.filesystem.used.pct` metric reaching 100%.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in the Logs Explorer and observe the flood of "No space left on device"
- *    errors from the `billing-processor` service.
- * 2. Note the `host.name` (`billing-host-01`) from the log documents.
- * 3. Pivot to the Infrastructure UI and view the metrics for `billing-host-01`.
- * 4. Observe that the "Disk Usage" metric is at 100%, and its spike correlates
- *    perfectly with the start of the error logs.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in Discover with the appropriate logs data view selected. Filter for
+ *    'service.name: "billing-processor"' and observe the flood of "No space left
+ *    on device" error logs.
+ * 2. Note the 'host.name' ('billing-host-01') from the log documents.
+ * 3. Pivot to the Infrastructure UI's "Hosts" view. Search for 'billing-host-01'.
+ * 4. On the host details page, observe that the "Disk Usage" metric is at 100%,
+ *    and its spike correlates perfectly with the start of the error logs.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'logs-*' data view. Filter for
+ *    'service.name: "billing-processor"' and 'log.level: "error"'. Observe the
+ *    "No space left on device" messages.
+ * 2. Note the 'host.name' from the error logs ('billing-host-01').
+ * 3. Create a Dashboard. Add a Lens visualization from the 'logs-*' data view
+ *    showing the count of error logs over time.
+ * 4. Add a second Lens visualization to the Dashboard, this time using the
+ *    'metrics-*' data view. Plot the average 'system.filesystem.used.pct' over
+ *    time, filtering for 'host.name: "billing-host-01"'.
+ * 5. The resulting dashboard will show a clear correlation: the log errors begin
+ *    at the exact moment the disk usage metric hits 100%.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Why is the billing-processor service logging errors?"

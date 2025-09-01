@@ -20,14 +20,27 @@
  * The application code contains inefficient operations for the
  * `/always-spike` and `/sometimes-spike` endpoints.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in the APM UI for the `spikey-frontend` service.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI for the 'spikey-frontend' service.
  * 2. Observe the high average latency, but notice that the p95 or p99 latency
  *    is significantly higher, suggesting outliers.
- * 3. Go to the Transactions tab and sort by Impact or Latency. This will
- *    immediately highlight the `/always-spike` and `/sometimes-spike` transactions.
- * 4. View the latency distribution for the `/sometimes-spike` transaction to see
- *    the bimodal distribution of fast and slow requests.
+ * 3. Go to the "Transactions" tab and sort by "Impact" or "Latency". This will
+ *    immediately highlight the '/always-spike' and '/sometimes-spike' transactions.
+ * 4. Click on the '/sometimes-spike' transaction and view its latency distribution
+ *    chart to see the bimodal distribution of fast and slow requests.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view, filtering for
+ *    'service.name: "spikey-frontend"'.
+ * 2. Add the 'transaction.name' and 'transaction.duration.us' fields to the
+ *    document table. Sort by 'transaction.duration.us' in descending order.
+ * 3. This immediately reveals that the '/always-spike' and '/sometimes-spike'
+ *    transactions are the slowest by a large margin.
+ * 4. To analyze the intermittent issue, add a filter for
+ *    'transaction.name: "/sometimes-spike"'. Create a Lens Histogram of the
+ *    'transaction.duration.us' field. This will clearly show a bimodal
+ *    distribution, with a small peak for fast requests and a large peak for
+ *    slow requests, confirming the intermittent nature of the problem.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Which transactions in the spikey-frontend service are the slowest?"

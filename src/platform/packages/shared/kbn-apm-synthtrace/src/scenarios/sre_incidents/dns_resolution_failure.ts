@@ -22,14 +22,29 @@
  * indicating a DNS lookup failure. There are no exit spans from the gateway to the
  * user service during the incident, as the requests fail before being sent.
  *
- * TROUBLESHOOTING PATH (MANUAL):
- * 1. Start in APM for the `api-gateway` and observe the 100% failure rate.
- * 2. Notice that the `user-profile-service` shows no signs of failure.
- * 3. Examine a failed trace from the `api-gateway`. Note the absence of any exit
- *    spans to the `user-profile-service`.
- * 4. Inspect the error documents attached to the failed trace, which will show the
- *    `EAI_AGAIN` DNS error.
- * 5. Correlate with logs from the `api-gateway`, which show the same error message.
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI for the 'api-gateway' and observe the 100% failure rate.
+ * 2. Navigate to the Service Map, which will show the 'api-gateway' as red and the
+ *    downstream 'user-profile-service' as green, with no connecting line during
+ *    the incident.
+ * 3. Go to the "Errors" tab for the 'api-gateway'. The top error will be
+ *    'getaddrinfo EAI_AGAIN user-profile-service'.
+ * 4. Click on the error to view its details. This confirms the DNS lookup failure.
+ *    Examining a failed trace sample will show the absence of any exit spans to the
+ *    'user-profile-service', as the request failed before being sent.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view. Filter for
+ *    'service.name: "api-gateway"' and 'transaction.result: "failure"'. Note the
+ *    100% failure rate during the incident period.
+ * 2. Investigate the health of the downstream service by changing the filter to
+ *    'service.name: "user-profile-service"'. Observe that it has no failures.
+ * 3. Go back to the failed 'api-gateway' transactions. Inspect the 'error.message'
+ *    field in the documents, which clearly states "getaddrinfo EAI_AGAIN user-profile-service".
+ * 4. To confirm, examine a full trace by filtering for a specific 'trace.id'. You
+ *    will see a transaction for the 'api-gateway' but notice the complete absence
+ *    of any spans connecting to the 'user-profile-service', confirming the request
+ *    never left the gateway.
  *
  * AI ASSISTANT QUESTIONS:
  * - "Why is the api-gateway failing?"
