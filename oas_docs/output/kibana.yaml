@@ -42364,7 +42364,6 @@ paths:
       summary: Get CCR Remote synced integrations status by outputId
       tags:
         - CCR Remote synced integrations
-      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -42502,7 +42501,6 @@ paths:
       summary: Get CCR Remote synced integrations status
       tags:
         - CCR Remote synced integrations
-      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
