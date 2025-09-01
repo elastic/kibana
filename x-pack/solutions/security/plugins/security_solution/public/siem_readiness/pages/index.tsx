@@ -21,8 +21,8 @@ import {
 
 const SiemReadinessDashboard = () => {
 
-  const t = useKibana().services;
-  console.log(t)
+  // const t = useKibana().services.data.search;
+  // console.log(t)
 
   const handleLogTask = useCallback(async () => {
     // logReadinessTask({ taskId: '1', status: 'complete', meta: {} });
