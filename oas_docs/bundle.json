@@ -41855,7 +41855,8 @@
         "summary": "Get remote synced integrations status",
         "tags": [
           "Fleet remote synced integrations"
-        ]
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
@@ -42050,7 +42051,8 @@
         "summary": "Get remote synced integrations status by outputId",
         "tags": [
           "Fleet remote synced integrations"
-        ]
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/service_tokens": {
