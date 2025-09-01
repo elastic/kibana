@@ -52,7 +52,7 @@ export interface ContentFrameworkTableProps
   > {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
-  title: string;
+  id: string;
 }
 
 export function ContentFrameworkTable({
@@ -61,7 +61,7 @@ export function ContentFrameworkTable({
   fieldConfigurations,
   dataView,
   columns,
-  title,
+  id,
   textBasedHits,
   filter,
   onAddColumn,
@@ -189,7 +189,7 @@ export function ContentFrameworkTable({
     <div ref={setContainerRef}>
       <TableGrid
         data-test-subj="ContentFrameworkTableTableGrid"
-        id={title}
+        id={id}
         containerWidth={containerWidth}
         rows={rows}
         isEsqlMode={isEsqlMode}
