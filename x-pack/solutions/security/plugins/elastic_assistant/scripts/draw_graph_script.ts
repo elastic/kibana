@@ -20,6 +20,7 @@ import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { MemorySaver } from '@langchain/langgraph-checkpoint';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -35,7 +36,6 @@ import {
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
 import { getDefaultAttackDiscoveryGraph } from '../server/lib/attack_discovery/graphs/default_attack_discovery_graph';
 import { getDefaultDefendInsightsGraph } from '../server/lib/defend_insights/graphs/default_defend_insights_graph';
-import { MemorySaver } from '@langchain/langgraph-checkpoint';
 
 /**
  * Sometimes there is a cloudflare error from mermaid.ink (mermaid js rendered).
@@ -69,7 +69,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     tools: [],
     savedObjectsClient: {} as unknown as SavedObjectsClientContract,
     contentReferencesStore: {} as unknown as ContentReferencesStore,
-    checkpointSaver: new MemorySaver()
+    checkpointSaver: new MemorySaver(),
   });
   return graph.getGraphAsync({ xray: true });
 }

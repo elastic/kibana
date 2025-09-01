@@ -123,7 +123,7 @@ describe('AI Assistant Service', () => {
     clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
     clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
-    clusterClient.indices.get.mockResolvedValue({})
+    clusterClient.indices.get.mockResolvedValue({});
     ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
     ml.trainedModelsProvider = jest.fn().mockImplementation(() => ({
       getELSER: jest.fn().mockImplementation(() => '.elser_model_2'),
@@ -688,7 +688,7 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-component-template-checkpoints',
         '.kibana-elastic-ai-assistant-component-template-checkpoint-writes',
       ];
-      
+
       clusterClient.cluster.putComponentTemplate.mock.calls.forEach((call, i) => {
         expect(call[0].name).toEqual(expectedTemplates[i]);
       });

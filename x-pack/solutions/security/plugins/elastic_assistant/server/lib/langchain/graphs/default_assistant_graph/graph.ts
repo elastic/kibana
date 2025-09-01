@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BaseCheckpointSaver, END, START, StateGraph } from '@langchain/langgraph';
+import type { BaseCheckpointSaver } from '@langchain/langgraph';
+import { END, START, StateGraph } from '@langchain/langgraph';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 
@@ -83,7 +84,7 @@ export const getDefaultAssistantGraph = async ({
         [NodeType.END]: END,
       });
     return graph.compile({
-      ...(checkpointSaver !== null ? { checkpointer: checkpointSaver } : {})
+      ...(checkpointSaver !== null ? { checkpointer: checkpointSaver } : {}),
     });
   } catch (e) {
     throw new Error(`Unable to compile DefaultAssistantGraph\n${e}`);

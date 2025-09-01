@@ -234,7 +234,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  threadId: string,
+  threadId: string;
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;

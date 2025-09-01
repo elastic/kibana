@@ -55,6 +55,7 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
   AIAssistantKnowledgeBaseDataClient,
@@ -69,7 +70,6 @@ import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
-import { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };

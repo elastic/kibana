@@ -218,7 +218,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       }),
 
       getCheckpointSaver: memoize(async () => {
-        if(!this.assistantService.getIsCheckpointSaverEnabled()){
+        if (!this.assistantService.getIsCheckpointSaverEnabled()) {
           return null;
         }
         const currentUser = await getCurrentUser();

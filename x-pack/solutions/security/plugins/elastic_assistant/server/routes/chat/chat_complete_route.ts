@@ -21,6 +21,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { v4 as uuidv4 } from 'uuid';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
@@ -35,7 +36,6 @@ import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_
 import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
 import type { ConfigSchema } from '../../config_schema';
-import { v4 as uuidv4 } from 'uuid';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;

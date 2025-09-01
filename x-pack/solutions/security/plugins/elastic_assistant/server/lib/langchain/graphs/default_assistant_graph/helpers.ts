@@ -96,7 +96,7 @@ export const streamGraph = async ({
           traceId: streamingSpan?.ids?.['trace.id'],
         },
         isError
-      ).catch(() => { });
+      ).catch(() => {});
     }
     streamEnd();
     didEnd = true;

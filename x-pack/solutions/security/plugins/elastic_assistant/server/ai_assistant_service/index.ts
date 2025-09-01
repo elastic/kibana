@@ -29,6 +29,8 @@ import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/ins
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
+import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -69,8 +71,6 @@ import {
   ANONYMIZATION_FIELDS_INDEX_TEMPLATE,
   ANONYMIZATION_FIELDS_RESOURCE,
 } from './constants';
-import { IndexPatternAdapter } from '@kbn/index-adapter';
-import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -100,12 +100,12 @@ export interface CreateAIAssistantClientParams {
 
 export type CreateDataStream = (params: {
   resource:
-  | 'anonymizationFields'
-  | 'conversations'
-  | 'knowledgeBase'
-  | 'prompts'
-  | 'defendInsights'
-  | 'alertSummary';
+    | 'anonymizationFields'
+    | 'conversations'
+    | 'knowledgeBase'
+    | 'prompts'
+    | 'defendInsights'
+    | 'alertSummary';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -114,9 +114,7 @@ export type CreateDataStream = (params: {
 }) => DataStreamSpacesAdapter;
 
 export type CreateIndexPattern = (params: {
-  resource:
-  | 'checkpoints'
-  | 'checkpointWrites';
+  resource: 'checkpoints' | 'checkpointWrites';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -263,16 +261,14 @@ export class AIAssistantService {
         template: {
           settings: {
             'index.default_pipeline':
-              this.resourceNames.pipelines[
-              resource as keyof typeof this.resourceNames.pipelines
-              ],
+              this.resourceNames.pipelines[resource as keyof typeof this.resourceNames.pipelines],
           },
         },
       }),
     });
 
     return newIndexPattern;
-  }
+  };
 
   private createDataStream: CreateDataStream = ({
     resource,
@@ -298,18 +294,18 @@ export class AIAssistantService {
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines &&
-        // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-        !(resource === 'knowledgeBase')
+      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+      !(resource === 'knowledgeBase')
         ? {
-          template: {
-            settings: {
-              'index.default_pipeline':
-                this.resourceNames.pipelines[
-                resource as keyof typeof this.resourceNames.pipelines
-                ],
+            template: {
+              settings: {
+                'index.default_pipeline':
+                  this.resourceNames.pipelines[
+                    resource as keyof typeof this.resourceNames.pipelines
+                  ],
+              },
             },
-          },
-        }
+          }
         : {}),
     });
 
@@ -510,7 +506,6 @@ export class AIAssistantService {
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
-
     } catch (error) {
       this.options.logger.warn(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
