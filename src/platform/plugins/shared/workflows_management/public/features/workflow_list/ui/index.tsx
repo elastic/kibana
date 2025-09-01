@@ -13,63 +13,37 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { capitalize } from 'lodash';
-import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
+import { getStatusLabel } from '../../../shared/translations';
+import { getExecutionStatusIcon } from '../../../shared/ui';
+import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-
-const EXECUTION_STATUS_MAP = {
-  [ExecutionStatus.COMPLETED]: {
-    icon: 'checkInCircleFilled',
-    color: 'success',
-  },
-  [ExecutionStatus.FAILED]: {
-    icon: 'errorFilled',
-    color: 'danger',
-  },
-  [ExecutionStatus.CANCELLED]: {
-    icon: 'crossInCircle',
-    color: 'disabled',
-  },
-  [ExecutionStatus.RUNNING]: {
-    icon: 'play',
-    color: 'primary',
-  },
-  [ExecutionStatus.PENDING]: {
-    icon: 'clock',
-    color: 'subdued',
-  },
-  [ExecutionStatus.SKIPPED]: {
-    icon: 'checkInCircleFilled',
-    color: 'grey',
-  },
-  [ExecutionStatus.WAITING_FOR_INPUT]: {
-    icon: 'inputOutput',
-    color: 'warning',
-  },
-};
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
+  onCreateWorkflow?: () => void;
 }
 
-export function WorkflowList({ search, setSearch }: WorkflowListProps) {
+export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
+  const { euiTheme } = useEuiTheme();
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
@@ -100,10 +74,15 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
       runWorkflow.mutate(
         { id: item.id, inputs: {} },
         {
-          onSuccess: () => {
+          onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
               toastLifeTimeMs: 3000,
             });
+            application!.navigateToUrl(
+              application!.getUrlForApp('workflows', {
+                path: `/${item.id}?tab=executions&executionId=${workflowExecutionId}`,
+              })
+            );
           },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
@@ -114,7 +93,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         }
       );
     },
-    [notifications, runWorkflow]
+    [application, notifications, runWorkflow]
   );
 
   const handleDeleteWorkflow = useCallback(
@@ -151,7 +130,6 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         {
           id: item.id,
           workflow: {
-            ...item,
             enabled: !item.enabled,
           },
         },
@@ -167,6 +145,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     },
     [notifications?.toasts, updateWorkflow]
   );
+
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
       {
@@ -207,11 +186,11 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         render: (value, item) => {
           if (item.history.length === 0) return;
           const lastRun = item.history[0];
-          const { icon, color } = EXECUTION_STATUS_MAP[lastRun.status];
+          const icon = getExecutionStatusIcon(euiTheme, lastRun.status);
 
           return (
             <EuiText size="s">
-              <EuiIcon type={icon} color={color} /> {capitalize(lastRun.status)}
+              {icon} {getStatusLabel(lastRun.status)}
             </EuiText>
           );
         },
@@ -225,7 +204,16 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
               disabled={!canUpdateWorkflow}
               checked={item.enabled}
               onChange={() => handleToggleWorkflow(item)}
-              label={'Enabled'}
+              label={
+                item.enabled
+                  ? i18n.translate('workflows.workflowList.enabled', {
+                      defaultMessage: 'Enabled',
+                    })
+                  : i18n.translate('workflows.workflowList.disabled', {
+                      defaultMessage: 'Disabled',
+                    })
+              }
+              showLabel={false}
             />
           );
         },
@@ -284,6 +272,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
       },
     ],
     [
+      euiTheme,
       application,
       canCreateWorkflow,
       canDeleteWorkflow,
@@ -311,6 +300,20 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
 
   if (error) {
     return <EuiText>Error loading workflows</EuiText>;
+  }
+
+  // Show empty state if no workflows exist and no filters are applied
+  if (shouldShowWorkflowsEmptyState(workflows, search)) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+        <EuiFlexItem grow={false}>
+          <WorkflowsEmptyState
+            onCreateWorkflow={onCreateWorkflow}
+            canCreateWorkflow={!!canCreateWorkflow}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const showStart = (search.page - 1) * search.limit + 1;

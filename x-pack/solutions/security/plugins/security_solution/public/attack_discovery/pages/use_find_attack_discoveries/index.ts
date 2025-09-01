@@ -18,7 +18,6 @@ import { useCallback, useRef } from 'react';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -79,7 +78,6 @@ export const useFindAttackDiscoveries = ({
   sortOrder = 'desc',
 }: Props): UseFindAttackDiscoveries => {
   const { addError } = useAppToasts();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -169,7 +167,7 @@ export const useFindAttackDiscoveries = ({
     ],
     queryFn,
     {
-      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
+      enabled: isAssistantEnabled,
       getNextPageParam,
       onError: (e: ServerError) => {
         addError(e.body && e.body.message ? new Error(e.body.message) : e, {
