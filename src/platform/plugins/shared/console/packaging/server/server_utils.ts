@@ -236,7 +236,6 @@ export function createSpecDefinitionsLoader(
   stackVersion: string,
   endpointsAvailability: EndpointsAvailability = 'stack'
 ): ConsoleSpecDefinitionsLoader {
-
   // Path to bundled console definitions (relative to this file)
   const definitionsPath = path.join(__dirname, 'console_definitions');
 
