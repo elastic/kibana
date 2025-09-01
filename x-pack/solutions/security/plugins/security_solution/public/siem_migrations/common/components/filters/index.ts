@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const POLLING_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.baseService.pollingError',
-  {
-    defaultMessage: 'Error fetching migrations stats',
-  }
-);
+export * from './status';

@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { StartRuleMigrationModal } from './start_rule_migration_modal';
+export * from './column_header';
+export * from './empty_migration';
+export * from './filters';
+export * from './header_buttons';
+export * from './search_field';
+export * from './start_migration_modal';
+export * from './unknown_migration';
