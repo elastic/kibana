@@ -15,7 +15,7 @@ export interface MetricField {
   timeSeriesMetric?: string;
   unit?: string;
   description?: string;
-  source?: string;
+  source?: 'otel' | 'ecs' | 'custom';
   stability?: 'stable' | 'beta' | 'experimental';
   display?: string;
   noData?: boolean;
