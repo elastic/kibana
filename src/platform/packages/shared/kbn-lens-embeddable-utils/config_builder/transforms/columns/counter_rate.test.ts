@@ -130,5 +130,4 @@ describe('Counter Rate Transforms', () => {
       expect(result.label).toBe('Byte Rate');
     });
   });
-
 });

@@ -174,5 +174,4 @@ describe('Count Transforms', () => {
       expect(result.label).toBe('Count of Records');
     });
   });
-
 });

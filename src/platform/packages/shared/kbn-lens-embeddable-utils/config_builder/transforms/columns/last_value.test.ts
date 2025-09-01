@@ -171,5 +171,4 @@ describe('Last Value Transforms', () => {
       expect(result.show_array_values).toBe(true);
     });
   });
-
 });

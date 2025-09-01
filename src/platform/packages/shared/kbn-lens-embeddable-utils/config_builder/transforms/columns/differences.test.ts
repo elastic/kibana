@@ -179,5 +179,4 @@ describe('Differences Transforms', () => {
       }
     });
   });
-
 });

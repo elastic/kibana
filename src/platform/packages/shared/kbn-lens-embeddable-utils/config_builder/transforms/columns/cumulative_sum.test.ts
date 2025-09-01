@@ -149,5 +149,4 @@ describe('Cumulative Sum Transforms', () => {
       expect(result.label).toBe('Running Total');
     });
   });
-
 });
