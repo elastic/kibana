@@ -66,7 +66,6 @@ tags:
       Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
       For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
-  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -37520,6 +37519,9 @@ paths:
       summary: Create a service token
       tags:
         - Fleet service tokens
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/settings:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read.'
