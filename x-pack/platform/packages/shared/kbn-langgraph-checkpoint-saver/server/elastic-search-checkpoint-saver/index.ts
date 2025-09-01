@@ -18,7 +18,6 @@ import {
   type PendingWrite,
   type CheckpointMetadata,
 } from '@langchain/langgraph-checkpoint';
-import { array } from 'joi';
 
 interface CheckpointDocument {
   '@timestamp': string;
