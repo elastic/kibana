@@ -10,10 +10,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiIcon,
   EuiPanel,
   EuiText,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -126,16 +125,16 @@ export const QuerySidePanel = ({
               </h5>
             </EuiText>
             {hasFieldsError && (
-              <EuiToolTip
+              <EuiIconTip
                 content={
                   <FormattedMessage
                     id="xpack.searchPlayground.viewQuery.queryFields.error"
                     defaultMessage="At least one index field must be enabled"
                   />
                 }
-              >
-                <EuiIcon type="warning" color="danger" />
-              </EuiToolTip>
+                type="warning"
+                color="danger"
+              />
             )}
           </EuiFlexGroup>
         </EuiFlexItem>

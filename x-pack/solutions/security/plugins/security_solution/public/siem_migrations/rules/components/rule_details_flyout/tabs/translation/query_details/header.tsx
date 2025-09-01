@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 
 interface QueryHeaderProps {
   title: string;
@@ -22,9 +22,7 @@ export const QueryHeader: React.FC<QueryHeaderProps> = React.memo(({ title, tool
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={tooltip}>
-          <EuiIcon size="s" type="question" color="subdued" />
-        </EuiToolTip>
+        <EuiIconTip content={tooltip} type="question" size="s" color="subdued" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

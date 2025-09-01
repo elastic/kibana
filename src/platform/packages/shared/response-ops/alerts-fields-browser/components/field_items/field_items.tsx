@@ -10,8 +10,8 @@
 import React from 'react';
 import {
   EuiCheckbox,
-  EuiIcon,
   EuiToolTip,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
@@ -111,13 +111,12 @@ const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): Fiel
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={type}>
-              <EuiIcon
-                data-test-subj={`field-${name}-icon`}
-                css={styles.icon}
-                type={getIconFromType(type ?? null)}
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              content={type}
+              data-test-subj={`field-${name}-icon`}
+              css={styles.icon}
+              type={getIconFromType(type ?? null)}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
