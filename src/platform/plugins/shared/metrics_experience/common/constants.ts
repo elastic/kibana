@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const METRIC_EXPERIENCE_FEATURE_FLAG_KEY = 'metricsExperienceEnabled';
+export const METRICS_EXPERIENCE_FEATURE_FLAG_KEY = 'metricsExperienceEnabled';

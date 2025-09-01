@@ -8,10 +8,10 @@
  */
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { METRIC_EXPERIENCE_FEATURE_FLAG_KEY } from '../../../common/constants';
+import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../../../common/constants';
 
 export const isMetricsExperienceEnabled = async (
   services: AwaitedProperties<Pick<RequestHandlerContext, 'core'>>
 ): Promise<boolean> => {
-  return services.core.featureFlags.getBooleanValue(METRIC_EXPERIENCE_FEATURE_FLAG_KEY, false);
+  return services.core.featureFlags.getBooleanValue(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false);
 };

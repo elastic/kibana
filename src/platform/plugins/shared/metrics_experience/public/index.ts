@@ -10,4 +10,4 @@
 import { MetricsExperiencePlugin } from './plugin';
 export const plugin = () => new MetricsExperiencePlugin();
 
-export { METRIC_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';
+export { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';

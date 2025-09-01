@@ -9,7 +9,7 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { METRIC_EXPERIENCE_FEATURE_FLAG_KEY } from '@kbn/metrics-experience-plugin/public';
+import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '@kbn/metrics-experience-plugin/public';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
@@ -36,7 +36,7 @@ export const createMetricsDataSourceProfileProvider = (
   },
   resolve: async (params) => {
     const isEnabled = await services.core.featureFlags.getBooleanValue(
-      METRIC_EXPERIENCE_FEATURE_FLAG_KEY,
+      METRICS_EXPERIENCE_FEATURE_FLAG_KEY,
       false
     );
 
