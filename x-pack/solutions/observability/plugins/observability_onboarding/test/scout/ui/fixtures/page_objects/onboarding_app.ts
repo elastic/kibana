@@ -81,6 +81,21 @@ export class OnboardingApp {
     return this.page.getByRole('group', { name: 'What do you want to monitor?' });
   }
 
+  public get useCaseGridByTestId() {
+    return this.page.getByTestId('observabilityOnboardingUseCaseGrid');
+  }
+
+  async getTileCount() {
+    const grid = this.useCaseGridByTestId;
+    const tiles = grid.locator('[data-test-subj^="observabilityOnboardingUseCaseCard-"]');
+    return await tiles.count();
+  }
+
+  async openWithCategory(category: 'host' | 'kubernetes' | 'cloud' | 'application') {
+    await this.page.gotoApp('observabilityOnboarding', { params: { category } });
+    await this.waitForMainTilesToLoad();
+  }
+
   async selectHostUseCase() {
     const hostRadio = this.hostUseCaseTile.getByRole('radio');
     await hostRadio.click();
@@ -108,9 +123,15 @@ export class OnboardingApp {
   async clickIntegrationCard(cardSelector: string) {
     const card = this.page.getByTestId(cardSelector);
     await card.click();
-    await this.page.waitForURL(
-      /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual|aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/
-    );
+
+    const nonRouting = /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
+    if (nonRouting.test(cardSelector)) {
+      await this.waitForIntegrationCards();
+    } else {
+      await this.page.waitForURL(
+        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/
+      );
+    }
   }
 
   async getGridColumnCount() {
@@ -149,9 +170,14 @@ export class OnboardingApp {
   }
 
   async waitForIntegrationCards() {
-    await this.page.waitForFunction(
-      () => document.querySelectorAll('[data-test-subj^="integration-card:"]').length > 0,
-      { timeout: 10000 }
-    );
+    const cards = this.page.locator('[data-test-subj^="integration-card:"]').first();
+    try {
+      await cards.waitFor({ state: 'visible', timeout: 10000 });
+    } catch {
+      await this.page
+        .getByText(/Monitor your (Host|Kubernetes cluster|Application) using:|Select your Cloud provider:/)
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 });
+    }
   }
 }

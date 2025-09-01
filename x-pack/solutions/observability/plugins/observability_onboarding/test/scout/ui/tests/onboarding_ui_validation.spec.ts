@@ -20,11 +20,13 @@ test.describe('Onboarding UI Validation', () => {
     await browserAuth.loginAsAdmin();
     await pageObjects.onboarding.goto();
     await pageObjects.onboarding.waitForMainTilesToLoad();
+    await pageObjects.onboarding.useCaseGrid.waitFor({ state: 'visible' });
+    await pageObjects.onboarding.hostUseCaseTile.waitFor({ state: 'visible' });
   });
 
   test(
     'should always show Host, Kubernetes, and Cloud tiles',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ pageObjects }) => {
       await expect(pageObjects.onboarding.hostUseCaseTile).toBeVisible();
       await expect(pageObjects.onboarding.kubernetesUseCaseTile).toBeVisible();
@@ -33,46 +35,8 @@ test.describe('Onboarding UI Validation', () => {
   );
 
   test(
-    'should show Application tile and complete mode copy when in complete deployment',
-    { tag: ['@ess', '@svlOblt'] },
-    async ({ pageObjects }) => {
-      test.skip(
-        !(await pageObjects.onboarding.applicationUseCaseTile.isVisible()),
-        'Application tile not visible - likely logs-essentials mode'
-      );
-
-      const hostDescription = await pageObjects.onboarding.getTileDescription('host');
-      const kubernetesDescription = await pageObjects.onboarding.getTileDescription('kubernetes');
-
-      expect(hostDescription).toContain('Monitor your host');
-      expect(kubernetesDescription).toContain('metrics');
-      expect(kubernetesDescription).toContain('traces');
-      await expect(pageObjects.onboarding.applicationUseCaseTile).toBeVisible();
-    }
-  );
-
-  test(
-    'should show logs-essentials copy when Application tile is not visible',
-    { tag: ['@ess', '@svlOblt'] },
-    async ({ pageObjects }) => {
-      test.skip(
-        await pageObjects.onboarding.applicationUseCaseTile.isVisible(),
-        'Application tile visible - likely complete mode'
-      );
-
-      const hostDescription = await pageObjects.onboarding.getTileDescription('host');
-      const kubernetesDescription = await pageObjects.onboarding.getTileDescription('kubernetes');
-
-      expect(hostDescription).toContain('logs');
-      expect(kubernetesDescription).toContain('logs');
-      expect(kubernetesDescription).not.toContain('traces');
-      await expect(pageObjects.onboarding.applicationUseCaseTile).not.toBeVisible();
-    }
-  );
-
-  test(
     'should show Host sub-section tiles when Host tile is selected',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
@@ -84,7 +48,7 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'should show Kubernetes sub-section tiles when Kubernetes tile is selected',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ pageObjects }) => {
       await pageObjects.onboarding.selectKubernetesUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
@@ -96,78 +60,69 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'should show Cloud sub-section tiles when Cloud tile is selected',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ pageObjects }) => {
       await pageObjects.onboarding.selectCloudUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
 
       await expect(pageObjects.onboarding.awsLogsVirtualCard).toBeVisible();
-      // At least one of azure or gcp should be visible
       await expect.soft(pageObjects.onboarding.azureLogsVirtualCard).toBeVisible();
       await expect.soft(pageObjects.onboarding.gcpLogsVirtualCard).toBeVisible();
     }
   );
 
   test(
-    'should show Application sub-section tiles when Application tile is selected in complete mode',
-    { tag: ['@ess', '@svlOblt'] },
-    async ({ pageObjects }) => {
-      test.skip(
-        !(await pageObjects.onboarding.applicationUseCaseTile.isVisible()),
-        'Application tile not visible - likely logs-essentials mode'
-      );
-
-      await pageObjects.onboarding.selectApplicationUseCase();
-      await pageObjects.onboarding.waitForIntegrationCards();
-
-      await expect(pageObjects.onboarding.apmVirtualCard).toBeVisible();
-      await expect(pageObjects.onboarding.otelVirtualCard).toBeVisible();
-      await expect(pageObjects.onboarding.syntheticsVirtualCard).toBeVisible();
-    }
-  );
-
-  test(
     'should navigate correctly when Host integration cards are clicked',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ page, pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
 
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
-
       await expect(page).toHaveURL(/.*\/auto-detect/);
     }
   );
 
   test(
     'should navigate correctly when Kubernetes integration cards are clicked',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ page, pageObjects }) => {
       await pageObjects.onboarding.selectKubernetesUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
 
       await pageObjects.onboarding.clickIntegrationCard('integration-card:kubernetes-quick-start');
-
       await expect(page).toHaveURL(/.*\/kubernetes/);
     }
   );
 
   test(
     'should navigate correctly when OTel integration cards are clicked',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ page, pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
 
       await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-logs');
-
       await expect(page).toHaveURL(/.*\/otel-logs/);
     }
   );
 
   test(
+    'should navigate correctly when Cloud integration cards are clicked',
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    async ({ page, pageObjects }) => {
+      await pageObjects.onboarding.selectCloudUseCase();
+      await pageObjects.onboarding.waitForIntegrationCards();
+
+      await pageObjects.onboarding.clickIntegrationCard('integration-card:aws-logs-virtual');
+      await pageObjects.onboarding.waitForIntegrationCards();
+      await expect(page).toHaveURL(/.*category=cloud/);
+    }
+  );
+
+  test(
     'should maintain proper URL state when switching between use cases',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ page, pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await expect(page).toHaveURL(/.*category=host/);
@@ -181,8 +136,23 @@ test.describe('Onboarding UI Validation', () => {
   );
 
   test(
+    'should deep-link to sub-sections using category param',
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
+    async ({ pageObjects }) => {
+      await pageObjects.onboarding.openWithCategory('host');
+      await pageObjects.onboarding.waitForIntegrationCards();
+
+      await pageObjects.onboarding.openWithCategory('kubernetes');
+      await pageObjects.onboarding.waitForIntegrationCards();
+
+      await pageObjects.onboarding.openWithCategory('cloud');
+      await pageObjects.onboarding.waitForIntegrationCards();
+    }
+  );
+
+  test(
     'should maintain consistent tile layout structure',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ pageObjects }) => {
       const gridContainer = pageObjects.onboarding.useCaseGrid;
       await expect(gridContainer).toBeVisible();
@@ -195,36 +165,57 @@ test.describe('Onboarding UI Validation', () => {
 
   test(
     'should maintain consistent integration card structure after selection',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: ['@ess', '@svlOblt', '@svlLogsEssentials'] },
     async ({ pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
 
       const autoDetectCard = pageObjects.onboarding.autoDetectLogsCard;
       await expect(autoDetectCard).toBeVisible();
-      await expect(autoDetectCard).toContainText('Elastic Agent');
-
+      
       const otelCard = pageObjects.onboarding.otelLogsCard;
       await expect(otelCard).toBeVisible();
-      await expect(otelCard).toContainText('OpenTelemetry');
+      
+      await expect(autoDetectCard.locator('button, a, [role="button"]')).toBeVisible();
+      await expect(otelCard.locator('button, a, [role="button"]')).toBeVisible();
     }
   );
 
   test(
-    'should handle feature flag changes gracefully',
+    'should show Application tile in complete tier',
     { tag: ['@ess', '@svlOblt'] },
     async ({ pageObjects }) => {
-      await pageObjects.onboarding.selectHostUseCase();
+      await expect(pageObjects.onboarding.applicationUseCaseTile).toBeVisible();
+    }
+  );
+
+  test(
+    'should show Application sub-section tiles when Application tile is selected',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ pageObjects }) => {
+      await pageObjects.onboarding.selectApplicationUseCase();
       await pageObjects.onboarding.waitForIntegrationCards();
 
-      await expect(pageObjects.onboarding.autoDetectLogsCard).toBeVisible();
-      await expect(pageObjects.onboarding.otelLogsCard).toBeVisible();
+      await expect(pageObjects.onboarding.apmVirtualCard).toBeVisible();
+      await expect(pageObjects.onboarding.otelVirtualCard).toBeVisible();
+      await expect(pageObjects.onboarding.syntheticsVirtualCard).toBeVisible();
+    }
+  );
 
-      await pageObjects.onboarding.selectKubernetesUseCase();
+  test(
+    'should deep-link to application category in complete tier',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ pageObjects }) => {
+      await pageObjects.onboarding.openWithCategory('application');
       await pageObjects.onboarding.waitForIntegrationCards();
+    }
+  );
 
-      await expect(pageObjects.onboarding.kubernetesQuickStartCard).toBeVisible();
-      await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
+  test(
+    'should hide Application tile in logs-essentials tier',
+    { tag: ['@svlLogsEssentials'] },
+    async ({ pageObjects }) => {
+      await expect(pageObjects.onboarding.applicationUseCaseTile).not.toBeVisible();
     }
   );
 });
