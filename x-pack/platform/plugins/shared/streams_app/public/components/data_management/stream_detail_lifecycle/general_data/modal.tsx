@@ -50,12 +50,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
-import { useKibana } from '../../../hooks/use_kibana';
-import { rolloverCondition } from './helpers/rollover_condition';
-import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useWiredStreams } from '../../../hooks/use_wired_streams';
-import { getFormattedError } from '../../../util/errors';
-import { parseDuration } from './helpers';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { rolloverCondition } from '../helpers/rollover_condition';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useWiredStreams } from '../../../../hooks/use_wired_streams';
+import { getFormattedError } from '../../../../util/errors';
+import { parseDuration } from '../helpers/helpers';
 
 export type LifecycleEditAction = 'none' | 'dsl' | 'ilm' | 'inherit';
 
