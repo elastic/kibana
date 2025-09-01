@@ -33,6 +33,7 @@ async function registryFetch(url: string) {
     }`;
     const responseError = new RegistryResponseError(message, status);
 
+    // retry 5xx errors
     if (status >= 500) {
       throw responseError;
     }
