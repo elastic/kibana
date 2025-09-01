@@ -988,6 +988,7 @@
     "@kbn/shared-ux-tabbed-modal": "link:src/platform/packages/shared/shared-ux/modal/tabbed",
     "@kbn/shared-ux-table-persist": "link:src/platform/packages/shared/shared-ux/table_persist",
     "@kbn/shared-ux-utility": "link:src/platform/packages/shared/kbn-shared-ux-utility",
+    "@kbn/siem-readiness": "link:x-pack/solutions/security/packages/siem-readiness",
     "@kbn/slo-plugin": "link:x-pack/solutions/observability/plugins/slo",
     "@kbn/slo-schema": "link:x-pack/platform/packages/shared/kbn-slo-schema",
     "@kbn/snapshot-restore-plugin": "link:x-pack/platform/plugins/private/snapshot_restore",
