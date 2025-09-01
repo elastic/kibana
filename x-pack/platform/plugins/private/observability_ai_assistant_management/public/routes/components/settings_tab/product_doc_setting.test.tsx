@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ProductDocSetting } from './product_doc_setting';
 import type { APIReturnType } from '@kbn/observability-ai-assistant-plugin/public';
 import {
@@ -55,7 +56,7 @@ const createMockKnowledgeBase = (
 });
 
 describe('ProductDocSetting', () => {
-  it('should render the installed state correctly', async () => {
+  it('renders the installed state with uninstall link', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
       isInstalling: false,
       isWarmingUpModel: false,
@@ -82,24 +83,127 @@ describe('ProductDocSetting', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Installed')).toBeInTheDocument();
+      expect(screen.getByTestId('productDocStatusBadge')).toHaveTextContent('Installed');
+    });
+    const action = screen.getByTestId('productDocActionLink');
+    expect(action).toHaveTextContent('Uninstall');
+  });
+
+  it('renders the uninstalled state with install link', async () => {
+    const mockKnowledgeBase = createMockKnowledgeBase({
+      isInstalling: false,
+      isWarmingUpModel: false,
+      status: createMockStatus({
+        productDocStatus: 'uninstalled',
+      }),
+      isProductDocInstalling: false,
+      isProductDocUninstalling: false,
+    });
+
+    render(
+      <ProductDocSetting
+        knowledgeBase={mockKnowledgeBase}
+        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('productDocStatusBadge')).toHaveTextContent('Not installed');
+      expect(screen.getByTestId('productDocActionLink')).toHaveTextContent('Install');
     });
   });
 
-  it('should render the uninstalled state correctly', async () => {
+  it('doesnt render an install link when the model is NOT_INSTALLED', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
+      isInstalling: false,
+      isWarmingUpModel: false,
+      status: createMockStatus({
+        inferenceModelState: InferenceModelState.NOT_INSTALLED,
+        currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+        endpoint: {
+          inference_id: LEGACY_CUSTOM_INFERENCE_ID,
+          task_type: 'text_embedding',
+          service: 'my-service',
+          service_settings: {},
+        },
+        productDocStatus: 'uninstalled',
+      }),
+      isProductDocInstalling: false,
+      isProductDocUninstalling: false,
+    });
+
+    render(
+      <ProductDocSetting
+        knowledgeBase={mockKnowledgeBase}
+        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('productDocStatusBadge')).toHaveTextContent('Not installed');
+    });
+
+    const link = screen.queryByTestId('productDocActionLink');
+    expect(link).not.toBeInTheDocument();
+  });
+
+  it('shows Retry link and warning callout on backend error and retries install', async () => {
+    const installProductDoc = jest.fn().mockResolvedValue(undefined);
+
+    const mockKnowledgeBase = createMockKnowledgeBase({
+      installProductDoc,
+      isInstalling: false,
+      isWarmingUpModel: false,
+      status: createMockStatus({
+        inferenceModelState: InferenceModelState.NOT_INSTALLED,
+        currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+        endpoint: {
+          inference_id: LEGACY_CUSTOM_INFERENCE_ID,
+          task_type: 'text_embedding',
+          service: 'my-service',
+          service_settings: {},
+        },
+        productDocStatus: 'error',
+      }),
+      isProductDocInstalling: false,
+      isProductDocUninstalling: false,
+    });
+
+    render(
+      <ProductDocSetting
+        knowledgeBase={mockKnowledgeBase}
+        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
+      />
+    );
+
+    expect(await screen.findByTestId('productDocNotAvailableCallout')).toBeInTheDocument();
+
+    const retry = await screen.findByTestId('productDocRetryLink');
+    expect(retry).toHaveTextContent('Retry');
+
+    await userEvent.click(retry);
+    expect(installProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
+  });
+
+  it('does not call install when not eligible (no inference id)', async () => {
+    const installProductDoc = jest.fn().mockResolvedValue(undefined);
+    const mockKnowledgeBase = createMockKnowledgeBase({
+      installProductDoc,
       status: createMockStatus({ productDocStatus: 'uninstalled' }),
     });
 
     render(
       <ProductDocSetting
         knowledgeBase={mockKnowledgeBase}
-        currentlyDeployedInferenceId={undefined}
+        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('Install')).toBeInTheDocument();
-    });
+    const action = await screen.findByTestId('productDocActionLink');
+    expect(action).toHaveTextContent('Install');
+
+    await userEvent.click(action);
+
+    expect(installProductDoc).toHaveBeenCalled();
   });
 });
