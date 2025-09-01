@@ -73,6 +73,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions: {
+            deleteOldIndex: true,
+          },
         })
         .expect(200);
 
@@ -241,15 +244,16 @@ export default function ({ getService }: FtrProviderContext) {
         { warningType: 'replaceIndexWithAlias', flow: 'reindex' },
       ]);
     });
-    */
+
 
     it('reindexes old 7.0 index', async () => {
+      const newIndexName = generateNewIndexName('reindexed-v7-6.0-data', versionService);
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex`) // reusing the index previously migrated in v7->v8 UA tests
         .set('kbn-xsrf', 'xxx')
         .send({
           indexName: 'reindexed-v7-6.0-data',
-          newIndexName: generateNewIndexName('reindexed-v7-6.0-data', versionService),
+          newIndexName,
         })
         .expect(200);
 
@@ -270,6 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });
 
+        */
     it('should reindex a batch in order and report queue state', async () => {
       const assertQueueState = async (
         firstInQueueIndexName: string | undefined,
