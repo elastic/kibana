@@ -199,7 +199,7 @@ export interface ChartSectionProps {
   /**
    * Required services
    */
-  services: UnifiedHistogramServices;
+  services?: UnifiedHistogramServices;
   /**
    * The abort controller to use for requests
    */
@@ -207,7 +207,7 @@ export interface ChartSectionProps {
   /**
    * The current query
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * The current query
    */
@@ -215,7 +215,7 @@ export interface ChartSectionProps {
   /**
    * The current time range
    */
-  getTimeRange?: () => TimeRange;
+  getTimeRange: () => TimeRange;
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */

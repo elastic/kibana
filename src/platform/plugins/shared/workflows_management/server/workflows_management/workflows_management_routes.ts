@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   CreateWorkflowCommandSchema,
   SearchWorkflowCommandSchema,
@@ -17,6 +18,7 @@ import {
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
+import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../common/lib/errors';
 
 export function defineRoutes(
   router: IRouter,
@@ -366,8 +368,37 @@ export function defineRoutes(
         if (!workflow) {
           return response.notFound();
         }
+        if (!workflow.valid) {
+          return response.badRequest({
+            body: {
+              message: `Workflow is not valid.`,
+            },
+          });
+        }
+        if (!workflow.definition) {
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: `Workflow definition is missing.`,
+            },
+          });
+        }
+        if (!workflow.enabled) {
+          return response.badRequest({
+            body: {
+              message: `Workflow is disabled. Enable it to run it.`,
+            },
+          });
+        }
         const { inputs } = request.body as { inputs: Record<string, any> };
-        const workflowExecutionId = await api.runWorkflow(workflow, spaceId, inputs);
+        const workflowForExecution: WorkflowExecutionEngineModel = {
+          id: workflow.id,
+          name: workflow.name,
+          enabled: workflow.enabled,
+          definition: workflow.definition,
+          yaml: workflow.yaml,
+        };
+        const workflowExecutionId = await api.runWorkflow(workflowForExecution, spaceId, inputs);
         return response.ok({
           body: {
             workflowExecutionId,
@@ -458,6 +489,13 @@ export function defineRoutes(
           },
         });
       } catch (error) {
+        if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
+          return response.badRequest({
+            body: {
+              message: `Invalid workflow yaml: ${error.message}`,
+            },
+          });
+        }
         return response.customError({
           statusCode: 500,
           body: {
