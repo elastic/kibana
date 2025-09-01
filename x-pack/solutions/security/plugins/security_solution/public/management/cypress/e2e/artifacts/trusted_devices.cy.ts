@@ -122,8 +122,6 @@ describe(
         });
 
         cy.get('[role="option"]').should('not.contain', 'Username');
-
-        selectField('Host');
       });
     });
 
