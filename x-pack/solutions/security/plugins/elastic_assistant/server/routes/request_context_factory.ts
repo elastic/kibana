@@ -216,8 +216,11 @@ export class RequestContextFactory implements IRequestContextFactory {
           contentReferencesEnabled: params?.contentReferencesEnabled,
         });
       }),
-      
+
       getCheckpointSaver: memoize(async () => {
+        if(!this.assistantService.getIsCheckpointSaverEnabled()){
+          return null;
+        }
         const currentUser = await getCurrentUser();
         return this.assistantService.createCheckpointSaver({
           spaceId: getSpaceId(),
