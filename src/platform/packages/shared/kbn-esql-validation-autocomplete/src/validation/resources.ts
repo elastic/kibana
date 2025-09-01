@@ -17,7 +17,6 @@ import {
 } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import {
-  buildQueryForFieldsForStringSources,
   buildQueryForFieldsFromSource,
   buildQueryForFieldsInPolicies,
   getEnrichCommands,
@@ -98,17 +97,5 @@ export async function retrievePoliciesFields(
   const customQuery = buildQueryForFieldsInPolicies(
     policyNames.map((name) => policies.get(name)) as ESQLPolicy[]
   );
-  return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
-}
-
-export async function retrieveFieldsFromStringSources(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLFieldWithMetadata>> {
-  if (!callbacks) {
-    return new Map();
-  }
-  const customQuery = buildQueryForFieldsForStringSources(queryString, commands);
   return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }
