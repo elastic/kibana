@@ -17,7 +17,10 @@ import { firstValueFrom } from 'rxjs';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { getMissingCapabilities } from './capabilities';
-import { TASK_STATS_POLLING_SLEEP_SECONDS, SiemMigrationsServiceBase } from './migrations_service';
+import {
+  TASK_STATS_POLLING_SLEEP_SECONDS,
+  SiemMigrationsServiceBase,
+} from './migrations_service_base';
 import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
 
 // --- Mocks for external modules ---

@@ -8,7 +8,7 @@
 import useObservable from 'react-use/lib/useObservable';
 import { useCallback, useEffect, useMemo } from 'react';
 import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
-import type { SiemMigrationsServiceBase } from '../migrations_service';
+import type { SiemMigrationsServiceBase } from '../migrations_service_base';
 
 export const useLatestStats = <T extends MigrationTaskStats>(
   migrationService: SiemMigrationsServiceBase<T>

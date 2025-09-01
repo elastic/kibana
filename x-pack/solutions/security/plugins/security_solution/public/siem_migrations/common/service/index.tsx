@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { SiemMigrationsServiceBase } from './migrations_service';
+export { SiemMigrationsServiceBase } from './migrations_service_base';
 
 export * from './capabilities';
 export * from './notifications';
