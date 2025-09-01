@@ -167,13 +167,20 @@ function extractBodyExample(bodySchema: z.ZodType): any {
         const description = (field as any)?._def?.description || '';
         
         // Extract example from description if available
-        const exampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
-        if (exampleMatch) {
-          example[key] = exampleMatch[1];
-        } else if (key === 'query') {
-          // Default example for query fields
-          example[key] = 'FROM my-index | LIMIT 10';
+        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
+        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
+        
+        if (stringExampleMatch) {
+          example[key] = stringExampleMatch[1];
+        } else if (objectExampleMatch) {
+          try {
+            example[key] = JSON.parse(objectExampleMatch[1]);
+          } catch {
+            // If JSON parse fails, use as string
+            example[key] = objectExampleMatch[1];
+          }
         }
+        // No fallback - only use examples explicitly defined in enhanced connectors
       }
       
       if (Object.keys(example).length > 0) {
@@ -273,7 +280,34 @@ function getRequiredParamsForConnector(
 
   if (connector && connector.paramsSchema) {
     try {
-      // Extract required parameters from the actual Zod schema
+      // Check if this connector has enhanced examples
+      const hasEnhancedExamples = (connector as any).examples?.params;
+      
+      console.log(`DEBUG getRequiredParamsForConnector - ${connectorType}`);
+      console.log('Has enhanced examples:', hasEnhancedExamples);
+      console.log('Connector examples:', (connector as any).examples);
+      
+      if (hasEnhancedExamples) {
+        // Use examples directly from enhanced connector
+        const exampleParams = (connector as any).examples.params;
+        console.log('Using enhanced examples:', exampleParams);
+        const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
+        
+        for (const [key, value] of Object.entries(exampleParams)) {
+          // Only include required parameters or common important ones
+          if (['index', 'id', 'body'].includes(key)) {
+            result.push({ name: key, example: value });
+            console.log(`Added enhanced example: ${key} =`, value);
+          }
+        }
+        
+        if (result.length > 0) {
+          console.log('Returning enhanced examples:', result);
+          return result;
+        }
+      }
+
+      // Fallback to extracting from schema
       const params = extractRequiredParamsFromSchema(connector.paramsSchema);
 
       // Return only required parameters, or most important ones if no required ones

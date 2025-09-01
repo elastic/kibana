@@ -79,6 +79,22 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
   {
     type: 'elasticsearch.search',
     enhancedDescription: 'Search documents with query DSL, aggregations, and advanced options',
+    enhancedParamsSchema: z.object({
+      // Copy existing URL parameters from generated schema
+      error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
+      filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
+      human: z.boolean().optional().describe('Boolean flag: human'),
+      pretty: z.boolean().optional().describe('Boolean flag: pretty'),
+      index: z.string().describe('Path parameter: index (required)'),
+      // Enhanced body parameter with proper Elasticsearch Query DSL example
+      body: z.object({
+        query: z.any().describe('Elasticsearch query DSL (e.g., {"match_all": {}})'),
+        size: z.number().optional().describe('Number of documents to return (e.g., 10)'),
+        from: z.number().optional().describe('Starting document offset (e.g., 0)'),
+        sort: z.any().optional().describe('Sort specification'),
+        aggs: z.any().optional().describe('Aggregations'),
+      }).describe('Search request body'),
+    }),
     examples: {
       params: {
         index: 'logs-*',
@@ -101,23 +117,6 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
           "@timestamp":
             gte: "now-1h"
       size: 100`
-    },
-    parameterEnhancements: {
-      body: {
-        schema: z.object({
-          query: z.any().describe('Elasticsearch query DSL'),
-          size: z.number().optional().describe('Number of documents to return'),
-          from: z.number().optional().describe('Starting document offset'),
-          sort: z.any().optional().describe('Sort specification'),
-          aggs: z.any().optional().describe('Aggregations'),
-        }).describe('Search request body'),
-        example: {
-          query: {
-            match_all: {}
-          },
-          size: 10
-        }
-      }
     }
   },
 
@@ -166,9 +165,10 @@ export function mergeEnhancedConnectors(
     console.log('Original paramsSchema:', connector.paramsSchema);
     
     // Create enhanced connector
-    const enhanced: InternalConnectorContract = {
+    const enhanced: InternalConnectorContract & { examples?: any } = {
       ...connector,
       description: enhancement.enhancedDescription || connector.description,
+      ...(enhancement.examples && { examples: enhancement.examples }),
     };
     
     // Override parameter schema if provided
