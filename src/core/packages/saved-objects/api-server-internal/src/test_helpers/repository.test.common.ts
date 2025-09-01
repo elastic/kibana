@@ -385,11 +385,6 @@ export const createRegistry = () => {
       namespaceType: 'multiple',
     })
   );
-  registry.registerType(
-    createType(ACCESS_CONTROL_TYPE, {
-      supportsAccessControl: true,
-    })
-  );
   return registry;
 };
 
