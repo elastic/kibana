@@ -108,8 +108,10 @@ export const useSchemaFields = ({
 
     const unmanagedFields: SchemaField[] = dataViewFields
       ? dataViewFields
-          .filter((field) => !field.runtimeField && !field.metadata_field)
-          .filter((field) => !allManagedFieldsSet.has(field.name))
+          .filter(
+            (field) =>
+              !field.runtimeField && !field.metadata_field && !allManagedFieldsSet.has(field.name)
+          )
           .map((field) => ({
             name: field.name,
             status: 'unmapped',

@@ -248,7 +248,7 @@ export function addAliasesForNamespacedFields(
   );
 
   // Add aliases defined in the base mappings
-  Object.entries(baseMappings || {}).forEach(([key, fieldDef]) => {
+  Object.entries(baseMappings).forEach(([key, fieldDef]) => {
     if (fieldDef.type === 'alias') {
       inheritedFields[key] = {
         type: baseFields[fieldDef.path!].type,
