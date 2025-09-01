@@ -16,7 +16,7 @@ import type {
   WaitStep,
   WorkflowOnFailure,
   WorkflowYaml,
-} from '../../spec/schema';
+} from '../../../spec/schema';
 import type {
   AtomicGraphNode,
   EnterConditionBranchNode,
@@ -27,8 +27,8 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
-} from '../../types/execution';
-import { convertToWorkflowGraph } from './build_execution_graph';
+} from '../../../types/execution';
+import { convertToWorkflowGraph } from '../build_execution_graph';
 
 describe('convertToWorkflowGraph', () => {
   describe('atomic steps', () => {
