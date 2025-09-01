@@ -9,21 +9,21 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
+import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
+import { WorkflowEventModal } from '../../../features/run_workflow/ui/workflow_event_modal';
+import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { WorkflowEventModal } from '../../../features/run_workflow/ui/workflow_event_modal';
-import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -165,6 +165,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
 
+  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
+
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
     setHasChanges(false);
@@ -218,12 +220,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 <WorkflowYAMLEditor
                   workflowId={workflow?.id ?? 'unknown'}
                   filename={`${workflow?.id ?? 'unknown'}.yaml`}
-                  value={workflowYaml}
+                  value={yamlValue}
                   onChange={(v) => handleChange(v ?? '')}
                   lastUpdatedAt={workflow?.lastUpdatedAt}
                   hasChanges={hasChanges}
                   highlightStep={selectedStepId}
                   stepExecutions={execution?.stepExecutions}
+                  readOnly={activeTab === 'executions'}
                 />
               </React.Suspense>
             </EuiFlexItem>
@@ -231,7 +234,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               <EuiFlexItem css={styles.workflowVisualEditorColumn}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <WorkflowVisualEditor
-                    workflowYaml={workflowYaml}
+                    workflowYaml={yamlValue}
                     workflowExecutionId={selectedExecutionId}
                   />
                 </React.Suspense>
@@ -244,7 +247,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             {workflow && (
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
-                workflowYaml={workflow.yaml}
+                workflowYaml={yamlValue}
               />
             )}
           </EuiFlexItem>

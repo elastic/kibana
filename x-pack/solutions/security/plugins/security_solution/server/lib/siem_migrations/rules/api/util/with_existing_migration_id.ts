@@ -28,9 +28,7 @@ export const withExistingMigration = <
     const { migration_id: migrationId } = req.params;
     const ctx = await context.resolve(['securitySolution']);
     const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
-    const storedMigration = await ruleMigrationsClient.data.migrations.get({
-      id: migrationId,
-    });
+    const storedMigration = await ruleMigrationsClient.data.migrations.get(migrationId);
 
     if (!storedMigration) {
       return res.notFound({
