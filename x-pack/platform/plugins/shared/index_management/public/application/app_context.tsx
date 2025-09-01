@@ -21,7 +21,7 @@ import type {
   OverlayStart,
   ChromeStart,
 } from '@kbn/core/public';
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
