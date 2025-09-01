@@ -11,7 +11,7 @@ import { EuiBadge, EuiToken, EuiText, EuiToolTip, useEuiTheme } from '@elastic/e
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Dimension } from '../../utils';
-import { sortDimensions } from '../../utils';
+import { getTopLevelNamespace, sortDimensions } from '../../utils';
 
 interface DimensionBadgesProps {
   dimensions: Dimension[];
@@ -27,7 +27,7 @@ export const DimensionBadges = ({
   const { euiTheme } = useEuiTheme();
 
   // Extract top-level namespace from metric name (e.g., "system" from "system.network.in.bytes")
-  const topLevelNamespace = metricName.split('.')[0] + '.';
+  const topLevelNamespace = getTopLevelNamespace(metricName);
 
   // Sort dimensions to prioritize attributes.* and top-level namespace
   const sortedDimensions = sortDimensions(dimensions, topLevelNamespace);

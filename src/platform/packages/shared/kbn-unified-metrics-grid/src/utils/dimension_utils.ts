@@ -13,7 +13,8 @@ export interface Dimension {
   description?: string;
 }
 
-const getTopLevelNamespace = (metricName: string) => {
+export const getTopLevelNamespace = (metricName: string) => {
+  // Extract top-level namespace from metric name (e.g., "system" from "system.network.in.bytes")
   const idx = metricName.indexOf('.');
   return idx === -1 ? metricName : metricName.slice(0, idx + 1);
 };
