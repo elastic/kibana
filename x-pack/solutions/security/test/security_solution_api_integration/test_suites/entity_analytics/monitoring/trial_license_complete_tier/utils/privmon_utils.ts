@@ -17,9 +17,11 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
+import moment from 'moment';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
+type PrivmonUser = ListPrivMonUsersResponse[number];
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
@@ -33,6 +35,24 @@ export const PrivMonUtils = (
   const es = getService('es');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
+
+  const _expectDateToBeGreaterThan = (
+    bigDate: string | undefined,
+    smallDate: string | undefined
+  ) => {
+    const bigMoment = moment(bigDate);
+    const smallMoment = moment(smallDate);
+    const isAfter = bigMoment.isAfter(smallMoment);
+    if (!isAfter) {
+      log.error(`Expected ${bigDate} to be after ${smallDate}`);
+    }
+    expect(isAfter).toBeTruthy();
+  };
+
+  const expectTimestampsHaveBeenUpdated = (userBefore?: PrivmonUser, userAfter?: PrivmonUser) => {
+    _expectDateToBeGreaterThan(userAfter?.['@timestamp'], userBefore?.['@timestamp']);
+    _expectDateToBeGreaterThan(userAfter?.event?.ingested, userBefore?.event?.ingested);
+  };
 
   const initPrivMonEngine = async () => {
     log.info(`Initializing Privilege Monitoring engine in namespace ${namespace || 'default'}`);
@@ -145,10 +165,7 @@ export const PrivMonUtils = (
     );
   };
 
-  const assertIsPrivileged = (
-    user: ListPrivMonUsersResponse[number] | undefined,
-    isPrivileged: boolean
-  ) => {
+  const assertIsPrivileged = (user: PrivmonUser | undefined, isPrivileged: boolean) => {
     if (isPrivileged) {
       expect(user?.user?.is_privileged).toEqual(true);
     } else {
@@ -178,15 +195,16 @@ export const PrivMonUtils = (
     });
 
   return {
+    assertIsPrivileged,
+    bulkUploadUsersCsv,
+    createSourceIndex,
+    expectTimestampsHaveBeenUpdated,
+    findUser,
     initPrivMonEngine,
     initPrivMonEngineWithoutAuth,
-    bulkUploadUsersCsv,
     retry,
-    waitForSyncTaskRun,
-    findUser,
-    createSourceIndex,
-    assertIsPrivileged,
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
+    waitForSyncTaskRun,
   };
 };
