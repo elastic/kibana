@@ -334,7 +334,7 @@ function createNormalPath(id: string, normalPathGraph: graphlib.Graph): graphlib
   const enterNormalPathNode: EnterNormalPathNode = {
     id: enterNormalPathNodeId,
     type: 'enter-normal-path',
-    enterZoneNodeId: enterNormalPathNodeId,
+    enterZoneNodeId: `enterTryBlock_${id}`,
     enterFailurePathNodeId: `enterFallbackPath_${id}`,
   };
   const exitNormalPathNode: ExitNormalPathNode = {
