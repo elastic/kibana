@@ -72,7 +72,7 @@ export function ContentFrameworkTable({
     fieldFormats,
   } = getUnifiedDocViewerServices();
   const { fieldsMetadata = {} } = useFieldsMetadata({
-    attributes: ['short', 'flat_name', 'name'],
+    attributes: ['short'],
     fieldNames,
   });
 
