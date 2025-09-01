@@ -2229,9 +2229,11 @@
     {
       "groupName": "d3 modules",
       "matchDepNames": [
+        "@elastic/kibana-d3-color",
         "@types/d3",
         "@types/d3-array",
         "@types/d3-brush",
+        "@types/d3-color",
         "@types/d3-interpolate",
         "@types/d3-scale",
         "@types/d3-selection",
