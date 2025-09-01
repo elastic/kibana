@@ -10,12 +10,12 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
-import { PrivMonUtils } from './privileged_users/utils';
+import { PrivMonUtils, PlainIndexSyncUtils } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const kibanaServer = getService('kibanaServer');
-  const privMonUtils = PrivMonUtils(getService);
+  const privmonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const es = getService('es');
   const retry = getService('retry');
@@ -23,54 +23,9 @@ export default ({ getService }: FtrProviderContext) => {
   const customSpace = 'privmontestspace';
   const supertest = getService('supertest');
 
-  const createUserIndex = async (indexName: string) =>
-    es.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          user: {
-            properties: {
-              name: {
-                type: 'keyword',
-                fields: {
-                  text: { type: 'text' },
-                },
-              },
-              role: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
-    });
-
-  const addUsersToIndex = async (indexName: string, users: string[]) => {
-    const ops = users.flatMap((name) => [{ index: {} }, { user: { name, role: 'admin' } }]);
-    await es.bulk({
-      index: indexName,
-      body: ops,
-      refresh: true,
-    });
-  };
-
-  const deleteUserFromIndex = async (indexName: string, userName: string) => {
-    await es.deleteByQuery({
-      index: indexName,
-      query: {
-        match: { 'user.name': userName },
-      },
-      refresh: true,
-    });
-  };
-
-  const getUserWithName = (userDocs: any[], userName: string) => {
-    return userDocs.find((doc) => doc.user.name === userName);
-  };
-
   const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
-    await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-    await privMonUtils.waitForSyncTaskRun();
+    await privmonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+    await privmonUtils.waitForSyncTaskRun();
     await waitForPrivMonUsersToBeSynced(expectedCount);
     const res = await api.listPrivMonUsers({ query: {} });
 
@@ -107,11 +62,19 @@ export default ({ getService }: FtrProviderContext) => {
     // Global setup and teardown
     before(async () => {
       await dataView.create('security-solution');
-      await spaces.create({
-        id: customSpace,
-        name: customSpace,
-        disabledFeatures: [],
-      });
+      try {
+        await spaces.create({
+          id: customSpace,
+          name: customSpace,
+          disabledFeatures: [],
+        });
+      } catch (error) {
+        if (error.statusCode === 409) {
+          log.info(`Space ${customSpace} already exists`);
+        } else {
+          throw error;
+        }
+      }
       await dataViewWithNamespace.create('security-solution');
       await enablePrivmonSetting(kibanaServer);
     });
@@ -381,41 +344,19 @@ export default ({ getService }: FtrProviderContext) => {
         await api.deleteMonitoringEngine({ query: { data: true } });
       });
       it('should return a 409 if the task is already running', async () => {
-        await privMonUtils.setPrivmonTaskStatus(TaskStatus.Running);
-        await privMonUtils.scheduleMonitoringEngineNow({ expectStatusCode: 409 });
+        await privmonUtils.setPrivmonTaskStatus(TaskStatus.Running);
+        await privmonUtils.scheduleMonitoringEngineNow({ expectStatusCode: 409 });
       });
     });
 
-    describe('plain index sync', () => {
+    describe('Plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
-      const entitySource = {
-        type: 'index',
-        name: 'StarWars',
-        managed: true,
-        indexPattern: indexName,
-        enabled: true,
-        matchers: [
-          {
-            fields: ['user.role'],
-            values: ['admin'],
-          },
-        ],
-        filter: {},
-      };
-
-      const createEntitySource = async () => {
-        const response = await api.createEntitySource({ body: entitySource });
-        expect(response.status).toBe(200);
-
-        const sources = await api.listEntitySources({ query: {} });
-        const names = sources.body.map((s: any) => s.name);
-        expect(names).toContain('StarWars');
-      };
+      const indexSyncUtils = PlainIndexSyncUtils(getService, indexName);
 
       beforeEach(async () => {
-        await createUserIndex(indexName);
+        await indexSyncUtils.createIndex();
         await enablePrivmonSetting(kibanaServer);
-        await privMonUtils.initPrivMonEngine();
+        await privmonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
@@ -428,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
         await disablePrivmonSetting(kibanaServer);
       });
 
-      it('should sync plain index', async () => {
+      it('should not create duplicate users', async () => {
         const uniqueUsernames = [
           'Luke Skywalker',
           'Leia Organa',
@@ -443,9 +384,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const repeatedUsers = Array.from({ length: 150 }).map(() => 'C-3PO');
 
-        await addUsersToIndex(indexName, [...uniqueUsernames, ...repeatedUsers]);
-
-        await createEntitySource();
+        await indexSyncUtils.addUsersToIndex([...uniqueUsernames, ...repeatedUsers]);
+        await indexSyncUtils.createEntitySourceForIndex();
 
         const users = await scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
 
@@ -456,26 +396,47 @@ export default ({ getService }: FtrProviderContext) => {
         expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
       });
 
-      it('should soft delete user from index', async () => {
-        await addUsersToIndex(indexName, ['Darth Vader', 'Luke Skywalker']);
+      it('should soft delete user when they are removed', async () => {
+        await indexSyncUtils.addUsersToIndex(['user1', 'user2']);
 
-        await createEntitySource();
+        await indexSyncUtils.createEntitySourceForIndex();
 
         const usersBefore = await scheduleEngineAndWaitForUserCount(2);
 
-        const lukeBefore = getUserWithName(usersBefore, 'Luke Skywalker');
-        log.info(`Luke before: ${JSON.stringify(lukeBefore)}`);
-        await deleteUserFromIndex(indexName, 'Luke Skywalker');
-        await addUsersToIndex(indexName, ['C-3PO']);
+        const user1Before = privmonUtils.findUser(usersBefore, 'user1');
+        log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
+        await indexSyncUtils.deleteUserFromIndex('user1');
+        // add a new user so we know when the task completes
+        await indexSyncUtils.addUsersToIndex(['user3']);
 
         const usersAfter = await scheduleEngineAndWaitForUserCount(3);
-        const lukeAfter = getUserWithName(usersAfter, 'Luke Skywalker');
-        log.info(`Luke after: ${JSON.stringify(lukeAfter)}`);
-        expect(lukeBefore['@timestamp']).not.toEqual(lukeAfter['@timestamp']);
-        expect(lukeBefore.event.ingested).not.toEqual(lukeAfter.event.ingested);
-        expect(lukeAfter.user.is_privileged).toEqual(false);
-        expect(lukeAfter.labels.source_ids).toEqual([]);
-        expect(lukeAfter.labels.sources).toEqual([]);
+        const user1After = privmonUtils.findUser(usersAfter, 'user1');
+        log.info(`User 1 after: ${JSON.stringify(user1After)}`);
+        privmonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
+        privmonUtils.assertIsPrivileged(user1After, false);
+      });
+
+      it('should update a user when it was already added by the API', async () => {
+        const user1 = { name: 'user1' };
+        await api.createPrivMonUser({
+          body: { user: user1 },
+        });
+
+        const { body: usersBeforeSync } = await api.listPrivMonUsers({ query: {} });
+        const user1Before = privmonUtils.findUser(usersBeforeSync, user1.name);
+        log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
+
+        await indexSyncUtils.addUsersToIndex([user1.name]);
+        await indexSyncUtils.createEntitySourceForIndex();
+
+        const usersAfterSync = await scheduleEngineAndWaitForUserCount(1);
+        const user1After = privmonUtils.findUser(usersAfterSync, user1.name);
+        log.info(`User 1 after: ${JSON.stringify(user1After)}`);
+
+        privmonUtils.assertIsPrivileged(user1After, true);
+        expect(user1After?.user?.name).toEqual(user1.name);
+        expect(user1After?.labels?.sources).toEqual(['api', 'index']);
+        privmonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
       });
     });
   });
