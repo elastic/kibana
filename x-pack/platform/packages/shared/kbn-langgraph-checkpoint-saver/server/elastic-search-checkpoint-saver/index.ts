@@ -200,7 +200,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       new Uint8Array(Buffer.from(doc.checkpoint, 'base64'))
     )) as Checkpoint;
 
-
     const pendingWrites: CheckpointPendingWrite[] = await Promise.all(
       serializedWrites.hits.hits.map(async (serializedWrite) => {
         const source = serializedWrite._source!;
@@ -333,7 +332,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     checkpoint: Checkpoint,
     metadata: CheckpointMetadata
   ): Promise<RunnableConfig> {
-    this.logger.debug(`Putting checkpoint ${checkpoint.id} for thread ${config.configurable?.thread_id}`);
+    this.logger.debug(
+      `Putting checkpoint ${checkpoint.id} for thread ${config.configurable?.thread_id}`
+    );
 
     const threadId = config.configurable?.thread_id;
 
@@ -416,7 +417,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         type,
       };
 
-      this.logger.debug(`Indexing write operation for checkpoint ${checkpointId}: ${JSON.stringify(doc)}`);
+      this.logger.debug(
+        `Indexing write operation for checkpoint ${checkpointId}: ${JSON.stringify(doc)}`
+      );
 
       return [
         {
@@ -429,21 +432,26 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       ];
     });
 
-    this.logger.debug(`Bulk operations for checkpoint ${checkpointId}: ${JSON.stringify(operations)}`)
+    this.logger.debug(
+      `Bulk operations for checkpoint ${checkpointId}: ${JSON.stringify(operations)}`
+    );
 
     const result = await this.client.bulk({
       operations,
       refresh: this.refreshPolicy,
       error_trace: true,
-    })
-
-
-    await this.client.indices.refresh({ index: this.checkpointWritesIndex });
+    });
 
     if (result.errors) {
-      this.logger.error(`Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`);
+      this.logger.error(
+        `Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result.errors)}`
+      );
 
-      throw new Error(`Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`);
+      if (result.errors) {
+        this.logger.error(`Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`);
+
+        throw new Error(`Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`);
+      }
     }
   }
 }
