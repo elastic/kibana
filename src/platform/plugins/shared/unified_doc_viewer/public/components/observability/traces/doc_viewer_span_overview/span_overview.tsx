@@ -23,23 +23,18 @@ import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
-import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { SpanLinks } from '../components/span_links';
-import { Trace } from '../components/trace';
 import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { RootSpanProvider } from './hooks/use_root_span';
-import { allSpanFields, spanFields } from './resources/fields';
-import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
-import { SpanSummaryField } from './sub_components/span_summary_field';
-import { SpanSummaryTitle } from './sub_components/span_summary_title';
 import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
+import { Trace2 } from '../components/trace2';
+import { About } from '../components/about';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -55,24 +50,17 @@ export function SpanOverview({
   onRemoveColumn,
   indexes,
   showWaterfall = true,
-  showActions = true,
   dataView,
-  columnsMeta,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: SpanOverviewProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats } = getUnifiedDocViewerServices();
-  const { formattedDoc, flattenedDoc } = useMemo(
+  const { flattenedDoc } = useMemo(
     () => ({
       formattedDoc: getSpanDocumentOverview(hit, { dataView, fieldFormats }),
       flattenedDoc: getFlattenedSpanDocumentOverview(hit),
     }),
     [dataView, fieldFormats, hit]
-  );
-  const { dataViewFields } = useDataViewFields({ fields: allSpanFields, dataView, columnsMeta });
-  const fieldConfigurations = useMemo(
-    () => getSpanFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
-    [formattedDoc, flattenedDoc]
   );
 
   const isOtelSpan =
@@ -94,77 +82,60 @@ export function SpanOverview({
     <DataSourcesProvider indexes={indexes}>
       <RootTransactionProvider traceId={traceId}>
         <RootSpanProvider traceId={traceId} transactionId={transactionId}>
-          <FieldActionsProvider
-            columns={columns}
-            filter={filter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
+            ref={setContainerRef}
+            css={
+              containerHeight
+                ? css`
+                    max-height: ${containerHeight}px;
+                    overflow: auto;
+                  `
+                : undefined
+            }
           >
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="m"
-              ref={setContainerRef}
-              css={
-                containerHeight
-                  ? css`
-                      max-height: ${containerHeight}px;
-                      overflow: auto;
-                    `
-                  : undefined
-              }
-            >
-              <EuiFlexItem>
-                <EuiSpacer size="m" />
-                <SpanSummaryTitle
-                  spanName={flattenedDoc[SPAN_NAME_FIELD]}
-                  formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
-                  spanId={flattenedDoc[SPAN_ID_FIELD]}
-                  formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
-                  showActions={showActions}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {spanFields.map((fieldId) => (
-                  <SpanSummaryField
-                    key={fieldId}
-                    fieldId={fieldId}
-                    fieldMapping={dataViewFields[fieldId]}
-                    fieldConfiguration={fieldConfigurations[fieldId]}
-                    showActions={showActions}
-                  />
-                ))}
-              </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <About
+                hit={hit}
+                displayType="span" // TODO I think it should be the section itself who decides the "displayType" as it has access to the whole hit
+                dataView={dataView}
+                filter={filter}
+                onAddColumn={onAddColumn}
+                onRemoveColumn={onRemoveColumn}
+              />
+            </EuiFlexItem>
 
-              {spanDuration && (
-                <EuiFlexItem>
-                  <EuiSpacer size="m" />
-                  <SpanDurationSummary
-                    spanDuration={spanDuration}
-                    spanName={flattenedDoc[SPAN_NAME_FIELD]}
-                    serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
-                    isOtelSpan={isOtelSpan}
-                  />
-                </EuiFlexItem>
-              )}
+            {spanDuration && ( // TODO change with new section for Similar spans / Latency (still to be created)
               <EuiFlexItem>
                 <EuiSpacer size="m" />
-                <Trace
-                  fields={fieldConfigurations}
-                  fieldMappings={dataViewFields}
-                  traceId={flattenedDoc[TRACE_ID_FIELD]}
-                  docId={flattenedDoc[SPAN_ID_FIELD]}
-                  displayType="span"
-                  dataView={dataView}
-                  showWaterfall={showWaterfall}
-                  showActions={showActions}
+                <SpanDurationSummary
+                  spanDuration={spanDuration}
+                  spanName={flattenedDoc[SPAN_NAME_FIELD]}
+                  serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+                  isOtelSpan={isOtelSpan}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSpacer size="m" />
-                <SpanLinks traceId={traceId} docId={spanId} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </FieldActionsProvider>
+            )}
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+
+              <Trace2
+                hit={hit}
+                displayType="span" // TODO I think it should be the section itself who decides the "displayType" as it has access to the whole hit
+                showWaterfall={showWaterfall}
+                dataView={dataView}
+                filter={filter}
+                onAddColumn={onAddColumn}
+                onRemoveColumn={onRemoveColumn}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <SpanLinks traceId={traceId} docId={spanId} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </RootSpanProvider>
       </RootTransactionProvider>
     </DataSourcesProvider>
