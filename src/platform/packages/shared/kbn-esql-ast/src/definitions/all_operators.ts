@@ -19,6 +19,14 @@ export const comparisonFunctions: FunctionDefinition[] = operatorFunctionDefinit
     name === '==' || name === '!=' || name === '<' || name === '>' || name === '<=' || name === '>='
 );
 
+export const specialOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'like' || name === 'rlike' || name === 'in' || name === ':'
+);
+
+export const nullCheckOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'is null' || name === 'is not null'
+);
+
 export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',

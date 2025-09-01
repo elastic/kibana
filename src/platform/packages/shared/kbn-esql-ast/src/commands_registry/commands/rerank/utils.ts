@@ -6,232 +6,156 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
-import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import type {
-  ESQLCommand,
-  ESQLAstRerankCommand,
-  ESQLMap,
-  ESQLCommandOption,
-  ESQLAstExpression,
-  ESQLSingleAstItem,
-} from '../../../types';
-import type { ISuggestionItem } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import type { ESQLCommand, ESQLAstRerankCommand, ESQLMap, ESQLSingleAstItem } from '../../../types';
+import { isAssignment, isFunctionExpression } from '../../../ast/is';
+
+export type RhsBooleanState = 'after-assignment' | 'within' | 'complete' | 'none';
+
+export interface RerankPosition {
+  position: CaretPosition;
+  context?: {
+    expressionRoot?: ESQLSingleAstItem;
+  };
+}
 
 export enum CaretPosition {
   RERANK_KEYWORD, // After RERANK: can be target field assignment or query
-  RERANK_AFTER_ASSIGNMENT, // After "target_field ="
-
-  ON_KEYWORD, // Should suggest "ON"
-  ON_AFTER, // After "ON": suggest field names
+  RERANK_AFTER_TARGET_FIELD, // After potential target field: suggest assignment operator
+  RERANK_AFTER_TARGET_ASSIGNMENT, // After "target_field ="
+  SUGGEST_ON_KEYWORD, // Should suggest "ON"
+  ON_AFTER_FIELD_LIST, // After "ON": suggest field names
   ON_AFTER_FIELD_ASSIGNMENT, // After "field =" in field list: suggest expressions/functions
-  ON_AFTER_FIELD_SPACE, // Should suggest "WITH or PIPE or Expression"
-
+  ON_AFTER_FIELD_COMPLETE, // After complete field: suggest continuations (comma, WITH, pipe, assignment)
+  WITHIN_BOOLEAN_EXPRESSION, // Inside booleanExpression: suggest operators (>, <, ==, etc.)
+  BOOLEAN_EXPRESSION_COMPLETE, // Complete booleanExpression: suggest continuations (AND, OR, comma, WITH, pipe)
   WITHIN_MAP_EXPRESSION, // After "WITH": suggest a json of params
-
   AFTER_COMMAND, // Command is complete, suggest pipe
 }
 
-export function getPosition(innerText: string, command: ESQLCommand): CaretPosition {
+/**
+ * Determines caret position in RERANK command
+ */
+export function getPosition(innerText: string, command: ESQLCommand): RerankPosition {
   const rerankCommand = command as ESQLAstRerankCommand;
-  const trimmedText = innerText.trim();
 
-  // If the user is still composing the ON field list, prefer that context over AST state
-  // Handle both: immediately after selecting a field (no trailing space) and after a comma
-  const upper = innerText.toUpperCase();
-  const onIndex = upper.lastIndexOf(' ON ');
+  const OnMap = rerankCommand.args[1];
+  const WithMap = rerankCommand.args[2] as ESQLMap | undefined;
 
-  if (onIndex !== -1) {
-    const afterOn = innerText.slice(onIndex + 4);
-    // If we're right after a comma (", ") stay in field list
-    if (/[,\s]$/.test(afterOn) && /,\s*$/.test(afterOn)) {
-      return CaretPosition.ON_AFTER;
+  if (WithMap) {
+    if (WithMap.text && WithMap.incomplete) {
+      return { position: CaretPosition.WITHIN_MAP_EXPRESSION };
     }
-    // Extract last token after the last comma
-    const lastToken = afterOn.split(',').pop()?.trim() ?? '';
-    // If there's a token with no spaces or assignment and the cursor is immediately after it (no trailing space),
-    // we are selecting a field -> stay in ON_FIELD_LIST. If there is a trailing space, allow WITH/=/| suggestions.
-    if (lastToken && !lastToken.includes(' ') && !lastToken.includes('=') && /\S$/.test(afterOn)) {
-      return CaretPosition.ON_AFTER;
+
+    if (!WithMap.incomplete) {
+      return { position: CaretPosition.AFTER_COMMAND };
     }
   }
 
-  const hasValidQuery =
-    rerankCommand.query &&
-    !rerankCommand.query.incomplete &&
-    (rerankCommand.query as ESQLSingleAstItem).type !== 'unknown';
-
-  const hasValidFields =
-    rerankCommand.fields?.length > 0 &&
-    rerankCommand.fields.some((field) => field.name && !field.incomplete);
-
-  // Check first for field assignment expressions before checking WITH clause
-  if (isAfterFieldAssignment(trimmedText)) {
-    return CaretPosition.ON_AFTER_FIELD_ASSIGNMENT;
-  }
-
-  // If we have query and fields, check for WITH clause
-  if (hasValidQuery && hasValidFields) {
-    const inferenceId = getWithMapEntry(rerankCommand, 'inference_id');
-    const withMapComplete = hasCompleteWithMap(rerankCommand);
-
-    if (inferenceId || withMapComplete) {
-      return CaretPosition.AFTER_COMMAND;
+  if (OnMap) {
+    // Check for incomplete field assignment first: "ON my_field = "
+    if (hasIncompleteFieldAssignment(rerankCommand) || isAfterFieldAssignment(innerText)) {
+      return { position: CaretPosition.ON_AFTER_FIELD_ASSIGNMENT };
     }
 
-    if (trimmedText.includes('WITH')) {
-      return CaretPosition.WITHIN_MAP_EXPRESSION;
+    // Follow EVAL pattern: treat RHS as within-expression; autocomplete decides completeness
+    const lastField = rerankCommand.fields?.[rerankCommand.fields.length - 1];
+
+    if (lastField && isAssignment(lastField)) {
+      // WHERE pattern: extract RHS for boolean expression
+      const expressionRoot = Array.isArray(lastField.args[1])
+        ? (lastField.args[1][0] as ESQLSingleAstItem)
+        : lastField.args[1];
+
+      if (expressionRoot) {
+        return {
+          position: CaretPosition.WITHIN_BOOLEAN_EXPRESSION,
+          // Extract the boolean expression's AST root
+          // This context is crucial to offering 'AND/OR' after a complete expression or values after an operator
+          context: { expressionRoot },
+        };
+      }
+    }
+    if (isAfterCompleteFieldWithSpace(innerText)) {
+      return { position: CaretPosition.ON_AFTER_FIELD_COMPLETE };
     }
 
-    return CaretPosition.ON_AFTER_FIELD_SPACE;
+    return { position: CaretPosition.ON_AFTER_FIELD_LIST };
   }
 
-  // If we have query but no fields, expect ON keyword
-  if (hasValidQuery) {
-    if (trimmedText.includes('ON')) {
-      return CaretPosition.ON_AFTER;
+  const queryComplete = !!(rerankCommand.query && !rerankCommand.query.incomplete);
+
+  if (queryComplete) {
+    return { position: CaretPosition.SUGGEST_ON_KEYWORD };
+  }
+
+  // Check targetField (only if query is not complete)
+  if (rerankCommand.targetField && !rerankCommand.targetField.incomplete) {
+    return { position: CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT };
+  }
+
+  // Check for pattern "RERANK col0 " (space after potential target field)
+  if (!rerankCommand.targetField && isAfterPotentialTargetField(innerText, command)) {
+    return { position: CaretPosition.RERANK_AFTER_TARGET_FIELD };
+  }
+
+  return { position: CaretPosition.RERANK_KEYWORD };
+}
+
+function hasIncompleteFieldAssignment(command: ESQLAstRerankCommand): boolean {
+  try {
+    const lastField = command.fields?.[command.fields.length - 1];
+
+    if (!lastField || !isFunctionExpression(lastField)) {
+      return false;
     }
 
-    return CaretPosition.ON_KEYWORD;
-  }
-
-  if (isAfterTargetFieldAssignment(innerText)) {
-    return CaretPosition.RERANK_AFTER_ASSIGNMENT;
-  }
-
-  if (isInFieldListContext(trimmedText)) {
-    // Check if we're after a field assignment in the field list
-    if (isAfterFieldAssignment(trimmedText)) {
-      return CaretPosition.ON_AFTER_FIELD_ASSIGNMENT;
+    if (!isAssignment(lastField) || !Array.isArray(lastField.args)) {
+      return false;
     }
 
-    return CaretPosition.ON_AFTER;
-  }
+    const rhs = lastField.args[1];
 
-  return CaretPosition.RERANK_KEYWORD;
-}
-
-export const onKeywordSuggestion: ISuggestionItem = {
-  label: 'ON',
-  text: 'ON ',
-  kind: 'Reference',
-  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rerankOnDetailDoc', {
-    defaultMessage: 'Specify fields to rerank',
-  }),
-  sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
-
-export const withKeywordSuggestion: ISuggestionItem = {
-  label: 'WITH',
-  text: 'WITH { $0 }',
-  asSnippet: true,
-  kind: 'Reference',
-  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rerankWithDetailDoc', {
-    defaultMessage: 'Optional inference parameters',
-  }),
-  sortText: '2',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
-
-/**
- * Creates basic constant suggestions for RERANK query (simplified version)
- */
-export function createBasicConstants(): ISuggestionItem[] {
-  return [
-    {
-      label: '"query"',
-      text: '"query" ',
-      kind: 'Value',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.stringLiteralDetailDoc', {
-        defaultMessage: 'String literal',
-      }),
-      command: TRIGGER_SUGGESTION_COMMAND,
-    },
-  ];
-}
-
-/**
- * Creates field assignment operator suggestion
- */
-export const createFieldAssignmentSuggestion = (): ISuggestionItem => ({
-  label: '= expression',
-  text: ' = ',
-  kind: 'Operator',
-  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.rerankFieldAssignmentDoc', {
-    defaultMessage: 'Optional assignment of boolean expression to field',
-  }),
-  sortText: 'C',
-  command: TRIGGER_SUGGESTION_COMMAND,
-});
-
-/**
- * Creates WITH parameter map suggestions for RERANK command
- */
-export const createInferenceEndpointToCompletionItem = (
-  inferenceEndpoint: InferenceEndpointAutocompleteItem
-): ISuggestionItem => ({
-  detail: i18n.translate('kbn-esql-ast.esql.definitions.rerankInferenceIdDoc', {
-    defaultMessage: 'Inference endpoint used for the completion',
-  }),
-  kind: 'Reference',
-  label: inferenceEndpoint.inference_id,
-  sortText: '1',
-  text: inferenceEndpoint.inference_id,
-});
-
-/**
- * Checks if the cursor is positioned after a target field assignment (field =)
- */
-function isAfterTargetFieldAssignment(innerText: string): boolean {
-  return /\bRERANK\s+\w+\s*=\s*$/.test(innerText);
-}
-
-/**
- * Checks if we're in the field list context (after ON keyword)
- */
-function isInFieldListContext(trimmedText: string): boolean {
-  return /\bON\s+/.test(trimmedText) || trimmedText.endsWith(' ON');
-}
-
-/**
- * Checks if we're positioned after a field assignment in the ON field list
- * Example: "RERANK query ON field = " or "RERANK query ON field1, field2 = "
- */
-function isAfterFieldAssignment(trimmedText: string): boolean {
-  return /\bon\s+.*\w+\s*=\s*$/i.test(trimmedText);
-}
-
-/**
- * Helper to extract a value from the WITH clause map of a RERANK command
- */
-function getWithMapEntry(
-  rerankCommand: ESQLAstRerankCommand,
-  key: string
-): ESQLAstExpression | undefined {
-  const withOption = rerankCommand.args.find(
-    (arg): arg is ESQLCommandOption => 'type' in arg && arg.type === 'option' && arg.name === 'with'
-  );
-
-  if (!withOption) return undefined;
-
-  const map = withOption.args[0] as ESQLMap | undefined;
-  return map?.entries.find((entry) => entry.key.valueUnquoted === key)?.value;
-}
-
-/**
- * Returns true if a WITH map is present and not incomplete, regardless of its content.
- */
-function hasCompleteWithMap(rerankCommand: ESQLAstRerankCommand): boolean {
-  const withOption = rerankCommand.args.find(
-    (arg): arg is ESQLCommandOption => 'type' in arg && arg.type === 'option' && arg.name === 'with'
-  );
-
-  if (!withOption) {
+    return (
+      rhs === undefined ||
+      (Array.isArray(rhs) && rhs.length === 0) ||
+      (!Array.isArray(rhs) && !!rhs?.incomplete)
+    );
+  } catch {
     return false;
   }
+}
 
-  const map = withOption.args[0] as ESQLMap | undefined;
-  return Boolean(map && !map.incomplete);
+// WWhen the RHS is mssing, the CTS does not include ASSING(=).
+// The Ast cannot see "field =" inside the ON clause yet.
+// Use a regex on raw text ti detect the incomplete assignment and drive suggestions.
+function isAfterFieldAssignment(text: string): boolean {
+  return /\bon\s+.*\w+\s*=\s*$/i.test(text);
+}
+
+// AST does not encode trailing whitespace/caret after fields: we rely on regex
+// to detect "ON <field>[, <field>...] <space>" and switch to next actions
+// (comma/WITH/pipe) instead of reopening field suggestions.
+function isAfterCompleteFieldWithSpace(text: string): boolean {
+  const hasFieldWithSpace = /\bon\s+(?:[^=\s,]+(?:\s*,\s*[^=\s,]+)*)\s+$/i.test(text);
+  const hasAssignment = /\bon\s+.*=\s*$/i.test(text);
+  const endsWithCommaSpace = /,\s+$/i.test(text);
+
+  return hasFieldWithSpace && !hasAssignment && !endsWithCommaSpace;
+}
+
+// AST cannot disambiguate "RERANK <identifier>" without '=' or a string.
+// and it does not capture trailing space; use regex on raw text to detect
+// "RERANK <identifier> " and trigger the assignment operator suggestion (=)
+function isAfterPotentialTargetField(innerText: string, command: ESQLCommand): boolean {
+  const commandText = innerText.substring(command.location.min);
+  // Check for pattern "RERANK col0 " (field followed by space, cursor at end)
+  const match = /^rerank\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+$/i.exec(commandText);
+
+  if (match) {
+    const potentialField = match[1];
+
+    return !potentialField.startsWith('"');
+  }
+
+  return false;
 }
