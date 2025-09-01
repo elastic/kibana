@@ -13,7 +13,7 @@ import {
   getTimeDifferenceInSeconds,
   getOffsetFromNowInSeconds,
   type TimeRange,
-} from './index';
+} from '.';
 
 describe('@kbn/timerange', () => {
   describe('getTimeDifferenceInSeconds', () => {
