@@ -21,7 +21,9 @@
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
             ".fleet-actions*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".privmon*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
         }
@@ -70,7 +72,9 @@
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
             ".fleet-actions*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".privmon*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
         }
@@ -111,7 +115,9 @@
             "packetbeat-*",
             "winlogbeat-*",
             "logstash-*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".privmon*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read", "write"]
         },
@@ -191,7 +197,9 @@
             "winlogbeat-*",
             ".lists*",
             ".items*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".privmon*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read", "write"]
         },
@@ -248,7 +256,9 @@
             "winlogbeat-*",
             ".lists*",
             ".items*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".privmon*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read", "write"]
         },
@@ -311,7 +321,9 @@
             "logs-*",
             "packetbeat-*",
             "winlogbeat-*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".privmon*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["manage", "write", "read"]
         },
@@ -363,7 +375,9 @@
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
             ".fleet-actions*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".privmon*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["all"]
         },
