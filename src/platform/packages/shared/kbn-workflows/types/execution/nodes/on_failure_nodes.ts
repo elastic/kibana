@@ -10,17 +10,6 @@
 import { z } from '@kbn/zod';
 import { WorkflowRetrySchema } from '../../../spec/schema';
 
-export const EnterOnFailureNode = z.object({
-  id: z.string(),
-  type: z.literal('enter-on-failure'),
-});
-export type EnterOnFailureNode = z.infer<typeof EnterOnFailureNode>;
-export const ExitOnFailureNode = z.object({
-  id: z.string(),
-  type: z.literal('exit-on-failure'),
-});
-export type ExitOnFailureNode = z.infer<typeof ExitOnFailureNode>;
-
 export const EnterContinueNodeSchema = z.object({
   id: z.string(),
   type: z.literal('enter-continue'),

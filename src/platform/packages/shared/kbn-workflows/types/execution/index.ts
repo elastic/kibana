@@ -24,8 +24,6 @@ export type {
 } from './nodes/branching_nodes';
 export type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
 export type {
-  EnterOnFailureNode,
-  ExitOnFailureNode,
   EnterRetryNode,
   ExitRetryNode,
   EnterContinueNode,

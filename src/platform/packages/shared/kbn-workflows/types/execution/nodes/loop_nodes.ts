@@ -13,7 +13,6 @@ import { ForEachStepSchema } from '../../../spec/schema';
 export const EnterForeachNodeSchema = z.object({
   id: z.string(),
   type: z.literal('enter-foreach'),
-  itemNodeIds: z.array(z.string()),
   exitNodeId: z.string(),
   configuration: ForEachStepSchema.omit({
     steps: true,

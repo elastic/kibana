@@ -47,6 +47,7 @@ export const WorkflowSettingsSchema = z.object({
   templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
 });
+export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
 /* --- Triggers --- */
 export const AlertRuleTriggerSchema = z.object({

@@ -35,7 +35,6 @@ import {
   EnterFallbackPathNodeImpl,
   ExitFallbackPathNodeImpl,
 } from './on_failure/fallback-step';
-import { EnterOnFailureNodeImpl, ExitOnFailureNodeImpl } from './on_failure/on_failure_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 
 export class StepFactory {
@@ -67,10 +66,6 @@ export class StepFactory {
         );
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
-      case 'enter-on-failure':
-        return new EnterOnFailureNodeImpl(this.workflowRuntime);
-      case 'exit-on-failure':
-        return new ExitOnFailureNodeImpl(this.workflowRuntime);
       case 'enter-retry':
         return new EnterRetryNodeImpl(
           step as any,
