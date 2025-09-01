@@ -125,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'test-group',
               description: 'A Group stream',
               group: {
+                metadata: {},
                 tags: [],
                 members: ['logs'],
               },
@@ -168,6 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'test-group',
               description: 'A Group stream',
               group: {
+                metadata: {},
                 tags: [],
                 members: ['logs.test'],
               },
@@ -399,6 +401,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(response.body).to.eql({
             group: {
+              metadata: {},
               tags: [],
               members: ['logs.test2'],
             },
