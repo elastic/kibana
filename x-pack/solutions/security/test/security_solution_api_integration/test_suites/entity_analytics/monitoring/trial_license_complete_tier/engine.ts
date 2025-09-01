@@ -450,5 +450,22 @@ export default ({ getService }: FtrProviderContext) => {
         expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
       });
     });
+
+    describe('default entity sources', () => {
+      it('should create default entity sources on privileged monitoring engine initialization', async () => {
+        await enablePrivmonSetting(kibanaServer);
+        await privMonUtils.initPrivMonEngine();
+
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
+        expect(names).toEqual(
+          expect.arrayContaining([
+            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.ad-default',
+            '.entity_analytics.monitoring.users-default',
+          ])
+        );
+      });
+    });
   });
 };
