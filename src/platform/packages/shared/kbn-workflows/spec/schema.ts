@@ -155,7 +155,7 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 
 export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = HttpStepSchema.extend({
-    'on-failure': getOnFailureStepSchema(stepSchema, loose),
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
 
   if (loose) {
@@ -176,7 +176,7 @@ export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = ForEachStepSchema.extend({
     steps: z.array(stepSchema).min(1),
-    'on-failure': getOnFailureStepSchema(stepSchema, loose),
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
 
   if (loose) {
