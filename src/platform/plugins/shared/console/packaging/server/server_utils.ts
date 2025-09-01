@@ -8,6 +8,10 @@
  */
 
 import { merge } from 'lodash';
+import * as path from 'path';
+import * as fs from 'fs';
+import glob from 'glob';
+import normalizePath from 'normalize-path';
 import type {
   EndpointDescription,
   EndpointDefinition,
@@ -199,11 +203,6 @@ export class ConsoleSpecDefinitionsLoader {
       try {
         fs.readFileSync(jsIndexPath, 'utf8');
       } catch (jsError) {
-        console.warn(`No compiled JS definitions found for stack version ${stackVersion}`);
-        console.warn(`Expected: ${jsIndexPath}`);
-        console.warn(
-          'Make sure the webpack build process compiled TypeScript definitions to JavaScript.'
-        );
         return;
       }
 
@@ -217,14 +216,14 @@ export class ConsoleSpecDefinitionsLoader {
           try {
             loader(this);
           } catch (error) {
-            console.error(`Error loading JS spec definition:`, error);
+            // Error loading JS spec definition
           }
         });
       } else {
-        console.warn(`jsSpecLoaders is not an array in the loaded module`);
+        // jsSpecLoaders is not an array in the loaded module
       }
     } catch (error) {
-      console.error('Error loading JS definitions:', error);
+      // Error loading JS definitions
     }
   }
 }
@@ -237,10 +236,6 @@ export function createSpecDefinitionsLoader(
   stackVersion: string,
   endpointsAvailability: EndpointsAvailability = 'stack'
 ): ConsoleSpecDefinitionsLoader {
-  const path = require('path');
-  const fs = require('fs');
-  const glob = require('glob');
-  const normalizePath = require('normalize-path');
 
   // Path to bundled console definitions (relative to this file)
   const definitionsPath = path.join(__dirname, 'console_definitions');

@@ -56,7 +56,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   } = useServicesContext();
   const { euiTheme } = useEuiTheme();
 
-  const { currentTextObject } = useEditorReadContext();
+  const { currentTextObject, customParsedRequestsProvider } = useEditorReadContext();
 
   const {
     requestInFlight,
@@ -168,9 +168,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                       localStorageValue={currentTextObject.text}
                       value={inputEditorValue}
                       setValue={setInputEditorValue}
-                      customParsedRequestsProvider={
-                        useEditorReadContext().customParsedRequestsProvider
-                      }
+                      customParsedRequestsProvider={customParsedRequestsProvider}
                     />
                   )}
                 </EuiSplitPanel.Inner>

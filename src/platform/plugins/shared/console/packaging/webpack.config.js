@@ -14,7 +14,6 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const ConsoleDefinitionsPlugin = require('./console-definitions-plugin');
-const webpack = require('webpack');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
 const isProd = process.env.NODE_ENV === 'production';

@@ -46,7 +46,6 @@ export const createStandaloneConsoleParser = () => {
         errors: result.errors || [],
       };
     } catch (error) {
-      console.error('Original parser error:', error);
       return {
         requests: [],
         errors: [
@@ -84,7 +83,6 @@ export class StandaloneConsoleParsedRequestsProvider implements ConsoleParsedReq
       const result = this.parser(text);
       return result.requests || [];
     } catch (error) {
-      console.error('Standalone parser error in getRequests:', error);
       return [];
     }
   }
@@ -99,7 +97,6 @@ export class StandaloneConsoleParsedRequestsProvider implements ConsoleParsedReq
       const result = this.parser(text);
       return result.errors || [];
     } catch (error) {
-      console.error('Standalone parser error in getErrors:', error);
       return [];
     }
   }
