@@ -35,7 +35,7 @@ export const createSelectionHandler = <T extends BaseSelectorState>(
     _event: unknown,
     changedOption: EuiSelectableOption
   ) => {
-    if (changedOption.checked === 'on') {
+    if (changedOption.checked === 'on' && 'value' in changedOption) {
       const newState = {
         ...state,
         isPopoverOpen: false,

@@ -16,6 +16,7 @@ import { useGenericErrorToast, useBaseSelectorHandlers, useFocusManagement } fro
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ActionDetails, ActionListApiResponse } from '../../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import type {
   CommandArgumentValueSelectorProps,
   Command,
@@ -112,7 +113,7 @@ describe('PendingActionsSelector', () => {
         agentType: 'endpoint',
         endpointId: '',
         capabilities: [],
-        privileges: {},
+        privileges: getEndpointPrivilegesInitialStateMock(),
         platform: 'linux',
       } as EndpointCommandDefinitionMeta,
     },
@@ -287,7 +288,7 @@ describe('PendingActionsSelector', () => {
       {
         ...mockActionDetails,
         id: 'action-456-def',
-        command: 'release',
+        command: 'unisolate',
       },
       {
         ...mockActionDetails,

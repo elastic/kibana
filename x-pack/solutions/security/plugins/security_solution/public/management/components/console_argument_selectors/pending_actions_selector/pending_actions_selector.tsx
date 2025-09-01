@@ -24,7 +24,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 /**
  * State for the pending actions selector component
  */
-interface PendingActionsSelectorState {
+export interface PendingActionsSelectorState {
   isPopoverOpen: boolean;
 }
 

@@ -114,7 +114,7 @@ describe('utils', () => {
       const secondAction: ActionDetails = {
         ...mockActionDetails,
         id: 'action-456-def',
-        command: 'release',
+        command: 'unisolate',
         startedAt: '2023-11-01T11:00:00.000Z',
       };
 
