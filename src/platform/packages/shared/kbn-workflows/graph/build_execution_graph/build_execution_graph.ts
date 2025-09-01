@@ -399,15 +399,69 @@ function insertGraphBetweenNodes(
   startNodeId: string,
   endNodeId: string
 ): void {
-  const topologicalOrder = graphlib.alg.topsort(subGraph);
-  graph.setEdge(startNodeId, topologicalOrder[0]);
-  graph.setEdge(topologicalOrder[topologicalOrder.length - 1], endNodeId);
+  // Find all start nodes (no incoming edges) and end nodes (no outgoing edges)
+  const startNodes = subGraph.nodes().filter((nodeId) => subGraph.inEdges(nodeId)?.length === 0);
+  const endNodes = subGraph.nodes().filter((nodeId) => subGraph.outEdges(nodeId)?.length === 0);
+
+  // Connect all start nodes to the main start node
+  startNodes.forEach((startNode) => {
+    graph.setEdge(startNodeId, startNode);
+  });
+
+  // Connect all end nodes to the main end node
+  endNodes.forEach((endNode) => {
+    graph.setEdge(endNode, endNodeId);
+  });
+
+  // Copy all nodes from subGraph to the main graph
   subGraph.nodes().forEach((nodeId) => {
     graph.setNode(nodeId, subGraph.node(nodeId));
   });
+
+  // Copy all edges from subGraph to the main graph
   subGraph.edges().forEach((edgeObj) => {
     graph.setEdge(edgeObj.v, edgeObj.w);
   });
+}
+
+// TODO: Will be used later when we refactor visitors
+function connectTwoGraphs(firstGraph: graphlib.Graph, secondGraph: graphlib.Graph): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+
+  // Copy all nodes and edges from the first graph
+  firstGraph.nodes().forEach((nodeId) => {
+    graph.setNode(nodeId, firstGraph.node(nodeId));
+  });
+  firstGraph.edges().forEach((edgeObj) => {
+    graph.setEdge(edgeObj.v, edgeObj.w);
+  });
+
+  // Copy all nodes and edges from the second graph
+  secondGraph.nodes().forEach((nodeId) => {
+    graph.setNode(nodeId, secondGraph.node(nodeId));
+  });
+  secondGraph.edges().forEach((edgeObj) => {
+    graph.setEdge(edgeObj.v, edgeObj.w);
+  });
+
+  // Find end nodes of the first graph (nodes with no outgoing edges)
+  const endNodesFirstGraph = firstGraph
+    .nodes()
+    .filter((nodeId) => firstGraph.outEdges(nodeId)?.length === 0);
+
+  // Find start nodes of the second graph (nodes with no incoming edges)
+  const startNodesSecondGraph = secondGraph
+    .nodes()
+    .filter((nodeId) => secondGraph.inEdges(nodeId)?.length === 0);
+
+  // Connect each end node of the first graph to each start node of the second graph
+  endNodesFirstGraph.forEach((endNode) => {
+    startNodesSecondGraph.forEach((startNode) => {
+      graph.setEdge(endNode, startNode);
+    });
+  });
+
+  return graph;
 }
 
 function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
