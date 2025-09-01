@@ -18,8 +18,8 @@ import { z } from '@kbn/zod';
 
 import { SuccessResponse } from '../../../model/schema/common.gen';
 
-export type CancelActionRequestBody = z.infer<typeof CancelActionRequestBody>;
-export const CancelActionRequestBody = z.object({
+export type CancelRouteRequestBody = z.infer<typeof CancelRouteRequestBody>;
+export const CancelRouteRequestBody = z.object({
   /**
    * The unique identifier of the response action to cancel. This should be the internal Kibana action ID, not the external system's action ID.
    */
@@ -31,7 +31,7 @@ export const CancelActionRequestBody = z.object({
 });
 
 export type CancelActionRequestBody = z.infer<typeof CancelActionRequestBody>;
-export const CancelActionRequestBody = CancelActionRequestBody;
+export const CancelActionRequestBody = CancelRouteRequestBody;
 export type CancelActionRequestBodyInput = z.input<typeof CancelActionRequestBody>;
 
 export type CancelActionResponse = z.infer<typeof CancelActionResponse>;

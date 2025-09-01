@@ -16,7 +16,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CancelActionRequestBody'
+              $ref: '#/components/schemas/CancelRouteRequestBody'
       responses:
         '200':
           description: OK
@@ -26,7 +26,10 @@ paths:
                 $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 components:
   schemas:
-    CancelActionRequestBody:
+    CancelRouteRequestBody:
+      example:
+        id: "7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d"
+        comment: "Action no longer needed due to resolved incident"
       type: object
       required:
         - id
