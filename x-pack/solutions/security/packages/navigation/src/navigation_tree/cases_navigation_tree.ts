@@ -13,6 +13,7 @@ export const createCasesNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),
   renderAs: 'item',
+  iconV2: 'casesApp',
   children: [
     {
       id: SecurityPageName.caseCreate,

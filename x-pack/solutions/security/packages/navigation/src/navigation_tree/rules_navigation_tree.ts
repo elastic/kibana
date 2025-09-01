@@ -14,6 +14,7 @@ import { i18nStrings } from '../i18n_strings';
 export const createRulesNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.rules,
   title: SecurityLinkGroup[SecurityGroupName.rules].title,
+  iconV2: 'list',
   renderAs: 'panelOpener',
   children: [
     {
