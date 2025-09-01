@@ -449,7 +449,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         url: `${this.urls.machineActions}/${payload.actionId}/cancel`,
         method: 'POST',
         data: {
-          Comment: payload.comment || 'Test comment',
+          Comment: payload.comment,
         },
       },
       connectorUsageCollector
