@@ -11,7 +11,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/test-jest-helpers",
     "@kbn/unified-histogram",
     "@kbn/metrics-experience-plugin",
     "@kbn/shared-ux-utility",
