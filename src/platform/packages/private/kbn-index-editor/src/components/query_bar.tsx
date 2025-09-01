@@ -21,7 +21,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FilePicker } from './file_picker';
 import type { KibanaContextExtra } from '../types';
-import { isPlaceholderColumn } from '../utils';
 
 export const QueryBar = () => {
   const {
@@ -30,17 +29,12 @@ export const QueryBar = () => {
 
   const dataView = useObservable(indexUpdateService.dataView$);
   const esqlDiscoverQuery = useObservable(indexUpdateService.esqlDiscoverQuery$, '');
-  const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
     indexUpdateService.isIndexCreated()
   );
 
   const [queryError, setQueryError] = useState<string>('');
-
-  const activeColumns = useMemo(() => {
-    return dataViewColumns?.map((c) => c.name).filter((c) => !isPlaceholderColumn(c));
-  }, [dataViewColumns]);
 
   const discoverLocator = useMemo(() => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
@@ -53,7 +47,6 @@ export const QueryBar = () => {
           query: {
             esql: esqlDiscoverQuery,
           },
-          ...(activeColumns ? { columns: activeColumns } : {}),
         })
       : null;
 
