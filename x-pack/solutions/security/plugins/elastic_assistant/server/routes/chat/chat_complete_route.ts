@@ -35,6 +35,7 @@ import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_
 import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
 import type { ConfigSchema } from '../../config_schema';
+import { v4 as uuidv4 } from 'uuid';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -114,6 +115,7 @@ export const chatCompleteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
+          const threadId = uuidv4();
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -237,6 +239,7 @@ export const chatCompleteRoute = (
               actionsClient,
               actionTypeId,
               connectorId,
+              threadId,
               isOssModel,
               conversationId,
               context: ctx,

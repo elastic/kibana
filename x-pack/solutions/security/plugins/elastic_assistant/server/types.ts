@@ -69,6 +69,7 @@ import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
+import { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -170,6 +171,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getCheckpointSaver: () => Promise<BaseCheckpointSaver | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   savedObjectsClient: SavedObjectsClientContract;
