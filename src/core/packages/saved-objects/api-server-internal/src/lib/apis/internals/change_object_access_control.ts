@@ -9,12 +9,12 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
-  ISavedObjectTypeRegistry,
-  ISavedObjectsSecurityExtension,
-  ISavedObjectsSerializer,
+  type ISavedObjectTypeRegistry,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectsSerializer,
   SavedObjectsErrorHelpers,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsChangeAccessControlResponse,
@@ -34,8 +34,8 @@ import {
   left,
   right,
 } from '../utils';
-import { ApiExecutionContext } from '../types';
-import { GetBulkOperationErrorRawResponse, isMgetError } from '../utils/internal_utils';
+import type { ApiExecutionContext } from '../types';
+import { type GetBulkOperationErrorRawResponse, isMgetError } from '../utils/internal_utils';
 
 export type ChangeAccessControlActionType = 'changeOwnership' | 'changeAccessMode';
 

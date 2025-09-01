@@ -39,10 +39,9 @@ import {
   errorContent,
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
-import { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
-import { ApiExecutionContext } from './types';
+import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
+import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
-
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;

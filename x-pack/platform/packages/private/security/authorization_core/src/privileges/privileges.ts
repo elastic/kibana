@@ -241,6 +241,7 @@ function getFeaturePrivileges({
         actions.ui.get('globalSettings', 'show'),
         ...allSavedObjectsManageOwnershipActions,
         ...allActions,
+        ,
       ],
       read: [
         actions.login,
@@ -254,6 +255,8 @@ function getFeaturePrivileges({
       read: [actions.login, ...readActions],
     },
     reserved: features.reduce((acc: Record<string, string[]>, feature: KibanaFeature) => {
+      // Reserved privileges are intentionally not excluded from registration based on their `hidden` attribute.
+      // This is explicitly to support the legacy reporting use case.
       if (feature.reserved) {
         feature.reserved.privileges.forEach((reservedPrivilege) => {
           acc[reservedPrivilege.id] = [
@@ -298,50 +301,6 @@ export function privilegesFactory(
         actions,
         savedObjectTypesSupportingAccessControl,
       });
-      const allActions = [...allActionsSet];
-      const readActions = [...readActionsSet];
-      return {
-        features: featurePrivileges,
-        global: {
-          all: [
-            actions.login,
-            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
-            actions.api.get(ApiOperation.Read, 'features'),
-            actions.api.get(ApiOperation.Manage, 'taskManager'),
-            actions.api.get(ApiOperation.Manage, 'spaces'),
-            actions.space.manage,
-            actions.ui.get('spaces', 'manage'),
-            actions.ui.get('management', 'kibana', 'spaces'),
-            actions.ui.get('catalogue', 'spaces'),
-            actions.ui.get('enterpriseSearch', 'all'),
-            actions.ui.get('globalSettings', 'save'),
-            actions.ui.get('globalSettings', 'show'),
-            ...allActions,
-          ],
-          read: [
-            actions.login,
-            actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
-            actions.ui.get('globalSettings', 'show'),
-            ...readActions,
-          ],
-        },
-        space: {
-          all: [actions.login, ...allActions],
-          read: [actions.login, ...readActions],
-        },
-        reserved: features.reduce((acc: Record<string, string[]>, feature: KibanaFeature) => {
-          // Reserved privileges are intentionally not excluded from registration based on their `hidden` attribute.
-          // This is explicitly to support the legacy reporting use case.
-          if (feature.reserved) {
-            feature.reserved.privileges.forEach((reservedPrivilege) => {
-              acc[reservedPrivilege.id] = [
-                ...uniq(featurePrivilegeBuilder.getActions(reservedPrivilege.privilege, feature)),
-              ];
-            });
-          }
-          return acc;
-        }, {}),
-      };
     },
   };
 }
