@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Index } from '@kbn/index-management-shared-types';
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import { useState, useEffect } from 'react';
 import { normalize } from '../components/mappings_editor/lib';
 import { isLocalModel } from '../components/mappings_editor/lib/utils';
