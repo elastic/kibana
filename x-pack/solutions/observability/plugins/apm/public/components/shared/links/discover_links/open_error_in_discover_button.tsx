@@ -11,17 +11,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { from, where } from '@kbn/esql-composer';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { BaseDiscoverButton } from './base_discover_button';
 
 export const getESQLQuery = ({
   params,
@@ -65,8 +62,7 @@ export const getESQLQuery = ({
 };
 
 export function OpenErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
-  const { share } = useApmPluginContext();
-  const { serviceName, indexSettings, indexSettingsStatus } = useApmServiceContext();
+  const { serviceName, indexSettings } = useApmServiceContext();
 
   const {
     query: { rangeFrom, rangeTo, kuery },
@@ -88,30 +84,18 @@ export function OpenErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: stri
     indexSettings,
   });
 
-  const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
-    timeRange: {
-      from: rangeFrom,
-      to: rangeTo,
-    },
-    query: {
-      esql: esqlQuery,
-    },
-  });
-
   return (
-    <EuiButtonEmpty
-      aria-label={i18n.translate('xpack.apm.openErrorInDiscoverButton.ariaLabel', {
+    <BaseDiscoverButton
+      dataTestSubj={dataTestSubj}
+      esqlQuery={esqlQuery}
+      rangeTo={rangeTo}
+      rangeFrom={rangeFrom}
+      label={i18n.translate('xpack.apm.openErrorInDiscoverButton.label', {
         defaultMessage: 'Open in Discover',
       })}
-      data-test-subj={dataTestSubj}
-      isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
-      iconType="discoverApp"
-      href={discoverHref}
-      isDisabled={!esqlQuery || indexSettingsStatus !== FETCH_STATUS.SUCCESS}
-    >
-      {i18n.translate('xpack.apm.openErrorInDiscoverButton.label', {
+      ariaLabel={i18n.translate('xpack.apm.openErrorInDiscoverButton.ariaLabel', {
         defaultMessage: 'Open in Discover',
       })}
-    </EuiButtonEmpty>
+    />
   );
 }
