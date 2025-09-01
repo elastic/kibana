@@ -18,6 +18,7 @@ import type {
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { ConnectorConfig } from '../common';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -193,6 +194,23 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
+
+    this.logger.debug('Workflows Management: Setting connector config from actions client');
+
+    this.unsecureActionsClient!.getAll('default').then((connectors) => {
+      const nameMap = connectors.reduce((acc, connector) => {
+        if (!acc[connector.actionTypeId]) {
+          acc[connector.actionTypeId] = [];
+        }
+        acc[connector.actionTypeId].push(connector.name);
+        return acc;
+      }, {} as ConnectorConfig['nameMap']);
+
+      this.workflowsService!.setConnectorConfig({
+        types: actionsTypes,
+        nameMap,
+      });
+    });
 
     this.logger.debug('Workflows Management: Started');
 

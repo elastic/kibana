@@ -641,4 +641,29 @@ export function defineRoutes(
       }
     }
   );
+  router.get(
+    {
+      path: '/api/workflows/connectorConfig',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      const connectorConfig = await api.getConnectorConfig();
+      if (!connectorConfig) {
+        return response.notFound();
+      }
+      return response.ok({ body: connectorConfig });
+    }
+  );
 }

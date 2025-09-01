@@ -18,7 +18,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import YAML from 'yaml';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { SchemasSettings } from 'monaco-yaml';
-import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import type { z } from '@kbn/zod';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import {
@@ -33,13 +33,6 @@ import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt'
 import type { YamlValidationError } from '../model/types';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
-
-const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
-
-const useWorkflowJsonSchema = () => {
-  return jsonSchema;
-};
-
 export interface WorkflowYAMLEditorProps {
   workflowId?: string;
   filename?: string;
@@ -50,6 +43,8 @@ export interface WorkflowYAMLEditorProps {
   stepExecutions?: EsWorkflowStepExecution[];
   'data-testid'?: string;
   value: string;
+  workflowYamlZodSchemaStrict: z.ZodSchema;
+  workflowYamlZodSchemaLoose: z.ZodSchema;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
@@ -64,6 +59,8 @@ export const WorkflowYAMLEditor = ({
   lastUpdatedAt,
   highlightStep,
   stepExecutions,
+  workflowYamlZodSchemaStrict,
+  workflowYamlZodSchemaLoose,
   onMount,
   onChange,
   onSave,
@@ -74,17 +71,23 @@ export const WorkflowYAMLEditor = ({
 
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-  const workflowJsonSchema = useWorkflowJsonSchema();
+  const jsonSchemaStrict = useMemo(() => {
+    if (!workflowYamlZodSchemaStrict) {
+      return null;
+    }
+    return getJsonSchemaFromYamlSchema(workflowYamlZodSchemaStrict);
+  }, [workflowYamlZodSchemaStrict]);
+
   const schemas: SchemasSettings[] = useMemo(() => {
     return [
       {
         fileMatch: ['*'],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
-        schema: workflowJsonSchema as any,
+        schema: jsonSchemaStrict as any,
         uri: WorkflowSchemaUri,
       },
     ];
-  }, [workflowJsonSchema]);
+  }, [jsonSchemaStrict]);
 
   const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
   const highlightStepDecorationCollectionRef =
@@ -98,7 +101,7 @@ export const WorkflowYAMLEditor = ({
     validateVariables,
     handleMarkersChanged,
   } = useYamlValidation({
-    workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
+    workflowYamlSchema: workflowYamlZodSchemaLoose,
     onValidationErrors,
   });
 
@@ -236,8 +239,8 @@ export const WorkflowYAMLEditor = ({
   }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
 
   const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
-  }, []);
+    return getCompletionItemProvider(workflowYamlZodSchemaLoose);
+  }, [workflowYamlZodSchemaLoose]);
 
   useEffect(() => {
     monaco.editor.defineTheme('workflows-subdued', {

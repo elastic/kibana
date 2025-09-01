@@ -27,7 +27,7 @@ import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workfl
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
-    default: module.WorkflowYAMLEditor,
+    default: module.WorkflowYAMLEditorWithSchema,
   }))
 );
 

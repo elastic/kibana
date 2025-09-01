@@ -22,15 +22,16 @@ import {
 
 export interface ConnectorContract {
   type: string;
+  actionTypeId: string;
   paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
+  connectorId?: z.ZodType;
   outputSchema: z.ZodType;
 }
 
 function generateStepSchemaForConnector(connector: ConnectorContract) {
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
+    'connector-id': connector.connectorId ?? z.string().optional(),
     with: connector.paramsSchema,
   });
 }

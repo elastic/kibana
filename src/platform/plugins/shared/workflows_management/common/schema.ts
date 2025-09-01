@@ -12,10 +12,22 @@ import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 // TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.
+// type ActionTypeExecutorResult = ActionTypeExecutorResult<unknown>;
+
+function createConnectorOutputSchema(dataSchema: z.ZodType) {
+  return z.object({
+    actionId: z.string(),
+    status: z.enum(['ok', 'error']),
+    message: z.string().optional(),
+    serviceMessage: z.string().optional(),
+    data: dataSchema,
+  });
+}
 
 const connectors: ConnectorContract[] = [
   {
     type: 'console',
+    actionTypeId: '_console',
     paramsSchema: z
       .object({
         message: z.string(),
@@ -25,19 +37,23 @@ const connectors: ConnectorContract[] = [
   },
   {
     type: 'slack',
-    connectorIdRequired: true,
+    actionTypeId: '.slack',
+    connectorId: z.string(),
     paramsSchema: z
       .object({
         message: z.string(),
       })
       .required(),
-    outputSchema: z.object({
-      message: z.string(),
-    }),
+    outputSchema: createConnectorOutputSchema(
+      z.object({
+        message: z.string(),
+      })
+    ),
   },
   {
     type: 'inference.unified_completion',
-    connectorIdRequired: true,
+    actionTypeId: '.inference',
+    connectorId: z.string(),
     paramsSchema: z
       .object({
         body: z.object({
@@ -51,31 +67,51 @@ const connectors: ConnectorContract[] = [
       })
       .required(),
     // TODO: use UnifiedChatCompleteResponseSchema from stack_connectors/common/inference/schema.ts
-    outputSchema: z.object({
-      id: z.string(),
-      choices: z.array(
-        z.object({
-          message: z.object({
-            content: z.string(),
-            role: z.string(),
-          }),
-        })
-      ),
-    }),
-  },
-  {
-    type: 'inference.completion',
-    connectorIdRequired: true,
-    paramsSchema: z.object({
-      input: z.string(),
-    }),
-    outputSchema: z.array(
+    outputSchema: createConnectorOutputSchema(
       z.object({
-        result: z.string(),
+        id: z.string(),
+        choices: z.array(
+          z.object({
+            message: z.object({
+              content: z.string(),
+              role: z.string(),
+            }),
+          })
+        ),
       })
     ),
   },
+  {
+    type: 'inference.completion',
+    actionTypeId: '.inference',
+    connectorId: z.string(),
+    paramsSchema: z.object({
+      input: z.string(),
+    }),
+    outputSchema: createConnectorOutputSchema(
+      z.array(
+        z.object({
+          result: z.string(),
+        })
+      )
+    ),
+  },
 ];
+
+export function getConnectorContracts(actionTypeId: string, connectorIds?: string[]) {
+  return connectors
+    .filter((c) => c.actionTypeId === actionTypeId)
+    .map((c) => {
+      if (connectorIds && connectorIds.length > 0) {
+        return {
+          ...c,
+          // @ts-expect-error TODO: fix this
+          connectorId: z.union(connectorIds.map((id) => z.literal(id))),
+        };
+      }
+      return c;
+    });
+}
 
 export const getOutputSchemaForStepType = (stepType: string) => {
   return connectors.find((c) => c.type === stepType)?.outputSchema ?? z.any();

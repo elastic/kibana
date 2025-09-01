@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowYAMLEditor } from './ui/workflow_yaml_editor';
-export { WorkflowYAMLEditorWithSchema } from './ui/workflow_yaml_editor_with_schema';
+export { useWorkflowYamlZodSchema } from './model/use_workflow_yaml_schema';

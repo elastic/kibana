@@ -44,8 +44,6 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './lib/index_mappings';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
-import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type {
   GetExecutionLogsParams,
   GetStepExecutionParams,
@@ -53,6 +51,9 @@ import type {
   GetWorkflowsParams,
 } from './workflows_management_api';
 import { searchStepExecutions } from './lib/search_step_executions';
+import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
+import { SimpleWorkflowLogger } from './lib/workflow_logger';
+import type { ConnectorConfig } from '../../common';
 
 const SO_ATTRIBUTES_PREFIX = `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes`;
 const WORKFLOW_EXECUTION_STATUS_STATS_BUCKET = 50;
@@ -67,6 +68,8 @@ export class WorkflowsService {
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private workflowExecutionLogsIndex: string;
   private security?: SecurityServiceStart;
+
+  private connectorConfig: ConnectorConfig | null = null;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -845,5 +848,16 @@ export class WorkflowsService {
         cancelled,
       };
     });
+  }
+
+  public setConnectorConfig(connectorConfig: {
+    types: string[];
+    nameMap: Record<string, string[]>;
+  }) {
+    this.connectorConfig = connectorConfig;
+  }
+
+  public getConnectorConfig() {
+    return this.connectorConfig;
   }
 }

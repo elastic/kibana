@@ -102,6 +102,10 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.getWorkflow(id, spaceId);
   }
 
+  public async getConnectorConfig() {
+    return await this.workflowsService.getConnectorConfig();
+  }
+
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
