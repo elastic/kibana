@@ -54,6 +54,20 @@ export default ({ getService }: FtrProviderContext) => {
     });
   };
 
+  const deleteUserFromIndex = async (indexName: string, userName: string) => {
+    await es.deleteByQuery({
+      index: indexName,
+      query: {
+        match: { 'user.name': userName },
+      },
+      refresh: true,
+    });
+  };
+
+  const getUserWithName = (userDocs: any[], userName: string) => {
+    return userDocs.find((doc) => doc.user.name === userName);
+  };
+
   const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
     await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
     await privMonUtils.waitForSyncTaskRun();
@@ -430,6 +444,7 @@ export default ({ getService }: FtrProviderContext) => {
         const repeatedUsers = Array.from({ length: 150 }).map(() => 'C-3PO');
 
         await addUsersToIndex(indexName, [...uniqueUsernames, ...repeatedUsers]);
+
         await createEntitySource();
 
         const users = await scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
@@ -439,6 +454,28 @@ export default ({ getService }: FtrProviderContext) => {
         expect(userNames).toContain('Luke Skywalker');
         expect(userNames).toContain('C-3PO');
         expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
+      });
+
+      it('should soft delete user from index', async () => {
+        await addUsersToIndex(indexName, ['Darth Vader', 'Luke Skywalker']);
+
+        await createEntitySource();
+
+        const usersBefore = await scheduleEngineAndWaitForUserCount(2);
+
+        const lukeBefore = getUserWithName(usersBefore, 'Luke Skywalker');
+        log.info(`Luke before: ${JSON.stringify(lukeBefore)}`);
+        await deleteUserFromIndex(indexName, 'Luke Skywalker');
+        await addUsersToIndex(indexName, ['C-3PO']);
+
+        const usersAfter = await scheduleEngineAndWaitForUserCount(3);
+        const lukeAfter = getUserWithName(usersAfter, 'Luke Skywalker');
+        log.info(`Luke after: ${JSON.stringify(lukeAfter)}`);
+        expect(lukeBefore['@timestamp']).not.toEqual(lukeAfter['@timestamp']);
+        expect(lukeBefore.event.ingested).not.toEqual(lukeAfter.event.ingested);
+        expect(lukeAfter.user.is_privileged).toEqual(false);
+        expect(lukeAfter.labels.source_ids).toEqual([]);
+        expect(lukeAfter.labels.sources).toEqual([]);
       });
     });
   });

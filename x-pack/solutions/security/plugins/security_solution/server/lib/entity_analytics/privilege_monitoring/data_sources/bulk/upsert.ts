@@ -29,6 +29,7 @@ export const bulkUpsertOperationsFactory =
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];
     dataClient.log('info', `Building bulk operations for ${users.length} users`);
+    const now = new Date().toISOString();
     for (const user of users) {
       if (user.existingUserId) {
         // Update user with painless script
@@ -41,6 +42,8 @@ export const bulkUpsertOperationsFactory =
           {
             script: {
               source: `
+              ctx._source['@timestamp'] = params.now;
+              ctx._source.event.ingested = params.now;
               if (ctx._source.labels == null) {
                 ctx._source.labels = new HashMap();
               }
@@ -58,6 +61,7 @@ export const bulkUpsertOperationsFactory =
             `,
               params: {
                 source_id: user.sourceId,
+                now,
               },
             },
           }
@@ -68,6 +72,7 @@ export const bulkUpsertOperationsFactory =
         ops.push(
           { index: { _index: userIndexName } },
           {
+            '@timestamp': new Date().toISOString(),
             user: { name: user.username, is_privileged: true },
             labels: {
               sources: ['index'],
