@@ -6,14 +6,14 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationTranslationResult } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
+import type { MigrationTranslationResult as MigrationTranslationResultType } from '../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
 
 const COLORS = {
-  [RuleTranslationResult.FULL]: '#54B399',
-  [RuleTranslationResult.PARTIAL]: '#D6BF57',
-  [RuleTranslationResult.UNTRANSLATABLE]: '#DA8B45',
+  [MigrationTranslationResult.FULL]: '#54B399',
+  [MigrationTranslationResult.PARTIAL]: '#D6BF57',
+  [MigrationTranslationResult.UNTRANSLATABLE]: '#DA8B45',
   error: '#E7664C',
 } as const;
 
@@ -21,9 +21,9 @@ export const useResultVisColors = () => {
   const { euiTheme } = useEuiTheme();
   if (euiTheme.themeName === 'EUI_THEME_AMSTERDAM') {
     return {
-      [RuleTranslationResult.FULL]: euiTheme.colors.vis.euiColorVis0,
-      [RuleTranslationResult.PARTIAL]: euiTheme.colors.vis.euiColorVis5,
-      [RuleTranslationResult.UNTRANSLATABLE]: euiTheme.colors.vis.euiColorVis7,
+      [MigrationTranslationResult.FULL]: euiTheme.colors.vis.euiColorVis0,
+      [MigrationTranslationResult.PARTIAL]: euiTheme.colors.vis.euiColorVis5,
+      [MigrationTranslationResult.UNTRANSLATABLE]: euiTheme.colors.vis.euiColorVis7,
       error: euiTheme.colors.vis.euiColorVis9,
     };
   }
@@ -31,26 +31,26 @@ export const useResultVisColors = () => {
   return COLORS;
 };
 
-export const convertTranslationResultIntoColor = (status?: RuleMigrationTranslationResult) => {
+export const convertTranslationResultIntoColor = (status?: MigrationTranslationResultType) => {
   switch (status) {
-    case RuleTranslationResult.FULL:
-      return COLORS[RuleTranslationResult.FULL];
-    case RuleTranslationResult.PARTIAL:
-      return COLORS[RuleTranslationResult.PARTIAL];
-    case RuleTranslationResult.UNTRANSLATABLE:
-      return COLORS[RuleTranslationResult.UNTRANSLATABLE];
+    case MigrationTranslationResult.FULL:
+      return COLORS[MigrationTranslationResult.FULL];
+    case MigrationTranslationResult.PARTIAL:
+      return COLORS[MigrationTranslationResult.PARTIAL];
+    case MigrationTranslationResult.UNTRANSLATABLE:
+      return COLORS[MigrationTranslationResult.UNTRANSLATABLE];
     default:
       return 'subdued';
   }
 };
 
-export const convertTranslationResultIntoText = (status?: RuleMigrationTranslationResult) => {
+export const convertTranslationResultIntoText = (status?: MigrationTranslationResultType) => {
   switch (status) {
-    case RuleTranslationResult.FULL:
+    case MigrationTranslationResult.FULL:
       return i18n.SIEM_TRANSLATION_RESULT_FULL_LABEL;
-    case RuleTranslationResult.PARTIAL:
+    case MigrationTranslationResult.PARTIAL:
       return i18n.SIEM_TRANSLATION_RESULT_PARTIAL_LABEL;
-    case RuleTranslationResult.UNTRANSLATABLE:
+    case MigrationTranslationResult.UNTRANSLATABLE:
       return i18n.SIEM_TRANSLATION_RESULT_UNTRANSLATABLE_LABEL;
     default:
       return i18n.SIEM_TRANSLATION_RESULT_UNKNOWN_LABEL;
