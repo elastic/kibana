@@ -35,37 +35,44 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
     matchers: getMatchersFor(integration),
   });
 
+  function buildRequiredSources(namespace: string, indexPattern: string) {
+    const integrations = INTEGRATION_TYPES.map((integration) =>
+      makeIntegrationSource(namespace, integration)
+    );
+    return [makeDefaultIndexSource(namespace, indexPattern), ...integrations];
+  }
+
   async function upsertSources(client: MonitoringEntitySourceDescriptorClient) {
     // required sources to initialize privileged monitoring engine
-    const requiredInitSources = [
-      ...(dataClient.index ? [makeDefaultIndexSource(deps.namespace, dataClient.index)] : []), // default index source
-      ...INTEGRATION_TYPES.map((i) => makeIntegrationSource(deps.namespace, i)), // integration sources
-    ];
-    // get already existing/ managed sources
-    const existing = await client.findAll({});
-    if (!existing) {
-      // just create all, no point doing extra logic otherwise.
+    const requiredInitSources = buildRequiredSources(deps.namespace, dataClient.index);
+    const existing = (await client.findAll({})) ?? [];
+    // create all sources, if none exist already
+    if (existing.length === 0) {
       await Promise.all(requiredInitSources.map((attrs) => client.create(attrs)));
-      dataClient.log('debug', `Created all default sources`);
-    } else {
-      const soNameMap = new Map(existing.map((so) => [so.name, so]));
-      // update or create sources based on existing sources
-      await Promise.all(
-        requiredInitSources.map(async (attrs) => {
-          const source = soNameMap.get(attrs.name);
-          // if source exists, update it (in case attrs changed), else create a new one
-          if (source) {
-            const res = await client.update({ id: source.id, ...attrs });
-            dataClient.log('debug', `Updated source '${attrs.name}' (id: ${source.id})`);
-            return res;
-          } else {
-            const res = await client.create(attrs);
-            dataClient.log('debug', `Created new source '${attrs.name}'`);
-            return res;
-          }
-        })
-      );
+      dataClient.log('debug', `Created all ${requiredInitSources.length} default sources`);
+      return;
     }
+    // map existing by name for easy lookup
+    const soNameMap = new Map(existing.map((so) => [so.name, so]));
+    let created = 0;
+    let updated = 0;
+    // update or create sources based on existing sources
+    await Promise.all(
+      requiredInitSources.map(async (attrs) => {
+        const found = soNameMap.get(attrs.name);
+        if (!found) {
+          await client.create(attrs);
+          created++;
+        } else {
+          await client.update({ id: found.id, ...attrs });
+          updated++;
+        }
+      })
+    );
+    dataClient.log(
+      'debug',
+      `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${requiredInitSources.length}.`
+    );
   }
   return { upsertSources };
 };
