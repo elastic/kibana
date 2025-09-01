@@ -111,7 +111,7 @@ export const MetricsAndGroupByToolbarItems = ({
       {featureFlags.hostOtelEnabled && allowSchemaSelection && (
         <EuiFlexItem grow={false}>
           <SchemaSelector
-            value={preferredSchema ?? 'ecs'}
+            value={preferredSchema ?? 'semconv'}
             schemas={schemas}
             isLoading={loading}
             onChange={changePreferredSchema}
