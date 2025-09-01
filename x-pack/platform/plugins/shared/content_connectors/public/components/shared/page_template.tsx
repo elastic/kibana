@@ -12,10 +12,10 @@ import classNames from 'classnames';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import './page_template.scss';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { Loading } from './loading';
 import { FlashMessages } from './flash_messages';
+import * as Styles from './styles';
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
   customPageSections?: boolean; // If false, automatically wraps children in an EuiPageSection
@@ -46,6 +46,7 @@ export const SearchConnectorsPageTemplateWrapper: React.FC<PageTemplateProps> = 
     <KibanaPageTemplate
       {...pageTemplateProps}
       className={classNames('searchConnectorsPageTemplate', className)}
+      css={Styles.searchConnectorsPageTemplate}
       mainProps={{
         ...pageTemplateProps.mainProps,
         className: classNames(
