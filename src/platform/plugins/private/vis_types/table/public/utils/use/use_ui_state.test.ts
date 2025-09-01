@@ -157,6 +157,37 @@ describe('useUiState', () => {
       expect(uiState.set).toHaveBeenCalledWith('vis.params.colWidth', [updatedCol1, col2]);
     });
 
+    it('should ignore external attempts to clear valid sort state', async () => {
+      const { result } = renderHook(() => useUiState(uiState));
+
+      const validSort: TableVisUiState['sort'] = { columnIndex: 1, direction: 'desc' as const };
+
+      act(() => {
+        result.current.setSort(validSort);
+      });
+
+      expect(result.current.sort).toEqual(validSort);
+
+      uiState.getChanges = jest.fn(() => ({
+        vis: {
+          params: {
+            sort: undefined,
+            colWidth: [],
+          },
+        },
+      }));
+
+      // @ts-expect-error
+      const updateOnChange = uiState.on.mock.calls[0][1];
+
+      act(() => {
+        updateOnChange();
+        jest.runAllTimers();
+      });
+
+      expect(result.current.sort).toEqual(validSort);
+    });
+
     afterAll(() => {
       jest.useRealTimers();
     });
