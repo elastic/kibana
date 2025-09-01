@@ -46,77 +46,57 @@ export interface EnhancedConnectorDefinition {
 export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = [
   {
     type: 'elasticsearch.esql.query',
-    enhancedDescription: 'Execute ES|QL queries against Elasticsearch with support for various output formats',
-    enhancedParamsSchema: z.object({
-      error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
-      filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
-      human: z.boolean().optional().describe('Boolean flag: human'),
-      pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-      format: z.enum(['csv', 'json', 'tsv', 'txt', 'yaml', 'cbor', 'smile', 'arrow']).optional().describe('Output format for the query results'),
-      delimiter: z.union([z.string(), z.number()]).optional().describe('Parameter: delimiter'),
-      drop_null_columns: z.boolean().optional().describe('Boolean flag: drop_null_columns'),
-      allow_partial_results: z.boolean().optional().describe('Boolean flag: allow_partial_results'),
-      body: z.object({
-        query: z.string().describe('ES|QL query string (e.g., "FROM my-index | LIMIT 10")'),
-      }).describe('Request body containing the ES|QL query'),
-    }),
+    enhancedDescription: 'Execute ES|QL queries against Elasticsearch with support for various output formats. Parameters are flattened - no body wrapper needed.',
     examples: {
       params: {
-        body: {
-          query: 'FROM my-index | LIMIT 10'
-        },
+        query: 'FROM my-index | LIMIT 10',
         format: 'json'
       },
       snippet: `- name: run_esql_query
   type: elasticsearch.esql.query
   with:
     format: "json"
-    body:
-      query: "FROM logs-* | WHERE @timestamp > NOW() - 1h | STATS count() BY host.name"`
-    }
+    query: "FROM logs-* | WHERE @timestamp > NOW() - 1h | STATS count() BY host.name"`
+    },
+    parameterEnhancements: {
+      query: {
+        schema: z.string().min(1).describe('ES|QL query string'),
+        example: 'FROM my-index | WHERE status = "active" | LIMIT 100',
+        description: 'ES|QL query string. Use the Elasticsearch Query Language to filter, aggregate, and transform data.',
+      },
+      format: {
+        example: 'json',
+        description: 'Response format. JSON is recommended for further processing in workflows.',
+      },
+      columnar: {
+        example: false,
+        description: 'Return results in columnar format instead of rows.',
+      },
+    },
   },
   
   {
     type: 'elasticsearch.search',
-    enhancedDescription: 'Search documents with query DSL, aggregations, and advanced options',
-    enhancedParamsSchema: z.object({
-      // Copy existing URL parameters from generated schema
-      error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
-      filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
-      human: z.boolean().optional().describe('Boolean flag: human'),
-      pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-      index: z.string().describe('Path parameter: index (required)'),
-      // Enhanced body parameter with proper Elasticsearch Query DSL example
-      body: z.object({
-        query: z.any().describe('Elasticsearch query DSL (e.g., {"match_all": {}})'),
-        size: z.number().optional().describe('Number of documents to return (e.g., 10)'),
-        from: z.number().optional().describe('Starting document offset (e.g., 0)'),
-        sort: z.any().optional().describe('Sort specification'),
-        aggs: z.any().optional().describe('Aggregations'),
-      }).describe('Search request body'),
-    }),
+    enhancedDescription: 'Search documents with query DSL, aggregations, and advanced options. Parameters are flattened - no body wrapper needed.',
     examples: {
       params: {
         index: 'logs-*',
-        body: {
-          query: {
-            match: {
-              message: 'error'
-            }
-          },
-          size: 10
-        }
+        query: {
+          match: {
+            message: 'error'
+          }
+        },
+        size: 10
       },
       snippet: `- name: search_logs
   type: elasticsearch.search
   with:
     index: "logs-*"
-    body:
-      query:
-        range:
-          "@timestamp":
-            gte: "now-1h"
-      size: 100`
+    query:
+      range:
+        "@timestamp":
+          gte: "now-1h"
+    size: 100`
     }
   },
 
@@ -162,7 +142,7 @@ export function mergeEnhancedConnectors(
     }
     
     console.log(`DEBUG - Enhancing connector: ${connector.type}`);
-    console.log('Original paramsSchema:', connector.paramsSchema);
+    console.log('Original paramsSchema keys:', Object.keys((connector.paramsSchema as any)._def?.shape?.() || {}));
     
     // Create enhanced connector
     const enhanced: InternalConnectorContract & { examples?: any } = {

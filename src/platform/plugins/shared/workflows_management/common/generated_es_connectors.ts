@@ -2,7 +2,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Elasticsearch connector definitions generated from Console's API specifications.
- * Generated at: 2025-09-01T11:51:57.380Z
+ * Generated at: 2025-09-01T13:35:29.922Z
  * Source: Console definitions (568 APIs)
  * 
  * To regenerate: npm run generate:es-connectors
@@ -22,7 +22,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -39,7 +39,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -56,7 +56,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -73,7 +73,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -90,7 +90,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -107,7 +107,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["history_id","version"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     history_id: z.string().describe('Path parameter: history_id (required)'),
@@ -126,7 +126,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -148,7 +148,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","keep_alive","typed_keys","wait_for_completion_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -173,7 +173,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","keep_alive"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -196,7 +196,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","wait_for_completion_timeout","keep_alive","keep_on_completion","allow_no_indices","allow_partial_search_results","analyzer","analyze_wildcard","batched_reduce_size","ccs_minimize_roundtrips","default_operator","df","docvalue_fields","expand_wildcards","explain","ignore_throttled","ignore_unavailable","lenient","max_concurrent_shard_requests","preference","request_cache","routing","search_type","stats","stored_fields","suggest_field","suggest_mode","suggest_size","suggest_text","terminate_after","timeout","track_total_hits","track_scores","typed_keys","rest_total_hits_as_int","version","_source","_source_excludes","_source_includes","seq_no_primary_term","q","size","from","sort"],
-      bodyParams: ['body']
+      bodyParams: ["__scope_link"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -247,7 +247,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.string(), z.number()]).optional().describe('Parameter: size'),
     from: z.union([z.string(), z.number()]).optional().describe('Parameter: from'),
     sort: z.array(z.string()).optional().describe('Array parameter: sort'),
-    body: z.any().optional().describe('Request body'),
+    __scope_link: z.any().optional().describe('__scope_link'),
     }),
     outputSchema: z.any().describe('Response from async_search.submit API'),
   },
@@ -261,7 +261,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -285,7 +285,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -307,7 +307,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -330,7 +330,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -354,7 +354,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","include_source_on_error","list_executed_pipelines","pipeline","refresh","routing","_source","_source_excludes","_source_includes","timeout","wait_for_active_shards","require_alias","require_data_stream"],
-      bodyParams: ['body']
+      bodyParams: ["operations"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -374,7 +374,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     require_alias: z.boolean().optional().describe('Boolean flag: require_alias'),
     require_data_stream: z.boolean().optional().describe('Boolean flag: require_data_stream'),
-    body: z.any().optional().describe('Request body'),
+    operations: z.array(z.object({}).passthrough()).optional().describe('Bulk operations'),
     }),
     outputSchema: z.any().describe('Response from bulk API'),
   },
@@ -388,7 +388,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -405,7 +405,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","expand_wildcards","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -434,7 +434,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","bytes","h","s","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -464,7 +464,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -493,7 +493,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -520,7 +520,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["fields"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","bytes","fields","h","s"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     fields: z.string().describe('Path parameter: fields (required)'),
@@ -548,7 +548,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","time","ts","h","s"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -576,7 +576,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -593,7 +593,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","bytes","expand_wildcards","health","include_unloaded_segments","pri","time","master_timeout","h","s"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -627,7 +627,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -655,7 +655,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","allow_no_match","bytes","h","s","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -685,7 +685,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","allow_no_match","h","s","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -714,7 +714,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","allow_no_match","bytes","h","s","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -744,7 +744,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","allow_no_match","bytes","h","s","from","size","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -776,7 +776,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -804,7 +804,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","bytes","full_id","include_unloaded_segments","h","s","master_timeout","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -835,7 +835,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","local","master_timeout","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -864,7 +864,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","include_bootstrap","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -893,7 +893,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","active_only","bytes","detailed","index","h","s","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -924,7 +924,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -952,7 +952,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","bytes","h","s","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -982,7 +982,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","bytes","h","s","master_timeout","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1012,7 +1012,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","ignore_unavailable","h","s","master_timeout","time"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -1042,7 +1042,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","actions","detailed","nodes","parent_task_id","h","s","time","timeout","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     format: z.enum(['text']).optional().describe('Enum parameter: format'),
@@ -1075,7 +1075,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1104,7 +1104,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["thread_pool_patterns"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","h","s","time","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     thread_pool_patterns: z.string().describe('Path parameter: thread_pool_patterns (required)'),
@@ -1134,7 +1134,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["format","help","v","error_trace","filter_path","human","pretty","allow_no_match","from","h","s","time","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -1165,7 +1165,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1188,7 +1188,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["remote_cluster","leader_index","max_read_request_operation_count","max_outstanding_read_requests","max_read_request_size","max_write_request_operation_count","max_write_request_size","max_outstanding_write_requests","max_write_buffer_count","max_write_buffer_size","max_retry_delay","read_poll_timeout"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1198,7 +1198,18 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     wait_for_active_shards: z.enum(['all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
-    body: z.any().optional().describe('Request body'),
+    remote_cluster: z.any().optional().describe('remote_cluster'),
+    leader_index: z.any().optional().describe('leader_index'),
+    max_read_request_operation_count: z.any().optional().describe('max_read_request_operation_count'),
+    max_outstanding_read_requests: z.any().optional().describe('max_outstanding_read_requests'),
+    max_read_request_size: z.any().optional().describe('max_read_request_size'),
+    max_write_request_operation_count: z.any().optional().describe('max_write_request_operation_count'),
+    max_write_request_size: z.any().optional().describe('max_write_request_size'),
+    max_outstanding_write_requests: z.any().optional().describe('max_outstanding_write_requests'),
+    max_write_buffer_count: z.any().optional().describe('max_write_buffer_count'),
+    max_write_buffer_size: z.any().optional().describe('max_write_buffer_size'),
+    max_retry_delay: z.any().optional().describe('max_retry_delay'),
+    read_poll_timeout: z.any().optional().describe('read_poll_timeout'),
     }),
     outputSchema: z.any().describe('Response from ccr.follow API'),
   },
@@ -1212,7 +1223,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1235,7 +1246,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1258,7 +1269,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["follower_cluster","follower_index","follower_index_uuid","leader_remote_cluster"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1267,7 +1278,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    follower_cluster: z.any().optional().describe('follower_cluster'),
+    follower_index: z.any().optional().describe('follower_index'),
+    follower_index_uuid: z.any().optional().describe('follower_index_uuid'),
+    leader_remote_cluster: z.any().optional().describe('leader_remote_cluster'),
     }),
     outputSchema: z.any().describe('Response from ccr.forget_follower API'),
   },
@@ -1281,7 +1295,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1304,7 +1318,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1327,7 +1341,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1350,7 +1364,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["remote_cluster","leader_index_patterns","follow_index_pattern","max_read_request_operation_count","max_outstanding_read_requests","max_read_request_size","max_write_request_operation_count","max_write_request_size","max_outstanding_write_requests","max_write_buffer_count","max_write_buffer_size","max_retry_delay","read_poll_timeout"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1359,7 +1373,19 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
-    body: z.any().optional().describe('Request body'),
+    remote_cluster: z.any().optional().describe('remote_cluster'),
+    leader_index_patterns: z.any().optional().describe('leader_index_patterns'),
+    follow_index_pattern: z.any().optional().describe('follow_index_pattern'),
+    max_read_request_operation_count: z.any().optional().describe('max_read_request_operation_count'),
+    max_outstanding_read_requests: z.any().optional().describe('max_outstanding_read_requests'),
+    max_read_request_size: z.any().optional().describe('max_read_request_size'),
+    max_write_request_operation_count: z.any().optional().describe('max_write_request_operation_count'),
+    max_write_request_size: z.any().optional().describe('max_write_request_size'),
+    max_outstanding_write_requests: z.any().optional().describe('max_outstanding_write_requests'),
+    max_write_buffer_count: z.any().optional().describe('max_write_buffer_count'),
+    max_write_buffer_size: z.any().optional().describe('max_write_buffer_size'),
+    max_retry_delay: z.any().optional().describe('max_retry_delay'),
+    read_poll_timeout: z.any().optional().describe('read_poll_timeout'),
     }),
     outputSchema: z.any().describe('Response from ccr.put_auto_follow_pattern API'),
   },
@@ -1373,7 +1399,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1396,7 +1422,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["max_read_request_operation_count","max_outstanding_read_requests","max_read_request_size","max_write_request_operation_count","max_write_request_size","max_outstanding_write_requests","max_write_buffer_count","max_write_buffer_size","max_retry_delay","read_poll_timeout"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1405,7 +1431,16 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
-    body: z.any().optional().describe('Request body'),
+    max_read_request_operation_count: z.any().optional().describe('max_read_request_operation_count'),
+    max_outstanding_read_requests: z.any().optional().describe('max_outstanding_read_requests'),
+    max_read_request_size: z.any().optional().describe('max_read_request_size'),
+    max_write_request_operation_count: z.any().optional().describe('max_write_request_operation_count'),
+    max_write_request_size: z.any().optional().describe('max_write_request_size'),
+    max_outstanding_write_requests: z.any().optional().describe('max_outstanding_write_requests'),
+    max_write_buffer_count: z.any().optional().describe('max_write_buffer_count'),
+    max_write_buffer_size: z.any().optional().describe('max_write_buffer_size'),
+    max_retry_delay: z.any().optional().describe('max_retry_delay'),
+    read_poll_timeout: z.any().optional().describe('read_poll_timeout'),
     }),
     outputSchema: z.any().describe('Response from ccr.resume_follow API'),
   },
@@ -1419,7 +1454,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1442,7 +1477,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1465,7 +1500,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["scroll_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["scroll_id"]
     },
     paramsSchema: z.object({
     scroll_id: z.string().describe('Path parameter: scroll_id (required)'),
@@ -1473,7 +1508,6 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from clear_scroll API'),
   },
@@ -1487,7 +1521,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1508,7 +1542,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","include_disk_info","include_yes_decisions","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1532,7 +1566,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1556,7 +1590,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","wait_for_removal"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1579,7 +1613,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","local"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1603,7 +1637,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","flat_settings","include_defaults","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1629,7 +1663,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","flat_settings","include_defaults","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1654,7 +1688,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","level","local","master_timeout","timeout","wait_for_active_shards","wait_for_events","wait_for_nodes","wait_for_no_initializing_shards","wait_for_no_relocating_shards","wait_for_status"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -1687,7 +1721,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["target"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     target: z.string().describe('Path parameter: target (required)'),
@@ -1709,7 +1743,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1732,7 +1766,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","node_names","node_ids","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1757,7 +1791,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","create","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["template","_meta","version","allow_auto_create"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -1767,7 +1801,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     create: z.boolean().optional().describe('Boolean flag: create'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
-    body: z.any().optional().describe('Request body'),
+    template: z.any().optional().describe('template'),
+    _meta: z.any().optional().describe('_meta'),
+    version: z.any().optional().describe('version'),
+    allow_auto_create: z.any().optional().describe('allow_auto_create'),
     }),
     outputSchema: z.any().describe('Response from cluster.put_component_template API'),
   },
@@ -1781,7 +1818,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","flat_settings","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["persistent","transient"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1791,7 +1828,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     flat_settings: z.boolean().optional().describe('Boolean flag: flat_settings'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    persistent: z.any().optional().describe('persistent'),
+    transient: z.any().optional().describe('transient'),
     }),
     outputSchema: z.any().describe('Response from cluster.put_settings API'),
   },
@@ -1805,7 +1843,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1826,7 +1864,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","dry_run","explain","metric","retry_failed","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["commands","dry_run"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -1839,7 +1877,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     retry_failed: z.boolean().optional().describe('Boolean flag: retry_failed'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    commands: z.any().optional().describe('commands'),
     }),
     outputSchema: z.any().describe('Response from cluster.reroute API'),
   },
@@ -1853,7 +1891,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["metric","index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","flat_settings","ignore_unavailable","local","master_timeout","wait_for_metadata_version","wait_for_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     metric: z.string().describe('Path parameter: metric (required)'),
@@ -1884,7 +1922,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","include_remotes","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -1908,7 +1946,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -1930,7 +1968,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty","delete_sync_jobs","hard"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -1954,7 +1992,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty","include_deleted"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -1977,7 +2015,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -1999,7 +2037,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","from","size","index_name","connector_name","service_type","include_deleted","query"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -2027,7 +2065,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -2048,7 +2086,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2070,7 +2108,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -2088,7 +2126,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -2106,7 +2144,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -2123,7 +2161,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -2141,7 +2179,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_sync_job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_sync_job_id: z.string().describe('Path parameter: connector_sync_job_id (required)'),
@@ -2163,7 +2201,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_sync_job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_sync_job_id: z.string().describe('Path parameter: connector_sync_job_id (required)'),
@@ -2185,7 +2223,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_sync_job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_sync_job_id: z.string().describe('Path parameter: connector_sync_job_id (required)'),
@@ -2207,7 +2245,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_sync_job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_sync_job_id: z.string().describe('Path parameter: connector_sync_job_id (required)'),
@@ -2229,7 +2267,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_sync_job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_sync_job_id: z.string().describe('Path parameter: connector_sync_job_id (required)'),
@@ -2251,7 +2289,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_sync_job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_sync_job_id: z.string().describe('Path parameter: connector_sync_job_id (required)'),
@@ -2273,7 +2311,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","from","size","status","connector_id","job_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -2299,7 +2337,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -2320,7 +2358,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_sync_job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_sync_job_id: z.string().describe('Path parameter: connector_sync_job_id (required)'),
@@ -2342,7 +2380,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2364,7 +2402,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2386,7 +2424,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2408,7 +2446,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2430,7 +2468,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2452,7 +2490,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2474,7 +2512,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2496,7 +2534,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2518,7 +2556,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2540,7 +2578,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2562,7 +2600,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2584,7 +2622,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2606,7 +2644,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2628,7 +2666,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["connector_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     connector_id: z.string().describe('Path parameter: connector_id (required)'),
@@ -2650,7 +2688,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","analyzer","analyze_wildcard","default_operator","df","expand_wildcards","ignore_throttled","ignore_unavailable","lenient","min_score","preference","routing","terminate_after","q"],
-      bodyParams: ['body']
+      bodyParams: ["query"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -2672,7 +2710,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     routing: z.union([z.string(), z.number()]).optional().describe('Parameter: routing'),
     terminate_after: z.union([z.string(), z.number()]).optional().describe('Parameter: terminate_after'),
     q: z.union([z.string(), z.number()]).optional().describe('Parameter: q'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
     }),
     outputSchema: z.any().describe('Response from count API'),
   },
@@ -2686,7 +2724,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","if_primary_term","if_seq_no","include_source_on_error","op_type","pipeline","refresh","require_alias","require_data_stream","routing","timeout","version","version_type","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -2722,7 +2760,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index_uuid"],
       urlParams: ["error_trace","filter_path","human","pretty","accept_data_loss","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index_uuid: z.string().describe('Path parameter: index_uuid (required)'),
@@ -2747,7 +2785,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index_uuid"],
       urlParams: ["error_trace","filter_path","human","pretty","accept_data_loss","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index_uuid: z.string().describe('Path parameter: index_uuid (required)'),
@@ -2772,7 +2810,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -2793,7 +2831,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","if_primary_term","if_seq_no","refresh","routing","timeout","version","version_type","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -2824,7 +2862,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","analyzer","analyze_wildcard","conflicts","default_operator","df","expand_wildcards","from","ignore_unavailable","lenient","max_docs","preference","refresh","request_cache","requests_per_second","routing","q","scroll","scroll_size","search_timeout","search_type","slices","sort","stats","terminate_after","timeout","version","wait_for_active_shards","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["query","conflicts"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -2861,7 +2899,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version: z.boolean().optional().describe('Boolean flag: version'),
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
     }),
     outputSchema: z.any().describe('Response from delete_by_query API'),
   },
@@ -2875,7 +2913,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_id"],
       urlParams: ["error_trace","filter_path","human","pretty","requests_per_second"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_id: z.string().describe('Path parameter: task_id (required)'),
@@ -2898,7 +2936,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -2922,7 +2960,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -2945,7 +2983,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -2969,7 +3007,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -2992,7 +3030,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["geo_match","match"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -3001,7 +3039,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
-    body: z.any().optional().describe('Request body'),
+    geo_match: z.any().optional().describe('geo_match'),
+    match: z.any().optional().describe('match'),
     }),
     outputSchema: z.any().describe('Response from enrich.put_policy API'),
   },
@@ -3015,7 +3054,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3037,7 +3076,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3059,7 +3098,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","keep_alive","wait_for_completion_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3083,7 +3122,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3105,7 +3144,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","allow_partial_search_results","allow_partial_sequence_results","expand_wildcards","ignore_unavailable","keep_alive","keep_on_completion","wait_for_completion_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3135,7 +3174,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","allow_partial_results","delimiter","drop_null_columns","format"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3160,7 +3199,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3182,7 +3221,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","drop_null_columns","format","keep_alive","wait_for_completion_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3208,7 +3247,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","drop_null_columns"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3231,7 +3270,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3253,7 +3292,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3274,7 +3313,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","format","delimiter","drop_null_columns","allow_partial_results"],
-      bodyParams: ['body']
+      bodyParams: ["columnar","locale","params","query","profile","filter"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3285,7 +3324,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     delimiter: z.union([z.string(), z.number()]).optional().describe('Parameter: delimiter'),
     drop_null_columns: z.boolean().optional().describe('Boolean flag: drop_null_columns'),
     allow_partial_results: z.boolean().optional().describe('Boolean flag: allow_partial_results'),
-    body: z.any().optional().describe('Request body'),
+    columnar: z.boolean().optional().describe('Return columnar results'),
+    locale: z.string().optional().describe('Locale for query execution'),
+    params: z.array(z.any()).optional().describe('Query parameters'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    profile: z.boolean().optional().describe('Enable profiling'),
+    filter: z.object({}).passthrough().optional().describe('Query filter'),
     }),
     outputSchema: z.any().describe('Response from esql.query API'),
   },
@@ -3299,7 +3343,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","preference","realtime","refresh","routing","_source","_source_excludes","_source_includes","stored_fields","version","version_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3332,7 +3376,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","preference","realtime","refresh","routing","_source","_source_excludes","_source_includes","version","version_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3364,7 +3408,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","analyzer","analyze_wildcard","default_operator","df","lenient","preference","routing","_source","_source_excludes","_source_includes","stored_fields","q"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3399,7 +3443,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3421,7 +3465,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3443,7 +3487,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","fields","ignore_unavailable","include_unmapped","filters","types","include_empty_fields"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3473,7 +3517,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3491,7 +3535,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3509,7 +3553,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","wait_for_advance","wait_for_index","checkpoints","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3535,7 +3579,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","ccs_minimize_roundtrips","expand_wildcards","ignore_throttled","ignore_unavailable","max_concurrent_searches","max_concurrent_shard_requests","pre_filter_shard_size","search_type","rest_total_hits_as_int","typed_keys","wait_for_checkpoints","allow_partial_search_results"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3570,7 +3614,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -3587,7 +3631,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","analyzer","analyze_wildcard","batched_reduce_size","ccs_minimize_roundtrips","default_operator","df","docvalue_fields","expand_wildcards","explain","ignore_throttled","ignore_unavailable","lenient","max_concurrent_shard_requests","preference","pre_filter_shard_size","request_cache","routing","scroll","search_type","stats","stored_fields","suggest_field","suggest_mode","suggest_size","suggest_text","terminate_after","timeout","track_total_hits","track_scores","typed_keys","rest_total_hits_as_int","version","_source","_source_excludes","_source_includes","seq_no_primary_term","q","size","from","sort","wait_for_checkpoints","allow_partial_search_results"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3652,7 +3696,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","force_synthetic_source","preference","realtime","refresh","routing","_source","_source_excludes","_source_includes","stored_fields","version","version_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3686,7 +3730,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -3709,7 +3753,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3730,7 +3774,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3751,7 +3795,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","preference","realtime","refresh","routing","_source","_source_excludes","_source_includes","stored_fields","version","version_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3784,7 +3828,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","routing","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["query","vertices","connections"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3794,7 +3838,9 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     routing: z.union([z.string(), z.number()]).optional().describe('Parameter: routing'),
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    vertices: z.any().optional().describe('vertices'),
+    connections: z.any().optional().describe('connections'),
     }),
     outputSchema: z.any().describe('Response from graph.explore API'),
   },
@@ -3808,7 +3854,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["feature"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout","verbose","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     feature: z.string().describe('Path parameter: feature (required)'),
@@ -3833,7 +3879,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["policy"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     policy: z.string().describe('Path parameter: policy (required)'),
@@ -3857,7 +3903,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","only_errors","only_managed","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3882,7 +3928,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["policy"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     policy: z.string().describe('Path parameter: policy (required)'),
@@ -3906,7 +3952,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3927,7 +3973,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","dry_run","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -3950,7 +3996,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["current_step","next_step"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -3958,7 +4004,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    current_step: z.any().optional().describe('current_step'),
+    next_step: z.any().optional().describe('next_step'),
     }),
     outputSchema: z.any().describe('Response from ilm.move_to_step API'),
   },
@@ -3972,7 +4019,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["policy"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["policy"]
     },
     paramsSchema: z.object({
     policy: z.string().describe('Path parameter: policy (required)'),
@@ -3982,7 +4029,6 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ilm.put_lifecycle API'),
   },
@@ -3996,7 +4042,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4018,7 +4064,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4040,7 +4086,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -4063,7 +4109,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -4086,7 +4132,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","if_primary_term","if_seq_no","include_source_on_error","op_type","pipeline","refresh","routing","timeout","version","version_type","wait_for_active_shards","require_alias"],
-      bodyParams: ['body']
+      bodyParams: ["document"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4107,7 +4153,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.enum(['internal', 'external', 'external_gte', 'force']).optional().describe('Enum parameter: version_type'),
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     require_alias: z.boolean().optional().describe('Boolean flag: require_alias'),
-    body: z.any().optional().describe('Request body'),
+    document: z.object({}).passthrough().optional().describe('Document content'),
     }),
     outputSchema: z.any().describe('Response from index API'),
   },
@@ -4121,7 +4167,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","block"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4149,7 +4195,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","index"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4171,7 +4217,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4193,7 +4239,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","index","allow_no_indices","expand_wildcards","fielddata","fields","ignore_unavailable","query","request"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4222,7 +4268,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","target"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["settings","aliases"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4234,7 +4280,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
-    body: z.any().optional().describe('Request body'),
+    settings: z.any().optional().describe('settings'),
+    aliases: z.any().optional().describe('aliases'),
     }),
     outputSchema: z.any().describe('Response from indices.clone API'),
   },
@@ -4248,7 +4295,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout","timeout","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4276,7 +4323,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["mappings","settings","aliases"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4287,7 +4334,9 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
-    body: z.any().optional().describe('Request body'),
+    mappings: z.any().optional().describe('mappings'),
+    settings: z.any().optional().describe('settings'),
+    aliases: z.any().optional().describe('aliases'),
     }),
     outputSchema: z.any().describe('Response from indices.create API'),
   },
@@ -4301,7 +4350,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4325,7 +4374,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["source","dest"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     source: z.string().describe('Path parameter: source (required)'),
@@ -4348,7 +4397,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4371,7 +4420,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4398,7 +4447,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4423,7 +4472,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4448,7 +4497,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","expand_wildcards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4472,7 +4521,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4497,7 +4546,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4521,7 +4570,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4545,7 +4594,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","flush","ignore_unavailable","run_expensive_tasks"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4572,7 +4621,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","target_index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4595,7 +4644,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","flat_settings","ignore_unavailable","include_defaults","local"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4623,7 +4672,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name","index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4650,7 +4699,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","local","flat_settings","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4675,7 +4724,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","flat_settings","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4700,7 +4749,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","include_defaults","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4724,7 +4773,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","fields"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4750,7 +4799,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","force","ignore_unavailable","wait_if_ongoing"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4777,7 +4826,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","flush","ignore_unavailable","max_num_segments","only_expunge_deletes","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4806,7 +4855,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","flat_settings","ignore_unavailable","include_defaults","local","master_timeout","features"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -4836,7 +4885,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name","index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4863,7 +4912,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","include_defaults","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4888,7 +4937,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -4909,7 +4958,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","include_defaults","master_timeout","verbose"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4935,7 +4984,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4953,7 +5002,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -4977,7 +5026,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5000,7 +5049,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["fields","index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","include_defaults"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     fields: z.string().describe('Path parameter: fields (required)'),
@@ -5027,7 +5076,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","local","flat_settings","master_timeout","include_defaults"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5053,7 +5102,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5080,7 +5129,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5102,7 +5151,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","name"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","flat_settings","ignore_unavailable","include_defaults","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5132,7 +5181,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","flat_settings","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5157,7 +5206,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -5178,7 +5227,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5202,7 +5251,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -5223,7 +5272,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout","timeout","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5251,7 +5300,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5274,7 +5323,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","name"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["filter","routing","search_routing","index_routing"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5285,7 +5334,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    filter: z.object({}).passthrough().optional().describe('Query filter'),
+    routing: z.any().optional().describe('routing'),
+    search_routing: z.any().optional().describe('search_routing'),
+    index_routing: z.any().optional().describe('index_routing'),
     }),
     outputSchema: z.any().describe('Response from indices.put_alias API'),
   },
@@ -5299,7 +5351,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5324,7 +5376,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5342,7 +5394,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5367,7 +5419,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","dry_run","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5392,7 +5444,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","create","master_timeout","cause"],
-      bodyParams: ['body']
+      bodyParams: ["composed_of","index_patterns","data_stream","template","_meta","priority","version"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5403,7 +5455,13 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     create: z.boolean().optional().describe('Boolean flag: create'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     cause: z.union([z.string(), z.number()]).optional().describe('Parameter: cause'),
-    body: z.any().optional().describe('Request body'),
+    composed_of: z.any().optional().describe('composed_of'),
+    index_patterns: z.any().optional().describe('index_patterns'),
+    data_stream: z.any().optional().describe('data_stream'),
+    template: z.any().optional().describe('template'),
+    _meta: z.any().optional().describe('_meta'),
+    priority: z.any().optional().describe('priority'),
+    version: z.any().optional().describe('version'),
     }),
     outputSchema: z.any().describe('Response from indices.put_index_template API'),
   },
@@ -5417,7 +5475,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout","timeout","write_index_only"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5445,7 +5503,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","flat_settings","ignore_unavailable","master_timeout","preserve_existing","reopen","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["__scope_link"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5461,7 +5519,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     preserve_existing: z.boolean().optional().describe('Boolean flag: preserve_existing'),
     reopen: z.boolean().optional().describe('Boolean flag: reopen'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    __scope_link: z.any().optional().describe('__scope_link'),
     }),
     outputSchema: z.any().describe('Response from indices.put_settings API'),
   },
@@ -5475,7 +5533,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","create","master_timeout","order","cause"],
-      bodyParams: ['body']
+      bodyParams: ["index_patterns","mappings","settings","version","order","aliases"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5487,7 +5545,11 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     order: z.union([z.string(), z.number()]).optional().describe('Parameter: order'),
     cause: z.union([z.string(), z.number()]).optional().describe('Parameter: cause'),
-    body: z.any().optional().describe('Request body'),
+    index_patterns: z.any().optional().describe('index_patterns'),
+    mappings: z.any().optional().describe('mappings'),
+    settings: z.any().optional().describe('settings'),
+    version: z.any().optional().describe('version'),
+    aliases: z.any().optional().describe('aliases'),
     }),
     outputSchema: z.any().describe('Response from indices.put_template API'),
   },
@@ -5501,7 +5563,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","active_only","detailed"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5525,7 +5587,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5550,7 +5612,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","resource"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5576,7 +5638,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","block"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5604,7 +5666,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_throttled","ignore_unavailable","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5631,7 +5693,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","ignore_unavailable","allow_no_indices"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5656,7 +5718,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["alias","new_index"],
       urlParams: ["error_trace","filter_path","human","pretty","dry_run","master_timeout","timeout","wait_for_active_shards","lazy"],
-      bodyParams: ['body']
+      bodyParams: ["conditions","settings","mappings","aliases"]
     },
     paramsSchema: z.object({
     alias: z.string().describe('Path parameter: alias (required)'),
@@ -5670,7 +5732,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     lazy: z.boolean().optional().describe('Boolean flag: lazy'),
-    body: z.any().optional().describe('Request body'),
+    conditions: z.any().optional().describe('conditions'),
+    settings: z.any().optional().describe('settings'),
+    mappings: z.any().optional().describe('mappings'),
+    aliases: z.any().optional().describe('aliases'),
     }),
     outputSchema: z.any().describe('Response from indices.rollover API'),
   },
@@ -5684,7 +5749,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5709,7 +5774,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","status"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5735,7 +5800,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","target"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5761,7 +5826,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","create","cause","master_timeout","include_defaults"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5787,7 +5852,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","create","cause","master_timeout","include_defaults"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -5813,7 +5878,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","target"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout","wait_for_active_shards"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5839,7 +5904,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["metric","index"],
       urlParams: ["error_trace","filter_path","human","pretty","completion_fields","expand_wildcards","fielddata_fields","fields","forbid_closed_indices","groups","include_segment_file_sizes","include_unloaded_segments","level"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     metric: z.string().describe('Path parameter: metric (required)'),
@@ -5871,7 +5936,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["actions"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -5880,7 +5945,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    actions: z.any().optional().describe('actions'),
     }),
     outputSchema: z.any().describe('Response from indices.update_aliases API'),
   },
@@ -5894,7 +5959,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","all_shards","analyzer","analyze_wildcard","default_operator","df","expand_wildcards","explain","ignore_unavailable","lenient","rewrite","q"],
-      bodyParams: ['body']
+      bodyParams: ["query"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -5914,7 +5979,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     lenient: z.boolean().optional().describe('Boolean flag: lenient'),
     rewrite: z.boolean().optional().describe('Boolean flag: rewrite'),
     q: z.union([z.string(), z.number()]).optional().describe('Parameter: q'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
     }),
     outputSchema: z.any().describe('Response from indices.validate_query API'),
   },
@@ -5928,7 +5993,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -5951,7 +6016,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -5974,7 +6039,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id","task_type"],
       urlParams: ["error_trace","filter_path","human","pretty","dry_run","force"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -5999,7 +6064,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id","task_type"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6022,7 +6087,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id","task_type"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6046,7 +6111,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id","task_type"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6069,7 +6134,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","alibabacloud_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6092,7 +6157,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","amazonbedrock_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6115,7 +6180,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","amazonsagemaker_inference_id"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6134,7 +6199,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","anthropic_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6157,7 +6222,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","azureaistudio_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6180,7 +6245,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","azureopenai_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6203,7 +6268,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","cohere_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6226,7 +6291,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","deepseek_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6249,7 +6314,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","elasticsearch_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6272,7 +6337,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","elser_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6295,7 +6360,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","googleaistudio_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6318,7 +6383,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","googlevertexai_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6341,7 +6406,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","huggingface_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6364,7 +6429,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","jinaai_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6387,7 +6452,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","mistral_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6410,7 +6475,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","openai_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6433,7 +6498,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","voyageai_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6456,7 +6521,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_type","watsonx_inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_type: z.string().describe('Path parameter: task_type (required)'),
@@ -6479,7 +6544,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6502,7 +6567,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6525,7 +6590,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6547,7 +6612,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6570,7 +6635,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["inference_id","task_type"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     inference_id: z.string().describe('Path parameter: inference_id (required)'),
@@ -6593,7 +6658,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -6614,7 +6679,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6638,7 +6703,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6662,7 +6727,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6686,7 +6751,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -6707,7 +6772,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6729,7 +6794,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6752,7 +6817,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","summary"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6776,7 +6841,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -6797,7 +6862,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6821,7 +6886,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6845,7 +6910,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout","if_version"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6870,7 +6935,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","verbose"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -6893,7 +6958,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -6911,7 +6976,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -6934,7 +6999,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","accept_enterprise","local"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -6957,7 +7022,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -6978,7 +7043,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -6999,7 +7064,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","acknowledge","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["licenses"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -7009,7 +7074,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     acknowledge: z.boolean().optional().describe('Boolean flag: acknowledge'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    licenses: z.any().optional().describe('licenses'),
     }),
     outputSchema: z.any().describe('Response from license.post API'),
   },
@@ -7023,7 +7088,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","acknowledge","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -7047,7 +7112,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","acknowledge","type_query_string","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -7071,7 +7136,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -7093,7 +7158,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -7115,7 +7180,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["__template","last_modified","pipeline_metadata","username","pipeline","pipeline_settings","description"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -7123,7 +7188,13 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    __template: z.any().optional().describe('__template'),
+    last_modified: z.any().optional().describe('last_modified'),
+    pipeline_metadata: z.any().optional().describe('pipeline_metadata'),
+    username: z.any().optional().describe('username'),
+    pipeline: z.any().optional().describe('pipeline'),
+    pipeline_settings: z.any().optional().describe('pipeline_settings'),
+    description: z.any().optional().describe('description'),
     }),
     outputSchema: z.any().describe('Response from logstash.put_pipeline API'),
   },
@@ -7137,7 +7208,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","force_synthetic_source","preference","realtime","refresh","routing","_source","_source_excludes","_source_includes","stored_fields"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -7168,7 +7239,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -7190,7 +7261,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -7211,7 +7282,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -7232,7 +7303,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -7254,7 +7325,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","force","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7279,7 +7350,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -7301,7 +7372,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id","event_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -7324,7 +7395,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id","job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -7347,7 +7418,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","force","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -7371,7 +7442,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","force"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -7394,7 +7465,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","requests_per_second","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7418,7 +7489,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["filter_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     filter_id: z.string().describe('Path parameter: filter_id (required)'),
@@ -7440,7 +7511,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","forecast_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_forecasts","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7465,7 +7536,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","force","delete_user_annotations","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7490,7 +7561,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","snapshot_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7513,7 +7584,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","force","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -7537,7 +7608,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id","model_alias"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -7560,7 +7631,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -7581,14 +7652,15 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["index","evaluation"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    index: z.any().optional().describe('index'),
+    evaluation: z.any().optional().describe('evaluation'),
     }),
     outputSchema: z.any().describe('Response from ml.evaluate_data_frame API'),
   },
@@ -7602,7 +7674,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["data_frame_analytics_config"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -7610,7 +7682,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    data_frame_analytics_config: z.any().optional().describe('data_frame_analytics_config'),
     }),
     outputSchema: z.any().describe('Response from ml.explain_data_frame_analytics API'),
   },
@@ -7624,7 +7696,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","advance_time","calc_interim","end","skip_time","start"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7651,7 +7723,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","duration","expires_in","max_model_memory"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7676,7 +7748,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","timestamp"],
       urlParams: ["error_trace","filter_path","human","pretty","anomaly_score","desc","end","exclude_interim","expand","from","size","sort","start"],
-      bodyParams: ['body']
+      bodyParams: ["desc","exclude_interim","expand","anomaly_score","end","page","sort","start"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7694,7 +7766,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     sort: z.enum(['timestamp']).optional().describe('Enum parameter: sort'),
     start: z.union([z.number(), z.array(z.number()), z.enum(['-1'])]).optional().describe('Numeric parameter: start'),
-    body: z.any().optional().describe('Request body'),
+    page: z.any().optional().describe('page'),
     }),
     outputSchema: z.any().describe('Response from ml.get_buckets API'),
   },
@@ -7708,7 +7780,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id"],
       urlParams: ["error_trace","filter_path","human","pretty","end","from","job_id","size","start"],
-      bodyParams: ['body']
+      bodyParams: ["from","size"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -7721,7 +7793,6 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     job_id: z.union([z.string(), z.number()]).optional().describe('Parameter: job_id'),
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     start: z.array(z.string()).optional().describe('Array parameter: start'),
-    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ml.get_calendar_events API'),
   },
@@ -7735,7 +7806,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id"],
       urlParams: ["error_trace","filter_path","human","pretty","from","size"],
-      bodyParams: ['body']
+      bodyParams: ["from","size"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -7745,7 +7816,6 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     from: z.union([z.string(), z.number()]).optional().describe('Parameter: from'),
     size: z.union([z.number(), z.array(z.number()), z.enum(['10000'])]).optional().describe('Numeric parameter: size'),
-    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ml.get_calendars API'),
   },
@@ -7759,7 +7829,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","category_id"],
       urlParams: ["error_trace","filter_path","human","pretty","from","partition_field_value","size"],
-      bodyParams: ['body']
+      bodyParams: ["page"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7771,7 +7841,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     from: z.union([z.string(), z.number()]).optional().describe('Parameter: from'),
     partition_field_value: z.union([z.string(), z.number()]).optional().describe('Parameter: partition_field_value'),
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
-    body: z.any().optional().describe('Request body'),
+    page: z.any().optional().describe('page'),
     }),
     outputSchema: z.any().describe('Response from ml.get_categories API'),
   },
@@ -7785,7 +7855,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","from","size","exclude_generated"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -7811,7 +7881,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","from","size","verbose"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -7837,7 +7907,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -7860,7 +7930,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","exclude_generated"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -7884,7 +7954,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["filter_id"],
       urlParams: ["error_trace","filter_path","human","pretty","from","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     filter_id: z.string().describe('Path parameter: filter_id (required)'),
@@ -7908,7 +7978,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","desc","end","exclude_interim","influencer_score","from","size","sort","start"],
-      bodyParams: ['body']
+      bodyParams: ["desc","exclude_interim","influencer_score","end","page","sort","start"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7924,7 +7994,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     sort: z.union([z.string(), z.number()]).optional().describe('Parameter: sort'),
     start: z.union([z.number(), z.array(z.number()), z.enum(['-1'])]).optional().describe('Numeric parameter: start'),
-    body: z.any().optional().describe('Request body'),
+    page: z.any().optional().describe('page'),
     }),
     outputSchema: z.any().describe('Response from ml.get_influencers API'),
   },
@@ -7938,7 +8008,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7961,7 +8031,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","exclude_generated"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -7985,7 +8055,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -8009,7 +8079,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","snapshot_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8033,7 +8103,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","snapshot_id"],
       urlParams: ["error_trace","filter_path","human","pretty","desc","end","from","size","sort","start"],
-      bodyParams: ['body']
+      bodyParams: ["desc","end","from","size","sort","start"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8048,7 +8118,6 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     sort: z.union([z.string(), z.number()]).optional().describe('Parameter: sort'),
     start: z.array(z.string()).optional().describe('Array parameter: start'),
-    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ml.get_model_snapshots API'),
   },
@@ -8062,7 +8131,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","bucket_span","end","exclude_interim","overall_score","start","top_n"],
-      bodyParams: ['body']
+      bodyParams: ["allow_no_jobs","bucket_span","end","exclude_interim","overall_score","start","top_n"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8077,7 +8146,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     overall_score: z.array(z.string()).optional().describe('Array parameter: overall_score'),
     start: z.array(z.string()).optional().describe('Array parameter: start'),
     top_n: z.union([z.number(), z.array(z.number()), z.enum(['1'])]).optional().describe('Numeric parameter: top_n'),
-    body: z.any().optional().describe('Request body'),
+    allow_no_jobs: z.any().optional().describe('allow_no_jobs'),
     }),
     outputSchema: z.any().describe('Response from ml.get_overall_buckets API'),
   },
@@ -8091,7 +8160,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","desc","end","exclude_interim","from","record_score","size","sort","start"],
-      bodyParams: ['body']
+      bodyParams: ["desc","exclude_interim","record_score","end","page","sort","start"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8107,7 +8176,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     sort: z.enum(['record_score']).optional().describe('Enum parameter: sort'),
     start: z.union([z.number(), z.array(z.number()), z.enum(['-1'])]).optional().describe('Numeric parameter: start'),
-    body: z.any().optional().describe('Request body'),
+    page: z.any().optional().describe('page'),
     }),
     outputSchema: z.any().describe('Response from ml.get_records API'),
   },
@@ -8121,7 +8190,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","decompress_definition","exclude_generated","from","include","size","tags"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8150,7 +8219,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","from","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8175,7 +8244,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8198,7 +8267,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -8219,7 +8288,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8242,7 +8311,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["events"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -8250,7 +8319,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    events: z.any().optional().describe('events'),
     }),
     outputSchema: z.any().describe('Response from ml.post_calendar_events API'),
   },
@@ -8264,7 +8333,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","reset_end","reset_start"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8288,7 +8357,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -8310,7 +8379,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","start","end"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -8334,7 +8403,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["description"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -8342,7 +8411,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    description: z.any().optional().describe('description'),
     }),
     outputSchema: z.any().describe('Response from ml.put_calendar API'),
   },
@@ -8356,7 +8425,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["calendar_id","job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     calendar_id: z.string().describe('Path parameter: calendar_id (required)'),
@@ -8379,7 +8448,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["source","dest","analysis","analyzed_fields","description","model_memory_limit"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -8387,7 +8456,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    source: z.object({}).passthrough().optional().describe('Source configuration'),
+    dest: z.object({}).passthrough().optional().describe('Destination configuration'),
+    analysis: z.any().optional().describe('analysis'),
+    analyzed_fields: z.any().optional().describe('analyzed_fields'),
+    description: z.any().optional().describe('description'),
+    model_memory_limit: z.any().optional().describe('model_memory_limit'),
     }),
     outputSchema: z.any().describe('Response from ml.put_data_frame_analytics API'),
   },
@@ -8401,7 +8475,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_throttled","ignore_unavailable"],
-      bodyParams: ['body']
+      bodyParams: ["aggregations","chunking_config","frequency","indices","job_id","query","query_delay","script_field","scroll_size","types"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -8413,7 +8487,16 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     expand_wildcards: z.enum(['all', 'open', 'closed', 'hidden', 'none']).optional().describe('Enum parameter: expand_wildcards'),
     ignore_throttled: z.boolean().optional().describe('Boolean flag: ignore_throttled'),
     ignore_unavailable: z.boolean().optional().describe('Boolean flag: ignore_unavailable'),
-    body: z.any().optional().describe('Request body'),
+    aggregations: z.object({}).passthrough().optional().describe('Aggregations'),
+    chunking_config: z.any().optional().describe('chunking_config'),
+    frequency: z.any().optional().describe('frequency'),
+    indices: z.any().optional().describe('indices'),
+    job_id: z.any().optional().describe('job_id'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    query_delay: z.any().optional().describe('query_delay'),
+    script_field: z.any().optional().describe('script_field'),
+    scroll_size: z.any().optional().describe('scroll_size'),
+    types: z.any().optional().describe('types'),
     }),
     outputSchema: z.any().describe('Response from ml.put_datafeed API'),
   },
@@ -8427,7 +8510,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["filter_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     filter_id: z.string().describe('Path parameter: filter_id (required)'),
@@ -8449,7 +8532,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_throttled","ignore_unavailable"],
-      bodyParams: ['body']
+      bodyParams: ["analysis_config","background_persist_interval","custom_settings","data_description","description","groups","model_plot_config","model_snapshot_retention_days","renormalization_window_days","results_index_name","results_retention_days"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8461,7 +8544,17 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     expand_wildcards: z.enum(['all', 'open', 'closed', 'hidden', 'none']).optional().describe('Enum parameter: expand_wildcards'),
     ignore_throttled: z.boolean().optional().describe('Boolean flag: ignore_throttled'),
     ignore_unavailable: z.boolean().optional().describe('Boolean flag: ignore_unavailable'),
-    body: z.any().optional().describe('Request body'),
+    analysis_config: z.any().optional().describe('analysis_config'),
+    background_persist_interval: z.any().optional().describe('background_persist_interval'),
+    custom_settings: z.any().optional().describe('custom_settings'),
+    data_description: z.any().optional().describe('data_description'),
+    description: z.any().optional().describe('description'),
+    groups: z.any().optional().describe('groups'),
+    model_plot_config: z.any().optional().describe('model_plot_config'),
+    model_snapshot_retention_days: z.any().optional().describe('model_snapshot_retention_days'),
+    renormalization_window_days: z.any().optional().describe('renormalization_window_days'),
+    results_index_name: z.any().optional().describe('results_index_name'),
+    results_retention_days: z.any().optional().describe('results_retention_days'),
     }),
     outputSchema: z.any().describe('Response from ml.put_job API'),
   },
@@ -8475,7 +8568,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","defer_definition_decompression","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8499,7 +8592,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id","model_alias"],
       urlParams: ["error_trace","filter_path","human","pretty","reassign"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8523,7 +8616,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id","part"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8546,7 +8639,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8568,7 +8661,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty","wait_for_completion","delete_user_annotations"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8592,7 +8685,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","snapshot_id"],
       urlParams: ["error_trace","filter_path","human","pretty","delete_intervening_results"],
-      bodyParams: ['body']
+      bodyParams: ["delete_intervening_results"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8602,7 +8695,6 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     delete_intervening_results: z.boolean().optional().describe('Boolean flag: delete_intervening_results'),
-    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ml.revert_model_snapshot API'),
   },
@@ -8616,7 +8708,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","enabled","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -8639,7 +8731,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -8662,7 +8754,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","end","start","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -8687,7 +8779,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","cache_size","deployment_id","number_of_allocations","priority","queue_capacity","threads_per_allocation","timeout","wait_for"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8717,7 +8809,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","force","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -8742,7 +8834,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","force","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -8767,7 +8859,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","force"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8791,7 +8883,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -8813,7 +8905,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["datafeed_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_throttled","ignore_unavailable"],
-      bodyParams: ['body']
+      bodyParams: ["aggregations","chunking_config","frequency","indices","job_id","query","query_delay","script_field","scroll_size","types"]
     },
     paramsSchema: z.object({
     datafeed_id: z.string().describe('Path parameter: datafeed_id (required)'),
@@ -8825,7 +8917,16 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     expand_wildcards: z.enum(['all', 'open', 'closed', 'hidden', 'none']).optional().describe('Enum parameter: expand_wildcards'),
     ignore_throttled: z.boolean().optional().describe('Boolean flag: ignore_throttled'),
     ignore_unavailable: z.boolean().optional().describe('Boolean flag: ignore_unavailable'),
-    body: z.any().optional().describe('Request body'),
+    aggregations: z.object({}).passthrough().optional().describe('Aggregations'),
+    chunking_config: z.any().optional().describe('chunking_config'),
+    frequency: z.any().optional().describe('frequency'),
+    indices: z.any().optional().describe('indices'),
+    job_id: z.any().optional().describe('job_id'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    query_delay: z.any().optional().describe('query_delay'),
+    script_field: z.any().optional().describe('script_field'),
+    scroll_size: z.any().optional().describe('scroll_size'),
+    types: z.any().optional().describe('types'),
     }),
     outputSchema: z.any().describe('Response from ml.update_datafeed API'),
   },
@@ -8839,7 +8940,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["filter_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     filter_id: z.string().describe('Path parameter: filter_id (required)'),
@@ -8861,7 +8962,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["analysis_limits","background_persist_interval","custom_settings","description","groups","model_plot_config","model_snapshot_retention_days","renormalization_window_days","results_index_name","results_retention_days"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8869,7 +8970,16 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    analysis_limits: z.any().optional().describe('analysis_limits'),
+    background_persist_interval: z.any().optional().describe('background_persist_interval'),
+    custom_settings: z.any().optional().describe('custom_settings'),
+    description: z.any().optional().describe('description'),
+    groups: z.any().optional().describe('groups'),
+    model_plot_config: z.any().optional().describe('model_plot_config'),
+    model_snapshot_retention_days: z.any().optional().describe('model_snapshot_retention_days'),
+    renormalization_window_days: z.any().optional().describe('renormalization_window_days'),
+    results_index_name: z.any().optional().describe('results_index_name'),
+    results_retention_days: z.any().optional().describe('results_retention_days'),
     }),
     outputSchema: z.any().describe('Response from ml.update_job API'),
   },
@@ -8883,7 +8993,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","snapshot_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["description","retain"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8892,7 +9002,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    description: z.any().optional().describe('description'),
+    retain: z.any().optional().describe('retain'),
     }),
     outputSchema: z.any().describe('Response from ml.update_model_snapshot API'),
   },
@@ -8906,7 +9017,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["model_id"],
       urlParams: ["error_trace","filter_path","human","pretty","number_of_allocations"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     model_id: z.string().describe('Path parameter: model_id (required)'),
@@ -8929,7 +9040,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["job_id","snapshot_id"],
       urlParams: ["error_trace","filter_path","human","pretty","wait_for_completion","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     job_id: z.string().describe('Path parameter: job_id (required)'),
@@ -8954,7 +9065,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -8975,7 +9086,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -8996,7 +9107,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["type"],
       urlParams: ["error_trace","filter_path","human","pretty","system_id","system_api_version","interval"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     type: z.string().describe('Path parameter: type (required)'),
@@ -9021,7 +9132,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","ccs_minimize_roundtrips","expand_wildcards","ignore_throttled","ignore_unavailable","include_named_queries_score","max_concurrent_searches","max_concurrent_shard_requests","pre_filter_shard_size","rest_total_hits_as_int","routing","search_type","typed_keys"],
-      bodyParams: ['body']
+      bodyParams: ["query","size","from","sort","aggs","aggregations","post_filter","highlight","_source","index"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9042,7 +9153,15 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     routing: z.union([z.string(), z.number()]).optional().describe('Parameter: routing'),
     search_type: z.enum(['query_then_fetch', 'dfs_query_then_fetch']).optional().describe('Enum parameter: search_type'),
     typed_keys: z.boolean().optional().describe('Boolean flag: typed_keys'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    size: z.number().optional().describe('Number of results to return'),
+    from: z.number().optional().describe('Starting offset'),
+    sort: z.union([z.array(z.any()), z.object({}).passthrough()]).optional().describe('Sort specification'),
+    aggs: z.object({}).passthrough().optional().describe('Aggregations'),
+    aggregations: z.object({}).passthrough().optional().describe('Aggregations'),
+    post_filter: z.object({}).passthrough().optional().describe('Post filter'),
+    highlight: z.object({}).passthrough().optional().describe('Highlighting configuration'),
+    _source: z.union([z.boolean(), z.array(z.string()), z.object({}).passthrough()]).optional().describe('Source field filtering'),
     }),
     outputSchema: z.any().describe('Response from msearch API'),
   },
@@ -9056,7 +9175,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","ccs_minimize_roundtrips","max_concurrent_searches","search_type","rest_total_hits_as_int","typed_keys"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9083,7 +9202,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","ids","fields","field_statistics","offsets","payloads","positions","preference","realtime","routing","term_statistics","version","version_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9117,7 +9236,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id","max_archive_version"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -9140,7 +9259,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -9162,7 +9281,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","ignore_idle_threads","interval","snapshots","threads","timeout","type","sort"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -9191,7 +9310,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id","metric"],
       urlParams: ["error_trace","filter_path","human","pretty","flat_settings","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -9216,7 +9335,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -9239,7 +9358,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id","metric","index_metric"],
       urlParams: ["error_trace","filter_path","human","pretty","completion_fields","fielddata_fields","fields","groups","include_segment_file_sizes","level","timeout","types","include_unloaded_segments"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -9272,7 +9391,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id","metric"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -9296,7 +9415,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","keep_alive","ignore_unavailable","preference","routing","expand_wildcards","allow_partial_search_results","max_concurrent_shard_requests"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9325,7 +9444,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -9346,7 +9465,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -9363,7 +9482,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -9380,7 +9499,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -9397,7 +9516,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -9414,7 +9533,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id","context"],
       urlParams: ["error_trace","filter_path","human","pretty","context","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9439,7 +9558,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ruleset_id","rule_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     ruleset_id: z.string().describe('Path parameter: ruleset_id (required)'),
@@ -9462,7 +9581,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ruleset_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     ruleset_id: z.string().describe('Path parameter: ruleset_id (required)'),
@@ -9484,7 +9603,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ruleset_id","rule_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     ruleset_id: z.string().describe('Path parameter: ruleset_id (required)'),
@@ -9507,7 +9626,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ruleset_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     ruleset_id: z.string().describe('Path parameter: ruleset_id (required)'),
@@ -9529,7 +9648,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","from","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -9552,7 +9671,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ruleset_id","rule_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     ruleset_id: z.string().describe('Path parameter: ruleset_id (required)'),
@@ -9575,7 +9694,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ruleset_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["rules"]
     },
     paramsSchema: z.object({
     ruleset_id: z.string().describe('Path parameter: ruleset_id (required)'),
@@ -9583,7 +9702,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    rules: z.any().optional().describe('rules'),
     }),
     outputSchema: z.any().describe('Response from query_rules.put_ruleset API'),
   },
@@ -9597,7 +9716,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ruleset_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     ruleset_id: z.string().describe('Path parameter: ruleset_id (required)'),
@@ -9619,7 +9738,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","search_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9645,7 +9764,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","refresh","requests_per_second","scroll","slices","timeout","wait_for_active_shards","wait_for_completion","require_alias"],
-      bodyParams: ['body']
+      bodyParams: ["source","dest","script","conflicts"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -9660,7 +9779,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     require_alias: z.boolean().optional().describe('Boolean flag: require_alias'),
-    body: z.any().optional().describe('Request body'),
+    source: z.object({}).passthrough().optional().describe('Source configuration'),
+    dest: z.object({}).passthrough().optional().describe('Destination configuration'),
+    script: z.object({}).passthrough().optional().describe('Script configuration'),
+    conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
     outputSchema: z.any().describe('Response from reindex API'),
   },
@@ -9674,7 +9796,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_id"],
       urlParams: ["error_trace","filter_path","human","pretty","requests_per_second"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_id: z.string().describe('Path parameter: task_id (required)'),
@@ -9697,7 +9819,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9719,7 +9841,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["index_pattern","rollup_index","cron","page_size","groups","metrics"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9727,7 +9849,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    index_pattern: z.any().optional().describe('index_pattern'),
+    rollup_index: z.any().optional().describe('rollup_index'),
+    cron: z.any().optional().describe('cron'),
+    page_size: z.any().optional().describe('page_size'),
+    groups: z.any().optional().describe('groups'),
+    metrics: z.any().optional().describe('metrics'),
     }),
     outputSchema: z.any().describe('Response from rollup.delete_job API'),
   },
@@ -9741,7 +9868,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9763,7 +9890,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9785,7 +9912,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9807,7 +9934,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["index_pattern","rollup_index","cron","page_size","groups","metrics"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9815,7 +9942,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    index_pattern: z.any().optional().describe('index_pattern'),
+    rollup_index: z.any().optional().describe('rollup_index'),
+    cron: z.any().optional().describe('cron'),
+    page_size: z.any().optional().describe('page_size'),
+    groups: z.any().optional().describe('groups'),
+    metrics: z.any().optional().describe('metrics'),
     }),
     outputSchema: z.any().describe('Response from rollup.put_job API'),
   },
@@ -9829,7 +9961,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","rest_total_hits_as_int","typed_keys"],
-      bodyParams: ['body']
+      bodyParams: ["query","aggregations"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9839,7 +9971,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     rest_total_hits_as_int: z.boolean().optional().describe('Boolean flag: rest_total_hits_as_int'),
     typed_keys: z.boolean().optional().describe('Boolean flag: typed_keys'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    aggregations: z.object({}).passthrough().optional().describe('Aggregations'),
     }),
     outputSchema: z.any().describe('Response from rollup.rollup_search API'),
   },
@@ -9853,7 +9986,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9875,7 +10008,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -9899,7 +10032,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -9920,7 +10053,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["scroll_id"],
       urlParams: ["error_trace","filter_path","human","pretty","scroll","scroll_id","rest_total_hits_as_int"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     scroll_id: z.string().describe('Path parameter: scroll_id (required)'),
@@ -9944,7 +10077,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","allow_partial_search_results","analyzer","analyze_wildcard","batched_reduce_size","ccs_minimize_roundtrips","default_operator","df","docvalue_fields","expand_wildcards","explain","ignore_throttled","ignore_unavailable","include_named_queries_score","lenient","max_concurrent_shard_requests","preference","pre_filter_shard_size","request_cache","routing","scroll","search_type","stats","stored_fields","suggest_field","suggest_mode","suggest_size","suggest_text","terminate_after","timeout","track_total_hits","track_scores","typed_keys","rest_total_hits_as_int","version","_source","_source_excludes","_source_includes","seq_no_primary_term","q","size","from","sort","force_synthetic_source"],
-      bodyParams: ['body']
+      bodyParams: ["query","size","from","sort","aggs","aggregations","post_filter","highlight","_source","fields","track_total_hits","timeout"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -9996,7 +10129,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     from: z.union([z.string(), z.number()]).optional().describe('Parameter: from'),
     sort: z.array(z.string()).optional().describe('Array parameter: sort'),
     force_synthetic_source: z.boolean().optional().describe('Boolean flag: force_synthetic_source'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    aggs: z.object({}).passthrough().optional().describe('Aggregations'),
+    aggregations: z.object({}).passthrough().optional().describe('Aggregations'),
+    post_filter: z.object({}).passthrough().optional().describe('Post filter'),
+    highlight: z.object({}).passthrough().optional().describe('Highlighting configuration'),
+    fields: z.array(z.string()).optional().describe('Fields to return'),
     }),
     outputSchema: z.any().describe('Response from search API'),
   },
@@ -10010,7 +10148,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10032,7 +10170,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10054,7 +10192,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10076,7 +10214,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10098,7 +10236,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","q","from","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10122,7 +10260,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["collection_name","event_type"],
       urlParams: ["error_trace","filter_path","human","pretty","debug"],
-      bodyParams: ['body']
+      bodyParams: ["document","page","search","session","user"]
     },
     paramsSchema: z.object({
     collection_name: z.string().describe('Path parameter: collection_name (required)'),
@@ -10132,7 +10270,11 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     debug: z.boolean().optional().describe('Boolean flag: debug'),
-    body: z.any().optional().describe('Request body'),
+    document: z.object({}).passthrough().optional().describe('Document content'),
+    page: z.any().optional().describe('page'),
+    search: z.any().optional().describe('search'),
+    session: z.any().optional().describe('session'),
+    user: z.any().optional().describe('user'),
     }),
     outputSchema: z.any().describe('Response from search_application.post_behavioral_analytics_event API'),
   },
@@ -10146,7 +10288,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","create"],
-      bodyParams: ['body']
+      bodyParams: ["__template","indices","template"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10155,7 +10297,9 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     create: z.boolean().optional().describe('Boolean flag: create'),
-    body: z.any().optional().describe('Request body'),
+    __template: z.any().optional().describe('__template'),
+    indices: z.any().optional().describe('indices'),
+    template: z.any().optional().describe('template'),
     }),
     outputSchema: z.any().describe('Response from search_application.put API'),
   },
@@ -10169,7 +10313,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10191,7 +10335,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10213,7 +10357,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","typed_keys"],
-      bodyParams: ['body']
+      bodyParams: ["params"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10222,7 +10366,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     typed_keys: z.boolean().optional().describe('Boolean flag: typed_keys'),
-    body: z.any().optional().describe('Request body'),
+    params: z.array(z.any()).optional().describe('Query parameters'),
     }),
     outputSchema: z.any().describe('Response from search_application.search API'),
   },
@@ -10236,7 +10380,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","field","zoom","x","y"],
       urlParams: ["error_trace","filter_path","human","pretty","exact_bounds","extent","grid_agg","grid_precision","grid_type","size","with_labels"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -10269,7 +10413,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","expand_wildcards","ignore_unavailable","local","master_timeout","preference","routing"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -10298,7 +10442,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","ccs_minimize_roundtrips","expand_wildcards","explain","ignore_throttled","ignore_unavailable","preference","profile","routing","scroll","search_type","rest_total_hits_as_int","typed_keys"],
-      bodyParams: ['body']
+      bodyParams: ["id","params","source","explain","profile"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -10319,7 +10463,9 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     search_type: z.enum(['query_then_fetch', 'dfs_query_then_fetch']).optional().describe('Enum parameter: search_type'),
     rest_total_hits_as_int: z.boolean().optional().describe('Boolean flag: rest_total_hits_as_int'),
     typed_keys: z.boolean().optional().describe('Boolean flag: typed_keys'),
-    body: z.any().optional().describe('Request body'),
+    id: z.any().optional().describe('id'),
+    params: z.array(z.any()).optional().describe('Query parameters'),
+    source: z.object({}).passthrough().optional().describe('Source configuration'),
     }),
     outputSchema: z.any().describe('Response from search_template API'),
   },
@@ -10333,7 +10479,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -10356,7 +10502,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","expand_wildcards","allow_no_indices","ignore_unavailable"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -10381,7 +10527,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository","snapshot"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","wait_for_completion","storage"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -10407,7 +10553,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","level"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -10430,7 +10576,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10451,14 +10597,14 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["password"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    password: z.any().optional().describe('password'),
     }),
     outputSchema: z.any().describe('Response from security.authenticate API'),
   },
@@ -10472,7 +10618,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10494,7 +10640,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10516,7 +10662,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10537,7 +10683,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["username"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["password"]
     },
     paramsSchema: z.object({
     username: z.string().describe('Path parameter: username (required)'),
@@ -10546,7 +10692,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
-    body: z.any().optional().describe('Request body'),
+    password: z.any().optional().describe('password'),
     }),
     outputSchema: z.any().describe('Response from security.change_password API'),
   },
@@ -10560,7 +10706,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["ids"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     ids: z.string().describe('Path parameter: ids (required)'),
@@ -10582,7 +10728,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["application"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     application: z.string().describe('Path parameter: application (required)'),
@@ -10604,7 +10750,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["realms"],
       urlParams: ["error_trace","filter_path","human","pretty","usernames"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     realms: z.string().describe('Path parameter: realms (required)'),
@@ -10627,7 +10773,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10649,7 +10795,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["namespace","service","name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     namespace: z.string().describe('Path parameter: namespace (required)'),
@@ -10673,7 +10819,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["name","expiration","role_descriptors"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10681,7 +10827,9 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
-    body: z.any().optional().describe('Request body'),
+    name: z.any().optional().describe('name'),
+    expiration: z.any().optional().describe('expiration'),
+    role_descriptors: z.any().optional().describe('role_descriptors'),
     }),
     outputSchema: z.any().describe('Response from security.create_api_key API'),
   },
@@ -10695,7 +10843,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10716,7 +10864,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["namespace","service","name"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     namespace: z.string().describe('Path parameter: namespace (required)'),
@@ -10741,7 +10889,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10762,7 +10910,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["application","name"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     application: z.string().describe('Path parameter: application (required)'),
@@ -10786,7 +10934,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10809,7 +10957,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -10832,7 +10980,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["namespace","service","name"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     namespace: z.string().describe('Path parameter: namespace (required)'),
@@ -10857,7 +11005,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["username"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     username: z.string().describe('Path parameter: username (required)'),
@@ -10880,7 +11028,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["username"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     username: z.string().describe('Path parameter: username (required)'),
@@ -10903,7 +11051,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["uid"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     uid: z.string().describe('Path parameter: uid (required)'),
@@ -10926,7 +11074,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["username"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     username: z.string().describe('Path parameter: username (required)'),
@@ -10949,7 +11097,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["uid"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     uid: z.string().describe('Path parameter: uid (required)'),
@@ -10972,7 +11120,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -10993,7 +11141,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11014,7 +11162,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","id","name","owner","realm_name","username","with_limited_by","active_only","with_profile_uid"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11043,7 +11191,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11064,7 +11212,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["application","name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     application: z.string().describe('Path parameter: application (required)'),
@@ -11087,7 +11235,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -11109,7 +11257,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -11131,7 +11279,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["namespace","service"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     namespace: z.string().describe('Path parameter: namespace (required)'),
@@ -11154,7 +11302,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["namespace","service"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     namespace: z.string().describe('Path parameter: namespace (required)'),
@@ -11177,7 +11325,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11199,14 +11347,17 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["grant_type","password","scope","username"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    grant_type: z.any().optional().describe('grant_type'),
+    password: z.any().optional().describe('password'),
+    scope: z.any().optional().describe('scope'),
+    username: z.any().optional().describe('username'),
     }),
     outputSchema: z.any().describe('Response from security.get_token API'),
   },
@@ -11220,7 +11371,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["username"],
       urlParams: ["error_trace","filter_path","human","pretty","with_profile_uid"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     username: z.string().describe('Path parameter: username (required)'),
@@ -11243,7 +11394,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","application","priviledge","username"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11267,7 +11418,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["uid"],
       urlParams: ["error_trace","filter_path","human","pretty","data"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     uid: z.string().describe('Path parameter: uid (required)'),
@@ -11290,7 +11441,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11311,7 +11462,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["user"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["cluster","index","application"]
     },
     paramsSchema: z.object({
     user: z.string().describe('Path parameter: user (required)'),
@@ -11319,7 +11470,9 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    cluster: z.any().optional().describe('cluster'),
+    index: z.any().optional().describe('index'),
+    application: z.any().optional().describe('application'),
     }),
     outputSchema: z.any().describe('Response from security.has_privileges API'),
   },
@@ -11333,7 +11486,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11354,14 +11507,17 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["id","name","realm_name","username"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    id: z.any().optional().describe('id'),
+    name: z.any().optional().describe('name'),
+    realm_name: z.any().optional().describe('realm_name'),
+    username: z.any().optional().describe('username'),
     }),
     outputSchema: z.any().describe('Response from security.invalidate_api_key API'),
   },
@@ -11375,14 +11531,14 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["token"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    token: z.any().optional().describe('token'),
     }),
     outputSchema: z.any().describe('Response from security.invalidate_token API'),
   },
@@ -11396,7 +11552,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11417,7 +11573,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11438,7 +11594,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11459,7 +11615,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11481,7 +11637,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["cluster","indices","remote_indices","run_as","metadata"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -11490,7 +11646,11 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
-    body: z.any().optional().describe('Request body'),
+    cluster: z.any().optional().describe('cluster'),
+    indices: z.any().optional().describe('indices'),
+    remote_indices: z.any().optional().describe('remote_indices'),
+    run_as: z.any().optional().describe('run_as'),
+    metadata: z.any().optional().describe('metadata'),
     }),
     outputSchema: z.any().describe('Response from security.put_role API'),
   },
@@ -11504,7 +11664,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["enabled","metadata","roles","rules"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -11513,7 +11673,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
-    body: z.any().optional().describe('Request body'),
+    enabled: z.any().optional().describe('enabled'),
+    metadata: z.any().optional().describe('metadata'),
+    roles: z.any().optional().describe('roles'),
+    rules: z.any().optional().describe('rules'),
     }),
     outputSchema: z.any().describe('Response from security.put_role_mapping API'),
   },
@@ -11527,7 +11690,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["username"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["metadata","password","full_name","roles"]
     },
     paramsSchema: z.object({
     username: z.string().describe('Path parameter: username (required)'),
@@ -11536,7 +11699,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
-    body: z.any().optional().describe('Request body'),
+    metadata: z.any().optional().describe('metadata'),
+    password: z.any().optional().describe('password'),
+    full_name: z.any().optional().describe('full_name'),
+    roles: z.any().optional().describe('roles'),
     }),
     outputSchema: z.any().describe('Response from security.put_user API'),
   },
@@ -11550,7 +11716,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","with_limited_by","with_profile_uid","typed_keys"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11574,7 +11740,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11595,7 +11761,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","with_profile_uid"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11617,14 +11783,16 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["content","ids","realm"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    content: z.any().optional().describe('content'),
+    ids: z.any().optional().describe('ids'),
+    realm: z.any().optional().describe('realm'),
     }),
     outputSchema: z.any().describe('Response from security.saml_authenticate API'),
   },
@@ -11638,14 +11806,17 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["realm","ids","query_string","content"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    realm: z.any().optional().describe('realm'),
+    ids: z.any().optional().describe('ids'),
+    query_string: z.any().optional().describe('query_string'),
+    content: z.any().optional().describe('content'),
     }),
     outputSchema: z.any().describe('Response from security.saml_complete_logout API'),
   },
@@ -11659,14 +11830,16 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["query_string","acs","realm"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    query_string: z.any().optional().describe('query_string'),
+    acs: z.any().optional().describe('acs'),
+    realm: z.any().optional().describe('realm'),
     }),
     outputSchema: z.any().describe('Response from security.saml_invalidate API'),
   },
@@ -11680,14 +11853,15 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["token","refresh_token"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    token: z.any().optional().describe('token'),
+    refresh_token: z.any().optional().describe('refresh_token'),
     }),
     outputSchema: z.any().describe('Response from security.saml_logout API'),
   },
@@ -11701,14 +11875,15 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["acs","realm"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    acs: z.any().optional().describe('acs'),
+    realm: z.any().optional().describe('realm'),
     }),
     outputSchema: z.any().describe('Response from security.saml_prepare_authentication API'),
   },
@@ -11722,7 +11897,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["realm_name"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     realm_name: z.string().describe('Path parameter: realm_name (required)'),
@@ -11744,7 +11919,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","data"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11766,7 +11941,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -11788,7 +11963,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -11810,7 +11985,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -11833,7 +12008,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["uid"],
       urlParams: ["error_trace","filter_path","human","pretty","if_seq_no","if_primary_term","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     uid: z.string().describe('Path parameter: uid (required)'),
@@ -11858,7 +12033,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -11882,7 +12057,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -11905,7 +12080,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["node_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     node_id: z.string().describe('Path parameter: node_id (required)'),
@@ -11929,7 +12104,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","pipeline"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -11952,7 +12127,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["policy_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     policy_id: z.string().describe('Path parameter: policy_id (required)'),
@@ -11976,7 +12151,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["policy_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     policy_id: z.string().describe('Path parameter: policy_id (required)'),
@@ -12000,7 +12175,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12023,7 +12198,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["policy_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     policy_id: z.string().describe('Path parameter: policy_id (required)'),
@@ -12047,7 +12222,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12070,7 +12245,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12093,7 +12268,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["policy_id"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["schedule","name","repository","config","retention"]
     },
     paramsSchema: z.object({
     policy_id: z.string().describe('Path parameter: policy_id (required)'),
@@ -12103,7 +12278,11 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    schedule: z.any().optional().describe('schedule'),
+    name: z.any().optional().describe('name'),
+    repository: z.any().optional().describe('repository'),
+    config: z.any().optional().describe('config'),
+    retention: z.any().optional().describe('retention'),
     }),
     outputSchema: z.any().describe('Response from slm.put_lifecycle API'),
   },
@@ -12117,7 +12296,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12140,7 +12319,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12163,7 +12342,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12187,7 +12366,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository","snapshot","target_snapshot"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12212,7 +12391,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository","snapshot"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["indices","ignore_unavailable","include_global_state","partial"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12223,7 +12402,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
-    body: z.any().optional().describe('Request body'),
+    indices: z.any().optional().describe('indices'),
+    ignore_unavailable: z.any().optional().describe('ignore_unavailable'),
+    include_global_state: z.any().optional().describe('include_global_state'),
+    partial: z.any().optional().describe('partial'),
     }),
     outputSchema: z.any().describe('Response from snapshot.create API'),
   },
@@ -12237,7 +12419,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout","verify"],
-      bodyParams: ['body']
+      bodyParams: ["__template","type","settings"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12248,7 +12430,9 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     verify: z.boolean().optional().describe('Boolean flag: verify'),
-    body: z.any().optional().describe('Request body'),
+    __template: z.any().optional().describe('__template'),
+    type: z.any().optional().describe('type'),
+    settings: z.any().optional().describe('settings'),
     }),
     outputSchema: z.any().describe('Response from snapshot.create_repository API'),
   },
@@ -12262,7 +12446,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository","snapshot"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12286,7 +12470,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12310,7 +12494,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository","snapshot"],
       urlParams: ["error_trace","filter_path","human","pretty","after","from_sort_value","ignore_unavailable","index_details","index_names","include_repository","master_timeout","order","offset","size","slm_policy_filter","sort","state","verbose"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12347,7 +12531,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["error_trace","filter_path","human","pretty","local","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12371,7 +12555,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["error_trace","filter_path","human","pretty","blob_count","concurrency","detailed","early_read_node_count","max_blob_size","max_total_data_size","rare_action_probability","rarely_abort_writes","read_node_count","register_operation_count","seed","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12405,7 +12589,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["error_trace","filter_path","human","pretty","blob_thread_pool_concurrency","index_snapshot_verification_concurrency","index_verification_concurrency","max_bytes_per_sec","max_failed_shard_snapshots","meta_thread_pool_concurrency","snapshot_verification_concurrency","verify_blob_contents"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12435,7 +12619,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository","snapshot"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["indices","ignore_unavailable","include_global_state","rename_pattern","rename_replacement"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12446,7 +12630,11 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
-    body: z.any().optional().describe('Request body'),
+    indices: z.any().optional().describe('indices'),
+    ignore_unavailable: z.any().optional().describe('ignore_unavailable'),
+    include_global_state: z.any().optional().describe('include_global_state'),
+    rename_pattern: z.any().optional().describe('rename_pattern'),
+    rename_replacement: z.any().optional().describe('rename_replacement'),
     }),
     outputSchema: z.any().describe('Response from snapshot.restore API'),
   },
@@ -12460,7 +12648,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository","snapshot"],
       urlParams: ["error_trace","filter_path","human","pretty","ignore_unavailable","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12485,7 +12673,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["repository"],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     repository: z.string().describe('Path parameter: repository (required)'),
@@ -12509,7 +12697,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12530,7 +12718,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -12552,7 +12740,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","delimiter","format","keep_alive","wait_for_completion_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -12578,7 +12766,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -12600,7 +12788,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","format"],
-      bodyParams: ['body']
+      bodyParams: ["query"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12608,7 +12796,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     format: z.enum(['csv', 'json', 'tsv', 'txt', 'yaml', 'cbor', 'smile']).optional().describe('Enum parameter: format'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
     }),
     outputSchema: z.any().describe('Response from sql.query API'),
   },
@@ -12622,7 +12810,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12643,7 +12831,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12664,7 +12852,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -12681,7 +12869,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -12698,7 +12886,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -12715,7 +12903,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -12737,7 +12925,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["set_id","rule_id"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     set_id: z.string().describe('Path parameter: set_id (required)'),
@@ -12761,7 +12949,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","from","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -12785,7 +12973,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["set_id","rule_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     set_id: z.string().describe('Path parameter: set_id (required)'),
@@ -12808,7 +12996,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","from","size"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12831,7 +13019,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["synonyms_set"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -12840,7 +13028,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     refresh: z.boolean().optional().describe('Boolean flag: refresh'),
-    body: z.any().optional().describe('Request body'),
+    synonyms_set: z.any().optional().describe('synonyms_set'),
     }),
     outputSchema: z.any().describe('Response from synonyms.put_synonym API'),
   },
@@ -12854,7 +13042,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["set_id","rule_id"],
       urlParams: ["error_trace","filter_path","human","pretty","refresh"],
-      bodyParams: ['body']
+      bodyParams: ["synonyms"]
     },
     paramsSchema: z.object({
     set_id: z.string().describe('Path parameter: set_id (required)'),
@@ -12864,7 +13052,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     refresh: z.boolean().optional().describe('Boolean flag: refresh'),
-    body: z.any().optional().describe('Request body'),
+    synonyms: z.any().optional().describe('synonyms'),
     }),
     outputSchema: z.any().describe('Response from synonyms.put_synonym_rule API'),
   },
@@ -12878,7 +13066,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_id"],
       urlParams: ["error_trace","filter_path","human","pretty","actions","nodes","parent_task_id","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_id: z.string().describe('Path parameter: task_id (required)'),
@@ -12904,7 +13092,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_id: z.string().describe('Path parameter: task_id (required)'),
@@ -12928,7 +13116,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","actions","detailed","group_by","nodes","parent_task_id","timeout","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -12956,7 +13144,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["field","string","size","timeout","case_insensitive","index_filter"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -12964,7 +13152,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     filter_path: z.array(z.string()).optional().describe('Array parameter: filter_path'),
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
-    body: z.any().optional().describe('Request body'),
+    field: z.any().optional().describe('field'),
+    string: z.any().optional().describe('string'),
+    size: z.number().optional().describe('Number of results to return'),
+    timeout: z.string().optional().describe('Query timeout'),
+    case_insensitive: z.any().optional().describe('case_insensitive'),
+    index_filter: z.any().optional().describe('index_filter'),
     }),
     outputSchema: z.any().describe('Response from terms_enum API'),
   },
@@ -12978,7 +13171,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","fields","field_statistics","offsets","payloads","positions","preference","realtime","routing","term_statistics","version","version_type"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -13012,7 +13205,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","column_names","delimiter","documents_to_sample","ecs_compatibility","explain","field","format","grok_pattern","index","quote","should_trim_fields","timeout","timestamp_field","timestamp_format"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13047,7 +13240,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","column_names","delimiter","ecs_compatibility","explain","format","grok_pattern","quote","should_trim_fields","timeout","timestamp_field","timestamp_format"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13079,7 +13272,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["charset","column_names","delimiter","ecs_compatibility","explain","format","grok_pattern","has_header_row","line_merge_size_limit","lines_to_sample","quote","should_trim_fields","timeout","timestamp_field","timestamp_format"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     charset: z.union([z.string(), z.number()]).optional().describe('Parameter: charset'),
@@ -13111,7 +13304,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","ecs_compatibility"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13133,7 +13326,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","force","delete_dest_index","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13158,7 +13351,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
@@ -13175,7 +13368,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","from","size","exclude_generated"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13201,7 +13394,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","from","size","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13227,7 +13420,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["source","pivot"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13236,7 +13429,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    source: z.object({}).passthrough().optional().describe('Source configuration'),
+    pivot: z.any().optional().describe('pivot'),
     }),
     outputSchema: z.any().describe('Response from transform.preview_transform API'),
   },
@@ -13250,7 +13444,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","defer_validation","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["description","dest","frequency","pivot","source","sync"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13260,7 +13454,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     defer_validation: z.boolean().optional().describe('Boolean flag: defer_validation'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    description: z.any().optional().describe('description'),
+    dest: z.object({}).passthrough().optional().describe('Destination configuration'),
+    frequency: z.any().optional().describe('frequency'),
+    pivot: z.any().optional().describe('pivot'),
+    source: z.object({}).passthrough().optional().describe('Source configuration'),
+    sync: z.any().optional().describe('sync'),
     }),
     outputSchema: z.any().describe('Response from transform.put_transform API'),
   },
@@ -13274,7 +13473,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","force","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13298,7 +13497,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13321,7 +13520,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","timeout","from"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13345,7 +13544,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_match","force","timeout","wait_for_checkpoint","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13372,7 +13571,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["transform_id"],
       urlParams: ["error_trace","filter_path","human","pretty","defer_validation","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["description","dest","frequency","source","sync"]
     },
     paramsSchema: z.object({
     transform_id: z.string().describe('Path parameter: transform_id (required)'),
@@ -13382,7 +13581,11 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     defer_validation: z.boolean().optional().describe('Boolean flag: defer_validation'),
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
-    body: z.any().optional().describe('Request body'),
+    description: z.any().optional().describe('description'),
+    dest: z.object({}).passthrough().optional().describe('Destination configuration'),
+    frequency: z.any().optional().describe('frequency'),
+    source: z.object({}).passthrough().optional().describe('Source configuration'),
+    sync: z.any().optional().describe('sync'),
     }),
     outputSchema: z.any().describe('Response from transform.update_transform API'),
   },
@@ -13396,7 +13599,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","dry_run","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13419,7 +13622,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index","id"],
       urlParams: ["error_trace","filter_path","human","pretty","if_primary_term","if_seq_no","include_source_on_error","lang","refresh","require_alias","retry_on_conflict","routing","timeout","wait_for_active_shards","_source","_source_excludes","_source_includes"],
-      bodyParams: ['body']
+      bodyParams: ["doc","script","upsert","doc_as_upsert"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -13441,7 +13644,10 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     _source: z.boolean().optional().describe('Boolean flag: _source'),
     _source_excludes: z.array(z.string()).optional().describe('Array parameter: _source_excludes'),
     _source_includes: z.array(z.string()).optional().describe('Array parameter: _source_includes'),
-    body: z.any().optional().describe('Request body'),
+    doc: z.object({}).passthrough().optional().describe('Document content'),
+    script: z.object({}).passthrough().optional().describe('Script configuration'),
+    upsert: z.object({}).passthrough().optional().describe('Upsert document'),
+    doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
     outputSchema: z.any().describe('Response from update API'),
   },
@@ -13455,7 +13661,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["index"],
       urlParams: ["error_trace","filter_path","human","pretty","allow_no_indices","analyzer","analyze_wildcard","conflicts","default_operator","df","expand_wildcards","from","ignore_unavailable","lenient","max_docs","pipeline","preference","q","refresh","request_cache","requests_per_second","routing","scroll","scroll_size","search_timeout","search_type","slices","sort","stats","terminate_after","timeout","version","version_type","wait_for_active_shards","wait_for_completion"],
-      bodyParams: ['body']
+      bodyParams: ["query","script","conflicts"]
     },
     paramsSchema: z.object({
     index: z.string().describe('Path parameter: index (required)'),
@@ -13494,7 +13700,8 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.boolean().optional().describe('Boolean flag: version_type'),
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
-    body: z.any().optional().describe('Request body'),
+    query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
+    script: z.object({}).passthrough().optional().describe('Script configuration'),
     }),
     outputSchema: z.any().describe('Response from update_by_query API'),
   },
@@ -13508,7 +13715,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["task_id"],
       urlParams: ["error_trace","filter_path","human","pretty","requests_per_second"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     task_id: z.string().describe('Path parameter: task_id (required)'),
@@ -13531,7 +13738,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["watch_id","action_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     watch_id: z.string().describe('Path parameter: watch_id (required)'),
@@ -13554,7 +13761,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["watch_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     watch_id: z.string().describe('Path parameter: watch_id (required)'),
@@ -13576,7 +13783,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["watch_id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     watch_id: z.string().describe('Path parameter: watch_id (required)'),
@@ -13598,7 +13805,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -13620,7 +13827,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","debug"],
-      bodyParams: ['body']
+      bodyParams: ["trigger_data","ignore_condition","record_execution","watch","alternative_input","action_modes"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -13629,7 +13836,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     human: z.boolean().optional().describe('Boolean flag: human'),
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     debug: z.boolean().optional().describe('Boolean flag: debug'),
-    body: z.any().optional().describe('Request body'),
+    trigger_data: z.any().optional().describe('trigger_data'),
+    ignore_condition: z.any().optional().describe('ignore_condition'),
+    record_execution: z.any().optional().describe('record_execution'),
+    watch: z.any().optional().describe('watch'),
+    alternative_input: z.any().optional().describe('alternative_input'),
+    action_modes: z.any().optional().describe('action_modes'),
     }),
     outputSchema: z.any().describe('Response from watcher.execute_watch API'),
   },
@@ -13643,7 +13855,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13665,7 +13877,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -13687,7 +13899,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["error_trace","filter_path","human","pretty","active","if_primary_term","if_seq_no","version"],
-      bodyParams: ['body']
+      bodyParams: ["metadata","trigger","input","condition","throttle_period","actions"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
@@ -13699,7 +13911,12 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     if_primary_term: z.union([z.string(), z.number()]).optional().describe('Parameter: if_primary_term'),
     if_seq_no: z.union([z.string(), z.number()]).optional().describe('Parameter: if_seq_no'),
     version: z.union([z.string(), z.number()]).optional().describe('Parameter: version'),
-    body: z.any().optional().describe('Request body'),
+    metadata: z.any().optional().describe('metadata'),
+    trigger: z.any().optional().describe('trigger'),
+    input: z.any().optional().describe('input'),
+    condition: z.any().optional().describe('condition'),
+    throttle_period: z.any().optional().describe('throttle_period'),
+    actions: z.any().optional().describe('actions'),
     }),
     outputSchema: z.any().describe('Response from watcher.put_watch API'),
   },
@@ -13713,7 +13930,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13734,7 +13951,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13756,7 +13973,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["metric"],
       urlParams: ["error_trace","filter_path","human","pretty","emit_stacktraces","metric"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     metric: z.string().describe('Path parameter: metric (required)'),
@@ -13779,7 +13996,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13801,7 +14018,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout","timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13824,7 +14041,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","categories","accept_enterprise"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),
@@ -13847,7 +14064,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["error_trace","filter_path","human","pretty","master_timeout"],
-      bodyParams: ['body']
+      bodyParams: ["body"]
     },
     paramsSchema: z.object({
     error_trace: z.boolean().optional().describe('Boolean flag: error_trace'),

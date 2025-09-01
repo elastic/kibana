@@ -113,6 +113,131 @@ function isUrlParamRequired(paramName, endpointName) {
 }
 
 /**
+ * Read Console API definition files to extract body parameter schemas
+ * Also includes hardcoded definitions for common APIs within workflows scope
+ */
+function readConsoleBodyDefinitions(endpointName) {
+  const bodyParams = new Set();
+  
+  // Hardcoded body parameters for common ES APIs (within workflows scope)
+  const commonBodyParams = {
+    'search': ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'fields', 'track_total_hits', 'timeout'],
+    'msearch': ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'index'],
+    'index': ['document'],
+    'update': ['doc', 'script', 'upsert', 'doc_as_upsert'],
+    'bulk': ['operations'],
+    'reindex': ['source', 'dest', 'script', 'conflicts'],
+    'update_by_query': ['query', 'script', 'conflicts'],
+    'delete_by_query': ['query', 'conflicts'],
+  };
+  
+  // Check hardcoded definitions first
+  if (commonBodyParams[endpointName]) {
+    for (const param of commonBodyParams[endpointName]) {
+      bodyParams.add(param);
+    }
+  }
+  
+  // Look for override files (they have data_autocomplete_rules)
+  const overridePath = path.resolve(
+    __dirname,
+    '../../console/server/lib/spec_definitions/json/overrides',
+    `${endpointName}.json`
+  );
+  
+  if (fs.existsSync(overridePath)) {
+    try {
+      const content = JSON.parse(fs.readFileSync(overridePath, 'utf8'));
+      const endpoint = content[endpointName];
+      if (endpoint && endpoint.data_autocomplete_rules) {
+        // Extract parameter names from data_autocomplete_rules
+        for (const paramName of Object.keys(endpoint.data_autocomplete_rules)) {
+          bodyParams.add(paramName);
+        }
+      }
+    } catch (error) {
+      // Ignore errors reading override files
+    }
+  }
+  
+  return Array.from(bodyParams);
+}
+
+/**
+ * Convert Console data_autocomplete_rules parameter to Zod schema string
+ */
+function convertBodyParamToZodString(paramName, isRequired = false) {
+  const optionalSuffix = isRequired ? '' : '.optional()';
+  const requiredMarker = isRequired ? ' (required)' : '';
+
+  // Generate appropriate Zod schemas for common ES API parameters
+  switch (paramName) {
+    // ESQL-specific parameters
+    case 'query':
+      return `z.union([z.string(), z.object({}).passthrough()])${optionalSuffix}.describe('Query (ES-QL string or Elasticsearch Query DSL)${requiredMarker}')`;
+    case 'columnar':
+      return `z.boolean()${optionalSuffix}.describe('Return columnar results${requiredMarker}')`;
+    case 'locale':
+      return `z.string()${optionalSuffix}.describe('Locale for query execution${requiredMarker}')`;
+    case 'params':
+      return `z.array(z.any())${optionalSuffix}.describe('Query parameters${requiredMarker}')`;
+    case 'profile':
+      return `z.boolean()${optionalSuffix}.describe('Enable profiling${requiredMarker}')`;
+    case 'filter':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Query filter${requiredMarker}')`;
+    
+    // Common search parameters
+    case 'size':
+      return `z.number()${optionalSuffix}.describe('Number of results to return${requiredMarker}')`;
+    case 'from':
+      return `z.number()${optionalSuffix}.describe('Starting offset${requiredMarker}')`;
+    case 'sort':
+      return `z.union([z.array(z.any()), z.object({}).passthrough()])${optionalSuffix}.describe('Sort specification${requiredMarker}')`;
+    case 'aggs':
+    case 'aggregations':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Aggregations${requiredMarker}')`;
+    case 'post_filter':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Post filter${requiredMarker}')`;
+    case 'highlight':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Highlighting configuration${requiredMarker}')`;
+    case '_source':
+      return `z.union([z.boolean(), z.array(z.string()), z.object({}).passthrough()])${optionalSuffix}.describe('Source field filtering${requiredMarker}')`;
+    case 'fields':
+      return `z.array(z.string())${optionalSuffix}.describe('Fields to return${requiredMarker}')`;
+    case 'track_total_hits':
+      return `z.union([z.boolean(), z.number()])${optionalSuffix}.describe('Track total hits${requiredMarker}')`;
+    case 'timeout':
+      return `z.string()${optionalSuffix}.describe('Query timeout${requiredMarker}')`;
+    
+    // Document operations
+    case 'document':
+    case 'doc':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Document content${requiredMarker}')`;
+    case 'script':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Script configuration${requiredMarker}')`;
+    case 'upsert':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Upsert document${requiredMarker}')`;
+    case 'doc_as_upsert':
+      return `z.boolean()${optionalSuffix}.describe('Use doc as upsert${requiredMarker}')`;
+    
+    // Bulk operations
+    case 'operations':
+      return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Bulk operations${requiredMarker}')`;
+    
+    // Reindex operations
+    case 'source':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Source configuration${requiredMarker}')`;
+    case 'dest':
+      return `z.object({}).passthrough()${optionalSuffix}.describe('Destination configuration${requiredMarker}')`;
+    case 'conflicts':
+      return `z.enum(['abort', 'proceed'])${optionalSuffix}.describe('Conflict resolution${requiredMarker}')`;
+    
+    default:
+      return `z.any()${optionalSuffix}.describe('${paramName}${requiredMarker}')`;
+  }
+}
+
+/**
  * Generate connector contract for a single ES API
  */
 function generateConnectorDefinition(endpointName, definition) {
@@ -128,6 +253,7 @@ function generateConnectorDefinition(endpointName, definition) {
   const schemaFields = [];
   const pathParams = extractPathParameters(patterns);
   const urlParamNames = Object.keys(urlParams);
+  const bodyParamNames = readConsoleBodyDefinitions(endpointName);
   const addedParams = new Set();
 
   // Add path parameters (required)
@@ -151,8 +277,20 @@ function generateConnectorDefinition(endpointName, definition) {
     }
   }
 
-  // Add body parameter
-  schemaFields.push(`    body: z.any().optional().describe('Request body'),`);
+  // Add specific body parameters from Console definitions
+  for (const paramName of bodyParamNames) {
+    if (!addedParams.has(paramName)) {
+      const zodDef = convertBodyParamToZodString(paramName, false);
+      schemaFields.push(`    ${paramName}: ${zodDef},`);
+      addedParams.add(paramName);
+    }
+  }
+
+  // If no specific body parameters found, add a generic body parameter
+  if (bodyParamNames.length === 0) {
+    schemaFields.push(`    body: z.any().optional().describe('Request body'),`);
+    bodyParamNames.push('body');
+  }
 
   return `  {
     type: '${type}',
@@ -164,7 +302,7 @@ function generateConnectorDefinition(endpointName, definition) {
     parameterTypes: {
       pathParams: ${JSON.stringify(pathParams)},
       urlParams: ${JSON.stringify(urlParamNames)},
-      bodyParams: ['body']
+      bodyParams: ${JSON.stringify(bodyParamNames)}
     },
     paramsSchema: z.object({
 ${schemaFields.join('\n')}

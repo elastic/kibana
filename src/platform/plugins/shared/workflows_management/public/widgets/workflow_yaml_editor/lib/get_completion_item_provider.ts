@@ -294,8 +294,8 @@ function getRequiredParamsForConnector(
         const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
         
         for (const [key, value] of Object.entries(exampleParams)) {
-          // Only include required parameters or common important ones
-          if (['index', 'id', 'body'].includes(key)) {
+          // Include common important parameters for ES APIs
+          if (['index', 'id', 'body', 'query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'format'].includes(key)) {
             result.push({ name: key, example: value });
             console.log(`Added enhanced example: ${key} =`, value);
           }
@@ -316,8 +316,8 @@ function getRequiredParamsForConnector(
         return requiredParams.map((p) => ({ name: p.name, example: p.example }));
       }
 
-      // If no required params, return the most important ones (index, id, body)
-      const importantParams = params.filter((p) => ['index', 'id', 'body'].includes(p.name));
+      // If no required params, return the most important ones for ES APIs
+      const importantParams = params.filter((p) => ['index', 'id', 'body', 'query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'format'].includes(p.name));
       if (importantParams.length > 0) {
         return importantParams.slice(0, 3).map((p) => ({ name: p.name, example: p.example }));
       }

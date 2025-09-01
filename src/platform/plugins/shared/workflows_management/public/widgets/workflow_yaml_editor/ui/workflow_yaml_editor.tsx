@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,8 @@ import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import YAML, { isPair, isScalar, visit } from 'yaml';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { getStepNode } from '../../../../common/lib/yaml_utils';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -32,6 +34,11 @@ import {
 } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+import { registerElasticsearchStepHoverProvider } from '../lib/elasticsearch_step_hover_provider';
+import { updateElasticsearchStepDecorations } from '../lib/elasticsearch_step_decorations';
+import { enhanceEditorWithElasticsearchStepContextMenu } from '../lib/elasticsearch_step_context_menu_provider';
+import { ElasticsearchStepActionsProvider } from '../lib/elasticsearch_step_actions_provider';
+import { ElasticsearchStepActions } from './elasticsearch_step_actions';
 
 const getTriggerNodes = (
   yamlDocument: YAML.Document
@@ -169,6 +176,8 @@ export interface WorkflowYAMLEditorProps {
   onChange?: (value: string | undefined) => void;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
   onSave?: (value: string) => void;
+  esHost?: string;
+  kibanaHost?: string;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -183,9 +192,14 @@ export const WorkflowYAMLEditor = ({
   onChange,
   onSave,
   onValidationErrors,
+  esHost = 'http://localhost:9200',
+  kibanaHost,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { http, notifications },
+  } = useKibana<CoreStart>();
 
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
@@ -202,12 +216,21 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchema]);
 
   const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
+  const yamlDocumentRef = useRef<YAML.Document | null>(null);
   const highlightStepDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const stepExecutionsDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const elasticsearchStepDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const elasticsearchStepActionsProviderRef =
+    useRef<ElasticsearchStepActionsProvider | null>(null);
+
+  // Disposables for Monaco providers
+  const disposablesRef = useRef<monaco.IDisposable[]>([]);
+  const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({});
 
   const {
     error: errorValidating,
@@ -230,9 +253,12 @@ export const WorkflowYAMLEditor = ({
       validateVariables(editorRef.current);
       try {
         const value = model.getValue();
-        setYamlDocument(YAML.parseDocument(value ?? ''));
+        const parsedDocument = YAML.parseDocument(value ?? '');
+        setYamlDocument(parsedDocument);
+        yamlDocumentRef.current = parsedDocument;
       } catch (error) {
         setYamlDocument(null);
+        yamlDocumentRef.current = null;
       }
     }
   }, [validateVariables]);
@@ -254,9 +280,50 @@ export const WorkflowYAMLEditor = ({
       glyphMargin: true,
     });
 
+    // Setup Elasticsearch step providers if we have the required services
+    if (http && notifications) {
+      console.log('WorkflowYAMLEditor: Setting up Elasticsearch step providers');
+      
+      // Register hover provider
+      const hoverProvider = registerElasticsearchStepHoverProvider({
+        http,
+        notifications: notifications as any, // Temporary type cast
+        esHost,
+        kibanaHost: kibanaHost || window.location.origin,
+        getYamlDocument: () => yamlDocumentRef.current,
+      });
+      disposablesRef.current.push(hoverProvider);
+      console.log('WorkflowYAMLEditor: Hover provider registered');
+
+      // Actions provider will be created later when YAML document is ready
+
+      // Enhance editor with context menu (keyboard shortcuts)
+      const contextMenuDisposable = enhanceEditorWithElasticsearchStepContextMenu(editor, {
+        http,
+        notifications: notifications as any, // Temporary type cast
+        esHost,
+        kibanaHost: kibanaHost || window.location.origin,
+        getYamlDocument: () => yamlDocumentRef.current,
+      });
+      disposablesRef.current.push(contextMenuDisposable);
+      console.log('WorkflowYAMLEditor: Context menu enhanced');
+    } else {
+      console.log('WorkflowYAMLEditor: Missing http or notifications services');
+    }
+
     onMount?.(editor, monaco);
 
     setIsEditorMounted(true);
+    
+    // Trigger initial parsing if there's content
+    setTimeout(() => {
+      if (editorRef.current) {
+        const model = editorRef.current.getModel();
+        if (model && model.getValue().trim()) {
+          changeSideEffects();
+        }
+      }
+    }, 100);
   };
 
   useEffect(() => {
@@ -265,6 +332,26 @@ export const WorkflowYAMLEditor = ({
       changeSideEffects();
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
+
+  // Initialize actions provider after YAML document is ready
+  useEffect(() => {
+    if (isEditorMounted && editorRef.current && yamlDocument && http && notifications && !elasticsearchStepActionsProviderRef.current) {
+      console.log('WorkflowYAMLEditor: Late initializing actions provider with YAML document');
+      
+      elasticsearchStepActionsProviderRef.current = new ElasticsearchStepActionsProvider(
+        editorRef.current,
+        setEditorActionsCss,
+        {
+          http,
+          notifications: notifications as any,
+          esHost,
+          kibanaHost: kibanaHost || window.location.origin,
+          getYamlDocument: () => yamlDocumentRef.current,
+        }
+      );
+      console.log('WorkflowYAMLEditor: Late actions provider created');
+    }
+  }, [isEditorMounted, yamlDocument]); // Removed changing dependencies
 
   useEffect(() => {
     const model = editorRef.current?.getModel() ?? null;
@@ -449,6 +536,20 @@ export const WorkflowYAMLEditor = ({
       editorRef.current?.createDecorationsCollection(decorations) ?? null;
   }, [isEditorMounted, yamlDocument, readOnly]);
 
+  // Handle Elasticsearch step decorations - DISABLED for now to avoid conflicts
+  // The ElasticsearchStepActionsProvider handles cursor-based highlighting instead
+  // useEffect(() => {
+  //   if (!isEditorMounted || !editorRef.current || readOnly) {
+  //     return;
+  //   }
+
+  //   elasticsearchStepDecorationCollectionRef.current = updateElasticsearchStepDecorations(
+  //     editorRef.current,
+  //     yamlDocument,
+  //     elasticsearchStepDecorationCollectionRef.current
+  //   );
+  // }, [isEditorMounted, yamlDocument, readOnly]);
+
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
   }, []);
@@ -510,6 +611,15 @@ export const WorkflowYAMLEditor = ({
   useEffect(() => {
     const editor = editorRef.current;
     return () => {
+      // Dispose of Monaco providers
+      disposablesRef.current.forEach(disposable => disposable.dispose());
+      disposablesRef.current = [];
+      
+      // Dispose of decorations and actions provider
+      elasticsearchStepDecorationCollectionRef.current?.clear();
+      elasticsearchStepActionsProviderRef.current?.dispose();
+      elasticsearchStepActionsProviderRef.current = null;
+      
       editor?.dispose();
     };
   }, []);
@@ -534,6 +644,27 @@ export const WorkflowYAMLEditor = ({
   return (
     <div css={styles.container}>
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
+      {/* Floating Elasticsearch step actions */}
+      <EuiFlexGroup
+        className="elasticsearch-step-actions"
+        gutterSize="xs"
+        responsive={false}
+        style={editorActionsCss}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <EuiFlexItem grow={false}>
+          {http && notifications && (
+            <ElasticsearchStepActions
+              actionsProvider={elasticsearchStepActionsProviderRef.current}
+              http={http}
+              notifications={notifications as any}
+              esHost={esHost}
+              kibanaHost={kibanaHost}
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
@@ -706,6 +837,24 @@ const componentStyles = {
       },
       '.alert-trigger-highlight': {
         backgroundColor: euiTheme.colors.backgroundLightWarning,
+      },
+      '.elasticsearch-step-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.vis.euiColorVis1,
+          borderRadius: '50%',
+        },
+      },
+      '.elasticsearch-step-type-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.1)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.elasticsearch-step-block-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.08)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
       },
     }),
   editorContainer: css({
