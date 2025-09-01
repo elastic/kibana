@@ -173,6 +173,9 @@ export const ensureUserHasAuthzToFilesForAction = async (
     case 'runscript':
       hasAuthzToCommand = userAuthz.canWriteExecuteOperations;
       break;
+    case 'cancel':
+      hasAuthzToCommand = userAuthz.canReadActionsLogManagement;
+      break;
   }
 
   if (!hasAuthzToCommand) {

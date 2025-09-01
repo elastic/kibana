@@ -172,6 +172,17 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (command === 'cancel') {
+      if (!output) {
+        output = {
+          type: 'json',
+          content: {
+            code: '200',
+          },
+        };
+      }
+    }
+
     if (command === 'execute') {
       if (!output) {
         output = this.generateExecuteActionResponseOutput();

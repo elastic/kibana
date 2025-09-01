@@ -12,7 +12,12 @@ import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { CustomScriptSelectorState } from './custom_script_selector';
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
-import { useGenericErrorToast, useBaseSelectorHandlers, useFocusManagement } from '../shared/hooks';
+import {
+  useGenericErrorToast,
+  useBaseSelectorHandlers,
+  useFocusManagement,
+  useRenderDelay,
+} from '../shared/hooks';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import type {
@@ -54,6 +59,7 @@ describe('CustomScriptSelector', () => {
     typeof useFocusManagement
   >;
   const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+  const mockUseRenderDelay = useRenderDelay as jest.MockedFunction<typeof useRenderDelay>;
   const mockOnChange = jest.fn();
   const mockRequestFocus = jest.fn();
   const mockScripts: ResponseActionScript[] = [
@@ -98,6 +104,9 @@ describe('CustomScriptSelector', () => {
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useGetCustomScripts>);
+
+    // Default behavior: don't show render delay
+    mockUseRenderDelay.mockReturnValue(false);
 
     // Mock the error toast hook
     mockUseGenericErrorToast.mockImplementation(() => {});
@@ -164,6 +173,9 @@ describe('CustomScriptSelector', () => {
   };
 
   test('renders loading spinner when fetching data', () => {
+    // Ensure render delay doesn't block the spinner
+    mockUseRenderDelay.mockReturnValueOnce(true);
+
     mockUseGetCustomScripts.mockReturnValueOnce({
       data: undefined,
       isLoading: true,
