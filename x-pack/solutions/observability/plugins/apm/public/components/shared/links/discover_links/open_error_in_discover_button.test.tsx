@@ -7,62 +7,22 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
 import { OpenErrorInDiscoverButton } from './open_error_in_discover_button';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-
-const MOCK_INDEX_PATTERN = 'logs-*';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('../../../../context/apm_service/use_apm_service_context');
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: () => ({
-    services: {
-      apmSourcesAccess: {
-        getApmIndexSettings: jest.fn(),
-      },
-    },
-  }),
-}));
-jest.mock('../../../../hooks/use_fetcher', () => {
-  const originalUseFetcher = jest.requireActual('../../../../hooks/use_fetcher').useFetcher;
-  return {
-    ...jest.requireActual('../../../../hooks/use_fetcher'),
-    useFetcher: jest.fn((fn, deps) => {
-      // Only mock when used with apmSourcesAccess.getApmIndexSettings
-      if (deps && deps[0]?.getApmIndexSettings) {
-        return {
-          data: {
-            apmIndexSettings: [
-              {
-                configurationName: 'test',
-                savedValue: 'fake-index',
-                defaultValue: 'fake-*',
-              },
-              {
-                configurationName: 'error',
-                savedValue: MOCK_INDEX_PATTERN,
-                defaultValue: 'error-*',
-              },
-            ],
-          },
-        };
-      }
-      // Use the real useFetcher for other calls
-      return originalUseFetcher(fn, deps);
-    }),
-  };
-});
 
 const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
   typeof useApmServiceContext
 >;
-const mockUseApmParams = useApmParams as jest.MockedFunction<any>;
+const mockUseAnyOfApmParams = useAnyOfApmParams as jest.MockedFunction<any>;
 const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
   typeof useApmPluginContext
 >;
@@ -72,6 +32,7 @@ const mockLocatorGet = jest.fn().mockReturnValue({
   getRedirectUrl: mockGetRedirectUrl,
 });
 
+const MOCK_INDEX_PATTERN = 'logs-*';
 const errorGroupId = 'test-error-group-id';
 const serviceName = 'test-service';
 
@@ -79,6 +40,18 @@ describe('OpenErrorInDiscoverButton', () => {
   beforeEach(() => {
     mockUseApmServiceContext.mockReturnValue({
       serviceName,
+      indexSettings: [
+        {
+          configurationName: 'error',
+          defaultValue: MOCK_INDEX_PATTERN,
+        },
+        {
+          configurationName: 'test',
+          savedValue: 'fake-index',
+          defaultValue: 'fake-*',
+        },
+      ],
+      indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);
     mockUseApmPluginContext.mockReturnValue({
       share: {
@@ -90,7 +63,7 @@ describe('OpenErrorInDiscoverButton', () => {
       },
     } as any);
 
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query: {},
     });
 
@@ -109,9 +82,21 @@ describe('OpenErrorInDiscoverButton', () => {
 
     mockUseApmServiceContext.mockReturnValue({
       serviceName: '',
+      indexSettings: [
+        {
+          configurationName: 'error',
+          defaultValue: MOCK_INDEX_PATTERN,
+        },
+        {
+          configurationName: 'test',
+          savedValue: 'fake-index',
+          defaultValue: 'fake-*',
+        },
+      ],
+      indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);
 
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query,
       path: { groupId: errorGroupId },
     });
@@ -134,7 +119,7 @@ describe('OpenErrorInDiscoverButton', () => {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     };
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query,
       path: { groupId: errorGroupId },
     });
@@ -160,8 +145,20 @@ describe('OpenErrorInDiscoverButton', () => {
     };
     mockUseApmServiceContext.mockReturnValue({
       serviceName: '',
+      indexSettings: [
+        {
+          configurationName: 'error',
+          defaultValue: MOCK_INDEX_PATTERN,
+        },
+        {
+          configurationName: 'test',
+          savedValue: 'fake-index',
+          defaultValue: 'fake-*',
+        },
+      ],
+      indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query,
       path: { groupId: errorGroupId },
     });
@@ -180,7 +177,7 @@ describe('OpenErrorInDiscoverButton', () => {
   });
 
   it('should render button with correct props', () => {
-    mockUseApmParams.mockReturnValue({
+    mockUseAnyOfApmParams.mockReturnValue({
       query: {},
       path: { groupId: errorGroupId },
     });
@@ -190,6 +187,25 @@ describe('OpenErrorInDiscoverButton', () => {
     const button = getByTestId('testId');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
+    expect(button).toHaveTextContent('Open in Discover');
+  });
+
+  it('should render button with disabled state', () => {
+    mockUseAnyOfApmParams.mockReturnValue({
+      query: {},
+      path: { groupId: errorGroupId },
+    });
+    mockUseApmServiceContext.mockReturnValue({
+      serviceName,
+      indexSettings: [],
+      indexSettingsStatus: FETCH_STATUS.SUCCESS,
+    } as any);
+
+    const { getByTestId } = render(<OpenErrorInDiscoverButton dataTestSubj="testId" />);
+
+    const button = getByTestId('testId');
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
     expect(button).toHaveTextContent('Open in Discover');
   });
 });

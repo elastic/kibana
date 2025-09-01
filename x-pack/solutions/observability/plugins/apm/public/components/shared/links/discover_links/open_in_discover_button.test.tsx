@@ -22,55 +22,13 @@ import {
   SPAN_NAME,
   TRANSACTION_NAME,
 } from '@kbn/apm-types';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 const MOCK_INDEX_PATTERN = 'traces-*';
 
 jest.mock('../../../../context/apm_service/use_apm_service_context');
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: () => ({
-    services: {
-      apmSourcesAccess: {
-        getApmIndexSettings: jest.fn(),
-      },
-    },
-  }),
-}));
-jest.mock('../../../../hooks/use_fetcher', () => {
-  const originalUseFetcher = jest.requireActual('../../../../hooks/use_fetcher').useFetcher;
-  return {
-    ...jest.requireActual('../../../../hooks/use_fetcher'),
-    useFetcher: jest.fn((fn, deps) => {
-      // Only mock when used with apmSourcesAccess.getApmIndexSettings
-      if (deps && deps[0]?.getApmIndexSettings) {
-        return {
-          data: {
-            apmIndexSettings: [
-              {
-                configurationName: 'transaction',
-                defaultValue: MOCK_INDEX_PATTERN,
-              },
-              {
-                configurationName: 'span',
-                savedValue: MOCK_INDEX_PATTERN,
-                defaultValue: 'traces-otel-*',
-              },
-              {
-                configurationName: 'test',
-                savedValue: 'fake-index',
-                defaultValue: 'fake-*',
-              },
-            ],
-          },
-        };
-      }
-      // Use the real useFetcher for other calls
-      return originalUseFetcher(fn, deps);
-    }),
-  };
-});
 
 const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
   typeof useApmServiceContext
@@ -91,6 +49,23 @@ describe('OpenInDiscoverButton', () => {
   beforeEach(() => {
     mockUseApmServiceContext.mockReturnValue({
       serviceName,
+      indexSettings: [
+        {
+          configurationName: 'transaction',
+          defaultValue: MOCK_INDEX_PATTERN,
+        },
+        {
+          configurationName: 'span',
+          savedValue: MOCK_INDEX_PATTERN,
+          defaultValue: 'traces-otel-*',
+        },
+        {
+          configurationName: 'test',
+          savedValue: 'fake-index',
+          defaultValue: 'fake-*',
+        },
+      ],
+      indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);
 
     mockUseApmPluginContext.mockReturnValue({
@@ -351,6 +326,24 @@ describe('OpenInDiscoverButton', () => {
     const button = getByTestId('testId');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
+    expect(button).toHaveTextContent('Open in Discover');
+  });
+
+  it('should render button with disabled state', () => {
+    mockUseAnyOfApmParams.mockReturnValue({
+      query: {},
+    });
+    mockUseApmServiceContext.mockReturnValue({
+      serviceName,
+      indexSettings: [],
+      indexSettingsStatus: FETCH_STATUS.SUCCESS,
+    } as any);
+
+    const { getByTestId } = render(<OpenInDiscoverButton dataTestSubj="testId" />);
+
+    const button = getByTestId('testId');
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
     expect(button).toHaveTextContent('Open in Discover');
   });
 });

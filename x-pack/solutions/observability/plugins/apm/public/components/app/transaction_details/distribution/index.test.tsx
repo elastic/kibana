@@ -26,50 +26,6 @@ import { fromQuery } from '../../../shared/links/url_helpers';
 
 import { TransactionDistribution } from '.';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: () => ({
-    services: {
-      apmSourcesAccess: {
-        getApmIndexSettings: jest.fn(),
-      },
-    },
-  }),
-}));
-jest.mock('../../../../hooks/use_fetcher', () => {
-  const originalUseFetcher = jest.requireActual('../../../../hooks/use_fetcher').useFetcher;
-  return {
-    ...jest.requireActual('../../../../hooks/use_fetcher'),
-    useFetcher: jest.fn((fn, deps) => {
-      // Only mock when used with apmSourcesAccess.getApmIndexSettings
-      if (deps && deps[0]?.getApmIndexSettings) {
-        return {
-          data: {
-            apmIndexSettings: [
-              {
-                configurationName: 'transaction',
-                defaultValue: 'traces-*',
-              },
-              {
-                configurationName: 'span',
-                savedValue: 'traces-*',
-                defaultValue: 'traces-otel-*',
-              },
-              {
-                configurationName: 'test',
-                savedValue: 'fake-index',
-                defaultValue: 'fake-*',
-              },
-            ],
-          },
-        };
-      }
-      // Use the real useFetcher for other calls
-      return originalUseFetcher(fn, deps);
-    }),
-  };
-});
-
 const coreMock = {
   settings: { client: { get: () => {} } },
 } as unknown as CoreStart;
