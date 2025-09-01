@@ -12,9 +12,9 @@ const fs = require('fs');
 const typescript = require('typescript');
 
 /**
- * Custom webpack plugin to compile TypeScript files and copy JSON files 
+ * Custom webpack plugin to compile TypeScript files and copy JSON files
  * while preserving the original folder structure.
- * 
+ *
  * This plugin processes the console_definitions folder and:
  * - Compiles .ts files to .js files
  * - Copies .json files as-is
@@ -75,7 +75,7 @@ class ConsoleDefinitionsPlugin {
   compileTypeScriptFile(sourcePath, targetDir, fileName) {
     try {
       const sourceCode = fs.readFileSync(sourcePath, 'utf8');
-      
+
       // TypeScript compiler options optimized for console definitions
       const compilerOptions = {
         target: typescript.ScriptTarget.ES2018,
@@ -102,7 +102,7 @@ class ConsoleDefinitionsPlugin {
       // Check for compilation errors
       if (result.diagnostics && result.diagnostics.length > 0) {
         console.warn(`TypeScript compilation warnings for ${sourcePath}:`);
-        result.diagnostics.forEach(diagnostic => {
+        result.diagnostics.forEach((diagnostic) => {
           const message = typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
           console.warn(`  ${message}`);
         });
@@ -117,7 +117,6 @@ class ConsoleDefinitionsPlugin {
       if (process.env.WEBPACK_VERBOSE) {
         console.log(`Compiled: ${sourcePath} -> ${targetPath}`);
       }
-
     } catch (error) {
       console.error(`Error compiling TypeScript file ${sourcePath}:`, error.message);
       throw error; // Re-throw to fail the build if compilation fails

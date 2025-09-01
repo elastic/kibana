@@ -226,7 +226,7 @@ module.exports = [
         cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../target/react/**/*')],
       }),
       // new MonacoWebpackPlugin({}),
-      new BundleAnalyzerPlugin()
+      new BundleAnalyzerPlugin(),
     ],
   },
 

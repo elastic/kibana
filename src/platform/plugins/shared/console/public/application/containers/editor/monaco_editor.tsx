@@ -117,7 +117,7 @@ export const MonacoEditor = ({
         : undefined;
 
       const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, customProvider);
-        
+
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);

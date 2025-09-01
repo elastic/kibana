@@ -12,7 +12,7 @@ export type {
   EndpointDescription,
   EndpointsAvailability,
 } from '../../common/types';
-import { EndpointDescription, EndpointsAvailability } from '../../common/types';
+import type { EndpointDescription, EndpointsAvailability } from '../../common/types';
 
 export interface FileSystemAdapter {
   readFileSync: (path: string, encoding: 'utf8') => string;

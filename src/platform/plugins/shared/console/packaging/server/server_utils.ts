@@ -8,7 +8,7 @@
  */
 
 import { merge } from 'lodash';
-import {
+import type {
   EndpointDescription,
   EndpointDefinition,
   EndpointsAvailability,
@@ -191,17 +191,19 @@ export class ConsoleSpecDefinitionsLoader {
   private loadJSDefinitions() {
     try {
       const { fs, definitionsPath, stackVersion } = this.config;
-      
+
       // Look for compiled JavaScript files (TypeScript files are compiled during webpack build)
       const jsIndexPath = fs.join(definitionsPath, stackVersion, 'js', 'index.js');
-      
+
       // Check if compiled JS file exists
       try {
         fs.readFileSync(jsIndexPath, 'utf8');
       } catch (jsError) {
         console.warn(`No compiled JS definitions found for stack version ${stackVersion}`);
         console.warn(`Expected: ${jsIndexPath}`);
-        console.warn('Make sure the webpack build process compiled TypeScript definitions to JavaScript.');
+        console.warn(
+          'Make sure the webpack build process compiled TypeScript definitions to JavaScript.'
+        );
         return;
       }
 
