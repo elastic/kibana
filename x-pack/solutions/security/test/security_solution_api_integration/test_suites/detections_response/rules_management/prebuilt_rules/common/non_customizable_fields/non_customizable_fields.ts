@@ -15,6 +15,7 @@ import {
   createPrebuiltRulesPackage,
   installFleetPackageByUpload,
   installPrebuiltRules,
+  deletePrebuiltRulesFleetPackage,
 } from '../../../../utils';
 import {
   MOCK_PKG_VERSION,
@@ -28,27 +29,30 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
+  const retryService = getService('retry');
+
+  const setupPrebuiltPackageAndRules = async () => {
+    const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
+      packageName: PREBUILT_RULES_PACKAGE_NAME,
+      packageSemver: MOCK_PKG_VERSION,
+      prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
+    });
+    await installFleetPackageByUpload({
+      getService,
+      packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
+    });
+    await installPrebuiltRules(es, supertest);
+  };
 
   describe('@ess @serverless @serverlessQA modifying non-customizable fields', () => {
     describe('patch rules', () => {
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
+        await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
+        await setupPrebuiltPackageAndRules();
       });
 
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-          packageName: PREBUILT_RULES_PACKAGE_NAME,
-          packageSemver: MOCK_PKG_VERSION,
-          prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-        });
-
-        await installFleetPackageByUpload({
-          getService,
-          packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
-        });
-
-        await installPrebuiltRules(es, supertest);
-
         const { body } = await securitySolutionApi
           .patchRule({
             body: {
@@ -63,24 +67,13 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('update rules', () => {
-      afterEach(async () => {
+      beforeEach(async () => {
         await deleteAllRules(supertest, log);
+        await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
+        await setupPrebuiltPackageAndRules();
       });
 
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-          packageName: PREBUILT_RULES_PACKAGE_NAME,
-          packageSemver: MOCK_PKG_VERSION,
-          prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-        });
-
-        await installFleetPackageByUpload({
-          getService,
-          packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
-        });
-
-        await installPrebuiltRules(es, supertest);
-
         const { body: existingRule } = await securitySolutionApi
           .readRule({
             query: { rule_id: PREBUILT_RULE_ID_A },
