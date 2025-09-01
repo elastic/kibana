@@ -21,6 +21,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-types';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -123,7 +124,7 @@ const getESQLQuery = ({
 
 export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
   const { share } = useApmPluginContext();
-  const { serviceName, indexSettings } = useApmServiceContext();
+  const { serviceName, indexSettings, indexSettingsStatus } = useApmServiceContext();
 
   const { query: queryParams } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
@@ -161,10 +162,6 @@ export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
     indexSettings,
   });
 
-  if (!esqlQuery) {
-    return null;
-  }
-
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: {
       from: rangeFrom,
@@ -180,9 +177,11 @@ export function OpenInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
       aria-label={i18n.translate('xpack.apm.waterfallWithSummary.openInDiscoverButton.ariaLabel', {
         defaultMessage: 'Open in Discover',
       })}
+      isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
       data-test-subj={dataTestSubj}
       iconType="discoverApp"
       href={discoverHref}
+      isDisabled={!esqlQuery || indexSettingsStatus !== FETCH_STATUS.SUCCESS}
     >
       {i18n.translate('xpack.apm.waterfallWithSummary.openInDiscoverButton.label', {
         defaultMessage: 'Open in Discover',

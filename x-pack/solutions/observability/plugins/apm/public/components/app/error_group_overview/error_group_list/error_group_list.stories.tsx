@@ -102,6 +102,7 @@ const stories: Meta<Args> = {
                 savedValue: 'traces-*, apm-*',
               },
             ],
+            indexSettingsStatus: FETCH_STATUS.SUCCESS,
           }}
         >
           <StoryComponent />

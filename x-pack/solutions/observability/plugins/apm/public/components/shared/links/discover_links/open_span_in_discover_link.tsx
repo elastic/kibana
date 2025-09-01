@@ -11,13 +11,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { from, where } from '@kbn/esql-composer';
 import { SPAN_ID } from '@kbn/apm-types';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -66,7 +67,7 @@ export function OpenSpanInDiscoverLink({
   spanId: string;
 }) {
   const { share } = useApmPluginContext();
-  const { indexSettings } = useApmServiceContext();
+  const { indexSettings, indexSettingsStatus } = useApmServiceContext();
 
   const {
     query: { rangeFrom, rangeTo, kuery },
@@ -87,10 +88,6 @@ export function OpenSpanInDiscoverLink({
     indexSettings,
   });
 
-  if (!esqlQuery) {
-    return null;
-  }
-
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: {
       from: rangeFrom,
@@ -102,19 +99,19 @@ export function OpenSpanInDiscoverLink({
   });
 
   return (
-    <EuiLink
+    <EuiButtonEmpty
       aria-label={i18n.translate('xpack.apm.openSpanInDiscoverLink.ariaLabel', {
         defaultMessage: 'Open in Discover',
       })}
+      isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
       data-test-subj={dataTestSubj}
+      iconType="discoverApp"
       href={discoverHref}
+      isDisabled={!esqlQuery || indexSettingsStatus !== FETCH_STATUS.SUCCESS}
     >
-      <EuiFlexGroup gutterSize="s">
-        <EuiIcon type="discoverApp" />
-        {i18n.translate('xpack.apm.openSpanInDiscoverLink.label', {
-          defaultMessage: 'Open in Discover',
-        })}
-      </EuiFlexGroup>
-    </EuiLink>
+      {i18n.translate('xpack.apm.openSpanInDiscoverLink.label', {
+        defaultMessage: 'Open in Discover',
+      })}
+    </EuiButtonEmpty>
   );
 }

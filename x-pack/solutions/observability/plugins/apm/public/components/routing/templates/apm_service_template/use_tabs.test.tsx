@@ -187,6 +187,7 @@ describe('APM service template', () => {
               savedValue: 'traces-*, apm-*',
             },
           ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 

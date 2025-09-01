@@ -69,6 +69,7 @@ describe('Metrics', () => {
               savedValue: 'traces-*, apm-*',
             },
           ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -98,6 +99,7 @@ describe('Metrics', () => {
               savedValue: 'traces-*, apm-*',
             },
           ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -127,6 +129,7 @@ describe('Metrics', () => {
               savedValue: 'traces-*, apm-*',
             },
           ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 

@@ -36,6 +36,7 @@ export interface APMServiceContextValue {
   fallbackToTransactions: boolean;
   serviceAgentStatus: FETCH_STATUS;
   indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
+  indexSettingsStatus: FETCH_STATUS;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
@@ -45,6 +46,7 @@ export const APMServiceContext = createContext<APMServiceContextValue>({
   fallbackToTransactions: false,
   serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
   indexSettings: [],
+  indexSettingsStatus: FETCH_STATUS.NOT_INITIATED,
 });
 
 export function ApmServiceContextProvider({ children }: { children: ReactNode }) {
@@ -98,7 +100,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     kuery,
   });
 
-  const { data = { apmIndexSettings: [] } } = useFetcher(
+  const { data = { apmIndexSettings: [] }, status: indexSettingsStatus } = useFetcher(
     (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
     [services.apmSourcesAccess]
   );
@@ -118,6 +120,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
         fallbackToTransactions,
         serviceAgentStatus,
         indexSettings: data?.apmIndexSettings,
+        indexSettingsStatus,
       }}
       children={children}
     />
