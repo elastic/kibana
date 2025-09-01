@@ -10,7 +10,6 @@ import type { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugi
 import type { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
-export * from './authz';
 export * from './os';
 export * from './trusted_apps';
 export type * from './trusted_devices';

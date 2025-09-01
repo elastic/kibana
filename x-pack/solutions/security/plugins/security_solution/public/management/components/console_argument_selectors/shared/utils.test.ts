@@ -9,13 +9,13 @@ import type {
   ActionListApiResponse,
   ActionDetails,
   ResponseActionScript,
-  EndpointAuthz,
 } from '../../../../../common/endpoint/types';
 import {
   transformPendingActionsToOptions,
   transformCustomScriptsToOptions,
   checkActionCancelPermission,
 } from './utils';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
 describe('utils', () => {
   describe('transformPendingActionsToOptions', () => {

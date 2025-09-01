@@ -10,8 +10,8 @@ import type {
   ActionListApiResponse,
   ActionDetails,
   ResponseActionScript,
-  EndpointAuthz,
 } from '../../../../../common/endpoint/types';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { BaseSelectorState } from './types';
 import { getRequiredCancelPermissions } from '../../../../../common/endpoint/service/authz/authz';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
