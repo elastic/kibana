@@ -62,7 +62,7 @@ export const SolutionViewTour: FC<Props> = ({ children, solution, isTourOpen, on
               id="xpack.spaces.navControl.tour.content"
               defaultMessage="You can switch between Elastic Observability, Elastic Security, Elasticsearch or show all solutions by configuring the space here. {learnMore}"
               values={{
-                solution: solutionLabel,
+                //  solution: solutionLabel,
                 learnMore: <LearnMoreLink />,
               }}
             />
