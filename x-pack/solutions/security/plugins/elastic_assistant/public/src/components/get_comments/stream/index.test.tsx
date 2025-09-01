@@ -142,19 +142,22 @@ describe('StreamComment', () => {
           resumeGraph: resumeFunction,
           content: 'User information requested',
           interruptValue: {
-            "type": "SELECT_OPTION",
-            "threadId": "test-thread-id",
-            "options": [{
-              "value": "APPROVED",
-              "label": "Approved",
-              "buttonColor": "success"
-            }, {
-              "value": "REJECTED",
-              "label": "Rejected",
-              "buttonColor": "danger"
-            }],
-            "description": "Select an option"
-          }
+            type: 'SELECT_OPTION',
+            threadId: 'test-thread-id',
+            options: [
+              {
+                value: 'APPROVED',
+                label: 'Approved',
+                buttonColor: 'success',
+              },
+              {
+                value: 'REJECTED',
+                label: 'Rejected',
+                buttonColor: 'danger',
+              },
+            ],
+            description: 'Select an option',
+          },
         }}
       />
     );
@@ -175,10 +178,10 @@ describe('StreamComment', () => {
           resumeGraph: resumeFunction,
           content: 'User information requested',
           interruptValue: {
-            "type": "INPUT_TEXT",
-            "threadId": "test-thread-id",
-            "description": "Input text"
-          }
+            type: 'INPUT_TEXT',
+            threadId: 'test-thread-id',
+            description: 'Input text',
+          },
         }}
       />
     );
@@ -187,7 +190,6 @@ describe('StreamComment', () => {
     expect(screen.getByTestId('input-text-interrupt')).toBeInTheDocument();
     expect(screen.queryByText('User information requested')).toBeInTheDocument();
   });
-
 
   it('renders cursor when content is loading', () => {
     render(<StreamComment {...testProps} isFetching={true} />);

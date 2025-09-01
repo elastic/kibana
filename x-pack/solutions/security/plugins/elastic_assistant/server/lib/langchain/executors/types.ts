@@ -33,14 +33,12 @@ import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_d
 import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import type { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 
-export type OnLlmResponse = (
-  args: {
-    content: string,
-    interruptValue?: InterruptValue
-    traceData?: Message['traceData'],
-    isError?: boolean
-  }
-) => Promise<void>;
+export type OnLlmResponse = (args: {
+  content: string;
+  interruptValue?: InterruptValue;
+  traceData?: Message['traceData'];
+  isError?: boolean;
+}) => Promise<void>;
 
 export interface AssistantDataClients {
   anonymizationFieldsDataClient?: AIAssistantDataClient;

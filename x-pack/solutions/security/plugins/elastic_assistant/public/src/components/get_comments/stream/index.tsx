@@ -7,7 +7,12 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { InterruptResumeValue, InterruptValue, MessageRole } from '@kbn/elastic-assistant-common';
+import type {
+  InterruptResumeValue,
+  InterruptValue,
+  MessageRole,
+} from '@kbn/elastic-assistant-common';
+import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -16,7 +21,6 @@ import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
 import { InterruptFactory } from '../typed_interrupt';
-import { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 interface Props {
   abortStream: () => void;
@@ -57,7 +61,7 @@ export const StreamComment = ({
   interruptValue,
   interruptResumeValue,
   resumeGraph,
-  isLastInConversation
+  isLastInConversation,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,

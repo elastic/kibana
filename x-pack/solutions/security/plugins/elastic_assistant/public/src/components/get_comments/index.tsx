@@ -17,10 +17,10 @@ import {
 } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 import { SecurityUserAvatar, SecurityUserName } from './user_avatar';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
-import { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 // Matches EuiAvatar L
 const SpinnerWrapper = styled.div`
@@ -144,7 +144,7 @@ export const getComments: GetComments =
           ]
         : []),
       ...currentConversation.messages.map((message, index, total) => {
-        const isLastInConversation = (index === total.length - 1) && extraLoadingComment.length === 0;
+        const isLastInConversation = index === total.length - 1 && extraLoadingComment.length === 0;
         const isUser = message.role === 'user';
         const replacements = currentConversation.replacements;
         const user = isUser

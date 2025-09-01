@@ -108,62 +108,62 @@ export const transformToUpdateScheme = (
     ...(users ? { users } : {}),
     ...(apiConfig
       ? {
-        api_config: {
-          action_type_id: apiConfig?.actionTypeId,
-          connector_id: apiConfig?.connectorId,
-          default_system_prompt_id: apiConfig?.defaultSystemPromptId,
-          model: apiConfig?.model,
-          provider: apiConfig?.provider,
-        },
-      }
+          api_config: {
+            action_type_id: apiConfig?.actionTypeId,
+            connector_id: apiConfig?.connectorId,
+            default_system_prompt_id: apiConfig?.defaultSystemPromptId,
+            model: apiConfig?.model,
+            provider: apiConfig?.provider,
+          },
+        }
       : {}),
     ...(excludeFromLastConversationStorage != null
       ? {
-        exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-      }
+          exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
+        }
       : {}),
     ...(replacements
       ? {
-        replacements: Object.keys(replacements).map((key) => ({
-          uuid: key,
-          value: replacements[key],
-        })),
-      }
+          replacements: Object.keys(replacements).map((key) => ({
+            uuid: key,
+            value: replacements[key],
+          })),
+        }
       : {}),
     ...(messages
       ? {
-        messages: messages.map((message) => ({
-          '@timestamp': message.timestamp,
-          id: message.id ?? uuidv4(),
-          content: message.content,
-          is_error: message.isError,
-          reader: message.reader,
-          role: message.role,
-          ...(message.metadata
-            ? {
-              metadata: {
-                ...(message.metadata.contentReferences
-                  ? { content_references: message.metadata.contentReferences }
-                  : {}),
-                ...(message.metadata.interruptValue
-                  ? { interrupt_value: message.metadata.interruptValue }
-                  : {}),
-                ...(message.metadata.interruptResumeValue
-                  ? { interrupt_resume_value: message.metadata.interruptResumeValue }
-                  : {}),
-              },
-            }
-            : {}),
-          ...(message.traceData
-            ? {
-              trace_data: {
-                trace_id: message.traceData.traceId,
-                transaction_id: message.traceData.transactionId,
-              },
-            }
-            : {}),
-        })),
-      }
+          messages: messages.map((message) => ({
+            '@timestamp': message.timestamp,
+            id: message.id ?? uuidv4(),
+            content: message.content,
+            is_error: message.isError,
+            reader: message.reader,
+            role: message.role,
+            ...(message.metadata
+              ? {
+                  metadata: {
+                    ...(message.metadata.contentReferences
+                      ? { content_references: message.metadata.contentReferences }
+                      : {}),
+                    ...(message.metadata.interruptValue
+                      ? { interrupt_value: message.metadata.interruptValue }
+                      : {}),
+                    ...(message.metadata.interruptResumeValue
+                      ? { interrupt_resume_value: message.metadata.interruptResumeValue }
+                      : {}),
+                  },
+                }
+              : {}),
+            ...(message.traceData
+              ? {
+                  trace_data: {
+                    trace_id: message.traceData.traceId,
+                    transaction_id: message.traceData.transactionId,
+                  },
+                }
+              : {}),
+          })),
+        }
       : {}),
   };
 };

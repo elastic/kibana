@@ -194,7 +194,7 @@ export const appendAssistantMessageToConversation = async ({
   contentReferences,
   isError = false,
   traceData = {},
-  interruptValue = undefined
+  interruptValue = undefined,
 }: AppendAssistantMessageToConversationParams) => {
   const conversation = await conversationsDataClient.getConversation({ id: conversationId });
   if (!conversation) {
@@ -203,7 +203,7 @@ export const appendAssistantMessageToConversation = async ({
 
   const metadata: MessageMetadata = {
     ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
-    interruptValue
+    interruptValue,
   };
 
   await conversationsDataClient.appendConversationMessages({

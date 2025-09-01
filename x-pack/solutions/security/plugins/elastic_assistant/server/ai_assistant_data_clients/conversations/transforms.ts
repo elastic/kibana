@@ -62,8 +62,8 @@ export const transformESToConversation = (
                   ? { contentReferences: message.metadata.content_references }
                   : {}),
                 ...(message.metadata.interrupt_value
-                    ? { interruptValue: message.metadata.interrupt_value }
-                    : {}),
+                  ? { interruptValue: message.metadata.interrupt_value }
+                  : {}),
                 ...(message.metadata.interrupt_resume_value
                   ? { interruptResumeValue: message.metadata.interrupt_resume_value }
                   : {}),

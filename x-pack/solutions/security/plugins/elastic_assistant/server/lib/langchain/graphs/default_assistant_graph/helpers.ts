@@ -12,7 +12,11 @@ import type { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody, InterruptValue, TraceData } from '@kbn/elastic-assistant-common';
+import type {
+  ExecuteConnectorRequestBody,
+  InterruptValue,
+  TraceData,
+} from '@kbn/elastic-assistant-common';
 import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -75,7 +79,7 @@ export const streamGraph = async ({
 
   let didEnd = false;
 
-  const closeStream = (args: { errorMessage: string, isError: true } | { isError: false }) => {
+  const closeStream = (args: { errorMessage: string; isError: true } | { isError: false }) => {
     if (didEnd) {
       return;
     }
@@ -98,22 +102,23 @@ export const streamGraph = async ({
       streamingSpan.outcome = args.isError ? 'failure' : 'success';
     }
     streamingSpan?.end();
-  }
+  };
 
-  const handleFinalContent = (args: { finalResponse: string, isError: boolean, interruptValue?: InterruptValue }) => {
+  const handleFinalContent = (args: {
+    finalResponse: string;
+    isError: boolean;
+    interruptValue?: InterruptValue;
+  }) => {
     if (onLlmResponse) {
-
-      onLlmResponse(
-        {
-          content: args.finalResponse,
-          interruptValue: args.interruptValue,
-          traceData: {
-            transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
-            traceId: streamingSpan?.ids?.['trace.id'],
-          },
-          isError: args.isError
-        }
-      ).catch(() => { });
+      onLlmResponse({
+        content: args.finalResponse,
+        interruptValue: args.interruptValue,
+        traceData: {
+          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+          traceId: streamingSpan?.ids?.['trace.id'],
+        },
+        isError: args.isError,
+      }).catch(() => {});
     }
   };
 
@@ -225,7 +230,7 @@ export const invokeGraph = async ({
     const conversationId = result.conversationId;
     if (onLlmResponse) {
       await onLlmResponse({
-        "content": output,
+        content: output,
         traceData,
       });
     }

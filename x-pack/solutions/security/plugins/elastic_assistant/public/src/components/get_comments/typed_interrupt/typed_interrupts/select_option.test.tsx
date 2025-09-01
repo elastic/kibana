@@ -56,9 +56,9 @@ describe('SelectOption', () => {
   it('calls resumeGraph with correct parameters when an option is clicked', () => {
     render(<SelectOption {...defaultProps} />);
     const approveButton = screen.getByTestId('select-option-approve');
-    
+
     fireEvent.click(approveButton);
-    
+
     expect(mockResumeGraph).toHaveBeenCalledWith('test-thread-id', {
       type: 'SELECT_OPTION',
       value: 'approve',
@@ -71,7 +71,7 @@ describe('SelectOption', () => {
       value: 'approve',
     };
     render(<SelectOption {...defaultProps} resumedValue={resumedValue} />);
-    
+
     const approveButton = screen.getByTestId('select-option-approve');
     expect(approveButton).toBeDisabled();
   });
@@ -79,14 +79,14 @@ describe('SelectOption', () => {
   it('disables buttons when interrupt is expired', () => {
     const expiredInterrupt = { ...defaultInterrupt, expired: true };
     render(<SelectOption {...defaultProps} interrupt={expiredInterrupt} />);
-    
+
     const approveButton = screen.getByTestId('select-option-approve');
     expect(approveButton).toBeDisabled();
   });
 
   it('disables buttons when not last in conversation', () => {
     render(<SelectOption {...defaultProps} isLastInConversation={false} />);
-    
+
     const approveButton = screen.getByTestId('select-option-approve');
     expect(approveButton).toBeDisabled();
   });
@@ -97,7 +97,7 @@ describe('SelectOption', () => {
       value: 'approve',
     };
     render(<SelectOption {...defaultProps} resumedValue={resumedValue} />);
-    
+
     const approveTexts = screen.getAllByText('Approve');
     expect(approveTexts).toHaveLength(2); // Button + Badge
   });
@@ -105,13 +105,13 @@ describe('SelectOption', () => {
   it('shows "Expired" badge when interrupt is expired', () => {
     const expiredInterrupt = { ...defaultInterrupt, expired: true };
     render(<SelectOption {...defaultProps} interrupt={expiredInterrupt} />);
-    
+
     expect(screen.getByText('Expired')).toBeInTheDocument();
   });
 
   it('shows "Expired" badge when not last in conversation and not resumed', () => {
     render(<SelectOption {...defaultProps} isLastInConversation={false} />);
-    
+
     expect(screen.getByText('Expired')).toBeInTheDocument();
   });
 
@@ -121,22 +121,22 @@ describe('SelectOption', () => {
       value: 'unknown-value',
     };
     render(<SelectOption {...defaultProps} resumedValue={resumedValue} />);
-    
+
     expect(screen.getByText('Actioned')).toBeInTheDocument();
   });
 
   it('renders with correct test subject', () => {
     render(<SelectOption {...defaultProps} />);
-    
+
     expect(screen.getByTestId('select-option-interrupt')).toBeInTheDocument();
   });
 
   it('updates internal state when option is selected', () => {
     render(<SelectOption {...defaultProps} />);
     const approveButton = screen.getByTestId('select-option-approve');
-    
+
     fireEvent.click(approveButton);
-    
+
     // After clicking, the button should be disabled due to state change
     expect(approveButton).toBeDisabled();
   });

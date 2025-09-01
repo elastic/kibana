@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ApiConfig, InterruptResumeValue, Message, Replacements, User } from '@kbn/elastic-assistant-common';
+import type {
+  ApiConfig,
+  InterruptResumeValue,
+  Message,
+  Replacements,
+  User,
+} from '@kbn/elastic-assistant-common';
 import type { EuiCommentProps } from '@elastic/eui';
 
 export interface MessagePresentation {

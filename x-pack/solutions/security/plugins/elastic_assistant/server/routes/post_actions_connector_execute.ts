@@ -36,7 +36,7 @@ import {
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
-import { OnLlmResponse } from '../lib/langchain/executors/types';
+import type { OnLlmResponse } from '../lib/langchain/executors/types';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -158,14 +158,12 @@ export const postActionsConnectorExecuteRoute = (
             disabled: request.query.content_references_disabled,
           });
 
-          onLlmResponse = async (
-            {
-              content,
-              traceData,
-              isError,
-              interruptValue
-            }
-          ): Promise<void> => {
+          onLlmResponse = async ({
+            content,
+            traceData,
+            isError,
+            interruptValue,
+          }): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
                 content,
@@ -180,7 +178,7 @@ export const postActionsConnectorExecuteRoute = (
                 isError,
                 traceData,
                 contentReferences: prunedContentReferencesStore,
-                interruptValue: interruptValue,
+                interruptValue,
               });
             }
           };
