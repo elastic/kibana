@@ -186,7 +186,7 @@ export const executeUpdate = async <T>(
 
     if (registry.supportsAccessControl(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        `"update" does not support setting access control or changing owner. Use `changeOwnership` or `changeAccessMode` instead.` 
+        `"update" does not support setting access control or changing owner. Use "changeOwnership" or "changeAccessMode" instead.`
       );
     }
     // ignore attributes if creating a new doc: only use the upsert attributes

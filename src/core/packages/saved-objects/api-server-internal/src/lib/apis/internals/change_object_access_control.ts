@@ -72,6 +72,9 @@ export const isSavedObjectsChangeOwnershipOptions = (
   return 'newOwnerProfileUid' in options;
 };
 
+const VALID_ACCESS_MODES = ['default', 'read_only'] as const;
+type AccessMode = (typeof VALID_ACCESS_MODES)[number];
+
 const validateChangeAccessControlParams = ({
   actionType,
   newOwnerProfileUid,
@@ -100,8 +103,7 @@ const validateChangeAccessControlParams = ({
   if (
     actionType === 'changeAccessMode' &&
     accessMode !== undefined &&
-    accessMode !== 'default' &&
-    accessMode !== 'read_only'
+    !VALID_ACCESS_MODES.includes(accessMode as AccessMode)
   ) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'When specified, the "accessMode" field can only be "default" or "read_only".'
