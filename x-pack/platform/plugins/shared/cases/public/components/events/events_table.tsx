@@ -118,14 +118,12 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
 
   return !eventsDataView || eventsResponse.isFetching ? (
     <>
-      <EuiSpacer size="l" />
       <EuiSkeletonText data-test-subj="cases-events-table-loading" lines={10} />
     </>
   ) : (
     <>
       {events.length > 0 && (
         <>
-          <EuiSpacer size="xl" />
           <EuiText size="xs" color="subdued" data-test-subj="cases-events-table-results-count">
             {i18n.SHOWING_EVENTS(events.length)}
           </EuiText>
