@@ -10,7 +10,7 @@
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -24,7 +24,7 @@ export const renderApp = (
   pluginsStart: WorkflowsPluginStartDependencies,
   { history, element }: AppMountParameters
 ) => {
-  const { chrome, analytics, i18n: i18nService, theme, executionContext } = coreStart;
+  const { chrome, theme } = coreStart;
 
   chrome.setBreadcrumbs([
     {
@@ -33,12 +33,7 @@ export const renderApp = (
   ]);
 
   ReactDOM.render(
-    <KibanaRenderContextProvider
-      analytics={analytics}
-      i18n={i18nService}
-      theme={theme}
-      executionContext={executionContext}
-    >
+    <KibanaThemeProvider theme={theme}>
       <KibanaContextProvider
         services={{
           ...coreStart,
@@ -49,7 +44,7 @@ export const renderApp = (
           <WorkflowsRoutes history={history} />
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    </KibanaThemeProvider>,
     element
   );
 
