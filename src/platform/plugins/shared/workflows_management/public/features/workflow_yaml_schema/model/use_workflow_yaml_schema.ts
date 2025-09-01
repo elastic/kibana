@@ -9,10 +9,8 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
-import type { ConnectorContract } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { useMemo } from 'react';
-import { getConnectorContracts } from '../../../../common/schema';
+import { getWorkflowZodSchemaFromConnectorConfig } from '../../../../common/schema';
 import type { ConnectorConfig } from '../../../../common';
 
 export const useWorkflowYamlZodSchema = ({ loose }: { loose: boolean }) => {
@@ -27,12 +25,6 @@ export const useWorkflowYamlZodSchema = ({ loose }: { loose: boolean }) => {
     if (!connectorConfig) {
       return null;
     }
-    // Add special non-connector step types
-    const types = [...connectorConfig.types, '_console'];
-    const contracts = types.map((type) =>
-      getConnectorContracts(type, connectorConfig.nameMap[type])
-    );
-    const connectorContracts = contracts.flat();
-    return generateYamlSchemaFromConnectors(connectorContracts as ConnectorContract[], loose);
+    return getWorkflowZodSchemaFromConnectorConfig(connectorConfig, loose);
   }, [connectorConfig, loose]);
 };

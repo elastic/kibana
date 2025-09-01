@@ -31,8 +31,9 @@ import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { estypes } from '@elastic/elasticsearch';
 import { parseDocument } from 'yaml';
+import type { ZodSchema } from '@kbn/zod';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
+import { getWorkflowZodSchemaFromConnectorConfig } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import type { WorkflowSavedObjectAttributes } from '../saved_objects/workflow';
 import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
@@ -70,6 +71,8 @@ export class WorkflowsService {
   private security?: SecurityServiceStart;
 
   private connectorConfig: ConnectorConfig | null = null;
+  public workflowZodSchemaStrict: ZodSchema | null = null;
+  public workflowZodSchemaLoose: ZodSchema | null = null;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -319,11 +322,10 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto> {
     const baseSavedObjectsClient = await this.getSavedObjectsClient();
     const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, this.workflowZodSchemaLoose!);
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
-    // @ts-expect-error - TODO: fix this
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -394,12 +396,11 @@ export class WorkflowsService {
     let updateData: Partial<WorkflowSavedObjectAttributes>;
 
     if (yaml) {
-      const parsedYaml = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+      const parsedYaml = parseWorkflowYamlToJSON(yaml, this.workflowZodSchemaLoose!);
       if (!parsedYaml.success) {
         throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
       }
-      // @ts-expect-error - TODO: fix this
-      const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
+      const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
       updateData = {
         name: updatedWorkflow.name,
         description: updatedWorkflow.description,
@@ -411,12 +412,12 @@ export class WorkflowsService {
       };
 
       // Update scheduled tasks if triggers changed
-      if (this.taskScheduler && updatedWorkflow.definition?.workflow?.triggers) {
+      if (this.taskScheduler && updatedWorkflow.definition?.triggers) {
         // Remove existing scheduled tasks for this workflow
         await this.taskScheduler.unscheduleWorkflowTasks(id);
 
         // Add new scheduled tasks
-        for (const trigger of updatedWorkflow.definition.workflow.triggers) {
+        for (const trigger of updatedWorkflow.definition.triggers) {
           if (trigger.type === 'scheduled') {
             await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
           }
@@ -855,6 +856,9 @@ export class WorkflowsService {
     nameMap: Record<string, string[]>;
   }) {
     this.connectorConfig = connectorConfig;
+    // Generate zod schemas for validation
+    this.workflowZodSchemaStrict = getWorkflowZodSchemaFromConnectorConfig(connectorConfig, false);
+    this.workflowZodSchemaLoose = getWorkflowZodSchemaFromConnectorConfig(connectorConfig, true);
   }
 
   public getConnectorConfig() {

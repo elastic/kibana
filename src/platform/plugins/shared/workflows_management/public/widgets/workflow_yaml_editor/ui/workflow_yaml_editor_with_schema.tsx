@@ -16,8 +16,8 @@ import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 export function WorkflowYAMLEditorWithSchema(
   props: Omit<WorkflowYAMLEditorProps, 'workflowYamlZodSchemaStrict' | 'workflowYamlZodSchemaLoose'>
 ) {
-  const workflowYamlZodSchemaStrict = useWorkflowYamlZodSchema({ loose: false });
-  const workflowYamlZodSchemaLoose = useWorkflowYamlZodSchema({ loose: true });
+  const workflowYamlZodSchemaStrict = useWorkflowYamlZodSchema({ loose: false }); // used to get json schema for validation via monaco-yaml
+  const workflowYamlZodSchemaLoose = useWorkflowYamlZodSchema({ loose: true }); // used to parse the current yaml to have AST to have proper context for variable validation
 
   if (!workflowYamlZodSchemaStrict || !workflowYamlZodSchemaLoose) {
     return <EuiLoadingSpinner />;

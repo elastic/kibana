@@ -10,10 +10,16 @@
 import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import type { ConnectorConfig } from '.';
 
 // TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.
 // type ActionTypeExecutorResult = ActionTypeExecutorResult<unknown>;
 
+/**
+ * Wraps output schema for a given data schema with the required fields for a connector output
+ * @param dataSchema - The data schema for the connector output
+ * @returns The connector output schema as returned from actions client
+ */
 function createConnectorOutputSchema(dataSchema: z.ZodType) {
   return z.object({
     actionId: z.string(),
@@ -24,6 +30,7 @@ function createConnectorOutputSchema(dataSchema: z.ZodType) {
   });
 }
 
+// Hardcoded connectors, will be replaced with api once https://github.com/elastic/kibana-team/issues/1923 is resolved
 const connectors: ConnectorContract[] = [
   {
     type: 'console',
@@ -98,6 +105,12 @@ const connectors: ConnectorContract[] = [
   },
 ];
 
+/**
+ * Enrich hardcoded connector contracts with the connector ids if provided
+ * @param actionTypeId - The action type id
+ * @param connectorIds - The connector ids
+ * @returns The connector contracts
+ */
 export function getConnectorContracts(actionTypeId: string, connectorIds?: string[]) {
   return connectors
     .filter((c) => c.actionTypeId === actionTypeId)
@@ -117,11 +130,22 @@ export const getOutputSchemaForStepType = (stepType: string) => {
   return connectors.find((c) => c.type === stepType)?.outputSchema ?? z.any();
 };
 
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(connectors, true);
-
-// Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
-// TODO: replace with dynamic schema
+export const getWorkflowZodSchemaFromConnectorConfig = (
+  connectorConfig: ConnectorConfig,
+  loose: boolean
+) => {
+  if (!connectorConfig) {
+    return null;
+  }
+  // Add special non-connector step types: console
+  const types = [...connectorConfig.types, '_console'];
+  const connectorContracts: ConnectorContract[] = [];
+  for (const type of types) {
+    const contracts = getConnectorContracts(type, connectorConfig.nameMap[type]);
+    connectorContracts.push(...contracts);
+  }
+  return generateYamlSchemaFromConnectors(connectorContracts, loose);
+};
 
 // TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
 const AlertSchema = z.object({

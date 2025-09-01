@@ -12,9 +12,9 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowYamlZodSchema } from '../../workflow_yaml_schema/model/use_workflow_yaml_schema';
 
 interface WorkflowVisualEditorStatefulProps {
   workflowYaml: string;
@@ -26,17 +26,21 @@ export function WorkflowVisualEditorStateful({
   workflowExecutionId,
 }: WorkflowVisualEditorStatefulProps) {
   const { data: workflowExecution } = useWorkflowExecution(workflowExecutionId ?? null);
+  const workflowYamlZodSchemaLoose = useWorkflowYamlZodSchema({ loose: true });
 
   const workflowYamlObject = useMemo(() => {
+    if (!workflowYamlZodSchemaLoose) {
+      return null;
+    }
     if (!workflowYaml) {
       return null;
     }
-    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    const result = parseWorkflowYamlToJSON(workflowYaml, workflowYamlZodSchemaLoose);
     if (result.error) {
       return null;
     }
     return result.data;
-  }, [workflowYaml]);
+  }, [workflowYaml, workflowYamlZodSchemaLoose]);
 
   if (!workflowYamlObject) {
     return (

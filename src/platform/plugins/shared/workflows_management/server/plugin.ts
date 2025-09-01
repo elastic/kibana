@@ -206,6 +206,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
         return acc;
       }, {} as ConnectorConfig['nameMap']);
 
+      // TODO: listen to actions client for changes and update the connector config
       this.workflowsService!.setConnectorConfig({
         types: actionsTypes,
         nameMap,
