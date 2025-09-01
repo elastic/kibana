@@ -14,7 +14,6 @@ import {
   type ISavedObjectsClientFactory,
   Request,
   Response,
-  SavedObjectsClient,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
@@ -32,30 +31,6 @@ import type { v1 } from '../../common';
 import { findRelationships } from '../lib';
 import { SavedObjectsManagement, type ISavedObjectsManagement } from '../services';
 import { SAVED_OBJECT_TYPES_MAX_SIZE } from '.';
-
-type RelationshipsRequest = KibanaRequest<
-  TypeOf<typeof RelationshipsRoute.validate.params>,
-  TypeOf<typeof RelationshipsRoute.validate.query>
->;
-
-export function relationshipsClientFactory(
-  { query: { savedObjectTypes: types } }: RelationshipsRequest,
-  clientFactory: ISavedObjectsClientFactory,
-  typeRegistry: ISavedObjectTypeRegistry
-): SavedObjectsClientContract {
-  return clientFactory({
-    includedHiddenTypes: chain(types)
-      .castArray()
-      .uniq()
-      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
-      .value(),
-  });
-}
-relationshipsClientFactory.inject = [
-  Request,
-  SavedObjectsClientFactory,
-  SavedObjectsTypeRegistry,
-] as const satisfies unknown[];
 
 @injectable()
 export class RelationshipsRoute {
@@ -84,12 +59,29 @@ export class RelationshipsRoute {
     }),
   };
 
+  private readonly client: SavedObjectsClientContract;
+
   constructor(
-    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
+    @inject(SavedObjectsClientFactory) clientFactory: ISavedObjectsClientFactory,
+    @inject(SavedObjectsTypeRegistry) typeRegistry: ISavedObjectTypeRegistry,
     @inject(SavedObjectsManagement) private readonly management: ISavedObjectsManagement,
-    @inject(Request) private readonly request: RelationshipsRequest,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      TypeOf<typeof RelationshipsRoute.validate.params>,
+      TypeOf<typeof RelationshipsRoute.validate.query>
+    >,
     @inject(Response) private readonly response: KibanaResponseFactory
-  ) {}
+  ) {
+    this.client = clientFactory({
+      includedHiddenTypes: chain(request.query.savedObjectTypes)
+        .castArray()
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value(),
+    });
+  }
 
   async handle() {
     const { type, id } = this.request.params;
