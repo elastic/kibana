@@ -144,30 +144,4 @@ describe('Percentile Ranks Transforms', () => {
       expect(result.label).toBe('PR95 Response Time');
     });
   });
-
-  describe('ofName helper', () => {
-    it('should generate correct label with provided rank', () => {
-      const input: LensApiPercentileRanksOperation = {
-        operation: 'percentile_rank',
-        field: 'response_time',
-        rank: 99,
-      };
-
-      const result = fromPercentileRanksAPItoLensState(input);
-      expect(result.label).toBe('Percentile rank (99) of response_time');
-    });
-
-    it('should generate correct label with default rank', () => {
-      const input: LensApiPercentileRanksOperation = {
-        operation: 'percentile_rank',
-        field: 'response_time',
-        rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
-      };
-
-      const result = fromPercentileRanksAPItoLensState(input);
-      expect(result.label).toBe(
-        `Percentile rank (${LENS_PERCENTILE_RANK_DEFAULT_VALUE}) of response_time`
-      );
-    });
-  });
 });

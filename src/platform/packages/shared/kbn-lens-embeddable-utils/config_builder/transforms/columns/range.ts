@@ -18,7 +18,7 @@ import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 export function fromRangeOrHistogramLensApiToLensState(
   options: LensApiRangeOperation | LensApiHistogramOperation
 ): RangeIndexPatternColumn {
-  const { operation, label, field } = options;
+  const { operation } = options;
   if (operation === 'range') {
     return {
       operationType: 'range',

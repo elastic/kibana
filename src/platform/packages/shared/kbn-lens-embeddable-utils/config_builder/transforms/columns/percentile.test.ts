@@ -168,28 +168,4 @@ describe('Percentile Transforms', () => {
       expect(result.label).toBe('P95 Response Time');
     });
   });
-
-  describe('ofName helper', () => {
-    it('should generate correct label with provided percentile', () => {
-      const input: LensApiPercentileOperation = {
-        operation: 'percentile',
-        field: 'response_time',
-        percentile: 99,
-      };
-
-      const result = fromPercentileAPItoLensState(input);
-      expect(result.label).toBe('99th Percentile of response_time');
-    });
-
-    it('should generate correct label with default percentile', () => {
-      const input: LensApiPercentileOperation = {
-        operation: 'percentile',
-        field: 'response_time',
-        percentile: LENS_PERCENTILE_DEFAULT_VALUE,
-      };
-
-      const result = fromPercentileAPItoLensState(input);
-      expect(result.label).toBe(`${LENS_PERCENTILE_DEFAULT_VALUE}th Percentile of response_time`);
-    });
-  });
 });

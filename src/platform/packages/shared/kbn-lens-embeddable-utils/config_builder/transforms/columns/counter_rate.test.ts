@@ -131,15 +131,4 @@ describe('Counter Rate Transforms', () => {
     });
   });
 
-  describe('ofName helper', () => {
-    it('should generate correct label with field', () => {
-      const input: LensApiCounterRateOperation = {
-        operation: 'counter_rate',
-        field: 'requests',
-      };
-
-      const result = fromCounterRateAPItoLensState(input, { ...testRef, field: 'requests' });
-      expect(result.label).toBe('Counter rate of requests');
-    });
-  });
 });

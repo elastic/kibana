@@ -35,7 +35,7 @@ export function fromFiltersLensApiToLensState(
 export function fromFiltersLensStateToAPI(
   column: FiltersIndexPatternColumn
 ): LensApiFiltersOperation {
-  const { field, label } = getLensAPIBucketSharedProps({ ...column, sourceField: '' });
+  const { label } = getLensAPIBucketSharedProps({ ...column, sourceField: '' });
   return {
     operation: 'filters',
     label,

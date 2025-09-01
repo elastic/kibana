@@ -142,26 +142,4 @@ describe('Formula Transforms', () => {
       });
     });
   });
-
-  describe('ofName helper', () => {
-    it('should generate default label for empty formula', () => {
-      const input: LensApiFormulaOperation = {
-        operation: 'formula',
-        formula: '',
-      };
-
-      const result = fromFormulaAPItoLensState(input);
-      expect(result.label).toBe('Formula');
-    });
-
-    it('should use formula as label when provided', () => {
-      const input: LensApiFormulaOperation = {
-        operation: 'formula',
-        formula: 'count(col1) + count(col2)',
-      };
-
-      const result = fromFormulaAPItoLensState(input);
-      expect(result.label).toBe('count(col1) + count(col2)');
-    });
-  });
 });

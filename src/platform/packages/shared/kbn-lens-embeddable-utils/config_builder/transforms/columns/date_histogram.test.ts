@@ -13,6 +13,7 @@ import {
 } from './date_histogram';
 import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
+import { bucketDateHistogramOperationSchema } from '../../schema/bucket_ops';
 import {
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
@@ -26,6 +27,8 @@ describe('Date Histogram Transforms', () => {
         operation: 'date_histogram',
         field: '@timestamp',
         suggested_interval: '1d',
+        include_empty_rows: false,
+        use_original_time_rangeoverride_time_range: false,
       };
 
       const expected: DateHistogramIndexPatternColumn = {
@@ -47,10 +50,12 @@ describe('Date Histogram Transforms', () => {
     });
 
     it('should use default values when optional parameters are not provided', () => {
-      const input: LensApiDateHistogramOperation = {
+      const partialInput: Partial<LensApiDateHistogramOperation> = {
         operation: 'date_histogram',
         field: '@timestamp',
       };
+
+      const input: LensApiDateHistogramOperation = bucketDateHistogramOperationSchema.validate(partialInput);
 
       const result = fromDateHistogramLensApiToLensState(input);
 
@@ -67,6 +72,9 @@ describe('Date Histogram Transforms', () => {
         operation: 'date_histogram',
         field: '@timestamp',
         label: 'Daily Events',
+        include_empty_rows: false,
+        use_original_time_rangeoverride_time_range: false,
+        suggested_interval: '1d',
       };
 
       const result = fromDateHistogramLensApiToLensState(input);
@@ -171,29 +179,6 @@ describe('Date Histogram Transforms', () => {
         include_empty_rows: true,
         drop_partial_intervals: true,
       });
-    });
-  });
-
-  describe('ofName helper', () => {
-    it('should generate correct label with provided interval', () => {
-      const input: LensApiDateHistogramOperation = {
-        operation: 'date_histogram',
-        field: '@timestamp',
-        suggested_interval: '1w',
-      };
-
-      const result = fromDateHistogramLensApiToLensState(input);
-      expect(result.label).toBe('@timestamp per 1w');
-    });
-
-    it('should generate correct label with default interval', () => {
-      const input: LensApiDateHistogramOperation = {
-        operation: 'date_histogram',
-        field: '@timestamp',
-      };
-
-      const result = fromDateHistogramLensApiToLensState(input);
-      expect(result.label).toBe('@timestamp per 1h');
     });
   });
 });

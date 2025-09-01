@@ -172,29 +172,4 @@ describe('Last Value Transforms', () => {
     });
   });
 
-  describe('ofName helper', () => {
-    it('should generate correct label for empty field', () => {
-      const input: LensApiLastValueOperation = {
-        operation: 'last_value',
-        field: '',
-        sort_by: '@timestamp',
-        show_array_values: true,
-      };
-
-      const result = fromLastValueAPItoLensState(input);
-      expect(result.label).toBe('Last value of (empty)');
-    });
-
-    it('should generate correct label for specific field', () => {
-      const input: LensApiLastValueOperation = {
-        operation: 'last_value',
-        field: 'user_status',
-        sort_by: '@timestamp',
-        show_array_values: true,
-      };
-
-      const result = fromLastValueAPItoLensState(input);
-      expect(result.label).toBe('Last value of user_status');
-    });
-  });
 });

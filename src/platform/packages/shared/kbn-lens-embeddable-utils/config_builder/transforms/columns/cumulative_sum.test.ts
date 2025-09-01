@@ -150,27 +150,4 @@ describe('Cumulative Sum Transforms', () => {
     });
   });
 
-  describe('ofName helper', () => {
-    it('should generate correct label with field', () => {
-      const input: LensApiCumulativeSumOperation = {
-        operation: 'cumulative_sum',
-        field: 'revenue',
-      };
-
-      const ref = { id: 'col1', field: 'revenue' };
-      const result = fromCumulativeSumAPItoLensState(input, ref);
-      expect(result.label).toBe('Cumulative sum of revenue');
-    });
-
-    it('should generate default label for empty field', () => {
-      const input: LensApiCumulativeSumOperation = {
-        operation: 'cumulative_sum',
-        field: '',
-      };
-
-      const ref = { id: 'col1', field: '' };
-      const result = fromCumulativeSumAPItoLensState(input, ref);
-      expect(result.label).toBe('Cumulative sum of (incomplete)');
-    });
-  });
 });

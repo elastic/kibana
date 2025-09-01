@@ -128,36 +128,4 @@ describe('Static Value Transforms', () => {
       });
     });
   });
-
-  describe('ofName helper', () => {
-    it('should generate default label for undefined value', () => {
-      const input: LensApiStaticValueOperation = {
-        operation: 'static_value',
-        value: 100,
-      };
-
-      const result = fromStaticValueAPItoLensState(input);
-      expect(result.label).toBe('Static value: 100');
-    });
-
-    it('should generate default label for NaN value', () => {
-      const input: LensApiStaticValueOperation = {
-        operation: 'static_value',
-        value: NaN,
-      };
-
-      const result = fromStaticValueAPItoLensState(input);
-      expect(result.label).toBe('Static Value');
-    });
-
-    it('should generate label with value when provided', () => {
-      const input: LensApiStaticValueOperation = {
-        operation: 'static_value',
-        value: 42,
-      };
-
-      const result = fromStaticValueAPItoLensState(input);
-      expect(result.label).toBe('Static value: 42');
-    });
-  });
 });

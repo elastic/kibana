@@ -84,6 +84,7 @@ describe('Format Transforms', () => {
         const input: LensApiMetricOperation['format'] = {
           type: 'bits',
           suffix: '/s',
+          decimals: 2,
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'bits',

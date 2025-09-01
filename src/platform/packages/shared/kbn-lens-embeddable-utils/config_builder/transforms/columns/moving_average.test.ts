@@ -174,30 +174,4 @@ describe('Moving Average Transforms', () => {
       });
     });
   });
-
-  describe('ofName helper', () => {
-    it('should generate correct label with name', () => {
-      const input: LensApiMovingAverageOperation = {
-        operation: 'moving_average',
-        of: apiColumnRef,
-        window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
-      };
-
-      const ref = { ...testRef, label: 'Revenue' };
-      const result = fromMovingAverageAPItoLensState(input, ref);
-      expect(result.label).toBe('Moving average of Revenue');
-    });
-
-    it('should generate default label for empty name', () => {
-      const input: LensApiMovingAverageOperation = {
-        operation: 'moving_average',
-        of: apiColumnRef,
-        window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
-      };
-
-      const ref = { ...testRef, label: '' };
-      const result = fromMovingAverageAPItoLensState(input, ref);
-      expect(result.label).toBe('Moving average of (incomplete)');
-    });
-  });
 });

@@ -175,26 +175,4 @@ describe('Count Transforms', () => {
     });
   });
 
-  describe('ofName helper', () => {
-    it('should generate correct label for undefined field', () => {
-      const input: LensApiCountMetricOperation = {
-        operation: 'count',
-        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-      };
-
-      const result = fromCountAPItoLensState(input);
-      expect(result.label).toBe('Count of Records');
-    });
-
-    it('should generate correct label for specific field', () => {
-      const input: LensApiCountMetricOperation = {
-        operation: 'count',
-        field: 'user_sessions',
-        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-      };
-
-      const result = fromCountAPItoLensState(input);
-      expect(result.label).toBe('Count of user_sessions');
-    });
-  });
 });

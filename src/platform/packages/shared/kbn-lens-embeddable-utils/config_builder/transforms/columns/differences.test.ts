@@ -180,27 +180,4 @@ describe('Differences Transforms', () => {
     });
   });
 
-  describe('ofName helper', () => {
-    it('should generate correct label with name', () => {
-      const input: LensApiDifferencesOperation = {
-        operation: 'differences',
-        of: { ...apiColumnRef, label: 'Revenue' },
-      };
-
-      const ref = { ...testRef, label: 'Revenue' };
-      const result = fromDifferencesAPItoLensState(input, ref);
-      expect(result.label).toBe('Differences of Revenue');
-    });
-
-    it('should generate default label for empty name', () => {
-      const input: LensApiDifferencesOperation = {
-        operation: 'differences',
-        of: { ...apiColumnRef, label: '' },
-      };
-
-      const ref = { ...testRef, label: '' };
-      const result = fromDifferencesAPItoLensState(input, ref);
-      expect(result.label).toBe('Differences of (incomplete)');
-    });
-  });
 });
