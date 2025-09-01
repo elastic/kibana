@@ -169,20 +169,20 @@ const layoutStackedLabels = (
     (child) => isLabelNode(child.data) && child.parentId === groupNode.id
   );
   const stackSize = children.length;
-  const labelNodeWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
+  const stackWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
   const spaceBetweenLabelShapes = snapped(NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING);
   const stackHeight = spaceBetweenLabelShapes * (stackSize + 1) + NODE_LABEL_HEIGHT * stackSize;
 
   // Layout children relative to parent
   children.forEach((child, index) => {
     child.position = {
-      x: labelNodeWidth / 2 - NODE_LABEL_WIDTH / 2,
+      x: stackWidth / 2 - NODE_LABEL_WIDTH / 2,
       y: spaceBetweenLabelShapes * (index + 1) + NODE_LABEL_HEIGHT * index,
     };
   });
 
   return {
-    size: { width: labelNodeWidth, height: stackHeight },
+    size: { width: stackWidth, height: stackHeight },
     children,
   };
 };
