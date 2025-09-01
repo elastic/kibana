@@ -571,7 +571,7 @@ export const QueryBarTopRow = React.memo(
             iconType="cross"
             aria-label={buttonLabelCancel}
             onClick={onClickCancelButton}
-            size={'s'}
+            size="s"
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
@@ -586,7 +586,7 @@ export const QueryBarTopRow = React.memo(
           iconType="cross"
           aria-label={buttonLabelCancel}
           onClick={onClickCancelButton}
-          size={'s'}
+          size="s"
           data-test-subj="queryCancelButton"
           color="text"
         >
@@ -620,7 +620,7 @@ export const QueryBarTopRow = React.memo(
               isDisabled={isDateRangeInvalid || props.isDisabled}
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
-              size={'s'}
+              size="s"
               color={props.isDirty ? 'success' : 'primary'}
               fill={false}
               needsUpdate={props.isDirty}
@@ -697,7 +697,7 @@ export const QueryBarTopRow = React.memo(
             <FilterButtonGroup
               items={[props.prepend, renderAddButton()]}
               attached={renderFilterMenuOnly()}
-              size={'s'}
+              size="s"
             />
           </EuiFlexItem>
         )
