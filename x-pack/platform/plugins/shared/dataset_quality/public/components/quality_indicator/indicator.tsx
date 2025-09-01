@@ -20,13 +20,13 @@ export function QualityIndicator({
 }) {
   const qualityColors: Record<QualityIndicators, InfoIndicators> = {
     poor: 'danger',
-    warning: 'warning',
+    degraded: 'warning',
     good: 'success',
   };
 
   const qualityIcons: Record<QualityIndicators, IconType> = {
     poor: 'error',
-    warning: 'warning',
+    degraded: 'warning',
     good: 'checkCircle',
   };
 
