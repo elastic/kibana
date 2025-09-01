@@ -17,6 +17,7 @@ import { z } from '@kbn/zod';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createRoute } from '../create_route';
 import { extractDimensionsFromESQL } from '../../lib/dimensions/extract_dimensions_from_esql';
+import { isMetricsExperienceEnabled } from '../../lib/utils';
 
 export const metricDataApi = createRoute({
   endpoint: 'POST /internal/metrics_experience/data',
@@ -34,8 +35,15 @@ export const metricDataApi = createRoute({
       ),
     }),
   }),
-  handler: async ({ context, params }) => {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  handler: async ({ context, params, response }) => {
+    const services = await context.resolve(['core']);
+    const isEnabled = await isMetricsExperienceEnabled(services);
+
+    if (!isEnabled) {
+      return response.notFound();
+    }
+
+    const esClient = services.core.elasticsearch.client.asCurrentUser;
     const { esql, from, to, filters } = params.body;
 
     const startTimestamp = new Date(from).toISOString();
@@ -79,7 +87,7 @@ export const metricDataApi = createRoute({
       filterQuery = baseFilter;
     }
 
-    const response = await esClient.esql.query(
+    const esqlResponse = await esClient.esql.query(
       {
         query: esql,
         filter: filterQuery,
@@ -90,7 +98,7 @@ export const metricDataApi = createRoute({
       }
     );
 
-    const responseBody = response.body;
+    const responseBody = esqlResponse.body;
 
     // Handle data differently based on whether dimensions are present
     let data;
