@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import { isEqual } from 'lodash';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 
@@ -40,6 +41,7 @@ import {
 
 import { AutoDeploy } from './auto_deploy';
 import { createUrlOverrides } from '../src/utils';
+import { DocCountService } from './doc_count_service';
 
 export enum STATUS {
   NA,
@@ -69,6 +71,7 @@ export interface UploadStatus {
   mappingsJsonValid: boolean;
   settingsJsonValid: boolean;
   pipelinesJsonValid: boolean;
+  indexSearchable: boolean;
   errors: Array<{ title: string; error: any }>;
 }
 
@@ -107,6 +110,7 @@ export class FileUploadManager {
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
   private commonFileFormat: string | null = null;
+  private docCountService: DocCountService;
 
   private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
@@ -123,6 +127,7 @@ export class FileUploadManager {
     mappingsJsonValid: true,
     settingsJsonValid: true,
     pipelinesJsonValid: true,
+    indexSearchable: false,
     errors: [],
   });
   public readonly uploadStatus$ = this._uploadStatus$.asObservable();
@@ -132,18 +137,27 @@ export class FileUploadManager {
   constructor(
     private fileUpload: FileUploadStartApi,
     private http: HttpSetup,
-    private dataViewsContract: DataViewsServicePublic,
+    private data: DataPublicPluginStart,
     private notifications: NotificationsStart,
     private autoAddInferenceEndpointName: string | null = null,
     private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
     existingIndexName: string | null = null,
-    indexSettingsOverride: IndicesIndexSettings | undefined = undefined
+    indexSettingsOverride: IndicesIndexSettings | undefined = undefined,
+    onIndexSearchable?: (indexName: string) => void
   ) {
     this.setExistingIndexName(existingIndexName);
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.updateSettings(indexSettingsOverride ?? {});
+    this.docCountService = new DocCountService(this.data, (indexName) => {
+      this.setStatus({
+        indexSearchable: true,
+      });
+      if (onIndexSearchable) {
+        onIndexSearchable(indexName);
+      }
+    });
 
     this.mappingsCheckSubscription = combineLatest([
       this.fileAnalysisStatus$,
@@ -212,6 +226,7 @@ export class FileUploadManager {
     this.existingIndexMappings$.complete();
     this._uploadStatus$.complete();
     this.mappingsCheckSubscription.unsubscribe();
+    this.docCountService.destroy();
   }
   private setStatus(status: Partial<UploadStatus>) {
     this._uploadStatus$.next({
@@ -462,6 +477,9 @@ export class FileUploadManager {
         pipelines,
         this.isExistingIndexUpload()
       );
+
+      this.docCountService.start(indexName);
+
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;
       pipelinesCreated = initializeImportResp.pipelineIds.length > 0;
@@ -566,7 +584,7 @@ export class FileUploadManager {
       const dataViewName2 = dataViewName === undefined ? indexName : dataViewName;
       dataViewResp = await createKibanaDataView(
         dataViewName2,
-        this.dataViewsContract,
+        this.data.dataViews,
         this.timeFieldName ?? undefined
       );
       if (dataViewResp.success === false) {

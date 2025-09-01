@@ -13,6 +13,7 @@ import { getContextSchemaForPath } from './get_context_for_path';
 import { z } from '@kbn/zod';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
 import { EventSchema } from '../../../../common/schema';
+import { WorkflowExecutionContextSchema, WorkflowDataContextSchema } from '@kbn/workflows';
 
 describe('getContextSchemaForPath', () => {
   const definition = {
@@ -21,7 +22,7 @@ describe('getContextSchemaForPath', () => {
     enabled: true,
     triggers: [
       {
-        type: 'triggers.elastic.manual' as const,
+        type: 'manual' as const,
         enabled: true,
       },
     ],
@@ -82,12 +83,13 @@ describe('getContextSchemaForPath', () => {
     const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
     expect(Object.keys(context.shape).sort()).toEqual(
-      ['workflowRunId', 'now', 'event', 'steps', 'consts'].sort()
+      ['execution', 'workflow', 'now', 'event', 'steps', 'consts'].sort()
     );
     expectZodSchemaEqual(
       context,
       z.object({
-        workflowRunId: z.string(),
+        execution: WorkflowExecutionContextSchema,
+        workflow: WorkflowDataContextSchema,
         now: z.date(),
         event: EventSchema,
         steps: z.object({}),
@@ -109,7 +111,8 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual(
       context,
       z.object({
-        workflowRunId: z.string(),
+        execution: WorkflowExecutionContextSchema,
+        workflow: WorkflowDataContextSchema,
         now: z.date(),
         event: EventSchema,
         steps: z.object({
