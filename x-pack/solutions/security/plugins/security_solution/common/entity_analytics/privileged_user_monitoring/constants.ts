@@ -20,7 +20,7 @@ const MONITORING_URL = `/api/entity_analytics/monitoring` as const;
 // Monitoring users URLs
 export const MONITORING_USERS_URL = `${MONITORING_URL}/users` as const;
 export const MONITORING_USERS_CSV_UPLOAD_URL = `${MONITORING_USERS_URL}/_csv` as const;
-export const MONITORING_USERS_LIST_URL = `${MONITORING_URL}/list` as const;
+export const MONITORING_USERS_LIST_URL = `${MONITORING_USERS_URL}/list` as const;
 
 // Monitoring entity source URLs
 export const MONITORING_ENTITY_SOURCE_URL = `${MONITORING_URL}/entity_source` as const;
