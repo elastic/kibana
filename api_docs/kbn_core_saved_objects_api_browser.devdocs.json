@@ -2592,14 +2592,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/common/hooks/types.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
           },
