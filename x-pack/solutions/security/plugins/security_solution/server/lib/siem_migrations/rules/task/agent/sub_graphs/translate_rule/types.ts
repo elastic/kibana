@@ -7,10 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { EsqlKnowledgeBase } from '../../../util/esql_knowledge_base';
+import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
+import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
-import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
-import type { ChatModel } from '../../../util/actions_client_chat';
+import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { translateRuleState } from './state';
 import type { migrateRuleConfigSchema } from '../../state';
 
@@ -25,7 +25,7 @@ export interface TranslateRuleGraphParams {
   model: ChatModel;
   esqlKnowledgeBase: EsqlKnowledgeBase;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
-  telemetryClient: SiemMigrationTelemetryClient;
+  telemetryClient: RuleMigrationTelemetryClient;
   logger: Logger;
 }
 

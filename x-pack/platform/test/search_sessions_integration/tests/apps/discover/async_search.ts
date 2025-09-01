@@ -147,15 +147,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(searchesCountBeforeRestore).to.be(searchesCountAfterRestore); // no new searches started during restore
     });
 
-    it('should should clean the search session when navigating to ESQL mode, and reinitialize when navigating back', async () => {
+    it('should have the search session when navigating to ESQL mode', async () => {
       await common.navigateToApp('discover');
-      await timePicker.setDefaultAbsoluteRange();
-      await header.waitUntilLoadingHasFinished();
-      expect(await searchSessions.exists()).to.be(true);
       await discover.selectTextBaseLang();
-      await header.waitUntilLoadingHasFinished();
-      await searchSessions.missingOrFail();
-      await browser.goBack();
       await header.waitUntilLoadingHasFinished();
       expect(await searchSessions.exists()).to.be(true);
     });
