@@ -112,6 +112,7 @@
     "@kbn/restorable-state",
     "@kbn/esql-editor",
     "@kbn/core-application-browser",
+    "@kbn/timerange",
   ],
   "exclude": ["target/**/*"]
 }

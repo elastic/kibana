@@ -9,6 +9,15 @@
 
 import datemath from '@kbn/datemath';
 
+/**
+ * Represents a time range with from and to ISO string dates
+ */
+export interface TimeRange {
+  from: string;
+  to: string;
+  mode?: 'absolute' | 'relative';
+}
+
 function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
     const parsed = datemath.parse(rawDate, options);
@@ -53,19 +62,27 @@ export function getDateISORange({ from, to }: { from: string; to: string }) {
   };
 }
 
-export function getTimeDifferenceInSeconds({
-  startDate,
-  endDate,
-}: {
-  startDate: number;
-  endDate: number;
-}): number {
-  if (!startDate || !endDate || startDate > endDate) {
-    throw new Error(`Invalid Dates: from: ${startDate}, to: ${endDate}`);
-  }
+export function getTimeDifferenceInSeconds(
+  input: { startDate: number; endDate: number } | TimeRange
+): number {
+  if ('startDate' in input && 'endDate' in input) {
+    // Original API with timestamp objects
+    if (!input.startDate || !input.endDate || input.startDate > input.endDate) {
+      throw new Error(`Invalid Dates: from: ${input.startDate}, to: ${input.endDate}`);
+    }
 
-  const rangeInSeconds = (endDate - startDate) / 1000;
-  return Math.round(rangeInSeconds);
+    return Math.round((input.endDate - input.startDate) / 1000);
+  } else {
+    // New API with TimeRange object
+    const fromTime = new Date(input.from).getTime();
+    const toTime = new Date(input.to).getTime();
+
+    if (isNaN(fromTime) || isNaN(toTime)) {
+      return NaN;
+    }
+
+    return Math.round((toTime - fromTime) / 1000);
+  }
 }
 
 export function getOffsetFromNowInSeconds(epochDate: number) {

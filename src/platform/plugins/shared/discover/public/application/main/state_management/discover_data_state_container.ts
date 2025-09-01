@@ -28,6 +28,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -42,7 +43,6 @@ import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabSta
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { calculateQueryRangeSeconds } from '../../../utils/time_range_utils';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -280,7 +280,7 @@ export function getDataStateContainer({
 
             // Calculate query range in seconds
             const timeRange = timefilter.getAbsoluteTime();
-            const queryRangeSeconds = calculateQueryRangeSeconds(timeRange);
+            const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
             await fetchMoreDocuments({
               ...commonFetchParams,
@@ -333,7 +333,7 @@ export function getDataStateContainer({
 
           // Calculate query range in seconds
           const timeRange = timefilter.getAbsoluteTime();
-          const queryRangeSeconds = calculateQueryRangeSeconds(timeRange);
+          const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
           await fetchAll({
             ...commonFetchParams,
