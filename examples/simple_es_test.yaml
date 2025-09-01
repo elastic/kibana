@@ -1,0 +1,19 @@
+name: "Simple ES Test"
+description: "Basic test of elasticsearch.request connector"
+
+steps:
+  search_test:
+    type: "elasticsearch.request"
+    with:
+      request:
+        method: "POST"
+        path: "_search"
+        body:
+          query:
+            match_all: {}
+          size: 5
+
+  log_result:
+    type: "console"
+    with:
+      message: "Search completed with {{ steps.search_test.output.response.hits.total.value }} results"

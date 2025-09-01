@@ -89,11 +89,16 @@ export interface GetStepLogsParams {
 }
 
 export class WorkflowsManagementApi {
+  private securityService: any = null;
+
   constructor(
     private readonly workflowsService: WorkflowsService,
     private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
 
+  public setSecurityService(securityService: any) {
+    this.securityService = securityService;
+  }
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
     return await this.workflowsService.searchWorkflows(params, spaceId);
   }
@@ -149,7 +154,6 @@ export class WorkflowsManagementApi {
   ): Promise<void> {
     return await this.workflowsService.deleteWorkflows(workflowIds, spaceId, request);
   }
-
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
@@ -163,11 +167,11 @@ export class WorkflowsManagementApi {
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
     return executeResponse.workflowExecutionId;
   }
-
   public async testWorkflow(
     workflowYaml: string,
     inputs: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
 

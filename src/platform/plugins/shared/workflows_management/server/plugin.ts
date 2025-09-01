@@ -191,6 +191,11 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       }
     }
 
+    // Set security service in API
+    if (this.api && plugins.security) {
+      this.api.setSecurityService(core.security);
+    }
+
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 

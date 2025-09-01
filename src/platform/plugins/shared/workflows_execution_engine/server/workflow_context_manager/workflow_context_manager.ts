@@ -15,15 +15,21 @@ export interface ContextManagerInit {
   // New properties for logging
   workflowExecutionGraph: graphlib.Graph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  // Full context including the original request
+  fullContext?: Record<string, any>;
 }
 
 export class WorkflowContextManager {
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  private fullContext?: Record<string, any>;
+  private esClient?: ElasticsearchClient;
 
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
+    this.fullContext = init.fullContext;
+    this.esClient = init.esClient;
   }
 
   public getContext(): StepContext {
@@ -64,6 +70,14 @@ export class WorkflowContextManager {
     directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
 
     return this.enrichStepContextAccordingToStepScope(stepContext);
+  }
+
+  public getFullContext(): Record<string, any> | undefined {
+    return this.fullContext;
+  }
+
+  public getEsClient(): ElasticsearchClient | undefined {
+    return this.esClient;
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {

@@ -8,11 +8,11 @@
  */
 
 import type {
+  Plugin,
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Logger,
-  Plugin,
-  PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -136,7 +136,8 @@ export class WorkflowsExecutionEnginePlugin
                 esClient,
                 logger,
                 config,
-                workflowExecutionRepository
+                workflowExecutionRepository,
+                (pluginsStart as any).core || core
               );
               await workflowRuntime.resume();
 
@@ -215,7 +216,8 @@ async function createContainer(
   esClient: Client,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
-  workflowExecutionRepository: WorkflowExecutionRepository
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  core?: CoreStart
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -262,6 +264,8 @@ async function createContainer(
   const contextManager = new WorkflowContextManager({
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
+    // Pass the full context including the user context
+    fullContext: workflowExecution.context,
   });
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
