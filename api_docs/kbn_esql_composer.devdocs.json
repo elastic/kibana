@@ -10,14 +10,24 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.drop",
+        "id": "def-common.drop",
         "type": "Function",
         "tags": [],
         "label": "drop",
-        "description": [],
+        "description": [
+          "\nAppends a `DROP` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(columns: (string | string[])[]) => ",
           "QueryOperator"
@@ -28,11 +38,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.drop.$1",
+            "id": "def-common.drop.$1",
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": [],
+            "description": [
+              "The columns to drop."
+            ],
             "signature": [
               "(string | string[])[]"
             ],
@@ -42,16 +54,20 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `DROP` command appended."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.evaluate",
+        "id": "def-common.evaluate",
         "type": "Function",
         "tags": [],
         "label": "evaluate",
-        "description": [],
+        "description": [
+          "\nAppends an `EVAL` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -62,11 +78,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.evaluate.$1",
+            "id": "def-common.evaluate.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [],
+            "description": [
+              "The body of the `EVAL` command."
+            ],
             "signature": [
               "TQuery"
             ],
@@ -77,11 +95,13 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.evaluate.$2",
+            "id": "def-common.evaluate.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "The parameters to use in the `EVAL` command."
+            ],
             "signature": [
               "TParams | undefined"
             ],
@@ -91,16 +111,20 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `EVAL` command appended."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.from",
+        "id": "def-common.from",
         "type": "Function",
         "tags": [],
         "label": "from",
-        "description": [],
+        "description": [
+          "\nThe entry point for the ESQL composer pipeline. Creates a new query\nstarting with a `FROM` clause.\n"
+        ],
         "signature": [
           "(patterns: (string | string[])[]) => ",
           "QueryPipeline"
@@ -111,11 +135,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.from.$1",
+            "id": "def-common.from.$1",
             "type": "Array",
             "tags": [],
             "label": "patterns",
-            "description": [],
+            "description": [
+              "The index patterns to query."
+            ],
             "signature": [
               "(string | string[])[]"
             ],
@@ -125,16 +151,20 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance to which other composer commands can be chained."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.keep",
+        "id": "def-common.keep",
         "type": "Function",
         "tags": [],
         "label": "keep",
-        "description": [],
+        "description": [
+          "\nAppends a `KEEP` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(columns: (string | string[])[]) => ",
           "QueryOperator"
@@ -145,11 +175,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.keep.$1",
+            "id": "def-common.keep.$1",
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": [],
+            "description": [
+              "The columns to keep."
+            ],
             "signature": [
               "(string | string[])[]"
             ],
@@ -159,16 +191,20 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `KEEP` command appended."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.limit",
+        "id": "def-common.limit",
         "type": "Function",
         "tags": [],
         "label": "limit",
-        "description": [],
+        "description": [
+          "\nAppends a `LIMIT` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(value: number) => ",
           "QueryOperator"
@@ -179,11 +215,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.limit.$1",
+            "id": "def-common.limit.$1",
             "type": "number",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "The limit to apply."
+            ],
             "signature": [
               "number"
             ],
@@ -193,16 +231,20 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `LIMIT` command appended."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.sort",
+        "id": "def-common.sort",
         "type": "Function",
         "tags": [],
         "label": "sort",
-        "description": [],
+        "description": [
+          "\nAppends a `SORT` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -213,7 +255,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$1",
+            "id": "def-common.sort.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -228,7 +270,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$2",
+            "id": "def-common.sort.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
@@ -242,12 +284,14 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `SORT` command appended."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.sort",
+        "id": "def-common.sort",
         "type": "Function",
         "tags": [],
         "label": "sort",
@@ -262,7 +306,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$1",
+            "id": "def-common.sort.$1",
             "type": "Array",
             "tags": [],
             "label": "sorts",
@@ -281,7 +325,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.sort",
+        "id": "def-common.sort",
         "type": "Function",
         "tags": [],
         "label": "sort",
@@ -296,7 +340,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$1",
+            "id": "def-common.sort.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "firstArg",
@@ -311,7 +355,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$2",
+            "id": "def-common.sort.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "secondArg",
@@ -326,7 +370,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$3",
+            "id": "def-common.sort.$3",
             "type": "Array",
             "tags": [],
             "label": "restSorts",
@@ -345,11 +389,13 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.stats",
+        "id": "def-common.stats",
         "type": "Function",
         "tags": [],
         "label": "stats",
-        "description": [],
+        "description": [
+          "\nAppends a `STATS` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -360,11 +406,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.stats.$1",
+            "id": "def-common.stats.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [],
+            "description": [
+              "The body of the `STATS` command."
+            ],
             "signature": [
               "TQuery"
             ],
@@ -375,11 +423,13 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.stats.$2",
+            "id": "def-common.stats.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "The parameters to use in the `STATS` command."
+            ],
             "signature": [
               "TParams | undefined"
             ],
@@ -389,16 +439,20 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `STATS` command appended."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.where",
+        "id": "def-common.where",
         "type": "Function",
         "tags": [],
         "label": "where",
-        "description": [],
+        "description": [
+          "\nAppends a `WHERE` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -409,11 +463,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.where.$1",
+            "id": "def-common.where.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [],
+            "description": [
+              "The body of the `WHERE` command."
+            ],
             "signature": [
               "TQuery"
             ],
@@ -424,11 +480,13 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.where.$2",
+            "id": "def-common.where.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "The parameters to use in the `WHERE` command."
+            ],
             "signature": [
               "TParams | undefined"
             ],
@@ -438,7 +496,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `WHERE` command appended."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -446,7 +506,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.SortOrder",
+        "id": "def-common.SortOrder",
         "type": "Enum",
         "tags": [],
         "label": "SortOrder",
@@ -457,14 +517,6 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [],
     "objects": []
   }

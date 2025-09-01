@@ -978,5 +978,30 @@ describe('artifacts lists', () => {
         sortOrder: 'desc',
       });
     });
+
+    test('for Trusted Devices', async () => {
+      mockExceptionClient.findExceptionListItem = jest
+        .fn()
+        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
+
+      const resp = await getAllItemsFromEndpointExceptionList({
+        elClient: mockExceptionClient,
+        os: 'windows',
+        listId: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      });
+
+      const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
+      expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
+
+      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
+        listId: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+        namespaceType: 'agnostic',
+        filter: 'exception-list-agnostic.attributes.os_types:"windows"',
+        perPage: 1000,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      });
+    });
   });
 });
