@@ -23,6 +23,10 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
       link: securityLink(SecurityPageName.detectionAndResponse),
     },
     {
+      id: SecurityPageName.kubernetes,
+      link: securityLink(SecurityPageName.kubernetes),
+    },
+    {
       id: SecurityPageName.cloudSecurityPostureDashboard,
       link: securityLink(SecurityPageName.cloudSecurityPostureDashboard),
     },
