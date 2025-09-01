@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/dashboards/dashboards-selector'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/dashboards/dashboards-selector/setup_tests.ts',
+  ],
+};
