@@ -53,7 +53,7 @@ describe('startMigrationCheckComplete', () => {
 
     const result = await checkStartMigrationCardComplete(services);
 
-    expect(siemMigrations.rules.getRuleMigrationsStats).toHaveBeenCalled();
+    expect(siemMigrations.rules.getMigrationsStats).toHaveBeenCalled();
 
     expect(result).toEqual({
       completeBadgeText: '1 migration',

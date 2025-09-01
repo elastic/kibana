@@ -17,11 +17,15 @@ interface Options {
   storageType?: keyof typeof storages;
 }
 
-export class RuleMigrationsStorage<T> {
+export class MigrationsStorage<T> {
   private readonly storage: Storage;
   public key: string;
 
-  constructor(private readonly objectName: string, private readonly options?: Options) {
+  constructor(
+    private readonly source: string,
+    private readonly objectName: string,
+    private readonly options?: Options
+  ) {
     this.storage = storages[this.options?.storageType ?? 'local'];
     this.key = this.getKey();
   }
@@ -30,7 +34,7 @@ export class RuleMigrationsStorage<T> {
     if (this.options?.customKey) {
       return this.options.customKey;
     }
-    return `siem_migrations.rules.${this.objectName}.${spaceId}`;
+    return `siem_migrations.${this.source}.${this.objectName}.${spaceId}`;
   }
 
   public setSpaceId(spaceId: string) {

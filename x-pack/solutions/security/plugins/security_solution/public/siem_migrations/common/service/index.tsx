@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+export { SiemMigrationsServiceBase } from './migrations_service';
 
-export const EMPTY_RULES_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rulesService.create.emptyRulesError',
-  { defaultMessage: 'Can not create a migration without rules' }
-);
+export * from './capabilities';
+export * from './notifications';
+export * from './hooks';
