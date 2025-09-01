@@ -28,7 +28,7 @@ export class EnterNormalPathNodeImpl implements StepImplementation, StepErrorCat
     this.workflowLogger.logError(
       'Error caught by the OnFailure zone. Redirecting to the fallback path'
     );
-    const stepState = this.wfExecutionRuntimeManager.getStepState(this.node.id) || {};
+    const stepState = this.wfExecutionRuntimeManager.getStepState(this.node.enterZoneNodeId) || {};
 
     await this.wfExecutionRuntimeManager.setStepState(this.node.enterZoneNodeId, {
       ...stepState,
