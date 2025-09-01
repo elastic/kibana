@@ -109,9 +109,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                   font-size: ${euiTheme.font.scale.xs * 10.5}px;
                 `}
               >
-                <EuiTextTruncate truncation="end" text={text}>
-                  {(truncatedText) => truncatedText}
-                </EuiTextTruncate>
+                <EuiTextTruncate truncation="end" text={text} />
               </EuiText>
               <LabelNodeBadges analysis={analysis} />
             </div>
