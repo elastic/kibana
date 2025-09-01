@@ -149,6 +149,7 @@ src/platform/packages/**/package-map.json
 **/.journeys/
 **/.rca/
 x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/test
 
 # ignore FTR temp directory
 .ftr
