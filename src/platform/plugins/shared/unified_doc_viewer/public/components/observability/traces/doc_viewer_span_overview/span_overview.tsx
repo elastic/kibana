@@ -35,6 +35,7 @@ import {
 } from '../../../doc_viewer_source/get_height';
 import { Trace2 } from '../components/trace2';
 import { About } from '../components/about';
+import { TraceContextLogEvents } from '../components/trace_context_log_events';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -120,7 +121,6 @@ export function SpanOverview({
             )}
             <EuiFlexItem>
               <EuiSpacer size="m" />
-
               <Trace2
                 hit={hit}
                 displayType="span" // TODO I think it should be the section itself who decides the "displayType" as it has access to the whole hit
@@ -133,7 +133,16 @@ export function SpanOverview({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiSpacer size="m" />
+              {/* // I realized that if the section does not load (when no results) we still keep the spacer*/}
               <SpanLinks traceId={traceId} docId={spanId} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <TraceContextLogEvents
+                traceId={flattenedDoc[TRACE_ID_FIELD]}
+                spanId={flattenedDoc[SPAN_ID_FIELD]}
+                transactionId={transactionId}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </RootSpanProvider>
