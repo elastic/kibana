@@ -137,7 +137,7 @@ export function fromTermsLensStateToAPI(
   column: TermsIndexPatternColumn,
   columns: (LensApiAllMetricOperations & { id: string })[]
 ): LensApiTermsOperation {
-  const { field, label } = getLensAPIBucketSharedProps(column);
+  const { label } = getLensAPIBucketSharedProps(column);
   return {
     operation: 'terms',
     fields: [column.sourceField].concat(column.params.secondaryFields ?? []),
