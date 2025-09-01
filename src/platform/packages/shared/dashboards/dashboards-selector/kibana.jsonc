@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/dashboards-selector",
   "owner": "@elastic/obs-ux-management-team",
   "group": "platform",
