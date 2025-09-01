@@ -40,7 +40,7 @@ export abstract class Importer implements IImporter {
   private _pipelines: IngestPipelineWrapper[] = [];
   private _timeFieldName: string | undefined;
   private _initialized = false;
-  protected _reader: MessageReader | TikaReader | NdjsonReader;
+  protected abstract _reader: MessageReader | TikaReader | NdjsonReader;
 
   public initialized() {
     return this._initialized;

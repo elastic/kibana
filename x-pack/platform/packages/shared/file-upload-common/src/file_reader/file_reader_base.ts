@@ -31,10 +31,6 @@ export abstract class FileReaderBase {
   protected _docArray: ImportDoc[] = [];
   protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
 
-  constructor(options?: { docLimit?: number }) {
-    this._docLimit = options?.docLimit;
-  }
-
   public read(data: ArrayBuffer) {
     let docArray: ImportDoc[] = [];
     const decoder = new TextDecoder();

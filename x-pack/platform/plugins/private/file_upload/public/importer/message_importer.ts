@@ -10,6 +10,8 @@ import { Importer } from './importer';
 import type { ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {
+  protected _reader: MessageReader;
+
   constructor(options: ImportFactoryOptions) {
     super();
     this._reader = new MessageReader(options);

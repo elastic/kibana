@@ -9,10 +9,6 @@ import type { CreateDocsResponse } from './file_reader_base';
 import { FileReaderBase } from './file_reader_base';
 
 export class NdjsonReader extends FileReaderBase {
-  constructor(options: { docLimit?: number }) {
-    super(options);
-  }
-
   protected _createDocs(json: string, isLastPart: boolean): CreateDocsResponse<string> {
     let remainder = 0;
     try {

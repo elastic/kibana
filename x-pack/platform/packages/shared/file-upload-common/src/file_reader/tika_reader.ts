@@ -9,10 +9,6 @@ import type { CreateDocsResponse, ImportDocTika } from './file_reader_base';
 import { FileReaderBase } from './file_reader_base';
 
 export class TikaReader extends FileReaderBase {
-  constructor(options?: { docLimit?: number }) {
-    super(options);
-  }
-
   public read(data: ArrayBuffer) {
     let docArray: ImportDocTika[] = [];
     const pdfBase64 = fromByteArray(new Uint8Array(data));
