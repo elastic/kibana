@@ -9,6 +9,17 @@ interface NullifyMissingProperties<T> {
   source?: T;
   target: T;
 }
+/**
+ * Takes a reference object {source} and another object {target}, and returns a new object.
+ * The return object simply nullifies any properties that are missing/undefined in the {target} but exist in the {source}.
+ *
+ * Example:
+ * ```ts
+ * source = { a: 1, b: 2, c: 3 }
+ * target = { a: 10, b: undefined }
+ * result = { a: 10, b: null, c: null }
+ * ```
+ * */
 export const nullifyMissingProperties = <T extends object = object>(
   params: NullifyMissingProperties<T>
 ): T => {
@@ -18,7 +29,7 @@ export const nullifyMissingProperties = <T extends object = object>(
   }
   const result: T = { ...stored, ...output };
   (Object.keys(stored) as Array<keyof T>).forEach((key) => {
-    if (output[key] == null) {
+    if (typeof output[key] === 'undefined') {
       result[key] = null as T[keyof T];
     }
   });

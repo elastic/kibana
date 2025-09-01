@@ -6,6 +6,10 @@
  */
 
 import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type {
+  RuleMigration,
+  RuleMigrationRule,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_prebuilt_rules_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
@@ -16,7 +20,10 @@ import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migrat
 import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data_client';
 import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 
-export class RuleMigrationsDataClient extends SiemMigrationsDataClient {
+export class RuleMigrationsDataClient extends SiemMigrationsDataClient<
+  RuleMigration,
+  RuleMigrationRule
+> {
   public readonly migrations: RuleMigrationsDataMigrationClient;
   public readonly items: RuleMigrationsDataRulesClient;
   public readonly resources: SiemMigrationsDataResourcesClient;

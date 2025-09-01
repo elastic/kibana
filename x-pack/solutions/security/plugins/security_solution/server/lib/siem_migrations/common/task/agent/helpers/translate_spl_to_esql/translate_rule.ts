@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { EsqlKnowledgeBase } from '../../../util/esql_knowledge_base';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';

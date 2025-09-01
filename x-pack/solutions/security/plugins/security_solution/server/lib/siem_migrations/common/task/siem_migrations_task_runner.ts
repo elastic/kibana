@@ -99,7 +99,7 @@ export class SiemMigrationTaskRunner<
   }
 
   /** Optional initialization logic */
-  protected async initialize() {}
+  async initialize() {}
 
   public async run(invocationConfig: RunnableConfig<C>): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');
@@ -182,6 +182,12 @@ export class SiemMigrationTaskRunner<
     }
   }
 
+  /** Executes the task with raw input and config, and returns the output promise. */
+  async executeTask(input: P, config: RunnableConfig<C>) {
+    assert(this.task, 'Migration task is not defined');
+    return this.task(input, config);
+  }
+
   /** Creates the task invoke function, the input is prepared and the output is processed as a migrationItem */
   private createTaskInvoke = async (
     migrationItem: I,
@@ -189,8 +195,7 @@ export class SiemMigrationTaskRunner<
   ): Promise<Invoke<I>> => {
     const input = await this.prepareTaskInput(migrationItem);
     return async () => {
-      assert(this.task, 'Migration task is not defined');
-      const output = await this.task(input, config);
+      const output = await this.executeTask(input, config);
       return this.processTaskOutput(migrationItem, output);
     };
   };
@@ -256,7 +261,7 @@ export class SiemMigrationTaskRunner<
               this.isWaiting = false;
             });
           }
-          this.logger.debug(`Awaiting backoff task for document "${migrationItem.id}"`);
+          this.logger.debug(`Awaiting backoff task for migration item "${migrationItem.id}"`);
           await backoffPromise.catch(() => {
             throw error; // throw the original error
           });
@@ -316,7 +321,7 @@ export class SiemMigrationTaskRunner<
 
   protected async saveItemFailed(migrationItem: Stored<I>, error: Error) {
     this.logger.error(
-      `Error translating document "${migrationItem.id}" with error: ${error.message}`
+      `Error translating migration item "${migrationItem.id}" with error: ${error.message}`
     );
     const comments = [generateAssistantComment(`Error migrating document: ${error.message}`)];
     return this.data.items.saveError({ ...migrationItem, comments });

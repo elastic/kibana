@@ -41,7 +41,7 @@ interface SplunkXmlElement extends XmlElement {
   - Add and configure visualizations
     - [x] vizualizations
     - [] event
-    - [] table
+    - [x] table
     - [x] chart
     - [] map
     - [x] single value (metric)
@@ -86,13 +86,11 @@ export class SplunkXmlDashboardParser {
       allPanels.forEach((panel, panelIndex) => {
         if (!panel) return;
 
-        // Use deep search to find query element (equivalent to .//query in Python)
         const queryElement = this.findDeep(panel, 'query') as string[] | undefined;
         if (!Array.isArray(queryElement) || !queryElement[0]) return;
 
         const query = queryElement[0].toString().trim();
 
-        // Extract panel title using deep search (equivalent to .//title in Python)
         let title = '';
         const titleElement = this.findDeep(panel, 'title') as string[] | undefined;
         if (Array.isArray(titleElement) && titleElement.length > 0) {
@@ -140,14 +138,11 @@ export class SplunkXmlDashboardParser {
     return queries;
   }
 
-  // Unified chart type mapping with deep search (equivalent to Python logic)
   private getPanelChartType(panel: SplunkXmlElement): VizType {
-    // Deep search for visualization elements
     const metricXml = this.findDeep(panel, 'single');
     const vizXml = this.findDeep(panel, 'viz') as SplunkXmlElement[] | undefined;
     const chartXml = this.findDeep(panel, 'chart') as SplunkXmlElement[] | undefined;
 
-    // Deep search for chart options with attribute filtering
     const chartOption = this.findDeep(panel, 'option', 'name', 'charting.chart') as
       | SplunkXmlElement
       | undefined;
@@ -158,25 +153,20 @@ export class SplunkXmlDashboardParser {
       | SplunkXmlElement
       | undefined;
 
-    // Extract chart type (combining extractChartType logic)
     let chartType = 'table';
 
-    // Override with viz type if present (matching Python logic)
     if (Array.isArray(vizXml) && vizXml[0]?.$ && vizXml[0].$.type) {
       chartType = vizXml[0].$.type;
     }
 
-    // Override with chart type if present (matching Python logic)
     if (Array.isArray(chartXml) && chartXml[0]?.$ && chartXml[0].$.type) {
       chartType = chartXml[0].$.type;
     }
 
-    // Override with chart option if present (matching Python logic)
     if (chartOption && chartOption._) {
       chartType = chartOption._;
     }
 
-    // Convert to VizType (combining getChartType logic)
     return this.mapToVizType(chartType, stackMode, overlayMode, metricXml);
   }
 
@@ -188,7 +178,6 @@ export class SplunkXmlDashboardParser {
   ): VizType {
     const isStacked = stackMode?._ && stackMode._.includes('stacked');
 
-    // Direct mapping to VizType enum values (matching Python logic)
     if (chartType === 'bar') {
       return isStacked ? 'bar_horizontal_stacked' : 'bar_horizontal';
     }
@@ -201,7 +190,6 @@ export class SplunkXmlDashboardParser {
       return isStacked ? 'area_stacked' : 'area';
     }
 
-    // Special case transformations (matching Python logic)
     if (chartType === 'table' && overlayMode?._ === 'heatmap') {
       return 'heatmap';
     }
@@ -214,7 +202,6 @@ export class SplunkXmlDashboardParser {
       return 'metric';
     }
 
-    // Direct enum mapping for other types
     const typeMap: Record<string, VizType> = {
       table: 'table',
       heatmap: 'heatmap',
@@ -230,7 +217,7 @@ export class SplunkXmlDashboardParser {
     return typeMap[chartType] || 'table';
   }
 
-  // Unified deep search method (equivalent to Python's .// XPath expressions)
+  /** Unified deep search method (equivalent to XML's .// XPath expressions) */
   private findDeep(
     source: SplunkXmlElement,
     elementName: string,
@@ -259,11 +246,9 @@ export class SplunkXmlDashboardParser {
       }
     }
 
-    // Search recursively in all properties
     for (const key of Object.keys(source)) {
       const value = source[key];
 
-      // Handle array values
       if (Array.isArray(value)) {
         for (const item of value) {
           const result = this.findDeep(item, elementName, attrName, attrValue);
@@ -271,9 +256,7 @@ export class SplunkXmlDashboardParser {
             return result;
           }
         }
-      }
-      // Handle object values
-      else if (typeof value === 'object' && value !== null) {
+      } else if (typeof value === 'object' && value !== null) {
         const result = this.findDeep(value, elementName, attrName, attrValue);
         if (result !== undefined) {
           return result;
@@ -291,18 +274,13 @@ export class SplunkXmlDashboardParser {
       return results;
     }
 
-    // Check if the element exists at this level
     if (elementName in source) {
       const element = source[elementName];
 
-      // If it's an array, add all elements to results
       if (Array.isArray(element)) {
         results.push(...element);
-        // Don't search deeper in these found elements, continue with siblings
       } else if (element) {
-        // Single element, add it to results
         results.push(element as SplunkXmlElement);
-        // Don't search deeper in this found element, continue with siblings
       }
     }
 
@@ -313,15 +291,12 @@ export class SplunkXmlDashboardParser {
       } else {
         const value = source[key];
 
-        // Handle array values
         if (Array.isArray(value)) {
           for (const item of value) {
             const childResults = this.findAllDeep(item, elementName);
             results.push(...childResults);
           }
-        }
-        // Handle object values
-        else if (typeof value === 'object' && value !== null) {
+        } else if (typeof value === 'object' && value !== null) {
           const childResults = this.findAllDeep(value, elementName);
           results.push(...childResults);
         }
@@ -331,7 +306,7 @@ export class SplunkXmlDashboardParser {
     return results;
   }
 
-  // Calculate panel positions
+  /** Calculate panel positions */
   private calculatePositions(
     rowIndex: number,
     panelIndex: number,

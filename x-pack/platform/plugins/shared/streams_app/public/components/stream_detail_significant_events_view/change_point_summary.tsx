@@ -9,7 +9,7 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { FormattedChangePoint } from './change_point';
+import type { FormattedChangePoint } from './utils/change_point';
 
 export function ChangePointSummary({
   change,

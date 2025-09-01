@@ -6,7 +6,7 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRulePartial,
   OriginalRule,
@@ -43,9 +43,9 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => ({ iterations: 0 } as TranslateRuleValidationErrors),
   }),
-  translation_result: Annotation<RuleTranslationResult>({
+  translation_result: Annotation<MigrationTranslationResult>({
     reducer: (current, value) => value ?? current,
-    default: () => RuleTranslationResult.UNTRANSLATABLE,
+    default: () => MigrationTranslationResult.UNTRANSLATABLE,
   }),
   comments: Annotation<RuleMigrationRule['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),

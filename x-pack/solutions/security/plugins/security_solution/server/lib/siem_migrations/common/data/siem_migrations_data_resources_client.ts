@@ -11,11 +11,10 @@ import type {
   Duration,
   BulkOperationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-// TODO: Use a common schema to define the common types
 import type {
-  RuleMigrationResource as SiemMigrationResource,
-  RuleMigrationResourceType as SiemMigrationResourceType,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+  SiemMigrationResource,
+  SiemMigrationResourceType,
+} from '../../../../../common/siem_migrations/model/common.gen';
 import type { Stored } from '../types';
 import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from './constants';

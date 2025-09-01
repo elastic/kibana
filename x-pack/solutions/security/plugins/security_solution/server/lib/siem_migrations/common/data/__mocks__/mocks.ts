@@ -10,7 +10,6 @@ import type { SiemMigrationsDataMigrationClient } from '../siem_migrations_data_
 import type { SiemMigrationsDataResourcesClient } from '../siem_migrations_data_resources_client';
 import type { SiemMigrationsDataItemClient } from '../siem_migrations_data_item_client';
 
-// Rule migrations data items client
 export const mockSiemMigrationsDataItemClient = {
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue({ data: [], total: 0 }),

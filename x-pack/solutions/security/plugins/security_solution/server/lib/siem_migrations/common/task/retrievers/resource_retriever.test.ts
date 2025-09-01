@@ -6,14 +6,14 @@
  */
 
 import { ResourceRetriever } from './resource_retriever'; // Adjust path as needed
-import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources/resource_identifier';
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/resources/resource_identifier';
+import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources';
+import { ResourceIdentifier } from '../../../../../../common/siem_migrations/resources';
 import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { ItemDocument } from '../../types';
 
 jest.mock('../../data/siem_migrations_data_resources_client');
-jest.mock('../../../../../../common/siem_migrations/resources/resource_identifier');
+jest.mock('../../../../../../common/siem_migrations/resources');
 
 const migrationItem = {
   original_rule: {
@@ -64,7 +64,7 @@ describe('ResourceRetriever', () => {
 
   it('returns an empty object if no matching resources are found', async () => {
     // Mock the resource identifier to return no resources
-    mockResourceIdentifier.fromOriginal.mockReturnValue([]);
+    mockResourceIdentifier.fromOriginal.mockResolvedValue([]);
     await retriever.initialize(); // Pretend initialize has been called
 
     const result = await retriever.getResources(migrationItem.original_rule);

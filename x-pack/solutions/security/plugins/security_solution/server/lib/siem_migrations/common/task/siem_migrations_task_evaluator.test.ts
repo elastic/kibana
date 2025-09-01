@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import type { CustomEvaluator } from './siem_migrations_task_evaluator';
-import { SiemMigrationTaskEvaluable } from './siem_migrations_task_evaluator';
+import {
+  SiemMigrationsBaseEvaluator,
+  type CustomEvaluator,
+} from './siem_migrations_task_evaluator';
 import type { Run, Example } from 'langsmith/schemas';
-import { createSiemMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import type { SiemMigrationsClientDependencies } from '../types';
 import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
+
+jest.mock('./siem_migrations_task_runner', () => ({
+  SiemMigrationTaskRunner: jest.fn().mockReturnValue({
+    prepareTaskInvoke: jest.fn(),
+    setup: jest.fn(),
+    run: jest.fn(),
+    abortController: new AbortController(),
+  }),
+}));
 
 // Mock dependencies
 jest.mock('langsmith/evaluation', () => ({
@@ -30,15 +39,12 @@ jest.mock('langsmith', () => ({
 }));
 
 // Create generic task evaluator class using the generic task runner
-class SiemMigrationTaskEvaluator extends SiemMigrationTaskEvaluable(SiemMigrationTaskRunner) {
-  public async setup(_: string) {}
+class SiemMigrationTaskEvaluator extends SiemMigrationsBaseEvaluator {
   protected evaluators: Record<string, CustomEvaluator> = {};
 }
 
-describe('SiemMigrationTaskEvaluator', () => {
+describe('SiemMigrationsBaseEvaluator', () => {
   let taskEvaluator: SiemMigrationTaskEvaluator;
-  let mockRuleMigrationsDataClient: ReturnType<typeof createSiemMigrationsDataClientMock>;
-  let abortController: AbortController;
 
   const mockLogger = loggerMock.create();
   const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
@@ -51,22 +57,9 @@ describe('SiemMigrationTaskEvaluator', () => {
     telemetry: {},
   } as unknown as SiemMigrationsClientDependencies;
 
-  const mockRequest = {} as unknown as KibanaRequest;
-  const mockUser = {} as unknown as AuthenticatedUser;
-
   beforeAll(() => {
-    mockRuleMigrationsDataClient = createSiemMigrationsDataClientMock();
-    abortController = new AbortController();
-
-    taskEvaluator = new SiemMigrationTaskEvaluator(
-      'test-migration-id',
-      mockRequest,
-      mockUser,
-      abortController,
-      mockRuleMigrationsDataClient,
-      mockLogger,
-      mockDependencies
-    );
+    const taskRunner = (SiemMigrationTaskRunner as jest.Mock)();
+    taskEvaluator = new SiemMigrationTaskEvaluator(taskRunner, mockDependencies, mockLogger);
   });
 
   afterEach(() => {

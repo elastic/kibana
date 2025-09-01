@@ -7,27 +7,25 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
-  // TODO: RuleTranslationResult -> TranslationResult
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../../rules/constants';
 
 export const dsl = {
   isFullyTranslated(): QueryDslQueryContainer {
-    return { term: { translation_result: RuleTranslationResult.FULL } };
+    return { term: { translation_result: MigrationTranslationResult.FULL } };
   },
   isNotFullyTranslated(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isFullyTranslated() } };
   },
   isPartiallyTranslated(): QueryDslQueryContainer {
-    return { term: { translation_result: RuleTranslationResult.PARTIAL } };
+    return { term: { translation_result: MigrationTranslationResult.PARTIAL } };
   },
   isNotPartiallyTranslated(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isPartiallyTranslated() } };
   },
   isUntranslatable(): QueryDslQueryContainer {
-    return { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } };
+    return { term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE } };
   },
   isNotUntranslatable(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isUntranslatable() } };
@@ -37,12 +35,5 @@ export const dsl = {
   },
   isNotFailed(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isFailed() } };
-  },
-  isMissingIndex(): QueryDslQueryContainer {
-    return {
-      query_string: {
-        query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
-      },
-    };
   },
 };

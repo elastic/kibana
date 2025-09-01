@@ -25,9 +25,12 @@ jest.mock('./retrievers', () => ({
 }));
 
 const mockCreateModel = jest.fn(() => ({ model: 'test-model' }));
+const mockGetModelName = jest.fn(() => 'test-model');
 jest.mock('../../common/task/util/actions_client_chat', () => ({
   ...jest.requireActual('../../common/task/util/actions_client_chat'),
-  ActionsClientChat: jest.fn().mockImplementation(() => ({ createModel: mockCreateModel })),
+  ActionsClientChat: jest
+    .fn()
+    .mockImplementation(() => ({ createModel: mockCreateModel, getModelName: mockGetModelName })),
 }));
 
 const mockInvoke = jest.fn().mockResolvedValue({});
@@ -85,7 +88,7 @@ describe('RuleMigrationTaskRunner', () => {
     it('should create the agent and tools', async () => {
       await expect(taskRunner.setup('test-connector-id')).resolves.toBeUndefined();
       // @ts-expect-error (checking private properties)
-      expect(taskRunner.agent).toBeDefined();
+      expect(taskRunner.task).toBeDefined();
       // @ts-expect-error (checking private properties)
       expect(taskRunner.retriever).toBeDefined();
       // @ts-expect-error (checking private properties)

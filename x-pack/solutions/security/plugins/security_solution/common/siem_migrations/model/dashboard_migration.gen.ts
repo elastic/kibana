@@ -23,7 +23,7 @@ import {
   MigrationStatus,
   MigrationComments,
   MigrationTaskStats,
-} from './migration.gen';
+} from './common.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
@@ -77,6 +77,9 @@ export const OriginalDashboard = z.object({
    * The unique identifier for the dashboard
    */
   id: z.string(),
+  /**
+   * The original dashboard vendor identifier.
+   */
   vendor: OriginalDashboardVendor,
   /**
    * The title of the dashboard
@@ -122,9 +125,9 @@ export const ElasticDashboard = z.object({
    */
   description: z.string().optional(),
   /**
-   * The data of the dashboard Saved Object
+   * The data of the dashboard, format could depend on the vendor
    */
-  data: z.object({}).optional(),
+  data: z.string().optional(),
 });
 
 /**

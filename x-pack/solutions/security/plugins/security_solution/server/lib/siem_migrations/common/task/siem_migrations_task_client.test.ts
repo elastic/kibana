@@ -127,6 +127,13 @@ describe('RuleMigrationsTaskClient', () => {
       data.items.getStats.mockResolvedValue({
         items: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
+      const mockedRunnerInstance = {
+        setup: jest.fn().mockResolvedValue(undefined),
+        run: jest.fn().mockResolvedValue(undefined),
+        abortController: { abort: jest.fn() },
+      };
+      // Use our custom mock for this test.
+      (SiemMigrationTaskRunner as jest.Mock).mockImplementationOnce(() => mockedRunnerInstance);
 
       const client = new TestTaskClient(
         migrationsRunning,
@@ -190,10 +197,14 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
 
-      await client.start(params);
+      await client.start({
+        ...params,
+      });
+
       expect(data.migrations.saveAsStarted).toHaveBeenCalledWith({
         id: migrationId,
         connectorId: params.connectorId,
+        skipPrebuiltRulesMatching: false,
       });
     });
 

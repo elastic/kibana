@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { isEmpty } from 'lodash/fp';
-import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { MigrationResources } from '../../../retrievers/resource_retriever';

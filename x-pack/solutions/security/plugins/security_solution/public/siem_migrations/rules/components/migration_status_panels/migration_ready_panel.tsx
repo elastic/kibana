@@ -14,10 +14,10 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
@@ -34,7 +34,7 @@ export interface MigrationReadyPanelProps {
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
   const { openFlyout } = useRuleMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
-  const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceBase[]>([]);
+  const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
   const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
 
   useEffect(() => {

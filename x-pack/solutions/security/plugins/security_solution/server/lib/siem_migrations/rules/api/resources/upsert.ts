@@ -8,13 +8,13 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { partition } from 'lodash';
-import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
   UpsertRuleMigrationResourcesRequestBody,
   UpsertRuleMigrationResourcesRequestParams,
   type UpsertRuleMigrationResourcesResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
@@ -92,7 +92,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
           } catch (error) {
             logger.error(error);
             await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
-            return res.badRequest({ body: error.message });
+            return res.customError({ statusCode: 500, body: error.message });
           }
         }
       )

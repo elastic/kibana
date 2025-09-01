@@ -56,6 +56,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
           result: { terms: { field: 'translation_result' } },
           installable: { filter: { bool: { must: dsl.isInstallable() } } },
           prebuilt: { filter: dsl.isPrebuilt() },
+          missing_index: { filter: dsl.isMissingIndex() },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
@@ -133,6 +134,9 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
     }
     if (filters.prebuilt != null) {
       filter.push(filters.prebuilt ? dsl.isPrebuilt() : dsl.isCustom());
+    }
+    if (filters.missingIndex) {
+      filter.push(dsl.isMissingIndex());
     }
 
     return { bool: { filter } };

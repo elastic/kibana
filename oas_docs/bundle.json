@@ -23354,10 +23354,14 @@
                       "properties": {
                         "agent_policy_count": {
                           "type": "number"
+                        },
+                        "package_policy_count": {
+                          "type": "number"
                         }
                       },
                       "required": [
-                        "agent_policy_count"
+                        "agent_policy_count",
+                        "package_policy_count"
                       ],
                       "type": "object"
                     }
@@ -49502,6 +49506,13 @@
                                                           "minLength": 1,
                                                           "type": "string"
                                                         },
+                                                        "status": {
+                                                          "enum": [
+                                                            "enabled",
+                                                            "disabled"
+                                                          ],
+                                                          "type": "string"
+                                                        },
                                                         "where": {
                                                           "anyOf": [
                                                             {
@@ -58530,9 +58541,16 @@
                                           "type": "string"
                                         },
                                         "type": "array"
+                                      },
+                                      "tags": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
                                       }
                                     },
                                     "required": [
+                                      "tags",
                                       "members"
                                     ],
                                     "type": "object"
@@ -58600,6 +58618,13 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "status": {
+                    "enum": [
+                      "enabled",
+                      "disabled"
+                    ],
+                    "type": "string"
+                  },
                   "stream": {
                     "additionalProperties": false,
                     "properties": {
@@ -58988,9 +59013,16 @@
                           "type": "string"
                         },
                         "type": "array"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
                       }
                     },
                     "required": [
+                      "tags",
                       "members"
                     ],
                     "type": "object"
@@ -61916,6 +61948,13 @@
                                       "properties": {
                                         "destination": {
                                           "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "status": {
+                                          "enum": [
+                                            "enabled",
+                                            "disabled"
+                                          ],
                                           "type": "string"
                                         },
                                         "where": {

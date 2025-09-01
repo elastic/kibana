@@ -9,9 +9,9 @@ import type { Client } from '@elastic/elasticsearch';
 import type { DashboardMigrationDashboard } from '@kbn/security-solution-plugin/common/siem_migrations/model/dashboard_migration.gen';
 
 const SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN = `.kibana-siem-dashboard-migrations`;
-
 const MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-migrations-default`;
 const DASHBOARDS_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-dashboards-default`;
+const RESOURCES_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-resources-default`;
 
 export const getDashboardMigrationsFromES = async ({
   es,
@@ -48,18 +48,27 @@ export const getDashboardsPerMigrationFromES = async ({
   });
 };
 
+export const getDashboardResourcesPerMigrationFromES = async ({
+  es,
+  migrationId,
+}: {
+  es: Client;
+  migrationId: string;
+}) => {
+  return await es.search({
+    index: RESOURCES_INDEX_PATTERN,
+    size: 10000,
+    query: {
+      term: {
+        migration_id: migrationId,
+      },
+    },
+  });
+};
+
 export const deleteAllDashboardMigrations = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: [MIGRATIONS_INDEX_PATTERN],
-    query: {
-      match_all: {},
-    },
-    ignore_unavailable: true,
-    refresh: true,
-  });
-
-  await es.deleteByQuery({
-    index: [DASHBOARDS_INDEX_PATTERN],
+    index: [MIGRATIONS_INDEX_PATTERN, DASHBOARDS_INDEX_PATTERN, RESOURCES_INDEX_PATTERN],
     query: {
       match_all: {},
     },

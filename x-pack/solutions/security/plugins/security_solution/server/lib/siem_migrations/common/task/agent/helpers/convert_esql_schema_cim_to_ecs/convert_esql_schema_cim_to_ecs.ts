@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/migration.gen';
+import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import type { EsqlKnowledgeBase } from '../../../util/esql_knowledge_base';
 import { CIM_TO_ECS_MAP } from './cim_ecs_map';
 import { ESQL_CONVERT_CIM_TO_ECS_PROMPT } from './prompts';

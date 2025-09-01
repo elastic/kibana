@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationStatus,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 
@@ -17,7 +17,7 @@ import type {
   RuleMigrationRuleData,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/task/util/comments';
-import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/types';
+import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/types';
 
 const SIEM_MIGRATIONS_BASE_INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
@@ -138,11 +138,11 @@ export const statsOverrideCallbackFactory = ({
       const partiallyTranslatedEndIndex =
         completedEndIndex - completed + fullyTranslated + partiallyTranslated;
       if (index < fullyTranslatedEndIndex) {
-        translationResult = RuleTranslationResult.FULL;
+        translationResult = MigrationTranslationResult.FULL;
       } else if (index < partiallyTranslatedEndIndex) {
-        translationResult = RuleTranslationResult.PARTIAL;
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else {
-        translationResult = RuleTranslationResult.UNTRANSLATABLE;
+        translationResult = MigrationTranslationResult.UNTRANSLATABLE;
       }
     }
     return {

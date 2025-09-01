@@ -32,8 +32,9 @@ describe('toNavigationItems', () => {
   it('should return missing logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "data-test-subj": undefined,
         "href": "/missing-href-😭",
-        "iconType": "logoKibana",
+        "iconType": "broom",
         "id": "kibana",
         "label": "Kibana",
       }
@@ -58,29 +59,29 @@ describe('toNavigationItems', () => {
       === Navigation Warnings ===
       • No \\"home\\" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: \\"home\\" is expected.
       • Navigation item is missing. Using fallback value: \\"/missing-href-😭\\".
-      • Navigation item is missing. Using fallback value: \\"logoKibana\\".
+      • No icon found for node \\"undefined\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Navigation item is missing. Using fallback value: \\"kibana\\".
       • Navigation item is missing. Using fallback value: \\"Kibana\\".
       • Navigation node \\"node-2\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:rules, alerts, attack_discovery, cloud_security_posture-findings, cases.
-      • Navigation item \\"securityGroup:rules\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
-      • Navigation item \\"alerts\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
-      • Navigation item \\"attack_discovery\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
-      • Navigation item \\"cloud_security_posture-findings\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
-      • Navigation item \\"cases\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
+      • No icon found for node \\"securityGroup:rules\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"alerts\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"attack_discovery\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"cloud_security_posture-findings\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"cases\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Navigation node \\"node-3\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:entityAnalytics, securityGroup:explore, securityGroup:investigations, threat_intelligence.
       • Panel opener node \\"securityGroup:entityAnalytics\\" has no children. Ignoring it.
       • Panel opener node \\"securityGroup:explore\\" should contain panel sections, not direct links. Flattening links \\"hosts, network, users\\" into secondary items and creating a placeholder section for these links.
-      • Navigation item \\"securityGroup:explore\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
+      • No icon found for node \\"securityGroup:explore\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Panel opener node \\"securityGroup:investigations\\" should contain panel sections, not direct links. Flattening links \\"timelines, notes, osquery\\" into secondary items and creating a placeholder section for these links.
-      • Navigation item \\"securityGroup:investigations\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
-      • Navigation item \\"threat_intelligence\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
+      • No icon found for node \\"securityGroup:investigations\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"threat_intelligence\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Navigation node \\"node-4\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:assets.
       • Secondary menu item node \\"fleet\\" has a href \\"/tzo/s/sec/app/fleet\\", but it should not. We're using it as a section title that doesn't have a link.
       • Navigation item \\"node-0\\" is missing a \\"title\\". Using fallback value: \\"Missing Title 😭\\".
       • Navigation item \\"node-0\\" is missing a \\"href\\". Using fallback value: \\"Missing Href 😭\\".
-      • Navigation item \\"securityGroup:assets\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
-      • Navigation item \\"securityGroup:machineLearning\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
-      • Navigation item \\"stack_management\\" is missing all of \\"iconV2, icon\\". Using fallback value: \\"broom\\".
+      • No icon found for node \\"securityGroup:assets\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"securityGroup:machineLearning\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"stack_management\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\"."
     `);
   });
@@ -210,6 +211,7 @@ describe('logo node', () => {
     const { logoItem } = toNavigationItems(treeWithLogo, [], []);
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome",
         "href": "/tzo/s/sec/app/security/get_started",
         "iconType": "launch",
         "id": "securityHome",

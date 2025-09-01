@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
-import { type MigrationTranslationResult } from '../../../../../../../common/siem_migrations/model/migration.gen';
+import { type MigrationTranslationResult } from '../../../../../../../common/siem_migrations/model/common.gen';
 import { type RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 

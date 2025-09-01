@@ -24,7 +24,7 @@ import {
   MigrationComments,
   MigrationTaskStats,
   MigrationLastExecution,
-} from './migration.gen';
+} from './common.gen';
 
 /**
  * The original rule vendor identifier.
@@ -379,73 +379,6 @@ export const RuleMigrationIntegrationStats = z.object({
  */
 export type RuleMigrationAllIntegrationsStats = z.infer<typeof RuleMigrationAllIntegrationsStats>;
 export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationIntegrationStats);
-
-/**
- * The type of the rule migration resource.
- */
-export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
-export const RuleMigrationResourceType = z.enum(['macro', 'lookup']);
-export type RuleMigrationResourceTypeEnum = typeof RuleMigrationResourceType.enum;
-export const RuleMigrationResourceTypeEnum = RuleMigrationResourceType.enum;
-
-/**
- * The rule migration resource basic information.
- */
-export type RuleMigrationResourceBase = z.infer<typeof RuleMigrationResourceBase>;
-export const RuleMigrationResourceBase = z.object({
-  type: RuleMigrationResourceType,
-  /**
-   * The resource name identifier.
-   */
-  name: z.string(),
-});
-
-export type RuleMigrationResourceContent = z.infer<typeof RuleMigrationResourceContent>;
-export const RuleMigrationResourceContent = z.object({
-  /**
-   * The resource content value. Can be an empty string.
-   */
-  content: z.string(),
-  /**
-   * The resource arbitrary metadata.
-   */
-  metadata: z.object({}).optional(),
-});
-
-/**
- * The rule migration resource data.
- */
-export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
-export const RuleMigrationResourceData = RuleMigrationResourceBase.merge(
-  RuleMigrationResourceContent
-);
-
-/**
- * The rule migration resource document object.
- */
-export type RuleMigrationResource = z.infer<typeof RuleMigrationResource>;
-export const RuleMigrationResource = RuleMigrationResourceBase.merge(
-  RuleMigrationResourceContent.partial()
-).merge(
-  z.object({
-    /**
-     * The rule resource migration id
-     */
-    id: NonEmptyString,
-    /**
-     * The migration id
-     */
-    migration_id: NonEmptyString,
-    /**
-     * The moment of the last update
-     */
-    updated_at: z.string().optional(),
-    /**
-     * The user who last updated the resource
-     */
-    updated_by: z.string().optional(),
-  })
-);
 
 /**
  * The rule migration task execution settings.

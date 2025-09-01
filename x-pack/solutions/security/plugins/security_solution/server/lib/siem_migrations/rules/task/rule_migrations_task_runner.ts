@@ -89,7 +89,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   }
 
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
-  protected async initialize() {
+  async initialize() {
     await this.retriever.initialize();
   }
 
@@ -100,6 +100,17 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     return { id: migrationRule.id, original_rule: migrationRule.original_rule, resources };
   }
 
+  /**
+   *
+   * Processes the output of the task for indexing.
+   *
+   * we use the nullify properties which are available in source (i.e. indexed document)
+   * but missing in migration output.
+   *
+   * If a property is missing in output it means that it needs to be empty in the ES document as well
+   * and only way to do that is to set it to null explicitly.
+   *
+   * */
   protected processTaskOutput(
     migrationRule: StoredRuleMigrationRule,
     migrationOutput: RuleMigrationTaskOutput

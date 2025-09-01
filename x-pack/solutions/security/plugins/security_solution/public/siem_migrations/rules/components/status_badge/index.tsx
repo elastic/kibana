@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 import {
@@ -39,7 +39,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
         <EuiToolTip content={i18n.RULE_STATUS_INSTALLED}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="check" color={colors[RuleTranslationResult.FULL]} />
+              <EuiIcon type="check" color={colors[MigrationTranslationResult.FULL]} />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
               {i18n.RULE_STATUS_INSTALLED}

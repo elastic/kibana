@@ -14,6 +14,7 @@ import { registerSiemDashboardMigrationsGetRoute } from './get';
 import { registerSiemDashboardMigrationsStartRoute } from './start';
 import { registerSiemDashboardMigrationsStopRoute } from './stop';
 import { registerSiemDashboardMigrationsEvaluateRoute } from './evaluation/evaluate';
+import { registerSiemDashboardMigrationsResourceGetMissingRoute } from './resources/missing';
 
 export const registerSiemDashboardMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -24,19 +25,21 @@ export const registerSiemDashboardMigrationsRoutes = (
   registerSiemDashboardMigrationsCreateRoute(router, logger);
   registerSiemDashboardMigrationsGetRoute(router, logger);
 
+  // ===== Dashboards ======
+  registerSiemDashboardMigrationsCreateDashboardsRoute(router, logger);
+
   // ===== Stats ========
   registerSiemDashboardMigrationsStatsRoute(router, logger);
 
   // ===== Task ========
   registerSiemDashboardMigrationsStartRoute(router, logger);
   registerSiemDashboardMigrationsStopRoute(router, logger);
-
-  // ===== Dashboards ======
-  registerSiemDashboardMigrationsCreateDashboardsRoute(router, logger);
-
   if (config.experimentalFeatures.assistantModelEvaluation) {
     // Use the same experimental feature flag as the assistant model evaluation.
     // This route is not intended to be used by the end user, but rather for internal purposes.
     registerSiemDashboardMigrationsEvaluateRoute(router, logger);
   }
+
+  // ===== Resources ======
+  registerSiemDashboardMigrationsResourceGetMissingRoute(router, logger);
 };

@@ -12,7 +12,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import {
   SiemMigrationStatus,
-  RuleTranslationResult,
+  MigrationTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
@@ -170,12 +170,12 @@ describe('RuleMigrationsDataRulesClient', () => {
         {
           id: 'doc1',
           status: SiemMigrationStatus.COMPLETED,
-          translation_result: RuleTranslationResult.FULL,
+          translation_result: MigrationTranslationResult.FULL,
         },
         {
           id: 'doc2',
           status: SiemMigrationStatus.FAILED,
-          translation_result: RuleTranslationResult.UNTRANSLATABLE,
+          translation_result: MigrationTranslationResult.UNTRANSLATABLE,
         },
       ];
 
@@ -188,7 +188,7 @@ describe('RuleMigrationsDataRulesClient', () => {
           {
             doc: {
               status: SiemMigrationStatus.COMPLETED,
-              translation_result: RuleTranslationResult.FULL,
+              translation_result: MigrationTranslationResult.FULL,
               updated_by: 'testProfileUid',
               updated_at: expect.any(String),
             },
@@ -197,7 +197,7 @@ describe('RuleMigrationsDataRulesClient', () => {
           {
             doc: {
               status: SiemMigrationStatus.FAILED,
-              translation_result: RuleTranslationResult.UNTRANSLATABLE,
+              translation_result: MigrationTranslationResult.UNTRANSLATABLE,
               updated_by: 'testProfileUid',
               updated_at: expect.any(String),
             },
@@ -221,7 +221,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         'Bulk update failed'
       );
       expect(logger.error).toHaveBeenCalledWith(
-        'Error updating rule migrations: Bulk update failed'
+        'Error updating migration rule: Bulk update failed'
       );
     });
   });
@@ -335,7 +335,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       esClient.asInternalUser.search = jest.fn().mockRejectedValue(error);
 
       await expect(ruleMigrationsDataRulesClient.get(migrationId)).rejects.toThrow('Search failed');
-      expect(logger.error).toHaveBeenCalledWith('Error searching rule migrations: Search failed');
+      expect(logger.error).toHaveBeenCalledWith('Error searching migration rule: Search failed');
     });
   });
 
@@ -377,7 +377,7 @@ describe('RuleMigrationsDataRulesClient', () => {
           query: 'elastic query',
         },
         status: SiemMigrationStatus.PROCESSING,
-        translation_result: RuleTranslationResult.FULL,
+        translation_result: MigrationTranslationResult.FULL,
         '@timestamp': '2025-08-04T00:00:00.000Z',
         created_by: 'testProfileUid',
       };
@@ -403,7 +403,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             query: 'elastic query',
           },
           status: SiemMigrationStatus.COMPLETED,
-          translation_result: RuleTranslationResult.FULL,
+          translation_result: MigrationTranslationResult.FULL,
           '@timestamp': '2025-08-04T00:00:00.000Z',
           created_by: 'testProfileUid',
           updated_by: 'testProfileUid',
@@ -526,7 +526,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         ruleMigrationsDataRulesClient.updateStatus(migrationId, {}, SiemMigrationStatus.COMPLETED)
       ).rejects.toThrow('UpdateByQuery failed');
       expect(logger.error).toHaveBeenCalledWith(
-        'Error updating rule migrations status: UpdateByQuery failed'
+        'Error updating migration rule status: UpdateByQuery failed'
       );
     });
   });
@@ -541,9 +541,9 @@ describe('RuleMigrationsDataRulesClient', () => {
             doc_count: 8,
             result: {
               buckets: [
-                { key: RuleTranslationResult.FULL, doc_count: 5 },
-                { key: RuleTranslationResult.PARTIAL, doc_count: 2 },
-                { key: RuleTranslationResult.UNTRANSLATABLE, doc_count: 1 },
+                { key: MigrationTranslationResult.FULL, doc_count: 5 },
+                { key: MigrationTranslationResult.PARTIAL, doc_count: 2 },
+                { key: MigrationTranslationResult.UNTRANSLATABLE, doc_count: 1 },
               ],
             },
             installable: { doc_count: 6 },
@@ -555,8 +555,45 @@ describe('RuleMigrationsDataRulesClient', () => {
       };
 
       esClient.asInternalUser.search = jest.fn().mockResolvedValue(mockResponse);
-
       const result = await ruleMigrationsDataRulesClient.getTranslationStats(migrationId);
+
+      // make sure the search is being called with correct query
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        query: {
+          bool: {
+            filter: [{ term: { migration_id: 'migration1' } }],
+          },
+        },
+        aggregations: {
+          success: {
+            filter: { term: { status: SiemMigrationStatus.COMPLETED } },
+            aggs: {
+              result: { terms: { field: 'translation_result' } },
+              installable: {
+                filter: {
+                  bool: {
+                    must: [
+                      { term: { translation_result: MigrationTranslationResult.FULL } },
+                      { bool: { must_not: dsl.isInstalled() } },
+                    ],
+                  },
+                },
+              },
+              prebuilt: { filter: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } },
+              missing_index: {
+                filter: {
+                  query_string: {
+                    query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
+                  },
+                },
+              },
+            },
+          },
+          failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
+        },
+        _source: false,
+      });
 
       expect(result).toEqual({
         id: 'migration1',
@@ -565,9 +602,9 @@ describe('RuleMigrationsDataRulesClient', () => {
           success: {
             total: 8,
             result: {
-              [RuleTranslationResult.FULL]: 5,
-              [RuleTranslationResult.PARTIAL]: 2,
-              [RuleTranslationResult.UNTRANSLATABLE]: 1,
+              [MigrationTranslationResult.FULL]: 5,
+              [MigrationTranslationResult.PARTIAL]: 2,
+              [MigrationTranslationResult.UNTRANSLATABLE]: 1,
             },
             installable: 6,
             prebuilt: 4,
@@ -617,7 +654,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
       expect(result).toEqual({
         id: 'migration1',
-        rules: {
+        items: {
           total: 10,
           [SiemMigrationStatus.PENDING]: 3,
           [SiemMigrationStatus.PROCESSING]: 2,
@@ -660,7 +697,7 @@ describe('RuleMigrationsDataRulesClient', () => {
       expect(result).toEqual([
         {
           id: 'migration1',
-          rules: {
+          items: {
             total: 5,
             [SiemMigrationStatus.PENDING]: 0,
             [SiemMigrationStatus.PROCESSING]: 0,
@@ -880,21 +917,25 @@ describe('RuleMigrationsDataRulesClient', () => {
               { term: { migration_id: 'migration1' } },
               { terms: { status: [SiemMigrationStatus.PENDING, SiemMigrationStatus.PROCESSING] } },
               { terms: { _id: ['doc1', 'doc2'] } },
-              { match: { 'elastic_rule.title': 'test' } },
-              { exists: { field: 'elastic_rule.id' } },
-              { term: { translation_result: RuleTranslationResult.FULL } },
-              { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
-              { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
               { bool: { must_not: { term: { status: SiemMigrationStatus.FAILED } } } },
-              { term: { translation_result: RuleTranslationResult.FULL } },
+              { term: { translation_result: MigrationTranslationResult.FULL } },
               {
-                bool: { must_not: { term: { translation_result: RuleTranslationResult.PARTIAL } } },
+                bool: {
+                  must_not: { term: { translation_result: MigrationTranslationResult.PARTIAL } },
+                },
               },
               {
                 bool: {
-                  must_not: { term: { translation_result: RuleTranslationResult.UNTRANSLATABLE } },
+                  must_not: {
+                    term: { translation_result: MigrationTranslationResult.UNTRANSLATABLE },
+                  },
                 },
               },
+              { match: { 'elastic_rule.title': 'test' } },
+              { exists: { field: 'elastic_rule.id' } },
+              { term: { translation_result: MigrationTranslationResult.FULL } },
+              { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
+              { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
             ],
           },
         });
@@ -978,9 +1019,9 @@ describe('RuleMigrationsDataRulesClient', () => {
       test('should count translation result aggregations correctly', () => {
         const resultAgg = {
           buckets: [
-            { key: RuleTranslationResult.FULL, doc_count: 8 },
-            { key: RuleTranslationResult.PARTIAL, doc_count: 2 },
-            { key: RuleTranslationResult.UNTRANSLATABLE, doc_count: 1 },
+            { key: MigrationTranslationResult.FULL, doc_count: 8 },
+            { key: MigrationTranslationResult.PARTIAL, doc_count: 2 },
+            { key: MigrationTranslationResult.UNTRANSLATABLE, doc_count: 1 },
           ],
         };
 
@@ -989,15 +1030,15 @@ describe('RuleMigrationsDataRulesClient', () => {
         ).translationResultAggCount(resultAgg);
 
         expect(result).toEqual({
-          [RuleTranslationResult.FULL]: 8,
-          [RuleTranslationResult.PARTIAL]: 2,
-          [RuleTranslationResult.UNTRANSLATABLE]: 1,
+          [MigrationTranslationResult.FULL]: 8,
+          [MigrationTranslationResult.PARTIAL]: 2,
+          [MigrationTranslationResult.UNTRANSLATABLE]: 1,
         });
       });
 
       test('should handle missing translation result buckets', () => {
         const resultAgg = {
-          buckets: [{ key: RuleTranslationResult.FULL, doc_count: 5 }],
+          buckets: [{ key: MigrationTranslationResult.FULL, doc_count: 5 }],
         };
 
         const result = (
@@ -1005,9 +1046,9 @@ describe('RuleMigrationsDataRulesClient', () => {
         ).translationResultAggCount(resultAgg);
 
         expect(result).toEqual({
-          [RuleTranslationResult.FULL]: 5,
-          [RuleTranslationResult.PARTIAL]: 0,
-          [RuleTranslationResult.UNTRANSLATABLE]: 0,
+          [MigrationTranslationResult.FULL]: 5,
+          [MigrationTranslationResult.PARTIAL]: 0,
+          [MigrationTranslationResult.UNTRANSLATABLE]: 0,
         });
       });
     });

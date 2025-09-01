@@ -14,6 +14,7 @@ interface TestObject {
   missing?: string | undefined;
   emptyText?: string;
   counter?: number;
+  nullableValue: string | null;
 }
 
 describe('nullifyMissingProperties', () => {
@@ -21,9 +22,10 @@ describe('nullifyMissingProperties', () => {
     const source: TestObject = {
       title: 'Some Title',
       boolean: true,
-      missing: 'defined',
       emptyText: 'defined',
       counter: 1,
+      missing: 'defined',
+      nullableValue: 'some value',
     };
     const target: TestObject = {
       name: 'Some Name',
@@ -31,6 +33,7 @@ describe('nullifyMissingProperties', () => {
       emptyText: '',
       counter: 0,
       missing: undefined,
+      nullableValue: null,
     };
 
     const result = nullifyMissingProperties<TestObject>({
@@ -45,6 +48,7 @@ describe('nullifyMissingProperties', () => {
       emptyText: '',
       counter: 0,
       missing: null,
+      nullableValue: null,
     });
   });
 });

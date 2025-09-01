@@ -198,3 +198,120 @@ paths:
             application/json:
               schema:
                 $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTaskStats'
+
+  /internal/siem_migrations/dashboards/{migration_id}/resources:
+    post:
+      summary: Creates or updates rule migration resources for a migration
+      operationId: UpsertDashboardMigrationResources
+      x-codegen-enabled: true
+      x-internal: true
+      description: Creates or updates resources for an existing SIEM dashboards migration
+      tags:
+        - SIEM Dashboard Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to attach the resources
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceData'
+      responses:
+        200:
+          description: Indicates migration resources have been created or updated correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - acknowledged
+                properties:
+                  acknowledged:
+                    type: boolean
+                    description: The request has been processed correctly.
+
+    get:
+      summary: Gets rule migration resources for a migration
+      operationId: GetDashboardMigrationResources
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves resources for an existing SIEM dashboards migration
+      tags:
+        - SIEM Dashboard Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to attach the resources
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceType'
+
+        - name: names
+          in: query
+          required: false
+          schema:
+            type: array
+            description: The names of the resource to retrieve
+            items:
+              type: string
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
+      responses:
+        200:
+          description: Indicates migration resources have been retrieved correctly
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResource'
+
+  /internal/siem_migrations/dashboards/{migration_id}/resources/missing:
+    get:
+      summary: Gets missing dashboard migration resources for a migration
+      operationId: GetDashboardMigrationResourcesMissing
+      x-codegen-enabled: true
+      x-internal: true
+      description: Identifies missing resources from all the dashboards of an existing SIEM dashboard migration
+      tags:
+        - SIEM Dashboard Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to identify the resources from
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates missing migration resources have been retrieved correctly
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The identified resources missing
+                items:
+                  $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceBase'
