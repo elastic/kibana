@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/siem-readiness",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "description": "SIEM readiness functionality for Kibana Security Solution",
+  "sideEffects": false
+}
