@@ -156,10 +156,13 @@ import { of } from 'rxjs';
 // plugin.ts (public) "start()"
 const navigationTree$ = of(navigationTree);
 
-serverless.initNavigation(navigationTree$, /* optional */ {
-  // Optional: pass a test subject for the navigation
-  dataTestSubj: 'myNavigation'
-});
+serverless.initNavigation(
+  navigationTree$,
+  /* optional */ {
+    // Optional: pass a test subject for the navigation
+    dataTestSubj: 'myNavigation',
+  }
+);
 ```
 
 ```tsx
@@ -204,32 +207,31 @@ All those interfaces extend the `NodeDefinition` which has the following **commo
 
 ### `NodeDefinition`
 
-| Property             | Type                     | Description|
-| -------------------- | -------------------------| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                 | `Id` (extends `string`)  | Optional ID of the navigation node.|
-| `title`              | `string`                 | Optional title of the navigation node. If not provided and a "link" is provided, the title will be the Deep link title.|
-| `link`               | `LinkId`                 | Optional App ID or deep link ID for the navigation node. [More about deep links](#deep-links)|
-| `icon`               | `string`                 | Optional icon for the navigation node. Note that not all navigation depths will render the icon.|
-| `href`               | `string`                 | Use `href` for absolute links only. Internal links should use "link".|
-| `getIsActive`        | `function`               | Optional function to control the active state. This function is called whenever the location changes.|
-| `sideNavStatus`   | `'hidden'\|'visible'`    | Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree). |
-| `breadcrumbStatus`   | `'hidden'\|'visible'`    | An optional flag to indicate if the breadcrumb should be hidden when this node is active. The default value is `'visible'`.|
-| `spaceBefore`          | `EuiThemeSize\|null`   | Optional vertical space to add before this node. It defaults to `null` except for group node at **tree depth 1** where it defaults to `"m"`. |
-
+| Property           | Type                    | Description                                                                                                                                  |
+| ------------------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`               | `Id` (extends `string`) | Optional ID of the navigation node.                                                                                                          |
+| `title`            | `string`                | Optional title of the navigation node. If not provided and a "link" is provided, the title will be the Deep link title.                      |
+| `link`             | `LinkId`                | Optional App ID or deep link ID for the navigation node. [More about deep links](#deep-links)                                                |
+| `icon`             | `string`                | Optional icon for the navigation node. Note that not all navigation depths will render the icon.                                             |
+| `href`             | `string`                | Use `href` for absolute links only. Internal links should use "link".                                                                        |
+| `getIsActive`      | `function`              | Optional function to control the active state. This function is called whenever the location changes.                                        |
+| `sideNavStatus`    | `'hidden'\|'visible'`   | Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree).                         |
+| `breadcrumbStatus` | `'hidden'\|'visible'`   | An optional flag to indicate if the breadcrumb should be hidden when this node is active. The default value is `'visible'`.                  |
+| `spaceBefore`      | `EuiThemeSize\|null`    | Optional vertical space to add before this node. It defaults to `null` except for group node at **tree depth 1** where it defaults to `"m"`. |
 
 ##### `GroupDefinition`
 
 The `GroupDefinition` interface represents a group of items in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
 
-| Property             | Type                    | Description|
-| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`               | `'navGroup'`            | Indicates that this item is a navigation group.|
-| `children`           | `NodeDefinition[]`      | Children of the group navigation node. This is recursive, groups can contain other groups. |
-| `defaultIsCollapsed` | `boolean \| undefined`  | Determines if the group is initially collapsed or expanded. Use `undefined` (recommended) to open the group if any of its children nodes match the current URL, `false` to always open the group, or `true` to always collapse it.|
-| `cloudLink`          | `CloudLinkId`           | Optional cloud link ID for the navigation node. [More about cloud links](#cloud-links)|
-| `renderAs`          | `'block'\|'accordion'\|'panelOpener'\|'item'`| Property to indicate how the group should be rendered.<br/>* `'block'`: this is the default, renders the group as a block of items.<br />* `'accordion'`: wraps the items in an `EuiAccordion`.<br />* `'panelOpener'`: renders as an item with a `link` (required) + an icon button to open a panel on the right of the side nav.<br />* `'item'`: renders the group as an item in the side nav. This is useful when you want to declare descendant links of a node that will be displayed in the breadcrumb as such but you don't want to render any of the `children` in the side nav. |
-| `appendHorizontalRule`          | `boolean`           | Optional flag to indicate if a horizontal rule should be rendered after the node. <br />Note: this property is currently only available for group nodes in the navigation **panel** opening on the right of the side nav. |
-| `isCollapsible`          | `boolean`           | Optional flag to indicate if the accordion is collapsible (when `renderAs` is set to `'accordion'`.|
+| Property               | Type                                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`                 | `'navGroup'`                                  | Indicates that this item is a navigation group.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `children`             | `NodeDefinition[]`                            | Children of the group navigation node. This is recursive, groups can contain other groups.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `defaultIsCollapsed`   | `boolean \| undefined`                        | Determines if the group is initially collapsed or expanded. Use `undefined` (recommended) to open the group if any of its children nodes match the current URL, `false` to always open the group, or `true` to always collapse it.                                                                                                                                                                                                                                                                                                                                                        |
+| `cloudLink`            | `CloudLinkId`                                 | Optional cloud link ID for the navigation node. [More about cloud links](#cloud-links)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `renderAs`             | `'block'\|'accordion'\|'panelOpener'\|'item'` | Property to indicate how the group should be rendered.<br/>_ `'block'`: this is the default, renders the group as a block of items.<br />_ `'accordion'`: wraps the items in an `EuiAccordion`.<br />_ `'panelOpener'`: renders as an item with a `link` (required) + an icon button to open a panel on the right of the side nav.<br />_ `'item'`: renders the group as an item in the side nav. This is useful when you want to declare descendant links of a node that will be displayed in the breadcrumb as such but you don't want to render any of the `children` in the side nav. |
+| `appendHorizontalRule` | `boolean`                                     | Optional flag to indicate if a horizontal rule should be rendered after the node. <br />Note: this property is currently only available for group nodes in the navigation **panel** opening on the right of the side nav.                                                                                                                                                                                                                                                                                                                                                                 |
+| `isCollapsible`        | `boolean`                                     | Optional flag to indicate if the accordion is collapsible (when `renderAs` is set to `'accordion'`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ##### `RecentlyAccessedDefinition`
 
@@ -243,23 +245,22 @@ The `GroupDefinition` interface represents a group of items in the side navigati
 
 The `PresetDefinition` interface represents a group of items which are prepopulated based on a preset. It extends the `GroupDefinition` interface (without `children` as those are pre-defined) and has the following additional properties:
 
-| Property             | Type                    | Description|
-| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`               | `'preset'`            | Indicates that this item is a navigation group.|
-| `preset`             | `NavigationGroupPreset` | A preset value for the group, such as `'analytics'`, `'devtools'`, `'ml'`, or `'management'`.|                                                                                                      |
+| Property | Type                    | Description                                                                                   |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------- | --- |
+| `type`   | `'preset'`              | Indicates that this item is a navigation group.                                               |
+| `preset` | `NavigationGroupPreset` | A preset value for the group, such as `'analytics'`, `'devtools'`, `'ml'`, or `'management'`. |     |
 
 ##### `ItemDefinition`
 
 The `ItemDefinition` interface represents a top level item in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
 
-
-| Property             | Type                    | Description|
-| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`               | `'navItem'`            | Indicates that this item is a navigation item.|
-| `cloudLink`          | `CloudLinkId`           | Optional cloud link ID for the navigation node. [More about cloud links](#cloud-links)|
-| `openInNewTab`          | `boolean`           | Optional flag to indicate if the target page should be opened in a new Browser tab.<br />Note: this property is currently only used in the navigation **panel** opening on the right of the side nav.|
-| `withBadge`          | `boolean`           | Optional flag to indicate if a badge should be rendered next to the text.<br />Note: this property is currently only used in the navigation **panel** opening on the right of the side nav.|
-| `badgeOptions`          | `{ text?: string; }`           | If `withBadge` is true, this object can be used to customize the badge. |
+| Property       | Type                 | Description                                                                                                                                                                                           |
+| -------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`         | `'navItem'`          | Indicates that this item is a navigation item.                                                                                                                                                        |
+| `cloudLink`    | `CloudLinkId`        | Optional cloud link ID for the navigation node. [More about cloud links](#cloud-links)                                                                                                                |
+| `openInNewTab` | `boolean`            | Optional flag to indicate if the target page should be opened in a new Browser tab.<br />Note: this property is currently only used in the navigation **panel** opening on the right of the side nav. |
+| `withBadge`    | `boolean`            | Optional flag to indicate if a badge should be rendered next to the text.<br />Note: this property is currently only used in the navigation **panel** opening on the right of the side nav.           |
+| `badgeOptions` | `{ text?: string; }` | If `withBadge` is true, this object can be used to customize the badge.                                                                                                                               |
 
 ### Panels
 
@@ -268,7 +269,7 @@ The content of the panel is auto-generated based on the group's children.
 
 #### Secondary nav panel
 
-A group's children can be rendered in the secondary nav panel. Those `children` can be items or other groups (that render as `'block' (default) or `'accordion'`). 
+A group's children can be rendered in the secondary nav panel. Those `children` can be items or other groups (that render as `'block' (default) or `'accordion'`).
 The panel will be opened when the user clicks on the group's icon button. The panel will be closed when the user clicks on the group's icon again or when the user clicks outside of the panel.
 
 ### Important Concepts
@@ -410,7 +411,7 @@ When on `ml:anomalyexplorer` page, the solution navigation breadcrumbs will be:
 ```ts
 [
   {
-    text: 'AI Ops'
+    text: 'AI Ops',
   },
   {
     text: 'Anomaly Explorer',
@@ -437,9 +438,9 @@ chrome.setBreadcrumbs([
     deepLinkId: 'ml:anomalyexplorer',
   },
   {
-    text: 'Jobs'
-  }
-])
+    text: 'Jobs',
+  },
+]);
 ```
 
 The resulting breadcrumbs list will be:
@@ -448,16 +449,16 @@ The resulting breadcrumbs list will be:
 [
   {}, // project name/deployment breadcrumb
   {
-      text: 'AI Ops'
+    text: 'AI Ops',
   },
   {
     text: 'Anomaly Explorer',
     link: 'ml:anomalyexplorer',
   },
   {
-      text: 'Jobs'
-  }
-]
+    text: 'Jobs',
+  },
+];
 ```
 
 Alternatively, the deeper context breadcrumbs can be manually (only in Serverless) set using the `serverless.setBreadcrumbs` API.
@@ -525,10 +526,9 @@ For each serverless project there is a navigation test suite that does a shared 
   - observability/navigation
   - security/navigation
 
-Similarily for stateful you will find smoe tests with setup examples in the following directories:
+Similarily for stateful you will find some tests with setup examples in the following directories:
 
-- x-pack/test/functional_solution_sidenav/tests
+- x-pack/solutions/{solution}/functional_solution_sidenav/tests
   - observability_sidenav.ts
   - search_sidenav.ts
   - security_sidenav.ts
-
