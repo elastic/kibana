@@ -307,6 +307,7 @@ export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
 export const WorkflowContextSchema = z.object({
   event: z.any().optional(),
+  inputs: z.any().optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   consts: z.record(z.string(), z.any()).optional(),
