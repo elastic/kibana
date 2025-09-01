@@ -249,14 +249,23 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           indexName: 'reindexed-v7-6.0-data',
-          newIndexName: generateNewIndexName('dummydata', versionService),
+          newIndexName: generateNewIndexName('reindexed-v7-6.0-data', versionService),
         })
         .expect(200);
 
       expect(body.indexName).to.equal('reindexed-v7-6.0-data');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
+      // eslint-disable-next-line no-console
+      console.log(body);
+
       const lastState = await waitForReindexToComplete('reindexed-v7-6.0-data');
+      // eslint-disable-next-line no-console
+      console.log('############');
+      // eslint-disable-next-line no-console
+      console.log(lastState);
+      // eslint-disable-next-line no-console
+      console.log('############');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });
