@@ -12,8 +12,8 @@ import ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 
 export class ManagementTestPlugin
   implements Plugin<ManagementTestPluginSetup, ManagementTestPluginStart>

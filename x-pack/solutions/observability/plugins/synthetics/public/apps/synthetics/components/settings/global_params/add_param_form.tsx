@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import { OptionalText } from '../components/optional_text';
 import { ParamValueField } from './param_value_field';
-import { SyntheticsParams } from '../../../../../../common/runtime_types';
-import { ListParamItem } from './params_list';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { ListParamItem } from './params_list';
 
 export const AddParamForm = ({
   items,

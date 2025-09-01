@@ -8,13 +8,13 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
+import type { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import {
   INFERENCE_CONNECTOR_ID,
   INFERENCE_CONNECTOR_TITLE,
 } from '../../../common/inference/constants';
-import { InferenceActionParams, InferenceConnector } from './types';
+import type { InferenceActionParams, InferenceConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];
@@ -58,9 +58,20 @@ export function getConnectorType(): InferenceConnector {
         subAction === SUB_ACTION.UNIFIED_COMPLETION_STREAM ||
         subAction === SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR
       ) {
+        let parsedBody;
+        try {
+          // Attempt to parse the body only if it is a string, otherwise it is already an object
+          parsedBody =
+            typeof subActionParams.body === 'string'
+              ? JSON.parse(subActionParams.body)
+              : subActionParams.body;
+        } catch {
+          errors.body.push(translations.BODY_INVALID);
+        }
+
         if (
-          !Array.isArray(subActionParams.body.messages) ||
-          !subActionParams.body.messages.length
+          parsedBody &&
+          (!parsedBody.messages?.length || !Array.isArray(subActionParams.body.messages))
         ) {
           errors.body.push(translations.getRequiredMessage('Messages'));
         }

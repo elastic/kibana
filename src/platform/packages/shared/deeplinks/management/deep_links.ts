@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   MONITORING_APP_ID,
   INTEGRATIONS_APP_ID,
   FLEET_APP_ID,
@@ -70,7 +70,8 @@ export type ManagementId =
   | 'triggersActionsConnectors'
   | 'upgrade_assistant'
   | 'users'
-  | 'watcher';
+  | 'watcher'
+  | 'genAiSettings';
 
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
 

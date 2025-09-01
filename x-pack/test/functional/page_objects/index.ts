@@ -38,7 +38,6 @@ import { LogstashPageObject } from '@kbn/test-suites-xpack-platform/functional/p
 import { RollupPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/rollup_page';
 import { RemoteClustersPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/remote_clusters_page';
 import { AssetDetailsProvider } from './asset_details';
-import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
@@ -56,7 +55,6 @@ export const pageObjects = {
   canvas: CanvasPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
-  detections: DetectionsPageObject,
   embeddedConsole: EmbeddedConsoleProvider,
   graph: GraphPageObject,
   grokDebugger: GrokDebuggerPageObject,

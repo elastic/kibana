@@ -19,10 +19,10 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { WorkflowExecution } from '../../workflow_execution_detail/ui';
+import { WorkflowExecutionDetail } from '../../workflow_execution_detail';
 
 export function TestWorkflowModal({
   workflowYaml,
@@ -129,7 +129,7 @@ export function TestWorkflowModal({
           </EuiFlexItem>
           {workflowExecutionId && (
             <EuiFlexItem>
-              <WorkflowExecution
+              <WorkflowExecutionDetail
                 workflowExecutionId={workflowExecutionId}
                 workflowYaml={workflowYaml}
               />

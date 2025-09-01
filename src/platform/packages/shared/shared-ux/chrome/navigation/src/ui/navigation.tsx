@@ -14,9 +14,12 @@ import type {
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EMPTY, Observable } from 'rxjs';
+import classnames from 'classnames';
+import type { Observable } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { useNavigation as useNavigationService } from '../services';
 import {
   FeedbackBtn,
@@ -46,8 +49,13 @@ export interface Props {
 }
 
 const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
-  const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
-    useNavigationService();
+  const {
+    activeNodes$,
+    selectedPanelNode,
+    setSelectedPanelNode,
+    isFeedbackBtnVisible$,
+    isSideNavCollapsed,
+  } = useNavigationService();
 
   const dataTestSubj = useObservable(dataTestSubj$ ?? EMPTY, undefined);
 
@@ -72,7 +80,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
           return <RecentlyAccessed {...navNode} key={`recentlyAccessed-${i}`} />;
         }
 
-        if (navNode.sideNavStatus === 'hidden') {
+        if (navNode.sideNavStatus === 'hidden' || navNode.sideNavVersion === 'v2') {
           return null;
         }
 
@@ -86,12 +94,14 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
     <PanelProvider selectedNode={selectedPanelNode} setSelectedNode={setSelectedPanelNode}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
-        <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
+        <EuiCollapsibleNavBeta.Body
+          data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV1')}
+        >
           <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
             <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiCollapsibleNavBeta.Body>
-        {isFeedbackBtnVisible && (
+        {isFeedbackBtnVisible && !isSideNavCollapsed && (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSpacer size="s" />

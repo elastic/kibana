@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UpdatedMonitoringEntitySource"
+                $ref: "#/components/schemas/MonitoringEntitySource"
 
   /api/entity_analytics/monitoring/entity_source/{id}:
     get:
@@ -65,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UpdatedMonitoringEntitySource"          
+                $ref: "#/components/schemas/MonitoringEntitySource"
 
     delete:
       operationId: DeleteEntitySource

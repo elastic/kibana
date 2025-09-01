@@ -11101,7 +11101,32 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
-    "id": Object {
+    "actionId": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "comment": Object {
       "flags": Object {
         "error": [Function],
       },
@@ -11132,6 +11157,46 @@ Object {
 `;
 
 exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 10`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "id": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 11`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11271,7 +11336,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 11`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 12`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11311,7 +11376,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 12`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 13`] = `
 Object {
   "flags": Object {
     "default": Object {

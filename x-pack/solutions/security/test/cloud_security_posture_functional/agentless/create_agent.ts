@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import equals from 'fast-deep-equal';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  describe('Agentless cloud', function () {
+  // https://github.com/elastic/kibana/issues/229298
+  describe.skip('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let mockApiServer: http.Server;

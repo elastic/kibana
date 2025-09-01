@@ -28,11 +28,13 @@ import {
   EVENT_OUTCOME,
   SPAN_TYPE,
   SPAN_SUBTYPE,
+  KIND,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
+import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -52,6 +54,7 @@ const optionalFields = asMutableArray([
   STATUS_CODE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
+  KIND,
 ] as const);
 
 export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -168,7 +171,7 @@ export async function getUnifiedTraceItems({
         errorCount: docErrorCount,
         parentId: event.parent?.id,
         serviceName: event.service.name,
-        spanType: event.span?.subtype || event.span?.type,
+        type: event.span?.subtype || event.span?.type || event.kind,
       } as TraceItem;
     })
     .filter((_) => _) as TraceItem[];
@@ -177,18 +180,7 @@ export async function getUnifiedTraceItems({
 /**
  * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
  */
-function resolveDuration(apmDuration?: number, otelDuration?: number[] | string): number {
-  if (apmDuration) {
-    return apmDuration;
-  }
-
-  const duration = Array.isArray(otelDuration)
-    ? otelDuration[0]
-    : otelDuration
-    ? parseFloat(otelDuration)
-    : 0;
-
-  return duration * 0.001;
-}
+const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string): number =>
+  apmDuration ?? parseOtelDuration(otelDuration);
 
 const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
