@@ -16,8 +16,8 @@
     ],
   },
   "include": [
-    "../**/*.ts",
-    "../**/*.tsx",
+    "./**/*.ts",
+    "./**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/core",
