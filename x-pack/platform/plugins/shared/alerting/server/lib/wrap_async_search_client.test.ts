@@ -13,6 +13,7 @@ import type { Observable } from 'rxjs';
 import { of, throwError } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const fakeRequest = {
   headers: {},
@@ -29,9 +30,15 @@ const fakeRequest = {
   },
 } as unknown as KibanaRequest;
 
+let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
 describe('wrapScopedClusterClient', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
+  });
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
   });
 
   afterAll(() => {
@@ -58,6 +65,13 @@ describe('wrapScopedClusterClient', () => {
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
       client,
       abortController,
+      rule: {
+        name: 'test-rule',
+        alertTypeId: 'test-type',
+        id: 'foo',
+        spaceId: 'default',
+      },
+      logger,
     });
 
     await asyncSearchClient.search({
@@ -86,6 +100,13 @@ describe('wrapScopedClusterClient', () => {
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
       client,
       abortController,
+      rule: {
+        name: 'test-rule',
+        alertTypeId: 'test-type',
+        id: 'foo',
+        spaceId: 'default',
+      },
+      logger,
     });
 
     await expect(
@@ -103,6 +124,13 @@ describe('wrapScopedClusterClient', () => {
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
       client,
       abortController,
+      rule: {
+        name: 'test-rule',
+        alertTypeId: 'test-type',
+        id: 'foo',
+        spaceId: 'default',
+      },
+      logger,
     });
 
     await expect(
@@ -133,6 +161,13 @@ describe('wrapScopedClusterClient', () => {
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
       client,
       abortController,
+      rule: {
+        name: 'test-rule',
+        alertTypeId: 'test-type',
+        id: 'foo',
+        spaceId: 'default',
+      },
+      logger,
     });
 
     await asyncSearchClient.search({ request: { params: { query: '' } } });

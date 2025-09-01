@@ -105,6 +105,8 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
       const client = context.data.search.asScoped(fakeRequest);
 
       return wrapAsyncSearchClient({
+        logger,
+        rule: ruleData,
         strategy,
         client,
         abortController,
