@@ -40,7 +40,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   contentReferencesStore,
   conversationId,
   threadId,
-  resumeValue,
+  interruptResumeValue: resumeValue,
   core,
   dataClients,
   esClient,

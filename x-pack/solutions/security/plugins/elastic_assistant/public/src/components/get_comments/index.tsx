@@ -221,8 +221,8 @@ export const getComments: GetComments =
               content={transformedMessage.content}
               contentReferences={message.metadata?.contentReferences}
               contentReferencesVisible={contentReferencesVisible}
-              typedInterrupt={message.metadata?.typedInterrupt}
-              resumedValue={message.metadata?.typedInterruptResumeValue}
+              interruptValue={message.metadata?.interruptValue}
+              interruptResumeValue={message.metadata?.interruptResumeValue}
               index={index}
               isLastMessage={total.length === index + 1 && extraLoadingComment.length === 0}
               isControlsEnabled={isControlsEnabled}

@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString, ScreenContext, PromptIds } from '../common_attributes.gen';
-import { Replacements, TypedInterruptResumeValue } from '../conversations/common_attributes.gen';
+import { Replacements, InterruptResumeValue } from '../conversations/common_attributes.gen';
 
 export type ExecuteConnectorRequestQuery = z.infer<typeof ExecuteConnectorRequestQuery>;
 export const ExecuteConnectorRequestQuery = z.object({
@@ -50,7 +50,7 @@ export const ExecuteConnectorRequestBody = z.object({
   allowReplacement: z.array(z.string()).optional(),
   replacements: Replacements,
   threadId: z.string().optional(),
-  resumeValue: TypedInterruptResumeValue.optional(),
+  resumeValue: InterruptResumeValue.optional(),
   size: z.number().optional(),
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),

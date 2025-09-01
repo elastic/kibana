@@ -183,7 +183,7 @@ describe('ElasticSearchSaver', () => {
 
   afterAll(async () => {
     // Stop the ES server
-    // await esServer.stop();
+    await esServer.stop();
   });
 
   it.each([

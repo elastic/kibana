@@ -24,8 +24,8 @@ import type {
   ContentReferences,
   MessageMetadata,
   ScreenContext,
-  TypedInterruptResumeValue,
-  TypedInterruptValue,
+  InterruptResumeValue,
+  InterruptValue,
 } from '@kbn/elastic-assistant-common';
 import {
   replaceAnonymizedValuesWithOriginalValues,
@@ -183,7 +183,7 @@ export interface AppendAssistantMessageToConversationParams {
   replacements: Replacements;
   conversationId: string;
   contentReferences: ContentReferences;
-  typedInterrupt?: TypedInterruptValue;
+  interruptValue?: InterruptValue;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -193,7 +193,7 @@ export const appendAssistantMessageToConversation = async ({
   replacements,
   conversationId,
   contentReferences,
-  typedInterrupt = undefined,
+  interruptValue = undefined,
   isError = false,
   traceData = {},
 }: AppendAssistantMessageToConversationParams) => {
@@ -204,7 +204,7 @@ export const appendAssistantMessageToConversation = async ({
 
   const metadata: MessageMetadata = {
     ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
-    typedInterrupt,
+    interruptValue,
   };
 
   await conversationsDataClient.appendConversationMessages({
@@ -247,7 +247,7 @@ export interface LangChainExecuteParams {
   isOssModel?: boolean;
   conversationId?: string;
   threadId: string;
-  resumeValue?: TypedInterruptResumeValue;
+  resumeValue?: InterruptResumeValue;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
   >;
@@ -339,7 +339,7 @@ export const langChainExecute = async ({
     assistantTools,
     conversationId,
     threadId,
-    resumeValue,
+    interruptResumeValue: resumeValue,
     connectorId,
     contentReferencesStore,
     esClient,

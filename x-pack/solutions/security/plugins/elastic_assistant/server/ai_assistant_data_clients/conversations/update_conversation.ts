@@ -183,9 +183,9 @@ export const transformToUpdateScheme = (
             ...(message.metadata
               ? {
                   metadata: {
-                    ...(message.metadata.contentReferences
-                      ? { content_references: message.metadata.contentReferences }
-                      : {}),
+                    content_references: message.metadata.contentReferences,
+                    interrupt_value: message.metadata.interruptValue,
+                    interrupt_resume_value: message.metadata.interruptResumeValue,
                   },
                 }
               : {}),

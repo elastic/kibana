@@ -253,7 +253,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   ): AsyncGenerator<CheckpointTuple> {
 
     console.log("list", JSON.stringify({ config, options }, null, 2))
-    const { limit, before, filter } = options ?? {};
+    const { limit, before } = options ?? {};
     const mustClauses = [];
 
     if (config?.configurable?.thread_id) {
@@ -272,12 +272,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     if (before) {
       mustClauses.push({
         range: { checkpoint_id: { lt: before.configurable?.checkpoint_id } },
-      });
-    }
-
-    if (filter) {
-      Object.entries(filter).forEach(([key, value]) => {
-        mustClauses.push({ term: { [`metadata.${key}`]: value } });
       });
     }
 

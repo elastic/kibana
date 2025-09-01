@@ -1,25 +1,25 @@
-import { RequestApprovalResumeSchema, RequestTextResumeSchema, TypedInterruptResumeValue, TypedInterruptValue } from "@kbn/elastic-assistant-common";
-import { RequestApproval } from "./typed_interrupts/request_approval";
+import { InterruptType, InterruptValue, InterruptResumeValue, SelectOptionInterruptResumeValue, InputTextInterruptResumeValue } from "@kbn/elastic-assistant-common";
+import { SelectOption } from "./typed_interrupts/select_option";
 import React from 'react'
-import { RequestText } from "./typed_interrupts/request_text";
+import { InputText } from "./typed_interrupts/input_text";
 
-interface Props<I extends TypedInterruptValue, R extends TypedInterruptResumeValue> {
-    interrupt?: TypedInterruptValue
-    resumeGraph: (threadId: string, resumeValue: TypedInterruptResumeValue) => void
-    resumedValue?: TypedInterruptResumeValue
+interface Props<T extends InterruptType> {
+    interruptValue?: {type: T} & InterruptValue
+    resumeGraph: (threadId: string, resumeValue: {type: T} & InterruptResumeValue) => void
+    interruptResumeValue?: {type: T} & InterruptResumeValue
     isLastMessage: boolean
 }
 
-export const TypedInterruptFactory = ({ interrupt, resumeGraph, resumedValue, isLastMessage }: Props<TypedInterruptValue, TypedInterruptResumeValue>) => {
+export const InterruptFactory = ({ interruptValue: interrupt, resumeGraph, interruptResumeValue: resumedValue, isLastMessage }: Props<InterruptType>) => {
     if (!interrupt) {
         return;
     }
 
     switch (interrupt.type) {
-        case "REQUEST_APPROVAL":
-            return <RequestApproval interrupt={interrupt} resumeGraph={resumeGraph} resumedValue={resumedValue as RequestApprovalResumeSchema} isLastMessage={isLastMessage} />;
-        case "REQUEST_TEXT":
-            return <RequestText interrupt={interrupt} resumeGraph={resumeGraph} resumedValue={resumedValue as RequestTextResumeSchema} isLastMessage={isLastMessage} />;
+        case "SELECT_OPTION":
+            return <SelectOption interrupt={interrupt} resumeGraph={resumeGraph} resumedValue={resumedValue as SelectOptionInterruptResumeValue} isLastMessage={isLastMessage} />;
+        case "INPUT_TEXT":
+            return <InputText interruptValue={interrupt} resumeGraph={resumeGraph} resumeValue={resumedValue as InputTextInterruptResumeValue} isLastMessage={isLastMessage} />;
         default:
             const neverValue: never = interrupt;
             throw new Error(`Unhandled typed interrupt type: ${JSON.stringify(neverValue)}`);

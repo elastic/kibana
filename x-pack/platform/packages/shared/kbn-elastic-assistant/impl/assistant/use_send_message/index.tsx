@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import type { ApiConfig, Replacements, TypedInterrupts } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Replacements, InterruptResumeValue } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
 import type { FetchConnectorExecuteResponse } from '../api';
@@ -27,7 +27,7 @@ interface ResumeGraphProps {
   conversationId: string;
   replacements: Replacements;
   threadId: string;
-  resumeValue: TypedInterrupts[keyof TypedInterrupts]["resumeValue"]
+  resumeValue: InterruptResumeValue
 }
 
 type InvokeGraphProps = SendMessageProps | ResumeGraphProps;

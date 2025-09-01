@@ -9,7 +9,7 @@ import type React from 'react';
 import { useCallback, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import type { Replacements, TypedInterruptValue } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import type { ClientMessage, ResumeGraphFunction } from '../../assistant_context/types';

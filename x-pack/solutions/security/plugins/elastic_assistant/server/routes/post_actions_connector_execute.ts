@@ -147,7 +147,7 @@ export const postActionsConnectorExecuteRoute = (
           });
 
           onLlmResponse = async (
-            {content, traceData = {} , isError = false, typedInterrupt  }
+            {content, traceData = {} , isError = false, interruptValue  }
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
@@ -158,7 +158,7 @@ export const postActionsConnectorExecuteRoute = (
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
-                typedInterrupt,
+                interruptValue: interruptValue,
                 messageContent: prunedContent,
                 replacements: latestReplacements,
                 isError,

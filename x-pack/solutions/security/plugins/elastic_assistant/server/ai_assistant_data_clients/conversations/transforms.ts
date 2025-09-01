@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import type { ConversationResponse, MessageMetadata, Replacements } from '@kbn/elastic-assistant-common';
 import { replaceOriginalValuesWithUuidValues } from '@kbn/elastic-assistant-common';
 import _ from 'lodash';
 import type { EsConversationSchema } from './types';
@@ -69,11 +69,11 @@ export const transformESSearchToConversations = (
                   ...(message.metadata.content_references
                     ? { contentReferences: message.metadata.content_references }
                     : {}),
-                  ...(message.metadata.typed_interrupt
-                    ? { typedInterrupt: message.metadata.typed_interrupt }
+                  ...(message.metadata.interrupt_value
+                    ? { interruptValue: message.metadata.interrupt_value }
                     : {}),
-                  ...(message.metadata.typed_interrupt_resume_value
-                    ? { typedInterruptResumeValue: message.metadata.typed_interrupt_resume_value }
+                  ...(message.metadata.interrupt_resume_value
+                    ? { interruptResumeValue: message.metadata.interrupt_resume_value }
                     : {}),
                 },
               }

@@ -21,8 +21,6 @@ import { Document } from 'langchain/document';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 import { APP_UI_ID } from '../../../../common';
-import { Command } from '@langchain/langgraph';
-import { ToolMessage } from '@langchain/core/messages';
 
 export type SecurityLabsKnowledgeBaseToolParams = Require<AssistantToolParams, 'kbDataClient'>;
 
@@ -53,22 +51,27 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     return tool(
       async (input, { configurable, toolCall }) => {
 
-        let adjustedQuestion = undefined;
+        let adjustedQuestion: string | undefined = undefined;
         const isApproved = typedInterrupt(
           {
-            type: "REQUEST_APPROVAL",
-            content: `Searching security labs content for the term ${input.question}. Would you like to change it?`,
-            threadId: configurable.thread_id
+            type: "SELECT_OPTION",
+            options: [
+              { label: "Rejected", value: "REJECTED", buttonColor: "danger" },
+              { label: "Approved", value: "APPROVED", buttonColor: "success" },
+            ],
+            description: "Do you want to adjust the search term?",
+            threadId: configurable.thread_id,
           }
         )
-        if (!isApproved.approved) {
+        if (isApproved.value === "APPROVED") {
           adjustedQuestion = typedInterrupt(
             {
-              type: "REQUEST_TEXT",
-              content: `Which term would you like to use instead?`,
-              threadId: configurable.thread_id
+              type: "INPUT_TEXT",
+              description: `Which term would you like to use instead?`,
+              threadId: configurable.thread_id,
+              placeholder: 'Enter new search term...'
             }
-          ).content
+          ).value
         }
 
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({

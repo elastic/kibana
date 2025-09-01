@@ -68,7 +68,13 @@ export const getUpdateScript = ({
         if (message.metadata != null) {
           newMessage.metadata = [:];
           if (message.metadata.content_references != null) {
-            newMessage.metadata.content_references = message.metadata.content_references;
+              newMessage.metadata.content_references = message.metadata.content_references;
+          }
+          if (message.metadata.interrupt_value != null) {
+            newMessage.metadata.interrupt_value = message.metadata.interrupt_value;
+          }
+          if (message.metadata.interrupt_resume_value != null) {
+            newMessage.metadata.interrupt_resume_value = message.metadata.interrupt_resume_value;
           }
         }
         messages.add(newMessage);

@@ -11,7 +11,7 @@ import type {
   Replacements,
   ScreenContext,
   MessageMetadata,
-  TypedInterrupts,
+  InterruptResumeValue,
 } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
@@ -28,7 +28,7 @@ export interface FetchConnectorExecuteAction {
   http: HttpSetup;
   message?: string;
   threadId?: string;
-  resumeValue?: TypedInterrupts[keyof TypedInterrupts]["resumeValue"];
+  resumeValue?: InterruptResumeValue;
   replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;

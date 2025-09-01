@@ -17,8 +17,8 @@ import type {
   Message,
   Replacements,
   ScreenContext,
-  TypedInterruptResumeValue,
-  TypedInterruptValue,
+  InterruptResumeValue,
+  InterruptValue,
 } from '@kbn/elastic-assistant-common';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -37,7 +37,7 @@ import type { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 export type OnLlmResponse = (
   args: {
     content: string,
-    typedInterrupt?: TypedInterruptValue
+    interruptValue?: InterruptValue
     traceData?: Message['traceData'],
     isError?: boolean
   }
@@ -57,7 +57,7 @@ export interface AgentExecutorParams<T extends boolean> {
   assistantTools?: AssistantTool[];
   connectorId: string;
   threadId: string;
-  resumeValue?: TypedInterruptResumeValue;
+  interruptResumeValue?: InterruptResumeValue;
   conversationId?: string;
   contentReferencesStore: ContentReferencesStore;
   core: CoreRequestHandlerContext;

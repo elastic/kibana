@@ -135,11 +135,9 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       ...(message.metadata
         ? {
           metadata: {
-            ...(message.metadata.contentReferences
-              ? { content_references: message.metadata.contentReferences }
-              : {}),
-            typed_interrupt: message.metadata.typedInterrupt,
-            typed_interrupt_resume_value: message.metadata.typedInterruptResumeValue,
+            content_references: message.metadata.contentReferences,
+            interrupt_value: message.metadata.interruptValue,
+            interrupt_resume_value: message.metadata.interruptResumeValue,
           },
         }
         : {}),

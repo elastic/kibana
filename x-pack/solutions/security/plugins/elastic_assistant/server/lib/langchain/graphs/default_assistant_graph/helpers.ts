@@ -12,7 +12,7 @@ import type { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { TypedInterruptResumeValue, TypedInterruptValue, type ExecuteConnectorRequestBody, type TraceData } from '@kbn/elastic-assistant-common';
+import { InterruptResumeValue, InterruptValue, type ExecuteConnectorRequestBody, type TraceData } from '@kbn/elastic-assistant-common';
 import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -28,7 +28,7 @@ import { Command } from '@langchain/langgraph';
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  resumeValue?: TypedInterruptResumeValue
+  resumeValue?: InterruptResumeValue
   inputs: GraphInputs;
   isEnabledKnowledgeBase: boolean;
   logger: Logger;
@@ -103,13 +103,13 @@ export const streamGraph = async ({
     streamingSpan?.end();
   }
 
-  const handleFinalContent = (args: { finalResponse: string, isError: boolean, typedInterrupt?: TypedInterruptValue }) => {
+  const handleFinalContent = (args: { finalResponse: string, isError: boolean, interruptValue?: InterruptValue }) => {
     if (onLlmResponse) {
 
       onLlmResponse(
         {
           content: args.finalResponse,
-          typedInterrupt: args.typedInterrupt,
+          interruptValue: args.interruptValue,
           traceData: {
             transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
             traceId: streamingSpan?.ids?.['trace.id'],
@@ -183,14 +183,14 @@ export const streamGraph = async ({
       }
       const interrupt = task.interrupts[0];
       const interruptValue = interrupt.value;
-      const parsedInterruptValue = TypedInterruptValue.safeParse(interruptValue);
+      const parsedInterruptValue = InterruptValue.safeParse(interruptValue);
       if (!parsedInterruptValue.success) {
         throw new Error(`Interrupt did not match schema. You must use typedInterrupt(...). ${JSON.stringify(parsedInterruptValue.error)}`);
       }
 
       handleFinalContent({
         finalResponse: "#### ⏳ Pending user input",
-        typedInterrupt: parsedInterruptValue.data,
+        interruptValue: parsedInterruptValue.data,
         isError: false,
       });
     }

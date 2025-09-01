@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MessageRole, TypedInterruptResumeValue, TypedInterruptValue } from '@kbn/elastic-assistant-common';
+import type { MessageRole, InterruptResumeValue, InterruptValue } from '@kbn/elastic-assistant-common';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
@@ -15,7 +15,7 @@ import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
-import { TypedInterruptFactory } from '../typed_interrupt';
+import { InterruptFactory } from '../typed_interrupt';
 import { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 interface Props {
@@ -34,8 +34,8 @@ interface Props {
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
   messageRole: MessageRole;
-  typedInterrupt?: TypedInterruptValue
-  resumedValue?: TypedInterruptResumeValue
+  interruptValue?: InterruptValue
+  interruptResumeValue?: InterruptResumeValue
   resumeGraph: ResumeGraphFunction;
 }
 
@@ -55,8 +55,8 @@ export const StreamComment = ({
   setIsStreaming,
   transformMessage,
   messageRole,
-  typedInterrupt,
-  resumedValue,
+  interruptValue,
+  interruptResumeValue,
   resumeGraph
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
@@ -126,7 +126,7 @@ export const StreamComment = ({
     );
   }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream, isLastMessage]);
 
-  const footer = <TypedInterruptFactory interrupt={typedInterrupt} resumeGraph={resumeGraph} resumedValue={resumedValue} isLastMessage={isLastMessage} />;
+  const footer = <InterruptFactory interruptValue={interruptValue} resumeGraph={resumeGraph} interruptResumeValue={interruptResumeValue} isLastMessage={isLastMessage} />;
 
   return (
     <MessagePanel

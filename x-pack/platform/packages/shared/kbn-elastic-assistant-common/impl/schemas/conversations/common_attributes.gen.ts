@@ -34,130 +34,173 @@ export const TraceData = z.object({
 });
 
 /**
- * The basis of a typed LangGraph interrupt
+ * The type of interrupt
  */
-export type BaseTypedInterrupt = z.infer<typeof BaseTypedInterrupt>;
-export const BaseTypedInterrupt = z.object({
+export type InterruptType = z.infer<typeof InterruptType>;
+export const InterruptType = z.enum(['SELECT_OPTION', 'INPUT_TEXT']);
+export type InterruptTypeEnum = typeof InterruptType.enum;
+export const InterruptTypeEnum = InterruptType.enum;
+
+/**
+ * The basis of a agent interrupt
+ */
+export type BaseInterruptValue = z.infer<typeof BaseInterruptValue>;
+export const BaseInterruptValue = z.object({
   /**
    * Type of the interrupt
    */
-  type: z.string(),
+  type: InterruptType,
   /**
    * Whether the interrupt has expired and can no longer be resumed.
    */
   expired: z.boolean().optional(),
   /**
-   * Thread ID of the graph execution that produced this message
+   * Thread ID of the graph execution that produced this message.
    */
   threadId: z.string(),
 });
 
 /**
- * A request approval interrupt
+ * The basis of a interrupt resume value
  */
-export type RequestApprovalTypedInterruptValue = z.infer<typeof RequestApprovalTypedInterruptValue>;
-export const RequestApprovalTypedInterruptValue = BaseTypedInterrupt.merge(
+export type BaseInterruptResumeValue = z.infer<typeof BaseInterruptResumeValue>;
+export const BaseInterruptResumeValue = z.object({
+  /**
+   * Type of the resume value
+   */
+  type: InterruptType,
+});
+
+/**
+ * A request approval option
+ */
+export type SelectOptionInterruptOption = z.infer<typeof SelectOptionInterruptOption>;
+export const SelectOptionInterruptOption = z.object({
+  label: z.string(),
+  value: z.string(),
+  buttonColor: z
+    .enum([
+      'text',
+      'accent',
+      'accentSecondary',
+      'primary',
+      'success',
+      'warning',
+      'danger',
+      'neutral',
+      'risk',
+    ])
+    .optional(),
+});
+
+/**
+ * Interrupt that requests user to select one of the provided options
+ */
+export type SelectOptionInterruptValue = z.infer<typeof SelectOptionInterruptValue>;
+export const SelectOptionInterruptValue = BaseInterruptValue.merge(
   z.object({
-    type: z.literal('REQUEST_APPROVAL'),
+    type: z.literal('SELECT_OPTION'),
     /**
-     * Content of the approval request
+     * Description of action required
      */
-    content: z.string(),
+    description: z.string(),
+    /**
+     * List of actions to choose from
+     */
+    options: z.array(SelectOptionInterruptOption),
   })
 );
 
 /**
  * A request approval resume schema
  */
-export type RequestApprovalResumeSchema = z.infer<typeof RequestApprovalResumeSchema>;
-export const RequestApprovalResumeSchema = z.object({
-  /**
-   * Whether the request was approved
-   */
-  approved: z.boolean(),
-});
-
-/**
- * A request approval interrupt
- */
-export type RequestApprovalTypedInterrupt = z.infer<typeof RequestApprovalTypedInterrupt>;
-export const RequestApprovalTypedInterrupt = z.object({
-  /**
-   * The interrupt value
-   */
-  interruptValue: RequestApprovalTypedInterruptValue,
-  /**
-   * The resume value
-   */
-  resumeValue: RequestApprovalResumeSchema,
-});
-
-/**
- * A request text interrupt
- */
-export type RequestTextTypedInterruptValue = z.infer<typeof RequestTextTypedInterruptValue>;
-export const RequestTextTypedInterruptValue = BaseTypedInterrupt.merge(
+export type SelectOptionInterruptResumeValue = z.infer<typeof SelectOptionInterruptResumeValue>;
+export const SelectOptionInterruptResumeValue = BaseInterruptResumeValue.merge(
   z.object({
-    type: z.literal('REQUEST_TEXT'),
+    type: z.literal('SELECT_OPTION'),
     /**
-     * Content of the text request
+     * The value of the selected option to resume the graph execution with
      */
-    content: z.string(),
+    value: z.string(),
   })
 );
 
 /**
- * A request text resume schema
+ * A request approval interrupt
  */
-export type RequestTextResumeSchema = z.infer<typeof RequestTextResumeSchema>;
-export const RequestTextResumeSchema = z.object({
+export type SelectOptionInterrupt = z.infer<typeof SelectOptionInterrupt>;
+export const SelectOptionInterrupt = z.object({
   /**
-   * Text value used to resume the graph execution with
+   * The interrupt value
    */
-  content: z.string(),
+  interruptValue: SelectOptionInterruptValue,
+  /**
+   * The resume value
+   */
+  resumeValue: SelectOptionInterruptResumeValue,
 });
+
+/**
+ * Interrupt that requests user to provide text input
+ */
+export type InputTextInterruptValue = z.infer<typeof InputTextInterruptValue>;
+export const InputTextInterruptValue = BaseInterruptValue.merge(
+  z.object({
+    type: z.literal('INPUT_TEXT'),
+    /**
+     * Description of action required
+     */
+    description: z.string().optional(),
+    /**
+     * Placeholder text for the input field
+     */
+    placeholder: z.string().optional(),
+  })
+);
+
+/**
+ * A resume value for input text
+ */
+export type InputTextInterruptResumeValue = z.infer<typeof InputTextInterruptResumeValue>;
+export const InputTextInterruptResumeValue = BaseInterruptResumeValue.merge(
+  z.object({
+    type: z.literal('INPUT_TEXT'),
+    /**
+     * Text value used to resume the graph execution with.
+     */
+    value: z.string(),
+  })
+);
 
 /**
  * A request text interrupt
  */
-export type RequestTextTypedInterrupt = z.infer<typeof RequestTextTypedInterrupt>;
-export const RequestTextTypedInterrupt = z.object({
+export type InputTextInterrupt = z.infer<typeof InputTextInterrupt>;
+export const InputTextInterrupt = z.object({
   /**
    * The interrupt value
    */
-  interruptValue: RequestTextTypedInterruptValue,
+  interruptValue: InputTextInterruptValue,
   /**
    * The resume value
    */
-  resumeValue: RequestTextResumeSchema,
+  resumeValue: InputTextInterruptResumeValue,
 });
 
 /**
- * A typed LangGraph interrupt
+ * Union of the interrupt values
  */
-export type TypedInterruptValue = z.infer<typeof TypedInterruptValue>;
-export const TypedInterruptValue = z.union([
-  RequestApprovalTypedInterruptValue,
-  RequestTextTypedInterruptValue,
-]);
+export type InterruptValue = z.infer<typeof InterruptValue>;
+export const InterruptValue = z.union([SelectOptionInterruptValue, InputTextInterruptValue]);
 
 /**
- * A typed LangGraph interrupt
+ * Union of the interrupt resume values
  */
-export type TypedInterruptResumeValue = z.infer<typeof TypedInterruptResumeValue>;
-export const TypedInterruptResumeValue = z.union([
-  RequestApprovalResumeSchema,
-  RequestTextResumeSchema,
+export type InterruptResumeValue = z.infer<typeof InterruptResumeValue>;
+export const InterruptResumeValue = z.union([
+  SelectOptionInterruptResumeValue,
+  InputTextInterruptResumeValue,
 ]);
-
-/**
- * A typed LangGraph interrupt
- */
-export type TypedInterrupts = z.infer<typeof TypedInterrupts>;
-export const TypedInterrupts = z.object({
-  REQUEST_APPROVAL: RequestApprovalTypedInterrupt,
-  REQUEST_TEXT: RequestTextTypedInterrupt,
-});
 
 /**
  * The basis of a content reference
@@ -325,11 +368,11 @@ export const MessageMetadata = z.object({
   /**
    * Graph interrupt value
    */
-  typedInterrupt: TypedInterruptValue.optional(),
+  interruptValue: InterruptValue.optional(),
   /**
    * Graph interrupt resume value
    */
-  typedInterruptResumeValue: TypedInterruptResumeValue.optional(),
+  interruptResumeValue: InterruptResumeValue.optional(),
 });
 
 /**

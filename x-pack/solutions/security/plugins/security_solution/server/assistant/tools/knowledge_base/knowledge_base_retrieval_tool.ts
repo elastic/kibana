@@ -81,12 +81,16 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
       async (input, {configurable}) => {
          const result = typedInterrupt(
           {
-            type: "REQUEST_APPROVAL",
-            content: `Trying to access user knowledge base`,
+            type: "SELECT_OPTION",
+            description: `Trying to access user knowledge base`,
+            options: [
+              { label: "Reject", value: "REJECT", buttonColor: "danger" },
+              { label: "Approve", value: "APPROVE", buttonColor: "success" },
+            ],
             threadId: configurable.thread_id
           }
         )
-        if (result.approved) {
+        if (result.value === "APPROVE") {
           // proceed to execute the tool logic
         } else {
           throw new Error(`User did not give permission to access their knowledge base`)
