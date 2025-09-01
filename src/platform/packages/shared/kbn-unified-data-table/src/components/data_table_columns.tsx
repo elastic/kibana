@@ -68,6 +68,8 @@ const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
 const DataTableSummaryColumnHeaderMemoized = React.memo(UnifiedDataTableSummaryColumnHeader);
 
+const EMPTY_CELL_ACTIONS: EuiDataGridColumnCellAction[] = [];
+
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
 
@@ -186,7 +188,7 @@ function buildEuiGridColumn({
   let cellActions: EuiDataGridColumnCellAction[];
 
   if (disableCellActions) {
-    cellActions = [];
+    cellActions = EMPTY_CELL_ACTIONS;
   } else {
     if (columnCellActions?.length && cellActionsHandling === 'replace') {
       cellActions = columnCellActions;
@@ -199,7 +201,7 @@ function buildEuiGridColumn({
             valueToStringConverter,
             onFilter
           )
-        : [];
+        : EMPTY_CELL_ACTIONS;
 
       if (columnCellActions?.length && cellActionsHandling === 'append') {
         cellActions.push(...columnCellActions);
