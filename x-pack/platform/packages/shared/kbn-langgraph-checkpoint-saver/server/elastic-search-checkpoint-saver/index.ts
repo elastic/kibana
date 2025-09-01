@@ -64,14 +64,15 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   static readonly checkpointsFieldMap = {
     '@timestamp': {
       type: 'date',
+      required: true
     },
-    thread_id: { type: 'keyword', },
-    checkpoint_ns: { type: 'keyword', },
-    checkpoint_id: { type: 'keyword', },
-    parent_checkpoint_id: { type: 'keyword', },
-    type: { type: 'keyword', },
-    checkpoint: { type: 'binary'},
-    metadata: { type: 'binary' },
+    thread_id: { type: 'keyword',  required: true},
+    checkpoint_ns: { type: 'keyword',  required: true},
+    checkpoint_id: { type: 'keyword',  required: false},
+    parent_checkpoint_id: { type: 'keyword',  required: true},
+    type: { type: 'keyword',  required: true},
+    checkpoint: { type: 'binary',  required: true},
+    metadata: { type: 'binary',  required: true},
   } as const;
 
   /**
@@ -80,15 +81,16 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   static readonly checkpointWritesFieldMap = {
     '@timestamp': {
       type: 'date',
+      required: true
     },
-    thread_id: { type: 'keyword', },
-    checkpoint_ns: { type: 'keyword', },
-    checkpoint_id: { type: 'keyword', },
-    task_id: { type: 'keyword', },
-    idx: { type: 'unsigned_long', },
-    channel: { type: 'keyword', },
-    type: { type: 'keyword', },
-    value: { type: 'binary' },
+    thread_id: { type: 'keyword',  required: true},
+    checkpoint_ns: { type: 'keyword',  required: true},
+    checkpoint_id: { type: 'keyword',  required: true},
+    task_id: { type: 'keyword',  required: true},
+    idx: { type: 'unsigned_long',  required: true},
+    channel: { type: 'keyword',  required: true},
+    type: { type: 'keyword',  required: true},
+    value: { type: 'binary',  required: true},
   } as const;
 
   protected client: ElasticsearchClient;
