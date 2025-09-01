@@ -531,7 +531,6 @@ export const useHostsTable = () => {
       detailsItemId,
       setProperties,
       reportHostEntryClick,
-      showNetworkColumns,
     ]
   );
 
