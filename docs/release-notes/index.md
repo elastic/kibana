@@ -26,6 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.1.3 [kibana-9.1.3-release-notes]
 
+:::{important}
+The 9.1.3 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Fixes [kibana-9.1.3-fixes]
 
 **Alerting**:
@@ -367,6 +371,25 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console [#224708]({{kib-pull}}224708).
 * Fixes an issue preventing solution navigation submenu items from being displayed when the navigation is collapsed [#227705]({{kib-pull}}227705).
 
+## 9.0.6 [kibana-9.0.6-release-notes]
+
+:::{important}
+The 9.0.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.0.6-features-enhancements]
+
+**Dashboards and Visualizations**:
+* Improves usability of dashboards when zooming up to 400% [#228978]({{kib-pull}}228978).
+
+### Fixes [kibana-9.0.6-fixes]
+
+**Kibana platform**:
+* Fixes the breadcrumb to include a link to the home page when browsing pages from the **{{es}}** section of the navigation [#230270]({{kib-pull}}230270).
+* Updates the built-in `reporting_user` role to leverage a new  `reporting_user` reserved privilege [#231533]({{kib-pull}}231533).
+
+**Search**:
+* Fixes an incorrect link in the **Build** breadcrumb when navigating to the **Connectors** and **{{es}} indices** pages [#232504]({{kib-pull}}232504).
 
 ## 9.0.5 [kibana-9.0.5-release-notes]
 
