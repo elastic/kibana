@@ -114,8 +114,16 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `is_default`
     :   If `true`, this policy is the default agent policy.
 
+    :::{admonition} Deprecated in 8.1.0
+    This setting was deprecated in 8.1.0.
+    :::
+
     `is_default_fleet_server`
     :   If `true`, this policy is the default {{fleet-server}} agent policy.
+
+    :::{admonition} Deprecated in 8.1.0
+    This setting was deprecated in 8.1.0.
+    :::
 
     `data_output_id`
     :   ID of the output to send data. (Need to be identical to `monitoring_output_id`)
