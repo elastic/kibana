@@ -9,6 +9,7 @@
 
 import { waitFor } from '@testing-library/dom';
 import { toNavigationItems } from './to_navigation_items';
+import { PanelStateManager } from './panel_state_manager';
 import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
@@ -19,15 +20,20 @@ import type {
 const navigationTree = require('./mocks/mock_security_tree.json') as NavigationTreeDefinitionUI;
 
 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+// Mock panelStateManager for testing
+const mockPanelStateManager = new PanelStateManager();
+
 beforeEach(() => {
   consoleWarnSpy.mockClear();
+  mockPanelStateManager.clearPanelState();
 });
 
 describe('toNavigationItems', () => {
   const {
     logoItem,
     navItems: { footerItems, primaryItems },
-  } = toNavigationItems(navigationTree, [], []);
+  } = toNavigationItems(navigationTree, [], [], mockPanelStateManager);
 
   it('should return missing logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
@@ -89,7 +95,7 @@ describe('toNavigationItems', () => {
 
 describe('isActive', () => {
   it('should return null if no active paths', () => {
-    const { activeItemId } = toNavigationItems(navigationTree, [], []);
+    const { activeItemId } = toNavigationItems(navigationTree, [], [], mockPanelStateManager);
     expect(activeItemId).toBeUndefined();
   });
 
@@ -97,7 +103,12 @@ describe('isActive', () => {
     const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
     const primaryNode = logoNode.children![0]! as ChromeProjectNavigationNode;
 
-    const { activeItemId } = toNavigationItems(navigationTree, [], [[logoNode, primaryNode]]);
+    const { activeItemId } = toNavigationItems(
+      navigationTree,
+      [],
+      [[logoNode, primaryNode]],
+      mockPanelStateManager
+    );
     expect(activeItemId).toBe(primaryNode.id);
   });
 
@@ -112,7 +123,8 @@ describe('isActive', () => {
       [
         [logoNode, primaryNode1],
         [logoNode, primaryNode2],
-      ]
+      ],
+      mockPanelStateManager
     );
     expect(activeItemId).toBe(primaryNode1.id);
   });
@@ -125,7 +137,8 @@ describe('isActive', () => {
     const { activeItemId } = toNavigationItems(
       navigationTree,
       [],
-      [[logoNode, primaryNode, secondaryNode]]
+      [[logoNode, primaryNode, secondaryNode]],
+      mockPanelStateManager
     );
     expect(activeItemId).toBe(secondaryNode.id);
   });
@@ -139,7 +152,8 @@ describe('isActive', () => {
     const { activeItemId } = toNavigationItems(
       navigationTree,
       [],
-      [[logoNode, primaryNode, secondaryNode, beyondNavNode]]
+      [[logoNode, primaryNode, secondaryNode, beyondNavNode]],
+      mockPanelStateManager
     );
     expect(activeItemId).toBe(secondaryNode.id);
   });
@@ -156,7 +170,8 @@ describe('isActive', () => {
       [
         [logoNode, primaryNode, secondaryNode, beyondNavNode],
         [logoNode, primaryNode],
-      ]
+      ],
+      mockPanelStateManager
     );
     expect(activeItemId).toBe(secondaryNode.id);
   });
@@ -181,7 +196,8 @@ describe('isActive', () => {
           managementSecondarySection,
           managementSecondaryItem,
         ],
-      ]
+      ],
+      mockPanelStateManager
     );
 
     expect(activeItemId).toBe(managementSecondaryItem.id);
@@ -208,7 +224,7 @@ describe('logo node', () => {
   ];
 
   test('should return logo node with correct properties', () => {
-    const { logoItem } = toNavigationItems(treeWithLogo, [], []);
+    const { logoItem } = toNavigationItems(treeWithLogo, [], [], mockPanelStateManager);
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
         "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome",
@@ -221,7 +237,12 @@ describe('logo node', () => {
   });
 
   test('Logo node can be active', () => {
-    const { activeItemId } = toNavigationItems(treeWithLogo, [], [[homeNode]]);
+    const { activeItemId } = toNavigationItems(
+      treeWithLogo,
+      [],
+      [[homeNode]],
+      mockPanelStateManager
+    );
     expect(activeItemId).toBe(homeNode.id);
   });
 });

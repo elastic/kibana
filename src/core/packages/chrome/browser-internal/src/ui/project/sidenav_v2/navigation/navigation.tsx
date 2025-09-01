@@ -24,6 +24,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
+import { panelStateManager } from './panel_state_manager';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -87,7 +88,7 @@ const useNavigationItems = (
   const memoizedItems = useMemo(() => {
     if (!state) return null;
     const [navigationTree, navLinks, activeNodes] = state;
-    return toNavigationItems(navigationTree, navLinks, activeNodes);
+    return toNavigationItems(navigationTree, navLinks, activeNodes, panelStateManager);
   }, [state]);
 
   return memoizedItems;
