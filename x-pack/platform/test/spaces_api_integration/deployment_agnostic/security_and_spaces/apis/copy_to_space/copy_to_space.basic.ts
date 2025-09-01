@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { AUTHENTICATION } from '../../common/lib/authentication';
-import { SPACES } from '../../common/lib/spaces';
-import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space.agnostic';
+import { AUTHENTICATION } from '../../../../common/lib/authentication';
+import { SPACES } from '../../../../common/lib/spaces';
+import { copyToSpaceTestSuiteFactory } from '../../../../common/suites/copy_to_space.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 interface User {
   username: string;
@@ -16,7 +16,9 @@ interface User {
   role: string;
 }
 
-export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderContext) {
+export default function copyToSpaceSpacesAndSecuritySuite(
+  context: DeploymentAgnosticFtrProviderContext
+) {
   const {
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
