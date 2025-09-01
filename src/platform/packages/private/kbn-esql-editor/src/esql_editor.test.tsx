@@ -40,7 +40,7 @@ jest.mock('@kbn/monaco', () => ({
 jest.mock('./custom_commands', () => {
   return {
     useCanCreateLookupIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),
-    useCreateLookupIndexCommand: jest.fn().mockReturnValue({
+    useLookupIndexCommand: jest.fn().mockReturnValue({
       lookupIndexBadgeStyle: {} as SerializedStyles,
       addLookupIndicesDecorator: jest.fn(),
     }),
