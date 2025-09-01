@@ -533,7 +533,7 @@
             "label": "db",
             "description": [],
             "signature": [
-              "({ name, duration, type, statement, timestamp, }: { name: string; duration: number; type: \"elasticsearch\" | \"sqlite\" | \"redis\"; statement?: string | undefined; timestamp?: number | undefined; }) => void"
+              "({ name, duration, type, statement, timestamp, }: { name: string; duration: number; type: \"elasticsearch\" | \"redis\" | \"sqlite\"; statement?: string | undefined; timestamp?: number | undefined; }) => void"
             ],
             "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
             "deprecated": false,
@@ -580,7 +580,7 @@
                     "label": "type",
                     "description": [],
                     "signature": [
-                      "\"elasticsearch\" | \"sqlite\" | \"redis\""
+                      "\"elasticsearch\" | \"redis\" | \"sqlite\""
                     ],
                     "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/dsl/distributed_trace_client.ts",
                     "deprecated": false,
@@ -1895,7 +1895,7 @@
             "label": "messagingExitSpan",
             "description": [],
             "signature": [
-              "({ name, type, operation, destination, }: { name: string; type: string; destination: string; operation: \"publish\" | \"receive\"; }) => ",
+              "({ name, type, operation, destination, }: { name: string; type: string; destination: string; operation: \"receive\" | \"publish\"; }) => ",
               "OtelSpan"
             ],
             "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
@@ -1954,7 +1954,7 @@
                     "label": "operation",
                     "description": [],
                     "signature": [
-                      "\"publish\" | \"receive\""
+                      "\"receive\" | \"publish\""
                     ],
                     "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
                     "deprecated": false,
