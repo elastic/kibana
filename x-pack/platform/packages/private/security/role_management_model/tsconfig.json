@@ -11,7 +11,6 @@
     "@kbn/security-plugin-types-common",
     "@kbn/security-authorization-core",
     "@kbn/security-authorization-core-common",
-    "@kbn/licensing-plugin",
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/licensing-types",
   ]
