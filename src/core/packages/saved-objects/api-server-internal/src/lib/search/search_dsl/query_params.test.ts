@@ -19,7 +19,7 @@ import {
   type IndexMapping,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { getQueryParams } from './query_params';
-import {
+import type {
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
 } from '@kbn/core-saved-objects-server';
