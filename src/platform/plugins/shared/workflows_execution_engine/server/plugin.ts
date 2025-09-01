@@ -167,6 +167,7 @@ export class WorkflowsExecutionEnginePlugin
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
+        yaml: workflow.yaml,
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
