@@ -67,8 +67,14 @@ export const getActPrompt = ({
                 • External system connectors (e.g., SaaS platform search) or federated knowledge base connectors (e.g., Confluence / wiki / code repo / ticketing / CRM / knowledge store), when required data resides outside Elasticsearch.
                 • Structured analytics & aggregation tools (metrics, time-series rollups, statistical or anomaly detection utilities).
                 • Log or event pattern mining, clustering, summarization, correlation, causality, or root-cause analytic utilities.
-          3. General search fallback: If no user-specified or specialized tool applies, call \`${tools.search}\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
-          4. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${tools.listIndices}\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${tools.search}\` is unavailable and structural discovery is necessary.
+          3. General search fallback: If no user-specified or specialized tool applies, call \`${
+            tools.search
+          }\` (if available). **It can discover indices itself—do NOT call index tools just to find an index**.
+          4. Index inspection fallback: Use \`${tools.indexExplorer}\` or \`${
+        tools.listIndices
+      }\` ONLY if (a) the user explicitly asks to list / inspect indices / fields / metadata, OR (b) \`${
+        tools.search
+      }\` is unavailable and structural discovery is necessary.
           5. Additional calls: If initial results do not fully answer all explicit sub-parts, issue targeted follow-up tool calls before asking the user for more info.
         Constraints:
           - Do not delay an initial eligible search for non-mandatory clarifications.
@@ -117,7 +123,7 @@ export const getActPrompt = ({
 
         ADDITIONAL INFO
         - Current date: ${formatDate()}`,
-      ],
-      ...messages,
+    ],
+    ...messages,
   ];
 };
