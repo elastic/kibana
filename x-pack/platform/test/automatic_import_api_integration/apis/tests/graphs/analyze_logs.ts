@@ -7,29 +7,24 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCelInput } from '../../../common/lib/api/cel';
+import { postAnalyzeLogs } from '../../../common/lib/api/analyze_logs';
 import type { User } from '../../../common/lib/authentication/types';
 import { BadRequestError } from '../../../common/lib/error/error';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  describe('Run cel', () => {
-    it('should get 400 when trying to run cel without connector action', async () => {
-      const response = await postCelInput({
+  describe('Run analyze logs', () => {
+    it('should get 400 when trying to run analyze logs without connector action', async () => {
+      const response = await postAnalyzeLogs({
         supertest,
         req: {
-          dataStreamTitle: 'some data stream',
+          packageName: 'some-package',
+          dataStreamName: 'some-data-stream',
+          packageTitle: 'Some Package',
+          dataStreamTitle: 'Some Data Stream',
+          logSamples: ['{test:json}'],
           connectorId: 'preconfigured-dummy',
-          celDetails: {
-            path: '/path1',
-            auth: 'basic',
-            openApiDetails: {
-              operation: '{ operationJson}',
-              schemas: '{schemasJson}',
-              auth: '{authJson}',
-            },
-          },
         },
         expectedHttpCode: 400,
         auth: {
