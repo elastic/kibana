@@ -77,6 +77,55 @@ describe('on_failure graph', () => {
         ],
       } as Partial<WorkflowYaml>,
     },
+    {
+      name: 'step level on-failure should override workflow level on-failure',
+      workflow: {
+        settings: {
+          'on-failure': {
+            retry: {
+              'max-attempts': 1,
+              delay: '1s',
+            },
+            fallback: [
+              {
+                name: 'workflowLevelFallbackAction',
+                type: 'console',
+                with: {
+                  message: 'fallback log',
+                },
+              } as ConnectorStep,
+            ],
+            continue: false,
+          } as WorkflowOnFailure,
+        },
+        steps: [
+          {
+            name: 'testRetryConnectorStep',
+            type: 'slack',
+            connectorId: 'slack',
+            'on-failure': {
+              retry: {
+                'max-attempts': 3,
+                delay: '5s',
+              },
+              fallback: [
+                {
+                  name: 'fallbackAction',
+                  type: 'console',
+                  with: {
+                    message: 'fallback log',
+                  },
+                } as ConnectorStep,
+              ],
+              continue: true,
+            } as WorkflowOnFailure,
+            with: {
+              message: 'Hello from retry step',
+            },
+          } as ConnectorStep,
+        ],
+      } as Partial<WorkflowYaml>,
+    },
   ])('%s', (testCase) => {
     const workflowDefinition = testCase.workflow;
 
@@ -248,5 +297,70 @@ describe('on_failure graph', () => {
         });
       });
     });
+  });
+
+  it('should not set workflow level on-failure for steps inside fallback', () => {
+    const workflow = {
+      settings: {
+        'on-failure': {
+          retry: {
+            'max-attempts': 3,
+            delay: '5s',
+          },
+          fallback: [
+            {
+              name: 'workflowLevel_fallbackAction',
+              type: 'console',
+              with: {
+                message: 'fallback log',
+              },
+            } as ConnectorStep,
+          ],
+          continue: true,
+        } as WorkflowOnFailure,
+      },
+      steps: [
+        {
+          name: 'testRetryConnectorStep',
+          type: 'slack',
+          connectorId: 'slack',
+          'on-failure': {
+            retry: {
+              'max-attempts': 1,
+              delay: '3s',
+            },
+            fallback: [
+              {
+                name: 'fallbackAction',
+                type: 'console',
+                with: {
+                  message: 'fallback log',
+                },
+              } as ConnectorStep,
+            ],
+            continue: true,
+          } as WorkflowOnFailure,
+          with: {
+            message: 'Hello from retry step',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+    const executionGraph = convertToWorkflowGraph(workflow as any);
+    const topsort = graphlib.alg.topsort(executionGraph);
+    expect(topsort).toEqual([
+      'enterContinue_testRetryConnectorStep',
+      'enterTryBlock_testRetryConnectorStep',
+      'enterNormalPath_testRetryConnectorStep',
+      'enterRetry_testRetryConnectorStep',
+      'testRetryConnectorStep',
+      'exitRetry_testRetryConnectorStep',
+      'exitNormalPath_testRetryConnectorStep',
+      'enterFallbackPath_testRetryConnectorStep',
+      'fallbackAction',
+      'exitFallbackPath_testRetryConnectorStep',
+      'exitTryBlock_testRetryConnectorStep',
+      'exitContinue_testRetryConnectorStep',
+    ]);
   });
 });

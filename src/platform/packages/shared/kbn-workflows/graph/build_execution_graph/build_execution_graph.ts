@@ -57,14 +57,19 @@ function getNodeId(node: BaseStep): string {
 
 function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): graphlib.Graph {
   if ((currentStep as StepWithOnFailure)['on-failure']) {
-    return handleStepLevelOnFailure(currentStep, context);
+    const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
+
+    if (stepLevelOnFailureGraph) {
+      return stepLevelOnFailureGraph;
+    }
   }
 
-  if (
-    !context.stack.some((nodeId) => `onFailure_${getNodeId(currentStep)}`) && // check to prevent recursion when workflow level on-failure is defined
-    context.settings?.['on-failure']
-  ) {
-    return handleWorkflowLevelOnFailure(currentStep, context);
+  if (context.settings?.['on-failure']) {
+    const workflowLevelOnFailureGraph = handleWorkflowLevelOnFailure(currentStep, context);
+
+    if (workflowLevelOnFailureGraph) {
+      return workflowLevelOnFailureGraph;
+    }
   }
 
   if ((currentStep as StepWithIfCondition).if) {
@@ -249,12 +254,38 @@ function visitOnFailure(
   return graph;
 }
 
-function handleStepLevelOnFailure(step: BaseStep, context: GraphBuildContext): graphlib.Graph {
-  return visitOnFailure(step, (step as StepWithOnFailure)['on-failure']!, context);
+function handleStepLevelOnFailure(
+  step: BaseStep,
+  context: GraphBuildContext
+): graphlib.Graph | null {
+  const stackKey = `stepLevelOnFailure_${getNodeId(step)}`;
+  if (context.stack.includes(stackKey)) {
+    return null;
+  }
+  context.stack.push(stackKey);
+  const result = visitOnFailure(step, (step as StepWithOnFailure)['on-failure']!, context);
+  context.stack.pop();
+  return result;
 }
 
-function handleWorkflowLevelOnFailure(step: BaseStep, context: GraphBuildContext): graphlib.Graph {
-  return visitOnFailure(step, context.settings!['on-failure']!, context);
+function handleWorkflowLevelOnFailure(
+  step: BaseStep,
+  context: GraphBuildContext
+): graphlib.Graph | null {
+  const stackKey = `workflowLevelOnFailure_${getNodeId(step)}`;
+
+  if (
+    context.stack.includes(stackKey) || // Avoid recursion
+    context.stack.includes(`stepLevelOnFailure_${getNodeId(step)}`) || // Avoid workflow-level on-failure if already in step-level on-failure
+    context.stack.some((nodeId) => nodeId.startsWith('enterFallbackPath')) // Avoid workflo-level on-failure for steps inside fallback path
+  ) {
+    return null;
+  }
+
+  context.stack.push(`workflowLevelOnFailure_${getNodeId(step)}`);
+  const result = visitOnFailure(step, context.settings!['on-failure']!, context);
+  context.stack.pop();
+  return result;
 }
 
 function createContinue(id: string, innerGraph: graphlib.Graph): graphlib.Graph {
