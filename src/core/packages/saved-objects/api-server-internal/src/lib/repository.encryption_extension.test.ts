@@ -668,6 +668,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         _shards: {} as any,
         hits: {
           total: 2,
+          max_score: 2,
           hits: [
             {
               _index: MAIN_SAVED_OBJECT_INDEX,

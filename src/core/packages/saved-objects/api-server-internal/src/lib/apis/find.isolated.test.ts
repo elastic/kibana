@@ -52,6 +52,7 @@ const createSuccessSearchResponse = (objects: ObjectInfo[]): estypes.SearchRespo
     _shards: {} as any,
     hits: {
       total: objects.length,
+      max_score: 1,
       hits: objects.map(createHit),
     },
   };

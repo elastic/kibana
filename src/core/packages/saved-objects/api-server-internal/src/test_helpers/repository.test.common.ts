@@ -731,6 +731,7 @@ export const generateIndexPatternSearchResults = (namespace?: string) => {
     _shards: {} as any,
     hits: {
       total: 4,
+      max_score: 4,
       hits: [
         {
           _index: MAIN_SAVED_OBJECT_INDEX,
