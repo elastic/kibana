@@ -9,14 +9,7 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { getAgentStatusForAgentPolicy } from '../../services/agents/status';
 
-import { RegistryResponseError } from '../../errors';
-import { getPackageInfo } from '../../services/epm/packages';
-
-import {
-  getAgentDataHandler,
-  getAgentStatusForAgentPolicyHandler,
-  getAvailableVersionsHandler,
-} from './handlers';
+import { getAgentStatusForAgentPolicyHandler, getAvailableVersionsHandler } from './handlers';
 
 jest.mock('../../services/agents/versions', () => {
   return {
@@ -36,12 +29,6 @@ jest.mock('../../services/app_context', () => {
 jest.mock('../../services/agents/status', () => ({
   getAgentStatusForAgentPolicy: jest.fn(),
 }));
-
-jest.mock('../../services/epm/packages', () => {
-  return {
-    getPackageInfo: jest.fn(),
-  };
-});
 
 describe('Handlers', () => {
   describe('getAgentStatusForAgentPolicyHandler', () => {
@@ -92,29 +79,6 @@ describe('Handlers', () => {
       expect(response.ok).toBeCalled();
       expect(response.ok.mock.calls[0][0]?.body).toEqual({
         items: ['8.1.0', '8.0.0', '7.17.0'],
-      });
-    });
-  });
-
-  describe('getAgentDataHandler', () => {
-    it('should return data:false when package info loading failed', async () => {
-      const ctx = coreMock.createCustomRequestHandlerContext(
-        coreMock.createRequestHandlerContext()
-      );
-      const response = httpServerMock.createResponseFactory();
-      const request = {
-        query: {
-          agentsIds: ['agent-id-1'],
-          pkgName: 'system',
-          pkgVersion: '1.0.0',
-        },
-      } as any;
-      (getPackageInfo as jest.Mock).mockRejectedValue(new RegistryResponseError('502 Bad Request'));
-
-      await getAgentDataHandler(ctx, request, response);
-
-      expect(response.ok).toBeCalledWith({
-        body: { items: [{ 'agent-id-1': { data: false } }], dataPreview: [] },
       });
     });
   });

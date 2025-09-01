@@ -49,7 +49,6 @@ import { getCurrentNamespace } from '../../services/spaces/get_current_namespace
 import { getPackageInfo } from '../../services/epm/packages';
 import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
-import { appContextService } from '../../services';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -345,24 +344,15 @@ export const getAgentDataHandler: RequestHandler<
   // and scope incoming data query to that pattern
   let dataStreamPattern: string | undefined;
   if (pkgName && pkgVersion) {
-    try {
-      const packageInfo = await getPackageInfo({
-        savedObjectsClient: coreContext.savedObjects.client,
-        prerelease: true,
-        pkgName,
-        pkgVersion,
-      });
-      dataStreamPattern = (packageInfo.data_streams || [])
-        .map((ds) => generateTemplateIndexPattern(ds))
-        .join(',');
-    } catch (error) {
-      appContextService
-        .getLogger()
-        .warn(`Failed to get package info for ${pkgName}@${pkgVersion}: ${error.message}`);
-      return response.ok({
-        body: { items: agentsIds.map((id) => ({ [id]: { data: false } })), dataPreview: [] },
-      });
-    }
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: coreContext.savedObjects.client,
+      prerelease: true,
+      pkgName,
+      pkgVersion,
+    });
+    dataStreamPattern = (packageInfo.data_streams || [])
+      .map((ds) => generateTemplateIndexPattern(ds))
+      .join(',');
   }
 
   const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId({
