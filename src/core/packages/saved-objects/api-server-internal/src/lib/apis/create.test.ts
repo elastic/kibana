@@ -856,7 +856,7 @@ describe('#create', () => {
     });
 
     describe('access control', () => {
-      it('should not allow creating a document with a type that does not support access control', async () => {
+      it('should not allow creating a document with predefined access control when the type does not support access control', async () => {
         await expect(
           repository.create(MULTI_NAMESPACE_TYPE, attributes, {
             id,
