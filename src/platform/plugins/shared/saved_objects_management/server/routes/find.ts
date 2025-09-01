@@ -14,7 +14,6 @@ import {
   type ISavedObjectsClientFactory,
   Request,
   Response,
-  SavedObjectsClient,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
@@ -27,27 +26,6 @@ import type {
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import { SavedObjectsManagement, type ISavedObjectsManagement } from '../services';
-
-type FindRequest = KibanaRequest<never, TypeOf<typeof FindRoute.validate.query>>;
-
-export function findClientFactory(
-  { query: { type: types } }: FindRequest,
-  clientFactory: ISavedObjectsClientFactory,
-  typeRegistry: ISavedObjectTypeRegistry
-): SavedObjectsClientContract {
-  return clientFactory({
-    includedHiddenTypes: chain(types)
-      .castArray()
-      .uniq()
-      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
-      .value(),
-  });
-}
-findClientFactory.inject = [
-  Request,
-  SavedObjectsClientFactory,
-  SavedObjectsTypeRegistry,
-] as const satisfies unknown[];
 
 const referenceSchema = schema.object({
   type: schema.string(),
@@ -87,13 +65,26 @@ export class FindRoute {
     }),
   };
 
+  private readonly client: SavedObjectsClientContract;
+
   constructor(
-    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
+    @inject(SavedObjectsClientFactory) clientFactory: ISavedObjectsClientFactory,
     @inject(SavedObjectsTypeRegistry) private readonly typeRegistry: ISavedObjectTypeRegistry,
     @inject(SavedObjectsManagement) private readonly management: ISavedObjectsManagement,
-    @inject(Request) private readonly request: FindRequest,
+    @inject(Request)
+    private readonly request: KibanaRequest<never, TypeOf<typeof FindRoute.validate.query>>,
     @inject(Response) private readonly response: KibanaResponseFactory
-  ) {}
+  ) {
+    this.client = clientFactory({
+      includedHiddenTypes: chain(request.query.type)
+        .castArray()
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value(),
+    });
+  }
 
   async handle() {
     const { query } = this.request;

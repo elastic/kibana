@@ -14,7 +14,6 @@ import {
   type ISavedObjectsClientFactory,
   Request,
   Response,
-  SavedObjectsClient,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
@@ -27,27 +26,6 @@ import type {
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import { SavedObjectsManagement, type ISavedObjectsManagement } from '../services';
-
-type BulkGetRequest = KibanaRequest<never, never, TypeOf<typeof BulkGetRoute.validate.body>>;
-
-export function bulkGetClientFactory(
-  { body: objects }: BulkGetRequest,
-  clientFactory: ISavedObjectsClientFactory,
-  typeRegistry: ISavedObjectTypeRegistry
-): SavedObjectsClientContract {
-  return clientFactory({
-    includedHiddenTypes: chain(objects)
-      .map(({ type }) => type)
-      .uniq()
-      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
-      .value(),
-  });
-}
-bulkGetClientFactory.inject = [
-  Request,
-  SavedObjectsClientFactory,
-  SavedObjectsTypeRegistry,
-] as const satisfies unknown[];
 
 @injectable()
 export class BulkGetRoute {
@@ -69,12 +47,30 @@ export class BulkGetRoute {
     ),
   };
 
+  private readonly client: SavedObjectsClientContract;
+
   constructor(
-    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
+    @inject(SavedObjectsClientFactory) clientFactory: ISavedObjectsClientFactory,
+    @inject(SavedObjectsTypeRegistry) typeRegistry: ISavedObjectTypeRegistry,
     @inject(SavedObjectsManagement) private readonly management: ISavedObjectsManagement,
-    @inject(Request) private readonly request: BulkGetRequest,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      never,
+      never,
+      TypeOf<typeof BulkGetRoute.validate.body>
+    >,
     @inject(Response) private readonly response: KibanaResponseFactory
-  ) {}
+  ) {
+    this.client = clientFactory({
+      includedHiddenTypes: chain(request.body)
+        .map(({ type }) => type)
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value(),
+    });
+  }
 
   async handle() {
     const response = await this.client.bulkGet<unknown>(this.request.body);
