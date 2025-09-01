@@ -34,6 +34,10 @@ export const getESQLQuery = ({
   };
   apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
 }) => {
+  if (!apmIndexSettings || apmIndexSettings?.length === 0) {
+    return null;
+  }
+
   const { kuery, spanId } = params;
 
   const tracesIndices = apmIndexSettings
@@ -89,6 +93,10 @@ export function OpenSpanInDiscoverLink({
     params,
     apmIndexSettings: data.apmIndexSettings,
   });
+
+  if (!esqlQuery) {
+    return null;
+  }
 
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: {

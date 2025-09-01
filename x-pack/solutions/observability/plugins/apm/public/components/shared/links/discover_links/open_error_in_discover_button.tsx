@@ -36,6 +36,10 @@ export const getESQLQuery = ({
   };
   apmIndexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
 }) => {
+  if (!apmIndexSettings || apmIndexSettings?.length === 0) {
+    return null;
+  }
+
   const { serviceName, kuery, errorGroupId } = params;
 
   const errorIndices = apmIndexSettings
@@ -91,6 +95,10 @@ export function OpenErrorInDiscoverButton({ dataTestSubj }: { dataTestSubj: stri
     params,
     apmIndexSettings: data.apmIndexSettings,
   });
+
+  if (!esqlQuery) {
+    return null;
+  }
 
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: {
