@@ -10,11 +10,13 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import {
   EuiCallOut,
+  EuiPanel,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiButtonIcon,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
@@ -251,10 +253,13 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({
   }
 
   return (
-    <EuiCallOut
-      size="s"
-      color="success"
-      title={
+    <EuiThemeProvider colorMode="dark">
+      <EuiPanel
+        borderRadius="none"
+        paddingSize="s"
+        hasShadow={false}
+        hasBorder
+      >
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
@@ -303,7 +308,7 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      }
-    />
+      </EuiPanel>
+    </EuiThemeProvider>
   );
 };

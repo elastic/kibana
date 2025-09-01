@@ -10,11 +10,13 @@
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import {
   EuiCallOut,
+  EuiPanel,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiButtonEmpty,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
@@ -38,7 +40,7 @@ interface MainPageObservabilityCueProps {
   onResetToClassic: () => void;
 }
 
-export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> = ({ 
+export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> = ({
   className,
   demoCanManageSpaces,
   setDemoCanManageSpaces,
@@ -138,8 +140,6 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('showObservabilityTour', 'true');
 
-
-
       // Navigate to the new URL to trigger the tour modal
       window.location.href = currentUrl.toString();
     } catch (error) {
@@ -203,20 +203,91 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
     canManageSpaces &&
     !demoHideFullCallout;
 
-
-
   return (
     <>
+      {/* 
+      EuiCallOut Version - Alternative design (replace EuiThemeProvider block with this):
+      <EuiCallOut
+        size="s"
+        color="success"
+        title={
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon color="success" type="apmApp" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <strong>Observability data detected</strong>. {getCalloutMessage()}
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="success"
+                    onClick={handleDismiss}
+                    aria-label="Dismiss"
+                    size="s"
+                  >
+                    Maybe later
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSwitchToObservability}
+                    data-test-subj="obsMainPageCueSwitchBtn"
+                    size="s"
+                    color="success"
+                    fill
+                  >
+                    Try Observability
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
+      */}
+
       {/* Only render the callout in Classic view */}
       {shouldRenderCallout && (
-        // Full variant for main Discover view
-        <EuiCallOut
-          size="s"
-          color="success"
-          title={
+        <EuiThemeProvider colorMode="dark">
+          <EuiPanel
+            borderRadius="none"
+            paddingSize="s"
+            hasShadow={false}
+            hasBorder
+            css={{
+              backgroundImage: `url("${services.addBasePath(
+                '/plugins/discover/assets/illustration-feature-packed-box-128.svg'
+              )}")`,
+              backgroundSize: '64px',
+              backgroundPosition: 'left 16px bottom -16px',
+              backgroundRepeat: 'no-repeat',
+              '@media (max-width: 768px)': {
+                backgroundImage: 'none',
+              },
+            }}
+          >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                <EuiFlexGroup
+                  responsive={false}
+                  alignItems="center"
+                  justifyContent="flexStart"
+                  gutterSize="s"
+                  css={{
+                    paddingInlineStart: '88px',
+                    '@media (max-width: 768px)': {
+                      paddingInlineStart: '0px',
+                    },
+                  }}
+                >
                   <EuiFlexItem grow={false}>
                     <EuiIcon color="success" type="apmApp" />
                   </EuiFlexItem>
@@ -253,8 +324,8 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          }
-        />
+          </EuiPanel>
+        </EuiThemeProvider>
       )}
 
       {/* Tour Modal - render regardless of solution type */}
@@ -272,3 +343,5 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
     </>
   );
 };
+
+
