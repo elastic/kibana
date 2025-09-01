@@ -45,8 +45,7 @@ import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
-import { CoreInjectionService } from '@kbn/core-di-internal';
-import { application as applicationModule } from '@kbn/core-di-browser-internal';
+import { CoreInjectionService } from '@kbn/core-di-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -294,9 +293,6 @@ export class CoreSystem {
         security,
         userProfile,
       };
-
-      const container = injection.getContainer();
-      container.loadSync(applicationModule);
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);
