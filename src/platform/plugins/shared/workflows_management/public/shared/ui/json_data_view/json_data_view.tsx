@@ -8,10 +8,10 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JSONDataTable } from './json_data_table';
 import { JsonDataCode } from './json_data_code';
+import { JSONDataTable } from './json_data_table';
 
 export interface JSONDataViewProps {
   /**
@@ -31,7 +31,15 @@ export interface JSONDataViewProps {
    */
   columns?: string[];
 
-  /** */
+  /**
+   * Optional search term to filter the data.
+   */
+  searchTerm?: string;
+
+  /**
+   * Optional function to set the search term.
+   */
+  onSearchTermChange?: (value: string) => void;
 
   /**
    * Test subject for testing purposes
@@ -43,6 +51,8 @@ export function JSONDataView({
   data,
   title = 'JSON Data',
   columns,
+  searchTerm,
+  onSearchTermChange,
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataViewProps) {
   const [viewMode, setViewMode] = useState<'table' | 'json'>('table');
@@ -71,12 +81,23 @@ export function JSONDataView({
       data-test-subj={dataTestSubj}
       direction="column"
       gutterSize="none"
-      css={{ flex: 1 }}
+      responsive={false}
     >
       {/* TODO: add filters and search without too much services dependencies */}
       <EuiFlexItem grow={false}>
-        {/* <TableFilters {...tableFiltersProps} allFields={allFields} /> */}
-        <EuiFlexGroup responsive={false}>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {viewMode === 'table' && onSearchTermChange && (
+            <EuiFlexItem>
+              <EuiFieldSearch
+                compressed
+                placeholder="Filter by field, value"
+                value={searchTerm}
+                onChange={(e) => onSearchTermChange(e.target.value)}
+                isClearable
+                aria-label="Use aria labels when no actual label is in use"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem
             grow={false}
             css={{
@@ -115,10 +136,15 @@ export function JSONDataView({
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
         <EuiSpacer size="s" />
         {viewMode === 'table' && (
-          <JSONDataTable data={jsonObject} title={title} columns={columns} />
+          <JSONDataTable
+            data={jsonObject}
+            title={title}
+            columns={columns}
+            searchTerm={searchTerm}
+          />
         )}
         {viewMode === 'json' && <JsonDataCode json={jsonObject} />}
       </EuiFlexItem>
