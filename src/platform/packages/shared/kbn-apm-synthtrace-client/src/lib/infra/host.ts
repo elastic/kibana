@@ -30,12 +30,12 @@ interface HostDocument extends Fields {
 
 export class Host extends Entity<HostDocument> {
   cpu(fields?: {
-    'system.cpu.total.norm.pct': number;
-    'system.cpu.user.pct': number;
-    'system.cpu.system.pct': number;
+    'system.cpu.total.norm.pct'?: number;
+    'system.cpu.user.pct'?: number;
+    'system.cpu.system.pct'?: number;
     'system.cpu.cores'?: number;
-    'process.cpu.pct': number;
-    'system.cpu.nice.pct': number;
+    'process.cpu.pct'?: number;
+    'system.cpu.nice.pct'?: number;
   }) {
     return new HostMetrics({
       ...this.fields,
