@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { RoleCredentials } from '../services';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import type { RoleCredentials } from '../services';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

@@ -7,10 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { DashboardMigrationsDataDashboardsClient } from './dashboard_migrations_dashboards_client';
+import { DashboardMigrationsDataDashboardsClient } from './dashboard_migrations_data_dashboards_client';
 import type { AuthenticatedUser, IScopedClusterClient } from '@kbn/core/server';
 import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
+import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { DashboardMigrationsClientDependencies } from '../types';
 
 const INDEX_NAME = '.kibana-siem-dashboard-migrations-dashboards';
@@ -28,6 +30,30 @@ const getSampleSplunkDashboard: () => SplunkOriginalDashboardExport = () => ({
     updated: '1970-01-01T00:00:00+00:00',
   },
 });
+
+const getDashboardInputFromExport = (
+  splunkExport: SplunkOriginalDashboardExport,
+  migrationId: string
+): CreateMigrationItemInput<DashboardMigrationDashboard> => {
+  const originalDashboard = splunkExport.result;
+  return {
+    migration_id: migrationId,
+    original_dashboard: {
+      id: originalDashboard.id as string,
+      title: originalDashboard.label ?? originalDashboard.title ?? '',
+      description: originalDashboard.description ?? '',
+      data: originalDashboard['eai:data'] ?? '<empty/>',
+      format: 'xml',
+      vendor: 'splunk',
+      last_updated: originalDashboard.updated ?? new Date().toISOString(),
+      splunk_properties: {
+        app: originalDashboard['eai:acl.app'],
+        owner: originalDashboard['eai:acl.owner'],
+        sharing: originalDashboard['eai:acl.sharing'],
+      },
+    },
+  };
+};
 
 describe('Dashboard Migrations Dashboards client', () => {
   let dashboardMigrationDataDashboardsClient: DashboardMigrationsDataDashboardsClient;
@@ -60,8 +86,9 @@ describe('Dashboard Migrations Dashboards client', () => {
 
   describe('create', () => {
     it('should create a dashboard with the correct parameters', async () => {
-      const sampleDashboard = getSampleSplunkDashboard();
-      await dashboardMigrationDataDashboardsClient.create(sampleMigrationId, [sampleDashboard]);
+      const sampleDashboardExport = getSampleSplunkDashboard();
+      const sampleDashboard = getDashboardInputFromExport(sampleDashboardExport, sampleMigrationId);
+      await dashboardMigrationDataDashboardsClient.create([sampleDashboard]);
 
       expect(esClientMock.asInternalUser.bulk).toHaveBeenCalledWith({
         refresh: 'wait_for',
@@ -75,17 +102,17 @@ describe('Dashboard Migrations Dashboards client', () => {
             updated_by: currentUser.profile_uid,
             updated_at: expect.stringMatching(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/),
             original_dashboard: {
-              id: sampleDashboard.result.id,
-              title: sampleDashboard.result.label,
-              data: sampleDashboard.result['eai:data'],
+              id: sampleDashboardExport.result.id,
+              title: sampleDashboardExport.result.label,
+              data: sampleDashboardExport.result['eai:data'],
               description: '',
               format: 'xml',
               vendor: 'splunk',
-              last_updated: sampleDashboard.result.updated,
+              last_updated: sampleDashboardExport.result.updated,
               splunk_properties: {
-                app: sampleDashboard.result['eai:acl.app'],
-                sharing: sampleDashboard.result['eai:acl.sharing'],
-                owner: sampleDashboard.result['eai:acl.owner'],
+                app: sampleDashboardExport.result['eai:acl.app'],
+                sharing: sampleDashboardExport.result['eai:acl.sharing'],
+                owner: sampleDashboardExport.result['eai:acl.owner'],
               },
             },
           },
@@ -94,11 +121,13 @@ describe('Dashboard Migrations Dashboards client', () => {
     });
 
     it('should handle batching correctly', async () => {
-      const listOfSplunkDashbaords = Array.from({ length: 501 }, () => getSampleSplunkDashboard());
-      await dashboardMigrationDataDashboardsClient.create(
-        sampleMigrationId,
-        listOfSplunkDashbaords
+      const listOfSplunkDashbaordExports = Array.from({ length: 501 }, () =>
+        getSampleSplunkDashboard()
       );
+      const listOfSplunkDashbaords = listOfSplunkDashbaordExports.map((exportItem) =>
+        getDashboardInputFromExport(exportItem, sampleMigrationId)
+      );
+      await dashboardMigrationDataDashboardsClient.create(listOfSplunkDashbaords);
 
       expect(esClientMock.asInternalUser.bulk).toHaveBeenCalledTimes(2);
       expect(esClientMock.asInternalUser.bulk.mock.calls[0][0].operations).not.toBeUndefined();
@@ -108,12 +137,15 @@ describe('Dashboard Migrations Dashboards client', () => {
 
     describe('errors', () => {
       it('should handle errors during creation', async () => {
+        const sampleDashboardExport = getSampleSplunkDashboard();
+        const sampleDashboard = getDashboardInputFromExport(
+          sampleDashboardExport,
+          sampleMigrationId
+        );
         esClientMock.asInternalUser.bulk.mockRejectedValue(new Error('Indexing error'));
 
         await expect(
-          dashboardMigrationDataDashboardsClient.create(sampleMigrationId, [
-            getSampleSplunkDashboard(),
-          ])
+          dashboardMigrationDataDashboardsClient.create([sampleDashboard])
         ).rejects.toThrow('Indexing error');
       });
     });
@@ -138,7 +170,7 @@ describe('Dashboard Migrations Dashboards client', () => {
         index: INDEX_NAME,
         query: {
           bool: {
-            filter: { term: { migration_id: sampleMigrationId } },
+            filter: [{ term: { migration_id: sampleMigrationId } }],
           },
         },
         aggregations: {
@@ -165,10 +197,9 @@ describe('Dashboard Migrations Dashboards client', () => {
 
       expect(stats).toEqual({
         id: sampleMigrationId,
-        dashboards: { pending: 3, processing: 0, completed: 0, failed: 0, total: 4 },
+        items: { pending: 3, processing: 0, completed: 0, failed: 0, total: 4 },
         created_at: 1622548800000,
         last_updated_at: 1622635200000,
-        status: 'ready',
       });
     });
 
@@ -181,7 +212,7 @@ describe('Dashboard Migrations Dashboards client', () => {
           dashboardMigrationDataDashboardsClient.getStats(sampleMigrationId)
         ).rejects.toThrow(error);
         expect(logger.error).toHaveBeenCalledWith(
-          `Error getting dashboard migration stats: ${error}`
+          `Error getting migration dashboard stats: ${error}`
         );
       });
     });

@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
+import type {
   Layer as BaseLayer,
   Column as BaseColumn,
   GenericColumnWithMeta,

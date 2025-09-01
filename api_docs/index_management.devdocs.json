@@ -2086,7 +2086,7 @@
             "label": "health",
             "description": [],
             "signature": [
-              "\"green\" | \"yellow\" | \"red\""
+              "\"red\" | \"green\" | \"yellow\""
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -2492,20 +2492,6 @@
             "description": [],
             "signature": [
               "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; read_failure_store: boolean; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.EnhancedDataStreamFromEs.index_mode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "index_mode",
-            "description": [],
-            "signature": [
-              "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -3913,7 +3899,7 @@
         "label": "Health",
         "description": [],
         "signature": [
-          "\"green\" | \"yellow\" | \"red\""
+          "\"red\" | \"green\" | \"yellow\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,

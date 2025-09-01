@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -227,13 +227,17 @@ export class DiscoverPageObject extends FtrService {
 
     await (
       await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field);
+    ).type(field, { charByChar: true });
 
     const optionValue = value ?? field;
 
     await this.find.clickDisplayedByCssSelector(
       `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
+
+    await this.retry.waitFor('the dropdown to close', async () => {
+      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
+    });
 
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
@@ -418,8 +422,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {
-    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
-    await fieldSearch.type(name);
+    await this.retry.waitForWithTimeout('field search input value', 5000, async () => {
+      const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+      await fieldSearch.clearValue();
+      await fieldSearch.type(name);
+      return (await fieldSearch.getAttribute('value')) === name;
+    });
   }
 
   public async openFilterByFieldTypeInDocViewer() {

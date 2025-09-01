@@ -14,7 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
 import { CreateMonitorButton } from '../monitors_page/create_monitor_button';
 import { PLUGIN } from '../../../../../common/constants/plugin';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export const MonitorNotFoundPage: React.FC = () => {
   const { application } = useKibana<ClientPluginsStart>().services;

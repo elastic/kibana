@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StoredLinksByValueState910 } from './types';
+import type { StoredLinksByValueState910 } from './types';
 
 export function isLegacyState(state: object): state is StoredLinksByValueState910 {
   return 'attributes' in state;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterField } from '../../types';
+import type { FilterField } from '../../types';
 
 // avoid import from shareable_runtime
 const SHAREABLE_RUNTIME_NAME = 'kbn_canvas';

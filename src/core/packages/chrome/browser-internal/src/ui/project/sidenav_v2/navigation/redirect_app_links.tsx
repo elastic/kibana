@@ -10,7 +10,7 @@
 import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import useObservable from 'react-use/lib/useObservable';
-import { NavigationProps } from '../types';
+import type { NavigationProps } from '../types';
 
 export interface NavigationRedirectWrapperProps {
   application: NavigationProps['application'];

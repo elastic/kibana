@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import {
-  Condition,
-  isAlwaysCondition,
-  isAndCondition,
-  isBinaryFilterCondition,
-  isFilterCondition,
-  isNeverCondition,
-  isOrCondition,
-} from '@kbn/streams-schema';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Condition } from '@kbn/streamlang';
+import {
+  isAlwaysCondition,
+  isNeverCondition,
+  isFilterCondition,
+  isAndCondition,
+  isOrCondition,
+  getFilterOperator,
+  getFilterValue,
+} from '@kbn/streamlang';
 
 export function ConditionMessage({ condition }: { condition: Condition }) {
   if (isAlwaysCondition(condition) || isNeverCondition(condition)) {
@@ -24,24 +25,14 @@ export function ConditionMessage({ condition }: { condition: Condition }) {
   }
 
   if (isFilterCondition(condition)) {
-    if (isBinaryFilterCondition(condition)) {
-      return i18n.translate('xpack.streams.filterDisplay.binary', {
-        defaultMessage: '{field} {operator} {value}',
-        values: {
-          field: condition.field,
-          operator: condition.operator,
-          value: condition.value,
-        },
-      });
-    } else {
-      return i18n.translate('xpack.streams.filterDisplay.unary', {
-        defaultMessage: '{field} {operator}',
-        values: {
-          field: condition.field,
-          operator: condition.operator,
-        },
-      });
-    }
+    return i18n.translate('xpack.streams.filterDisplay.binary', {
+      defaultMessage: '{field} {operator} {value}',
+      values: {
+        field: condition.field,
+        operator: getFilterOperator(condition),
+        value: String(getFilterValue(condition)),
+      },
+    });
   } else if (isAndCondition(condition)) {
     if (condition.and.length === 0) {
       return '';

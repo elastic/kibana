@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   ConversationCategory,
   ConversationCreateProps,
-  ConversationResponse,
   Provider,
 } from '@kbn/elastic-assistant-common';
-import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const getMockConversation = (body?: Partial<ConversationCreateProps>) => ({
   title: 'Test Conversation',
@@ -28,16 +27,6 @@ export const getMockConversation = (body?: Partial<ConversationCreateProps>) => 
   replacements: {},
   category: 'assistant' as ConversationCategory,
   ...body,
-});
-
-export const getMockConversationResponse = (
-  body?: Partial<ConversationCreateProps>
-): ConversationResponse => ({
-  id: 'test-conversation-id',
-  createdAt: '2023-10-31T00:00:00.000Z',
-  users: [{ id: 'elastic', name: 'elastic@elastic.co' }],
-  namespace: 'default',
-  ...getMockConversation(body),
 });
 
 export const getMockCreatePrompt = (body?: Partial<PromptCreateProps>): PromptCreateProps => ({

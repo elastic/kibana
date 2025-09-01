@@ -11,7 +11,8 @@ import { castArray, once } from 'lodash';
 import { Metadata } from '@grpc/grpc-js';
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
-import { api, metrics, resources } from '@elastic/opentelemetry-node/sdk';
+import type { resources } from '@elastic/opentelemetry-node/sdk';
+import { api, metrics } from '@elastic/opentelemetry-node/sdk';
 import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
 import { PrometheusExporter } from './prometheus_exporter';
@@ -68,14 +69,27 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
     } = otlpConfig;
 
     if (url) {
+      const temporalityPreference =
+        (process.env.OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE as 'cumulative' | 'delta') ??
+        'cumulative';
+
       // We just need to push it as another grpc config
-      exporters.push({ grpc: { url, headers, exportIntervalMillis } });
+      exporters.push({
+        grpc: { url, headers, exportIntervalMillis, temporalityPreference },
+      });
     }
   }
 
   readers.push(
     ...exporters.map((exporterConfig) => {
       const variant = fromExternalVariant(exporterConfig);
+
+      const commonConfig = {
+        temporalityPreference:
+          variant.value.temporalityPreference === 'delta'
+            ? metrics.AggregationTemporality.DELTA
+            : metrics.AggregationTemporality.CUMULATIVE,
+      };
 
       let exporter: metrics.PushMetricExporter;
       switch (variant.type) {
@@ -85,17 +99,17 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
             metadata.add(key, value);
           });
           exporter = new OTLPMetricExporterGrpc({
+            ...commonConfig,
             metadata,
             url: variant.value.url,
-            temporalityPreference: metrics.AggregationTemporality.DELTA,
           });
           break;
         }
         case 'http':
           exporter = new OTLPMetricExporterHttp({
+            ...commonConfig,
             headers: variant.value.headers,
             url: variant.value.url,
-            temporalityPreference: metrics.AggregationTemporality.DELTA,
           });
           break;
       }

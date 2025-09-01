@@ -9,8 +9,8 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { SchemaConfig } from '../../..';
-import { ExtendedColumnConverterArgs } from '../convert';
+import type { SchemaConfig } from '../../..';
+import type { ExtendedColumnConverterArgs } from '../convert';
 import { convertMetricToColumns } from './metrics';
 
 const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();

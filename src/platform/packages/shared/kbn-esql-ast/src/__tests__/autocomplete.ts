@@ -13,28 +13,28 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
   ICommandCallbacks,
   ISuggestionItem,
-  getLocationFromCommandOrOptionName,
   Location,
 } from '../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { parse } from '../parser';
 import type { ESQLCommand } from '../types';
-import {
+import type {
   FieldType,
-  FunctionDefinitionTypes,
   FunctionParameterType,
   FunctionReturnType,
   SupportedDataType,
 } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
@@ -154,7 +154,7 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
     license === 'platinum',
   activeProduct = { type: 'observability', tier: 'complete' }
 ) {
@@ -188,9 +188,7 @@ export function getFunctionSignaturesByReturnType(
         if (hasRestrictedSignature) {
           const availableSignatures = signatures.filter((signature) => {
             if (!signature.license) return true;
-            return hasMinimumLicenseRequired(
-              signature.license.toLocaleLowerCase() as ESQLLicenseType
-            );
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
           });
 
           if (availableSignatures.length === 0) {

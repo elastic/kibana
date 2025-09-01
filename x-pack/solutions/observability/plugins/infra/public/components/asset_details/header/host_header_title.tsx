@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { AgentIcon } from '@kbn/custom-icons';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { PageTitleWithPopover } from './page_title_with_popover';
 
 export const HostHeaderTitle = ({
@@ -18,7 +18,7 @@ export const HostHeaderTitle = ({
   title?: string;
   schema?: DataSchemaFormat | null;
 }) => {
-  return schema === DataSchemaFormat.SEMCONV ? (
+  return schema === 'semconv' ? (
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>{title}</EuiFlexItem>
       <EuiFlexItem grow={false}>

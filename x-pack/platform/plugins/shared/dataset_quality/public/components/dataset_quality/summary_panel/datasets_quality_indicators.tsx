@@ -17,7 +17,7 @@ import {
   EuiSkeletonTitle,
 } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { InfoIndicators } from '../../../../common/types';
+import type { InfoIndicators } from '../../../../common/types';
 import { useSummaryPanelContext } from '../../../hooks';
 import {
   summaryPanelQualityDegradedText,
@@ -46,6 +46,8 @@ export function DatasetsQualityIndicators() {
       meta: {
         rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
+        description:
+          '[ttfmp_dataset_quality] The dataset quality has finished loading. Summary panel is showing the qualities categorized.',
       },
     });
   }
@@ -70,7 +72,7 @@ export function DatasetsQualityIndicators() {
           />
           <VerticalRule />
           <QualityIndicator
-            value={datasetsQuality.degraded}
+            value={datasetsQuality.warning}
             quality="warning"
             description={summaryPanelQualityDegradedText}
             isLoading={isDatasetsQualityLoading}
