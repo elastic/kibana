@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHighlight,
   EuiIcon,
   EuiInputPopover,
@@ -331,26 +332,18 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const helpText = loadError || (isLoading ? i18n.LOADING_WORKFLOWS : undefined);
 
   return (
-    <>
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        style={{ marginBottom: '4px' }}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>{i18n.WORKFLOW_ID_LABEL}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={handleCreateNewWorkflow} external>
-            {/* Todo: add real icon from figma, doesn't exist in eui? */}
-            {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+    <EuiFormRow
+      label={i18n.WORKFLOW_ID_LABEL}
+      labelAppend={
+        <EuiLink onClick={handleCreateNewWorkflow} external>
+          {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
+        </EuiLink>
+      }
+      helpText={helpText}
+      error={displayError}
+      isInvalid={!!displayError}
+      fullWidth
+    >
       {isLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
@@ -405,13 +398,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           )}
         </EuiSelectable>
       )}
-
-      {(displayError || helpText) && (
-        <EuiText size="s" color={displayError ? 'danger' : 'subdued'}>
-          {displayError || helpText}
-        </EuiText>
-      )}
-    </>
+    </EuiFormRow>
   );
 };
 
