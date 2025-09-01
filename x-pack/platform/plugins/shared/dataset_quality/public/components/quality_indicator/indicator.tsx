@@ -6,10 +6,10 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { QualityIndicators, InfoIndicators } from '../../../common/types';
+import type { QualityIndicators } from '../../../common/types';
 
 export function QualityIndicator({
   quality,
@@ -18,10 +18,17 @@ export function QualityIndicator({
   quality: QualityIndicators;
   description: string | ReactNode;
 }) {
-  const qualityColors: Record<QualityIndicators, InfoIndicators> = {
-    poor: 'danger',
-    degraded: 'warning',
-    good: 'success',
+  const { euiTheme } = useEuiTheme();
+  const qualityColors: Record<QualityIndicators, string> = {
+    poor: euiTheme.colors.backgroundLightDanger,
+    degraded: euiTheme.colors.backgroundLightWarning,
+    good: euiTheme.colors.backgroundLightSuccess,
+  };
+
+  const qualityTextColors: Record<QualityIndicators, string> = {
+    poor: euiTheme.colors.textDanger,
+    degraded: euiTheme.colors.textWarning,
+    good: euiTheme.colors.textSuccess,
   };
 
   const qualityIcons: Record<QualityIndicators, IconType> = {
@@ -32,7 +39,9 @@ export function QualityIndicator({
 
   return (
     <EuiBadge color={qualityColors[quality]} iconType={qualityIcons[quality]}>
-      <EuiText size="relative">{description}</EuiText>
+      <EuiText color={qualityTextColors[quality]} size="relative">
+        {description}
+      </EuiText>
     </EuiBadge>
   );
 }
