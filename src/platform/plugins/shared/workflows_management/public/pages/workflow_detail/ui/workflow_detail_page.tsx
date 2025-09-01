@@ -50,6 +50,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
+  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
+  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
+
   chrome!.setBreadcrumbs([
     {
       text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
@@ -80,12 +86,22 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       });
       return;
     }
-    updateWorkflow.mutate({
-      id,
-      workflow: {
-        yaml: workflowYaml,
+    updateWorkflow.mutate(
+      {
+        id,
+        workflow: {
+          yaml: workflowYaml,
+        },
       },
-    });
+      {
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err as Error, {
+            toastLifeTimeMs: 3000,
+            title: 'Failed to save workflow',
+          });
+        },
+      }
+    );
   };
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
@@ -173,12 +189,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     false
   );
 
-  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
-  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
-  const [hasChanges, setHasChanges] = useState(false);
-
-  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
-
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
     setHasChanges(false);
@@ -209,6 +219,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
         canSaveWorkflow={canSaveWorkflow}
+        isValid={workflow?.valid ?? true}
         isEnabled={workflow?.enabled ?? false}
         handleRunClick={handleRunClick}
         handleSave={handleSave}
