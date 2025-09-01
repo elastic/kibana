@@ -15,7 +15,7 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
 
   return {
     async assertSvlSearchSideNavExists() {
-      await testSubjects.existOrFail('svlSearchSideNav');
+      await testSubjects.existOrFail('~svlSearchSideNav');
     },
     languageClients: {
       async expectLanguagePanelExists(id: string) {

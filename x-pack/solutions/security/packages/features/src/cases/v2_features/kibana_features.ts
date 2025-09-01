@@ -19,8 +19,8 @@ import {
 import type { CasesFeatureParams } from '../types';
 
 export const getCasesBaseKibanaFeatureV2 = ({
-  uiCapabilities,
   apiTags,
+  uiCapabilities,
   savedObjects,
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
@@ -52,7 +52,7 @@ export const getCasesBaseKibanaFeatureV2 = ({
     cases: [APP_ID],
     privileges: {
       all: {
-        api: apiTags.all,
+        api: apiTags.default.all,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -66,7 +66,7 @@ export const getCasesBaseKibanaFeatureV2 = ({
           all: [...savedObjects.files],
           read: [...savedObjects.files],
         },
-        ui: [...uiCapabilities.all, ...uiCapabilities.assignCase],
+        ui: [...uiCapabilities.default.all, ...uiCapabilities.default.assignCase],
         replacedBy: {
           default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
@@ -78,7 +78,7 @@ export const getCasesBaseKibanaFeatureV2 = ({
         },
       },
       read: {
-        api: apiTags.read,
+        api: apiTags.default.read,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -88,7 +88,7 @@ export const getCasesBaseKibanaFeatureV2 = ({
           all: [],
           read: [...savedObjects.files],
         },
-        ui: uiCapabilities.read,
+        ui: uiCapabilities.default.read,
         replacedBy: {
           default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['read'] }],
           minimal: [{ feature: CASES_FEATURE_ID_V3, privileges: ['minimal_read'] }],
