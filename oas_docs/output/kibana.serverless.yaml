@@ -10999,7 +10999,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CancelActionRequestBody'
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_CancelRouteRequestBody'
         required: true
       responses:
         '200':
@@ -69275,7 +69275,10 @@ components:
         type: string
       minItems: 1
       type: array
-    Security_Endpoint_Management_API_CancelActionRequestBody:
+    Security_Endpoint_Management_API_CancelRouteRequestBody:
+      example:
+        comment: Action no longer needed due to resolved incident
+        id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
       type: object
       properties:
         comment:
@@ -70112,13 +70115,6 @@ components:
             type: string
           minItems: 1
           type: array
-        case_ids:
-          description: Case IDs to be updated
-          items:
-            minLength: 1
-            type: string
-          minItems: 1
-          type: array
         comment:
           description: Optional comment for the action
           type: string
@@ -70130,13 +70126,6 @@ components:
           minItems: 1
           type: array
         parameters:
-          description: Script execution parameters that vary by agent type
-          discriminator:
-            mapping:
-              crowdstrike: '#/components/schemas/Security_Endpoint_Management_API_CrowdStrikeRunScriptParameters'
-              microsoft_defender_endpoint: '#/components/schemas/Security_Endpoint_Management_API_MSDefenderRunScriptParameters'
-              sentinel_one: '#/components/schemas/Security_Endpoint_Management_API_SentinelOneRunScriptParameters'
-            propertyName: agent_type
           oneOf:
             - $ref: '#/components/schemas/Security_Endpoint_Management_API_CrowdStrikeRunScriptParameters'
             - $ref: '#/components/schemas/Security_Endpoint_Management_API_MSDefenderRunScriptParameters'
