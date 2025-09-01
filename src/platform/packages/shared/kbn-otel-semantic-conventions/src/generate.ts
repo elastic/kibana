@@ -14,7 +14,6 @@ import * as fs from 'fs';
 import { processSemconvYaml } from './lib/generate_semconv';
 
 function generateTypeScriptFile(result: any, outputPath: string): void {
-  const timestamp = new Date().toISOString();
   const { totalFields, stats } = result;
 
   // Convert structured object to string representation with single quotes (for Prettier compliance)
@@ -27,15 +26,15 @@ function generateTypeScriptFile(result: any, outputPath: string): void {
     const lines = entries.map(([key, value]) => {
       const { name, description, type, example } = value;
 
-      // Escape single quotes in strings
-      const escapedName = name.replace(/'/g, "\\'");
-      const escapedDescription = description.replace(/'/g, "\\'");
-      const escapedType = type.replace(/'/g, "\\'");
+      // Properly escape both backslashes and single quotes in strings
+      const escapedName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const escapedDescription = description.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const escapedType = type.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
       let fieldObject = `    name: '${escapedName}',\n    description: '${escapedDescription}',\n    type: '${escapedType}',`;
 
       if (example !== undefined) {
-        const escapedExample = String(example).replace(/'/g, "\\'");
+        const escapedExample = String(example).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         fieldObject += `\n    example: '${escapedExample}',`;
       }
 
@@ -60,7 +59,6 @@ function generateTypeScriptFile(result: any, outputPath: string): void {
  * OpenTelemetry semantic conventions field definitions.
  *
  * This file is auto-generated. Do not edit manually.
- * Generated on: ${timestamp}
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: ${stats.registryGroups}
  * Metric groups: ${stats.metricGroups}
