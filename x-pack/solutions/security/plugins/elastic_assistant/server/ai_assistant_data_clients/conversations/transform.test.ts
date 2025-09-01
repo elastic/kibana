@@ -14,12 +14,13 @@ import {
 } from './transforms';
 import type { EsConversationSchema } from './types';
 
+const userAsUser = {
+  id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+  name: 'elastic',
+};
+
 const getEsConversationMock = (): EsConversationSchema => {
   return {
-    summary: {
-      '@timestamp': '2025-08-19T13:26:01.746Z',
-      semantic_content: 'Very nice demo semantic content 4.',
-    },
     '@timestamp': '2025-08-19T10:49:52.884Z',
     updated_at: '2025-08-19T13:26:01.746Z',
     api_config: {
@@ -28,6 +29,7 @@ const getEsConversationMock = (): EsConversationSchema => {
     },
     namespace: 'default',
     created_at: '2025-08-19T10:49:52.884Z',
+    created_by: userAsUser,
     messages: [
       {
         '@timestamp': '2025-08-19T10:49:53.799Z',
@@ -56,12 +58,7 @@ const getEsConversationMock = (): EsConversationSchema => {
     replacements: [],
     title: 'Viewing the Number of Open Alerts in Elastic Security',
     category: 'assistant',
-    users: [
-      {
-        name: 'elastic',
-        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      },
-    ],
+    users: [userAsUser],
     id: 'a565baa8-5566-47b2-ab69-807248b2fc46',
   };
 };
@@ -115,13 +112,10 @@ describe('transforms', () => {
       expect(conversation).toEqual({
         timestamp: '2025-08-19T10:49:52.884Z',
         createdAt: '2025-08-19T10:49:52.884Z',
-        users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
+        createdBy: userAsUser,
+        users: [userAsUser],
         title: 'Viewing the Number of Open Alerts in Elastic Security',
         category: 'assistant',
-        summary: {
-          timestamp: '2025-08-19T13:26:01.746Z',
-          semanticContent: 'Very nice demo semantic content 4.',
-        },
         apiConfig: { actionTypeId: '.gen-ai', connectorId: 'gpt-4-1' },
         messages: [
           {
@@ -156,13 +150,10 @@ describe('transforms', () => {
         {
           timestamp: '2025-08-19T10:49:52.884Z',
           createdAt: '2025-08-19T10:49:52.884Z',
-          users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
+          createdBy: userAsUser,
+          users: [userAsUser],
           title: 'Viewing the Number of Open Alerts in Elastic Security',
           category: 'assistant',
-          summary: {
-            timestamp: '2025-08-19T13:26:01.746Z',
-            semanticContent: 'Very nice demo semantic content 4.',
-          },
           apiConfig: { actionTypeId: '.gen-ai', connectorId: 'gpt-4-1' },
           messages: [
             {
@@ -200,13 +191,10 @@ describe('transforms', () => {
         {
           timestamp: '2025-08-19T10:49:52.884Z',
           createdAt: '2025-08-19T10:49:52.884Z',
-          users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
+          createdBy: userAsUser,
+          users: [userAsUser],
           title: 'Viewing the Number of Open Alerts in Elastic Security',
           category: 'assistant',
-          summary: {
-            timestamp: '2025-08-19T13:26:01.746Z',
-            semanticContent: 'Very nice demo semantic content 4.',
-          },
           apiConfig: { actionTypeId: '.gen-ai', connectorId: 'gpt-4-1' },
           messages: [
             {
@@ -251,10 +239,6 @@ describe('transforms', () => {
         'apiConfig.defaultSystemPromptId',
         'apiConfig.model',
         'apiConfig.provider',
-        'summary',
-        'summary.timestamp',
-        'summary.semanticContent',
-        'summary.summarizedMessageIds',
       ];
       const sourceNames = transformFieldNamesToSourceScheme(fields);
       expect(sourceNames).toEqual([
@@ -265,10 +249,6 @@ describe('transforms', () => {
         'api_config.default_system_prompt_id',
         'api_config.model',
         'api_config.provider',
-        'summary',
-        'summary.@timestamp',
-        'summary.semantic_content',
-        'summary.summarized_message_ids',
       ]);
     });
   });
