@@ -819,21 +819,21 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
 
-      const debugg = topsort.map((nodeId) => nodeId.split('_')[0]);
-
       expect(topsort).toEqual([
-        'continue_testRetryConnectorStep',
-        'fallback_testRetryConnectorStep',
-        'normalPath_fallback_testRetryConnectorStep',
-        'retry_testRetryConnectorStep',
+        'enterOnFailure(testRetryConnectorStep)',
+        'enterContinue_testRetryConnectorStep',
+        'enterTryBlock_testRetryConnectorStep',
+        'enterNormalPath_testRetryConnectorStep',
+        'enterRetry_testRetryConnectorStep',
         'testRetryConnectorStep',
-        'exitRetry(retry_testRetryConnectorStep)',
-        'exit_normalPath_fallback_testRetryConnectorStep',
-        'fallbackPath_fallback_testRetryConnectorStep',
+        'exitRetry_testRetryConnectorStep',
+        'exitNormalPath_testRetryConnectorStep',
+        'enterFallbackPath_testRetryConnectorStep',
         'fallbackAction',
-        'exit_fallbackPath_fallback_testRetryConnectorStep',
-        'exitTryBlock(fallback_testRetryConnectorStep)',
-        'exitContinue(continue_testRetryConnectorStep)',
+        'exitFallbackPath_testRetryConnectorStep',
+        'exitTryBlock_testRetryConnectorStep',
+        'exitContinue_testRetryConnectorStep',
+        'exitOnFailure(testRetryConnectorStep)',
       ]);
     });
 
@@ -843,52 +843,60 @@ describe('convertToWorkflowGraph', () => {
       expect(edges).toEqual(
         expect.arrayContaining([
           {
-            v: 'fallback_testRetryConnectorStep',
-            w: 'normalPath_fallback_testRetryConnectorStep',
+            v: 'enterOnFailure(testRetryConnectorStep)',
+            w: 'enterContinue_testRetryConnectorStep',
           },
           {
-            v: 'retry_testRetryConnectorStep',
+            v: 'exitContinue_testRetryConnectorStep',
+            w: 'exitOnFailure(testRetryConnectorStep)',
+          },
+          {
+            v: 'enterContinue_testRetryConnectorStep',
+            w: 'enterTryBlock_testRetryConnectorStep',
+          },
+          {
+            v: 'exitTryBlock_testRetryConnectorStep',
+            w: 'exitContinue_testRetryConnectorStep',
+          },
+          {
+            v: 'enterTryBlock_testRetryConnectorStep',
+            w: 'enterNormalPath_testRetryConnectorStep',
+          },
+          {
+            v: 'exitNormalPath_testRetryConnectorStep',
+            w: 'exitTryBlock_testRetryConnectorStep',
+          },
+          {
+            v: 'enterNormalPath_testRetryConnectorStep',
+            w: 'enterRetry_testRetryConnectorStep',
+          },
+          {
+            v: 'exitRetry_testRetryConnectorStep',
+            w: 'exitNormalPath_testRetryConnectorStep',
+          },
+          {
+            v: 'enterRetry_testRetryConnectorStep',
             w: 'testRetryConnectorStep',
           },
           {
             v: 'testRetryConnectorStep',
-            w: 'exitRetry(retry_testRetryConnectorStep)',
+            w: 'exitRetry_testRetryConnectorStep',
           },
           {
-            v: 'normalPath_fallback_testRetryConnectorStep',
-            w: 'retry_testRetryConnectorStep',
+            v: 'enterTryBlock_testRetryConnectorStep',
+            w: 'enterFallbackPath_testRetryConnectorStep',
           },
           {
-            v: 'exitRetry(retry_testRetryConnectorStep)',
-            w: 'exit_normalPath_fallback_testRetryConnectorStep',
+            v: 'exitFallbackPath_testRetryConnectorStep',
+            w: 'exitTryBlock_testRetryConnectorStep',
           },
           {
-            v: 'exit_normalPath_fallback_testRetryConnectorStep',
-            w: 'exitTryBlock(fallback_testRetryConnectorStep)',
-          },
-          {
-            v: 'fallback_testRetryConnectorStep',
-            w: 'fallbackPath_fallback_testRetryConnectorStep',
-          },
-          {
-            v: 'fallbackPath_fallback_testRetryConnectorStep',
+            v: 'enterFallbackPath_testRetryConnectorStep',
             w: 'fallbackAction',
           },
           {
             v: 'fallbackAction',
-            w: 'exit_fallbackPath_fallback_testRetryConnectorStep',
-          },
-          {
-            v: 'exit_fallbackPath_fallback_testRetryConnectorStep',
-            w: 'exitTryBlock(fallback_testRetryConnectorStep)',
-          },
-          {
-            v: 'continue_testRetryConnectorStep',
-            w: 'fallback_testRetryConnectorStep',
-          },
-          {
-            v: 'exitTryBlock(fallback_testRetryConnectorStep)',
-            w: 'exitContinue(continue_testRetryConnectorStep)',
+            w: 'exitFallbackPath_testRetryConnectorStep',
           },
         ])
       );
@@ -896,11 +904,11 @@ describe('convertToWorkflowGraph', () => {
 
     it('should configure retry node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const retryNode = executionGraph.node('retry_testRetryConnectorStep');
+      const retryNode = executionGraph.node('enterRetry_testRetryConnectorStep');
       expect(retryNode).toEqual({
-        id: 'retry_testRetryConnectorStep',
+        id: 'enterRetry_testRetryConnectorStep',
         type: 'enter-retry',
-        exitNodeId: 'exitRetry(retry_testRetryConnectorStep)',
+        exitNodeId: 'exitRetry_testRetryConnectorStep',
         configuration: {
           'max-attempts': 3,
           delay: '5s',
@@ -910,86 +918,78 @@ describe('convertToWorkflowGraph', () => {
 
     it('should configure continue node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const retryNode = executionGraph.node('continue_testRetryConnectorStep');
-      expect(retryNode).toEqual({
-        id: 'continue_testRetryConnectorStep',
+      const continueNode = executionGraph.node('enterContinue_testRetryConnectorStep');
+      expect(continueNode).toEqual({
+        id: 'enterContinue_testRetryConnectorStep',
         type: 'enter-continue',
-        exitNodeId: 'exitContinue(continue_testRetryConnectorStep)',
+        exitNodeId: 'exitContinue_testRetryConnectorStep',
       });
     });
 
     describe('fallback related nodes', () => {
       it('should configure EnterTryBlockNode', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const enterTryBlockNode = executionGraph.node('fallback_testRetryConnectorStep');
+        const enterTryBlockNode = executionGraph.node('enterTryBlock_testRetryConnectorStep');
         expect(enterTryBlockNode).toEqual({
-          id: 'fallback_testRetryConnectorStep',
-          exitNodeId: 'exitTryBlock(fallback_testRetryConnectorStep)',
+          id: 'enterTryBlock_testRetryConnectorStep',
+          exitNodeId: 'exitTryBlock_testRetryConnectorStep',
           type: 'enter-try-block',
-          enterNormalPathNodeId: 'normalPath_fallback_testRetryConnectorStep',
+          enterNormalPathNodeId: 'enterNormalPath_testRetryConnectorStep',
         });
       });
 
       it('should configure ExitTryBlockNode', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const exitTryBlockNode = executionGraph.node(
-          'exitTryBlock(fallback_testRetryConnectorStep)'
-        );
+        const exitTryBlockNode = executionGraph.node('exitTryBlock_testRetryConnectorStep');
         expect(exitTryBlockNode).toEqual({
           type: 'exit-try-block',
-          id: 'exitTryBlock(fallback_testRetryConnectorStep)',
-          enterNodeId: 'fallback_testRetryConnectorStep',
+          id: 'exitTryBlock_testRetryConnectorStep',
+          enterNodeId: 'enterTryBlock_testRetryConnectorStep',
         });
       });
 
       it('should configure EnterNormalPathNode', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const enterNormalPathNode = executionGraph.node(
-          'normalPath_fallback_testRetryConnectorStep'
-        );
+        const enterNormalPathNode = executionGraph.node('enterNormalPath_testRetryConnectorStep');
         expect(enterNormalPathNode).toEqual({
-          id: 'normalPath_fallback_testRetryConnectorStep',
+          id: 'enterNormalPath_testRetryConnectorStep',
           type: 'enter-normal-path',
-          enterZoneNodeId: 'fallback_testRetryConnectorStep',
-          enterFailurePathNodeId: 'fallbackPath_fallback_testRetryConnectorStep',
+          enterZoneNodeId: 'enterNormalPath_testRetryConnectorStep',
+          enterFailurePathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
 
       it('should configure ExitNormalPathNode', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const exitNormalPathNode = executionGraph.node(
-          'exit_normalPath_fallback_testRetryConnectorStep'
-        );
+        const exitNormalPathNode = executionGraph.node('exitNormalPath_testRetryConnectorStep');
         expect(exitNormalPathNode).toEqual({
-          id: 'exit_normalPath_fallback_testRetryConnectorStep',
+          id: 'exitNormalPath_testRetryConnectorStep',
           type: 'exit-normal-path',
-          enterNodeId: 'normalPath_fallback_testRetryConnectorStep',
-          exitOnFailureZoneNodeId: 'exitTryBlock(fallback_testRetryConnectorStep)',
+          enterNodeId: 'enterNormalPath_testRetryConnectorStep',
+          exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });
       });
 
       it('should configure EnterFallbackPathNode', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
         const enterFallbackPathNode = executionGraph.node(
-          'fallbackPath_fallback_testRetryConnectorStep'
+          'enterFallbackPath_testRetryConnectorStep'
         );
         expect(enterFallbackPathNode).toEqual({
-          id: 'fallbackPath_fallback_testRetryConnectorStep',
+          id: 'enterFallbackPath_testRetryConnectorStep',
           type: 'enter-fallback-path',
-          enterZoneNodeId: 'fallback_testRetryConnectorStep',
+          enterZoneNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
 
       it('should configure ExitFallbackPathNode', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-        const exitFallbackPathNode = executionGraph.node(
-          'exit_fallbackPath_fallback_testRetryConnectorStep'
-        );
+        const exitFallbackPathNode = executionGraph.node('exitFallbackPath_testRetryConnectorStep');
         expect(exitFallbackPathNode).toEqual({
-          id: 'exit_fallbackPath_fallback_testRetryConnectorStep',
+          id: 'exitFallbackPath_testRetryConnectorStep',
           type: 'exit-fallback-path',
-          enterNodeId: 'fallbackPath_fallback_testRetryConnectorStep',
-          exitOnFailureZoneNodeId: 'exitTryBlock(fallback_testRetryConnectorStep)',
+          enterNodeId: 'enterFallbackPath_testRetryConnectorStep',
+          exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });
       });
     });
@@ -1177,10 +1177,11 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
       expect(topsort).toEqual([
-        'continue_testForeachConnectorStep',
-        'fallback_testForeachConnectorStep',
-        'normalPath_fallback_testForeachConnectorStep',
-        'retry_testForeachConnectorStep',
+        'enterOnFailure(testForeachConnectorStep)',
+        'enterContinue_testForeachConnectorStep',
+        'enterTryBlock_testForeachConnectorStep',
+        'enterNormalPath_testForeachConnectorStep',
+        'enterRetry_testForeachConnectorStep',
         'if_testForeachConnectorStep',
         'enterThen(if_testForeachConnectorStep)',
         'foreach_testForeachConnectorStep',
@@ -1188,13 +1189,14 @@ describe('convertToWorkflowGraph', () => {
         'exitForeach(foreach_testForeachConnectorStep)',
         'exitThen(if_testForeachConnectorStep)',
         'exitCondition(if_testForeachConnectorStep)',
-        'exitRetry(retry_testForeachConnectorStep)',
-        'exit_normalPath_fallback_testForeachConnectorStep',
-        'fallbackPath_fallback_testForeachConnectorStep',
+        'exitRetry_testForeachConnectorStep',
+        'exitNormalPath_testForeachConnectorStep',
+        'enterFallbackPath_testForeachConnectorStep',
         'innerFallbackStep',
-        'exit_fallbackPath_fallback_testForeachConnectorStep',
-        'exitTryBlock(fallback_testForeachConnectorStep)',
-        'exitContinue(continue_testForeachConnectorStep)',
+        'exitFallbackPath_testForeachConnectorStep',
+        'exitTryBlock_testForeachConnectorStep',
+        'exitContinue_testForeachConnectorStep',
+        'exitOnFailure(testForeachConnectorStep)',
       ]);
     });
   });

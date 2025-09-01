@@ -46,28 +46,10 @@ import type {
 } from '../../types/execution';
 
 /**
- * TODO: We don't have primitive RetryStep so far, but we may need it in the future.
+ * TODO: We don't have primitives for OnFailureStep so far, but we may need it in the future.
  * For now, we only use it internally when building the graph from the workflow definition.
  * And only as a wrapper for steps that have 'on-failure' with 'retry' defined.
  */
-interface RetryStep extends BaseStep {
-  type: 'retry';
-  steps: BaseStep[];
-  retry: WorkflowRetry;
-}
-
-interface ContinueStep extends BaseStep {
-  name: string;
-  type: 'continue';
-  steps: BaseStep[];
-}
-
-interface FallbackStep extends BaseStep {
-  name: string;
-  type: 'fallback';
-  normalPathSteps: BaseStep[];
-  fallbackPathSteps: BaseStep[];
-}
 
 interface OnFailureStep extends BaseStep {
   name: string;
@@ -105,19 +87,6 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
   if ((modifiedCurrentStep as OnFailureStep).type === 'on-failure') {
     return visitOnFailureStep(graph, previousStep, modifiedCurrentStep as OnFailureStep);
   }
-
-  // if ((modifiedCurrentStep as ContinueStep).type === 'continue') {
-  //   return visitContinueStep(graph, previousStep, modifiedCurrentStep as ContinueStep);
-  // }
-
-  // if ((modifiedCurrentStep as RetryStep).type === 'retry') {
-  //   // Retry steps are treated as atomic steps for graph purposes
-  //   return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
-  // }
-
-  // if ((modifiedCurrentStep as FallbackStep).type === 'fallback') {
-  //   return visitFallbackStep(graph, previousStep, modifiedCurrentStep as FallbackStep);
-  // }
 
   return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
 }
@@ -430,175 +399,15 @@ function insertGraphBetweenNodes(
   startNodeId: string,
   endNodeId: string
 ): void {
-  try {
-    const topologicalOrder = graphlib.alg.topsort(subGraph);
-    graph.setEdge(startNodeId, topologicalOrder[0]);
-    graph.setEdge(topologicalOrder[topologicalOrder.length - 1], endNodeId);
-    subGraph.nodes().forEach((nodeId) => {
-      graph.setNode(nodeId, subGraph.node(nodeId));
-    });
-    subGraph.edges().forEach((edgeObj) => {
-      graph.setEdge(edgeObj.v, edgeObj.w);
-    });
-
-    try {
-      const topologicalOrderAAAA = graphlib.alg.topsort(graph);
-    } catch (e) {
-      throw e;
-    }
-    console.log('ff');
-  } catch (e) {
-    throw e;
-  }
-}
-
-function visitFallbackStep(
-  graph: graphlib.Graph,
-  previousStep: any,
-  currentStep: FallbackStep
-): any {
-  const enterTryBlockNodeId = getNodeId(currentStep);
-  const exitTryBlockNodeId = `exitTryBlock(${enterTryBlockNodeId})`;
-  const normalPathSteps: BaseStep[] = currentStep.normalPathSteps || [];
-  const fallbackPathSteps: BaseStep[] = currentStep.fallbackPathSteps || [];
-  const enterNormalPathNodeId = `normalPath_${enterTryBlockNodeId}`;
-  const exitNormalPathNodeId = `exit_${enterNormalPathNodeId}`;
-  const enterFallbackPathNodeId = `fallbackPath_${enterTryBlockNodeId}`;
-  const exitFallbackPathNodeId = `exit_${enterFallbackPathNodeId}`;
-
-  const enterTryBlockNode: EnterTryBlockNode = {
-    id: enterTryBlockNodeId,
-    exitNodeId: exitTryBlockNodeId,
-    type: 'enter-try-block',
-    enterNormalPathNodeId,
-  };
-  const exitTryBlockNode: ExitTryBlockNode = {
-    type: 'exit-try-block',
-    id: exitTryBlockNodeId,
-    enterNodeId: enterTryBlockNodeId,
-  };
-  const enterNormalPathNode: EnterNormalPathNode = {
-    id: enterTryBlockNode.enterNormalPathNodeId,
-    type: 'enter-normal-path',
-    enterZoneNodeId: enterTryBlockNode.id,
-    enterFailurePathNodeId: enterFallbackPathNodeId,
-  };
-
-  graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
-  graph.setEdge(enterTryBlockNodeId, enterNormalPathNode.id);
-  let thenPreviousStep: any = enterNormalPathNode;
-  normalPathSteps.forEach(
-    (ifTrueCurrentStep: any) =>
-      (thenPreviousStep = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep))
-  );
-  const exitNormalPathNode: ExitNormalPathNode = {
-    id: exitNormalPathNodeId,
-    type: 'exit-normal-path',
-    enterNodeId: enterTryBlockNode.enterNormalPathNodeId,
-    exitOnFailureZoneNodeId: exitTryBlockNode.id,
-  };
-  graph.setNode(exitNormalPathNode.id, exitNormalPathNode);
-  graph.setEdge(getNodeId(thenPreviousStep), exitNormalPathNode.id);
-  graph.setEdge(exitNormalPathNode.id, exitTryBlockNode.id);
-
-  if (fallbackPathSteps?.length > 0) {
-    const enterFallbackPathNode: EnterFallbackPathNode = {
-      id: enterFallbackPathNodeId,
-      type: 'enter-fallback-path',
-      enterZoneNodeId: enterTryBlockNode.id,
-    };
-    graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
-    graph.setEdge(enterTryBlockNodeId, enterFallbackPathNode.id);
-    let elsePreviousStep: any = enterFallbackPathNode;
-    fallbackPathSteps.forEach(
-      (ifFalseCurrentStep: any) =>
-        (elsePreviousStep = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep))
-    );
-    const exitFallbackPathNode: ExitFallbackPathNode = {
-      id: exitFallbackPathNodeId,
-      type: 'exit-fallback-path',
-      enterNodeId: enterFallbackPathNodeId,
-      exitOnFailureZoneNodeId: exitTryBlockNode.id,
-    };
-    graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
-    graph.setEdge(getNodeId(elsePreviousStep), exitFallbackPathNode.id);
-    graph.setEdge(exitFallbackPathNode.id, exitTryBlockNode.id);
-  }
-
-  graph.setNode(exitTryBlockNode.id, exitTryBlockNode);
-  graph.setNode(enterTryBlockNodeId, enterTryBlockNode);
-
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), enterTryBlockNodeId);
-  }
-
-  return exitTryBlockNode;
-}
-
-function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: RetryStep): any {
-  const enterRetryNodeId = getNodeId(currentStep);
-  const retryNestedSteps: BaseStep[] = currentStep.steps || [];
-  const exitNodeId = `exitRetry(${enterRetryNodeId})`;
-  const enterRetryNode: EnterRetryNode = {
-    id: enterRetryNodeId,
-    type: 'enter-retry',
-    exitNodeId,
-    configuration: currentStep.retry,
-  };
-  const exitRetryNode: ExitRetryNode = {
-    type: 'exit-retry',
-    id: exitNodeId,
-    startNodeId: enterRetryNodeId,
-  };
-
-  let previousNodeToLink: any = enterRetryNode;
-  retryNestedSteps.forEach(
-    (step: any) => (previousNodeToLink = visitAbstractStep(graph, previousNodeToLink, step))
-  );
-
-  graph.setNode(exitRetryNode.id, exitRetryNode);
-  graph.setEdge(getNodeId(previousNodeToLink), exitRetryNode.id);
-  graph.setNode(enterRetryNodeId, enterRetryNode);
-
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), enterRetryNodeId);
-  }
-
-  return exitRetryNode;
-}
-
-function visitContinueStep(
-  graph: graphlib.Graph,
-  previousStep: any,
-  currentStep: ContinueStep
-): any {
-  const enterContinueNodeId = getNodeId(currentStep);
-  const retryNestedSteps: BaseStep[] = currentStep.steps || [];
-  const exitNodeId = `exitContinue(${enterContinueNodeId})`;
-  const enterContinueNode: EnterContinueNode = {
-    id: enterContinueNodeId,
-    type: 'enter-continue',
-    exitNodeId,
-  };
-  const exitContinueNode: ExitContinueNode = {
-    type: 'exit-continue',
-    id: exitNodeId,
-  };
-
-  let previousNodeToLink: any = enterContinueNode;
-  retryNestedSteps.forEach(
-    (step: any) => (previousNodeToLink = visitAbstractStep(graph, previousNodeToLink, step))
-  );
-
-  graph.setNode(exitContinueNode.id, exitContinueNode);
-  graph.setEdge(getNodeId(previousNodeToLink), exitContinueNode.id);
-  graph.setNode(enterContinueNodeId, enterContinueNode);
-
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), enterContinueNodeId);
-  }
-
-  return exitContinueNode;
+  const topologicalOrder = graphlib.alg.topsort(subGraph);
+  graph.setEdge(startNodeId, topologicalOrder[0]);
+  graph.setEdge(topologicalOrder[topologicalOrder.length - 1], endNodeId);
+  subGraph.nodes().forEach((nodeId) => {
+    graph.setNode(nodeId, subGraph.node(nodeId));
+  });
+  subGraph.edges().forEach((edgeObj) => {
+    graph.setEdge(edgeObj.v, edgeObj.w);
+  });
 }
 
 function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
