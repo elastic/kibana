@@ -286,29 +286,46 @@ const AlertsTableContent = typedForwardRef(
       trackScores,
     });
 
+    /*
+     * if prevQueryParams is directly compared without selective prop assignment to a new object,
+     * deepEqual will return a false negative, even if the objects are structurally identical.
+     */
     useEffect(() => {
-      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
-        ruleTypeIds,
-        consumers,
-        fields,
-        query,
-        sort,
-        runtimeMappings,
-        minScore,
-        trackScores,
-        // Go back to the first page if the query changes
-        pageIndex: !deepEqual(prevQueryParams, {
+      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => {
+        const resetPageIndex = !deepEqual(
+          {
+            ruleTypeIds: prevQueryParams.ruleTypeIds,
+            consumers: prevQueryParams.consumers,
+            fields: prevQueryParams.fields,
+            query: prevQueryParams.query,
+            sort: prevQueryParams.sort,
+            runtimeMappings: prevQueryParams.runtimeMappings,
+            trackScores: prevQueryParams.trackScores,
+          },
+          {
+            ruleTypeIds,
+            consumers,
+            fields,
+            query,
+            sort,
+            runtimeMappings,
+            trackScores,
+          }
+        );
+        return {
           ruleTypeIds,
           consumers,
           fields,
           query,
           sort,
           runtimeMappings,
-        })
-          ? 0
-          : oldPageIndex,
-        pageSize: oldPageSize,
-      }));
+          minScore,
+          trackScores,
+          // Go back to the first page if the query changes
+          pageIndex: resetPageIndex ? 0 : oldPageIndex,
+          pageSize: oldPageSize,
+        };
+      });
     }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore, trackScores]);
 
     const {

@@ -17,49 +17,36 @@ import {
   EuiToolTip,
   EuiTextTruncate,
 } from '@elastic/eui';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import React, { useState } from 'react';
-import type { MetricField } from '../../types';
-// TODO Add flyout import when available
-// import { MetricInsightsFlyout } from '../metrics_insights_flyout';
 
 interface ChartHeaderProps {
   title: string;
   byDimension?: string;
-  esqlQuery: string;
   metric: MetricField;
-  displayDensity?: 'normal' | 'compact' | 'row';
-  hasExploreAction?: boolean;
-  hasMetricsInsightsAction?: boolean;
+  size?: 'm' | 's';
 }
 
-export const ChartHeader: React.FC<ChartHeaderProps> = ({
-  title,
-  byDimension,
-  esqlQuery,
-  metric,
-  displayDensity = 'normal',
-  hasExploreAction = true,
-  hasMetricsInsightsAction = true,
-}) => {
+export const ChartHeader = ({ title, byDimension, metric, size = 'm' }: ChartHeaderProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   // Get title sizes based on display density
   const getTitleSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xxs';
     }
     return 'xs';
   };
 
   const getSubtitleSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xxs';
     }
     return 'xs';
   };
 
   const getDescriptionSize = () => {
-    if (displayDensity === 'compact') {
+    if (size === 's') {
       return 'xs';
     }
     return 's';
@@ -77,32 +64,28 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
 
   const actionIcons = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      {hasExploreAction && (
-        <EuiFlexItem data-test-subj="metricsChartExploreAction" grow={false}>
-          <EuiToolTip content="Explore">
-            <EuiButtonIcon
-              iconType="inspect"
-              size="s"
-              color="text"
-              aria-label="Explore this metric"
-              onClick={handleExplore}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {hasMetricsInsightsAction && (
-        <EuiFlexItem data-test-subj="metricsChartInsightsAction" grow={false}>
-          <EuiToolTip content="Metric insights" disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="sparkles"
-              size="s"
-              color="text"
-              aria-label="Metric insights"
-              onClick={handleInsights}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Explore">
+          <EuiButtonIcon
+            iconType="inspect"
+            size="s"
+            color="text"
+            aria-label="Explore this metric"
+            onClick={handleExplore}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Metric insights" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="sparkles"
+            size="s"
+            color="text"
+            aria-label="Metric insights"
+            onClick={handleInsights}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -159,13 +142,6 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <EuiFlexItem grow={false}>{actionIcons}</EuiFlexItem>
         </EuiFlexGroup>
       )}
-
-      {/* <MetricInsightsFlyout
-        metric={metric}
-        esqlQuery={esqlQuery}
-        isOpen={isFlyoutOpen}
-        onClose={() => setIsFlyoutOpen(false)}
-      /> */}
     </>
   );
 };
