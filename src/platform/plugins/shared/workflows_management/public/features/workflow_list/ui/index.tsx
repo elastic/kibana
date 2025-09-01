@@ -231,7 +231,21 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: 'Run',
             icon: 'play',
             description: 'Run workflow',
-            onClick: (item: WorkflowListItemDto) => setExecuteWorkflow(item),
+            onClick: (item: WorkflowListItemDto) => {
+              let needInput: boolean | undefined = false;
+              if (item.definition?.triggers) {
+                needInput =
+                  item.definition.triggers.some((trigger) => trigger.type === 'alert') ||
+                  (item.definition.triggers.some((trigger) => trigger.type === 'manual') &&
+                    item.definition.inputs &&
+                    Object.keys(item.definition.inputs).length > 0);
+              }
+              if (needInput) {
+                setExecuteWorkflow(item);
+              } else {
+                handleRunWorkflow(item.id, {});
+              }
+            },
           },
           {
             enabled: () => !!canUpdateWorkflow,
@@ -282,6 +296,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       canUpdateWorkflow,
       handleCloneWorkflow,
       handleDeleteWorkflow,
+      handleRunWorkflow,
       setExecuteWorkflow,
       handleToggleWorkflow,
     ]

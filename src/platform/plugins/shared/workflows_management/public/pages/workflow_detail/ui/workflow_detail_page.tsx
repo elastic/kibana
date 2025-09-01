@@ -92,7 +92,19 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const handleRunClick = () => {
-    setWorkflowExecuteModalOpen(true);
+    let needInput: boolean | undefined = false;
+    if (workflow?.definition?.triggers) {
+      needInput =
+        workflow.definition.triggers.some((trigger) => trigger.type === 'alert') ||
+        (workflow.definition.triggers.some((trigger) => trigger.type === 'manual') &&
+          workflow.definition.inputs &&
+          Object.keys(workflow.definition.inputs).length > 0);
+    }
+    if (needInput) {
+      setWorkflowExecuteModalOpen(true);
+    } else {
+      handleRunWorkflow({});
+    }
   };
 
   const handleRunWorkflow = (event: Record<string, any>) => {
