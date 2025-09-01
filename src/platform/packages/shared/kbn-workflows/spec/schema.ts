@@ -19,8 +19,31 @@ export const TemplatingOptionsSchema = z.object({
   engine: z.enum(['mustache', 'nunjucks']),
 });
 
+export const WorkflowRetrySchema = z.object({
+  'max-attempts': z.number().min(1),
+  delay: z
+    .string()
+    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
+    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+});
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
+
+// Base step schema, with recursive steps property
+export const BaseStepSchema = z.object({
+  name: z.string().min(1),
+  type: z.string(),
+});
+export type BaseStep = z.infer<typeof BaseStepSchema>;
+
+export const WorkflowOnFailureSchema = z.object({
+  retry: WorkflowRetrySchema.optional(),
+  fallback: z.array(BaseStepSchema).min(1).optional(),
+  continue: z.boolean().optional(),
+});
+export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+
 export const WorkflowSettingsSchema = z.object({
-  retry: RetryPolicySchema.optional(),
+  'on-failure': WorkflowOnFailureSchema.optional(),
   templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
 });
@@ -58,15 +81,6 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 ]);
 
 /* --- Steps --- */
-export const WorkflowRetrySchema = z.object({
-  'max-attempts': z.number().min(1),
-  delay: z
-    .string()
-    .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
-    .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
-});
-export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
-
 const StepWithTimeoutSchema = z.object({
   timeout: z.number().optional(),
 });
@@ -83,20 +97,6 @@ const StepWithIfConditionSchema = z.object({
   if: z.string().optional(),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
-
-// Base step schema, with recursive steps property
-export const BaseStepSchema = z.object({
-  name: z.string().min(1),
-  type: z.string(),
-});
-export type BaseStep = z.infer<typeof BaseStepSchema>;
-
-export const WorkflowOnFailureSchema = z.object({
-  retry: WorkflowRetrySchema.optional(),
-  fallback: z.array(BaseStepSchema).min(1).optional(),
-  continue: z.boolean().optional(),
-});
-export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
 export const StepWithOnFailureSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
