@@ -71,6 +71,7 @@ import {
 } from './constants';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -99,12 +100,12 @@ export interface CreateAIAssistantClientParams {
 
 export type CreateDataStream = (params: {
   resource:
-    | 'anonymizationFields'
-    | 'conversations'
-    | 'knowledgeBase'
-    | 'prompts'
-    | 'defendInsights'
-    | 'alertSummary';
+  | 'anonymizationFields'
+  | 'conversations'
+  | 'knowledgeBase'
+  | 'prompts'
+  | 'defendInsights'
+  | 'alertSummary';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -114,8 +115,8 @@ export type CreateDataStream = (params: {
 
 export type CreateIndexPattern = (params: {
   resource:
-    | 'checkpoints'
-    | 'checkpointWrites';
+  | 'checkpoints'
+  | 'checkpointWrites';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -134,7 +135,7 @@ export class AIAssistantService {
   private alertSummaryDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
-    private checkpointsDataStream: IndexPatternAdapter;
+  private checkpointsDataStream: IndexPatternAdapter;
   private checkpointWritesDataStream: IndexPatternAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
@@ -250,15 +251,15 @@ export class AIAssistantService {
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines && {
-            template: {
-              settings: {
-                'index.default_pipeline':
-                  this.resourceNames.pipelines[
-                    resource as keyof typeof this.resourceNames.pipelines
-                  ],
-              },
-            },
-          }),
+        template: {
+          settings: {
+            'index.default_pipeline':
+              this.resourceNames.pipelines[
+              resource as keyof typeof this.resourceNames.pipelines
+              ],
+          },
+        },
+      }),
     });
 
     return newIndexPattern;
@@ -288,18 +289,18 @@ export class AIAssistantService {
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines &&
-      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-      !(resource === 'knowledgeBase')
+        // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+        !(resource === 'knowledgeBase')
         ? {
-            template: {
-              settings: {
-                'index.default_pipeline':
-                  this.resourceNames.pipelines[
-                    resource as keyof typeof this.resourceNames.pipelines
-                  ],
-              },
+          template: {
+            settings: {
+              'index.default_pipeline':
+                this.resourceNames.pipelines[
+                resource as keyof typeof this.resourceNames.pipelines
+                ],
             },
-          }
+          },
+        }
         : {}),
     });
 
@@ -635,6 +636,26 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.conversations,
       currentUser: opts.currentUser,
     });
+  }
+
+  public async createCheckpointSaver(opts: CreateAIAssistantClientParams) {
+    const esClient = await this.options.elasticsearchClientPromise;
+    const checkpointIndex = getIndexTemplateAndPattern(
+      this.resourceNames.aliases.checkpoints,
+      opts.spaceId
+    ).alias;
+    const checkpointWritesIndex = getIndexTemplateAndPattern(
+      this.resourceNames.aliases.checkpointWrites,
+      opts.spaceId
+    ).alias;
+
+    const elasticSearchSaver = new ElasticSearchSaver({
+      client: esClient,
+      checkpointIndex,
+      checkpointWritesIndex,
+      logger: this.options.logger,
+    });
+    return elasticSearchSaver;
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
