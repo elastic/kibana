@@ -24,6 +24,10 @@ export default function ({ getService }: FtrProviderContext) {
   const versionService = new Version();
   versionService.setup('8.0.0');
 
+  const reindexOptions = {
+    deleteOldIndex: true,
+  };
+
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
     let lastState;
@@ -134,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
         })
         .expect(200);
 
@@ -178,6 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
         })
         .expect(200);
 
@@ -218,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
         })
         .expect(200);
       const lastState = await waitForReindexToComplete('dummydata');
@@ -325,7 +332,13 @@ export default function ({ getService }: FtrProviderContext) {
         const result = await supertest
           .post(`/api/upgrade_assistant/reindex/batch`)
           .set('kbn-xsrf', 'xxx')
-          .send({ indexNames: [test1, test2, test3] })
+          .send({
+            indices: [
+              { indexName: test1, newIndexName: `${test1}New`, reindexOptions },
+              { index: test2, newIndexName: `${test2}New`, reindexOptions },
+              { index: test3, newIndexName: `${test3}New`, reindexOptions },
+            ],
+          })
           .expect(200);
 
         expect(result.body.enqueued.length).to.equal(3);
