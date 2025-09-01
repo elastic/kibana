@@ -25,7 +25,14 @@ export const reindexSchema = schema.object({
   ),
   settings: schema.maybe(
     schema.object({
-      mode: schema.maybe(schema.oneOf([schema.literal('standard'), schema.literal('lookup')])),
+      mode: schema.maybe(
+        schema.oneOf([
+          schema.literal('standard'),
+          schema.literal('lookup'),
+          schema.literal('logsdb'),
+          schema.literal('time_series'),
+        ])
+      ),
     })
   ),
 });
