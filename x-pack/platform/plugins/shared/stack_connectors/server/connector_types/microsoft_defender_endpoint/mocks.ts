@@ -22,13 +22,12 @@ import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/micros
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 import type { ConnectorInstanceMock } from '../lib/mocks';
 import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
-import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 export interface CreateMicrosoftDefenderConnectorMockResponse {
   options: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   apiMock: { [msApiRoute: string]: (...args: any) => any | Promise<any> };
-  instanceMock: ConnectorInstanceMock<MockableMicrosoftDefenderEndpointConnector>;
+  instanceMock: ConnectorInstanceMock<MicrosoftDefenderEndpointConnector>;
   usageCollector: ConnectorUsageCollector;
 }
 
@@ -93,15 +92,6 @@ const applyConnectorTokenClientInstanceMock = (
   });
 };
 
-// Wrapper class to make MicrosoftDefenderEndpointConnector compatible with createConnectorInstanceMock
-class MockableMicrosoftDefenderEndpointConnector extends MicrosoftDefenderEndpointConnector {
-  constructor(
-    params: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>
-  ) {
-    super(params, allowedExperimentalValues);
-  }
-}
-
 const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnectorMockResponse => {
   const apiUrl = 'https://api.mock__microsoft.com';
   const options: CreateMicrosoftDefenderConnectorMockResponse['options'] = {
@@ -118,10 +108,7 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
     logger: loggingSystemMock.createLogger(),
     services: actionsMock.createServices(),
   };
-  const instanceMock = createConnectorInstanceMock(
-    MockableMicrosoftDefenderEndpointConnector,
-    options
-  );
+  const instanceMock = createConnectorInstanceMock(MicrosoftDefenderEndpointConnector, options);
 
   // Default MS API response mocks. These (or additional ones) can always be defined directly in test
   const apiMock: CreateMicrosoftDefenderConnectorMockResponse['apiMock'] = {

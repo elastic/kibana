@@ -13,7 +13,6 @@ import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
   ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE,
 } from '@kbn/actions-plugin/server/feature';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 
 import type {
@@ -30,12 +29,13 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_TITLE,
 } from '../../../common/microsoft_defender_endpoint/constants';
 
-export const getMicrosoftDefenderEndpointConnectorType = (
-  experimentalFeatures: ExperimentalFeatures
-): SubActionConnectorType<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets> => ({
+export const getMicrosoftDefenderEndpointConnectorType = (): SubActionConnectorType<
+  MicrosoftDefenderEndpointConfig,
+  MicrosoftDefenderEndpointSecrets
+> => ({
   id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   name: MICROSOFT_DEFENDER_ENDPOINT_TITLE,
-  getService: (params) => new MicrosoftDefenderEndpointConnector(params, experimentalFeatures),
+  getService: (params) => new MicrosoftDefenderEndpointConnector(params),
   schema: {
     config: MicrosoftDefenderEndpointConfigSchema,
     secrets: MicrosoftDefenderEndpointSecretsSchema,
