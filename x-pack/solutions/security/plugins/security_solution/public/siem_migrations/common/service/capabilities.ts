@@ -61,15 +61,19 @@ const allCapabilities: MissingCapability[] = [
 
 export type CapabilitiesLevel = 'minimum' | 'all';
 
-const requiredCapabilities: Record<CapabilitiesLevel, MissingCapability[]> = {
+export const requiredSiemMigrationCapabilities: Record<CapabilitiesLevel, MissingCapability[]> = {
   minimum: minimumCapabilities,
   all: allCapabilities,
 };
 
-export const getMissingCapabilities = (
-  capabilities: Capabilities,
-  level: CapabilitiesLevel = 'all'
-): MissingCapability[] => {
-  const checker = new CapabilitiesChecker(capabilities);
-  return requiredCapabilities[level].filter((required) => !checker.has(required.capability));
+export const getMissingCapabilitiesChecker = (
+  _requiredCapabilities: Record<
+    CapabilitiesLevel,
+    MissingCapability[]
+  > = requiredSiemMigrationCapabilities
+) => {
+  return (capabilities: Capabilities, level: CapabilitiesLevel = 'all'): MissingCapability[] => {
+    const checker = new CapabilitiesChecker(capabilities);
+    return _requiredCapabilities[level].filter((required) => !checker.has(required.capability));
+  };
 };
