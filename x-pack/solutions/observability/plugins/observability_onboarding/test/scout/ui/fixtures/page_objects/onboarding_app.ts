@@ -124,7 +124,8 @@ export class OnboardingApp {
     const card = this.page.getByTestId(cardSelector);
     await card.click();
 
-    const nonRouting = /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
+    const nonRouting =
+      /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (nonRouting.test(cardSelector)) {
       await this.waitForIntegrationCards();
     } else {
@@ -175,7 +176,9 @@ export class OnboardingApp {
       await cards.waitFor({ state: 'visible', timeout: 10000 });
     } catch {
       await this.page
-        .getByText(/Monitor your (Host|Kubernetes cluster|Application) using:|Select your Cloud provider:/)
+        .getByText(
+          /Monitor your (Host|Kubernetes cluster|Application) using:|Select your Cloud provider:/
+        )
         .first()
         .waitFor({ state: 'visible', timeout: 10000 });
     }

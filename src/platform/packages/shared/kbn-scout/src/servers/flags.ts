@@ -29,7 +29,12 @@ export const SERVER_FLAG_OPTIONS: FlagOptions = {
 };
 
 export function parseServerFlags(flags: FlagsReader) {
-  const serverlessType = flags.enum('serverless', ['es', 'oblt', 'oblt-logs-essentials', 'security']);
+  const serverlessType = flags.enum('serverless', [
+    'es',
+    'oblt',
+    'oblt-logs-essentials',
+    'security',
+  ]);
   const isStateful = flags.boolean('stateful');
 
   if (!(serverlessType || isStateful) || (serverlessType && isStateful)) {

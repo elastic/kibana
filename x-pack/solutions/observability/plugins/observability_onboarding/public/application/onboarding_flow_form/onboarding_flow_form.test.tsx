@@ -56,7 +56,7 @@ const renderWithProviders = (children: React.ReactNode) => {
 describe('OnboardingFlowForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockUseKibana.mockReturnValue({
       services: {
         context: {
@@ -137,7 +137,9 @@ describe('OnboardingFlowForm', () => {
     it('should show logs-essentials description for Kubernetes', () => {
       renderWithProviders(<OnboardingFlowForm />);
 
-      expect(screen.getByText(/Observe logs from your Kubernetes environments/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Observe logs from your Kubernetes environments/)
+      ).toBeInTheDocument();
     });
 
     it('should use 3-column grid layout for logs-essentials tier', () => {

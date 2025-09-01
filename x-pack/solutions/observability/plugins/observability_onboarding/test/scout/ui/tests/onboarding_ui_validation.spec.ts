@@ -172,10 +172,10 @@ test.describe('Onboarding UI Validation', () => {
 
       const autoDetectCard = pageObjects.onboarding.autoDetectLogsCard;
       await expect(autoDetectCard).toBeVisible();
-      
+
       const otelCard = pageObjects.onboarding.otelLogsCard;
       await expect(otelCard).toBeVisible();
-      
+
       await expect(autoDetectCard.locator('button, a, [role="button"]')).toBeVisible();
       await expect(otelCard.locator('button, a, [role="button"]')).toBeVisible();
     }
