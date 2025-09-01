@@ -332,9 +332,16 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        style={{ marginBottom: '4px' }}
+      >
         <EuiFlexItem grow={false}>
-          <span>{i18n.WORKFLOW_ID_LABEL}</span>
+          <EuiText size="s">
+            <strong>{i18n.WORKFLOW_ID_LABEL}</strong>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink onClick={handleCreateNewWorkflow} external>
