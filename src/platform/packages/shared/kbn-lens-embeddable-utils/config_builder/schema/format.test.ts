@@ -44,6 +44,7 @@ describe('Format Schemas', () => {
       expect(validated).toEqual({
         type: 'number',
         decimals: 2,
+        compact: false,
       });
     });
   });
@@ -148,7 +149,7 @@ describe('Format Schemas', () => {
       };
 
       const validated = formatSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, format: { ...input.format, compact: false } });
     });
 
     it('validates without format configuration', () => {
