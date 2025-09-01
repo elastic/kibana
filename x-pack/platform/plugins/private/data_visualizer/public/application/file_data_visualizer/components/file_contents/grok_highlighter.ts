@@ -32,7 +32,7 @@ export class GrokHighlighter extends MessageImporter {
     mappings: FindFileStructureResponse['mappings'],
     ecsCompatibility: string | undefined
   ): Promise<HighlightedLine[]> {
-    const docs = this._createDocs(text, false, LINE_LIMIT);
+    const docs = this._reader._createDocs(text, false, LINE_LIMIT);
     const lines = docs.docs.map((doc) => doc.message);
     const matches = await this.testGrokPattern(lines, grokPattern, ecsCompatibility);
 
