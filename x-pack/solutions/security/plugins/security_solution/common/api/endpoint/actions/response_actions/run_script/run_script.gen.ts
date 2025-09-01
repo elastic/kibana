@@ -115,10 +115,6 @@ export const RunScriptRouteRequestBody = z.object({
    */
   alert_ids: z.array(z.string().min(1)).min(1).optional(),
   /**
-   * Case IDs to be updated
-   */
-  case_ids: z.array(z.string().min(1)).min(1).optional(),
-  /**
    * Optional comment for the action
    */
   comment: z.string().optional(),
@@ -129,10 +125,7 @@ export const RunScriptRouteRequestBody = z.object({
     .enum(['endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])
     .optional()
     .default('endpoint'),
-  /**
-   * Script execution parameters that vary by agent type
-   */
-  parameters: z.discriminatedUnion('agent_type', [
+  parameters: z.union([
     CrowdStrikeRunScriptParameters,
     MSDefenderRunScriptParameters,
     SentinelOneRunScriptParameters,

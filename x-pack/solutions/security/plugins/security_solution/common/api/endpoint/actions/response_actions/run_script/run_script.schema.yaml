@@ -45,34 +45,19 @@ components:
             minLength: 1
           minItems: 1
           description: If defined, any case associated with the given IDs will be updated
-        case_ids:
-          type: array
-          items:
-            type: string
-            minLength: 1
-          minItems: 1
-          description: Case IDs to be updated
         comment:
           type: string
           description: Optional comment for the action
         agent_type:
           type: string
-          enum: ['endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint']
+          enum: [ 'endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint' ]
           default: 'endpoint'
           description: Type of agent to execute the script on
         parameters:
           oneOf:
             - $ref: '#/components/schemas/CrowdStrikeRunScriptParameters'
-            - $ref: '#/components/schemas/MSDefenderRunScriptParameters' 
+            - $ref: '#/components/schemas/MSDefenderRunScriptParameters'
             - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
-          discriminator:
-            propertyName: agent_type
-            mapping:
-              crowdstrike: '#/components/schemas/CrowdStrikeRunScriptParameters'
-              microsoft_defender_endpoint: '#/components/schemas/MSDefenderRunScriptParameters'
-              sentinel_one: '#/components/schemas/SentinelOneRunScriptParameters'
-          description: Script execution parameters that vary by agent type
-    
     # CrowdStrike parameters - supports raw, hostPath, or cloudFile approaches
     CrowdStrikeRunScriptParameters:
       oneOf:
