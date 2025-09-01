@@ -126,7 +126,7 @@ export const LabelShape = styled(EuiText, {
   `};
 `;
 
-export const LabelShapeOnHover = styled.div<{ color: string }>`
+export const LabelShapeOnHover = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -134,7 +134,13 @@ export const LabelShapeOnHover = styled.div<{ color: string }>`
 
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
-  border: ${(props) => `dashed ${rgba(props.color, 0.5)} 1px`};
+  border: ${(props) => {
+    const { euiTheme } = useEuiTheme();
+    return `dashed ${rgba(
+      euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string,
+      0.5
+    )} 1px`;
+  }};
   border-radius: ${LABEL_BORDER_RADIUS}px;
   background: transparent;
   width: calc(100% + 12px);

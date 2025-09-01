@@ -59,8 +59,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const numEvents = eventsCount ?? 0;
   const numAlerts = alertsCount ?? 0;
-  // TODO Remove color when API returns `eventsCount` and `alertsCount`
-  const analysis = analyzeDocuments({ color, eventsCount: numEvents, alertsCount: numAlerts });
+
+  const analysis = analyzeDocuments({ eventsCount: numEvents, alertsCount: numAlerts });
   const shouldShowTooltip = numEvents > BADGES_LIMIT || numAlerts > BADGES_LIMIT;
 
   return (
@@ -74,14 +74,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
       >
         <LabelNodeContainer data-test-subj={GRAPH_LABEL_NODE_ID}>
           {interactive && (
-            <LabelShapeOnHover
-              data-test-subj={TEST_SUBJ_HOVER_OUTLINE}
-              color={
-                analysis.isSingleAlert || analysis.isGroupOfAlerts
-                  ? euiTheme.colors.danger
-                  : euiTheme.colors.primary
-              }
-            />
+            <LabelShapeOnHover data-test-subj={TEST_SUBJ_HOVER_OUTLINE} color={color} />
           )}
           <LabelShape
             data-test-subj={TEST_SUBJ_SHAPE}

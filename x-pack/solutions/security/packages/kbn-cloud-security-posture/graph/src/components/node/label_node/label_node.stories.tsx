@@ -36,6 +36,17 @@ const meta: Meta<LabelNodeViewModel> = {
     ],
     countryCodes: ['us', 'ru', 'es', 'us', 'us'],
   },
+  argTypes: {
+    color: {
+      options: ['primary', 'danger'],
+      control: { type: 'radio' },
+    },
+    interactive: {
+      control: {
+        type: 'boolean',
+      },
+    },
+  },
   decorators: [GlobalStylesStorybookDecorator],
 };
 
