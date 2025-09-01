@@ -118,26 +118,26 @@ describe('ElasticSearchSaver', () => {
   }
 
   async function deleteIndices(indexPattern: string) {
-      // Use indices.get to find indices matching the pattern
-      const response = await client.indices
-        .get({
-          index: indexPattern,
-          allow_no_indices: true,
-          expand_wildcards: 'all',
-        })
-        .catch(() => ({}));
-
-      const indexNames = Object.keys(response);
-
-      if (indexNames.length === 0) {
-        return;
-      }
-
-      // Delete indices by their specific names
-      await client.indices.delete({
-        index: indexNames.join(','),
+    // Use indices.get to find indices matching the pattern
+    const response = await client.indices
+      .get({
+        index: indexPattern,
         allow_no_indices: true,
-      });
+        expand_wildcards: 'all',
+      })
+      .catch(() => ({}));
+
+    const indexNames = Object.keys(response);
+
+    if (indexNames.length === 0) {
+      return;
+    }
+
+    // Delete indices by their specific names
+    await client.indices.delete({
+      index: indexNames.join(','),
+      allow_no_indices: true,
+    });
   }
 
   beforeEach(async () => {

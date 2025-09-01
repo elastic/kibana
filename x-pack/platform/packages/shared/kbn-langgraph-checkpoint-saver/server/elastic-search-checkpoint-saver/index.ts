@@ -65,12 +65,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     '@timestamp': {
       type: 'date',
     },
-    thread_id: { type: 'keyword', },
-    checkpoint_ns: { type: 'keyword', },
-    checkpoint_id: { type: 'keyword', },
-    parent_checkpoint_id: { type: 'keyword', },
-    type: { type: 'keyword', },
-    checkpoint: { type: 'binary'},
+    thread_id: { type: 'keyword' },
+    checkpoint_ns: { type: 'keyword' },
+    checkpoint_id: { type: 'keyword' },
+    parent_checkpoint_id: { type: 'keyword' },
+    type: { type: 'keyword' },
+    checkpoint: { type: 'binary' },
     metadata: { type: 'binary' },
   } as const;
 
@@ -81,13 +81,13 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     '@timestamp': {
       type: 'date',
     },
-    thread_id: { type: 'keyword', },
-    checkpoint_ns: { type: 'keyword', },
-    checkpoint_id: { type: 'keyword', },
-    task_id: { type: 'keyword', },
-    idx: { type: 'unsigned_long', },
-    channel: { type: 'keyword', },
-    type: { type: 'keyword', },
+    thread_id: { type: 'keyword' },
+    checkpoint_ns: { type: 'keyword' },
+    checkpoint_id: { type: 'keyword' },
+    task_id: { type: 'keyword' },
+    idx: { type: 'unsigned_long' },
+    channel: { type: 'keyword' },
+    type: { type: 'keyword' },
     value: { type: 'binary' },
   } as const;
 
