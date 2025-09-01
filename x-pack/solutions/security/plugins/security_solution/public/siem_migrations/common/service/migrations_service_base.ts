@@ -47,12 +47,11 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
   public traceOptionsStorage: MigrationsStorage<TraceOptions>;
 
   constructor(
-    private readonly source: string,
     protected readonly core: CoreStart,
     private readonly plugins: StartPluginsDependencies
   ) {
-    this.connectorIdStorage = new MigrationsStorage<string>(this.source, 'connectorId');
-    this.traceOptionsStorage = new MigrationsStorage<TraceOptions>(this.source, 'traceOptions', {
+    this.connectorIdStorage = new MigrationsStorage<string>('connectorId');
+    this.traceOptionsStorage = new MigrationsStorage<TraceOptions>('traceOptions', {
       customKey: NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY,
       storageType: 'session',
     });
@@ -97,9 +96,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
     this.isPolling = true;
     this.startTaskStatsPolling()
       .catch((e) => {
-        this.core.notifications.toasts.addError(e, {
-          title: i18n.POLLING_ERROR(this.source),
-        });
+        this.core.notifications.toasts.addError(e, { title: i18n.POLLING_ERROR });
       })
       .finally(() => {
         this.isPolling = false;

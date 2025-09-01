@@ -40,7 +40,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     plugins: StartPluginsDependencies,
     telemetryService: TelemetryServiceStart
   ) {
-    super('rules', core, plugins);
+    super(core, plugins);
     this.telemetry = new SiemRulesMigrationsTelemetry(telemetryService);
   }
 

@@ -57,9 +57,6 @@ const mockFetchMigrationsStatsAll = jest.fn();
 const mockSendFinishedMigrationNotification = jest.fn();
 
 class TestMigrationsService extends SiemMigrationsServiceBase<MigrationTaskStats> {
-  constructor(core: CoreStart, plugins: StartPluginsDependencies) {
-    super('test', core, plugins);
-  }
   protected startMigrationFromStats = mockStartMigrationFromStats;
   protected fetchMigrationStats = mockFetchMigrationStats;
   protected fetchMigrationsStatsAll = mockFetchMigrationsStatsAll;

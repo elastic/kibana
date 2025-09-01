@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const POLLING_ERROR = (source: string) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.baseService.pollingError', {
-    defaultMessage: 'Error fetching {source} migrations',
-    values: { source },
-  });
+export const POLLING_ERROR = i18n.translate(
+  'xpack.securitySolution.siemMigrations.baseService.pollingError',
+  {
+    defaultMessage: 'Error fetching migrations stats',
+  }
+);
