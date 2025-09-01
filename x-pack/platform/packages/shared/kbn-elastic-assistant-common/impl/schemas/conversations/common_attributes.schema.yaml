@@ -236,15 +236,6 @@ components:
         - insights
       example: 'assistant'
 
-    ConversationConfidence:
-      type: string
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: 'high'
-
     Message:
       type: object
       description: AI assistant conversation message.
@@ -312,31 +303,6 @@ components:
           description: Model
           example: 'gpt-4'
 
-    ConversationSummaryBase:
-      type: object
-      properties:
-        semanticContent:
-          type: string
-          description: Summary text of the conversation over time.
-          example: 'This conversation covered how to configure the Security AI Assistant.'
-        summarizedMessageIds:
-          type: array
-          description: The list of summarized messages.
-          items:
-            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-
-    ConversationSummary:
-      allOf:
-        - $ref: '#/components/schemas/ConversationSummaryBase'
-        - type: object
-          required:
-            - timestamp
-          properties:
-            timestamp:
-              $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
-              description: The timestamp summary was updated.
-              example: '2025-04-30T16:00:00Z'
-
     ErrorSchema:
       type: object
       required:
@@ -380,8 +346,6 @@ components:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
           example: 'assistant'
-        summary:
-          $ref: '#/components/schemas/ConversationSummary'
         timestamp:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
         updatedAt:
@@ -440,8 +404,6 @@ components:
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
-        summary:
-          $ref: '#/components/schemas/ConversationSummaryBase'
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
