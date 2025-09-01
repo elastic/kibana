@@ -15,6 +15,7 @@ import {
   EuiPageTemplate,
   EuiPanel,
   EuiBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -45,7 +46,6 @@ import { API_KEY_PLACEHOLDER, CLOUD_ID_PLACEHOLDER } from '../constants';
 import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
-import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
 import { PipelineOverviewButton } from './pipeline_overview_button';
@@ -54,8 +54,10 @@ import { PipelineManageButton } from './pipeline_manage_button';
 import { OPTIONAL_LABEL } from '../../../common/i18n_string';
 import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 import { useElasticsearchUrl } from '../hooks/use_elastisearch_url';
+import * as Styles from './styles';
 
 export const ElasticsearchOverview = () => {
+  const { euiTheme } = useEuiTheme();
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { application, cloud, user, share, console: consolePlugin } = useKibanaServices();
@@ -95,7 +97,7 @@ export const ElasticsearchOverview = () => {
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
-      <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
+      <EuiPageTemplate.Section alignment="top" css={Styles.serverlessSearchHeaderSection}>
         <WelcomeBanner user={user} assetBasePath={assetBasePath} />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -164,6 +166,7 @@ export const ElasticsearchOverview = () => {
         data-test-subj="cloud-details-section"
       >
         <CloudDetailsPanel
+          css={Styles.cloudDetailsPanel}
           cloudId={cloud.cloudId}
           elasticsearchUrl={elasticsearchUrl || undefined}
         />
@@ -368,7 +371,7 @@ export const ElasticsearchOverview = () => {
 
       <EuiPageTemplate.Section
         alignment="top"
-        className="serverlessSearchOverviewFooterSection"
+        css={Styles.serverlessSearchOverviewFooterSection(euiTheme)}
         data-test-subj="footer-section"
       >
         <OverviewPanel
