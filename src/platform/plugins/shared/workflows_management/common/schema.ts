@@ -118,8 +118,11 @@ export function getConnectorContracts(actionTypeId: string, connectorIds?: strin
       if (connectorIds && connectorIds.length > 0) {
         return {
           ...c,
-          // @ts-expect-error TODO: fix this
-          connectorId: z.union(connectorIds.map((id) => z.literal(id))),
+          connectorId:
+            connectorIds.length > 1
+              ? // @ts-expect-error we know that connectorIds has at least two values
+                z.union(connectorIds.map((id) => z.literal(id)))
+              : z.literal(connectorIds[0]),
         };
       }
       return c;
