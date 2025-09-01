@@ -18,6 +18,5 @@
     "@kbn/core",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/index-adapter"
   ]
 }
