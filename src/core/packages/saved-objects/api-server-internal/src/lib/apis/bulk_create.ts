@@ -39,6 +39,7 @@ import {
 import { getSavedObjectNamespaces } from './utils';
 import { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
 import { ApiExecutionContext } from './types';
+import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
@@ -127,13 +128,11 @@ export const performBulkCreate = async <T>(
       );
     }
 
-    const accessControlToWrite =
-      typeSupportsAccessControl && createdBy
-        ? {
-            owner: createdBy,
-            accessMode,
-          }
-        : undefined;
+    const accessControlToWrite = setAccessControl({
+      typeSupportsAccessControl,
+      createdBy,
+      accessMode,
+    });
     return right({
       method,
       object: {

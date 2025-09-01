@@ -304,3 +304,20 @@ export function isMgetError(
 ): doc is estypes.MgetMultiGetError {
   return Boolean(doc && 'error' in doc);
 }
+
+export function setAccessControl({
+  typeSupportsAccessControl,
+  createdBy,
+  accessMode,
+}: {
+  typeSupportsAccessControl: boolean;
+  createdBy?: string;
+  accessMode?: 'default' | 'read_only';
+}) {
+  return typeSupportsAccessControl && createdBy
+    ? {
+        owner: createdBy,
+        accessMode: accessMode ?? 'default',
+      }
+    : undefined;
+}
