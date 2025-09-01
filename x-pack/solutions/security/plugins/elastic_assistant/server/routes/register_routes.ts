@@ -54,7 +54,6 @@ import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedul
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import type { ConfigSchema } from '../config_schema';
 import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
-import { explainRiskScoreRoute } from './risk_score/explain';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -137,6 +136,4 @@ export const registerRoutes = (
   getDefendInsightRoute(router);
   getDefendInsightsRoute(router);
   postDefendInsightsRoute(router);
-
-  explainRiskScoreRoute(router);
 };
