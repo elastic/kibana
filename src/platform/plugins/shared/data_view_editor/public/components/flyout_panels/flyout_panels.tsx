@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import { css } from '@emotion/react';
 import type { EuiFlexGroupProps } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, useEuiMaxBreakpoint } from '@elastic/eui';
 
 interface Panel {
   width?: number;
@@ -121,7 +121,12 @@ export const useFlyoutPanelsContext = (): Context => {
 };
 
 const styles = {
-  flyoutPanels: css({
-    height: '100%',
-  }),
+  flyoutPanels: () => {
+    return css({
+      height: '100%',
+      [useEuiMaxBreakpoint('m')]: {
+        overflow: 'auto',
+      },
+    });
+  },
 };
