@@ -6,7 +6,7 @@
  */
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
