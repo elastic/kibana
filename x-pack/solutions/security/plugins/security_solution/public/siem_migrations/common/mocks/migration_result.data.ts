@@ -64,7 +64,7 @@ export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
   {
     id: '1',
     status: SiemMigrationTaskStatus.FINISHED,
-    rules: {
+    items: {
       total: 1,
       pending: 0,
       processing: 0,
@@ -78,7 +78,7 @@ export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
   {
     id: '2',
     status: SiemMigrationTaskStatus.FINISHED,
-    rules: {
+    items: {
       total: 2,
       pending: 0,
       processing: 0,
