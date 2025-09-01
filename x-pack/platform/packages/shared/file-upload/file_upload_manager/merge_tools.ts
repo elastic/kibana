@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { MappingPropertyBase, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
 import type { FileAnalysis, FileWrapper } from './file_wrapper';

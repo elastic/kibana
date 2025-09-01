@@ -8,16 +8,16 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { NdjsonReader, MessageReader, TikaReader, FILE_FORMATS } from '@kbn/file-upload-common';
 import type {
-  IngestDocumentSimulation,
-  IngestSimulateResponse,
-  TextStructureFindStructureResponse,
-} from '@elastic/elasticsearch/lib/api/types';
-import type {
   AnalysisResult,
   FormattedOverrides,
   InputData,
   InputOverrides,
-} from '../common/types';
+} from '@kbn/file-upload-common';
+import type {
+  IngestDocumentSimulation,
+  IngestSimulateResponse,
+  TextStructureFindStructureResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 const PREVIEW_DOC_LIMIT = 20;
 

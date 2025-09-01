@@ -14,16 +14,18 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { MessageReader, TikaReader, NdjsonReader } from '@kbn/file-upload-common';
-import { getHttp } from '../kibana_services';
-
 import type {
+  MessageReader,
+  TikaReader,
+  NdjsonReader,
   ImportDoc,
   ImportFailure,
   ImportResponse,
   IngestPipeline,
   IngestPipelineWrapper,
-} from '../../common/types';
+} from '@kbn/file-upload-common';
+import { getHttp } from '../kibana_services';
+
 import type { IImporter, ImportResults } from './types';
 import { callImportRoute, callInitializeImportRoute } from './routes';
 

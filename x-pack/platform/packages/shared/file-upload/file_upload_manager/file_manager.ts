@@ -18,7 +18,7 @@ import type {
   IngestPipeline,
   InitializeImportResponse,
   InputOverrides,
-} from '@kbn/file-upload-plugin/common/types';
+} from '@kbn/file-upload-common';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,

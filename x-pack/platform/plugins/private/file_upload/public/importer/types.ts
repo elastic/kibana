@@ -16,7 +16,7 @@ import type {
   IngestPipeline,
   ImportDoc,
   InitializeImportResponse,
-} from '../../common/types';
+} from '@kbn/file-upload-common';
 
 export interface ImportConfig {
   settings: IndicesIndexSettings;

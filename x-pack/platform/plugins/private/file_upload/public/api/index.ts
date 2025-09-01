@@ -6,9 +6,13 @@
  */
 
 import { fromByteArray } from 'base64-js';
+import type {
+  HasImportPermission,
+  PreviewTikaResponse,
+  AnalysisResult,
+} from '@kbn/file-upload-common';
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
-import type { HasImportPermission, PreviewTikaResponse, AnalysisResult } from '../../common/types';
 import type {
   getMaxBytes,
   getMaxBytesFormatted,

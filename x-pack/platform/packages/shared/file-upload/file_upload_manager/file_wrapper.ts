@@ -13,7 +13,7 @@ import type {
   ImportFailure,
   IngestPipeline,
   InputOverrides,
-} from '@kbn/file-upload-plugin/common/types';
+} from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isTikaType } from './tika_utils';
 

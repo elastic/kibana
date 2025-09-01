@@ -10,7 +10,7 @@ import type { Feature } from 'geojson';
 import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
 import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
 import { NdjsonReader } from '@kbn/file-upload-common';
-import type { ImportFailure } from '../../../../common/types';
+import type { ImportFailure } from '@kbn/file-upload-common';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
