@@ -42,6 +42,7 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
@@ -147,14 +148,14 @@ export class IndexUpdateService {
   }
 
   // Indicated if the index exists (has been created) in Elasticsearch.
-  private _indexCrated$ = new BehaviorSubject<boolean>(false);
-  public readonly indexCreated$: Observable<boolean> = this._indexCrated$.asObservable();
+  private _indexCreated$ = new BehaviorSubject<boolean>(false);
+  public readonly indexCreated$: Observable<boolean> = this._indexCreated$.asObservable();
 
   public setIndexCreated(created: boolean) {
-    this._indexCrated$.next(created);
+    this._indexCreated$.next(created);
   }
   public isIndexCreated(): boolean {
-    return this._indexCrated$.getValue();
+    return this._indexCreated$.getValue();
   }
 
   private readonly _actions$ = new Subject<Action>();
@@ -204,12 +205,14 @@ export class IndexUpdateService {
   private readonly _subscription = new Subscription();
 
   public readonly esqlQuery$: Observable<string> = combineLatest([
-    this._indexCrated$,
+    this._indexCreated$,
     this._indexName$,
     this._qstr$,
     this._sortOrder$,
   ]).pipe(
-    skipWhile(([indexCreated, indexName]) => !indexCreated || !indexName),
+    skipWhile(([indexCreated, indexName]) => {
+      return !indexCreated || !indexName;
+    }),
     map(([indexCreated, indexName, qstr, sortOrder]) => {
       return this._buildESQLQuery({
         indexName: indexName!,
@@ -383,7 +386,7 @@ export class IndexUpdateService {
 
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
-    this._indexCrated$,
+    this._indexCreated$,
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
@@ -455,10 +458,9 @@ export class IndexUpdateService {
       return dataView;
     }
 
-    const newDataView = await this.data.dataViews.create({
-      title: indexName,
-      name: indexName,
-      // The index might not exist yet
+    const esqlQuery = esql`FROM ${indexName}`.print();
+
+    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, {
       allowNoIndex: true,
     });
 
@@ -954,7 +956,7 @@ export class IndexUpdateService {
     this._totalHits$.complete();
     this._actions$.complete();
     this._pendingColumnsToBeSaved$.complete();
-    this._indexCrated$.complete();
+    this._indexCreated$.complete();
     this._qstr$.complete();
     this._refreshSubject$.complete();
     this._exitAttemptWithUnsavedChanges$.complete();
