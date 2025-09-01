@@ -27,11 +27,13 @@ export const MANUAL_TRIGGERS_DESCRIPTIONS: Record<string, string> = {
   manual: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.manualTriggerDescription',
     {
-      defaultMessage: 'Provide values based on workflow definition.',
+      defaultMessage:
+        'Provide custom JSON data manually for testing. Ideal for simulating specific scenarios or debugging edge cases.',
     }
   ),
   alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
-    defaultMessage: 'Select an alert to trigger workflow',
+    defaultMessage:
+      'Choose a document directly from an index to use as the test input. This is helpful for verifying workflows against real indexed data.',
   }),
   scheduled: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.scheduledTriggerDescription',

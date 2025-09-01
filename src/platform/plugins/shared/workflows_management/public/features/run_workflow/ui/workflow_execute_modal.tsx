@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiCard,
   EuiModal,
   EuiModalFooter,
   EuiModalHeader,
@@ -19,12 +18,14 @@ import {
   EuiFlexItem,
   EuiRadio,
   EuiButton,
+  useEuiTheme,
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { WorkflowDetailDto, WorkflowListItemDto } from '@kbn/workflows';
-import { capitalize } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import capitalize from 'lodash/capitalize';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
@@ -48,6 +49,8 @@ export function WorkflowExecuteModal({
 
   const [executionInput, setExecutionInput] = useState<string>('');
   const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
+
+  const { euiTheme } = useEuiTheme();
 
   const handleSubmit = () => {
     onSubmit(JSON.parse(executionInput));
@@ -73,26 +76,46 @@ export function WorkflowExecuteModal({
         <EuiFlexGroup direction="row" gutterSize="l">
           {enabledTriggers.map((trigger) => (
             <EuiFlexItem key={trigger}>
-              <EuiCard
-                title={
-                  <EuiText size="s">
-                    <strong>{capitalize(trigger)}</strong>
-                  </EuiText>
-                }
-                icon={
-                  <EuiRadio
-                    onChange={() => handleChangeTrigger(trigger)}
-                    name="selectedTrigger"
-                    checked={selectedTrigger === trigger}
-                  />
-                }
+              <EuiButton
+                color={selectedTrigger === trigger ? 'primary' : 'text'}
                 onClick={() => handleChangeTrigger(trigger)}
-                display={selectedTrigger === trigger ? 'primary' : 'plain'}
-                layout="horizontal"
-                hasBorder
+                // iconType={option.icon}
+                iconSide="right"
+                contentProps={{
+                  style: {
+                    justifyContent: 'flex-start',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    padding: euiTheme.size.m,
+                    textAlign: 'left',
+                  },
+                }}
+                css={css`
+                  width: 100%;
+                  height: fit-content;
+                  svg,
+                  img {
+                    margin-left: auto;
+                  }
+                `}
               >
-                {MANUAL_TRIGGERS_DESCRIPTIONS[trigger]}
-              </EuiCard>
+                <EuiRadio
+                  name={capitalize(trigger)}
+                  label={capitalize(trigger)}
+                  id={trigger}
+                  checked={selectedTrigger === trigger}
+                  onChange={() => {}}
+                />
+                <EuiText
+                  size="s"
+                  css={css`
+                    text-wrap: auto;
+                    margin-left: ${euiTheme.size.l};
+                  `}
+                >
+                  {MANUAL_TRIGGERS_DESCRIPTIONS[trigger]}
+                </EuiText>
+              </EuiButton>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
