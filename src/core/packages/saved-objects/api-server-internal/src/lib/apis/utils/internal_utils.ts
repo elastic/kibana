@@ -27,6 +27,7 @@ import {
 export interface GetBulkOperationErrorRawResponse {
   status: number;
   error: { type: string; reason?: string | null; index: string };
+  // Other fields are present on a bulk operation result but they are irrelevant for this function
 }
 
 /**
