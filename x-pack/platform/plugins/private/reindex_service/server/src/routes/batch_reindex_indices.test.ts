@@ -108,13 +108,13 @@ describe('reindex API', () => {
     it('creates a collection of index operations', async () => {
       mockReindexService.createReindexOperation
         .mockResolvedValueOnce({
-          attributes: { indexName: 'theIndex1' },
+          attributes: { indexName: 'theIndex1', newIndexName: 'theIndex1Reindexed' },
         })
         .mockResolvedValueOnce({
-          attributes: { indexName: 'theIndex2' },
+          attributes: { indexName: 'theIndex2', newIndexName: 'theIndex2Reindexed' },
         })
         .mockResolvedValueOnce({
-          attributes: { indexName: 'theIndex3' },
+          attributes: { indexName: 'theIndex3', newIndexName: 'theIndex3Reindexed' },
         });
 
       const resp = await routeDependencies.router.getHandler({
@@ -124,7 +124,7 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           body: {
-            indexNames: [
+            indices: [
               { indexName: 'theIndex1', newIndexName: 'theIndex1Reindexed' },
               { indexName: 'theIndex2', newIndexName: 'theIndex2Reindexed' },
               { indexName: 'theIndex3', newIndexName: 'theIndex3Reindexed' },
@@ -157,9 +157,9 @@ describe('reindex API', () => {
       expect(data).toEqual({
         errors: [],
         enqueued: [
-          { indexName: 'theIndex1' },
-          { indexName: 'theIndex2' },
-          { indexName: 'theIndex3' },
+          { indexName: 'theIndex1', newIndexName: 'theIndex1Reindexed' },
+          { indexName: 'theIndex2', newIndexName: 'theIndex2Reindexed' },
+          { indexName: 'theIndex3', newIndexName: 'theIndex3Reindexed' },
         ],
       });
     });
@@ -183,7 +183,7 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           body: {
-            indexNames: [
+            indices: [
               { indexName: 'theIndex1', newIndexName: 'theIndex1Reindexed' },
               { indexName: 'theIndex2', newIndexName: 'theIndex2Reindexed' },
               { indexName: 'theIndex3', newIndexName: 'theIndex3Reindexed' },
