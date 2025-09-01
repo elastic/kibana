@@ -818,6 +818,9 @@ describe('convertToWorkflowGraph', () => {
     it('should have correct topological order for step with retry', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
+
+      const debugg = topsort.map((nodeId) => nodeId.split('_')[0]);
+
       expect(topsort).toEqual([
         'continue_testRetryConnectorStep',
         'fallback_testRetryConnectorStep',

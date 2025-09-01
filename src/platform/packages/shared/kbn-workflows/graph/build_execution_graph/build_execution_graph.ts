@@ -20,7 +20,6 @@ import type {
   StepWithOnFailure,
   StepWithIfCondition,
   StepWithForeach,
-  WorkflowOnFailure,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -32,6 +31,8 @@ import type {
   ExitIfNode,
   HttpGraphNode,
   WaitGraphNode,
+  EnterOnFailureNode,
+  ExitOnFailureNode,
   EnterRetryNode,
   ExitRetryNode,
   EnterContinueNode,
@@ -68,6 +69,15 @@ interface FallbackStep extends BaseStep {
   fallbackPathSteps: BaseStep[];
 }
 
+interface OnFailureStep extends BaseStep {
+  name: string;
+  type: 'on-failure';
+  retry: WorkflowRetry;
+  continue: boolean;
+  fallback: BaseStep[];
+  normalPathSteps: BaseStep[];
+}
+
 function getNodeId(node: BaseStep): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
   // We should ensure that all steps have an `id` field in the future - either explicitly set or generated from name.
@@ -92,18 +102,22 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitHttpStep(graph, previousStep, modifiedCurrentStep);
   }
 
-  if ((modifiedCurrentStep as ContinueStep).type === 'continue') {
-    return visitContinueStep(graph, previousStep, modifiedCurrentStep as ContinueStep);
+  if ((modifiedCurrentStep as OnFailureStep).type === 'on-failure') {
+    return visitOnFailureStep(graph, previousStep, modifiedCurrentStep as OnFailureStep);
   }
 
-  if ((modifiedCurrentStep as RetryStep).type === 'retry') {
-    // Retry steps are treated as atomic steps for graph purposes
-    return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
-  }
+  // if ((modifiedCurrentStep as ContinueStep).type === 'continue') {
+  //   return visitContinueStep(graph, previousStep, modifiedCurrentStep as ContinueStep);
+  // }
 
-  if ((modifiedCurrentStep as FallbackStep).type === 'fallback') {
-    return visitFallbackStep(graph, previousStep, modifiedCurrentStep as FallbackStep);
-  }
+  // if ((modifiedCurrentStep as RetryStep).type === 'retry') {
+  //   // Retry steps are treated as atomic steps for graph purposes
+  //   return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
+  // }
+
+  // if ((modifiedCurrentStep as FallbackStep).type === 'fallback') {
+  //   return visitFallbackStep(graph, previousStep, modifiedCurrentStep as FallbackStep);
+  // }
 
   return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
 }
@@ -237,7 +251,208 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   return exitConditionNode;
 }
 
-export function visitFallbackStep(
+function visitOnFailureStep(
+  graph: graphlib.Graph,
+  previousStep: any,
+  currentStep: OnFailureStep
+): any {
+  const enterOnFailureNode: EnterOnFailureNode = {
+    id: `enterOnFailure(${getNodeId(currentStep)})`,
+    type: 'enter-on-failure',
+  };
+  const exitOnFailureNode: ExitOnFailureNode = {
+    id: `exitOnFailure(${getNodeId(currentStep)})`,
+    type: 'exit-on-failure',
+  };
+  graph.setNode(enterOnFailureNode.id, enterOnFailureNode);
+  graph.setNode(exitOnFailureNode.id, exitOnFailureNode);
+
+  const fallbackGraph = createFallback(
+    getNodeId(currentStep),
+    currentStep.normalPathSteps,
+    currentStep.fallback,
+    currentStep.retry
+  );
+  const continueGraph = createContinue(fallbackGraph, getNodeId(currentStep));
+
+  insertGraphBetweenNodes(graph, continueGraph, enterOnFailureNode.id, exitOnFailureNode.id);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), enterOnFailureNode.id);
+  }
+}
+
+function createContinue(innerGraph: graphlib.Graph, id: string): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const enterContinueNodeId = `enterContinue_${id}`;
+  const exitNodeId = `exitContinue_${id}`;
+  const enterContinueNode: EnterContinueNode = {
+    id: enterContinueNodeId,
+    type: 'enter-continue',
+    exitNodeId,
+  };
+  const exitContinueNode: ExitContinueNode = {
+    type: 'exit-continue',
+    id: exitNodeId,
+  };
+  graph.setNode(enterContinueNode.id, enterContinueNode);
+  graph.setNode(exitContinueNode.id, exitContinueNode);
+  insertGraphBetweenNodes(graph, innerGraph, enterContinueNode.id, exitContinueNode.id);
+  return graph;
+}
+
+function createRetry(innerGraph: graphlib.Graph, id: string, retry: WorkflowRetry): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const enterRetryNodeId = `enterRetry_${id}`;
+  const exitNodeId = `exitRetry_${id}`;
+  const enterRetryNode: EnterRetryNode = {
+    id: enterRetryNodeId,
+    type: 'enter-retry',
+    exitNodeId,
+    configuration: retry,
+  };
+  const exitRetryNode: ExitRetryNode = {
+    type: 'exit-retry',
+    id: exitNodeId,
+    startNodeId: enterRetryNodeId,
+  };
+  graph.setNode(enterRetryNode.id, enterRetryNode);
+  graph.setNode(exitRetryNode.id, exitRetryNode);
+  insertGraphBetweenNodes(graph, innerGraph, enterRetryNode.id, exitRetryNode.id);
+  return graph;
+}
+
+function createNormalPath(
+  id: string,
+  normalPathSteps: BaseStep[],
+  retry: WorkflowRetry
+): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const enterNormalPathNodeId = `enterNormalPath_${id}`;
+  const exitNormalPathNodeId = `exitNormalPath_${id}`;
+  const enterNormalPathNode: EnterNormalPathNode = {
+    id: enterNormalPathNodeId,
+    type: 'enter-normal-path',
+    enterZoneNodeId: enterNormalPathNodeId,
+    enterFailurePathNodeId: `enterFallbackPath_${id}`,
+  };
+  const exitNormalPathNode: ExitNormalPathNode = {
+    id: exitNormalPathNodeId,
+    type: 'exit-normal-path',
+    enterNodeId: enterNormalPathNodeId,
+    exitOnFailureZoneNodeId: `exitTryBlock_${id}`,
+  };
+  graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
+  graph.setNode(exitNormalPathNode.id, exitNormalPathNode);
+
+  const retryGraph = createRetry(createStepsSequence(normalPathSteps), id, retry);
+
+  insertGraphBetweenNodes(graph, retryGraph, enterNormalPathNode.id, exitNormalPathNode.id);
+  return graph;
+}
+
+function createFallbackPath(id: string, fallbackSteps: BaseStep[]): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const enterFallbackPathNodeId = `enterFallbackPath_${id}`;
+  const exitFallbackPathNodeId = `exitFallbackPath_${id}`;
+  const enterFallbackPathNode: EnterFallbackPathNode = {
+    id: enterFallbackPathNodeId,
+    type: 'enter-fallback-path',
+    enterZoneNodeId: enterFallbackPathNodeId,
+  };
+  const exitFallbackPathNode: ExitFallbackPathNode = {
+    id: exitFallbackPathNodeId,
+    type: 'exit-fallback-path',
+    enterNodeId: enterFallbackPathNodeId,
+    exitOnFailureZoneNodeId: `exitTryBlock_${id}`,
+  };
+  graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
+  graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
+  const fallbackPathGraph = createStepsSequence(fallbackSteps);
+  insertGraphBetweenNodes(
+    graph,
+    fallbackPathGraph,
+    enterFallbackPathNode.id,
+    exitFallbackPathNode.id
+  );
+  return graph;
+}
+
+function createFallback(
+  id: string,
+  normalPathSteps: BaseStep[],
+  fallbackPathSteps: BaseStep[],
+  retry: WorkflowRetry
+): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  const enterTryBlockNodeId = `enterTryBlock_${id}`;
+  const exitTryBlockNodeId = `exitTryBlock_${id}`;
+  const enterNormalPathNodeId = `enterNormalPath_${id}`;
+
+  const enterTryBlockNode: EnterTryBlockNode = {
+    id: enterTryBlockNodeId,
+    exitNodeId: exitTryBlockNodeId,
+    type: 'enter-try-block',
+    enterNormalPathNodeId,
+  };
+  graph.setNode(enterTryBlockNodeId, enterTryBlockNode);
+  const exitTryBlockNode: ExitTryBlockNode = {
+    type: 'exit-try-block',
+    id: exitTryBlockNodeId,
+    enterNodeId: enterTryBlockNodeId,
+  };
+  graph.setNode(exitTryBlockNodeId, exitTryBlockNode);
+
+  const normalPathGraphWithNodes = createNormalPath(id, normalPathSteps, retry);
+  insertGraphBetweenNodes(graph, normalPathGraphWithNodes, enterTryBlockNodeId, exitTryBlockNodeId);
+
+  const fallbackPathGraph = createFallbackPath(id, fallbackPathSteps);
+  insertGraphBetweenNodes(graph, fallbackPathGraph, enterTryBlockNodeId, exitTryBlockNodeId);
+
+  return graph;
+}
+
+function createStepsSequence(steps: BaseStep[]): graphlib.Graph {
+  const graph = new graphlib.Graph({ directed: true });
+  let previousStep: any = null;
+
+  steps.forEach((step) => {
+    const currentStep = visitAbstractStep(graph, previousStep, step);
+    previousStep = currentStep;
+  });
+
+  return graph;
+}
+
+function insertGraphBetweenNodes(
+  graph: graphlib.Graph,
+  subGraph: graphlib.Graph,
+  startNodeId: string,
+  endNodeId: string
+): void {
+  try {
+    const topologicalOrder = graphlib.alg.topsort(subGraph);
+    graph.setEdge(startNodeId, topologicalOrder[0]);
+    graph.setEdge(topologicalOrder[topologicalOrder.length - 1], endNodeId);
+    subGraph.nodes().forEach((nodeId) => {
+      graph.setNode(nodeId, subGraph.node(nodeId));
+    });
+    subGraph.edges().forEach((edgeObj) => {
+      graph.setEdge(edgeObj.v, edgeObj.w);
+    });
+
+    try {
+      const topologicalOrderAAAA = graphlib.alg.topsort(graph);
+    } catch (e) {
+      throw e;
+    }
+    console.log('ff');
+  } catch (e) {
+    throw e;
+  }
+}
+
+function visitFallbackStep(
   graph: graphlib.Graph,
   previousStep: any,
   currentStep: FallbackStep
@@ -426,6 +641,26 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   return exitForeachNode;
 }
 
+function handleOnFailure(currentStep: BaseStep): BaseStep {
+  /** !IMPORTANT!
+   * The order of operations is important here.
+   * The order affects what context will be available in the step if/foreach/etc operation.
+   */
+
+  const stepWithOnFailure = currentStep as StepWithOnFailure;
+  const onFailureConfig = stepWithOnFailure['on-failure']!;
+  return {
+    name: getNodeId(currentStep),
+    type: 'on-failure',
+    retry: stepWithOnFailure['on-failure']!.retry,
+    continue: stepWithOnFailure['on-failure']!.continue || false,
+    normalPathSteps: [omit(stepWithOnFailure, ['on-failure']) as BaseStep],
+    fallback: Array.isArray(onFailureConfig.fallback)
+      ? onFailureConfig.fallback
+      : [onFailureConfig.fallback],
+  } as OnFailureStep;
+}
+
 /**
  * Processes step-level operations for a given workflow step.
  *
@@ -444,62 +679,7 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
    */
 
   if ((currentStep as StepWithOnFailure)?.['on-failure']) {
-    const stepWithOnFailure = currentStep as StepWithOnFailure;
-    const onFailureConfig = stepWithOnFailure['on-failure']!;
-
-    if (onFailureConfig?.continue) {
-      // Wrap the current step in a continue step
-      // and remove the continue from the current step's on-failure to avoid infinite nesting
-      // The continue logic will be handled by the outer continue step
-      // We keep other on-failure properties (like fallback-step, retry) on the inner step
-      // so they can be handled if needed
-      return {
-        name: `continue_${getNodeId(currentStep)}`,
-        type: 'continue',
-        steps: [
-          handleStepLevelOperations({
-            ...currentStep,
-            'on-failure': omit(onFailureConfig, ['continue']) as WorkflowOnFailure,
-          } as BaseStep),
-        ],
-      } as ContinueStep;
-    }
-
-    if (onFailureConfig.fallback) {
-      // Wrap the current step in a fallback step
-      // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
-      const fallbackSteps = onFailureConfig.fallback;
-      return {
-        name: `fallback_${getNodeId(currentStep)}`,
-        type: 'fallback',
-        normalPathSteps: [
-          handleStepLevelOperations({
-            ...currentStep,
-            'on-failure': omit(onFailureConfig, ['fallback']) as WorkflowOnFailure,
-          } as BaseStep),
-        ],
-        fallbackPathSteps: Array.isArray(fallbackSteps) ? fallbackSteps : [fallbackSteps],
-      } as FallbackStep;
-    }
-
-    if (onFailureConfig?.retry) {
-      // Wrap the current step in a retry step
-      // and remove the retry from the current step's on-failure to avoid infinite nesting
-      // The retry logic will be handled by the outer retry step
-      // We keep other on-failure properties (like fallback-step, continue) on the inner step
-      // so they can be handled if the retry attempts are exhausted
-      return {
-        name: `retry_${getNodeId(currentStep)}`,
-        type: 'retry',
-        steps: [
-          handleStepLevelOperations({
-            ...currentStep,
-            'on-failure': omit(onFailureConfig, ['retry']) as WorkflowOnFailure,
-          } as BaseStep),
-        ],
-        retry: onFailureConfig.retry,
-      } as RetryStep;
-    }
+    return handleOnFailure(currentStep);
   }
 
   if ((currentStep as StepWithIfCondition).if) {
