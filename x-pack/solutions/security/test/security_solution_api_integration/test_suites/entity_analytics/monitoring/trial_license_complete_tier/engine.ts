@@ -387,7 +387,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('plain index sync', () => {
+    describe('plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const entitySource = createIndexEntitySource(indexName, { name: 'StarWars' });
 
