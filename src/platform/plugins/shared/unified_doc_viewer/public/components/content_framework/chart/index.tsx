@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
 export interface ContentFrameworkChartProps {
@@ -37,7 +38,7 @@ export function ContentFrameworkChart({
       },
     },
   } = getUnifiedDocViewerServices();
-  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+  const discoverLocator = useMemo(() => locators.get(DISCOVER_APP_LOCATOR), [locators]);
 
   const discoverUrl = useMemo(() => {
     if (!discoverLocator) {
