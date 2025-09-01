@@ -25,6 +25,7 @@ import type {
 export interface BasicDiffInfo {
   conflict: ThreeWayDiffConflict;
   merge_outcome?: ThreeWayMergeOutcome;
+  has_update: boolean;
 }
 export type BasicRuleFieldsDiff = Record<string, BasicDiffInfo>;
 import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -53,16 +54,16 @@ interface ProcessedRules {
 interface RuleTelemetry {
   ruleId: string;
   hasMissingBaseVersion: boolean;
-  totalFieldsWithConflict: {
+  updatedFieldsSummary: {
     count: number;
     prepopulated: number;
     notPrepopulated: number;
   };
-  customizedFields: Array<{
+  updatedFields: Array<{
     fieldName: string;
     selectedVersion: ThreeWayMergeOutcome | undefined;
     conflict: ThreeWayDiffConflict;
-    prepopulatedFinalVersion: boolean;
+    prepopulated: boolean;
   }>;
 }
 
@@ -139,7 +140,7 @@ export const createModifiedPrebuiltRuleAssets = ({
 
             processedRules.modifiedPrebuiltRuleAssets.push(modifiedPrebuiltRuleAsset);
 
-            if (sendTelemetry && isCustomized) {
+            if (sendTelemetry) {
               reportRuleUpgradeTelemetry({
                 analytics,
                 calculatedRuleDiff,
@@ -224,17 +225,17 @@ export function reportRuleUpgradeTelemetry({
   ruleId,
   upgradeableRule,
 }: ReportRuleUpgradeTelemetryParams) {
-  const customizedFields: RuleTelemetry['customizedFields'] = [];
+  const updatedFields: RuleTelemetry['updatedFields'] = [];
   let prepopulated = 0;
   let notPrepopulated = 0;
 
   for (const [fieldName, diff] of Object.entries(calculatedRuleDiff)) {
-    if (diff.conflict && diff.conflict !== 'NONE') {
-      customizedFields.push({
+    if (diff.has_update) {
+      updatedFields.push({
         fieldName,
         selectedVersion: diff.merge_outcome,
         conflict: diff.conflict,
-        prepopulatedFinalVersion: diff.conflict !== 'NON_SOLVABLE',
+        prepopulated: diff.conflict !== 'NON_SOLVABLE',
       });
       if (diff.conflict !== 'NON_SOLVABLE') {
         prepopulated++;
@@ -244,17 +245,15 @@ export function reportRuleUpgradeTelemetry({
     }
   }
 
-  if (customizedFields.length > 0) {
-    const ruleEvent: RuleTelemetry = {
-      ruleId,
-      hasMissingBaseVersion: upgradeableRule.base == null,
-      totalFieldsWithConflict: {
-        count: customizedFields.length,
-        prepopulated,
-        notPrepopulated,
-      },
-      customizedFields,
-    };
-    analytics.reportEvent(DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT.eventType, ruleEvent);
-  }
+  const ruleEvent: RuleTelemetry = {
+    ruleId,
+    hasMissingBaseVersion: upgradeableRule.base == null,
+    updatedFieldsSummary: {
+      count: updatedFields.length,
+      prepopulated,
+      notPrepopulated,
+    },
+    updatedFields,
+  };
+  analytics.reportEvent(DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT.eventType, ruleEvent);
 }

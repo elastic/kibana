@@ -29,16 +29,16 @@ import type {
 export const DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT: EventTypeOpts<{
   ruleId: string;
   hasMissingBaseVersion: boolean;
-  totalFieldsWithConflict: {
+  updatedFieldsSummary: {
     count: number;
     prepopulated: number;
     notPrepopulated: number;
   };
-  customizedFields: Array<{
+  updatedFields: Array<{
     fieldName: string;
     selectedVersion: 'base' | 'target' | 'merged' | 'resolved';
     conflict: string;
-    prepopulatedFinalVersion: boolean;
+    prepopulated: boolean;
   }>;
 }> = {
   eventType: 'detection_rule_upgrade_field_conflict',
@@ -48,29 +48,29 @@ export const DETECTION_RULE_UPGRADE_FIELD_CONFLICT_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: { description: 'True if base version is missing for this rule' },
     },
-    totalFieldsWithConflict: {
+    updatedFieldsSummary: {
       properties: {
-        count: { type: 'long', _meta: { description: 'Number of fields with conflict' } },
+        count: { type: 'long', _meta: { description: 'Number of updated fields' } },
         prepopulated: {
           type: 'long',
-          _meta: { description: 'Number of fields with conflict and prepopulated final version' },
+          _meta: { description: 'Number of updated fields with prepopulated final version' },
         },
         notPrepopulated: {
           type: 'long',
           _meta: {
-            description: 'Number of fields with conflict and without prepopulated final version',
+            description: 'Number of updated fields without prepopulated final version',
           },
         },
       },
     },
-    customizedFields: {
+    updatedFields: {
       type: 'array',
       items: {
         properties: {
           fieldName: { type: 'keyword', _meta: { description: 'Field name' } },
           selectedVersion: { type: 'keyword', _meta: { description: 'Selected field version' } },
           conflict: { type: 'text', _meta: { description: 'Type of the conflict' } },
-          prepopulatedFinalVersion: {
+          prepopulated: {
             type: 'boolean',
             _meta: { description: 'True if final version was prepopulated' },
           },
