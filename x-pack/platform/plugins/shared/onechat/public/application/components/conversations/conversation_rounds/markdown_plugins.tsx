@@ -49,11 +49,11 @@ export const visualizationPlugin = () => {
 };
 
 export function getVisualizationHandler({
-  pluginsStart,
+  startDependencies,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
 }: {
-  pluginsStart: OnechatStartDependencies;
+  startDependencies: OnechatStartDependencies;
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
@@ -69,7 +69,7 @@ export function getVisualizationHandler({
     const toolResult = steps
       .filter((s) => s.type === 'tool_call')
       .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-      .find((r) => r.type === 'tabular_data' && r.toolResultId === toolResultId) as
+      .find((r) => r.type === 'tabular_data' && r.tool_result_id === toolResultId) as
       | TabularDataResult
       | undefined;
 
@@ -85,8 +85,8 @@ export function getVisualizationHandler({
 
     return (
       <VisualizeESQL
-        lens={pluginsStart.lens}
-        dataViews={pluginsStart.dataViews}
+        lens={startDependencies.lens}
+        dataViews={startDependencies.dataViews}
         esqlQuery={query}
         esqlResult={result}
         preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}

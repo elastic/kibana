@@ -45,7 +45,7 @@ export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrent
     overflow-wrap: anywhere;
   `;
 
-  const { pluginsStart } = useOnechatServices();
+  const { startDependencies } = useOnechatServices();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -105,7 +105,7 @@ export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrent
         );
       },
       visualization: getVisualizationHandler({
-        pluginsStart,
+        startDependencies,
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
@@ -120,7 +120,7 @@ export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrent
       ],
       processingPluginList: processingPlugins,
     };
-  }, [pluginsStart, stepsFromCurrentRound, stepsFromPrevRounds]);
+  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]);
 
   return (
     <EuiText size="s" className={containerClassName}>

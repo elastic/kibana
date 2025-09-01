@@ -32,7 +32,7 @@ export interface ResourceResult {
 }
 
 export interface TabularDataResult {
-  toolResultId: string;
+  tool_result_id: string;
   type: ToolResultType.tabularData;
   data: {
     source?: 'esql';

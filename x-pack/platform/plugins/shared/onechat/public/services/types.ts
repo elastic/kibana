@@ -16,5 +16,5 @@ export interface OnechatInternalService {
   chatService: ChatService;
   conversationsService: ConversationsService;
   toolsService: ToolsService;
-  pluginsStart: OnechatStartDependencies;
+  startDependencies: OnechatStartDependencies;
 }
