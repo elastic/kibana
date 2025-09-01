@@ -60,6 +60,17 @@ export const formulaOperationDefinitionSchema = schema.object({
   }),
 });
 
+export const esqlValueSchema = schema.object({
+  /**
+   * Value
+   */
+  column: schema.string({
+    meta: {
+      description: 'Column to use',
+    },
+  }),
+});
+
 export const metricOperationSharedSchema = {
   ...genericOperationOptionsSchema,
   /**

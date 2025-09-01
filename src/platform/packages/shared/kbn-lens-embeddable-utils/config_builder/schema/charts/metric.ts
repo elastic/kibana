@@ -24,9 +24,10 @@ import {
   staticOperationDefinitionSchema,
   uniqueCountMetricOperationSchema,
   sumMetricOperationSchema,
+  esqlValueSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
-import { datasetSchema } from '../dataset';
+import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   bucketDateHistogramOperationSchema,
   bucketTermsOperationSchema,
@@ -241,4 +242,33 @@ export const metricStateSchema = schema.object({
   ),
 });
 
-export type MetricState = TypeOf<typeof metricStateSchema>;
+const esqlMetricState = schema.allOf([
+  sharedPanelInfoSchema,
+  layerSettingsSchema,
+  schema.object({
+    type: schema.literal('metric'),
+    ...datasetEsqlTableSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: schema.allOf([metricStatePrimaryMetricOptionsSchema, esqlValueSchema]),
+    /**
+     * Secondary value configuration, must define operation.
+     */
+    secondary_metric: schema.maybe(
+      schema.allOf([metricStateSecondaryMetricOptionsSchema, esqlValueSchema]),
+    ),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    breakdown_by: schema.maybe(
+      schema.allOf([metricStateBreakdownByOptionsSchema, esqlValueSchema])
+    ),
+  }),
+]);
+
+export const metricStateWithEsqlSupportSchema = schema.oneOf(
+  [metricStateSchema, esqlMetricState]
+);
+
+export type MetricState = TypeOf<typeof metricStateWithEsqlSupportSchema>;
