@@ -8,18 +8,14 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-
+import { createChartSection } from './accessor/chart_section';
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
 const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
-
-const LazyMetricsGridSection = dynamic(() => import('./dummy_metrics_grid'));
-
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
@@ -27,20 +23,21 @@ export const createMetricsDataSourceProfileProvider = (
   restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   isExperimental: true,
   profile: {
-    getChartSectionConfiguration: (prev) => () => ({
-      ...(prev ? prev() : {}),
-      Component: LazyMetricsGridSection,
-      replaceDefaultChart: true,
-      localStorageKeyPrefix: 'discover:metricsExperience',
-    }),
+    getChartSectionConfiguration: createChartSection(
+      services.metricsContextService.getMetricsExperienceClient()
+    ),
   },
   resolve: (params) => {
-    // This filter still needs to be narrowed down to `FROM metrics-*` or `TS metrics-*`
-    // and possibly other conditions
+    const metricsClient = services.metricsContextService.getMetricsExperienceClient();
+
     const isValidQuery =
       isOfAggregateQueryType(params.query) && params.query.esql.toLowerCase().includes('metrics');
 
-    if (params.rootContext.solutionType !== SolutionType.Observability || !isValidQuery) {
+    if (
+      params.rootContext.solutionType !== SolutionType.Observability ||
+      !isValidQuery ||
+      !metricsClient
+    ) {
       return {
         isMatch: false,
       };
