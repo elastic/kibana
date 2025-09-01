@@ -1766,6 +1766,8 @@
       "@kbn/search-api-panels/*": ["src/platform/packages/shared/kbn-search-api-panels/*"],
       "@kbn/search-assistant": ["x-pack/solutions/search/plugins/search_assistant"],
       "@kbn/search-assistant/*": ["x-pack/solutions/search/plugins/search_assistant/*"],
+      "@kbn/search-code-examples": ["x-pack/solutions/search/packages/kbn-search-code-examples"],
+      "@kbn/search-code-examples/*": ["x-pack/solutions/search/packages/kbn-search-code-examples/*"],
       "@kbn/search-connectors": ["src/platform/packages/shared/kbn-search-connectors"],
       "@kbn/search-connectors/*": ["src/platform/packages/shared/kbn-search-connectors/*"],
       "@kbn/search-errors": ["src/platform/packages/shared/kbn-search-errors"],

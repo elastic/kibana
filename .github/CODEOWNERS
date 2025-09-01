@@ -2784,6 +2784,9 @@ x-pack/plugins/elastic_assistant/server/__mocks__/defend_insights_schema.mock.ts
 x-pack/plugins/elastic_assistant/server/ai_assistant_data_clients/defend_insights @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/routes/defend_insights @elastic/security-defend-workflows
 x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights @elastic/security-defend-workflows
+x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/content_loaders/defend_insights_loader.* @elastic/security-defend-workflows
+x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/defend_insight_prompts.ts @elastic/security-defend-workflows
+x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/defend_insights @elastic/security-defend-workflows
 x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/components/response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
