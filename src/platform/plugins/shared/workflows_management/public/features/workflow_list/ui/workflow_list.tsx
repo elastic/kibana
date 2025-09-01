@@ -20,15 +20,17 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormattedRelative } from '@kbn/i18n-react';
-import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
-import { i18n } from '@kbn/i18n';
+import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
+import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
@@ -36,9 +38,10 @@ import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../..
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
+  onCreateWorkflow?: () => void;
 }
 
-export function WorkflowList({ search, setSearch }: WorkflowListProps) {
+export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
@@ -238,7 +241,10 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             }),
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
-              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled),
+              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled) ??
+              i18n.translate('workflows.workflowList.run', {
+                defaultMessage: 'Run',
+              }),
             onClick: (item: WorkflowListItemDto) => handleRunWorkflow(item),
           },
           {
@@ -325,6 +331,20 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
 
   if (error) {
     return <EuiText>Error loading workflows</EuiText>;
+  }
+
+  // Show empty state if no workflows exist and no filters are applied
+  if (shouldShowWorkflowsEmptyState(workflows, search)) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+        <EuiFlexItem grow={false}>
+          <WorkflowsEmptyState
+            onCreateWorkflow={onCreateWorkflow}
+            canCreateWorkflow={!!canCreateWorkflow}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const showStart = (search.page - 1) * search.limit + 1;
