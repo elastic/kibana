@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 import { fromPromise } from 'xstate5';
 
 export interface MlFeatureFlags {
