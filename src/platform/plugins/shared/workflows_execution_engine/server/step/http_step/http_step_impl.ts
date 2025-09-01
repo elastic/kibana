@@ -172,7 +172,7 @@ export class HttpStepImpl extends StepBase<HttpStep> {
     const errorMessage = axios.isAxiosError(error)
       ? error.response
         ? `HTTP Error: ${error.response.status} ${error.response.statusText}`
-        : `HTTP Error: ${error.message}`
+        : `HTTP Error: ${error.message ? error.message : error.name}`
       : error instanceof Error
       ? error.message
       : String(error);

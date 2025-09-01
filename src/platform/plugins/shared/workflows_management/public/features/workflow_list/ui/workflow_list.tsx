@@ -18,29 +18,30 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormattedRelative } from '@kbn/i18n-react';
-import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
-import { i18n } from '@kbn/i18n';
+import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
+import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { getExecutionStatusIcon } from '../../../shared/ui';
-import { getStatusLabel } from '../../../shared/translations';
+import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
+  onCreateWorkflow?: () => void;
 }
 
-export function WorkflowList({ search, setSearch }: WorkflowListProps) {
-  const { euiTheme } = useEuiTheme();
+export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
@@ -181,15 +182,17 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         name: 'Last run status',
         field: 'runHistory',
         render: (value, item) => {
-          if (item.history.length === 0) return;
-          const lastRun = item.history[0];
-          const icon = getExecutionStatusIcon(euiTheme, lastRun.status);
-
-          return (
-            <EuiText size="s">
-              {icon} {getStatusLabel(lastRun.status)}
-            </EuiText>
-          );
+          if (item.history.length === 0) {
+            return;
+          }
+          return <StatusBadge status={item.history[0].status} />;
+        },
+      },
+      {
+        name: 'Valid',
+        field: 'valid',
+        render: (value: boolean) => {
+          return <WorkflowStatus valid={value} />;
         },
       },
       {
@@ -197,21 +200,31 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         field: 'enabled',
         render: (value, item) => {
           return (
-            <EuiSwitch
-              disabled={!canUpdateWorkflow}
-              checked={item.enabled}
-              onChange={() => handleToggleWorkflow(item)}
-              label={
-                item.enabled
-                  ? i18n.translate('workflows.workflowList.enabled', {
-                      defaultMessage: 'Enabled',
+            <EuiToolTip
+              content={
+                !item.valid
+                  ? i18n.translate('workflows.workflowList.invalid', {
+                      defaultMessage: 'Fix errors to enable workflow',
                     })
-                  : i18n.translate('workflows.workflowList.disabled', {
-                      defaultMessage: 'Disabled',
-                    })
+                  : undefined
               }
-              showLabel={false}
-            />
+            >
+              <EuiSwitch
+                disabled={!canUpdateWorkflow || !item.valid}
+                checked={item.enabled}
+                onChange={() => handleToggleWorkflow(item)}
+                label={
+                  item.enabled
+                    ? i18n.translate('workflows.workflowList.enabled', {
+                        defaultMessage: 'Enabled',
+                      })
+                    : i18n.translate('workflows.workflowList.disabled', {
+                        defaultMessage: 'Disabled',
+                      })
+                }
+                showLabel={false}
+              />
+            </EuiToolTip>
           );
         },
       },
@@ -220,30 +233,44 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         actions: [
           {
             isPrimary: true,
-            enabled: (item) => !!canExecuteWorkflow && item.enabled,
+            enabled: (item) => !!canExecuteWorkflow && item.enabled && item.valid,
             type: 'icon',
             color: 'primary',
-            name: 'Run',
+            name: i18n.translate('workflows.workflowList.run', {
+              defaultMessage: 'Run',
+            }),
             icon: 'play',
-            description: 'Run workflow',
+            description: (item: WorkflowListItemDto) =>
+              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled) ??
+              i18n.translate('workflows.workflowList.run', {
+                defaultMessage: 'Run',
+              }),
             onClick: (item: WorkflowListItemDto) => handleRunWorkflow(item),
           },
           {
             enabled: () => !!canUpdateWorkflow,
             type: 'icon',
             color: 'primary',
-            name: 'Edit',
+            name: i18n.translate('workflows.workflowList.edit', {
+              defaultMessage: 'Edit',
+            }),
             icon: 'pencil',
-            description: 'Edit workflow',
+            description: i18n.translate('workflows.workflowList.edit', {
+              defaultMessage: 'Edit workflow',
+            }),
             href: (item) => application!.getUrlForApp('workflows', { path: `/${item.id}` }),
           },
           {
             enabled: () => !!canCreateWorkflow,
             type: 'icon',
             color: 'primary',
-            name: 'Clone',
+            name: i18n.translate('workflows.workflowList.clone', {
+              defaultMessage: 'Clone',
+            }),
             icon: 'copy',
-            description: 'Clone workflow',
+            description: i18n.translate('workflows.workflowList.clone', {
+              defaultMessage: 'Clone workflow',
+            }),
             onClick: (item: WorkflowListItemDto) => {
               handleCloneWorkflow(item);
             },
@@ -252,24 +279,31 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
             enabled: () => false,
             type: 'icon',
             color: 'primary',
-            name: 'Export',
+            name: i18n.translate('workflows.workflowList.export', {
+              defaultMessage: 'Export',
+            }),
             icon: 'export',
-            description: 'Export',
+            description: i18n.translate('workflows.workflowList.export', {
+              defaultMessage: 'Export workflow',
+            }),
           },
           {
             enabled: () => !!canDeleteWorkflow,
             type: 'icon',
             color: 'danger',
-            name: 'Delete',
+            name: i18n.translate('workflows.workflowList.delete', {
+              defaultMessage: 'Delete',
+            }),
             icon: 'trash',
-            description: 'Delete',
+            description: i18n.translate('workflows.workflowList.delete', {
+              defaultMessage: 'Delete workflow',
+            }),
             onClick: (item: WorkflowListItemDto) => handleDeleteWorkflow(item),
           },
         ],
       },
     ],
     [
-      euiTheme,
       application,
       canCreateWorkflow,
       canDeleteWorkflow,
@@ -297,6 +331,20 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
 
   if (error) {
     return <EuiText>Error loading workflows</EuiText>;
+  }
+
+  // Show empty state if no workflows exist and no filters are applied
+  if (shouldShowWorkflowsEmptyState(workflows, search)) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+        <EuiFlexItem grow={false}>
+          <WorkflowsEmptyState
+            onCreateWorkflow={onCreateWorkflow}
+            canCreateWorkflow={!!canCreateWorkflow}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const showStart = (search.page - 1) * search.limit + 1;
