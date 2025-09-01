@@ -63,7 +63,7 @@ export interface GetDataStreamMappingsRes {
 /**
  * Returns the mappings for each of the given datastreams.
  */
-export const getDatastreamMappings = async ({
+export const getDataStreamMappings = async ({
   datastreams,
   cleanup = true,
   esClient,

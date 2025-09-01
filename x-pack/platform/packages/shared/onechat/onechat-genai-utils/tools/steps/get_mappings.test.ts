@@ -8,7 +8,7 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { GetDataStreamMappingsRes } from './get_mappings';
-import { getDatastreamMappings } from './get_mappings';
+import { getDataStreamMappings } from './get_mappings';
 import { cleanupMapping } from '../utils';
 
 jest.mock('../utils');
@@ -46,7 +46,7 @@ describe('mappings utilities', () => {
 
       esClient.transport.request.mockResolvedValue(response);
 
-      await getDatastreamMappings({
+      await getDataStreamMappings({
         datastreams: ['streamA', 'streamB'],
         esClient,
         cleanup: false,
@@ -73,7 +73,7 @@ describe('mappings utilities', () => {
 
       esClient.transport.request.mockResolvedValue(response);
 
-      const res = await getDatastreamMappings({
+      const res = await getDataStreamMappings({
         datastreams: ['data_stream'],
         esClient,
         cleanup: false,
@@ -105,7 +105,7 @@ describe('mappings utilities', () => {
 
       esClient.transport.request.mockResolvedValue(response);
 
-      const res = await getDatastreamMappings({
+      const res = await getDataStreamMappings({
         datastreams: ['stream_A', 'stream_B'],
         esClient,
         cleanup: false,
@@ -132,7 +132,7 @@ describe('mappings utilities', () => {
 
       esClient.transport.request.mockResolvedValue(response);
 
-      await getDatastreamMappings({
+      await getDataStreamMappings({
         datastreams: ['data_stream'],
         esClient,
         cleanup: false,
@@ -161,7 +161,7 @@ describe('mappings utilities', () => {
 
       esClient.transport.request.mockResolvedValue(response);
 
-      await getDatastreamMappings({
+      await getDataStreamMappings({
         datastreams: ['stream_A', 'stream_B'],
         esClient,
         cleanup: true,
@@ -184,7 +184,7 @@ describe('mappings utilities', () => {
 
       esClient.transport.request.mockResolvedValue(response);
 
-      const res = await getDatastreamMappings({
+      const res = await getDataStreamMappings({
         datastreams: ['data_stream'],
         esClient,
         cleanup: false,

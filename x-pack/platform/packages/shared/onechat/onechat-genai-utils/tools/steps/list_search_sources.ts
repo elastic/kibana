@@ -122,7 +122,7 @@ export const listSearchSources = async ({
     const warnings: string[] = [];
     if (dataStreamSources.length > perTypeLimit) {
       warnings.push(
-        `DataSource results truncated to ${perTypeLimit} elements - Total result count was ${dataStreamSources.length}`
+        `DataStreams results truncated to ${perTypeLimit} elements - Total result count was ${dataStreamSources.length}`
       );
     }
     if (aliasSources.length > perTypeLimit) {

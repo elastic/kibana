@@ -9,7 +9,7 @@ import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { EsResourceType } from '@kbn/onechat-common';
-import { getIndexMappings, getDatastreamMappings } from './get_mappings';
+import { getIndexMappings, getDataStreamMappings } from './get_mappings';
 import type { MappingField } from '../utils';
 import { processFieldCapsResponse, flattenMapping } from '../utils';
 
@@ -74,7 +74,7 @@ export const resolveResource = async ({
   // target is a datastream
   if (resolveRes.data_streams.length > 0) {
     const datastream = resolveRes.data_streams[0].name;
-    const mappingRes = await getDatastreamMappings({
+    const mappingRes = await getDataStreamMappings({
       datastreams: [datastream],
       esClient,
       cleanup: true,

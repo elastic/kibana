@@ -18,7 +18,7 @@ import type {
   IndexSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
-import { getDatastreamMappings, getIndexMappings } from './steps/get_mappings';
+import { getDataStreamMappings, getIndexMappings } from './steps/get_mappings';
 import { flattenMapping } from './utils/mappings';
 
 export interface RelevantResource {
@@ -85,7 +85,7 @@ const createDatastreamSummaries = async ({
   datastreams: DataStreamSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const allMappings = await getDatastreamMappings({
+  const allMappings = await getDataStreamMappings({
     datastreams: datastreams.map((stream) => stream.name),
     cleanup: true,
     esClient,
