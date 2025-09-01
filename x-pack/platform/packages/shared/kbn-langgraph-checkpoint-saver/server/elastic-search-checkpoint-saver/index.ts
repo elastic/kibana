@@ -64,16 +64,14 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   static readonly checkpointsFieldMap = {
     '@timestamp': {
       type: 'date',
-      array: false,
-      required: false,
     },
-    thread_id: { type: 'keyword', array: false, required: true },
-    checkpoint_ns: { type: 'keyword', array: false, required: false },
-    checkpoint_id: { type: 'keyword', array: false, required: true },
-    parent_checkpoint_id: { type: 'keyword', array: false, required: false },
-    type: { type: 'keyword', array: false, required: true },
-    checkpoint: { type: 'binary', array: false, required: true },
-    metadata: { type: 'binary', array: false, required: true },
+    thread_id: { type: 'keyword', },
+    checkpoint_ns: { type: 'keyword', },
+    checkpoint_id: { type: 'keyword', },
+    parent_checkpoint_id: { type: 'keyword', },
+    type: { type: 'keyword', },
+    checkpoint: { type: 'binary'},
+    metadata: { type: 'binary' },
   } as const;
 
   /**
@@ -82,17 +80,15 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   static readonly checkpointWritesFieldMap = {
     '@timestamp': {
       type: 'date',
-      array: false,
-      required: false,
     },
-    thread_id: { type: 'keyword', array: false, required: true },
-    checkpoint_ns: { type: 'keyword', array: false, required: true },
-    checkpoint_id: { type: 'keyword', array: false, required: true },
-    task_id: { type: 'keyword', array: false, required: true },
-    idx: { type: 'unsigned_long', array: false, required: true },
-    channel: { type: 'keyword', array: false, required: true },
-    type: { type: 'keyword', array: false, required: true },
-    value: { type: 'binary', array: false, required: true },
+    thread_id: { type: 'keyword', },
+    checkpoint_ns: { type: 'keyword', },
+    checkpoint_id: { type: 'keyword', },
+    task_id: { type: 'keyword', },
+    idx: { type: 'unsigned_long', },
+    channel: { type: 'keyword', },
+    type: { type: 'keyword', },
+    value: { type: 'binary' },
   } as const;
 
   protected client: ElasticsearchClient;
