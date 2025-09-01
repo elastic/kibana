@@ -23,10 +23,9 @@ export const getRiskInputsIndex = async ({
   logger: Logger;
   soClient: SavedObjectsClientContract;
 }): Promise<RiskInputsIndexResponse> => {
-  console.log(`Fetching risk inputs index for data view ID: ${dataViewId}`);
   try {
     const dataView = await soClient.get<DataViewAttributes>('index-pattern', dataViewId);
-    console.log(`Data view found:`, dataView);
+
     const index = dataView.attributes.title;
     const runtimeMappings =
       dataView.attributes.runtimeFieldMap != null
