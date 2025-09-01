@@ -84,7 +84,7 @@ describe('ErrorCallout', () => {
 
     renderWithServices(<ErrorCallout error={ERROR} isEsqlMode title={TITLE} />);
 
-    expect(screen.queryByRole('button', { name: /view details/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /view details/i })).not.toBeInTheDocument();
   });
 
   it('should render the "ES|QL reference" button for ES|QL', () => {
