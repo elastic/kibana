@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { updateGlobalArtifactManageReplacements } from './product_features_extensions';
-import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import type { MutableKibanaFeatureConfig } from '@kbn/security-solution-features';
 import { cloneDeep } from 'lodash';
 
@@ -21,7 +21,7 @@ const baseFeatureConfig: MutableKibanaFeatureConfig = {
         read: ['*'],
       },
       ui: ['all'],
-      api: [`${SECURITY_FEATURE_ID_V3}-all`],
+      api: [`${SECURITY_FEATURE_ID}-all`],
     },
     read: {
       savedObject: {
@@ -29,7 +29,7 @@ const baseFeatureConfig: MutableKibanaFeatureConfig = {
         read: ['*'],
       },
       ui: ['read'],
-      api: [`${SECURITY_FEATURE_ID_V3}-read`],
+      api: [`${SECURITY_FEATURE_ID}-read`],
     },
   },
 };
@@ -49,7 +49,7 @@ describe('updateGlobalArtifactManageReplacements', () => {
     expect(featureConfig).toEqual(originalConfig);
   });
 
-  it('should modify privileges for SECURITY_FEATURE_ID_V3 in both default and minimal', () => {
+  it('should modify privileges for SECURITY_FEATURE_ID in both default and minimal', () => {
     const testFeatureConfig = {
       ...featureConfig,
       privileges: {
@@ -58,10 +58,10 @@ describe('updateGlobalArtifactManageReplacements', () => {
           ...featureConfig.privileges?.all,
           replacedBy: {
             default: [
-              { feature: SECURITY_FEATURE_ID_V3, privileges: ['all'] },
+              { feature: SECURITY_FEATURE_ID, privileges: ['all'] },
               { feature: 'other_feature', privileges: ['all'] },
             ],
-            minimal: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['all'] }],
+            minimal: [{ feature: SECURITY_FEATURE_ID, privileges: ['all'] }],
           },
         },
       },
@@ -73,13 +73,13 @@ describe('updateGlobalArtifactManageReplacements', () => {
 
     // Default privileges modified
     const v3Default = replacedBy.default.find(
-      ({ feature }: { feature: string }) => feature === SECURITY_FEATURE_ID_V3
+      ({ feature }: { feature: string }) => feature === SECURITY_FEATURE_ID
     );
     expect(v3Default?.privileges).toEqual(['minimal_all', 'global_artifact_management_all']);
 
     // Minimal privileges modified
     const v3Minimal = replacedBy.minimal.find(
-      ({ feature }: { feature: string }) => feature === SECURITY_FEATURE_ID_V3
+      ({ feature }: { feature: string }) => feature === SECURITY_FEATURE_ID
     );
     expect(v3Minimal?.privileges).toEqual(['minimal_all', 'global_artifact_management_all']);
 
@@ -90,7 +90,7 @@ describe('updateGlobalArtifactManageReplacements', () => {
     expect(otherFeature?.privileges).toEqual(['all']);
   });
 
-  it('should only modify existing SECURITY_FEATURE_ID_V3 entries', () => {
+  it('should only modify existing SECURITY_FEATURE_ID entries', () => {
     const testFeatureConfig = {
       ...featureConfig,
       privileges: {
@@ -109,7 +109,7 @@ describe('updateGlobalArtifactManageReplacements', () => {
 
     const replacedBy = testFeatureConfig.privileges.all.replacedBy;
 
-    // No SECURITY_FEATURE_ID_V3, so no changes
+    // No SECURITY_FEATURE_ID, so no changes
     expect(replacedBy.default[0].privileges).toEqual(['all']);
     expect(replacedBy.minimal[0].privileges).toEqual(['all']);
   });
