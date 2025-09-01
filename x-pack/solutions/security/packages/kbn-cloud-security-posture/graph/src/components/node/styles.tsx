@@ -359,6 +359,7 @@ const ThemedRoundedBadge = styled.div<{
   align-items: center;
 
   height: 20px;
+  min-width: 20px;
   padding: ${({ euiTheme }) => `${euiTheme.size.xxs} ${euiTheme.size.xs}`};
   gap: ${({ euiTheme }) => euiTheme.size.xxs};
 
