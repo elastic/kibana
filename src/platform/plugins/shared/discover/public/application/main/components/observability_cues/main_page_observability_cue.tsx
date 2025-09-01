@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useDiscoverServicesWithObservabilityCues } from '../../../../hooks/use_discover_services';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useCurrentDataView } from '../../state_management/redux';
 import { ObservabilityTourModal, TourHighlight } from './observability_tour_modal';
@@ -50,7 +50,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
   setDemoHideFullCallout,
   onResetToClassic,
 }) => {
-  const services = useDiscoverServices();
+  const services = useDiscoverServicesWithObservabilityCues();
   const [isDismissed, setIsDismissed] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
 
@@ -62,20 +62,14 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
   const filters = useAppStateSelector((state) => state.filters);
   const timeRange = useAppStateSelector((state) => state.time);
 
-  // Get current solution type
-  const activeSpace$ = useMemo(
-    () => services.spaces?.getActiveSpace$() ?? of(undefined),
-    [services.spaces]
-  );
-  const activeSpace = useObservable(activeSpace$);
-  const solutionType = activeSpace?.solution;
+
 
   // Check if we should show the tour modal (after switching from cue)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const showTour = urlParams.get('showObservabilityTour');
 
-    if (showTour === 'true' && solutionType === 'oblt') {
+    if (showTour === 'true' && !services.shouldShowObservabilityCues) {
       // Check if user has dismissed this modal before
       const hasDismissed = localStorage.getItem(STORAGE_KEY) === '1';
       if (!hasDismissed) {
@@ -90,7 +84,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
         window.history.replaceState({}, '', newUrl);
       }, 100);
     }
-  }, [solutionType]);
+  }, [services.shouldShowObservabilityCues]);
 
   // Probe for all observability data (span, transaction, OR error)
   const { hasObservabilityData, isLoading } = useMainPageObservabilityProbe();
@@ -196,7 +190,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
   // - User cannot manage spaces
   // - Full callout is hidden (for demo purposes)
   const shouldRenderCallout =
-    solutionType !== 'oblt' &&
+    services.shouldShowObservabilityCues &&
     hasObservabilityData &&
     !isLoading &&
     !isDismissed &&

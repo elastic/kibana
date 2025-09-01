@@ -8,6 +8,29 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { useMemo } from 'react';
+import { of } from 'rxjs';
 import type { DiscoverServices } from '../build_services';
 
 export const useDiscoverServices = () => useKibana<DiscoverServices>().services;
+
+export const useDiscoverServicesWithObservabilityCues = () => {
+  const services = useDiscoverServices();
+  
+  // Get current solution type
+  const activeSpace$ = useMemo(
+    () => services.spaces?.getActiveSpace$() ?? of(undefined),
+    [services.spaces]
+  );
+  const activeSpace = useObservable(activeSpace$);
+  const solutionType = activeSpace?.solution;
+  
+  // Determine if observability cues should be shown
+  const shouldShowObservabilityCues = solutionType !== 'oblt';
+  
+  return {
+    ...services,
+    shouldShowObservabilityCues,
+  };
+};

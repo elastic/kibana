@@ -185,13 +185,13 @@ export function DiscoverGridFlyout({
 
   // Create banner if conditions are met
   const banner = useMemo(() => {
-    // Show APM banner if feature enabled
-    if (isApmFeatureEnabled) {
+    // Only show banner if not in Observability view and feature is enabled
+    if (solutionType !== 'oblt' && isApmFeatureEnabled) {
       return <FlyoutCue document={actualHit} demoCanManageSpaces={demoCanManageSpaces} demoIsTrial={demoIsTrial} />;
     }
 
     return null;
-  }, [isApmFeatureEnabled, actualHit, demoCanManageSpaces, demoIsTrial]);
+  }, [solutionType, isApmFeatureEnabled, actualHit, demoCanManageSpaces, demoIsTrial]);
 
   return (
     <UnifiedDocViewerFlyout

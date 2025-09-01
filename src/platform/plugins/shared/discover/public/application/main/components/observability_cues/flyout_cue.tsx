@@ -136,6 +136,11 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({
     setIsDismissed(true);
   }, []);
 
+  // Early return if in Observability view to avoid unnecessary document detection
+  if (solutionType === 'oblt') {
+    return null;
+  }
+
   // Check if this is an APM document (span, transaction) or log document
   const documentType = useMemo(() => {
     if (!document) return null;
