@@ -75,9 +75,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     Boolean(application?.capabilities.workflowsManagement.executeWorkflow) &&
     Boolean(workflow?.enabled);
   const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
-  const canToggleWorkflow =
-    Boolean(application?.capabilities.workflowsManagement.updateWorkflow) &&
-    Boolean(workflow?.valid);
 
   const handleSave = () => {
     if (!id) {
