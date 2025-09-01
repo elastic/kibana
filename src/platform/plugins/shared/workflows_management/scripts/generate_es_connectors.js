@@ -124,13 +124,13 @@ function generateConnectorDefinition(endpointName, definition) {
     Object.keys(urlParams).length
   } parameters`;
 
-  // Build schema object
+  // Build schema object and track parameter types
   const schemaFields = [];
-
-  // Add path parameters (required)
   const pathParams = extractPathParameters(patterns);
+  const urlParamNames = Object.keys(urlParams);
   const addedParams = new Set();
 
+  // Add path parameters (required)
   for (const param of pathParams) {
     if (!addedParams.has(param)) {
       schemaFields.push(
@@ -158,6 +158,14 @@ function generateConnectorDefinition(endpointName, definition) {
     type: '${type}',
     connectorIdRequired: false,
     description: '${description}',
+    methods: ${JSON.stringify(methods)},
+    patterns: ${JSON.stringify(patterns)},
+    isInternal: true,
+    parameterTypes: {
+      pathParams: ${JSON.stringify(pathParams)},
+      urlParams: ${JSON.stringify(urlParamNames)},
+      bodyParams: ['body']
+    },
     paramsSchema: z.object({
 ${schemaFields.join('\n')}
     }),
@@ -210,9 +218,9 @@ function generateElasticsearchConnectors() {
  */
 
 import { z } from '@kbn/zod';
-import type { ConnectorContract } from '@kbn/workflows';
+import type { InternalConnectorContract } from '@kbn/workflows';
 
-export const GENERATED_ELASTICSEARCH_CONNECTORS: ConnectorContract[] = [
+export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}
 ];
 

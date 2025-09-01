@@ -102,10 +102,89 @@ function generateConnectorSnippet(connectorType: string, shouldBeQuoted: boolean
   let withBlock = `${quotedType}\nwith:`;
   requiredParams.forEach((param) => {
     const placeholder = param.example || param.defaultValue || '';
-    withBlock += `\n  ${param.name}: ${placeholder}`;
+    
+    // Handle complex objects (like body) by formatting as YAML
+    if (typeof placeholder === 'object' && placeholder !== null) {
+      const yamlContent = formatObjectAsYaml(placeholder, 2);
+      withBlock += `\n  ${param.name}:\n${yamlContent}`;
+    } else {
+      withBlock += `\n  ${param.name}: ${placeholder}`;
+    }
   });
 
   return withBlock;
+}
+
+/**
+ * Format an object as YAML with proper indentation
+ */
+function formatObjectAsYaml(obj: any, indentLevel: number = 0): string {
+  const indent = '  '.repeat(indentLevel);
+  const lines: string[] = [];
+  
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      lines.push(`${indent}${key}:`);
+      lines.push(formatObjectAsYaml(value, indentLevel + 1));
+    } else if (Array.isArray(value)) {
+      lines.push(`${indent}${key}:`);
+      value.forEach(item => {
+        if (typeof item === 'string') {
+          lines.push(`${indent}  - "${item}"`);
+        } else {
+          lines.push(`${indent}  - ${item}`);
+        }
+      });
+    } else if (typeof value === 'string') {
+      lines.push(`${indent}${key}: "${value}"`);
+    } else {
+      lines.push(`${indent}${key}: ${value}`);
+    }
+  }
+  
+  return lines.join('\n');
+}
+
+/**
+ * Extract example for body parameter based on its schema
+ */
+function extractBodyExample(bodySchema: z.ZodType): any {
+  try {
+    // Handle ZodOptional wrapper
+    let schema = bodySchema;
+    if (bodySchema instanceof z.ZodOptional) {
+      schema = bodySchema._def.innerType;
+    }
+    
+    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
+    if (schema instanceof z.ZodObject) {
+      const shape = schema._def.shape();
+      const example: any = {};
+      
+      // Extract examples from each field
+      for (const [key, fieldSchema] of Object.entries(shape)) {
+        const field = fieldSchema as z.ZodType;
+        const description = (field as any)?._def?.description || '';
+        
+        // Extract example from description if available
+        const exampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
+        if (exampleMatch) {
+          example[key] = exampleMatch[1];
+        } else if (key === 'query') {
+          // Default example for query fields
+          example[key] = 'FROM my-index | LIMIT 10';
+        }
+      }
+      
+      if (Object.keys(example).length > 0) {
+        return example; // Return object, not JSON string
+      }
+    }
+  } catch (error) {
+    // Fallback to empty object
+  }
+  
+  return {};
 }
 
 /**
@@ -157,7 +236,8 @@ function extractRequiredParamsFromSchema(
         } else if (key === 'id') {
           example = 'doc-id';
         } else if (key === 'body') {
-          example = '{}';
+          // Try to extract body structure from schema
+          example = extractBodyExample(zodField);
         } else if (key === 'query') {
           example = '{}';
         } else if (key.includes('name')) {
@@ -221,14 +301,6 @@ function getRequiredParamsForConnector(
       { name: 'method', example: 'GET' },
     ],
     wait: [{ name: 'duration', example: '5s' }],
-    'kibana.cases.create': [
-      { name: 'title', example: 'Case Title' },
-      { name: 'description', example: 'Case description' },
-    ],
-    'kibana.request': [
-      { name: 'method', example: 'GET' },
-      { name: 'path', example: '/api/status' },
-    ],
   };
 
   return basicConnectorParams[connectorType] || [];

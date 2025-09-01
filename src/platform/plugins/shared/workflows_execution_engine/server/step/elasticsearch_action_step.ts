@@ -12,6 +12,7 @@ import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manage
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { RunStepResult, BaseStep } from './step_base';
 import { StepBase } from './step_base';
+import { GENERATED_ELASTICSEARCH_CONNECTORS } from '../../../workflows_management/common/generated_es_connectors';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -61,9 +62,10 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         },
       });
 
-      return { output: result, error: undefined };
+      return { input: stepWith, output: result, error: undefined };
     } catch (error) {
       const stepType = (this.step as any).configuration?.type || this.step.type;
+      const stepWith = this.step.with || (this.step as any).configuration?.with;
 
       this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error as Error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
@@ -74,7 +76,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
           action_type: 'elasticsearch',
         },
       });
-      return await this.handleFailure(error);
+      return await this.handleFailure(stepWith, error);
     }
   }
 
@@ -83,7 +85,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
     stepType: string,
     params: any
   ): Promise<any> {
-    // Support both raw API format and sugar syntax
+    // Support both raw API format and connector-driven syntax
     if (params.request) {
       // Raw API format: { request: { method, path, body } } - like Dev Console
       const { method = 'GET', path, body } = params.request;
@@ -93,92 +95,157 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         body,
       });
     } else {
-      // Sugar syntax: convert to raw API call based on step type
-      const { method, path, body } = this.convertSugarSyntaxToApi(stepType, params);
-      return await esClient.transport.request({
+      // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
+      const { method, path, body, params: queryParams } = this.buildRequestFromConnector(stepType, params);
+      
+      // Build query string manually if needed
+      let finalPath = path;
+      if (queryParams && Object.keys(queryParams).length > 0) {
+        const queryString = new URLSearchParams(queryParams).toString();
+        finalPath = `${path}?${queryString}`;
+      }
+      
+      const requestOptions = {
         method,
-        path,
+        path: finalPath,
         body,
-      });
+      };
+      
+      console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
+      return await esClient.transport.request(requestOptions);
     }
   }
 
-  private convertSugarSyntaxToApi(
+  private buildRequestFromConnector(
     stepType: string,
     params: any
-  ): { method: string; path: string; body?: any } {
-    // Convert sugar syntax to raw API calls - same approach as Dev Console
-
-    if (stepType.startsWith('elasticsearch.search')) {
-      // For search: { index: "logs", query: {...}, size: 5 } -> GET /logs/_search { query: {...}, size: 5 }
-      const index = params.index || '_all';
+  ): { method: string; path: string; body?: any; params?: any } {
+    console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
+    
+    // Find the connector definition for this step type
+    const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find(c => c.type === stepType);
+    
+    if (connector && connector.patterns && connector.methods) {
+      // Use explicit parameter type metadata (no hardcoded keys!)
+      const urlParamKeys = new Set<string>(connector.parameterTypes?.urlParams || []);
+      
+      // Determine method (allow user override)
+      const method = params.method || connector.methods[0]; // User can override method
+      
+      // Choose the best pattern based on available parameters
+      let selectedPattern = this.selectBestPattern(connector.patterns, params);
+      
+      // Collect path parameters from the selected pattern
+      const pathParams = new Set<string>();
+      const pathParamMatches = selectedPattern.match(/\{([^}]+)\}/g);
+      if (pathParamMatches) {
+        for (const match of pathParamMatches) {
+          pathParams.add(match.slice(1, -1)); // Remove { and }
+        }
+      }
+      
+      // Debug logging
+      console.log('DEBUG - selectedPattern:', selectedPattern);
+      console.log('DEBUG - pathParams:', Array.from(pathParams));
+      console.log('DEBUG - urlParamKeys:', Array.from(urlParamKeys));
+      
+      // Replace path parameters in the selected pattern
+      for (const [key, value] of Object.entries(params)) {
+        if (pathParams.has(key)) {
+          selectedPattern = selectedPattern.replace(`{${key}}`, encodeURIComponent(String(value)));
+        }
+      }
+      
+      // Build body and query parameters
       const body: any = {};
-
-      if (params.query) body.query = params.query;
-      if (params.size !== undefined) body.size = params.size;
-      if (params.sort) body.sort = params.sort;
-      if (params.from !== undefined) body.from = params.from;
-      if (params._source !== undefined) body._source = params._source;
-      if (params.aggs) body.aggs = params.aggs;
-      if (params.aggregations) body.aggregations = params.aggregations;
-
-      return {
-        method: 'GET',
-        path: `/${index}/_search`,
+      const queryParams: any = {};
+      
+      for (const [key, value] of Object.entries(params)) {
+        console.log(`DEBUG - Processing param: ${key}, isPathParam: ${pathParams.has(key)}, isUrlParam: ${urlParamKeys.has(key)}`);
+        
+        // Skip path parameters (they're used in the URL)
+        if (pathParams.has(key)) continue;
+        
+        // Skip meta parameters that control request building
+        if (key === 'method') continue;
+        
+        // URL parameters become query parameters
+        if (urlParamKeys.has(key)) {
+          // Convert arrays to comma-separated strings for query parameters
+          const queryValue = Array.isArray(value) ? value.join(',') : value;
+          queryParams[key] = queryValue;
+          console.log(`DEBUG - Added to queryParams: ${key} = ${queryValue} (original: ${JSON.stringify(value)})`);
+        } else if (key === 'body') {
+          // Handle explicit body parameter
+          if (typeof value === 'object' && value !== null) {
+            Object.assign(body, value);
+          }
+        } else {
+          // All other parameters go in the body (query, aggs, size, etc.)
+          body[key] = value;
+          console.log(`DEBUG - Added to body: ${key} = ${value}`);
+        }
+      }
+      
+      const result = {
+        method,
+        path: `/${selectedPattern}`,
         body: Object.keys(body).length > 0 ? body : undefined,
+        params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
       };
+      
+      console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
+      return result;
     }
+    
+    // If no connector found, throw an error suggesting raw API format
+    throw new Error(
+      `No connector definition found for ${stepType}. Use raw API format with 'request' parameter: { request: { method: 'GET', path: '/my-index/_search', body: {...} } }`
+    );
+  }
 
-    if (stepType.startsWith('elasticsearch.index')) {
-      // For index: { index: "logs", id?: "1", body: {...} } -> POST /logs/_doc/1 {...}
-      const index = params.index;
-      if (!index) throw new Error('index parameter is required');
-
-      const path = params.id ? `/${index}/_doc/${params.id}` : `/${index}/_doc`;
-      return {
-        method: params.id ? 'PUT' : 'POST',
-        path,
-        body: params.body,
-      };
-    }
-
-    if (stepType.startsWith('elasticsearch.delete')) {
-      const index = params.index;
-      if (!index) throw new Error('index parameter is required');
-
-      if (params.id) {
-        // Delete by ID: { index: "logs", id: "1" } -> DELETE /logs/_doc/1
-        return {
-          method: 'DELETE',
-          path: `/${index}/_doc/${params.id}`,
-        };
-      } else if (params.query) {
-        // Delete by query: { index: "logs", query: {...} } -> POST /logs/_delete_by_query { query: {...} }
-        return {
-          method: 'POST',
-          path: `/${index}/_delete_by_query`,
-          body: { query: params.query },
-        };
+  private selectBestPattern(patterns: string[], params: any): string {
+    // Strategy: Prefer patterns where all path parameters are provided
+    
+    // Score each pattern based on how well it matches the provided parameters
+    let bestPattern = patterns[0];
+    let bestScore = -1;
+    
+    for (const pattern of patterns) {
+      let score = 0;
+      
+      // Extract path parameters from this pattern
+      const pathParamMatches = pattern.match(/\{([^}]+)\}/g);
+      if (pathParamMatches) {
+        const patternPathParams = pathParamMatches.map(match => match.slice(1, -1));
+        
+        // Count how many path parameters are satisfied
+        let satisfiedParams = 0;
+        for (const pathParam of patternPathParams) {
+          if (params[pathParam] !== undefined) {
+            satisfiedParams++;
+          }
+        }
+        
+        // Score = satisfied params / total params for this pattern
+        // Higher score means better match
+        score = satisfiedParams / patternPathParams.length;
+        
+        // If all path params are satisfied, this is a perfect match
+        if (satisfiedParams === patternPathParams.length) {
+          return pattern;
+        }
       } else {
-        throw new Error('Either id or query parameter is required for delete operations');
+        // Pattern with no path parameters gets score 1 (always usable)
+        score = 1;
+      }
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestPattern = pattern;
       }
     }
-
-    // For other operations, try to infer from step type
-    // e.g., 'elasticsearch.indices.create' -> PUT /{index} with body
-    if (stepType.includes('.indices.create')) {
-      const index = params.index;
-      if (!index) throw new Error('index parameter is required for indices.create');
-      return {
-        method: 'PUT',
-        path: `/${index}`,
-        body: params.body || params,
-      };
-    }
-
-    // Fallback: require raw API format for unsupported sugar syntax
-    throw new Error(
-      `Sugar syntax not supported for ${stepType}. Use raw API format with 'request' parameter: { request: { method: 'GET', path: '/my-index/_search', body: {...} } }`
-    );
+    
+    return bestPattern;
   }
 }

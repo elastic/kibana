@@ -28,6 +28,21 @@ export interface ConnectorContract {
   description?: string;
 }
 
+export interface InternalConnectorContract extends ConnectorContract {
+  /** HTTP method(s) for this API endpoint */
+  methods?: string[];
+  /** URL pattern(s) for this API endpoint */
+  patterns?: string[];
+  /** Whether this is an internal connector with hardcoded endpoint details */
+  isInternal?: boolean;
+  /** Parameter type metadata for proper request building */
+  parameterTypes?: {
+    pathParams?: string[];
+    urlParams?: string[];
+    bodyParams?: string[];
+  };
+}
+
 function generateStepSchemaForConnector(connector: ConnectorContract) {
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),

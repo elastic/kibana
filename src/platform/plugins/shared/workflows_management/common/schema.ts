@@ -11,6 +11,8 @@ import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { GENERATED_ELASTICSEARCH_CONNECTORS } from './generated_es_connectors';
+import { GENERATED_KIBANA_CONNECTORS } from './generated_kibana_connectors';
+import { ENHANCED_ELASTICSEARCH_CONNECTORS, mergeEnhancedConnectors } from './enhanced_es_connectors';
 
 // Static connectors used for schema generation
 const staticConnectors: ConnectorContract[] = [
@@ -75,21 +77,6 @@ const staticConnectors: ConnectorContract[] = [
       })
     ),
   },
-  // Elasticsearch actions are now dynamically generated from Console definitions
-  {
-    type: 'kibana.cases.create',
-    connectorIdRequired: false,
-    paramsSchema: z.object({
-      title: z.string(),
-      description: z.string(),
-      tags: z.array(z.string()).optional(),
-      severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-    }),
-    outputSchema: z.object({
-      id: z.string(),
-      title: z.string(),
-    }),
-  },
   // Generic request types for raw API calls
   {
     type: 'elasticsearch.request',
@@ -136,14 +123,23 @@ const staticConnectors: ConnectorContract[] = [
  * To regenerate: run `node scripts/generate_es_connectors.js`
  */
 function generateElasticsearchConnectors(): ConnectorContract[] {
-  // Return the pre-generated connectors (build-time generated, browser-safe)
-  return GENERATED_ELASTICSEARCH_CONNECTORS;
+  // Return enhanced connectors (merge generated with enhanced definitions)
+  return mergeEnhancedConnectors(
+    GENERATED_ELASTICSEARCH_CONNECTORS,
+    ENHANCED_ELASTICSEARCH_CONNECTORS
+  );
 }
 
-// Combine static connectors with dynamic Elasticsearch connectors
+function generateKibanaConnectors(): ConnectorContract[] {
+  // Return the pre-generated Kibana connectors (build-time generated, browser-safe)
+  return GENERATED_KIBANA_CONNECTORS;
+}
+
+// Combine static connectors with dynamic Elasticsearch and Kibana connectors
 export function getAllConnectors(): ConnectorContract[] {
   const elasticsearchConnectors = generateElasticsearchConnectors();
-  return [...staticConnectors, ...elasticsearchConnectors];
+  const kibanaConnectors = generateKibanaConnectors();
+  return [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
 }
 
 export const getOutputSchemaForStepType = (stepType: string) => {
