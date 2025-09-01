@@ -134,7 +134,7 @@ export class AIAssistantService {
   private alertSummaryDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
-  private checkpointsDataStream: IndexPatternAdapter;
+    private checkpointsDataStream: IndexPatternAdapter;
   private checkpointWritesDataStream: IndexPatternAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
@@ -178,6 +178,7 @@ export class AIAssistantService {
       kibanaVersion: options.kibanaVersion,
       fieldMap: alertSummaryFieldsFieldMap,
     });
+
     this.checkpointsDataStream = this.createIndexPattern({
       resource: 'checkpoints',
       kibanaVersion: options.kibanaVersion,
@@ -837,6 +838,17 @@ export class AIAssistantService {
       );
       if (!alertSummaryIndexName) {
         await this.alertSummaryDataStream.installSpace(spaceId);
+      }
+      const checkpointsIndexName = await this.checkpointsDataStream.getInstalledIndexName(spaceId);
+      if (!checkpointsIndexName) {
+        await this.checkpointsDataStream.createIndex(spaceId);
+      }
+
+      const checkpointWritesIndexName = await this.checkpointWritesDataStream.getInstalledIndexName(
+        spaceId
+      );
+      if (!checkpointWritesIndexName) {
+        await this.checkpointWritesDataStream.createIndex(spaceId);
       }
     } catch (error) {
       this.options.logger.warn(
