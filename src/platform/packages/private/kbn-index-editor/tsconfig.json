@@ -38,5 +38,6 @@
     "@kbn/esql-ast",
     "@kbn/es-types",
     "@kbn/file-upload-common",
+    "@kbn/esql-utils",
   ]
 }
