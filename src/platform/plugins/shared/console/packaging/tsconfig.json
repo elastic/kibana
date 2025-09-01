@@ -54,6 +54,14 @@
     "@kbn/core-analytics-browser-internal",
     "@kbn/core-theme-browser-internal",
     "@kbn/core-i18n-browser-internal",
+    "@kbn/esql-editor",
+    "@kbn/esql-utils",
+    "@kbn/esql-ast",
+    "@kbn/field-types",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/data-views-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*"
