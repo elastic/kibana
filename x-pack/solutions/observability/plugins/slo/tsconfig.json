@@ -110,5 +110,6 @@
     "@kbn/licensing-types",
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
+    "@kbn/dashboards-selector",
   ]
 }
