@@ -80,7 +80,6 @@ tags:
       description: Cases documentation
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
-  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -103,6 +102,7 @@ tags:
   - name: Fleet outputs
   - name: Fleet package policies
   - name: Fleet proxies
+  - name: Fleet remote synced integrations
   - name: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
@@ -42361,9 +42361,10 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Get CCR Remote synced integrations status by outputId
+      summary: Get remote synced integrations status by outputId
       tags:
-        - CCR Remote synced integrations
+        - Fleet remote synced integrations
+      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -42498,9 +42499,10 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Get CCR Remote synced integrations status
+      summary: Get remote synced integrations status
       tags:
-        - CCR Remote synced integrations
+        - Fleet remote synced integrations
+      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -83481,15 +83483,13 @@ components:
           type: number
         category_1_count:
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number
