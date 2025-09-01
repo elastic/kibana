@@ -45,7 +45,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
   async function upsertSources(client: MonitoringEntitySourceDescriptorClient) {
     // required sources to initialize privileged monitoring engine
     const requiredInitSources = buildRequiredSources(deps.namespace, dataClient.index);
-    const existing = (await client.findAll({})) ?? [];
+    const existing = await client.findAll({});
     // create all sources, if none exist already
     if (existing.length === 0) {
       await Promise.all(requiredInitSources.map((attrs) => client.create(attrs)));
@@ -62,9 +62,11 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
         const found = soNameMap.get(attrs.name);
         if (!found) {
           await client.create(attrs);
+          dataClient.log('debug', `Created source: ${attrs.name}`);
           created++;
         } else {
           await client.update({ id: found.id, ...attrs });
+          dataClient.log('debug', `Updated source: ${attrs.name}`);
           updated++;
         }
       })
