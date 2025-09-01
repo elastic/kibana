@@ -771,6 +771,7 @@ async function inputMachineLearningJobId(
 ): Promise<void> {
   const jobIds = [value].flat();
 
+  // Clear currently selected job
   await clearEuiComboBoxSelection({
     clearButton: within(fieldFinalSide).getByTestId('comboBoxClearButton'),
   });
