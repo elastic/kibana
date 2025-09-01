@@ -444,7 +444,7 @@ describe('fetchEsqlQuery', () => {
       params: defaultParams,
       services: {
         logger,
-        scopedClusterClient,
+        getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
         // @ts-expect-error
         share: {
           url: {

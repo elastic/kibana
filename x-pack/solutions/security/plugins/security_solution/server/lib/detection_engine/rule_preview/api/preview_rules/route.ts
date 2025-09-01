@@ -286,6 +286,7 @@ export const previewRulesRoute = (
                   uiSettingsClient: coreContext.uiSettings.client,
                   getDataViews: async () => dataViewsService,
                   share,
+                  getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
                 },
                 spaceId,
                 startedAt: startedAt.toDate(),
