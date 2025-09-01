@@ -1159,7 +1159,7 @@
       "labels": [
         "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -1195,7 +1195,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:prev-minor",
+        "backport:all-open",
         "Team:Operations",
         "Team:Core"
       ],
@@ -1216,7 +1216,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:prev-minor",
+        "backport:all-open",
         "Team:Operations",
         "Team:QA"
       ],
@@ -1283,8 +1283,7 @@
         "release_note:skip",
         "Team:Security",
         "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1306,8 +1305,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1330,8 +1328,7 @@
         "release_note:skip",
         "Team:Security",
         "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1353,8 +1350,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -1390,7 +1386,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -1427,7 +1423,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -1446,7 +1442,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -1467,7 +1463,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1496,7 +1492,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2172,7 +2168,7 @@
         "Feature:Vega",
         "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2193,7 +2189,7 @@
         "Feature:Vega",
         "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2220,7 +2216,7 @@
         "Feature:Vega",
         "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "dependencyDashboardApproval": true,
       "minimumReleaseAge": "7 days",
@@ -2254,7 +2250,7 @@
         "Feature:Vega",
         "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3741,7 +3737,7 @@
         "Team:Operations",
         "release_note:skip",
         "ci:build-storybooks",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -4369,7 +4365,7 @@
         "Team:Monitoring",
         "Team:Core",
         "Team:Security",
-        "backport:prev-minor",
+        "backport:all-open",
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
@@ -4520,7 +4516,7 @@
       "labels": [
         "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -4635,7 +4631,7 @@
       ],
       "labels": [
         "Team:Operations",
-        "backport:prev-minor",
+        "backport:all-open",
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
