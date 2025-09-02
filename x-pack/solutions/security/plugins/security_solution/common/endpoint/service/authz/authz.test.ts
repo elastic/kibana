@@ -298,11 +298,8 @@ describe('Endpoint Authz service', () => {
     it.each(responseConsolePrivileges)(
       'canAccessResponseConsole should be true if %s for CONSOLE privileges is true',
       (responseConsolePrivilege) => {
-        console.log({ responseConsolePrivilege });
         // set all to false
         responseConsolePrivileges.forEach((p) => {
-          console.log({ p });
-          console.log({ test: fleetAuthz.packagePrivileges!.endpoint.actions });
           fleetAuthz.packagePrivileges!.endpoint.actions[p].executePackageAction = false;
         });
         // set one of them to true
