@@ -17,7 +17,7 @@ import type {
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
-  AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ,
+  AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
   AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
   ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,
@@ -254,7 +254,7 @@ export const AwsCredentialsFormAgentless = ({
           <EuiSpacer size="m" />
           <EuiAccordion
             id="cloudFormationAccordianInstructions"
-            data-test-subj={AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ}
+            data-test-subj={AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ}
             buttonContent={accordianTitleLink}
             paddingSize="l"
           >

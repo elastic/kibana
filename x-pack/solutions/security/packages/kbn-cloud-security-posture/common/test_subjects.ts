@@ -6,7 +6,7 @@
  */
 
 export const AWS_PROVIDER_TEST_SUBJ = 'cloudSetupAwsTestId';
-export const AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ =
+export const AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ =
   'launchAwsCloudFormationAccordianInstructions';
 export const AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ = 'launchCloudFormationAgentlessButton';
 export const AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'aws-credentials-type-selector';
