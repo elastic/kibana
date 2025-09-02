@@ -39,11 +39,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getQueryLog } from '@kbn/data-plugin/public';
+import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { SplitButton } from '@kbn/split-button';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
@@ -91,6 +92,10 @@ export const strings = {
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
       defaultMessage: 'All time',
+    }),
+  getSendToBackgroundLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.sendToBackground', {
+      defaultMessage: 'Send to background',
     }),
 };
 
@@ -144,6 +149,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
   placeholder?: string;
@@ -278,7 +284,13 @@ export const QueryBarTopRow = React.memo(
       dataViews,
     } = kibana.services;
 
+    const isBackgroundSearchEnabled = data.search.isBackgroundSearchEnabled;
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
+
+    const backgroundSearchState = useObservable(data.search.session.state$);
+    const canSendToBackground =
+      backgroundSearchState === SearchSessionState.Loading ||
+      backgroundSearchState === SearchSessionState.Completed;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -361,6 +373,17 @@ export const QueryBarTopRow = React.memo(
         });
       },
       [persistedLog, onSubmit]
+    );
+
+    const onClickSendToBackground = useCallback(
+      (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        props.onSendToBackground({
+          query: queryRef.current,
+          dateRange: dateRangeRef.current,
+        });
+      },
+      [props]
     );
 
     const onClickCancelButton = useCallback(
@@ -565,6 +588,25 @@ export const QueryBarTopRow = React.memo(
     function renderCancelButton() {
       const buttonLabelCancel = strings.getCancelQueryLabel();
 
+      if (isBackgroundSearchEnabled) {
+        return (
+          <SplitButton
+            onClick={onClickCancelButton}
+            onSecondaryButtonClick={onClickSendToBackground}
+            aria-label={buttonLabelCancel}
+            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            iconType="cross"
+            data-test-subj="queryCancelButton"
+            color="text"
+            secondaryButtonIcon="clock"
+            secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
+            isSecondaryButtonDisabled={!canSendToBackground}
+          >
+            {buttonLabelCancel}
+          </SplitButton>
+        );
+      }
+
       if (submitButtonIconOnly) {
         return (
           <EuiButtonIcon
@@ -607,33 +649,51 @@ export const QueryBarTopRow = React.memo(
         ? strings.getRunButtonLabel()
         : strings.getUpdateButtonLabel();
 
+      const updateButton = isBackgroundSearchEnabled ? (
+        <SplitButton
+          iconType={props.isDirty ? iconDirty : 'refresh'}
+          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
+          isDisabled={isDateRangeInvalid || props.isDisabled}
+          isLoading={props.isLoading}
+          onClick={onClickSubmitButton}
+          onSecondaryButtonClick={onClickSendToBackground}
+          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          color={props.isDirty ? 'success' : 'primary'}
+          secondaryButtonIcon="clock"
+          secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
+          isSecondaryButtonDisabled={!canSendToBackground}
+        >
+          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+        </SplitButton>
+      ) : (
+        <EuiSuperUpdateButton
+          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconOnly={submitButtonIconOnly}
+          aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
+          isDisabled={isDateRangeInvalid || props.isDisabled}
+          isLoading={props.isLoading}
+          onClick={onClickSubmitButton}
+          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          color={props.isDirty ? 'success' : 'primary'}
+          fill={false}
+          needsUpdate={props.isDirty}
+          data-test-subj="querySubmitButton"
+          toolTipProps={{
+            content: props.isDirty ? labelDirty : strings.getRefreshQueryLabel(),
+            delay: 'long',
+            position: 'bottom',
+          }}
+        >
+          {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+        </EuiSuperUpdateButton>
+      );
+
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <EuiFlexItem grow={false}>
           {props.isLoading && propsOnCancel && renderCancelButton()}
-          {(!props.isLoading || !propsOnCancel) && (
-            <EuiSuperUpdateButton
-              iconType={props.isDirty ? iconDirty : 'refresh'}
-              iconOnly={submitButtonIconOnly}
-              aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
-              isDisabled={isDateRangeInvalid || props.isDisabled}
-              isLoading={props.isLoading}
-              onClick={onClickSubmitButton}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-              color={props.isDirty ? 'success' : 'primary'}
-              fill={false}
-              needsUpdate={props.isDirty}
-              data-test-subj="querySubmitButton"
-              toolTipProps={{
-                content: props.isDirty ? labelDirty : strings.getRefreshQueryLabel(),
-                delay: 'long',
-                position: 'bottom',
-              }}
-            >
-              {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
-            </EuiSuperUpdateButton>
-          )}
+          {(!props.isLoading || !propsOnCancel) && updateButton}
         </EuiFlexItem>
       );
 
