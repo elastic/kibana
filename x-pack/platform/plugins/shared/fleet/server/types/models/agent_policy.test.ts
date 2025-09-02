@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { set } from '@kbn/safer-lodash-set';
+
 import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
+import { getSettings } from '../../services/form_settings';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 
