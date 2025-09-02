@@ -133,7 +133,7 @@ export const DocumentMatchFilterControls = ({
             type={'question'}
             content={i18n.translate('xpack.streams.streamDetail.previewMatchesTooltipText', {
               defaultMessage:
-                'Approximate percentage of documents matching this condition over a random sample of documents.',
+                'Approximate percentage of documents matching/unmatching the condition over a random sample of documents.',
             })}
             iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
           />
