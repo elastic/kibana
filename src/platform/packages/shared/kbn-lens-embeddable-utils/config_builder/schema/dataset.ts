@@ -101,34 +101,37 @@ export const datasetSchema = {
   dataset: datasetTypeSchema,
 };
 
+
+export const datasetEsqlTableTypeSchema = schema.oneOf([
+  // ESQL dataset type
+  schema.object({
+    type: schema.literal('esql'),
+    /**
+     * The ESQL query string to use as the data source.
+     * Example: 'FROM my-index | LIMIT 100'
+     */
+    query: schema.string({
+      meta: {
+        description:
+          'The ESQL query string to use as the data source. Example: "FROM my-index | LIMIT 100".',
+      },
+    }),
+  }),
+  // Table dataset type
+  schema.object({
+    type: schema.literal('table'),
+    /**
+     * The Kibana datatable object to use as the data source. The structure should match the Kibana Datatable contract.
+     */
+    table: schema.any({
+      meta: {
+        description:
+          'The Kibana datatable object to use as the data source. Structure should match the Kibana Datatable contract.',
+      },
+    }),
+  }),
+]);
+
 export const datasetEsqlTableSchema = {
-  dataset: schema.oneOf([
-    // ESQL dataset type
-    schema.object({
-      type: schema.literal('esql'),
-      /**
-       * The ESQL query string to use as the data source.
-       * Example: 'FROM my-index | LIMIT 100'
-       */
-      query: schema.string({
-        meta: {
-          description:
-            'The ESQL query string to use as the data source. Example: "FROM my-index | LIMIT 100".',
-        },
-      }),
-    }),
-    // Table dataset type
-    schema.object({
-      type: schema.literal('table'),
-      /**
-       * The Kibana datatable object to use as the data source. The structure should match the Kibana Datatable contract.
-       */
-      table: schema.any({
-        meta: {
-          description:
-            'The Kibana datatable object to use as the data source. Structure should match the Kibana Datatable contract.',
-        },
-      }),
-    }),
-  ])
+  dataset: datasetEsqlTableTypeSchema
 }

@@ -8,7 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { metricStateSchema } from './metric';
+import { metricStateSchema, metricStateWithEsqlSupportSchema } from './metric';
 
 describe('Metric Schema', () => {
   const baseMetricConfig = {
@@ -321,6 +321,24 @@ describe('Metric Schema', () => {
         ...input,
         breakdown_by: { ...input.breakdown_by, size: 5 },
       });
+    });
+
+    it('validates esql configuration', () => {
+      const input = {
+        type: 'metric' as const,
+        dataset: {
+          type: 'esql' as const,
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metric: {
+          column: 'unique_count' as const,
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      };
+
+      const validated = metricStateWithEsqlSupportSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
 });
