@@ -23,12 +23,13 @@ import {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { dsl } from './dsl_queries';
-import { MAX_ES_SEARCH_SIZE, SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
 import type {
   CreateMigrationItemInput,
   SiemMigrationItemSort,
 } from '../../common/data/siem_migrations_data_item_client';
 import { SiemMigrationsDataItemClient } from '../../common/data/siem_migrations_data_item_client';
+import { MAX_ES_SEARCH_SIZE } from '../../common/data/constants';
 
 export type CreateRuleMigrationRulesInput = CreateMigrationItemInput<RuleMigrationRule>;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
@@ -164,7 +165,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         script: {
           source: `
                 def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
                 ctx._source.elastic_rule.query = newQuery;
               `,
           lang: 'painless',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import {
   getTranslateSplToEsql,
   TASK_DESCRIPTION,
@@ -23,7 +24,7 @@ export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): Grap
       description: state.description ?? '',
       taskDescription: TASK_DESCRIPTION.migrate_dashboard,
       inlineQuery: state.inline_query,
-      indexPattern: state.index_pattern || '[indexPattern]',
+      indexPattern: state.index_pattern || MISSING_INDEX_PATTERN_PLACEHOLDER,
     });
 
     if (!esqlQuery) {

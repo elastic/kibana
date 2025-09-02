@@ -7,6 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import { processPanel } from './process_panel';
@@ -19,8 +20,7 @@ export const getTranslationResultNode = (): GraphNode => {
     }
 
     let translationResult;
-    // TODO: use placeholder constant
-    if (query.startsWith('FROM [indexPattern]')) {
+    if (query.startsWith(`FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER}`)) {
       translationResult = MigrationTranslationResult.PARTIAL;
     } else if (state.validation_errors?.esql_errors) {
       translationResult = MigrationTranslationResult.PARTIAL;

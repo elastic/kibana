@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash/fp';
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import type { NodeHelperCreator } from '../types';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../constants';
 
 export interface GetValidateEsqlParams {
   logger: Logger;
@@ -54,7 +55,7 @@ export const getValidateEsql: NodeHelperCreator<
 
 function sanitizeQuery(query: string): string {
   return query
-    .replace('FROM [indexPattern]', 'FROM *') // Replace the index pattern placeholder with a wildcard
+    .replace(`FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER}`, 'FROM *') // Replace the index pattern placeholder with a wildcard
     .replaceAll(/\[(macro|lookup):.*?\]/g, '') // Removes any macro or lookup placeholders
     .replaceAll(/\n(\s*?\|\s*?\n)*/g, '\n'); // Removes any empty lines with | (pipe) alone after removing the placeholders
 }

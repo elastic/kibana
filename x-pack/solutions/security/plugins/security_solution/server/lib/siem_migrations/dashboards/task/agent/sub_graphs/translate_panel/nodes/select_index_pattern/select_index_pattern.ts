@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { getSelectIndexPatternGraph } from '../../../../../../../../../assistant/tools/esql/graphs/select_index_pattern/select_index_pattern';
 import type { ChatModel } from '../../../../../../../common/task/util/actions_client_chat';
 import type { DashboardMigrationTelemetryClient } from '../../../../../dashboard_migrations_telemetry_client';
@@ -30,7 +31,7 @@ export const getSelectIndexPatternNode = (params: GetSelectIndexPatternParams): 
     const selectIndexPatternGraph = await selectIndexPatternGraphPromise; // This will only be awaited the first time the node is executed
 
     if (!state.inline_query) {
-      return { index_pattern: '[indexPattern]' };
+      return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
     }
     const question = await SELECT_INDEX_PATTERN_PROMPT.format({
       query: state.inline_query,
@@ -43,7 +44,7 @@ export const getSelectIndexPatternNode = (params: GetSelectIndexPatternParams): 
     );
 
     if (!selectedIndexPattern) {
-      return { index_pattern: '[indexPattern]' };
+      return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
     }
     return {
       index_pattern: selectedIndexPattern,
