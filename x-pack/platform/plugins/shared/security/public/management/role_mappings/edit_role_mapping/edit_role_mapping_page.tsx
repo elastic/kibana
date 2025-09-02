@@ -214,7 +214,6 @@ export class EditRoleMappingPage extends Component<Props, State> {
                 />
               }
               type={'lock'}
-              style={{ verticalAlign: 'super' }}
             />
           )}
         </>

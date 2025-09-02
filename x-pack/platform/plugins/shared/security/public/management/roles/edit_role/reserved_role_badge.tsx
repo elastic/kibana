@@ -31,7 +31,6 @@ export const ReservedRoleBadge = (props: Props) => {
           />
         }
         type={'lock'}
-        style={{ verticalAlign: 'super' }}
       />
     );
   }
