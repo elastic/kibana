@@ -231,12 +231,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       parentConfig:
         doc.parent_checkpoint_id != null
           ? {
-            configurable: {
-              thread_id: threadId,
-              checkpoint_ns: checkpointNs,
-              checkpoint_id: doc.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: threadId,
+                checkpoint_ns: checkpointNs,
+                checkpoint_id: doc.parent_checkpoint_id,
+              },
+            }
           : undefined,
     };
   }
@@ -308,12 +308,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         metadata,
         parentConfig: source.parent_checkpoint_id
           ? {
-            configurable: {
-              thread_id: source.thread_id,
-              checkpoint_ns: source.checkpoint_ns,
-              checkpoint_id: source.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: source.thread_id,
+                checkpoint_ns: source.checkpoint_ns,
+                checkpoint_id: source.parent_checkpoint_id,
+              },
+            }
           : undefined,
       };
     }
@@ -413,9 +413,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         type,
       };
 
-      this.logger.debug(
-        `Indexing write operation for checkpoint ${checkpointId}`
-      );
+      this.logger.debug(`Indexing write operation for checkpoint ${checkpointId}`);
 
       return [
         {
@@ -428,9 +426,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       ];
     });
 
-    this.logger.debug(
-      `Bulk operations for checkpoint ${checkpointId}`
-    );
+    this.logger.debug(`Bulk operations for checkpoint ${checkpointId}`);
 
     const result = await this.client.bulk({
       operations,
@@ -439,13 +435,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     });
 
     if (result.errors) {
-      this.logger.error(
-        `Failed to index writes for checkpoint ${checkpointId}`
-      );
+      this.logger.error(`Failed to index writes for checkpoint ${checkpointId}`);
 
-      throw new Error(
-        `Failed to index writes for checkpoint ${checkpointId}`
-      );
+      throw new Error(`Failed to index writes for checkpoint ${checkpointId}`);
     }
   }
 }
