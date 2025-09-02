@@ -24,6 +24,7 @@ import type {
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../../../../common/endpoint/constants';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -579,6 +580,18 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       if (!error) {
         try {
+          // Check for existing cancel action
+          const actionAlreadyCanceled = await this.checkForAlreadyCanceledAction(
+            actionRequest.parameters.id
+          );
+
+          if (actionAlreadyCanceled) {
+            throw new ResponseActionsClientError(
+              `Unable to cancel action [${actionRequest.parameters.id}]. Action has already been cancelled.`,
+              409
+            );
+          }
+
           // Resolve the external action ID from the internal response action ID
           const externalActionId = await this.resolveExternalActionId(actionRequest.parameters.id);
 
@@ -1072,5 +1085,46 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     );
 
     return meta?.machineActionId;
+  }
+
+  /**
+   * Check if a successful cancel action already exists for the target actionId.
+   * This method queries the endpoint response index to look for action been canceled
+   * that target the specified action ID.
+   */
+  private async checkForAlreadyCanceledAction(targetActionId: string): Promise<boolean> {
+    try {
+      const searchQuery = {
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: [{ term: { 'EndpointActions.action_id': targetActionId } }],
+            should: [{ match_phrase: { 'error.message': 'Response action was canceled by' } }],
+            minimum_should_match: 1,
+          },
+        },
+        size: 1,
+        _source: ['EndpointActions.action_id', 'error.message', '@timestamp'],
+      };
+
+      const searchResult = await this.options.esClient.search(searchQuery);
+
+      const actionHasBeenCanceled = searchResult.hits.hits.length > 0;
+
+      if (actionHasBeenCanceled) {
+        const existingCancelId = searchResult.hits.hits[0]._source?.EndpointActions?.action_id;
+        this.log.debug(
+          `Found already successful cancel action [${existingCancelId}] for target [${targetActionId}]`
+        );
+      } else {
+        this.log.debug(`No already successful cancel actions found for target [${targetActionId}]`);
+      }
+
+      return actionHasBeenCanceled;
+    } catch (error) {
+      this.log.warn(`Error checking for existing cancel actions: ${error.message}`);
+      // On ES query error, allow cancel to proceed (fail open)
+      return false;
+    }
   }
 }

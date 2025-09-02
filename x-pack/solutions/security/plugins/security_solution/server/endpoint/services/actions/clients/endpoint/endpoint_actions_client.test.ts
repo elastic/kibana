@@ -390,6 +390,7 @@ describe('EndpointActionsClient', () => {
       'alertIds',
       'ruleId',
       'ruleName',
+      'meta',
     ]);
   });
 

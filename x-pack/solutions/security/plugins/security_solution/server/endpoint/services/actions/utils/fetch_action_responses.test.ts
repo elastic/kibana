@@ -55,7 +55,7 @@ describe('fetchActionResponses()', () => {
                 type: 'json',
               },
             },
-            started_at: '2022-04-30T10:53:59.449Z',
+            started_at: '2022-04-30T12:56:00.449Z',
           },
           agent: {
             id: 'agent-a',
@@ -94,7 +94,7 @@ describe('fetchActionResponses()', () => {
                 type: 'json',
               },
             },
-            started_at: '2022-04-30T10:53:59.449Z',
+            started_at: '2022-04-30T12:56:00.449Z',
           },
           agent: {
             id: 'agent-a',

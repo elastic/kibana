@@ -315,7 +315,7 @@ export const allowedExperimentalValues = Object.freeze({
   automaticDashboardsMigration: false,
   /**
    * Enables Microsoft Defender for Endpoint's Cancel command
-   * Release: 9.1.2/8.19.2
+   * Release: 9.2.0
    */
   microsoftDefenderEndpointCancelEnabled: false,
 });
