@@ -4448,8 +4448,6 @@
         "murmurhash",
         "mdast-util-to-hast",
         "pretty-ms",
-        "p-settle",
-        "p-reflect",
         "remark-stringify",
         "stats-lite",
         "textarea-caret",

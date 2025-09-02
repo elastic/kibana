@@ -26595,7 +26595,7 @@ p-finally@^1.0.0:
   resolved "https://registry.yarnpkg.com/p-finally/-/p-finally-1.0.0.tgz#3fbcfb15b899a44123b34b6dcc18b724336a2cae"
   integrity sha1-P7z7FbiZpEEjs0ttzBi3JDNqLK4=
 
-p-limit@^2.0.0, p-limit@^2.2.0, p-limit@^2.2.2:
+p-limit@^2.0.0, p-limit@^2.2.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-2.3.0.tgz#3dd33c647a214fdfffd835933eb086da0dc21db1"
   integrity sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==
@@ -26671,11 +26671,6 @@ p-queue@^6.6.2:
     eventemitter3 "^4.0.4"
     p-timeout "^3.2.0"
 
-p-reflect@2.1.0, p-reflect@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/p-reflect/-/p-reflect-2.1.0.tgz#5d67c7b3c577c4e780b9451fc9129675bd99fe67"
-  integrity sha512-paHV8NUz8zDHu5lhr/ngGWQiW067DK/+IbJ+RfZ4k+s8y4EKyYCz8pGYWjxCg35eHztpJAt+NUgvN4L+GCbPlg==
-
 p-retry@4, p-retry@^4.2.0:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.6.2.tgz#9baae7184057edd4e17231cee04264106e092a16"
@@ -26692,14 +26687,6 @@ p-retry@^6.2.0:
     "@types/retry" "0.12.2"
     is-network-error "^1.0.0"
     retry "^0.13.1"
-
-p-settle@4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/p-settle/-/p-settle-4.1.1.tgz#37fbceb2b02c9efc28658fc8d36949922266035f"
-  integrity sha512-6THGh13mt3gypcNMm0ADqVNCcYa3BK6DWsuJWFCuEKP1rpY+OKGp7gaZwVmLspmic01+fsg/fN57MfvDzZ/PuQ==
-  dependencies:
-    p-limit "^2.2.2"
-    p-reflect "^2.1.0"
 
 p-timeout@^2.0.1:
   version "2.0.1"
