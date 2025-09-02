@@ -451,9 +451,6 @@ export type RenderContext<AC extends AdditionalContext> = {
   isLoadingMaintenanceWindows: boolean;
   maintenanceWindows?: Map<string, MaintenanceWindow>;
 
-  pageIndex: number;
-  pageSize: number;
-
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
@@ -461,6 +458,10 @@ export type RenderContext<AC extends AdditionalContext> = {
   Pick<
     AlertsTableProps<AC>,
     | 'columns'
+    | 'pageIndex'
+    | 'onPageIndexChange'
+    | 'pageSize'
+    | 'onPageSizeChange'
     | 'renderCellValue'
     | 'renderCellPopover'
     | 'renderActionsCell'
@@ -471,7 +472,14 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'casesConfiguration'
     | 'openLinksInNewTab'
   >,
-  'columns' | 'openLinksInNewTab' | 'onExpandedAlertIndexChange'
+  | 'columns'
+  | 'pageIndex'
+  | 'onPageIndexChange'
+  | 'pageSize'
+  | 'onPageSizeChange'
+  | 'openLinksInNewTab'
+  | 'expandedAlertIndex'
+  | 'onExpandedAlertIndexChange'
 > &
   AC;
 
@@ -563,10 +571,8 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
    */
   dynamicRowHeight?: boolean;
   sort: SortCombinations[];
-  alertsQuerySnapshot?: EsQuerySnapshot;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
-  onChangePageSize: (size: number) => void;
-  onChangePageIndex: (index: number) => void;
+  alertsQuerySnapshot?: EsQuerySnapshot;
 }
 
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =

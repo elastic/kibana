@@ -201,7 +201,7 @@ const AlertsTableContent = typedForwardRef(
       configurationStorage = new Storage(window.localStorage),
       services,
       ...publicDataGridProps
-    }: AlertsTableProps,
+    }: AlertsTableProps<AC>,
     ref: Ref<AlertsTableImperativeApi>
   ) => {
     // Memoized so that consumers can pass an inline object without causing re-renders
@@ -218,23 +218,23 @@ const AlertsTableContent = typedForwardRef(
 
     const [pageIndex, setPageIndex] = useControllableState({
       prop: pageIndexProp,
-      defaultProp: 0,
       onChange: onPageIndexChange,
+      defaultValue: 0,
     });
     const [pageSize, setPageSize] = useControllableState({
       prop: pageSizeProp,
-      defaultProp: DEFAULT_ALERTS_PAGE_SIZE,
       onChange: onPageSizeChange,
+      defaultValue: DEFAULT_ALERTS_PAGE_SIZE,
     });
     const [sort, setSort] = useControllableState({
       prop: sortProp,
-      defaultProp: DEFAULT_SORT,
       onChange: onSortChange,
+      defaultValue: DEFAULT_SORT,
     });
     const [expandedAlertIndex, setExpandedAlertIndex] = useControllableState({
       prop: expandedAlertIndexProp,
-      defaultProp: null,
       onChange: onExpandedAlertIndexChange,
+      defaultValue: null,
     });
 
     const columnsLocal = useMemo(
@@ -459,7 +459,9 @@ const AlertsTableContent = typedForwardRef(
           isLoadingMutedAlerts: mutedAlertsQuery.isFetching,
           mutedAlerts: mutedAlertsQuery.data,
           pageIndex,
+          onPageIndexChange: setPageIndex,
           pageSize,
+          onPageSizeChange: setPageSize,
           showAlertStatusWithFlapping,
           bulkActionsStore,
           renderCellValue,
@@ -489,7 +491,9 @@ const AlertsTableContent = typedForwardRef(
         oldAlertsData,
         browserFields,
         pageIndex,
+        setPageIndex,
         pageSize,
+        setPageSize,
         showAlertStatusWithFlapping,
         bulkActionsStore,
         renderCellValue,
@@ -538,12 +542,8 @@ const AlertsTableContent = typedForwardRef(
         dynamicRowHeight,
         ruleTypeIds,
         alertsQuerySnapshot,
-        onChangePageIndex: setPageIndex,
-        onChangePageSize: setPageSize,
         sort,
         onSortChange: onDataGridSortChange,
-        expandedAlertIndex,
-        onExpandedAlertIndexChange: setExpandedAlertIndex,
       }),
       [
         publicDataGridProps,
@@ -564,12 +564,8 @@ const AlertsTableContent = typedForwardRef(
         dynamicRowHeight,
         ruleTypeIds,
         alertsQuerySnapshot,
-        setPageIndex,
-        setPageSize,
         sort,
         onDataGridSortChange,
-        expandedAlertIndex,
-        setExpandedAlertIndex,
       ]
     );
 

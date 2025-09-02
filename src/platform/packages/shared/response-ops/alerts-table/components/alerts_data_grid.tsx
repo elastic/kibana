@@ -73,8 +73,6 @@ export const AlertsDataGrid = typedMemo(
       renderContext,
       hideBulkActions,
       casesConfiguration,
-      onChangePageSize,
-      onChangePageIndex,
       actionsColumnWidth = DEFAULT_ACTIONS_COLUMN_WIDTH,
       additionalBulkActions,
       fieldsBrowserOptions,
@@ -93,7 +91,9 @@ export const AlertsDataGrid = typedMemo(
       expandedAlertIndex,
       renderExpandedAlertView,
       pageIndex,
+      onPageIndexChange,
       pageSize,
+      onPageSizeChange,
       refresh: refreshQueries,
       columns,
       dataGridRef,
@@ -192,10 +192,10 @@ export const AlertsDataGrid = typedMemo(
         pageIndex,
         pageSize,
         pageSizeOptions,
-        onChangeItemsPerPage: onChangePageSize,
-        onChangePage: onChangePageIndex,
+        onChangePage: onPageIndexChange,
+        onChangeItemsPerPage: onPageSizeChange,
       }),
-      [onChangePageIndex, onChangePageSize, pageIndex, pageSize, pageSizeOptions]
+      [onPageIndexChange, onPageSizeChange, pageIndex, pageSize, pageSizeOptions]
     );
 
     const { getCellActionsForColumn, visibleCellActions, disabledCellActions } =

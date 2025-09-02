@@ -204,7 +204,9 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   isLoadingMutedAlerts: false,
   mutedAlerts: {},
   pageIndex: 0,
+  onPageIndexChange: jest.fn(),
   pageSize: 1,
+  onPageSizeChange: jest.fn(),
   bulkActionsStore: [
     createMockBulkActionsState(),
     jest.fn(),
