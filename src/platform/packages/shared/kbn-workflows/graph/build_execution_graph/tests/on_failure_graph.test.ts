@@ -384,7 +384,9 @@ describe('on_failure graph', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         const topsort = graphlib.alg.topsort(executionGraph);
         expect(topsort).toEqual(
-          expect.arrayContaining(['workflow-level-on-failure_foreachFallbackAction'])
+          expect.arrayContaining([
+            'workflow-level-on-failure_testRetryConnectorStep_foreachFallbackAction',
+          ])
         );
       });
     });
