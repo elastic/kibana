@@ -100,7 +100,6 @@ export function JSONDataView({
       gutterSize="none"
       responsive={false}
     >
-      {/* TODO: add filters and search without too much services dependencies */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} gutterSize="s">
           {viewMode === 'table' && onSearchTermChange && (
