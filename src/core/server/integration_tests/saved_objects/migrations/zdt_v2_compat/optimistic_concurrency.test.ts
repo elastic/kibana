@@ -40,7 +40,7 @@ describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
   });
 
   beforeEach(async () => {
-    await fs.unlink(logFilePath).catch(() => {});
+    await fs.unlink(logFilePath).catch(() => { });
     jest.clearAllMocks();
   });
 
@@ -114,22 +114,19 @@ describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
 
     const typeA = getSampleAType();
 
-    const transformFunc: SavedObjectModelUnsafeTransformFn<TestSOType, TestSOType> = (
-      doc: SavedObjectModelTransformationDoc<TestSOType>
-    ) => {
-      const attributes = {
-        ...doc.attributes,
-        keyword: 'updated by the migrator',
-      };
-      return { document: { ...doc, attributes } };
-    };
     typeA.modelVersions = {
       ...typeA.modelVersions,
       '2': {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (typeSafeGuard) => typeSafeGuard(transformFunc),
+            transformFn: (doc) => {
+              const attributes = {
+                ...doc.attributes,
+                keyword: 'updated by the migrator',
+              };
+              return { document: { ...doc, attributes } };
+            }
           },
         ],
       },
