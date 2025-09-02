@@ -26,7 +26,7 @@ import {
 
 import '@xyflow/react/dist/style.css';
 
-export interface WorkflowExecutionProps {
+export interface ExecutionGraphProps {
   workflowYaml: string | undefined;
 }
 
@@ -185,7 +185,7 @@ const ReactFlowWrapper: React.FC<{
   );
 };
 
-export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) => {
+export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) => {
   const { euiTheme } = useEuiTheme();
 
   const workflowExecutionGraph: { result: any; error: any } | null = useMemo(() => {

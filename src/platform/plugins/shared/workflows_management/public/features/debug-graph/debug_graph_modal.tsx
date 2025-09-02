@@ -17,7 +17,7 @@ import {
   EuiButton,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { DebugGraph } from './execution_graph';
+import { ExecutionGraph } from './execution_graph';
 
 export interface DebugGraphModalProps {
   /**
@@ -52,8 +52,8 @@ export const DebugGraphModal: React.FC<DebugGraphModalProps> = ({
         <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
-      <EuiModalBody style={{ height: 'calc(90vh - 120px)', overflow: 'auto' }}>
-        <DebugGraph workflowYaml={workflowYaml} />
+      <EuiModalBody style={{ height: 'calc(90vh - 120px)', width: '90vw', overflow: 'auto' }}>
+        <ExecutionGraph workflowYaml={workflowYaml} />
       </EuiModalBody>
 
       <EuiModalFooter>

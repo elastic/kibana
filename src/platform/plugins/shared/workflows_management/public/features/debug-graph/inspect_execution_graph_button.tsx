@@ -14,14 +14,14 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DebugGraphModal } from './debug_graph_modal';
 
-export interface WorkflowExecutionProps {
+export interface InspectExecutionGraphButtonProps {
   workflowYaml: string | undefined;
 }
 
-export const ViewDebugGraphButton: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) => {
+export const InspectExecutionGraphButton: React.FC<InspectExecutionGraphButtonProps> = ({
+  workflowYaml,
+}) => {
   const [isModalOpen, setModalOpen] = React.useState<boolean>(false);
-
-  console.log(workflowYaml)
 
   return (
     <>

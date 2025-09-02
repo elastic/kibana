@@ -28,7 +28,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import { getRunWorkflowTooltipContent } from '../../../shared/ui';
-import { ViewDebugGraphButton } from '../../../features/debug-graph/inspect_execution_graph_button';
+import { InspectExecutionGraphButton } from '../../../features/debug-graph/inspect_execution_graph_button';
 
 export interface WorkflowDetailHeaderProps {
   name: string | undefined;
@@ -175,7 +175,7 @@ export const WorkflowDetailHeader = ({
                 })}
               />
             </EuiToolTip>
-            <ViewDebugGraphButton workflowYaml={yaml} />
+            <InspectExecutionGraphButton workflowYaml={yaml} />
             <EuiButton
               fill
               color="primary"
