@@ -173,6 +173,10 @@ module.exports = (_, argv) => {
       hints: false,
     },
 
+    cache: {
+      type: 'filesystem',
+    },
+
     plugins: [
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin({

@@ -109,6 +109,10 @@ module.exports = {
     ],
   },
 
+  cache: {
+    type: 'filesystem',
+  },
+
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
     mainFields: ['browser', 'module', 'main'],

@@ -21,7 +21,7 @@ import type {
   InputData,
   IngestPipelineWrapper,
   InitializeImportResponse,
-} from '../common/types';
+} from '@kbn/file-upload-common';
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function initializeImport(

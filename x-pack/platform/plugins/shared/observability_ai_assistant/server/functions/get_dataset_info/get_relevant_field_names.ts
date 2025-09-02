@@ -7,6 +7,7 @@
 import datemath from '@elastic/datemath';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { catchError, lastValueFrom, of } from 'rxjs';
 import {
@@ -163,7 +164,7 @@ export async function getRelevantFieldNames({
             )}`
           );
 
-          if (error.name === 'aborted' || error.code === 'ECONNRESET') {
+          if (isInferenceRequestAbortedError(error)) {
             // return empty fieldIds for chunk
             return of({
               message: {

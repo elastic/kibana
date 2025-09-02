@@ -17,7 +17,7 @@ export interface Props {
 }
 
 export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
 
   return (
     <AssetDetails
@@ -36,6 +36,7 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
         mode: 'flyout',
         closeFlyout,
       }}
+      preferredSchema={searchCriteria.preferredSchema}
     />
   );
 };
