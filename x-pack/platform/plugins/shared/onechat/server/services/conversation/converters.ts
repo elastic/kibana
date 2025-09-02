@@ -6,16 +6,14 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
-  type UserIdAndName,
-  type Conversation,
-  ConversationWithoutRounds,
-} from '@kbn/onechat-common';
+import type { ConversationWithoutRounds, ConversationRound } from '@kbn/onechat-common';
+import { type UserIdAndName, type Conversation } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
 } from '../../../common/conversations';
-import { ConversationProperties } from './storage';
+import type { ConversationProperties } from './storage';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
@@ -39,13 +37,37 @@ const convertBaseFromEs = (
   };
 };
 
+function serializeStepResults(
+  rounds: Array<ConversationRound<ToolResult[]>>
+): Array<ConversationRound<string>> {
+  return rounds.map((round) => ({
+    ...round,
+    steps: round.steps.map((step) => ({
+      ...step,
+      results: 'results' in step ? JSON.stringify(step.results) : '[]',
+    })),
+  }));
+}
+
+function deserializeStepResults(
+  rounds: Array<ConversationRound<string>>
+): Array<ConversationRound<ToolResult[]>> {
+  return rounds.map((round) => ({
+    ...round,
+    steps: round.steps.map((step) => ({
+      ...step,
+      results: 'results' in step ? JSON.parse(step.results) : [],
+    })),
+  }));
+}
+
 export const fromEs = (
   document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
 ): Conversation => {
   const base = convertBaseFromEs(document);
   return {
     ...base,
-    rounds: document._source!.rounds,
+    rounds: deserializeStepResults(document._source!.rounds),
   };
 };
 
@@ -63,7 +85,7 @@ export const toEs = (conversation: Conversation): ConversationProperties => {
     title: conversation.title,
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
-    rounds: conversation.rounds,
+    rounds: serializeStepResults(conversation.rounds),
   };
 };
 
@@ -101,6 +123,6 @@ export const createRequestToEs = ({
     title: conversation.title,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
-    rounds: conversation.rounds,
+    rounds: serializeStepResults(conversation.rounds),
   };
 };

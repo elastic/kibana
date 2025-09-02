@@ -6,7 +6,11 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role, RoleRemoteClusterPrivilege } from '@kbn/security-plugin/common';
+import type {
+  AuthenticatedUser,
+  Role,
+  RoleRemoteClusterPrivilege,
+} from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
@@ -253,7 +257,9 @@ export class SecurityPageObject extends FtrService {
   async initTests() {
     this.log.debug('SecurityPage:initTests');
     await this.kibanaServer.savedObjects.cleanStandardList();
-    await this.esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    await this.esArchiver.loadIfNeeded(
+      'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+    );
     await this.browser.setWindowSize(1600, 1000);
   }
 

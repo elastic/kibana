@@ -91,7 +91,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
       await esTestIndexToolAAD.removeAll();
 
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       connectorId = await createConnector();

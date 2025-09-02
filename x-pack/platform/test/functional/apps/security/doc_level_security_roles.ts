@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before('initialize tests', async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/security/dlstest');
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('settings');

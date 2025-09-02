@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api/infra';
@@ -69,10 +69,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Fetch hosts', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+        );
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+        );
       });
 
       it('should return metrics for a host', async () => {

@@ -35,7 +35,7 @@ export const hasFilters = (filters?: { [key: string]: string[] }) => {
     return false;
   }
 
-  return Object.values(FILTER_FIELDS).some((f) => filters[f].length);
+  return Object.values(FILTER_FIELDS).some((f) => filters[f]?.length);
 };
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {

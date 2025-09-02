@@ -14,13 +14,8 @@ import {
 } from '../../complete_items';
 import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ESQLPolicy,
-  ICommandCallbacks,
-} from '../../types';
+import type { ESQLPolicy, ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import {
   Position,
   buildMatchingFieldsDefinition,
@@ -154,7 +149,11 @@ export async function autocomplete(
         return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
       } else {
         // not recognized as a field name, assume new user-defined column name
-        return getOperatorSuggestions({ location: Location.ENRICH });
+        return getOperatorSuggestions(
+          { location: Location.ENRICH },
+          callbacks?.hasMinimumLicenseRequired,
+          context?.activeProduct
+        );
       }
     }
 

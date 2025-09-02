@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { setupTestUsers, testUsers } from '../test_users';
 
@@ -128,6 +128,17 @@ const ALL_SCENARIOS = [
   },
 ];
 
+const UPDATE_REQUIRED_VERSIONS_SCENARIOS = [
+  {
+    user: testUsers.fleet_agent_policies_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_agent_policies_all_and_agents_all_only,
+    statusCode: 200,
+  },
+];
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -206,13 +217,49 @@ export default function (providerContext: FtrProviderContext) {
           .send({ agentPolicyId: 'policy-test-privileges-2' });
       },
     },
+    {
+      method: 'PUT',
+      path: '/api/fleet/agent_policies/policy-test-privileges-3',
+      send: {
+        name: `TEST ${Date.now()}`,
+        namespace: 'default',
+        required_versions: [
+          {
+            version: '9.1.0',
+            percentage: 100,
+          },
+        ],
+      },
+      scenarios: UPDATE_REQUIRED_VERSIONS_SCENARIOS,
+      beforeEach: async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .send({
+            id: 'policy-test-privileges-3',
+            name: `TEST ${Date.now()}`,
+            namespace: 'default',
+            data_output_id: 'fleet-default-output',
+          })
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      },
+      afterEach: async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: 'policy-test-privileges-3' })
+          .expect(200);
+      },
+    },
   ];
 
   describe('fleet_agent_policies_privileges', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await setupTestUsers(getService('security'));
+      const fleetAndAgents = getService('fleetAndAgents');
+      await fleetAndAgents.setup();
 
       await supertest
         .post(`/api/fleet/agent_policies`)
@@ -221,6 +268,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'policy-test-privileges-1',
           name: `TEST ${Date.now()}`,
           namespace: 'default',
+          data_output_id: 'fleet-default-output',
         })
         .expect(200);
     });

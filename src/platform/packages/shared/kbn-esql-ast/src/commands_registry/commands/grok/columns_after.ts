@@ -9,7 +9,7 @@
 import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import type { ICommandContext } from '../../types';
 
 function unquoteTemplate(inputString: string): string {
   if (inputString.startsWith('"') && inputString.endsWith('"') && inputString.length >= 2) {
@@ -19,15 +19,33 @@ function unquoteTemplate(inputString: string): string {
 }
 
 export function extractSemanticsFromGrok(pattern: string): string[] {
-  const regex = /%\{\w+:(?<column>[\w@]+)\}/g;
-  const matches = pattern.matchAll(regex);
   const columns: string[] = [];
-  for (const match of matches) {
-    if (match?.groups?.column) {
-      columns.push(match.groups.column);
+
+  // Regex for Grok's %{SYNTAX:SEMANTIC} pattern
+  const grokSyntaxRegex = /%{\w+:(?<column>[\w@]+)(?::\w+)?}/g;
+  let grokMatch;
+  while ((grokMatch = grokSyntaxRegex.exec(pattern)) !== null) {
+    if (grokMatch?.groups?.column) {
+      columns.push(grokMatch.groups.column);
     }
   }
-  return columns;
+
+  // Regex for Oniguruma-style named capture groups (?<name>...) or (?'name'...)
+  // Oniguruma supports both `?<name>` and `?'name'` for named capture groups.
+  const onigurumaNamedCaptureRegex = /(?<column>\(\?<(\w+)>|\(\?'(\w+)'\)[^)]*\))/g;
+  let onigurumaMatch;
+  while ((onigurumaMatch = onigurumaNamedCaptureRegex.exec(pattern)) !== null) {
+    // If it's a (?<name>...) style
+    if (onigurumaMatch[2]) {
+      columns.push(onigurumaMatch[2]);
+    }
+    // If it's a (?'name'...) style
+    else if (onigurumaMatch[3]) {
+      columns.push(onigurumaMatch[3]);
+    }
+  }
+  // Remove duplicates
+  return [...new Set(columns)];
 }
 
 export const columnsAfter = (

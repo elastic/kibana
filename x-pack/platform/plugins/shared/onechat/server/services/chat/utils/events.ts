@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
-  ChatEventType,
+import type {
   ConversationCreatedEvent,
   ConversationUpdatedEvent,
   Conversation,
 } from '@kbn/onechat-common';
+import { ChatEventType } from '@kbn/onechat-common';
 
 export const createConversationCreatedEvent = (
   conversation: Conversation

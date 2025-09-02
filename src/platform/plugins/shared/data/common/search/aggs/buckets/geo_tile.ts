@@ -10,12 +10,13 @@
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 
-import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggGeoTileFnName } from './geo_tile_fn';
 import { KBN_FIELD_TYPES } from '../../..';
 import { METRIC_TYPES } from '../metrics/metric_agg_types';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 const geotileGridTitle = i18n.translate('data.search.aggs.buckets.geotileGridTitle', {
   defaultMessage: 'Geotile',

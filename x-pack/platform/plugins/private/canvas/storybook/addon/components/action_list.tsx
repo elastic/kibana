@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { addons } from '@storybook/manager-api';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EVENTS } from '../constants';
-import { RecordedAction, RecordedPayload } from '../types';
+import type { RecordedAction, RecordedPayload } from '../types';
 
 export const ActionList: FC<{
   onSelect: (action: RecordedAction | null) => void;

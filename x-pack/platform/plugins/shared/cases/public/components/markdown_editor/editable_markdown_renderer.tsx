@@ -86,6 +86,7 @@ const EditableMarkDownRenderer = forwardRef<
             'aria-label': 'Cases markdown editor',
             value: content,
             id,
+            caseId,
             draftStorageKey,
             bottomRightContent: (
               <EditableMarkdownFooter

@@ -9,11 +9,13 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
+import type { ConnectorExecutor } from '../connector_executor';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import { ConnectorExecutor } from '../connector_executor';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
+  input: any;
   output: any;
   error: any;
 }
@@ -25,104 +27,75 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
 
-export abstract class StepBase<TStep extends BaseStep> {
+export interface StepImplementation {
+  run(): Promise<void>;
+}
+
+export interface StepErrorCatcher {
+  catchError(): Promise<void>;
+}
+
+export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
+  protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
     step: TStep,
     contextManager: WorkflowContextManager,
-    connectorExecutor: ConnectorExecutor,
-    templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
+    connectorExecutor: ConnectorExecutor | undefined,
+    workflowExecutionRuntime: WorkflowExecutionRuntimeManager
   ) {
     this.step = step;
     this.contextManager = contextManager;
-    this.templatingEngine = new WorkflowTemplatingEngine(templatingEngineType);
-    this.connectorExecutor = connectorExecutor;
+    this.templatingEngine = new WorkflowTemplatingEngine();
+    this.connectorExecutor = connectorExecutor as any;
+    this.workflowExecutionRuntime = workflowExecutionRuntime;
   }
 
   public getName(): string {
     return this.step.name;
   }
 
-  public async run(): Promise<RunStepResult> {
-    const stepName = this.getName();
+  public getInput(): any {
+    return {};
+  }
 
-    // Set step context for logging
-    this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
+  public async run(): Promise<void> {
+    const stepId = (this.step as any).id || this.getName();
 
-    // Log step start
-    this.contextManager.logStepStart(stepName);
+    await this.workflowExecutionRuntime.startStep(stepId);
 
-    // const stepEvent = {
-    //   event: { action: 'step-execution' },
-    //   message: `Executing step: ${stepName}`,
-    // };
-
-    // Start timing
-    // this.contextManager.startTiming(stepEvent);
+    const input = this.getInput();
 
     try {
-      const result = await this._run();
-
-      // Log success
-      // this.contextManager.stopTiming({
-      //   ...stepEvent,
-      //   event: { ...stepEvent.event, outcome: 'success' },
-      // });
-
-      this.contextManager.logStepComplete(stepName, stepName, true);
-      this.contextManager.appendStepResult(stepName, result);
-
-      return result;
+      const result = await this._run(input);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } catch (error) {
-      // Log failure
-      // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
-      //   event: { action: 'step-failed' },
-      // });
-
-      // this.contextManager.stopTiming({
-      //   ...stepEvent,
-      //   event: { ...stepEvent.event, outcome: 'failure' },
-      // });
-
-      this.contextManager.logStepComplete(stepName, stepName, false);
-
-      const result = await this.handleFailure(error);
-      this.contextManager.appendStepResult(stepName, result);
-
-      return result;
+      const result = await this.handleFailure(input, error);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } finally {
-      // Clear step context
-      this.contextManager.clearCurrentStep();
+      await this.workflowExecutionRuntime.finishStep(stepId);
     }
+
+    this.workflowExecutionRuntime.goToNextStep();
   }
 
   // Subclasses implement this to execute the step logic
-  protected abstract _run(): Promise<RunStepResult>;
-
-  // Helper to handle common logic like condition evaluation, retries, etc.
-  protected async evaluateCondition(condition: string | undefined): Promise<boolean> {
-    if (!condition) return true;
-    // Use templating engine to evaluate condition with context
-    // For now, placeholder: assume it's true if condition exists
-    // Integrate with TemplatingEngine in actual implementation
-    // const context = this.contextManager.getContext();
-    // const parsedCondition = this.templatingEngine.render(condition, context);
-    // return evaluate(parsedCondition, context);
-    return true;
-  }
+  protected abstract _run(input?: any): Promise<RunStepResult>;
 
   // Helper for handling on-failure, retries, etc.
-  protected async handleFailure(error: any): Promise<RunStepResult> {
+  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
     // Implement retry logic based on step['on-failure']
     return {
+      input,
       output: undefined,
       error: error instanceof Error ? error.message : String(error),
     };

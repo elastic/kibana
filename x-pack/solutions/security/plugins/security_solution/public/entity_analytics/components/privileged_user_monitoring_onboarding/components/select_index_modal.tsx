@@ -20,6 +20,7 @@ import {
   EuiModal,
   EuiFormRow,
   EuiCallOut,
+  useGeneratedHtmlId,
   EuiText,
   EuiCode,
 } from '@elastic/eui';
@@ -59,6 +60,7 @@ export const IndexSelectorModal = ({
     indexPattern?: string;
   };
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>(
     editDataSource?.indexPattern?.split(',').map((index) => ({ label: index })) ?? []
   );
@@ -118,9 +120,14 @@ export const IndexSelectorModal = ({
   return isCreateIndexModalOpen ? (
     <CreateIndexModal onClose={hideCreateIndexModal} onCreate={onCreateIndex} />
   ) : (
-    <EuiModal onClose={onClose} maxWidth="624px" data-test-subj="index-selector-modal">
+    <EuiModal
+      onClose={onClose}
+      maxWidth="624px"
+      data-test-subj="index-selector-modal"
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.title"
             defaultMessage="Select index"
@@ -173,7 +180,11 @@ export const IndexSelectorModal = ({
       <EuiModalFooter>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="plusInCircle" onClick={showCreateIndexModal}>
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              onClick={showCreateIndexModal}
+              data-test-subj="create-index-button"
+            >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonLabel"
                 defaultMessage="Create index"
@@ -188,10 +199,15 @@ export const IndexSelectorModal = ({
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
-              <EuiButton onClick={addPrivilegedUsers} fill disabled={selectedOptions.length === 0}>
+              <EuiButton
+                onClick={addPrivilegedUsers}
+                fill
+                disabled={selectedOptions.length === 0}
+                data-test-subj="privileged-user-monitoring-update-button"
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.addUserButtonLabel"
-                  defaultMessage="Add privileged users"
+                  defaultMessage="Update privileged users"
                 />
               </EuiButton>
             </EuiFlexGroup>

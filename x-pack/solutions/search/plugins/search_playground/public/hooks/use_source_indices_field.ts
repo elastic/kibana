@@ -6,7 +6,7 @@
  */
 
 import { useController } from 'react-hook-form';
-import { IndexName } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useCallback } from 'react';
 import { useIndicesFields } from './use_indices_fields';
 import { PlaygroundFormFields } from '../types';

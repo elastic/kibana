@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, FC } from 'react';
+import type { ComponentProps, FC } from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CellValueHost } from './cell_value_host';
 import { createPartialObjectMock } from '../utils/test';

@@ -8,36 +8,62 @@
  */
 
 export type {
+  // commands
+  CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
-  WorkflowExecutionLogModel,
-  WorkflowExecutionHistoryModel,
-
-  // dtos
-  WorkflowDetailDto,
-  WorkflowListDto,
-  WorkflowListItemDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowExecutionListItemDto,
-
-  // commands
-  CreateWorkflowCommand,
-  UpdatedWorkflowResponseDto,
-
   // execution engine
   Provider,
   ProviderInput,
+  RunWorkflowCommand,
+  RunWorkflowResponseDto,
+  UpdatedWorkflowResponseDto,
+  // dtos
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionHistoryModel,
+  WorkflowExecutionListDto,
+  WorkflowExecutionListItemDto,
+  WorkflowExecutionLogModel,
+  WorkflowListDto,
+  WorkflowListItemAction,
+  WorkflowListItemDto,
 } from './v1';
 
 // exported full to use enum as values
 export {
-  ExecutionStatus,
-  WorkflowStatus,
-
   // command schemas
   CreateWorkflowCommandSchema,
+  ExecutionStatus,
+  SearchWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
 } from './v1';
+
+export type {
+  AtomicGraphNode,
+  EnterConditionBranchNode,
+  EnterConditionBranchNodeSchema,
+  EnterForeachNode,
+  EnterIfNode,
+  EnterRetryNode,
+  ExitConditionBranchNode,
+  ExitConditionBranchNodeSchema,
+  ExitForeachNode,
+  ExitIfNode,
+  ExitRetryNode,
+  EnterContinueNode,
+  ExitContinueNode,
+  WaitGraphNodeSchema,
+  WaitGraphNode,
+  HttpGraphNode,
+  HttpGraphNodeSchema,
+  EnterTryBlockNode,
+  ExitTryBlockNode,
+  EnterNormalPathNode,
+  ExitNormalPathNode,
+  EnterFallbackPathNode,
+  ExitFallbackPathNode,
+} from './execution';

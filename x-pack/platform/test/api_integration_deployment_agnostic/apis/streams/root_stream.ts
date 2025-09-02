@@ -6,21 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
-import { get } from 'lodash';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { Streams } from '@kbn/streams-schema';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
   ingest: {
     lifecycle: { dsl: {} },
-    processing: [],
+    processing: {
+      steps: [],
+    },
     wired: {
       routing: [],
       fields: {
@@ -85,7 +84,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  describe('Root stream', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/231900
+  describe.skip('Root stream', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -103,25 +103,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
-            processing: [
-              {
-                grok: {
-                  field: 'body.text',
+            processing: {
+              steps: [
+                {
+                  action: 'grok' as const,
+                  from: 'body.text',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
-                  if: { always: {} },
+                  where: { always: {} },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property('message', 'Desired stream state is invalid');
-
-      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
-        'Root stream processing rules cannot be changed'
+      expect(response).to.have.property(
+        'message',
+        'Desired stream state is invalid: Root stream processing rules cannot be changed'
       );
     });
 
@@ -147,10 +147,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
       const response = await putStream(apiClient, 'logs', body, 400);
 
-      expect(response).to.have.property('message', 'Desired stream state is invalid');
-
-      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
-        'Root stream fields cannot be changed'
+      expect(response).to.have.property(
+        'message',
+        'Desired stream state is invalid: Root stream fields cannot be changed'
       );
     });
 
@@ -167,11 +166,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               routing: [
                 {
                   destination: 'logs.gcpcloud',
-                  if: {
+                  where: {
                     field: 'cloud.provider',
-                    operator: 'eq',
-                    value: 'gcp',
+                    eq: 'gcp',
                   },
+                  status: 'enabled',
                 },
               ],
             },

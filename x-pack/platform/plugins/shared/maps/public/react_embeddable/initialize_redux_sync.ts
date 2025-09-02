@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { BehaviorSubject, debounceTime, filter, map, merge, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { PaletteRegistry } from '@kbn/coloring';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
-import { MapStoreState } from '../reducers/store';
+import type { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getLayerList,
@@ -33,13 +34,13 @@ import {
 } from '../actions';
 import type { MapSerializedState } from './types';
 import { getCharts, getExecutionContextService } from '../kibana_services';
+import type { EventHandlers } from '../reducers/non_serializable_instances';
 import {
-  EventHandlers,
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
 } from '../reducers/non_serializable_instances';
-import { SavedMap } from '../routes';
+import type { SavedMap } from '../routes';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {

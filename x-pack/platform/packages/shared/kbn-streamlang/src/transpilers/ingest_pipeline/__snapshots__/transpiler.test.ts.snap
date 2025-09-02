@@ -1,0 +1,390 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`transpile (Streamlang DSL to ingest pipeline) should handle manual_ingest_pipeline with nested and top-level if 1`] = `
+Object {
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "foo",
+        "if": "ctx._source.active == true",
+        "ignore_failure": true,
+        "on_failure": Array [
+          Object {
+            "set": Object {
+              "field": "error",
+              "value": "failed",
+            },
+          },
+        ],
+        "tag": "custom-pipeline",
+        "value": "bar",
+      },
+    },
+    Object {
+      "rename": Object {
+        "field": "foo",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.status'] = ctx['attributes'];
+if (relevant_fields['attributes.status'] != null) {
+  if (relevant_fields['attributes.status'] instanceof Map) {
+    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
+  } else {
+    relevant_fields['attributes.status'] = null;
+  }
+}
+
+  
+  try {
+  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "ignore_failure": true,
+        "on_failure": Array [
+          Object {
+            "set": Object {
+              "field": "error",
+              "value": "failed",
+            },
+          },
+        ],
+        "tag": "custom-pipeline",
+        "target_field": "baz",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "baz",
+        "if": "ctx._source.env == 'prod'",
+        "ignore_failure": true,
+        "on_failure": Array [
+          Object {
+            "set": Object {
+              "field": "error",
+              "value": "failed",
+            },
+          },
+        ],
+        "tag": "custom-pipeline",
+        "value": "qux",
+      },
+    },
+  ],
+}
+`;
+
+exports[`transpile (Streamlang DSL to ingest pipeline) should handle not conditions 1`] = `
+Object {
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "attributes.not_flag",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.status'] = ctx['attributes'];
+if (relevant_fields['attributes.status'] != null) {
+  if (relevant_fields['attributes.status'] instanceof Map) {
+    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
+  } else {
+    relevant_fields['attributes.status'] = null;
+  }
+}
+
+  
+  try {
+  if (!((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\")))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "not-active",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.not_nested",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.a'] = ctx['attributes'];
+if (relevant_fields['attributes.a'] != null) {
+  if (relevant_fields['attributes.a'] instanceof Map) {
+    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
+  } else {
+    relevant_fields['attributes.a'] = null;
+  }
+}
+
+relevant_fields['attributes.b'] = ctx['attributes'];
+if (relevant_fields['attributes.b'] != null) {
+  if (relevant_fields['attributes.b'] instanceof Map) {
+    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
+  } else {
+    relevant_fields['attributes.b'] = null;
+  }
+}
+
+  
+  try {
+  if (!(((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "not-a-or-b",
+      },
+    },
+  ],
+}
+`;
+
+exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variety of processor steps and where blocks 1`] = `
+Object {
+  "processors": Array [
+    Object {
+      "rename": Object {
+        "field": "attributes.old_name",
+        "target_field": "attributes.new_name",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.status",
+        "value": "active",
+      },
+    },
+    Object {
+      "grok": Object {
+        "ecs_compatibility": "v1",
+        "field": "body.message",
+        "patterns": Array [
+          "%{IP:attributes.client_ip} - %{WORD:attributes.method}",
+        ],
+      },
+    },
+    Object {
+      "date": Object {
+        "field": "attributes.timestamp",
+        "formats": Array [
+          "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+          "yyyy-MM-dd HH:mm:ss",
+        ],
+        "output_format": "yyyy-MM-dd",
+        "target_field": "attributes.parsed_time",
+      },
+    },
+    Object {
+      "dissect": Object {
+        "field": "body.log",
+        "pattern": "%{attributes.client} %{attributes.method} %{attributes.path}",
+      },
+    },
+    Object {
+      "append": Object {
+        "field": "attributes.tags",
+        "value": Array [
+          "new_tag",
+        ],
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.flag",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.status'] = ctx['attributes'];
+if (relevant_fields['attributes.status'] != null) {
+  if (relevant_fields['attributes.status'] instanceof Map) {
+    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
+  } else {
+    relevant_fields['attributes.status'] = null;
+  }
+}
+
+  
+  try {
+  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "yes",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.prod_flag",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.env'] = ctx['attributes'];
+if (relevant_fields['attributes.env'] != null) {
+  if (relevant_fields['attributes.env'] instanceof Map) {
+    relevant_fields['attributes.env'] = relevant_fields['attributes.env']['env'];
+  } else {
+    relevant_fields['attributes.env'] = null;
+  }
+}
+
+  
+  try {
+  if ((relevant_fields['attributes.env'] !== null && ((relevant_fields['attributes.env'] instanceof Number && relevant_fields['attributes.env'].toString() == \\"prod\\") || relevant_fields['attributes.env'] == \\"prod\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "prod-env",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.prod_flag",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.a'] = ctx['attributes'];
+if (relevant_fields['attributes.a'] != null) {
+  if (relevant_fields['attributes.a'] instanceof Map) {
+    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
+  } else {
+    relevant_fields['attributes.a'] = null;
+  }
+}
+
+relevant_fields['attributes.b'] = ctx['attributes'];
+if (relevant_fields['attributes.b'] != null) {
+  if (relevant_fields['attributes.b'] instanceof Map) {
+    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
+  } else {
+    relevant_fields['attributes.b'] = null;
+  }
+}
+
+  
+  try {
+  if ((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "prod-env",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.department_flag",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.a'] = ctx['attributes'];
+if (relevant_fields['attributes.a'] != null) {
+  if (relevant_fields['attributes.a'] instanceof Map) {
+    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
+  } else {
+    relevant_fields['attributes.a'] = null;
+  }
+}
+
+relevant_fields['attributes.b'] = ctx['attributes'];
+if (relevant_fields['attributes.b'] != null) {
+  if (relevant_fields['attributes.b'] instanceof Map) {
+    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
+  } else {
+    relevant_fields['attributes.b'] = null;
+  }
+}
+
+relevant_fields['attributes.department'] = ctx['attributes'];
+if (relevant_fields['attributes.department'] != null) {
+  if (relevant_fields['attributes.department'] instanceof Map) {
+    relevant_fields['attributes.department'] = relevant_fields['attributes.department']['department'];
+  } else {
+    relevant_fields['attributes.department'] = null;
+  }
+}
+
+  
+  try {
+  if (((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))) && (relevant_fields['attributes.department'] !== null && ((relevant_fields['attributes.department'] instanceof Number && relevant_fields['attributes.department'].toString() == \\"legal\\") || relevant_fields['attributes.department'] == \\"legal\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "legal-department",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.test",
+        "if": "
+  def relevant_fields = [:];
+  
+relevant_fields['attributes.status'] = ctx['attributes'];
+if (relevant_fields['attributes.status'] != null) {
+  if (relevant_fields['attributes.status'] instanceof Map) {
+    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
+  } else {
+    relevant_fields['attributes.status'] = null;
+  }
+}
+
+relevant_fields['attributes.read_only'] = ctx['attributes'];
+if (relevant_fields['attributes.read_only'] != null) {
+  if (relevant_fields['attributes.read_only'] instanceof Map) {
+    relevant_fields['attributes.read_only'] = relevant_fields['attributes.read_only']['read_only'];
+  } else {
+    relevant_fields['attributes.read_only'] = null;
+  }
+}
+
+  
+  try {
+  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\")) || ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"inactive\\") || relevant_fields['attributes.status'] == \\"inactive\\")) && (relevant_fields['attributes.read_only'] !== null && ((relevant_fields['attributes.read_only'] instanceof Number && relevant_fields['attributes.read_only'].toString() == \\"false\\") || relevant_fields['attributes.read_only'] == \\"false\\")))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "yes",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.my_field",
+        "ignore_failure": undefined,
+        "on_failure": undefined,
+        "tag": undefined,
+        "value": "my_value",
+      },
+    },
+  ],
+}
+`;

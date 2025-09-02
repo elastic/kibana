@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiText } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { ArgTypes, Args, Decorator } from '@storybook/react';
 import { produce } from 'immer';
+import React from 'react';
 import { mockUnifiedDocViewerServices } from '../public/__mocks__';
 import { setUnifiedDocViewerServices } from '../public/plugin';
 
@@ -54,7 +56,7 @@ export const argTypes: ArgTypes = {
 };
 
 export const decorators: Decorator[] = [
-  (Story, { args: storyArgs }) => {
+  (Story, { args: storyArgs, parameters }) => {
     // Override items provided by the mock unified doc view services.
     const unifiedDocViewerServices = produce(mockUnifiedDocViewerServices, (draft) => {
       // Mock locator return so the locator service returns as expected.
@@ -66,6 +68,18 @@ export const decorators: Decorator[] = [
       draft.core.application.capabilities.apm = {
         show: storyArgs.hasApmShowCapability as boolean,
       };
+
+      draft.fieldsMetadata.useFieldsMetadata = jest.fn().mockReturnValue({
+        fieldsMetadata: {
+          'service.name': {
+            description:
+              'Name of the service data is collected from.\nThe name of the service is normally user given. This allows for distributed services that run on multiple hosts to correlate the related instances based on the name.\nIn the case of Elasticsearch the `service.name` could contain the cluster name. For Beats the `service.name` is by default a copy of the `service.type` field if no name is specified.',
+            flat_name: 'service.name',
+
+            short: 'Name of the service.',
+          },
+        },
+      });
 
       // Mock for latency distribution chart
       draft.core.http.post = jest.fn().mockImplementation((url, options) => {
@@ -92,6 +106,15 @@ export const decorators: Decorator[] = [
     // The document the doc viewer gets is a `DataTableRecord`, while our fixtures use a "raw" hit object.
     // `buildDataTableRecord` adds the `flattened` fields.
     const hit = buildDataTableRecord(storyArgs.hit as EsHitRecord);
-    return Story({ args: { ...storyArgs, hit } });
+    return (
+      <>
+        <Story args={{ ...storyArgs, hit }} />
+        {parameters?.docs?.description?.story && (
+          <EuiText css={{ width: '33em', float: 'right' }} size="xs" color="subdued">
+            <p>{parameters.docs.description.story}</p>
+          </EuiText>
+        )}
+      </>
+    );
   },
 ];

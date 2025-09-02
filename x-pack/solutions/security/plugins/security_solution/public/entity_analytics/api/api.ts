@@ -67,8 +67,10 @@ import {
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
-import type { ListEntitiesResponse } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
-import { type ListEntitiesRequestQuery } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import {
+  type ListEntitiesRequestQuery,
+  type ListEntitiesResponse,
+} from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;

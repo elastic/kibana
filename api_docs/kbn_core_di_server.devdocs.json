@@ -1,0 +1,511 @@
+{
+  "id": "@kbn/core-di-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.CoreSetup",
+        "type": "Function",
+        "tags": [],
+        "label": "CoreSetup",
+        "description": [
+          "\nThe service identifier of {@link CoreSetupContext}."
+        ],
+        "signature": [
+          "<K extends keyof ",
+          "CoreSetup",
+          "<{}, unknown>>(key: K) => ",
+          "ServiceIdentifier",
+          "<",
+          "CoreSetup",
+          "<{}, unknown>[K]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.CoreSetup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The service key in the context."
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.CoreStart",
+        "type": "Function",
+        "tags": [],
+        "label": "CoreStart",
+        "description": [
+          "\nThe service identifier of {@link CoreStartContext}."
+        ],
+        "signature": [
+          "<K extends keyof ",
+          "CoreStart",
+          ">(key: K) => ",
+          "ServiceIdentifier",
+          "<",
+          "CoreStart",
+          "[K]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.CoreStart.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The service key in the context."
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.PluginInitializer",
+        "type": "Function",
+        "tags": [],
+        "label": "PluginInitializer",
+        "description": [
+          "\nThe service identifier of {@link PluginInitializerContext}."
+        ],
+        "signature": [
+          "<K extends keyof ",
+          "PluginInitializerContext",
+          "<unknown>>(key: K) => ",
+          "ServiceIdentifier",
+          "<",
+          "PluginInitializerContext",
+          "<unknown>[K]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.PluginInitializer.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The service key in the context."
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.RouteDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteDefinition",
+        "description": [
+          "\nThe route definition."
+        ],
+        "signature": [
+          "RouteDefinition",
+          "<P, Q, B, Method> extends ",
+          "RouteConfig",
+          "<P, Q, B, Method>,",
+          "Newable",
+          "<",
+          "RouteHandler",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/http.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.RouteDefinition.method",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "method",
+            "description": [
+              "\nThe HTTP method of the route."
+            ],
+            "signature": [
+              "Method"
+            ],
+            "path": "src/core/packages/di/server/src/services/http.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.RouteDefinition.handleLegacyErrors",
+            "type": "CompoundType",
+            "tags": [
+              "see"
+            ],
+            "label": "handleLegacyErrors",
+            "description": [
+              "\nCatch and convert legacy boom errors to proper custom errors."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/di/server/src/services/http.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.RouteHandler",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteHandler",
+        "description": [
+          "\nThe route handler."
+        ],
+        "path": "src/core/packages/di/server/src/services/http.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.RouteHandler.handle",
+            "type": "Function",
+            "tags": [],
+            "label": "handle",
+            "description": [
+              "\nThe handler function that will be called when the route is matched.\nThe request and response objects can be injected using {@link Request} and {@link Response}."
+            ],
+            "signature": [
+              "() => ",
+              "IKibanaResponse",
+              "<any> | Promise<",
+              "IKibanaResponse",
+              "<any>>"
+            ],
+            "path": "src/core/packages/di/server/src/services/http.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.CapabilitiesProvider",
+        "type": "CompoundType",
+        "tags": [
+          "see"
+        ],
+        "label": "CapabilitiesProvider",
+        "description": [
+          "\nService identifier to register a capabilities provider."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "CapabilitiesProvider",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "CapabilitiesProvider",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.ISavedObjectsClientFactory",
+        "type": "Type",
+        "tags": [
+          "see"
+        ],
+        "label": "ISavedObjectsClientFactory",
+        "description": [
+          "\nFactory type for creating parameterized Saved Objects client instances."
+        ],
+        "signature": [
+          "(args_0?: ",
+          "SavedObjectsClientProviderOptions",
+          " | undefined) => ",
+          "SavedObjectsClientContract"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-server",
+            "id": "def-server.ISavedObjectsClientFactory.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "TArgs"
+            ],
+            "path": "node_modules/@inversifyjs/core/lib/cjs/binding/models/Factory.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.Request",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Request",
+        "description": [
+          "\nThe service identifier of the current request."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>, any[]> | ",
+          "AbstractNewable",
+          "<",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>, any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/http.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.Response",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Response",
+        "description": [
+          "\nThe service identifier of the current response factory."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "KibanaResponseFactory",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "KibanaResponseFactory",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/http.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.Route",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Route",
+        "description": [
+          "\nThe service identifier that is used to register an HTTP route."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "ServiceIdentifier",
+          "<",
+          "RouteHandler",
+          "> & ",
+          "RouteDefinition",
+          "<unknown, unknown, unknown, \"get\" | ",
+          "DestructiveRouteMethod",
+          ">, any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ServiceIdentifier",
+          "<",
+          "RouteHandler",
+          "> & ",
+          "RouteDefinition",
+          "<unknown, unknown, unknown, \"get\" | ",
+          "DestructiveRouteMethod",
+          ">, any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/http.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.Router",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Router",
+        "description": [
+          "\nThe service identifier of the plugin-scoped router."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "IRouter",
+          "<any>, any[]> | ",
+          "AbstractNewable",
+          "<",
+          "IRouter",
+          "<any>, any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/http.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.SavedObjectsClient",
+        "type": "CompoundType",
+        "tags": [
+          "see"
+        ],
+        "label": "SavedObjectsClient",
+        "description": [
+          "\nThe Saved Objects client instance in the current HTTP request context."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "SavedObjectsClientContract",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "SavedObjectsClientContract",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.SavedObjectsClientFactory",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "SavedObjectsClientFactory",
+        "description": [
+          "\nThe Saved Objects client factory that constructs a client instance the current HTTP request context."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "ISavedObjectsClientFactory",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ISavedObjectsClientFactory",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-server",
+        "id": "def-server.SavedObjectsTypeRegistry",
+        "type": "CompoundType",
+        "tags": [
+          "see"
+        ],
+        "label": "SavedObjectsTypeRegistry",
+        "description": [
+          "\nThe Saved Objects type registry."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "ISavedObjectTypeRegistry",
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ISavedObjectTypeRegistry",
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

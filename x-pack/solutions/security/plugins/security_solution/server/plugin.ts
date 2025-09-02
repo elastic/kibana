@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -15,7 +15,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
@@ -29,7 +29,6 @@ import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_str
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
-import { siemGuideId, getSiemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -109,7 +108,7 @@ import type {
 } from './plugin_contract';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { artifactService } from './lib/telemetry/artifact';
+import { type CdnConfig, artifactService } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
@@ -118,6 +117,7 @@ import {
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
 
+import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/tasks';
@@ -139,7 +139,8 @@ import {
   CASE_ATTACHMENT_TYPE_ID,
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/threat_intelligence/constants';
-import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
+import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
+import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -156,6 +157,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
+
+  private readonly healthDiagnosticService: HealthDiagnosticService;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -210,6 +213,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.logger.debug('plugin initialized');
+
+    this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
   public setup(
@@ -228,7 +233,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
-    productFeaturesService.init(plugins.features);
+    productFeaturesService.setup(core, plugins);
 
     events.forEach((eventConfig) => {
       core.analytics.registerEventType(eventConfig);
@@ -286,7 +291,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       getStartServices: core.getStartServices,
       taskManager: plugins.taskManager,
       logger: this.logger,
-      auditLogger: plugins.security?.audit.withoutRequest,
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
@@ -306,7 +310,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       productFeaturesService,
     });
 
-    productFeaturesService.registerApiAccessControl(core.http);
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -542,11 +545,6 @@ export class Plugin implements ISecuritySolutionPlugin {
           id: CASE_ATTACHMENT_TYPE_ID,
         });
 
-        /**
-         * Register a config for the security guide
-         */
-        plugins.guidedOnboarding?.registerGuideConfig(siemGuideId, getSiemGuideConfig());
-
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
@@ -585,6 +583,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       isFeatureEnabled: config.experimentalFeatures.defendInsights,
       endpointContext: this.endpointContext.service,
     });
+
+    if (plugins.taskManager) {
+      this.healthDiagnosticService.setup({
+        taskManager: plugins.taskManager,
+      });
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not registered.');
+    }
 
     return {
       setProductFeaturesConfigurator:
@@ -631,6 +637,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      defendInsightsPolicyResponseFailure:
+        config.experimentalFeatures.defendInsightsPolicyResponseFailure,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
@@ -747,7 +755,17 @@ export class Plugin implements ISecuritySolutionPlugin {
       )
       .catch(() => {});
 
-    artifactService.start(this.telemetryReceiver).catch(() => {});
+    if (this.config.cdn?.url && this.config.cdn?.publicKey) {
+      const cdnConfig: CdnConfig = {
+        url: this.config.cdn.url,
+        pubKey: this.config.cdn.publicKey,
+      };
+      this.logger.info('Starting artifact service with custom CDN config');
+      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
+    } else {
+      this.logger.info('Starting artifact service with default CDN config');
+      artifactService.start(this.telemetryReceiver).catch(() => {});
+    }
 
     this.asyncTelemetryEventsSender.start(plugins.telemetry);
 
@@ -806,6 +824,23 @@ export class Plugin implements ISecuritySolutionPlugin {
           return packagePolicy;
         }
       );
+    }
+
+    if (plugins.taskManager) {
+      const serviceStart = {
+        taskManager: plugins.taskManager,
+        esClient: core.elasticsearch.client.asInternalUser,
+        analytics: core.analytics,
+        receiver: this.telemetryReceiver,
+      };
+
+      this.healthDiagnosticService.start(serviceStart).catch((e) => {
+        this.logger.warn('Error starting health diagnostic task', {
+          error: e.message,
+        } as LogMeta);
+      });
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
     return {};

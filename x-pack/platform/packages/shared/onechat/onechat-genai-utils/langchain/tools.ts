@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { StructuredTool, tool as toTool } from '@langchain/core/tools';
-import { Logger } from '@kbn/logging';
+import type { StructuredTool } from '@langchain/core/tools';
+import { tool as toTool } from '@langchain/core/tools';
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
+import type { ToolProvider, ExecutableTool, RunToolReturn } from '@kbn/onechat-server';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -52,7 +54,7 @@ export const toolsToLangchain = async ({
 };
 
 export const sanitizeToolId = (toolId: string): string => {
-  return toolId.replace(/[^a-zA-Z0-9_-]/g, '');
+  return toolId.replace('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
 };
 
 /**
@@ -87,21 +89,34 @@ export const toolToLangchain = ({
   logger: Logger;
 }): StructuredTool => {
   return toTool(
-    async (input) => {
+    async (input): Promise<[string, RunToolReturn]> => {
       try {
+        logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
         const toolReturn = await tool.execute({ toolParams: input });
-        const { result } = toolReturn;
-        const content = typeof result === 'string' ? result : JSON.stringify(result);
+        const content = JSON.stringify({ results: toolReturn.results }); // wrap in a results object to conform to bedrock format
+        logger.debug(`Tool ${tool.id} returned reply of length ${content.length}`);
         return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e}`);
-        return [`${e}`, { result: { success: false, error: `${e}` } }];
+
+        const errorToolReturn: RunToolReturn = {
+          runId: tool.id,
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: e.message },
+            },
+          ],
+        };
+
+        return [`${e}`, errorToolReturn];
       }
     },
     {
       name: toolId ?? tool.id,
       schema: tool.schema,
       description: tool.description,
+      verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',
       metadata: {
         toolId: tool.id,

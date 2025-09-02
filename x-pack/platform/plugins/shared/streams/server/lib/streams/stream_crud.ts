@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterComponentTemplate,
   IndicesDataStream,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
@@ -21,7 +21,7 @@ interface BaseParams {
 
 export function getDataStreamLifecycle(
   dataStream: IndicesDataStream | null
-): UnwiredIngestStreamEffectiveLifecycle {
+): ClassicIngestStreamEffectiveLifecycle {
   if (!dataStream) {
     return { error: { message: 'Data stream not found' } };
   }
@@ -68,7 +68,7 @@ export async function getUnmanagedElasticsearchAssets({
     name: templateName,
   });
   if (template.index_templates.length) {
-    template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
+    template.index_templates[0].index_template.composed_of?.forEach((componentTemplateName) => {
       componentTemplates.push(componentTemplateName);
     });
   }
@@ -142,7 +142,7 @@ async function fetchComponentTemplates(
     .map((componentTemplate) => ({
       ...componentTemplate,
       used_by: allIndexTemplates
-        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
+        .filter((template) => template.index_template.composed_of?.includes(componentTemplate.name))
         .map((template) => template.name),
     }));
 }

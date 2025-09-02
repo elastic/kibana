@@ -8,12 +8,10 @@
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolRegistry } from './tool_registry';
+import type { ToolRegistry } from './tool_registry';
 
 export interface ToolsServiceSetup {
-  register<RunInput extends ZodObject<any>, RunOutput = unknown>(
-    tool: BuiltinToolDefinition<RunInput, RunOutput>
-  ): void;
+  register<RunInput extends ZodObject<any>>(tool: BuiltinToolDefinition<RunInput>): void;
 }
 
 export interface ToolsServiceStart {

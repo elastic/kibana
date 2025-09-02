@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { CoreStart } from '@kbn/core/public';
 
 export interface TabItem {

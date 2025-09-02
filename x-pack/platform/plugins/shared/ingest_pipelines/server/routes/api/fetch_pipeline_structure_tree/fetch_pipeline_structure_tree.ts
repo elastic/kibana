@@ -7,8 +7,8 @@
 
 import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
 import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
-import { estypes } from '@elastic/elasticsearch';
-import { Processor } from '../../../../common/types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Processor } from '../../../../common/types';
 
 /**
  * This function fetches a Pipeline Structure Tree of type {@link PipelineTreeNode}
@@ -31,10 +31,15 @@ export const fetchPipelineStructureTree = (
   rootPipelineId: string,
   level: number = 1,
   createdNodes: Record<string, PipelineTreeNode> = {}
-): PipelineTreeNode | undefined => {
+): PipelineTreeNode => {
   const rootPipeline = allPipelines[rootPipelineId];
   if (!rootPipeline) {
-    return;
+    return {
+      pipelineName: rootPipelineId,
+      isManaged: false,
+      isDeprecated: false,
+      children: [],
+    };
   }
 
   const pipelineNode: PipelineTreeNode = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReportDocumentHead, ReportSource } from '@kbn/reporting-common/types';
+import type { ReportDocumentHead, ReportSource } from '@kbn/reporting-common/types';
 import { Report } from '.';
 
 /*

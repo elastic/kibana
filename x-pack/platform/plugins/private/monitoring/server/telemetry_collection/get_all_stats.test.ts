@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import sinon from 'sinon';
 import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
-import { ESClusterStats } from './get_es_stats';
-import { KibanaStats } from './get_kibana_stats';
-import { LogstashStatsByClusterUuid } from './logstash_monitoring';
-import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ESClusterStats } from './get_es_stats';
+import type { KibanaStats } from './get_kibana_stats';
+import type { LogstashStatsByClusterUuid } from './logstash_monitoring';
+import type { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('get_all_stats', () => {
   const timestamp = Date.now();

@@ -8,7 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -118,7 +118,9 @@
     "@kbn/core-saved-objects-server",
     "@kbn/cases-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/licensing-types",
+    "@kbn/apm-types",
   ],
   "exclude": ["target/**/*"]
 }

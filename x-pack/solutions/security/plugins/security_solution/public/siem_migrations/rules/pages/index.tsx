@@ -25,8 +25,7 @@ import { SecurityPageName } from '../../../app/types';
 import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
-import { HeaderButtons } from '../components/header_buttons';
-import { UnknownMigration } from '../components/unknown_migration';
+import { HeaderButtons, UnknownMigration } from '../../common/components';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { RuleMigrationDataInputWrapper } from '../components/data_input_flyout/data_input_wrapper';
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
@@ -146,7 +145,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
           border
         >
           <HeaderButtons
-            ruleMigrationsStats={ruleMigrationsStats}
+            migrationsStats={ruleMigrationsStats}
             selectedMigrationId={migrationId}
             onMigrationIdChange={onMigrationIdChange}
           />

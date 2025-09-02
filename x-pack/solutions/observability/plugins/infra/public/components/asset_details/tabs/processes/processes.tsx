@@ -46,7 +46,7 @@ export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { entity } = useAssetDetailsRenderPropsContext();
+  const { entity, schema } = useAssetDetailsRenderPropsContext();
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
@@ -91,12 +91,13 @@ export const Processes = () => {
           to: toTimestamp,
           sortBy: parsedSortBy,
           searchFilter,
+          schema,
         }),
       });
 
       return decodeOrThrow(ProcessListAPIResponseRT)(response);
     },
-    [hostTerm, parsedSortBy, searchFilter, sourceId, toTimestamp],
+    [hostTerm, parsedSortBy, searchFilter, sourceId, toTimestamp, schema],
     {
       requestObservable$: request$,
       autoFetch: isActiveTab('processes'),
@@ -132,15 +133,19 @@ export const Processes = () => {
 
   const isLoading = isPending(status);
 
+  const hideSummaryTable = schema === 'semconv';
+
   return (
     <ProcessListContextProvider hostTerm={hostTerm} to={toTimestamp}>
       <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
-        <EuiFlexItem grow={false}>
-          <SummaryTable
-            isLoading={isLoading}
-            processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
-          />
-        </EuiFlexItem>
+        {!hideSummaryTable && (
+          <EuiFlexItem grow={false}>
+            <SummaryTable
+              isLoading={isLoading}
+              processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -180,16 +185,20 @@ export const Processes = () => {
                 defaultMessage: 'Search for processes…',
               }),
             }}
-            filters={[
-              {
-                type: 'field_value_selection',
-                field: 'state',
-                name: 'State',
-                operator: 'exact',
-                multiSelect: false,
-                options,
-              },
-            ]}
+            filters={
+              schema === 'semconv'
+                ? []
+                : [
+                    {
+                      type: 'field_value_selection',
+                      field: 'state',
+                      name: 'State',
+                      operator: 'exact',
+                      multiSelect: false,
+                      options,
+                    },
+                  ]
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -202,6 +211,7 @@ export const Processes = () => {
               error={searchQueryError?.message}
               setSortBy={setSortBy}
               clearSearchBar={clearSearchBar}
+              schema={schema}
             />
           ) : (
             <EuiEmptyPrompt

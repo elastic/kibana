@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './observed_details';
-export * from './common';
+export type * from './observed_details';
+export type * from './common';
 
 export { ServicesQueries } from '../../../api/search_strategy';

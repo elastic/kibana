@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
@@ -15,7 +16,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
-  EuiSelectOption,
 } from '@elastic/eui';
 import {
   MIN_ALERT_DELETE_THRESHOLD_DAYS,

@@ -56,7 +56,7 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", context: Record<string, any>) => Promise<void>"
+            ", context: Record<string, any>) => Promise<ExecuteWorkflowResponse>"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
           "deprecated": false,
@@ -150,7 +150,7 @@
         "label": "WORKFLOWS_EXECUTION_LOGS_INDEX",
         "description": [],
         "signature": [
-          "\".workflows-execution-logs\""
+          "\".kibana-workflow-execution-logs\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
         "deprecated": false,
@@ -165,22 +165,7 @@
         "label": "WORKFLOWS_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".workflow-executions\""
-        ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workflowsExecutionEngine",
-        "id": "def-common.WORKFLOWS_INDEX",
-        "type": "string",
-        "tags": [],
-        "label": "WORKFLOWS_INDEX",
-        "description": [],
-        "signature": [
-          "\".workflows\""
+          "\".kibana-workflow-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
         "deprecated": false,
@@ -195,7 +180,7 @@
         "label": "WORKFLOWS_STEP_EXECUTIONS_INDEX",
         "description": [],
         "signature": [
-          "\".workflow-step-executions\""
+          "\".kibana-workflow-step-executions\""
         ],
         "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
         "deprecated": false,

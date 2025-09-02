@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, ROUTE_VERSIONS, PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 
-import {
-  APIRoutes,
+import type {
   DefineRoutesOptions,
   PlaygroundListResponse,
   PlaygroundResponse,
   PlaygroundSavedObject,
 } from '../types';
+import { APIRoutes } from '../types';
 import { errorHandler } from '../utils/error_handler';
 import { parsePlaygroundSO, parsePlaygroundSOList, validatePlayground } from '../utils/playgrounds';
 import { playgroundAttributesSchema } from '../playground_saved_object/schema/v1/v1';
@@ -239,7 +239,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
           return response.badRequest({
             body: {
               message: i18n.translate('xpack.searchPlayground.savedPlaygrounds.validationError', {
-                defaultMessage: 'Invalid playground request',
+                defaultMessage: 'Invalid RAG playground request',
               }),
               attributes: {
                 errors: validationErrors,

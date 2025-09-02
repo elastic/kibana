@@ -85,18 +85,25 @@ export class ConsolePageObject extends FtrService {
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.getTextArea();
     await textArea.type(letter);
-    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
+    await this.retry.waitFor(
+      'autocomplete to be visible',
+      async () => await this.isAutocompleteVisible()
+    );
   }
 
   public async isAutocompleteVisible() {
     const element = await this.find.byClassName('suggest-widget').catch(() => null);
     if (!element) return false;
 
-    const attribute = await element.getAttribute('style');
-    return !attribute?.includes('display: none;');
+    return await element.isDisplayed();
   }
 
   public async getAutocompleteSuggestion(index: number) {
+    await this.retry.waitFor(
+      'verify suggestions widget is displayed',
+      async () => await this.isAutocompleteVisible()
+    );
+
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const suggestion = suggestions[index];
@@ -346,16 +353,9 @@ export class ConsolePageObject extends FtrService {
     return await this.isConsoleTabOpen('consoleHistoryPanel');
   }
 
-  public async openSettings() {
-    await this.testSubjects.click('consoleConfigButton');
-  }
-
-  public async toggleA11yOverlaySetting() {
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableA11yOverlay');
-      await toggle.click();
-    });
+  public async toggleA11yOverlaySetting(enabled: boolean) {
+    await this.testSubjects.waitForEnabled('enableA11yOverlay');
+    await this.testSubjects.setEuiSwitch('enableA11yOverlay', enabled ? 'check' : 'uncheck');
   }
 
   public async addNewVariable({ name, value }: { name: string; value: string }) {
@@ -421,13 +421,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async toggleKeyboardShortcuts(enabled: boolean) {
-    await this.openSettings();
+    await this.testSubjects.waitForEnabled('enableKeyboardShortcuts');
+    await this.testSubjects.setEuiSwitch('enableKeyboardShortcuts', enabled ? 'check' : 'uncheck');
+  }
 
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
-      await toggle.click();
-    });
+  public async setKeyboardShortcutsEnabled(enabled: boolean) {
+    await this.openConfig();
+    await this.toggleKeyboardShortcuts(enabled);
+    // The sleep is necessary to allow the switch state to be propagated
+    await this.common.sleep(500);
+    await this.openConsole();
   }
 
   public async hasSuccessBadge() {

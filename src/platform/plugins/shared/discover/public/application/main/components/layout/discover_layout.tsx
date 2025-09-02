@@ -66,7 +66,7 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { TABS_ENABLED } from '../../../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
@@ -89,6 +89,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
+    core,
     dataViews,
     data,
     uiSettings,
@@ -112,6 +113,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -402,7 +404,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
           }
         `,
       ]}

@@ -1288,11 +1288,13 @@
   "workflow": [
     "createdBy",
     "definition",
+    "deleted_at",
     "description",
+    "enabled",
     "lastUpdatedBy",
     "name",
-    "status",
     "tags",
+    "valid",
     "yaml"
   ],
   "workplace_search_telemetry": []

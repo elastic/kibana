@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createTaskManagementScheduledAtTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -16,11 +16,11 @@ export default function createTaskManagementScheduledAtTests({ getService }: Ftr
 
   describe('task management scheduled at', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/task_manager_tasks');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/task_manager_tasks');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_tasks');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/task_manager_tasks');
       await esArchiver.emptyKibanaIndex();
     });
 

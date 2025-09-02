@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorExecutor } from '../connector_executor';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { RunStepResult, StepBase, BaseStep } from './step_base';
+import type { ConnectorExecutor } from '../connector_executor';
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { RunStepResult, BaseStep } from './step_base';
+import { StepBase } from './step_base';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -22,81 +25,89 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     step: ConnectorStep,
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor,
-    templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
+    workflowState: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger
   ) {
-    super(step, contextManager, connectorExecutor, templatingEngineType);
+    super(step, contextManager, connectorExecutor, workflowState);
   }
 
-  public async _run(): Promise<RunStepResult> {
-    const step = this.step;
-
-    // this.contextManager.logInfo(`Starting connector step: ${step.type}`, {
-    //   event: { action: 'connector-step-start' },
-    //   tags: ['connector', step.type],
-    // });
-
-    // Evaluate optional 'if' condition
-    const shouldRun = await this.evaluateCondition(step.if);
-    if (!shouldRun) {
-      // this.contextManager.logInfo('Step skipped due to condition evaluation', {
-      //   event: { action: 'step-skipped', outcome: 'success' },
-      // });
-      return { output: undefined, error: undefined };
-    }
-
+  public getInput() {
     // Get current context for templating
     const context = this.contextManager.getContext();
-
     // Render inputs from 'with'
-    // this.contextManager.logDebug('Rendering step inputs');
-    const renderedInputs = Object.entries(step.with ?? {}).reduce(
-      (acc: Record<string, any>, [key, value]) => {
-        if (typeof value === 'string') {
-          acc[key] = this.templatingEngine.render(value, context);
-        } else {
-          acc[key] = value;
-        }
-        return acc;
-      },
-      {}
-    );
+    return Object.entries(this.step.with ?? {}).reduce((acc: Record<string, any>, [key, value]) => {
+      if (typeof value === 'string') {
+        acc[key] = this.templatingEngine.render(value, context);
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+  }
 
-    // Execute the connector
+  public async _run(withInputs?: any): Promise<RunStepResult> {
     try {
-      // this.contextManager.logInfo(`Executing connector: ${step.type}`, {
-      //   event: { action: 'connector-execution' },
-      //   tags: ['connector', 'execution'],
-      // });
+      const step = this.step;
+
+      // Parse step type and determine if it's a sub-action
+      const [stepType, subActionName] = step.type.includes('.')
+        ? step.type.split('.', 2)
+        : [step.type, null];
+      const isSubAction = subActionName !== null;
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
-        // this.contextManager.logDebug(`Console output: ${step.with?.message}`);
-        return { output: step.with?.message, error: undefined };
-      } else if (step.type === 'console.sleep') {
-        const sleepTime = step.with?.sleepTime ?? 1000;
-        // this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
-        await new Promise((resolve) => setTimeout(resolve, sleepTime));
-        return { output: step.with?.message, error: undefined };
+        this.workflowLogger.logInfo(`Log from step ${step.name}: \n${withInputs.message}`, {
+          workflow: { step_id: step.name },
+          event: { action: 'log', outcome: 'success' },
+          tags: ['console', 'log'],
+        });
+        // eslint-disable-next-line no-console
+        console.log(withInputs.message);
+        return {
+          input: withInputs,
+          output: withInputs.message,
+          error: undefined,
+        };
+      } else if (step.type === 'delay') {
+        const delayTime = step.with?.delay ?? 1000;
+        // this.contextManager.logDebug(`Delaying for ${delayTime}ms`);
+        await new Promise((resolve) => setTimeout(resolve, delayTime));
+        return {
+          input: withInputs,
+          output: `Delayed for ${delayTime}ms`,
+          error: undefined,
+        };
       }
 
+      // Build final rendered inputs
+      const renderedInputs = isSubAction
+        ? {
+            subActionParams: withInputs,
+            subAction: subActionName,
+          }
+        : withInputs;
+
       const output = await this.connectorExecutor.execute(
-        step.type, // e.g., 'slack.sendMessage'
+        stepType,
         step['connector-id']!,
-        renderedInputs
+        renderedInputs,
+        step.spaceId
       );
 
-      // this.contextManager.logInfo(`Connector execution completed successfully`, {
-      //   event: { action: 'connector-success', outcome: 'success' },
-      //   tags: ['connector', 'success'],
-      // });
+      const { data, status, message } = output;
 
-      return { output, error: undefined };
+      if (status === 'ok') {
+        return {
+          input: withInputs,
+          output: data,
+          error: undefined,
+        };
+      } else {
+        return await this.handleFailure(withInputs, message);
+      }
     } catch (error) {
-      // this.contextManager.logError(`Connector execution failed: ${step.type}`, error as Error, {
-      //   event: { action: 'connector-failed', outcome: 'failure' },
-      //   tags: ['connector', 'error'],
-      // });
-      return await this.handleFailure(error);
+      return await this.handleFailure(withInputs, error);
     }
   }
 }

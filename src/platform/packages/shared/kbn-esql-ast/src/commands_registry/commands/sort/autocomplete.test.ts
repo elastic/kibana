@@ -12,18 +12,23 @@ import {
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
+  suggest,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks, Location } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
 
 const expectedFieldSuggestions = getFieldNamesByType('any');
 const expectedFunctionSuggestions = getFunctionSignaturesByReturnType(Location.SORT, 'any', {
   scalar: true,
 });
-
-export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
-  ...expectedFieldSuggestions,
-  ...expectedFunctionSuggestions,
-];
+const expressionOperatorSuggestions = getFunctionSignaturesByReturnType(
+  Location.SORT,
+  'any',
+  {
+    operators: true,
+  },
+  ['keyword']
+);
 
 const sortExpectSuggestions = (
   query: string,
@@ -46,23 +51,23 @@ describe('SORT Autocomplete', () => {
     jest.clearAllMocks();
   });
 
-  describe('SORT <column> ...', () => {
+  // @TODO — test for replacement ranges when we support that.
+  // test for replacement range in NULLS FIRST/LAST in all possible positions
+  //  including after whitespace... test that replacement range gets added to all suggestions
+  //  and IS NULL/IS NOT NULL scenarios
+  //  and after a field name starting with an N
+  // test for comma replacement range after whitespace
+
+  describe('SORT <expression> ...', () => {
     test('suggests column', async () => {
-      await sortExpectSuggestions('from a | sort ', EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS);
+      await sortExpectSuggestions('from a | sort ', [
+        ...expectedFieldSuggestions,
+        ...expectedFunctionSuggestions,
+      ]);
       await sortExpectSuggestions('from a | sort keyw', [
         ...expectedFieldSuggestions,
         ...expectedFunctionSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort keywordField ', [
-        ', ',
-        '| ',
-        'ASC',
-        'DESC',
-        'NULLS FIRST',
-        'NULLS LAST',
-      ]);
-    });
-    it('suggests subsequent column after comma', async () => {
       await sortExpectSuggestions('from a | sort keywordField, ', [
         ...expectedFieldSuggestions,
         ...expectedFunctionSuggestions,
@@ -70,6 +75,17 @@ describe('SORT Autocomplete', () => {
       await sortExpectSuggestions('from a | sort keywordField, doubl', [
         ...expectedFieldSuggestions,
         ...expectedFunctionSuggestions,
+      ]);
+    });
+
+    it('suggests modifers after complete column name', async () => {
+      await sortExpectSuggestions('from a | sort keywordField', [
+        'keywordField, ',
+        'keywordField | ',
+        'keywordField ASC',
+        'keywordField DESC',
+        'keywordField NULLS FIRST',
+        'keywordField NULLS LAST',
       ]);
       await sortExpectSuggestions('from a | sort keywordField, doubleField', [
         'doubleField, ',
@@ -80,34 +96,71 @@ describe('SORT Autocomplete', () => {
         'doubleField NULLS LAST',
       ]);
     });
+
+    it('suggests modifers and expression operators after column + whitespace', async () => {
+      await sortExpectSuggestions('from a | sort keywordField ', [
+        ', ',
+        '| ',
+        'ASC',
+        'DESC',
+        'NULLS FIRST',
+        'NULLS LAST',
+        ...expressionOperatorSuggestions,
+      ]);
+
+      await sortExpectSuggestions('from a | sort doubleField ASC, keywordField ', [
+        ', ',
+        '| ',
+        'ASC',
+        'DESC',
+        'NULLS FIRST',
+        'NULLS LAST',
+        ...expressionOperatorSuggestions,
+      ]);
+    });
+
+    it('suggests within functions', async () => {
+      const suggestions = await suggest(
+        'FROM a | SORT TRIM(',
+        undefined,
+        'sort',
+        undefined,
+        autocomplete
+      );
+      expect(suggestions).not.toHaveLength(0);
+    });
   });
 
   describe('... [ ASC / DESC ] ...', () => {
     test('suggests all modifiers on first space', async () => {
-      await sortExpectSuggestions('from a | sort stringField ', [
+      await sortExpectSuggestions('from a | sort keywordField ', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
         ', ',
         '| ',
+        ...expressionOperatorSuggestions,
       ]);
     });
 
     test('when user starts to type ASC modifier', async () => {
-      await sortExpectSuggestions('from a | sort stringField A', [
+      await sortExpectSuggestions('from a | sort keywordField A', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort stringField ASC', [
+      await sortExpectSuggestions('from a | sort keywordField ASC', [
         'ASC NULLS FIRST',
         'ASC NULLS LAST',
         'ASC, ',
         'ASC | ',
       ]);
-      await sortExpectSuggestions('from a | sort stringField asc', [
+      await sortExpectSuggestions('from a | sort keywordField asc', [
         'asc NULLS FIRST',
         'asc NULLS LAST',
         'asc, ',
@@ -116,19 +169,22 @@ describe('SORT Autocomplete', () => {
     });
 
     test('when user starts to type DESC modifier', async () => {
-      await sortExpectSuggestions('from a | sort stringField D', [
+      await sortExpectSuggestions('from a | sort keywordField D', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort stringField DESC ', [
+      await sortExpectSuggestions('from a | sort keywordField DESC ', [
         'NULLS FIRST',
         'NULLS LAST',
         ', ',
         '| ',
       ]);
-      await sortExpectSuggestions('from a | sort stringField desc', [
+      await sortExpectSuggestions('from a | sort keywordField desc', [
         'desc NULLS FIRST',
         'desc NULLS LAST',
         'desc, ',
@@ -139,7 +195,7 @@ describe('SORT Autocomplete', () => {
 
   describe('... [ NULLS FIRST / NULLS LAST ]', () => {
     test('suggests nulls modifier after order modifier + space', async () => {
-      await sortExpectSuggestions('from a | sort stringField ASC ', [
+      await sortExpectSuggestions('from a | sort keywordField ASC ', [
         'NULLS FIRST',
         'NULLS LAST',
         ', ',
@@ -149,64 +205,88 @@ describe('SORT Autocomplete', () => {
 
     test('when user starts to type NULLS modifiers', async () => {
       // @TODO check for replacement range
-      await sortExpectSuggestions('from a | sort stringField N/', [
+      await sortExpectSuggestions('from a | sort keywordField N', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort stringField null/', [
+      await sortExpectSuggestions('from a | sort keywordField null', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort stringField nulls/', [
+      await sortExpectSuggestions('from a | sort keywordField nulls', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort stringField nulls /', [
+      await sortExpectSuggestions('from a | sort keywordField nulls ', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
     });
 
     test('when user types NULLS FIRST', async () => {
-      await sortExpectSuggestions('from a | sort stringField NULLS F', [
+      await sortExpectSuggestions('from a | sort keywordField NULLS F', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort stringField NULLS FI', [
+      await sortExpectSuggestions('from a | sort keywordField NULLS FI', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
     });
 
     test('when user types NULLS LAST', async () => {
-      await sortExpectSuggestions('from a | sort stringField NULLS L', [
+      await sortExpectSuggestions('from a | sort keywordField NULLS L', [
         'ASC',
         'DESC',
         'NULLS LAST',
         'NULLS FIRST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
-      await sortExpectSuggestions('from a | sort stringField NULLS LAS', [
+      await sortExpectSuggestions('from a | sort keywordField NULLS LAS', [
         'ASC',
         'DESC',
         'NULLS LAST',
         'NULLS FIRST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
     });
 
     test('after nulls are entered, suggests comma or pipe', async () => {
-      await sortExpectSuggestions('from a | sort stringField NULLS LAST /', [', ', '| ']);
+      await sortExpectSuggestions('from a | sort keywordField NULLS LAST ', [', ', '| ']);
     });
   });
 });

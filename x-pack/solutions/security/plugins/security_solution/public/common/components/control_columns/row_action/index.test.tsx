@@ -57,7 +57,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...original,
   };
 });
-jest.mock('../../guided_onboarding_tour/tour_step');
 
 jest.mock('../../user_privileges');
 

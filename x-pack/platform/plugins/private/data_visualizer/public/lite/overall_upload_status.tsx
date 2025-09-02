@@ -60,6 +60,15 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       status: generateStatus([uploadStatus.indexCreated, uploadStatus.pipelineCreated]),
     },
     {
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.indexSearchable', {
+        defaultMessage: 'Index searchable',
+      }),
+      children: <></>,
+      status: generateStatus([
+        uploadStatus.indexSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+      ]),
+    },
+    {
       title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadingFiles', {
         defaultMessage: 'Uploading files',
       }),
@@ -100,6 +109,15 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       }),
       children: <></>,
       status: uploadStatus.overallImportStatus === STATUS.COMPLETED ? 'complete' : 'incomplete',
+    },
+    {
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.allDocsSearchable', {
+        defaultMessage: 'All docs searchable',
+      }),
+      children: <></>,
+      status: generateStatus([
+        uploadStatus.allDocsSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+      ]),
     },
   ];
 

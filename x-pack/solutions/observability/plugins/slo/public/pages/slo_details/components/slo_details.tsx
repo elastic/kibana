@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
@@ -57,7 +57,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   }, [isAutoRefreshing]);
 
   if (selectedTabId === HISTORY_TAB_ID) {
-    return <SloDetailsHistory slo={slo} isAutoRefreshing={isAutoRefreshing} />;
+    return <SloDetailsHistory slo={slo} />;
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {

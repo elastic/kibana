@@ -7,29 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
+import { BinaryExpressionGroup } from '../ast/grouping';
+import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
 import { isBinaryExpression } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
-import {
+import type {
   CommandOptionVisitorContext,
-  CommandVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
   ListLiteralExpressionVisitorContext,
   MapExpressionVisitorContext,
-  Visitor,
 } from '../visitor';
+import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
-import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import { BasicPrettyPrinter } from './basic_pretty_printer';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
-
-/**
- * @todo
- *
- * 1. Implement list literal pretty printing.
- */
 
 interface Input {
   indent: string;
@@ -162,6 +157,8 @@ export class WrappingPrettyPrinter {
     const [left, right] = ctx.arguments();
     const groupLeft = binaryExpressionGroup(left);
     const groupRight = binaryExpressionGroup(right);
+    const doGroupLeft = groupLeft && groupLeft < group;
+    const doGroupRight = groupRight && groupRight < group;
     const continueVerticalFlattening = group && inp.flattenBinExpOfType === group;
     const suffix = inp.suffix ?? '';
     const oneArgumentPerLine =
@@ -203,11 +200,11 @@ export class WrappingPrettyPrinter {
     let leftFormatted = BasicPrettyPrinter.expression(left, this.opts);
     let rightFormatted = BasicPrettyPrinter.expression(right, this.opts);
 
-    if (groupLeft && groupLeft < group) {
+    if (doGroupLeft) {
       leftFormatted = `(${leftFormatted})`;
     }
 
-    if (groupRight && groupRight < group) {
+    if (doGroupRight) {
       rightFormatted = `(${rightFormatted})`;
     }
 
@@ -239,6 +236,14 @@ export class WrappingPrettyPrinter {
       };
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
+
+      if (doGroupLeft) {
+        leftOut.txt = `(${leftOut.txt})`;
+      }
+
+      if (doGroupRight) {
+        rightOut.txt = `(${rightOut.txt})`;
+      }
 
       txt = `${leftOut.txt}${operatorLeadingWhitespace}${operator}\n`;
 
@@ -480,6 +485,7 @@ export class WrappingPrettyPrinter {
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
       const txt = ctx.node.text ?? '<EXPRESSION>';
+      // TODO: decorate with comments
       return { txt };
     })
 
@@ -506,13 +512,6 @@ export class WrappingPrettyPrinter {
 
     .on('visitLiteralExpression', (ctx, inp: Input): Output => {
       const formatted = LeafPrinter.literal(ctx.node);
-      const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
-
-      return { txt, indented };
-    })
-
-    .on('visitTimeIntervalLiteralExpression', (ctx, inp: Input): Output => {
-      const formatted = LeafPrinter.timeInterval(ctx.node);
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
 
       return { txt, indented };
@@ -600,16 +599,35 @@ export class WrappingPrettyPrinter {
 
       switch (node.subtype) {
         case 'unary-expression': {
+          operator = this.keyword(operator);
+
           const separator = operator === '-' || operator === '+' ? '' : ' ';
-          txt = `${operator}${separator}${ctx.visitArgument(0, inp).txt}`;
+          const argument = ctx.arguments()[0];
+          const argumentFormatted = ctx.visitArgument(0, inp);
+
+          const operatorPrecedence = unaryExpressionGroup(ctx.node);
+          const argumentPrecedence = binaryExpressionGroup(argument);
+
+          if (
+            argumentPrecedence !== BinaryExpressionGroup.none &&
+            argumentPrecedence < operatorPrecedence
+          ) {
+            argumentFormatted.txt = `(${argumentFormatted.txt})`;
+          }
+
+          txt = `${operator}${separator}${argumentFormatted.txt}`;
           break;
         }
         case 'postfix-unary-expression': {
+          operator = this.keyword(operator);
+
           const suffix = inp.suffix ?? '';
           txt = `${ctx.visitArgument(0, { ...inp, suffix: '' }).txt} ${operator}${suffix}`;
           break;
         }
         case 'binary-expression': {
+          operator = this.keyword(operator);
+
           return this.printBinaryOperatorExpression(ctx, operator, inp);
         }
         default: {
@@ -620,7 +638,7 @@ export class WrappingPrettyPrinter {
 
           let breakClosingParenthesis = false;
 
-          if (getPrettyPrintStats(ctx.node).hasRightSingleLineComments) {
+          if (getPrettyPrintStats(ctx.node.args).hasRightSingleLineComments) {
             breakClosingParenthesis = true;
           }
 
@@ -634,7 +652,7 @@ export class WrappingPrettyPrinter {
         }
       }
 
-      return { txt };
+      return this.decorateWithComments({ ...inp, suffix: '' }, ctx.node, txt);
     })
 
     .on('visitCommandOption', (ctx, inp: Input): Output => {
@@ -646,6 +664,8 @@ export class WrappingPrettyPrinter {
       const argsFormatted = args.txt ? `${args.txt[0] === '\n' ? '' : ' '}${args.txt}` : '';
       const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' =' : '';
       const txt = `${option}${separator}${argsFormatted}`;
+
+      // TODO: decorate with comments
 
       return { txt, lines: args.lines };
     })

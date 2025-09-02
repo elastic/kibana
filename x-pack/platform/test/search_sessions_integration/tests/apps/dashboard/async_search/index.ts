@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -15,10 +15,12 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
   describe('Dashboard', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_async/async_search'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_async/async_search'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });

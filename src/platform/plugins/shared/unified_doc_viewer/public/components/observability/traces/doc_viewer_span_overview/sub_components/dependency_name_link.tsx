@@ -68,8 +68,8 @@ export function DependencyNameLink({
     : undefined;
 
   const content = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
         <SpanIcon type={spanType} subtype={spanSubtype} size="m" />
       </EuiFlexItem>
       <EuiFlexItem>{formattedDependencyName}</EuiFlexItem>

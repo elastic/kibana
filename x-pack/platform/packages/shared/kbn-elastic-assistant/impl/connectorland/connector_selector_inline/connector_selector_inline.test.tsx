@@ -11,8 +11,9 @@ import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockConnectors } from '../../mock/connectors';
 import { ConnectorSelectorInline } from './connector_selector_inline';
-import { Conversation } from '../../..';
+import type { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
+import { MOCK_CURRENT_USER } from '../../assistant/use_conversation/sample_conversations';
 
 const setApiConfig = jest.fn();
 const mockConversation = {
@@ -60,6 +61,9 @@ const defaultConvo: Conversation = {
   apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
   replacements: {},
   title: 'conversation_id',
+  createdAt: '2025-02-19T23:28:54.962Z',
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
 };
 
 describe('ConnectorSelectorInline', () => {
@@ -136,6 +140,9 @@ describe('ConnectorSelectorInline', () => {
         id: 'conversation_id',
         messages: [],
         title: 'conversation_id',
+        createdAt: '2025-02-19T23:28:54.962Z',
+        createdBy: MOCK_CURRENT_USER,
+        users: [MOCK_CURRENT_USER],
       },
     });
   });

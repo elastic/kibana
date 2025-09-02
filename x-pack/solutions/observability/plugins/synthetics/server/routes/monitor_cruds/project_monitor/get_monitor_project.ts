@@ -6,10 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { SEARCH_FIELDS } from '../../common';
+import { MONITOR_SEARCH_FIELDS } from '../../common';
 
 const querySchema = schema.object({
   search_after: schema.maybe(schema.string()),
@@ -41,7 +42,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
       const { saved_objects: monitors, total } =
         await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
           perPage,
-          searchFields: SEARCH_FIELDS,
+          searchFields: MONITOR_SEARCH_FIELDS,
           fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
           filter: `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
           sortField: ConfigKey.JOURNEY_ID,

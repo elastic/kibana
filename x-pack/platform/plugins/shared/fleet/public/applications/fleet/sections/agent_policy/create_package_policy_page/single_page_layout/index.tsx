@@ -74,6 +74,8 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { packageHasAtLeastOneSecret } from '../utils';
 
+import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
+
 import {
   AddIntegrationFlyoutConfigureHeader,
   CreatePackagePolicySinglePageLayout,
@@ -84,7 +86,6 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
-import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
@@ -178,7 +179,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packageInfo &&
     packageHasAtLeastOneSecret({ packageInfo });
 
-  const hideAgentlessSelector = !!addIntegrationFlyoutProps;
+  const isAddIntegrationFlyout = !!addIntegrationFlyoutProps;
   // Save package policy
   const {
     onSubmit,
@@ -211,7 +212,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasFleetAddAgentsPrivileges,
     setNewAgentPolicy,
     setSelectedPolicyTab,
-    hideAgentlessSelector,
+    isAddIntegrationFlyout,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -324,12 +325,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
       setIsFleetExtensionLoaded(isExtensionLoaded);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+
+      if (isValid !== undefined) {
+        setFormState(isValid ? 'VALID' : 'INVALID');
+      }
     },
     [updatePackagePolicy, setFormState]
   );
@@ -458,7 +457,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
-          {!hideAgentlessSelector && isAgentlessIntegration(packageInfo) && (
+          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               showLimitationsMessage={!isServerless}
               disabled={false}
@@ -518,7 +517,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
-      hideAgentlessSelector,
+      isAddIntegrationFlyout,
       isServerless,
     ]
   );

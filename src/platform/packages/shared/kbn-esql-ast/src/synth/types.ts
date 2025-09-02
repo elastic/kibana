@@ -12,7 +12,42 @@ import type { ESQLAstExpression, ESQLProperNode } from '../types';
 
 export type SynthGenerator<N extends ESQLProperNode> = (src: string, opts?: ParseOptions) => N;
 
-export type SynthTemplateHole = ESQLAstExpression | ESQLAstExpression[] | number;
+export type SynthTemplateHole =
+  /**
+   * A hole is normally an AST node.
+   */
+  | ESQLAstExpression
+
+  /**
+   * If a list of AST nodes is provided, it will be joined with a comma.
+   */
+  | ESQLAstExpression[]
+
+  /**
+   * A shorthand for a column name, which is an array of column parts.
+   */
+  | SynthColumnShorthand
+
+  /**
+   * If a number is provided, it will be converted to the right AST node type:
+   *
+   * - integer for integers
+   * - decimal for floats
+   */
+  | number
+
+  /**
+   * A string will be converted to a string literal AST node.
+   */
+  | string;
+
+/**
+ * A developer-friendly way to specify nested column names in ESQL queries.
+ * Each part in the array represents a segment of the column name.
+ *
+ * For example, `['user', 'name']` represents the column `user.name`.
+ */
+export type SynthColumnShorthand = string[];
 
 export type SynthTaggedTemplate<N extends ESQLProperNode> = (
   template: TemplateStringsArray,

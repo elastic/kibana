@@ -7,16 +7,15 @@
 
 import { z } from '@kbn/zod';
 import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-server';
+import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
   createToolRegistryMock,
-  CreateScopedRunnerDepsMock,
-  MockedTool,
-  ToolRegistryMock,
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
@@ -116,16 +115,18 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockReturnValue({ result: { test: true, over: 9000 } });
+    tool.handler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
+    });
 
-    const result = await runTool({
+    const results = await runTool({
       toolExecutionParams: params,
       parentManager: runnerManager,
     });
 
-    expect(result).toEqual({
+    expect(results).toEqual({
       runId: expect.any(String),
-      result: { test: true, over: 9000 },
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
     });
   });
 
@@ -137,8 +138,8 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockImplementation((toolParams, context) => {
-      return { result: 'foo' };
+    tool.handler.mockImplementation(() => {
+      return { results: [{ type: ToolResultType.other, data: { value: 42 } }] };
     });
 
     await runTool({
@@ -177,7 +178,7 @@ describe('runTool', () => {
         type: 'test-event',
         data: { foo: 'bar' },
       });
-      return { result: 42 };
+      return { results: [{ type: ToolResultType.other, data: { foo: 'bar' } }] };
     });
 
     await runTool({

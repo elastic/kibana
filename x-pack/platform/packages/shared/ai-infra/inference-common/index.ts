@@ -26,6 +26,7 @@ export {
   type ToolCallsOf,
   type ToolCallbacksOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
@@ -70,7 +71,6 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
-  type AnonymizationRegexWorkerTaskPayload,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
