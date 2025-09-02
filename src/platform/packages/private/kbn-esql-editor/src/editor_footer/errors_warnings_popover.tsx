@@ -81,6 +81,7 @@ function ErrorsWarningsContent({
                                 &:hover {
                                   cursor: pointer;
                                 }
+                                white-space: pre-line;
                               `}
               onClick={() => onErrorClick(item)}
             >

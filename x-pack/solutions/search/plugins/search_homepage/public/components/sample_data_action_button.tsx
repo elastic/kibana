@@ -99,7 +99,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
               <EuiContextMenuItem key="playground" onClick={navigateToPlayground} icon="comment">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToPlayground"
-                  defaultMessage="Playground"
+                  defaultMessage="RAG Playground"
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem key="index" onClick={navigateToIndexDetails} icon="index">
