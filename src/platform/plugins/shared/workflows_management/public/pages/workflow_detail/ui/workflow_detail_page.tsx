@@ -24,6 +24,7 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
+import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -242,13 +243,20 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 />
               </React.Suspense>
             </EuiFlexItem>
-            {isVisualEditorEnabled && workflow && (
+            {true && workflow && (
               <EuiFlexItem css={styles.workflowVisualEditorColumn}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <WorkflowVisualEditor
                     workflowYaml={yamlValue}
                     workflowExecutionId={selectedExecutionId}
                   />
+                </React.Suspense>
+              </EuiFlexItem>
+            )}
+            {true && workflow && (
+              <EuiFlexItem css={styles.workflowVisualEditorColumn}>
+                <React.Suspense fallback={<EuiLoadingSpinner />}>
+                  <ExecutionGraph workflowYaml={yamlValue} />
                 </React.Suspense>
               </EuiFlexItem>
             )}

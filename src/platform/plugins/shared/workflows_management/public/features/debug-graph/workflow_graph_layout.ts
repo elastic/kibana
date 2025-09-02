@@ -30,13 +30,12 @@ export function convertWorkflowGraphToReactFlow(graph: dagre.graphlib.Graph) {
     nodesep: 40,
     ranksep: 40,
     edgesep: 40,
-    // align: 'UL', // Align nodes to Upper-Left within their ranks
     marginx: 20,
     marginy: 20,
   });
 
   const stack = [] as string[];
-  const baseWidth = 300;
+  const baseWidth = 100;
   let maxDepth = 0;
 
   topologySort

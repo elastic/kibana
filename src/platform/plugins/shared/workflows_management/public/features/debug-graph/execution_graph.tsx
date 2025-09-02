@@ -136,7 +136,7 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) 
         <div
           style={{
             width: '100%',
-            height: '600px',
+            height: '100%',
             border: `1px solid ${euiTheme.border.color}`,
             position: 'relative',
           }}
