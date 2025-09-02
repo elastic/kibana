@@ -706,48 +706,32 @@ class BrowserService extends FtrService {
 
   public async getScrollTop() {
     const scrollSize = await this.driver.executeScript<string>(`
-      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
-      if (container) {
-        return container.scrollTop;
-      } else {
-        return document.documentElement.scrollTop;
-      }
+      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+      return scrollContainer.scrollTop;
     `);
     return parseInt(scrollSize, 10);
   }
 
   public async getScrollLeft() {
     const scrollSize = await this.driver.executeScript<string>(`
-      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
-      if (container) {
-        return container.scrollLeft;
-      } else {
-        return document.documentElement.scrollLeft;
-      }
+      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+      return scrollContainer.scrollLeft;
     `);
     return parseInt(scrollSize, 10);
   }
 
   public async scrollTop() {
     await this.driver.executeScript(`
-    const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
-    if (container) {
-      container.scrollTop = 0;
-    } else {
-      document.documentElement.scrollTop = 0;
-    }
+    const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+    scrollContainer.scrollTop = 0;
   `);
   }
 
   // return promise with REAL scroll position
   public async setScrollTop(scrollSize: number | string) {
     await this.driver.executeScript(`
-      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
-      if (container) {
-        container.scrollTop = ${scrollSize};
-      } else {
-        document.documentElement.scrollTop = ${scrollSize};
-      }
+      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+      scrollContainer.scrollTop = ${scrollSize};
     `);
     return this.getScrollTop();
   }
