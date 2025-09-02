@@ -16,6 +16,9 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 
+// TODO: Import from gen-ai-settings-plugin (package) once available
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+
 const selectDefaultConnector = ({ connectors }: { connectors: InferenceConnector[] }) => {
   const inferenceConnector = connectors.find(
     (connector) => connector.type === InferenceConnectorType.Inference
@@ -80,7 +83,7 @@ export const resolveSelectedConnectorId = async ({
   ]);
 
   const hasValidDefaultConnector =
-    defaultConnectorSetting && defaultConnectorSetting !== 'NO_DEFAULT_CONNECTOR';
+    defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR;
 
   if (defaultConnectorOnly && hasValidDefaultConnector) return defaultConnectorSetting;
   if (connectorId) return connectorId;
