@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { MappingPropertyBase, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
 import type { FileAnalysis, FileWrapper } from './file_wrapper';
@@ -68,19 +68,17 @@ export function createMergedMappings(
 
   const mappings = files.map((file) => file.getMappings() ?? { properties: {} });
 
-  // compare the mappings of all files to see if they are all the same
+  // compare the mappings of all files and the existing index mappings to see if they are all the same
   // if they are, return early
-  if (mappings.every((m) => isEqual(m, mappings[0]))) {
+  const tempMappings = [
+    ...(existingIndexMappings !== null ? [existingIndexMappings] : []),
+    ...mappings,
+  ];
+  if (tempMappings.every((m) => isEqual(m, mappings[0]))) {
     return { mergedMappings: mappings[0] as MappingTypeMapping, mappingClashes: [] };
   }
 
-  const fieldsPerFile = mappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
-
-  if (existingIndexMappings !== null) {
-    // add the existing index mappings to the beginning of the fields array
-    // so the merged mappings contain the existing index mappings
-    fieldsPerFile.splice(0, 0, getFieldsFromMappings(existingIndexMappings as MappingTypeMapping));
-  }
+  const fieldsPerFile = tempMappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
 
   const mappingClashes: MappingClash[] = [];
 
@@ -104,7 +102,7 @@ export function createMergedMappings(
               fieldName: field.name,
               existingType: existingField.type,
               clashingType: {
-                fileName: files[i].getFileName(),
+                fileName: files[i]?.getFileName(),
                 newType: field.value.type as string,
                 fileIndex: i,
               },

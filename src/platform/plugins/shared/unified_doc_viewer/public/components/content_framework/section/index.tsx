@@ -41,14 +41,14 @@ export interface ContentFrameworkSectionProps {
   'data-test-subj'?: string;
 }
 
-export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = ({
+export function ContentFrameworkSection({
   id,
   title,
   description,
   actions,
   children,
   'data-test-subj': accordionDataTestSubj,
-}) => {
+}: ContentFrameworkSectionProps) {
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions?.map((action, idx) => {
@@ -117,4 +117,4 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
       </>
     </EuiAccordion>
   );
-};
+}
