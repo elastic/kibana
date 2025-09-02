@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const SIEM_MIGRATIONS_OPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.selectionOption.title',
+  'xpack.securitySolution.siemMigrations.common.selectionOption.title',
   {
     defaultMessage: 'Migrations',
   }
 );
 
 export const SIEM_MIGRATIONS_OPTION_AREAL_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.selectionOption.arealLabel',
+  'xpack.securitySolution.siemMigrations.common.selectionOption.arealLabel',
   {
     defaultMessage: 'Select a migration',
   }

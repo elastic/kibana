@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 import type { CombinedField } from '../../../common/components/combined_fields';

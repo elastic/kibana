@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { CombinedField } from '../../../common/components/combined_fields';
 import { CombinedFieldsReadOnlyForm } from '../../../common/components/combined_fields';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
