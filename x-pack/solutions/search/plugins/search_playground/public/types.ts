@@ -244,6 +244,7 @@ export interface LLMModel {
   icon: string;
   disabled: boolean;
   promptTokenLimit?: number;
+  isElasticConnector?: boolean;
 }
 
 export type { ActionConnector, UserConfiguredActionConnector };

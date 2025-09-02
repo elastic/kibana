@@ -156,3 +156,18 @@ export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
 export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
+
+const { columns, grid, hideChart, isTextBasedQuery, kibanaSavedObjectMeta, rowHeight, sort } =
+  SCHEMA_SEARCH_MODEL_VERSION_6.getPropSchemas();
+
+// Mark top-level attributes (except title and description) optional, and mark tabs as required
+export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.extends({
+  columns: schema.maybe(columns),
+  grid: schema.maybe(grid),
+  hideChart: schema.maybe(hideChart),
+  isTextBasedQuery: schema.maybe(isTextBasedQuery),
+  kibanaSavedObjectMeta: schema.maybe(kibanaSavedObjectMeta),
+  rowHeight: schema.maybe(rowHeight),
+  sort: schema.maybe(sort),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 }),
+});

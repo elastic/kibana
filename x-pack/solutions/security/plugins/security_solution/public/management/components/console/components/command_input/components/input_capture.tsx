@@ -82,7 +82,7 @@ export type InputCaptureProps = PropsWithChildren<{
     /** Keyboard control keys from the keyboard event */
     eventDetails: Pick<
       KeyboardEvent,
-      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey'
+      'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey' | 'code'
     >;
   }) => void;
   /** Sets an interface that allows interactions with this component's focus/blur states */
@@ -164,6 +164,7 @@ export const InputCapture = memo<InputCaptureProps>(
           'metaKey',
           'repeat',
           'shiftKey',
+          'code',
         ]);
 
         onCapture({
@@ -198,6 +199,7 @@ export const InputCapture = memo<InputCaptureProps>(
           metaKey: true,
           repeat: false,
           shiftKey: false,
+          code: 'MetaLeft',
         };
 
         onCapture({

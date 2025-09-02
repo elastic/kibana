@@ -139,6 +139,12 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       ).findByClassName('euiTitle');
       expect(await pageLoadErrorElement.getVisibleText()).to.contain('Not Found');
     },
+    async hasPageReloadButton() {
+      await testSubjects.existOrFail('reloadButton');
+    },
+    async pageReloadButtonIsVisible() {
+      return testSubjects.isDisplayed('reloadButton');
+    },
     async clickPageReload() {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('reloadButton', 2000);
@@ -289,6 +295,13 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
       const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
       expect(isMappingsFieldEnabled).to.be(true);
+    },
+
+    async dismissIngestTourIfShown() {
+      if (await testSubjects.isDisplayed('searchIngestTourCloseButton')) {
+        await testSubjects.click('searchIngestTourCloseButton');
+        await testSubjects.missingOrFail('searchIngestTourCloseButton', { timeout: 2000 });
+      }
     },
   };
 }

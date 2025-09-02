@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`
       await kibanaServer.savedObjects.cleanStandardList();
-      // TODO: Loading this from `es_archives` in `test_serverless`
+      // TODO: Loading this from `es_archives` in `test/serverless`
       // instead since minor modifications were required
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern'
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      // TODO: Loading this from `es_archives` in `test_serverless`
+      // TODO: Loading this from `es_archives` in `test/serverless`
       // instead since minor modifications were required
 
       await esArchiver.unload(

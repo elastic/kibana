@@ -31,6 +31,8 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
   onSuccess?: (theCase: CaseUI) => void;
 };
 
+export type GetAttachments = ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
+
 export const useCasesAddToExistingCaseModal = ({
   successToaster,
   noAttachmentsToaster,
@@ -135,13 +137,14 @@ export const useCasesAddToExistingCaseModal = ({
     ({
       getAttachments,
     }: {
-      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
+      getAttachments?: GetAttachments;
     } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
           hiddenStatuses: [CaseStatuses.closed],
           onCreateCaseClicked,
+          getAttachments,
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },

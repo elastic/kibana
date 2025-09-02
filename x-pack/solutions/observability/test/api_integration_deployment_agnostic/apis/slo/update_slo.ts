@@ -52,43 +52,67 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
-    it('updates the definition without a revision bump', async () => {
-      const createResponse = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
-      const sloId = createResponse.id;
+    describe('with revision bump', function () {
+      it('updates the definition', async () => {
+        const createResponse = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+        const sloId = createResponse.id;
 
-      const getResponse = await sloApi.get(sloId, adminRoleAuthc);
-      expect(getResponse).property('revision', 1);
+        const getResponse = await sloApi.get(sloId, adminRoleAuthc);
+        expect(getResponse).property('revision', 1);
 
-      const updateResponse = await sloApi.update(
-        { sloId, slo: Object.assign({}, DEFAULT_SLO, { name: 'updated name' }) },
-        adminRoleAuthc
-      );
-      expect(updateResponse).property('revision', 1);
-      expect(updateResponse).property('name', 'updated name');
+        const updateResponse = await sloApi.update(
+          { sloId, slo: Object.assign({}, DEFAULT_SLO, { objective: { target: 0.63 } }) },
+          adminRoleAuthc
+        );
+        expect(updateResponse).property('revision', 2);
+        expect(updateResponse.objective).eql({ target: 0.63 });
 
-      await transformHelper.assertExist(getSLOTransformId(sloId, 1));
-      await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 1));
+        await transformHelper.assertNotFound(getSLOTransformId(sloId, 1));
+        await transformHelper.assertNotFound(getSLOSummaryTransformId(sloId, 1));
+
+        await transformHelper.assertExist(getSLOTransformId(sloId, 2));
+        await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 2));
+      });
     });
 
-    it('updates the definition with a revision bump', async () => {
-      const createResponse = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
-      const sloId = createResponse.id;
+    describe('without revision bump', function () {
+      it('updates the definition', async () => {
+        const createResponse = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+        const sloId = createResponse.id;
 
-      const getResponse = await sloApi.get(sloId, adminRoleAuthc);
-      expect(getResponse).property('revision', 1);
+        const getResponse = await sloApi.get(sloId, adminRoleAuthc);
+        expect(getResponse).property('revision', 1);
 
-      const updateResponse = await sloApi.update(
-        { sloId, slo: Object.assign({}, DEFAULT_SLO, { objective: { target: 0.63 } }) },
-        adminRoleAuthc
-      );
-      expect(updateResponse).property('revision', 2);
-      expect(updateResponse.objective).eql({ target: 0.63 });
+        const updateResponse = await sloApi.update(
+          { sloId, slo: Object.assign({}, DEFAULT_SLO, { name: 'updated name' }) },
+          adminRoleAuthc
+        );
+        expect(updateResponse).property('revision', 1);
+        expect(updateResponse).property('name', 'updated name');
 
-      await transformHelper.assertNotFound(getSLOTransformId(sloId, 1));
-      await transformHelper.assertNotFound(getSLOSummaryTransformId(sloId, 1));
+        await transformHelper.assertExist(getSLOTransformId(sloId, 1));
+        await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 1));
+      });
 
-      await transformHelper.assertExist(getSLOTransformId(sloId, 2));
-      await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 2));
+      it('updates dashboard artifacts', async () => {
+        const createResp = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+        const sloId = createResp.id;
+
+        const updateResponse = await sloApi.update(
+          {
+            sloId,
+            slo: Object.assign({}, DEFAULT_SLO, {
+              artifacts: { dashboards: [{ id: 'dash-x' }, { id: 'dash-y' }] },
+            }),
+          },
+          adminRoleAuthc
+        );
+
+        expect(updateResponse).property('revision', 1);
+        expect(updateResponse.artifacts).eql({ dashboards: [{ id: 'dash-x' }, { id: 'dash-y' }] });
+        await transformHelper.assertExist(getSLOTransformId(sloId, 1));
+        await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 1));
+      });
     });
   });
 }
