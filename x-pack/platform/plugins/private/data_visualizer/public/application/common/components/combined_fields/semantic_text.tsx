@@ -7,10 +7,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { FC } from 'react';
-import type {
-  FindFileStructureResponse,
-  IngestPipeline,
-} from '@kbn/file-upload-plugin/common/types';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButton,
