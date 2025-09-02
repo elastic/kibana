@@ -52,6 +52,7 @@
     "@kbn/esql-types",
     "@kbn/aiops-utils",
     "@kbn/esql-ast",
+    "@kbn/background-search",
   ],
   "exclude": [
     "target/**/*",

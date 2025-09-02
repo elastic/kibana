@@ -8,8 +8,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
     "@kbn/data-plugin",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react"
   ]
 }
