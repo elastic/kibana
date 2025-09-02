@@ -51,6 +51,7 @@ import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
+import { alertSuppressionInfoRoute } from '../lib/detection_engine/routes/signals/alert_suppression_info_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -100,6 +101,7 @@ export const initRoutes = (
   setAlertTagsRoute(router);
   setAlertAssigneesRoute(router);
   querySignalsRoute(router, ruleDataClient);
+  alertSuppressionInfoRoute(router, logger, ruleDataClient);
   getSignalsMigrationStatusRoute(router, docLinks);
   createSignalsMigrationRoute(router, docLinks);
   finalizeSignalsMigrationRoute(router, ruleDataService, docLinks);

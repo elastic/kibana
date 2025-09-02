@@ -22,8 +22,9 @@ import {
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../../common/lib/kibana';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { getAlertSuppressionInfo } from '../containers/detection_engine/alerts/api';
 
-const DO_NOT_SHOW_AGAIN_SETTING_KEY = 'securitySolution.alertCloseInfoModal.doNotShowAgain';
+export const DO_NOT_SHOW_AGAIN_SETTING_KEY = 'securitySolution.alertCloseInfoModal.doNotShowAgain';
 
 const learnMoreLink = (
   <EuiLink data-test-subj="AlertCloseInfoModalLearnMoreLink" target="_blank">
@@ -110,29 +111,53 @@ const AlertCloseConfirmationModal = ({
 };
 
 export const useAlertCloseInfoModal = () => {
-  const advancedSettingEnabled = useIsExperimentalFeatureEnabled(
+  const experimentalFeatureEnabled = useIsExperimentalFeatureEnabled(
     'continueSuppressionWindowAdvancedSettingEnabled'
   );
   const [shouldShowModal, setShouldShowModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [alertsWithSuppressionWindow, setAlertsWithSuppressionWindow] = useState(0);
   const [resolveUserConfirmation, setUserConfirmationResolver] = useState<
     (shouldContinue: boolean) => void
   >(() => () => false);
   const { overlays, services } = useKibana();
   const { storage } = services;
 
-  const promptAlertCloseConfirmation = useCallback((): Promise<boolean> => {
-    if (!advancedSettingEnabled) {
-      return Promise.resolve(true);
-    }
+  const promptAlertCloseConfirmation = useCallback(
+    async (getAlertParams: { alertIds?: string[]; query?: string }): Promise<boolean> => {
+      if (!experimentalFeatureEnabled) {
+        return Promise.resolve(true);
+      }
 
-    if (storage.get(DO_NOT_SHOW_AGAIN_SETTING_KEY)) {
-      return Promise.resolve(true);
-    }
-    setShouldShowModal(true);
-    return new Promise((resolvePromise) => {
-      setUserConfirmationResolver(() => resolvePromise);
-    });
-  }, [storage, advancedSettingEnabled]);
+      if (storage.get(DO_NOT_SHOW_AGAIN_SETTING_KEY)) {
+        return Promise.resolve(true);
+      }
+
+      let alertCount = 0;
+      try {
+        const response = await getAlertSuppressionInfo(getAlertParams);
+        alertCount = Object.keys(response.alerts).filter((alertId) => {
+          return response.alerts[alertId].has_active_suppression_window;
+        }).length;
+
+        if (alertCount <= 0) {
+          // We did not find any alert with an active suppression window
+          return Promise.resolve(true);
+        }
+      } catch (error) {
+        // We do not want to break alert closure. If the endpoint breaks somehow,
+        // users should still be able to close alerts.
+        return Promise.resolve(true);
+      }
+
+      return new Promise((resolvePromise) => {
+        setAlertsWithSuppressionWindow(alertCount);
+        setUserConfirmationResolver(() => resolvePromise);
+        setShouldShowModal(true);
+      });
+    },
+    [storage, experimentalFeatureEnabled]
+  );
 
   const handleConfirmationResult = useCallback(
     (isConfirmed: boolean) => {
@@ -143,19 +168,28 @@ export const useAlertCloseInfoModal = () => {
   );
 
   useEffect(() => {
-    if (shouldShowModal) {
+    if (shouldShowModal && !isModalOpen) {
+      setIsModalOpen(true);
       const modalRef = overlays.openModal(
         <KibanaContextProvider services={services}>
           <AlertCloseConfirmationModal
             onConfirmationResult={(result) => {
               modalRef.close();
+              setIsModalOpen(false);
               handleConfirmationResult(result);
             }}
           />
         </KibanaContextProvider>
       );
     }
-  }, [shouldShowModal, overlays, services, handleConfirmationResult]);
+  }, [
+    isModalOpen,
+    shouldShowModal,
+    overlays,
+    services,
+    alertsWithSuppressionWindow,
+    handleConfirmationResult,
+  ]);
 
   return {
     promptAlertCloseConfirmation,
