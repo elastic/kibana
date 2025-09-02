@@ -33,6 +33,16 @@ import { setTabs } from './tabs';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
+export interface SaveDiscoverSessionThunkParams {
+  newTitle: string;
+  newTimeRestore: boolean;
+  newCopyOnSave: boolean;
+  newDescription: string;
+  newTags: string[];
+  isTitleDuplicateConfirmed: boolean;
+  onTitleDuplicate: () => void;
+}
+
 export const saveDiscoverSession = createInternalStateAsyncThunk(
   'internalState/saveDiscoverSession',
   async (
@@ -44,15 +54,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newTags,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
-    }: {
-      newTitle: string;
-      newTimeRestore: boolean;
-      newCopyOnSave: boolean;
-      newDescription: string;
-      newTags: string[];
-      isTitleDuplicateConfirmed: boolean;
-      onTitleDuplicate: () => void;
-    },
+    }: SaveDiscoverSessionThunkParams,
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
     const state = getState();
