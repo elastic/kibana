@@ -89,8 +89,11 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const [sortField, setSortField] = useState<keyof RuleMigrationRule>(DEFAULT_SORT_FIELD);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
-    const [isMissingIndexPatternFlyoutOpen, setIsMissingIndexPatternFlyoutOpen] = useState(false);
-
+    const {
+      isOpen: isMissingIndexPatternFlyoutOpen,
+      open: openMissingIndexPatternFlyout,
+      close: closeMissingIndexPatternFlyout,
+    } = useIsOpenState(false);
     // Filters
     const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();
 
@@ -195,7 +198,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       onSuccess: () => {
         refetchData?.();
         refetchTranslationStats();
-        setIsMissingIndexPatternFlyoutOpen(false);
+        closeMissingIndexPatternFlyout();
       },
     });
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
@@ -418,9 +421,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       isTableLoading={isRulesLoading}
                       translationStats={translationStats}
                       selectedRules={selectedMigrationRules}
-                      setMissingIndexPatternFlyoutOpen={() =>
-                        setIsMissingIndexPatternFlyoutOpen(true)
-                      }
+                      setMissingIndexPatternFlyoutOpen={openMissingIndexPatternFlyout}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
                       reprocessFailedRules={showReprocessFailedRulesModal}
@@ -445,7 +446,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         />
         {isMissingIndexPatternFlyoutOpen && (
           <UpdateIndexPatternForm
-            onClose={() => setIsMissingIndexPatternFlyoutOpen(false)}
+            onClose={closeMissingIndexPatternFlyout}
             onSubmit={onSubmitMissingIndexPattern}
           />
         )}

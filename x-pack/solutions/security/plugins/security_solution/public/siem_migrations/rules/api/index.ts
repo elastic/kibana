@@ -49,6 +49,7 @@ import type {
   UpdateRuleMigrationRulesResponse,
   UpdateRuleMigrationRequestBody,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationIndexPatternResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
@@ -425,11 +426,11 @@ export const updateIndexPattern = async ({
   indexPattern,
   ids,
   signal,
-}: UpdateIndexPatternParams): Promise<{ updated: number }> => {
+}: UpdateIndexPatternParams): Promise<UpdateRuleMigrationIndexPatternResponse> => {
   const payload = ids?.length
     ? { index_pattern: indexPattern, ids }
     : { index_pattern: indexPattern };
-  return KibanaServices.get().http.post<{ updated: number }>(
+  return KibanaServices.get().http.post<UpdateRuleMigrationIndexPatternResponse>(
     replaceParams(SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH, { migration_id: migrationId }),
     { version: '1', body: JSON.stringify(payload), signal }
   );
