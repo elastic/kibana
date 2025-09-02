@@ -5,27 +5,6 @@
  * 2.0.
  */
 
-jest.mock('../saved_objects', () => {
-  const mockFind = jest.fn().mockResolvedValue({
-    saved_objects: [],
-    total: 0,
-  });
-  const mockEngineDescriptorInit = jest.fn();
-  return {
-    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-      findByIndex: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      find: mockFind,
-      findAll: jest.fn(),
-    })),
-    PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
-      init: mockEngineDescriptorInit,
-      update: jest.fn(),
-    })),
-  };
-});
-
 import type { AuditLogger } from '@kbn/core/server';
 import type { PrivilegeMonitoringGlobalDependencies } from './data_client';
 import { PrivilegeMonitoringDataClient } from './data_client';
@@ -41,6 +20,28 @@ import {
 } from '@kbn/core/server/mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
+
+jest.mock('../saved_objects', () => {
+  const mockEngineDescriptorInit = jest.fn();
+  const mockFind = jest.fn().mockResolvedValue({
+    saved_objects: [],
+    total: 0,
+  });
+  return {
+    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
+      findByIndex: jest.fn(),
+      create: jest.fn(),
+      bulkCreate: jest.fn(),
+      update: jest.fn(),
+      find: mockFind,
+      findAll: jest.fn(),
+    })),
+    PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
+      init: mockEngineDescriptorInit,
+      update: jest.fn(),
+    })),
+  };
+});
 
 describe('createInitialisationSourcesService', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -60,27 +61,6 @@ describe('createInitialisationSourcesService', () => {
     savedObjects: savedObjectServiceMock,
   };
 
-  const mockEngineDescriptorInit = jest.fn();
-  const mockFind = jest.fn().mockResolvedValue({
-    saved_objects: [],
-    total: 0,
-  });
-
-  jest.mock('../saved_objects', () => {
-    return {
-      MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-        findByIndex: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        find: mockFind,
-      })),
-      PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
-        init: mockEngineDescriptorInit,
-        update: jest.fn(),
-      })),
-    };
-  });
-
   let dataClient: PrivilegeMonitoringDataClient;
   let initSourcesService: InitialisationSourcesService;
   let monitoringDescriptorClient: MonitoringEntitySourceDescriptorClient;
@@ -95,12 +75,13 @@ describe('createInitialisationSourcesService', () => {
   });
 
   it('should create sources when none exist', async () => {
+    (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue([]);
     await initSourcesService.upsertSources(monitoringDescriptorClient);
-    expect(monitoringDescriptorClient.create).toHaveBeenCalledTimes(3);
+    expect(monitoringDescriptorClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(monitoringDescriptorClient.update).not.toHaveBeenCalled();
     expect(dataClient.log).toHaveBeenCalledWith(
       'debug',
-      expect.stringContaining('Created all default sources')
+      expect.stringContaining('Created all 3 default sources')
     );
   });
 
