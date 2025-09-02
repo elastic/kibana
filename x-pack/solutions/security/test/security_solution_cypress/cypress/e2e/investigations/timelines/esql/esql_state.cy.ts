@@ -16,6 +16,7 @@ import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_VIEW_SWITCHER,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
+  TIMELINE_DISCOVER_TAB,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
@@ -88,8 +89,8 @@ describe.skip(
     });
     it('should remember columns when navigating away and back to discover ', () => {
       submitDiscoverSearchBar();
-      addFieldToTable('host.name');
-      addFieldToTable('user.name');
+      addFieldToTable('host.name', TIMELINE_DISCOVER_TAB);
+      addFieldToTable('user.name', TIMELINE_DISCOVER_TAB);
       addNameAndDescriptionToTimeline(mockTimeline);
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);

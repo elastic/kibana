@@ -2032,8 +2032,6 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Replacements'
-        summary:
-          $ref: '#/components/schemas/ConversationSummary'
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
         title:
@@ -2056,31 +2054,6 @@ components:
         - users
         - namespace
         - category
-    ConversationSummary:
-      allOf:
-        - $ref: '#/components/schemas/ConversationSummaryBase'
-        - type: object
-          properties:
-            timestamp:
-              $ref: '#/components/schemas/NonEmptyTimestamp'
-              description: The timestamp summary was updated.
-              example: '2025-04-30T16:00:00Z'
-          required:
-            - timestamp
-    ConversationSummaryBase:
-      type: object
-      properties:
-        semanticContent:
-          description: Summary text of the conversation over time.
-          example: >-
-            This conversation covered how to configure the Security AI
-            Assistant.
-          type: string
-        summarizedMessageIds:
-          description: The list of summarized messages.
-          items:
-            $ref: '#/components/schemas/NonEmptyString'
-          type: array
     ConversationUpdateProps:
       type: object
       properties:
@@ -2103,8 +2076,6 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Replacements'
-        summary:
-          $ref: '#/components/schemas/ConversationSummaryBase'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
@@ -2722,6 +2693,7 @@ components:
         'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
