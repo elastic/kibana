@@ -1,0 +1,320 @@
+name: Create PRs for Backstage catalog-info
+description: This workflow will sync Kibana packages as entries inside the Elastic Catalog Info repository. It will create PRs when packages are created / edited / deleted, making sure the Catalog Info repository will remain up to date with Kibana. This in turn will make sure Backstage will remain up to date with Kibana.  
+on:
+  workflow_dispatch:
+    inputs:
+      base:
+        description: 'Base branch on elastic/catalog-info'
+        default: main
+      filter:
+        description: 'Optional folder gate (substring on folder path), e.g., x-pack'
+        required: false
+      bulk:
+        description: 'Bulk mode: create a single PR that adds/updates all components (and prunes orphans)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-matrix:
+    name: Discover Kibana plugins
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.emit.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - id: emit
+        env:
+          FILTER: ${{ github.event.inputs.filter }}
+        run: |
+
+  fanout:
+    name: Open PR per plugin
+    needs: build-matrix
+    runs-on: ubuntu-latest
+      if: ${{ github.event.inputs.bulk != 'true' }}
+    strategy:
+      max-parallel: 4
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          owner: elastic
+
+      - name: Checkout elastic/catalog-info
+        uses: actions/checkout@v4
+        with:
+          repository: elastic/catalog-info
+          token: ${{ steps.app-token.outputs.token }}
+          path: catalog-info
+
+      - name: Write component file and push branch
+        run: |
+          set -euo pipefail
+          ID='${{ matrix.id }}'
+          TITLE='${{ matrix.title }}'
+          DESC='${{ matrix.description }}'
+          OWNER='${{ matrix.owner }}'
+          FOLDER='${{ matrix.folder }}'
+          TYPE='${{ matrix.type }}'
+          # Create a safe slug for filenames and Backstage metadata.name
+          SLUG_ID=$(printf '%s' "$ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g')
+          NAME="kibana-${SLUG_ID}"
+          BRANCH="backstage/kibana/${ID}"
+
+          cd catalog-info
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$BRANCH" || true
+          if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git checkout -B "$BRANCH"
+          fi
+
+            mkdir -p locations/kibana
+          FILE="locations/kibana/${NAME}.yml"
+          cat > "$FILE" <<YAML
+# yaml-language-server: $schema=https://json.schemastore.org/catalog-info.json
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${NAME}
+  title: ${TITLE}
+  description: ${DESC}
+  tags:
+    - kibana
+    - ${TYPE}
+  links:
+    - url: ${FOLDER}
+      title: Source (elastic/kibana)
+      icon: github
+spec:
+  type: ${TYPE}
+  lifecycle: production
+  owner: ${OWNER}
+  subcomponentOf: kibana
+YAML
+
+          git add -A
+          git commit -m "Add ${NAME} to Backstage catalog" || echo "Nothing to commit"
+          git push -u origin "$BRANCH"
+
+      - name: Open or update PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          ID='${{ matrix.id }}'
+          BRANCH="backstage/kibana/${ID}"
+          REPO='elastic/catalog-info'
+          BASE='${{ github.event.inputs.base }}'
+          if gh pr view "$BRANCH" --repo "$REPO" >/dev/null 2>&1; then
+            gh pr edit "$BRANCH" --repo "$REPO" --title "Add kibana-${ID} to catalog" --body "Automated Backstage component for ${ID}" --base "$BASE"
+          else
+            gh pr create --repo "$REPO" --title "Add kibana-${ID} to catalog" --body "Automated Backstage component for ${ID}" --head "$BRANCH" --base "$BASE"
+          fi
+
+  prune:
+    name: Prune removed components
+    needs: build-matrix
+    runs-on: ubuntu-latest
+      if: ${{ github.event.inputs.bulk != 'true' }}
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          owner: elastic
+
+      - name: Checkout elastic/catalog-info
+        uses: actions/checkout@v4
+        with:
+          repository: elastic/catalog-info
+          token: ${{ steps.app-token.outputs.token }}
+          path: catalog-info
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Compute expected component names
+        env:
+          MATRIX: ${{ needs.build-matrix.outputs.matrix }}
+        run: |
+          set -euo pipefail
+          echo "$MATRIX" | node -e '
+            const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+            const slug = (s) => s.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
+            for (const i of input.include || []) {
+              const name = `kibana-${slug(i.id)}`;
+              console.log(name);
+            }
+          ' > /tmp/expected.txt
+          sort -u /tmp/expected.txt -o /tmp/expected.txt
+
+      - name: Remove orphaned files and push branch
+        run: |
+          set -euo pipefail
+          cd catalog-info
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          PRUNE_BRANCH="backstage/prune"
+          git fetch origin "$PRUNE_BRANCH" || true
+          if git rev-parse --verify "origin/$PRUNE_BRANCH" >/dev/null 2>&1; then
+            git checkout -B "$PRUNE_BRANCH" "origin/$PRUNE_BRANCH"
+          else
+            git checkout -B "$PRUNE_BRANCH"
+          fi
+
+  bulk:
+    name: Bulk update (single PR)
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.bulk == 'true' }}
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          owner: elastic
+
+      - name: Checkout elastic/catalog-info
+        uses: actions/checkout@v4
+        with:
+          repository: elastic/catalog-info
+          token: ${{ steps.app-token.outputs.token }}
+          path: catalog-info
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Write all components and prune orphans
+        env:
+          MATRIX: ${{ needs.build-matrix.outputs.matrix }}
+        run: |
+          set -euo pipefail
+          cd catalog-info
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="backstage/kibana/bulk"
+          git fetch origin "$BRANCH" || true
+          if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git checkout -B "$BRANCH"
+          fi
+
+          mkdir -p locations/kibana
+          node -e '
+            const fs = require("fs");
+            const input = JSON.parse(process.env.MATRIX);
+            const slug = (s) => s.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
+            const list = [];
+            for (const i of input.include || []) {
+              const id = i.id;
+              const title = i.title || slug(id);
+              const desc = i.description || "";
+              const owner = Array.isArray(i.owner) ? i.owner.join(", ") : (i.owner || "unknown");
+              const folder = i.folder || "";
+              const type = i.type || "package";
+              const name = `kibana-${slug(id)}`;
+              const yaml = `# yaml-language-server: $schema=https://json.schemastore.org/catalog-info.json\n---\napiVersion: backstage.io/v1alpha1\nkind: Component\nmetadata:\n  name: ${name}\n  title: ${title}\n  description: ${desc}\n  tags:\n    - kibana\n    - ${type}\n  links:\n    - url: ${folder}\n      title: Source (elastic/kibana)\n      icon: github\nspec:\n  type: ${type}\n  lifecycle: production\n  owner: ${owner}\n  subcomponentOf: kibana\n`;
+                fs.writeFileSync(`locations/kibana/${name}.yml`, yaml);
+              list.push(name);
+            }
+            fs.writeFileSync('/tmp/expected.txt', list.sort().join('\n'));
+          '
+
+          cd locations/kibana
+          CHANGED=0
+            for f in kibana-*.yml; do
+            [ -e "$f" ] || continue
+              base="${f%.yml}"
+            if ! grep -xq "$base" /tmp/expected.txt; then
+              echo "Pruning orphan $f"
+              rm -f "$f"
+              CHANGED=1
+            fi
+          done
+          cd ../..
+
+          if ! git diff --quiet; then
+            CHANGED=1
+          fi
+          if [ "$CHANGED" -eq 1 ]; then
+            git add -A
+            git commit -m "Bulk sync Kibana components"
+            git push -u origin "$BRANCH"
+          else
+            echo "No changes in bulk sync"
+          fi
+
+      - name: Open or update bulk PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          REPO='elastic/catalog-info'
+          BRANCH='backstage/kibana/bulk'
+          BASE='${{ github.event.inputs.base }}'
+          if gh pr view "$BRANCH" --repo "$REPO" >/dev/null 2>&1; then
+            gh pr edit "$BRANCH" --repo "$REPO" --title "Bulk sync Kibana components" --body "Automated bulk update of Backstage components" --base "$BASE"
+          else
+            gh pr create --repo "$REPO" --title "Bulk sync Kibana components" --body "Automated bulk update of Backstage components" --head "$BRANCH" --base "$BASE"
+          fi
+
+          cd components/kibana
+          CHANGED=0
+          for f in kibana-*.yaml; do
+            [ -e "$f" ] || continue
+            base="${f%.yaml}"
+            if ! grep -xq "$base" /tmp/expected.txt; then
+              echo "Pruning orphan $f"
+              rm -f "$f"
+              CHANGED=1
+            fi
+          done
+
+          cd ../..
+          if [ "$CHANGED" -eq 1 ]; then
+            git add -A
+            git commit -m "Prune removed Kibana components"
+            git push -u origin "$PRUNE_BRANCH"
+          else
+            echo "No orphans to prune"
+          fi
+
+      - name: Open or update prune PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          REPO='elastic/catalog-info'
+          BRANCH='backstage/prune'
+          BASE='${{ github.event.inputs.base }}'
+          if git ls-remote --exit-code --heads "https://github.com/${REPO}.git" "$BRANCH" >/dev/null 2>&1; then
+            if gh pr view "$BRANCH" --repo "$REPO" >/dev/null 2>&1; then
+              gh pr edit "$BRANCH" --repo "$REPO" --title "Prune removed Kibana components" --body "Automated pruning of components without matching packages" --base "$BASE"
+            else
+              gh pr create --repo "$REPO" --title "Prune removed Kibana components" --body "Automated pruning of components without matching packages" --head "$BRANCH" --base "$BASE"
+            fi
+          else
+            echo "Prune branch not present; nothing to open/update"
+          fi
