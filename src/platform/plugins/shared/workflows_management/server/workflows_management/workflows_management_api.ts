@@ -12,6 +12,8 @@ import type {
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
+  ExecutionStatus,
+  ExecutionType,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -86,6 +88,12 @@ export interface GetStepLogsParams {
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   stepId: string;
+}
+
+export interface SearchWorkflowExecutionsParams {
+  workflowId: string;
+  status?: ExecutionStatus[];
+  executionType?: ExecutionType[];
 }
 
 export class WorkflowsManagementApi {
@@ -200,15 +208,10 @@ export class WorkflowsManagementApi {
   }
 
   public async getWorkflowExecutions(
-    workflowId: string,
+    params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions(
-      {
-        workflowId,
-      },
-      spaceId
-    );
+    return await this.workflowsService.searchWorkflowExecutions(params, spaceId);
   }
 
   public async getWorkflowExecution(

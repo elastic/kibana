@@ -38,6 +38,7 @@ export {
   // command schemas
   CreateWorkflowCommandSchema,
   ExecutionStatus,
+  ExecutionType,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';

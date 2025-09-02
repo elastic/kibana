@@ -52,6 +52,7 @@ import type {
   GetStepExecutionParams,
   GetStepLogsParams,
   GetWorkflowsParams,
+  SearchWorkflowExecutionsParams,
 } from './workflows_management_api';
 import { searchStepExecutions } from './lib/search_step_executions';
 
@@ -528,13 +529,39 @@ export class WorkflowsService {
   }
 
   public async searchWorkflowExecutions(
-    params: {
-      workflowId: string;
-    },
+    params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
+    }
+
+    const mustQueries: estypes.QueryDslQueryContainer[] = [
+      { term: { workflowId: params.workflowId } },
+      {
+        bool: {
+          should: [
+            { term: { spaceId } },
+            // Backward compatibility for objects without spaceId
+            { bool: { must_not: { exists: { field: 'spaceId' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+    if (params.status) {
+      mustQueries.push({
+        terms: {
+          status: params.status,
+        },
+      });
+    }
+    if (params.executionType) {
+      mustQueries.push({
+        terms: {
+          executionType: params.executionType,
+        },
+      });
     }
 
     return await searchWorkflowExecutions({
@@ -543,19 +570,7 @@ export class WorkflowsService {
       workflowExecutionIndex: this.workflowsExecutionIndex,
       query: {
         bool: {
-          must: [
-            { term: { workflowId: params.workflowId } },
-            {
-              bool: {
-                should: [
-                  { term: { spaceId } },
-                  // Backward compatibility for objects without spaceId
-                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          must: mustQueries,
         },
       },
     });

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
-import type { Meta } from '@storybook/react';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import type { Meta, StoryObj } from '@storybook/react';
+import { parseDuration } from '@kbn/workflows-execution-engine/server/utils/parse-duration/parse-duration';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowExecutionList } from './workflow_execution_list';
 
@@ -20,68 +21,82 @@ const meta: Meta<typeof WorkflowExecutionList> = {
 
 export default meta;
 
-export const Default = {
+type Story = StoryObj<typeof WorkflowExecutionList>;
+
+export const Default: Story = {
   args: {
     executions: {
       results: [
         {
           id: '3',
           status: ExecutionStatus.RUNNING,
-          startedAt: new Date(),
-          finishedAt: new Date(),
-          duration: 1000,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          spaceId: 'default',
+          duration: parseDuration('1m28s'),
         },
         {
           id: '1',
           status: ExecutionStatus.COMPLETED,
-          startedAt: new Date(),
-          finishedAt: new Date(),
-          duration: 1000,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          spaceId: 'default',
+          duration: parseDuration('1h2m'),
         },
         {
           id: '2',
           status: ExecutionStatus.FAILED,
-          startedAt: new Date(),
-          finishedAt: new Date(),
-          duration: 1000,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          spaceId: 'default',
+          duration: parseDuration('1d2h'),
         },
         {
           id: '4',
           status: ExecutionStatus.PENDING,
-          startedAt: new Date(),
-          finishedAt: new Date(),
-          duration: 1000,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          duration: parseDuration('1w2d'),
+          spaceId: 'default',
         },
         {
           id: '5',
           status: ExecutionStatus.WAITING_FOR_INPUT,
-          startedAt: new Date(),
-          finishedAt: new Date(),
-          duration: 1000,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          duration: parseDuration('1m28s'),
+          spaceId: 'default',
         },
         {
           id: '6',
           status: ExecutionStatus.CANCELLED,
-          startedAt: new Date(),
-          finishedAt: new Date(),
-          duration: 1000,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          duration: parseDuration('280ms'),
+          spaceId: 'default',
         },
         {
           id: '7',
           status: ExecutionStatus.SKIPPED,
-          startedAt: new Date(),
-          finishedAt: new Date(),
-          duration: 1000,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          duration: parseDuration('28s'),
+          spaceId: 'default',
         },
       ],
       _pagination: {
-        offset: 0,
+        page: 1,
         limit: 10,
         total: 8,
       },
     },
     onExecutionClick: () => {},
     selectedId: '2',
+    filters: {
+      status: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_INPUT],
+      executionType: [ExecutionType.PRODUCTION],
+    },
+    onFiltersChange: () => {},
   },
 };
 

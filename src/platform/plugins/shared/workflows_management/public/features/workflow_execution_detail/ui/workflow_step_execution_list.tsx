@@ -16,6 +16,9 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiButton,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,12 +47,12 @@ export const WorkflowStepExecutionList = ({
   onClose,
 }: WorkflowStepExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
+  let content: React.ReactNode = null;
 
   if (isLoading) {
-    return (
+    content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        css={styles.container}
         icon={<EuiLoadingSpinner size="l" />}
         title={
           <h2>
@@ -64,10 +67,9 @@ export const WorkflowStepExecutionList = ({
   }
 
   if (error) {
-    return (
+    content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        css={styles.container}
         icon={<EuiIcon type="error" size="l" />}
         title={
           <h2>
@@ -81,11 +83,10 @@ export const WorkflowStepExecutionList = ({
       />
     );
   }
-  if (!execution?.stepExecutions?.length) {
-    return (
+  if (!execution || !execution.stepExecutions.length) {
+    content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        css={styles.container}
         icon={<EuiIcon type="play" size="l" />}
         title={
           <h2>
@@ -97,6 +98,22 @@ export const WorkflowStepExecutionList = ({
         }
       />
     );
+  } else {
+    content = (
+      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+        {execution.stepExecutions.map((stepExecution) => (
+          <WorkflowStepExecutionListItem
+            key={stepExecution.id}
+            stepExecution={stepExecution}
+            selected={stepExecution.id === selectedId}
+            onClick={() => onStepExecutionClick(stepExecution.id)}
+          />
+        ))}
+        <EuiButton onClick={onClose} css={styles.doneButton}>
+          <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
+        </EuiButton>
+      </EuiFlexGroup>
+    );
   }
 
   return (
@@ -106,17 +123,24 @@ export const WorkflowStepExecutionList = ({
       justifyContent="flexStart"
       css={styles.container}
     >
-      {execution.stepExecutions.map((stepExecution) => (
-        <WorkflowStepExecutionListItem
-          key={stepExecution.id}
-          stepExecution={stepExecution}
-          selected={stepExecution.id === selectedId}
-          onClick={() => onStepExecutionClick(stepExecution.id)}
-        />
-      ))}
-      <EuiButton onClick={onClose} css={styles.doneButton}>
-        <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
-      </EuiButton>
+      <EuiFlexItem grow={false}>
+        <header css={styles.header}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <EuiButtonEmpty iconType="arrowLeft" onClick={onClose} size="xs">
+                  <FormattedMessage
+                    id="workflows.workflowStepExecutionList.backToExecution"
+                    defaultMessage="Back to executions"
+                  />
+                </EuiButtonEmpty>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{/* TODO: step execution filters */}</EuiFlexItem>
+          </EuiFlexGroup>
+        </header>
+      </EuiFlexItem>
+      <EuiFlexItem>{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -124,8 +148,11 @@ export const WorkflowStepExecutionList = ({
 const componentStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.s,
+      padding: euiTheme.size.m,
     }),
+  header: css({
+    minHeight: `32px`,
+  }),
   doneButton: css({
     justifySelf: 'flex-end',
     marginTop: 'auto',

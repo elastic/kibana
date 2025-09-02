@@ -25,6 +25,11 @@ export enum ExecutionStatus {
   SKIPPED = 'skipped',
 }
 
+export enum ExecutionType {
+  TEST = 'test',
+  PRODUCTION = 'production',
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;

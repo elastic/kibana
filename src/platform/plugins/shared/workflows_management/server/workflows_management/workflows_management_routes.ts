@@ -11,12 +11,16 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
+  ExecutionStatus,
   CreateWorkflowCommandSchema,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from '@kbn/workflows';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { WorkflowsManagementApi } from './workflows_management_api';
+import type {
+  SearchWorkflowExecutionsParams,
+  WorkflowsManagementApi,
+} from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../common/lib/errors';
 
@@ -521,17 +525,27 @@ export function defineRoutes(
         },
       },
       validate: {
+        // todo use shared params schema based on SearchWorkflowExecutionsParams type
         query: schema.object({
           workflowId: schema.string(),
+          status: schema.maybe(schema.string()),
+          executionType: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        const { workflowId } = request.query as { workflowId: string };
         const spaceId = spaces.getSpaceId(request);
+        const statuses = request.query.status?.split(',');
+        const types = request.query.executionType?.split(',');
+        const params: SearchWorkflowExecutionsParams = {
+          workflowId: request.query.workflowId,
+          status: Object.values(ExecutionStatus).filter((status) => statuses?.includes(status)),
+          // Execution type is not supported yet
+          // executionType: Object.values(ExecutionType).filter((type) => types?.includes(type)),
+        };
         return response.ok({
-          body: await api.getWorkflowExecutions(workflowId, spaceId),
+          body: await api.getWorkflowExecutions(params, spaceId),
         });
       } catch (error) {
         return response.customError({
