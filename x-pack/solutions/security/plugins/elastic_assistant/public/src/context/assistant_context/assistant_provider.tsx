@@ -94,7 +94,10 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     basePath,
     basePromptContexts: Object.values(promptContext),
     getComments: memoizedGetComments,
-    commentActionsMounter: memoizedCommentActionsMounter,
+    commentActionsMounter: (args: { message: { content: string } }) =>
+      memoizedCommentActionsMounter({
+        message: { content: args.message.content, role: 'user', timestamp: Date.now().toString() },
+      }),
     http,
     inferenceEnabled,
     navigateToApp,

@@ -96,7 +96,7 @@ export interface AssistantProviderProps {
   docLinks: DocLinksStart;
   getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
-  commentActionsMounter?: React.FC<{ message: ClientMessage }>;
+  commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
   http: HttpSetup;
   inferenceEnabled?: boolean;
   nameSpace?: string;
@@ -132,7 +132,7 @@ export interface UseAssistantContext {
   basePath: string;
   currentUser?: User;
   getComments: GetAssistantMessages;
-  commentActionsMounter?: React.FC<{ message: ClientMessage }>;
+  commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
   getUrlForApp: GetUrlForApp;
   http: HttpSetup;
   inferenceEnabled: boolean;

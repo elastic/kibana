@@ -25,9 +25,9 @@ export interface ConversationSettings {
   newConversationSubtitle: string | undefined;
   newConversationPrompts: StarterPrompt[] | undefined;
   selectedConnectorId: string | undefined;
-  setLastConversation: (lastConversation: LastConversation) => void;
+  setLastConversation: (lastConversation: any) => void;
   defaultAgentId: string | undefined;
-  commentActionsMounter: React.FC<{ message: string }> | undefined;
+  commentActionsMounter: (args: { message: { content: string } }) => React.JSX.Element;
 }
 
 export interface OnechatInternalService {
