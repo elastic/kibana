@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { filter, toArray, firstValueFrom } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isChatCompletionMessageEvent, isChatCompletionEvent } from '@kbn/inference-common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
-import { getIndexMappings } from './steps/get_mappings';
 import { extractEsqlQueries } from './utils/esql';
+import { formatFieldAsXml } from './utils/formatting';
+import { resolveResource } from './steps/resolve_resource';
 
 export interface GenerateEsqlResponse {
   answer: string;
@@ -22,8 +22,8 @@ export interface GenerateEsqlResponse {
 
 export const generateEsql = async ({
   nlQuery,
-  context,
   index,
+  context,
   model,
   esClient,
 }: {
@@ -33,47 +33,49 @@ export const generateEsql = async ({
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<GenerateEsqlResponse> => {
-  let selectedIndex: string | undefined;
-  let mappings: MappingTypeMapping;
+  let selectedTarget = index;
 
-  if (index) {
-    selectedIndex = index;
-    const indexMappings = await getIndexMappings({
-      indices: [index],
-      esClient,
-    });
-    mappings = indexMappings[index].mappings;
-  } else {
+  if (!selectedTarget) {
     const {
-      indices: [firstIndex],
+      resources: [selectedResource],
     } = await indexExplorer({
       nlQuery,
       esClient,
       limit: 1,
       model,
     });
-    selectedIndex = firstIndex.indexName;
-    mappings = firstIndex.mappings;
+    selectedTarget = selectedResource.name;
   }
+
+  const { fields, type: targetType } = await resolveResource({
+    resourceName: selectedTarget,
+    esClient,
+  });
 
   const esqlEvents$ = naturalLanguageToEsql({
     // @ts-expect-error using a scoped inference client
     connectorId: undefined,
     client: model.inferenceClient,
     logger: { debug: () => undefined },
-    input: `
-        Your task is to generate an ES|QL query given a natural language query from the user.
+    input: ` You are an expert ES|QL generator.
+Your task is to write a single, valid ES|QL query based on the provided information.
 
-        - Natural language query: "${nlQuery}",
-        - Additional context: "${context ?? 'N/A'}
-        - Index to use: "${selectedIndex}"
-        - Mapping of this index:
-        \`\`\`json
-        ${JSON.stringify(mappings, undefined, 2)}
-        \`\`\`
+<user_query>
+${nlQuery}
+</user_query>
 
-        Given those info, please generate an ES|QL query to address the user request
-        `,
+<context>
+${context ?? 'No additional context provided.'}
+</context>
+
+<target_resource name="${selectedTarget}" type="${targetType}" >
+  <fields>
+${fields.map((field) => `    ${formatFieldAsXml(field)}`).join('\n')}
+  </fields>
+</target_resource>
+
+Based on all the information above, generate the ES|QL query.
+`,
   });
 
   const messages = await firstValueFrom(
