@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useLogReadinessTask } from './log_readiness_task';
+import { useLogReadinessTask } from './use_log_readiness_task';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { POST_SIEM_READINESS_TASK_API_PATH } from '@kbn/security-solution-plugin/common/api/siem_readiness/constants';
 import type { SiemReadinessTask } from './types';
