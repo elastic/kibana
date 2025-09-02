@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  const privMonUtils = PrivMonUtils(getService);
+  const privmonUtils = PrivMonUtils(getService);
 
   describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const kibanaServer = getService('kibanaServer');
@@ -24,23 +24,27 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await enablePrivmonSetting(kibanaServer);
       await api.deleteMonitoringEngine({ query: { data: true } });
-      await privMonUtils.initPrivMonEngine();
+      await privmonUtils.initPrivMonEngine();
     });
 
     describe('CRUD API', () => {
       it('should create a user', async () => {
         log.info(`creating a user`);
-        const res = await api.createPrivMonUser({
+        const { status, body: user } = await api.createPrivMonUser({
           body: { user: { name: 'test_user1' } },
         });
 
-        if (res.status !== 200) {
+        if (status !== 200) {
           log.error(`Creating privmon user failed`);
-          log.error(JSON.stringify(res.body));
+          log.error(JSON.stringify(user));
         }
 
-        expect(res.status).eql(200);
-        expect(res.body);
+        expect(status).eql(200);
+        privmonUtils.assertIsPrivileged(user, true);
+        expect(user['@timestamp']).to.be.a('string');
+        expect(user.event.ingested).to.be.a('string');
+        expect(user.id).to.be.a('string');
+        expect(user.user.name).to.be('test_user1');
       });
 
       it('should not create a user if the advanced setting is disabled', async () => {
@@ -78,14 +82,15 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.status).eql(500);
         expect(res.body.message).to.match(/Maximum user limit of \d+ reached/);
       });
-      it('should update a user', async () => {
+      it.only('should update a user', async () => {
         log.info(`updating a user`);
-        const { body } = await api.createPrivMonUser({
+        const { body: userBefore } = await api.createPrivMonUser({
           body: { user: { name: 'test_user3' } },
         });
+        log.info(`User before: ${JSON.stringify(userBefore)}`);
         const res = await api.updatePrivMonUser({
           body: { user: { name: 'updated' } },
-          params: { id: body.id },
+          params: { id: userBefore.id },
         });
 
         if (res.status !== 200) {
@@ -95,6 +100,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(res.status).eql(200);
         expect(res.body.user.name).to.be('updated');
+
+        const {
+          body: [userAfter],
+        } = await api.listPrivMonUsers({ query: { kql: 'user.name: test_user3' } });
+
+        log.info(`User after: ${JSON.stringify(userAfter)}`);
+
+        privmonUtils.expectTimestampsHaveBeenUpdated(userBefore, userAfter);
       });
 
       it('should list users', async () => {
@@ -138,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should upload multiple users via a csv file', async () => {
         log.info(`Uploading multiple users via CSV`);
         const csv = ['csv_user_1', 'csv_user_2', 'csv_user_3'].join('\n');
-        const res = await privMonUtils.bulkUploadUsersCsv(csv);
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
         if (res.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res.body));
@@ -151,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should add source labels and `is_privileged` field to the uploaded users', async () => {
         log.info(`Uploading multiple users via CSV`);
         const csv = ['csv_user_1', 'csv_user_2', 'csv_user_3'].join('\n');
-        const res = await privMonUtils.bulkUploadUsersCsv(csv);
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
         if (res.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res.body));
@@ -186,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         log.info(`Uploading multiple users via CSV`);
         const csv = ['api_user_1', 'csv_user_1', 'csv_user_2'].join('\n');
-        const res = await privMonUtils.bulkUploadUsersCsv(csv);
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
         if (res.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res.body));
@@ -212,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should soft delete users when uploading a second csv which omits some users', async () => {
         log.info(`Uploading first CSV to create users`);
         const csv = ['csv_user_1', 'csv_user_2', 'csv_user_3'].join('\n');
-        const res = await privMonUtils.bulkUploadUsersCsv(csv);
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
         if (res.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res.body));
@@ -220,7 +233,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         log.info(`Uploading second CSV to soft delete users`);
         const csv2 = ['csv_user_1', 'csv_user_2'].join('\n');
-        const res2 = await privMonUtils.bulkUploadUsersCsv(csv2);
+        const res2 = await privmonUtils.bulkUploadUsersCsv(csv2);
         if (res2.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res2.body));
@@ -258,7 +271,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         log.info(`Uploading first CSV to create users`);
         const csv = ['test_user_1', 'test_user_2', 'test_user_3'].join('\n');
-        const res = await privMonUtils.bulkUploadUsersCsv(csv);
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
         if (res.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res.body));
@@ -266,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         log.info(`Uploading second CSV to soft delete users`);
         const csv2 = ['test_user_1', 'test_user_2'].join('\n');
-        const res2 = await privMonUtils.bulkUploadUsersCsv(csv2);
+        const res2 = await privmonUtils.bulkUploadUsersCsv(csv2);
         if (res2.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res2.body));
@@ -297,7 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should only upload unique users from the CSV', async () => {
         log.info(`Uploading multiple users via CSV with duplicates`);
         const csv = Array(150).fill('non_unique_user').join('\n');
-        const res = await privMonUtils.bulkUploadUsersCsv(csv);
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
         if (res.status !== 200) {
           log.error(`Failed to upload users via CSV`);
           log.error(JSON.stringify(res.body));
@@ -319,7 +332,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('CSV with labels', () => {
         it('should add labels to the uploaded users', async () => {
           const csv = ['csv_user_1,label1'].join('\n');
-          await privMonUtils.bulkUploadUsersCsv(csv);
+          await privmonUtils.bulkUploadUsersCsv(csv);
 
           const listRes = await api.listPrivMonUsers({
             query: {},
@@ -331,10 +344,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should update labels to the uploaded users', async () => {
           const csv = ['csv_user_1,label1'].join('\n');
-          await privMonUtils.bulkUploadUsersCsv(csv);
+          await privmonUtils.bulkUploadUsersCsv(csv);
 
           const updateCsv = ['csv_user_1,label3'].join('\n');
-          await privMonUtils.bulkUploadUsersCsv(updateCsv);
+          await privmonUtils.bulkUploadUsersCsv(updateCsv);
 
           const listRes = await api.listPrivMonUsers({
             query: {},
@@ -346,10 +359,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should keep the current labels when the updated user has no labels', async () => {
           const csv = ['csv_user_1,label1'].join('\n');
-          await privMonUtils.bulkUploadUsersCsv(csv);
+          await privmonUtils.bulkUploadUsersCsv(csv);
 
           const updateCsv = ['csv_user_1'].join('\n');
-          await privMonUtils.bulkUploadUsersCsv(updateCsv);
+          await privmonUtils.bulkUploadUsersCsv(updateCsv);
 
           const listRes = await api.listPrivMonUsers({
             query: {},
@@ -362,10 +375,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('should remove the label when soft deleting a user', async () => {
           const csv = ['csv_user_1,label1'].join('\n');
-          await privMonUtils.bulkUploadUsersCsv(csv);
+          await privmonUtils.bulkUploadUsersCsv(csv);
 
           const updateCsv = ['csv_user_2,label2'].join('\n');
-          await privMonUtils.bulkUploadUsersCsv(updateCsv);
+          await privmonUtils.bulkUploadUsersCsv(updateCsv);
 
           const listRes = await api.listPrivMonUsers({
             query: { kql: `user.name: csv_user_1` },
