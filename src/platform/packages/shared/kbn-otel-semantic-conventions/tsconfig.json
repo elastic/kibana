@@ -13,8 +13,6 @@
     "scripts"
   ],
   "kbn_references": [
-    "@kbn/tooling-log",
-    "@kbn/dev-cli-runner",
   ],
   "exclude": [
     "target/**/*"

@@ -86,7 +86,7 @@ export class SecuritySolutionServerlessPlugin
     // Register product features
     const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
-    registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
+    registerProductFeatures(pluginsSetup, enabledProductFeatures);
 
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));

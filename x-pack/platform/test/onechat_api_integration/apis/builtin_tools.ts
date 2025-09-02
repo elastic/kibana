@@ -13,14 +13,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/232991
-  describe.skip('Builtin Tools API', () => {
-    describe('DELETE /api/chat/tools/.nl_search', () => {
+  describe('Builtin Tools API', () => {
+    describe('DELETE /api/chat/tools/.search', () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
         for (const toolId of Object.values(builtinToolIds) as string[]) {
-          if (toolId === '.researcher_agent') {
-            continue;
-          }
           const response = await supertest
             .delete(`/api/chat/tools/${toolId}`)
             .set('kbn-xsrf', 'kibana')
@@ -36,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
           'onechat:api:enabled': false,
         });
 
-        await supertest.delete('/api/chat/tools/.nl_search').set('kbn-xsrf', 'kibana').expect(404);
+        await supertest.delete('/api/chat/tools/.search').set('kbn-xsrf', 'kibana').expect(404);
 
         await kibanaServer.uiSettings.update({
           'onechat:api:enabled': true,
@@ -44,10 +40,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('PUT /api/chat/tools/.nl_search', () => {
+    describe('PUT /api/chat/tools/.search', () => {
       it('should return 400 when attempting to update a builtin system tool', async () => {
         await supertest
-          .put('/api/chat/tools/.nl_search')
+          .put('/api/chat/tools/.search')
           .set('kbn-xsrf', 'kibana')
           .send({ description: 'Updated description' })
           .expect(400);
@@ -57,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('POST /api/chat/tools', () => {
       it('should return 400 when attempting to create a tool under an existing builtin tool ID', async () => {
         const toolData = {
-          id: '.nl_search',
+          id: '.search',
           type: 'esql',
           description: 'Attempting to create tool with builtin ID',
           configuration: {
@@ -73,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(response.body).to.have.property('message');
-        expect(response.body.message).to.contain('Tool id .nl_search is reserved');
+        expect(response.body.message).to.contain('Tool id .search is reserved');
       });
     });
 
@@ -99,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const executeRequest = {
-          tool_id: '.nl_search',
+          tool_id: '.search',
           tool_params: {
             query: 'test query',
           },
