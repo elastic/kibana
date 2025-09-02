@@ -21,7 +21,6 @@ import {
   type Query,
   type TimeRange,
 } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   diffComparators,
   type PublishingSubject,
@@ -116,17 +115,6 @@ export function initializeUnifiedSearchManager(
   const unifiedSearchSubscriptions: Subscription = new Subscription();
   let stopSyncingWithUrl: (() => void) | undefined;
   let stopSyncingAppFilters: (() => void) | undefined;
-
-  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-  // TODO - get ESQL Variables from children.
-  // const controlGroupEsqlVariables$ = controlGroupApi$.pipe(
-  //   switchMap((controlGroupApi) =>
-  //     controlGroupApi ? controlGroupApi.esqlVariables$ : of([] as ESQLControlVariable[])
-  //   )
-  // );
-  // unifiedSearchSubscriptions.add(
-  //   controlGroupEsqlVariables$.subscribe((latestVariables) => esqlVariables$.next(latestVariables))
-  // );
 
   if (
     creationOptions?.useUnifiedSearchIntegration &&
@@ -288,7 +276,6 @@ export function initializeUnifiedSearchManager(
     api: {
       query$,
       setQuery,
-      esqlVariables$,
       setFilters: setUnifiedSearchFilters,
       timeRange$,
       setTimeRange: setAndSyncTimeRange,

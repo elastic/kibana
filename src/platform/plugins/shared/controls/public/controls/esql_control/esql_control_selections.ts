@@ -9,7 +9,11 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import {
+  fetch$,
+  type PublishingSubject,
+  type StateComparators,
+} from '@kbn/presentation-publishing';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
 import { EsqlControlType } from '@kbn/esql-types';
@@ -19,8 +23,8 @@ import type {
   OptionsListSuggestions,
 } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
-import type { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
+import type { ESQLControlApi } from './types';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -57,8 +61,8 @@ export const selectionComparators: StateComparators<
 };
 
 export function initializeESQLControlSelections(
+  api: ESQLControlApi,
   initialState: ESQLControlState,
-  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>,
   setDataLoading: (loading: boolean) => void
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
@@ -91,7 +95,7 @@ export function initializeESQLControlSelections(
   }
 
   // For Values From Query controls, update values on dashboard load/reload
-  const fetchSubscription = controlFetch$
+  const fetchSubscription = fetch$(api)
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
       switchMap(async ({ timeRange }) => {

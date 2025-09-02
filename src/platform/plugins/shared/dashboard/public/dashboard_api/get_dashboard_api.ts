@@ -33,6 +33,7 @@ import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { initializeESQLVariablesManager } from './esql_variables_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -70,6 +71,9 @@ export function getDashboardApi({
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
   const settingsManager = initializeSettingsManager(initialState);
+
+  const esqlVariablesManager = initializeESQLVariablesManager(layoutManager.api.children$);
+
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
     settingsManager.api.timeRestore$,
@@ -122,6 +126,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,
     ...trackOverlayApi,
+    ...esqlVariablesManager.api,
     ...initializeTrackContentfulRender(),
     executionContext: {
       type: 'dashboard',

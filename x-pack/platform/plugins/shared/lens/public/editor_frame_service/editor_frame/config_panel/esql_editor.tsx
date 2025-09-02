@@ -287,6 +287,7 @@ function InnerESQLEditor({
   });
 
   const hideTimeFilterInfo = false;
+
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
       <ESQLLangEditor
