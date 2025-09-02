@@ -30,10 +30,6 @@ export const getConversationResponseMock = (): ConversationResponse => ({
     model: 'test',
     provider: 'Azure OpenAI',
   },
-  summary: {
-    timestamp: '2020-04-20T15:25:31.830Z',
-    semanticContent: 'test',
-  },
   category: 'assistant',
   users: [
     {
@@ -79,10 +75,6 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
             default_system_prompt_id: 'prompt-1',
             model: 'test',
             provider: 'Azure OpenAI',
-          },
-          summary: {
-            '@timestamp': '2020-04-20T15:25:31.830Z',
-            semantic_content: 'test',
           },
           category: 'assistant',
           users: [
