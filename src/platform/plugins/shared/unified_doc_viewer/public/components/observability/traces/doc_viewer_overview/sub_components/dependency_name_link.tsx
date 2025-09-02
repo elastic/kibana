@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { AgentIcon } from '@kbn/custom-icons';
-import type { AgentName } from '@kbn/elastic-agent-utils';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
+import React from 'react';
+import { SpanIcon } from '@kbn/apm-ui-shared';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
-const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
-
-interface ServiceNameLinkProps {
-  serviceName?: string;
-  agentName?: string;
-  formattedServiceName: React.ReactNode;
+interface DependencyNameLinkProps {
+  dependencyName: string;
+  spanType?: string;
+  spanSubtype?: string;
+  environment?: string;
+  formattedDependencyName?: React.ReactNode;
 }
 
-export function ServiceNameLink({
-  serviceName,
-  agentName,
-  formattedServiceName,
-}: ServiceNameLinkProps) {
+export function DependencyNameLink({
+  dependencyName,
+  spanType,
+  spanSubtype,
+  environment,
+  formattedDependencyName,
+}: DependencyNameLinkProps) {
   const {
     share: { url: urlService },
     core,
@@ -37,16 +39,18 @@ export function ServiceNameLink({
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
 
-  const apmLinkToServiceEntityLocator = urlService.locators.get<{
-    serviceName: string;
+  const apmLinkToDependencyOverviewLocator = urlService.locators.get<{
+    dependencyName: string;
+    environment: string;
     rangeFrom: string;
     rangeTo: string;
-  }>(SERVICE_OVERVIEW_LOCATOR_ID);
+  }>(DEPENDENCY_OVERVIEW_LOCATOR_ID);
 
   const href =
-    serviceName &&
-    apmLinkToServiceEntityLocator?.getRedirectUrl({
-      serviceName,
+    environment &&
+    apmLinkToDependencyOverviewLocator?.getRedirectUrl({
+      dependencyName,
+      environment,
       rangeFrom: timeRangeFrom,
       rangeTo: timeRangeTo,
     });
@@ -55,8 +59,9 @@ export function ServiceNameLink({
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          apmLinkToServiceEntityLocator?.navigate({
-            serviceName,
+          apmLinkToDependencyOverviewLocator?.navigate({
+            dependencyName,
+            environment,
             rangeFrom: timeRangeFrom,
             rangeTo: timeRangeTo,
           });
@@ -66,27 +71,18 @@ export function ServiceNameLink({
 
   const content = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      {agentName && (
-        <EuiFlexItem grow={false}>
-          <AgentIcon agentName={agentName as AgentName} size="m" />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>{formattedServiceName}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SpanIcon type={spanType} subtype={spanSubtype} size="m" />
+      </EuiFlexItem>
+      <EuiFlexItem>{formattedDependencyName}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
-  return (
-    <>
-      {canViewApm && routeLinkProps ? (
-        <EuiLink
-          {...routeLinkProps}
-          data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
-        >
-          {content}
-        </EuiLink>
-      ) : (
-        content
-      )}
-    </>
+  return canViewApm && routeLinkProps ? (
+    <EuiLink {...routeLinkProps} data-test-subj="unifiedDocViewSpanOverviewDependencyNameLink">
+      {content}
+    </EuiLink>
+  ) : (
+    content
   );
 }

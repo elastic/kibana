@@ -13,10 +13,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonEmpty } from '
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
-import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
-import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
-import { TransactionSummaryField } from '../doc_viewer_transaction_overview/sub_components/transaction_summary_field';
+import { transactionTraceFields, traceFields } from '../doc_viewer_overview/resources/fields';
+import { SummaryField } from '../doc_viewer_overview/sub_components/summary_field';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import type { FieldConfiguration } from '../resources/get_field_configuration';
 import { FullScreenWaterfall } from './full_screen_waterfall';
@@ -72,8 +70,8 @@ export const Trace = ({
 
   const fieldRows =
     displayType === 'span'
-      ? spanTraceFields.map((fieldId: string) => (
-          <SpanSummaryField
+      ? traceFields.map((fieldId: string) => (
+          <SummaryField
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
@@ -82,7 +80,7 @@ export const Trace = ({
           />
         ))
       : transactionTraceFields.map((fieldId: string) => (
-          <TransactionSummaryField
+          <SummaryField
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}

@@ -14,9 +14,9 @@ import { TRANSACTION_DETAILS_BY_NAME_LOCATOR } from '@kbn/deeplinks-observabilit
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 interface TransactionNameLinkProps {
-  serviceName: string;
-  transactionName: string;
-  renderContent?: (name: string) => React.ReactNode;
+  serviceName?: string;
+  transactionName?: string;
+  renderContent?: (name?: string) => React.ReactNode;
 }
 
 export function TransactionNameLink({
@@ -41,12 +41,15 @@ export function TransactionNameLink({
     rangeTo: string;
   }>(TRANSACTION_DETAILS_BY_NAME_LOCATOR);
 
-  const href = apmLinkToTransactionByNameLocator?.getRedirectUrl({
-    serviceName,
-    transactionName,
-    rangeFrom: timeRangeFrom,
-    rangeTo: timeRangeTo,
-  });
+  const href =
+    serviceName &&
+    transactionName &&
+    apmLinkToTransactionByNameLocator?.getRedirectUrl({
+      serviceName,
+      transactionName,
+      rangeFrom: timeRangeFrom,
+      rangeTo: timeRangeTo,
+    });
   const routeLinkProps = href
     ? getRouterLinkProps({
         href,

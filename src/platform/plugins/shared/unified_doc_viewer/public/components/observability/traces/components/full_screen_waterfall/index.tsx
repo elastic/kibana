@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
-import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import { useRootTransactionContext } from '../../doc_viewer_overview/hooks/use_root_transaction';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 

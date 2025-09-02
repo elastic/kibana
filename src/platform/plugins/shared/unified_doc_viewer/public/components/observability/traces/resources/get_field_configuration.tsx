@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SpanDocumentOverview, TransactionDocumentOverview } from '@kbn/discover-utils';
+import type {
+  SpanDocumentOverview,
+  TransactionDocumentOverview,
+  TraceDocumentOverview,
+} from '@kbn/discover-utils';
 import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
@@ -39,8 +43,8 @@ export const getCommonFieldConfiguration = ({
   attributes,
   flattenedDoc,
 }: {
-  attributes: TransactionDocumentOverview | SpanDocumentOverview;
-  flattenedDoc: TransactionDocumentOverview | SpanDocumentOverview;
+  attributes: TransactionDocumentOverview | SpanDocumentOverview | TraceDocumentOverview;
+  flattenedDoc: TransactionDocumentOverview | SpanDocumentOverview | TraceDocumentOverview;
 }): Record<string, FieldConfiguration> => {
   return {
     [TRANSACTION_NAME_FIELD]: {

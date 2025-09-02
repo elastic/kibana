@@ -131,6 +131,17 @@ export interface SpanDocumentOverview
   'resource.attributes.telemetry.sdk.language'?: string;
 }
 
+export interface TraceDocumentOverview
+  extends TraceFields,
+    Partial<ServiceFields>,
+    Partial<SpanFields>,
+    Partial<UserAgentFields>,
+    Partial<TransactionFields> {
+  duration?: number;
+  kind?: string;
+  'resource.attributes.telemetry.sdk.language'?: string;
+}
+
 export interface TraceFields {
   '@timestamp': number;
   'trace.id': string;
