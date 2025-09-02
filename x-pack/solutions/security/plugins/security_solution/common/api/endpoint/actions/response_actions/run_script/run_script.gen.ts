@@ -16,7 +16,10 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse, BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type RawScriptParameters = z.infer<typeof RawScriptParameters>;
 export const RawScriptParameters = z.object({
@@ -102,4 +105,4 @@ export const RunScriptActionRequestBody = RunScriptRouteRequestBody;
 export type RunScriptActionRequestBodyInput = z.input<typeof RunScriptActionRequestBody>;
 
 export type RunScriptActionResponse = z.infer<typeof RunScriptActionResponse>;
-export const RunScriptActionResponse = SuccessResponse;
+export const RunScriptActionResponse = ResponseActionCreateSuccessResponse;

@@ -221,5 +221,113 @@ export const ProtectionUpdatesNoteResponse = z.object({
   note: z.string().optional(),
 });
 
+export type ResponseActionCreateSuccessResponse = z.infer<
+  typeof ResponseActionCreateSuccessResponse
+>;
+export const ResponseActionCreateSuccessResponse = z.object({
+  /**
+   * The created response action details
+   */
+  data: z
+    .object({
+      /**
+       * The response action ID
+       */
+      id: z.string().optional(),
+      /**
+       * The response action command
+       */
+      command: z.string().optional(),
+      /**
+       * The response action agent type
+       */
+      agentType: z.string().optional(),
+      /**
+       * Whether the response action is expired
+       */
+      isExpired: z.boolean().optional(),
+      /**
+       * Whether the response action is complete
+       */
+      isComplete: z.boolean().optional(),
+      /**
+       * Whether the response action was successful
+       */
+      wasSuccessful: z.boolean().optional(),
+      /**
+       * The response action status
+       */
+      status: z.string().optional(),
+      /**
+       * The response action start time
+       */
+      startedAt: z.string().optional(),
+      /**
+       * The user who created the response action
+       */
+      createdBy: z.string().optional(),
+      /**
+       * The agent IDs for the hosts that the response action was sent to
+       */
+      agents: z.object({}).optional(),
+      /**
+       * The parameters of the response action. Content different depending on the response action command
+       */
+      parameters: z.object({}).optional(),
+      /**
+       * An object containing the host names associated with the agent IDs the response action was sent to
+       */
+      hosts: z
+        .object({})
+        .catchall(
+          z.object({
+            /**
+             * The host name
+             */
+            name: z.string().optional(),
+          })
+        )
+        .optional(),
+      /**
+       * The state of the response action for each agent ID that it was sent to
+       */
+      agentState: z
+        .object({})
+        .catchall(
+          z.object({
+            /**
+             * Whether the response action is completed for the agent ID
+             */
+            isCompleted: z.boolean().optional(),
+            /**
+             * Whether the response action was successful for the agent ID
+             */
+            wasSuccessful: z.boolean().optional(),
+            /**
+             * The date and time the response action was completed for the agent ID
+             */
+            completedAt: z.string().optional(),
+          })
+        )
+        .optional(),
+      /**
+       * The outputs of the response action for each agent ID that it was sent to
+       */
+      outputs: z
+        .object({})
+        .catchall(
+          z.object({
+            type: z.enum(['json', 'text']),
+            /**
+             * The response action output content for the agent ID. Exact format depends on the response action command.
+             */
+            content: z.union([z.object({}), z.string()]),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+});
+
 export type SuccessResponse = z.infer<typeof SuccessResponse>;
 export const SuccessResponse = z.object({});
