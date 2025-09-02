@@ -32,22 +32,21 @@ const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.d
     'Trace attributes and a timeline of all spans in the trace, including their duration and hierarchy.',
 });
 
-export interface Trace2Props
+export interface TraceProps
   extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
   hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
   showWaterfall?: boolean;
 }
 
-// TODO replace Trace With Trace2 in the overviews and rename it once everything is ready
-export const Trace2 = ({
+export const Trace = ({
   hit,
   dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
   showWaterfall = true,
-}: Trace2Props) => {
+}: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const isSpan = !isTransaction(hit);

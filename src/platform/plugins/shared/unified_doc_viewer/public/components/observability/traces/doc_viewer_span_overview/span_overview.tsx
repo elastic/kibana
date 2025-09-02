@@ -33,7 +33,7 @@ import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
-import { Trace2 } from '../components/trace2';
+import { Trace } from '../components/trace';
 import { About } from '../components/about';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 
@@ -121,7 +121,7 @@ export function SpanOverview({
             )}
             <EuiFlexItem>
               <EuiSpacer size="m" />
-              <Trace2
+              <Trace
                 hit={hit}
                 showWaterfall={showWaterfall}
                 dataView={dataView}

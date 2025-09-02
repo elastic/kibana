@@ -30,10 +30,11 @@ import { getTransactionFieldConfiguration } from './resources/get_transaction_fi
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 import { RootTransactionProvider } from './hooks/use_root_transaction';
-import { Trace } from '../components/trace';
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
+import { Trace } from '../components/trace';
+
 import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
@@ -145,14 +146,12 @@ export function TransactionOverview({
                 <>
                   <EuiSpacer size="m" />
                   <Trace
-                    fields={fieldConfigurations}
-                    fieldMappings={dataViewFields}
-                    traceId={traceId}
-                    docId={transactionId}
-                    displayType="transaction"
-                    dataView={dataView}
+                    hit={hit}
                     showWaterfall={showWaterfall}
-                    showActions={showActions}
+                    dataView={dataView}
+                    filter={filter}
+                    onAddColumn={onAddColumn}
+                    onRemoveColumn={onRemoveColumn}
                   />
                 </>
               )}
