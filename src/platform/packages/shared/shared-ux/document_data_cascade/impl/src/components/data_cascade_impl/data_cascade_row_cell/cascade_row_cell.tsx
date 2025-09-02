@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowCellPrimitiveProps } from '../types';
 import {
   getCascadeRowNodePath,
@@ -98,21 +98,19 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem tabIndex={-1}>
-        {isPendingRowLeafDataFetch || !leafData ? (
-          <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingChart size={size === 's' ? 'm' : size} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
+      <EuiFlexItem tabIndex={0}>
+        <EuiSkeletonText
+          lines={3}
+          size={size === 'l' ? 'm' : size}
+          isLoading={isPendingRowLeafDataFetch || !leafData}
+        >
           <div className={styles.cellWrapper}>
             {React.createElement(children, {
               data: leafData,
               key: leafCacheKey,
             })}
           </div>
-        )}
+        </EuiSkeletonText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
