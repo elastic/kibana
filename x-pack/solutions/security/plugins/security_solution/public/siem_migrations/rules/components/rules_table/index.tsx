@@ -15,16 +15,16 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiButton,
+  EuiSwitch,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { EmptyMigration } from './empty_migration';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
 import { useInstallMigrationRule } from '../../logic/use_install_migration_rule';
@@ -34,18 +34,23 @@ import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_t
 import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_prebuilt_rules';
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
-import { SearchField } from './search_field';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
-import type { FilterOptions, RuleMigrationSettings, RuleMigrationStats } from '../../types';
+import type { FilterOptions, RuleMigrationStats } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
-import { StartRuleMigrationModal } from './start_rule_migration_modal';
+import {
+  DATA_TEST_SUBJ_PREFIX,
+  EmptyMigration,
+  SearchField,
+  StartMigrationModal,
+} from '../../../common/components';
+import type { MigrationSettingsBase } from '../../../common/types';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -117,7 +122,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const tableSelection: EuiTableSelectionType<RuleMigrationRule> = useMemo(
       () => ({
         selectable: (item: RuleMigrationRule) => {
-          return !item.elastic_rule?.id && item.translation_result === RuleTranslationResult.FULL;
+          return (
+            !item.elastic_rule?.id && item.translation_result === MigrationTranslationResult.FULL
+          );
         },
         selectableMessage: (selectable: boolean, item: RuleMigrationRule) => {
           if (selectable) {
@@ -223,13 +230,6 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installMigrationRules]
     );
 
-    const reprocessFailedRulesWithSettings = useCallback(
-      (settings: RuleMigrationSettings) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
-      },
-      [migrationId, startMigration]
-    );
-
     const defaultSettingsForModal = useMemo(
       () => ({
         connectorId: migrationStats?.last_execution?.connector_id,
@@ -238,11 +238,36 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [migrationStats.last_execution]
     );
 
+    const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
+      !defaultSettingsForModal.skipPrebuiltRulesMatching
+    );
+
+    const reprocessFailedRulesWithSettings = useCallback(
+      (settings: MigrationSettingsBase) => {
+        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, {
+          ...settings,
+          skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
+        });
+      },
+      [enablePrebuiltRulesMatching, migrationId, startMigration]
+    );
+
     const {
       isOpen: isReprocessFailedRulesModalVisible,
       open: showReprocessFailedRulesModal,
       close: closeReprocessFailedRulesModal,
     } = useIsOpenState(false);
+
+    const prebuiltRulesMatchingSwitch = useMemo(() => {
+      return (
+        <EuiSwitch
+          data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`}
+          label={i18n.START_RULE_MIGRATION_MODAL_PREBUILT_RULES_LABEL}
+          checked={enablePrebuiltRulesMatching}
+          onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
+        />
+      );
+    }, [enablePrebuiltRulesMatching]);
 
     const isRulesLoading =
       isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
@@ -252,7 +277,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         const canMigrationRuleBeInstalled =
           !isRulesLoading &&
           !migrationRule.elastic_rule?.id &&
-          migrationRule.translation_result === RuleTranslationResult.FULL;
+          migrationRule.translation_result === MigrationTranslationResult.FULL;
         return (
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -337,11 +362,13 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     return (
       <>
         {isReprocessFailedRulesModalVisible && (
-          <StartRuleMigrationModal
+          <StartMigrationModal
+            title={i18n.REPROCESS_RULES_DIALOG_TITLE(translationStats?.rules.failed ?? 0)}
+            description={i18n.REPROCESS_RULES_DIALOG_DESCRIPTION}
             defaultSettings={defaultSettingsForModal}
             onStartMigrationWithSettings={reprocessFailedRulesWithSettings}
             onClose={closeReprocessFailedRulesModal}
-            numberOfRules={translationStats?.rules.failed ?? 0}
+            additionalSettings={prebuiltRulesMatchingSwitch}
           />
         )}
 

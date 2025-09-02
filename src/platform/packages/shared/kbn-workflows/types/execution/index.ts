@@ -22,9 +22,22 @@ export type {
   ExitConditionBranchNodeSchema,
   ExitIfNode,
 } from './nodes/branching_nodes';
+export type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
 export type {
-  EnterForeachNode,
   EnterRetryNode,
-  ExitForeachNode,
   ExitRetryNode,
-} from './nodes/loop_nodes';
+  EnterContinueNode,
+  ExitContinueNode,
+  EnterTryBlockNodeSchema,
+  EnterTryBlockNode,
+  ExitTryBlockNodeSchema,
+  ExitTryBlockNode,
+  EnterNormalPathNodeSchema,
+  EnterNormalPathNode,
+  ExitNormalPathNodeSchema,
+  ExitNormalPathNode,
+  EnterFallbackPathNodeSchema,
+  EnterFallbackPathNode,
+  ExitFallbackPathNodeSchema,
+  ExitFallbackPathNode,
+} from './nodes/on_failure_nodes';

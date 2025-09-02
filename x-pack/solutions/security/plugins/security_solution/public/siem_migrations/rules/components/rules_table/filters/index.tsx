@@ -7,8 +7,9 @@
 
 import React, { useCallback } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
-import type { AuthorFilter, FilterOptions, StatusFilter } from '../../../types';
-import { StatusFilterButton } from './status';
+import { StatusFilterButton } from '../../../../common/components';
+import type { StatusFilter } from '../../../../common/types';
+import type { AuthorFilter, FilterOptions } from '../../../types';
 import { AuthorFilterButton } from './author';
 
 export interface MigrationRulesFilterProps {
