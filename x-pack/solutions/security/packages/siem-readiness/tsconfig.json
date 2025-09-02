@@ -17,6 +17,5 @@
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/core",
-    "@kbn/security-solution-plugin",
   ]
 }
