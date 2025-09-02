@@ -60,7 +60,8 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
                 </p>
               </EuiText>
             }
-            anchorProps={{ type: 'question', color: 'subdued' }}
+            type="question"
+            color="subdued"
           />
         </>
       </EuiFormRow>
