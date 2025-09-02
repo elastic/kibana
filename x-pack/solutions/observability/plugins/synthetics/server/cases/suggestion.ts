@@ -118,9 +118,9 @@ export function getMonitorByServiceName(
             },
           });
 
-          const monitors = (results.aggregations as SyntheticsAggregationsResponse['aggregations'])
-            .by_monitor.buckets;
-
+          const monitors =
+            (results.aggregations as SyntheticsAggregationsResponse['aggregations'])?.by_monitor
+              .buckets || [];
           if (monitors.length === 0) {
             logger.debug(`No Synthetics monitors found for service ${serviceNames.join(', ')}`);
             return { suggestions: [] };
