@@ -57,7 +57,6 @@ import {
   registerCasesAnalyticsIndexesTasks,
   scheduleCasesAnalyticsSyncTasks,
 } from './cases_analytics';
-import { registerUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -139,10 +138,6 @@ export class CasePlugin
         core,
       })
     );
-
-    if (this.caseConfig.incrementalId.enabled) {
-      registerUiSettings(core);
-    }
 
     if (plugins.taskManager) {
       if (plugins.usageCollection) {

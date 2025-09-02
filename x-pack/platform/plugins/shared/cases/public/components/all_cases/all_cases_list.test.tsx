@@ -144,9 +144,6 @@ describe('AllCasesListGeneric', () => {
     userProfiles: new Map(),
     currentUserProfile: undefined,
     selectedColumns: [],
-    settings: {
-      displayIncrementalCaseId: false,
-    },
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');
@@ -189,9 +186,7 @@ describe('AllCasesListGeneric', () => {
 
   it('should render AllCasesList', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { settings: { displayIncrementalCaseId: true } },
-    });
+    renderWithTestingProviders(<AllCasesList />);
 
     const caseDetailsLinks = await screen.findAllByTestId('case-details-link');
 
@@ -224,18 +219,6 @@ describe('AllCasesListGeneric', () => {
 
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
-  });
-
-  it('should not render incremental id if setting is disabled', async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { settings: { displayIncrementalCaseId: false } },
-    });
-
-    await screen.findAllByTestId('case-details-link');
-
-    const incrementalIdTextElements = screen.queryAllByTestId('cases-incremental-id-text');
-    expect(incrementalIdTextElements).toHaveLength(0);
   });
 
   it("should show a tooltip with the assignee's email when hover over the assignee avatar", async () => {
