@@ -219,7 +219,12 @@ export class ReindexServiceWrapper {
 
         const existingOp = await reindexService.findReindexOperation(indexName);
 
-        if (existingOp) {
+        if (
+          existingOp &&
+          ![ReindexStatus.cancelled, ReindexStatus.completed, ReindexStatus.failed].includes(
+            existingOp.attributes.status
+          )
+        ) {
           throw error.reindexAlreadyInProgress(
             i18n.translate('xpack.reindexService.reindexAlreadyInProgressError', {
               defaultMessage: 'A reindex operation already in-progress for {indexName}',

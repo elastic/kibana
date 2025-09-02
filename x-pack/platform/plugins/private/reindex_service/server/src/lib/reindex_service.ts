@@ -486,15 +486,18 @@ export const reindexServiceFactory = (
       ? [
           { add: { index: newIndexName, alias: indexName, is_hidden: isHidden } },
           { remove_index: { index: indexName } },
+          ...extraAliases,
         ]
-      : [];
+      : extraAliases;
 
-    const aliasResponse = await esClient.indices.updateAliases({
-      actions: [...updateAliasActions, ...extraAliases],
-    });
+    if (updateAliasActions.length) {
+      const aliasResponse = await esClient.indices.updateAliases({
+        actions: updateAliasActions,
+      });
 
-    if (!aliasResponse.acknowledged) {
-      throw error.cannotCreateIndex(`Index aliases could not be created.`);
+      if (!aliasResponse.acknowledged) {
+        throw error.cannotCreateIndex(`Index aliases could not be created.`);
+      }
     }
 
     if (reindexOptions?.openAndClose === true) {
@@ -591,7 +594,8 @@ export const reindexServiceFactory = (
         const existingOp = existingReindexOps.saved_objects[0];
         if (
           existingOp.attributes.status === ReindexStatus.failed ||
-          existingOp.attributes.status === ReindexStatus.cancelled
+          existingOp.attributes.status === ReindexStatus.cancelled ||
+          existingOp.attributes.status === ReindexStatus.completed
         ) {
           // Delete the existing one if it failed or was cancelled to give a chance to retry.
           await actions.deleteReindexOp(existingOp);
