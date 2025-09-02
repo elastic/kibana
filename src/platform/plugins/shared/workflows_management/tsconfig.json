@@ -42,6 +42,7 @@
     "@kbn/discover-utils",
     "@kbn/field-utils",
     "@kbn/storybook",
+    "@kbn/core-security-browser",
     "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
