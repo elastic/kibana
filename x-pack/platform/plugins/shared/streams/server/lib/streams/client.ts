@@ -14,6 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
@@ -168,7 +169,7 @@ export class StreamsClient {
    * Disabling streams means deleting the logs root stream
    * AND its descendants, including any Elasticsearch objects,
    * such as data streams. That means it deletes all data
-   * belonging to wired streams.
+   * belonging to wired and group streams.
    *
    * It does NOT delete classic streams.
    */
@@ -189,13 +190,21 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (rootStreamExists) {
+      const streams = await this.getManagedStreams();
+      const groupStreams = streams.filter((stream) => Streams.GroupStream.Definition.is(stream));
+
       await State.attemptChanges(
         [
           {
-            type: 'delete',
+            type: 'delete' as const,
             name: rootStreamDefinition.name,
           },
-        ],
+        ].concat(
+          groupStreams.map((stream) => ({
+            type: 'delete' as const,
+            name: stream.name,
+          }))
+        ),
         {
           ...this.dependencies,
           streamsClient: this,
@@ -297,10 +306,12 @@ export class StreamsClient {
     parent,
     name,
     where: condition,
+    status,
   }: {
     parent: string;
     name: string;
     where: Condition;
+    status: RoutingStatus;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -323,6 +334,7 @@ export class StreamsClient {
                 routing: parentDefinition.ingest.wired.routing.concat({
                   destination: name,
                   where: condition,
+                  status,
                 }),
               },
             },
