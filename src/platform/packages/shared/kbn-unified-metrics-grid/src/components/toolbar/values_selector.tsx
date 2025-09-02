@@ -97,7 +97,6 @@ export const ValuesSelector = ({
             <FormattedMessage
               id="metricsExperience.valuesSelector.valuesSelectorButtonLabelWithSelection"
               defaultMessage="Values"
-              values={{ count }}
             />
           ) : (
             <FormattedMessage

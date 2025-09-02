@@ -1730,7 +1730,7 @@
             "label": "find",
             "description": [],
             "signature": [
-              "({ savedObjectsClient, internalElasticsearchClient }: ",
+              "({ savedObjectsClient, asCurrentUserElasticsearchClient }: ",
               "SearchSessionStatusDependencies",
               ", user: ",
               "AuthenticatedUser",
@@ -1755,7 +1755,7 @@
                 "id": "def-server.SearchSessionService.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjectsClient, internalElasticsearchClient }",
+                "label": "{ savedObjectsClient, asCurrentUserElasticsearchClient }",
                 "description": [],
                 "signature": [
                   "SearchSessionStatusDependencies"
