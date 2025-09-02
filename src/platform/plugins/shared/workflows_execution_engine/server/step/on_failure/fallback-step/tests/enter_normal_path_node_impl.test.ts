@@ -75,7 +75,7 @@ describe('EnterNormalPathNodeImpl', () => {
 
       it('should get step state for current node', async () => {
         await underTest.catchError();
-        expect(workflowRuntime.getStepState).toHaveBeenCalledWith(step.id);
+        expect(workflowRuntime.getStepState).toHaveBeenCalledWith(step.enterZoneNodeId);
       });
 
       it('should set step state with error on enter zone node', async () => {
