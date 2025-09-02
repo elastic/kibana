@@ -87,6 +87,7 @@ export class ScopeExpression extends Component {
               <EuiSelect
                 value={filterType}
                 onChange={this.onChangeFilterType}
+                data-test-subj="mlScopeFilterTypeSelect"
                 options={[
                   {
                     value: ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
@@ -104,6 +105,7 @@ export class ScopeExpression extends Component {
               <EuiSelect
                 value={filterId}
                 onChange={this.onChangeFilterId}
+                data-test-subj="mlScopeFilterIdSelect"
                 options={getFilterListOptions(filterListIds)}
               />
             </EuiFlexItem>
@@ -158,6 +160,7 @@ export class ScopeExpression extends Component {
                   value={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}
+                  data-test-subj="mlScopeExpressionFilterSelector"
                 />
               }
               isOpen={this.state.isFilterListOpen}
