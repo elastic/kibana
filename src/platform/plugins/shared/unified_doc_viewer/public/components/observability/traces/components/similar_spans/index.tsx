@@ -11,12 +11,12 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import type { ContentFrameworkSectionProps } from '../../../../content_framework/section';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { useLatencyChart } from '../../hooks/use_latency_chart';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 
 export interface SimilarSpansProps {
   duration: number;
@@ -35,17 +35,6 @@ export function SimilarSpans({
   transactionType,
   isOtelSpan,
 }: SimilarSpansProps) {
-  const {
-    share: {
-      url: { locators },
-    },
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-  } = getUnifiedDocViewerServices();
-  const discoverLocator = useMemo(() => locators.get(DISCOVER_APP_LOCATOR), [locators]);
   const latencyChart = useLatencyChart({
     spanName,
     serviceName,
@@ -54,32 +43,24 @@ export function SimilarSpans({
     isOtelSpan,
   });
 
+  const { indexes } = useDataSourcesContext();
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.traces });
+
   const isTransaction = !!transactionType;
 
   let esqlQuery = null;
 
   if (isTransaction) {
     // TODO build queries
-    esqlQuery = '';
+    esqlQuery = {};
   } else {
-    esqlQuery = '';
+    esqlQuery = {};
   }
 
-  const discoverUrl = useMemo(() => {
-    if (!discoverLocator) {
-      return undefined;
-    }
-
-    const url = discoverLocator.getRedirectUrl({
-      timeRange: timefilter.getAbsoluteTime(),
-      filters: [],
-      query: {
-        esql: esqlQuery,
-      },
-    });
-
-    return url;
-  }, [discoverLocator, esqlQuery, timefilter]);
+  const discoverUrl = useMemo(
+    () => generateDiscoverLink(esqlQuery),
+    [generateDiscoverLink, esqlQuery]
+  );
 
   const sectionActions: ContentFrameworkSectionProps['actions'] =
     esqlQuery && discoverUrl
