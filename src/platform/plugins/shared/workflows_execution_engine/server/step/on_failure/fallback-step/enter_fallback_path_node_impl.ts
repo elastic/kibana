@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepImplementation } from '../step_base';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepImplementation } from '../../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class EnterFallbackPathNodeImpl implements StepImplementation {
   constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
