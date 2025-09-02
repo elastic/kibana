@@ -1985,6 +1985,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test_serverless/functional/page_objects/add_cis_integration_form_page.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test_serverless/functional/page_objects/constants/test_subject_ids.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test_serverless/functional/page_objects/csp_dashboard_page.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test_serverless/functional/page_objects/csp_benchmark_page.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test_serverless/functional/page_objects/csp_findings_page.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test_serverless/functional/page_objects/security_common.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/platform/test/serverless/functional/configs/ @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/platform/test/serverless/functional/page_objects/ @elastic/appex-qa # temporarily due to SKA tests relocation
