@@ -7528,6 +7528,20 @@
                 }
               }
             },
+            "per_agent_config_settings": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Execution time in milliseconds for the \"aggregated_transactions\" task"
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "cloud": {
               "properties": {
                 "took": {
