@@ -13,6 +13,7 @@ import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState } from './format';
 import { isColumnOfReferableType } from './utils';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
+import type { AnyLensStateColumn } from './types';
 
 function getOrderByValue(
   rankBy: LensApiTermsOperation['rank_by'],
@@ -94,7 +95,7 @@ export function fromTermsLensApiToLensState(
 
 function getRankByConfig(
   params: TermsIndexPatternColumn['params'],
-  columns: (LensApiAllMetricOperations & { id: string })[]
+  columns: { column: AnyLensStateColumn; id: string }[]
 ): LensApiTermsOperation['rank_by'] {
   if (params.orderBy.type === 'alphabetical') {
     return { type: 'alphabetical', direction: params.orderDirection };
@@ -135,7 +136,7 @@ function getRankByConfig(
 
 export function fromTermsLensStateToAPI(
   column: TermsIndexPatternColumn,
-  columns: (LensApiAllMetricOperations & { id: string })[]
+  columns: ({ column: AnyLensStateColumn; id: string })[]
 ): LensApiTermsOperation {
   const { label } = getLensAPIBucketSharedProps(column);
   return {

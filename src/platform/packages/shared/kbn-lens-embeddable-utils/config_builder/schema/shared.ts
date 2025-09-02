@@ -15,7 +15,7 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
 
-export const sharedPanelInfoSchema = schema.object({
+export const sharedPanelInfoSchema = {
   /**
    * The title of the chart displayed in the panel.
    *
@@ -45,9 +45,9 @@ export const sharedPanelInfoSchema = schema.object({
       },
     })
   ),
-});
+};
 
-export const layerSettingsSchema = schema.object({
+export const layerSettingsSchema = {
   /**
    * The sampling factor for the dataset.
    *
@@ -83,7 +83,7 @@ export const layerSettingsSchema = schema.object({
         'If true, ignore global filters when fetching data for this layer. Default is false.',
     },
   }),
-});
+};
 
 export const collapseBySchema = schema.oneOf(
   [

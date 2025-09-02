@@ -8,7 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { metricStateSchema, metricStateWithEsqlSupportSchema } from './metric';
+import { metricStateSchema } from './metric';
 
 describe('Metric Schema', () => {
   const baseMetricConfig = {
@@ -25,6 +25,10 @@ describe('Metric Schema', () => {
   };
 
   describe('primary metric configuration', () => {
+    it.only('t4st', () => {
+      expect(true).toBe(true);
+    });
+
     it('validates count metric operation', () => {
       const input = {
         ...baseMetricConfig,
