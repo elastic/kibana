@@ -58,6 +58,7 @@ export const useChatSend = ({
     assistantTelemetry,
     toasts,
     assistantAvailability: { isAssistantEnabled },
+    currentUser,
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { setLastConversation } = useAssistantLastConversation({ spaceId });
@@ -99,6 +100,7 @@ export const useChatSend = ({
         currentReplacements: convo.replacements,
         promptText,
         selectedPromptContexts,
+        user: currentUser,
       });
 
       const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
@@ -161,6 +163,7 @@ export const useChatSend = ({
       assistantTelemetry,
       createConversation,
       currentConversation,
+      currentUser,
       getConversation,
       http,
       isSetupComplete,

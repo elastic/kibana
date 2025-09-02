@@ -12,6 +12,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 
+import { i18n } from '@kbn/i18n';
 import { useNestedMenu } from './use_nested_menu';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
@@ -35,8 +36,14 @@ export const Header: FC<HeaderProps> = ({ title }) => {
 
   return (
     <div css={titleStyle}>
-      {/* TODO: translate */}
-      <EuiButtonIcon aria-label="Go back" color="text" iconType="arrowLeft" onClick={goBack} />
+      <EuiButtonIcon
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.goBackButtonIconAriaLabel', {
+          defaultMessage: 'Go back',
+        })}
+        color="text"
+        iconType="arrowLeft"
+        onClick={goBack}
+      />
       {title && (
         <EuiTitle size="xs">
           <h4>{title}</h4>

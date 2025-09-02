@@ -8,7 +8,6 @@
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
-import { CONNECTORS_LABEL, WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
   function isAvailable<T>(appId: string, content: T): T[] {
@@ -91,19 +90,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               ...isAvailable('searchPlayground', {
                 id: 'searchPlayground',
                 title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
-                  defaultMessage: 'Playground',
+                  defaultMessage: 'RAG Playground',
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
               }),
-              {
-                title: CONNECTORS_LABEL,
-                link: 'serverlessConnectors',
-              },
-              {
-                title: WEB_CRAWLERS_LABEL,
-                link: 'serverlessWebCrawlers',
-              },
             ],
           },
           {

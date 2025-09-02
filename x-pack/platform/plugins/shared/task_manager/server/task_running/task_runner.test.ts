@@ -1363,6 +1363,8 @@ describe('TaskManagerRunner', () => {
 
     test('cancel cancels the task runner, if it is cancellable', async () => {
       let wasCancelled = false;
+      const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {
           bar: {
@@ -1387,6 +1389,7 @@ describe('TaskManagerRunner', () => {
       await promise;
 
       expect(wasCancelled).toBeTruthy();
+      expect(abortSpy).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
 

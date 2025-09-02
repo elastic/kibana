@@ -10,8 +10,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -58,15 +58,14 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
     usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
   const stackByOptions = useStackByOptions(selectedToggleOption);
   const setSelectedChartOptionCallback = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedStackByOption(
-        stackByOptions.find((co) => co.value === event.target.value) ?? stackByOptions[0]
-      );
+    (value: string) => {
+      setSelectedStackByOption(value ?? stackByOptions[0].value);
     },
     [stackByOptions]
   );
+
   const defaultStackByOption = stackByOptions[0];
-  const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption);
+  const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption.value);
   const toggleOptions = useToggleOptions();
 
   const tableQuery = generateTableQuery('@timestamp', 'DESC', 100);
@@ -81,7 +80,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         id={PRIVILEGED_USER_ACTIVITY_QUERY_ID}
         showInspectButton={false}
         title={TITLE}
-        titleSize="s"
+        titleSize="m"
         outerDirection="column"
         hideSubtitle
       >
@@ -108,20 +107,22 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
                 idSelected={selectedToggleOption}
                 onChange={(id) => {
                   setToggleOption(id as VisualizationToggleOptions);
-                  setSelectedStackByOption(defaultStackByOption);
+                  setSelectedStackByOption(defaultStackByOption.value);
                 }}
                 legend={PICK_VISUALIZATION_LEGEND}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {stackByOptions.length > 1 && (
-                <EuiSelect
+                <EuiSuperSelect
                   onChange={setSelectedChartOptionCallback}
                   options={stackByOptions}
                   prepend={i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
                     defaultMessage: 'Stack by',
                   })}
-                  value={selectedStackByOption?.value}
+                  valueOfSelected={selectedStackByOption}
+                  hasDividers={true}
+                  itemLayoutAlign="top"
                 />
               )}
             </EuiFlexItem>
@@ -130,7 +131,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
 
           <EsqlDashboardPanel<TableItemType>
             title={TITLE}
-            stackByField={selectedStackByOption.value}
+            stackByField={selectedStackByOption}
             timerange={{ from, to }}
             getLensAttributes={getLensAttributes}
             generateVisualizationQuery={generateVisualizationQuery}

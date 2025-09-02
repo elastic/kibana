@@ -110,7 +110,6 @@ export default function ({ getService }: FtrProviderContext) {
             'aiAssistantManagementSelection',
             'indexPatterns',
             'graph',
-            'guidedOnboardingFeature',
             'monitoring',
             'observabilityAIAssistant',
             'observabilityCasesV3',
@@ -127,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             'logs',
             'maintenanceWindow',
             'manageReporting',
+            'reportingLegacy',
             'maps_v2',
             'osquery',
             'rulesSettings',
@@ -170,7 +170,6 @@ export default function ({ getService }: FtrProviderContext) {
           'aiAssistantManagementSelection',
           'indexPatterns',
           'graph',
-          'guidedOnboardingFeature',
           'monitoring',
           'observabilityAIAssistant',
           'observabilityCasesV3',
@@ -209,6 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
           'fleet',
           'fleetv2',
           'manageReporting',
+          'reportingLegacy',
         ];
 
         const features = body.filter(

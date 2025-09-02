@@ -56,6 +56,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <EuiFlexItem grow={1}>
           <EuiCard
+            data-test-subj="privilegedUserMonitoringAddIndexCard"
             hasBorder
             layout="horizontal"
             icon={<EuiIcon size="l" type="indexOpen" />}

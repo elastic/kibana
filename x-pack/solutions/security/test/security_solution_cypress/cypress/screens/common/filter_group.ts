@@ -7,7 +7,6 @@
 
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const CONTROL_GROUP = '[data-test-subj="controls-group"]';
 export const CONTROL_FRAMES = '[data-test-subj="control-frame"]';
 
 export const CONTROL_FRAME_TITLE = '[data-test-subj="control-frame-title"]';
@@ -78,7 +77,6 @@ export const FILTER_GROUP_CONTROL_ACTION_EDIT = (idx: number) => {
   return `[data-test-subj="control-action-${idx}-edit"]`;
 };
 
-export const FILTER_GROUP_CONTROL_CONFIRM_DIALOG = `[data-test-subj="confirmModalTitleText"]`;
 export const FILTER_GROUP_CONTROL_CONFIRM_BTN = `[data-test-subj="confirmModalConfirmButton"]`;
 
 export const FILTER_GROUP_CHANGED_BANNER = `[data-test-subj="filter-group--changed-banner"]`;

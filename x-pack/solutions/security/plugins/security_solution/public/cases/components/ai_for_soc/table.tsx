@@ -14,7 +14,6 @@ import type {
   AlertsTableOnLoadedProps,
 } from '@kbn/response-ops-alerts-table/types';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useKibana } from '../../../common/lib/kibana';
 import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
@@ -25,12 +24,12 @@ import {
   ACTION_COLUMN_WIDTH,
   ALERT_TABLE_CONSUMERS,
   CASES_CONFIGURATION,
+  columns,
   EuiDataGridStyleWrapper,
   GRID_STYLE,
   ROW_HEIGHTS_OPTIONS,
   RULE_TYPE_IDS,
   TOOLBAR_VISIBILITY,
-  columns,
 } from '../../../detections/components/alert_summary/table/table';
 import { useAdditionalBulkActions } from '../../../detections/hooks/alert_summary/use_additional_bulk_actions';
 
@@ -55,95 +54,68 @@ export interface TableProps {
    * Query that contains the id of the alerts to display in the table
    */
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 /**
  * Component used in the Cases page under Alerts tab, only in the AI4DSOC tier.
  * It leverages a lot of configurations and constants from the Alert summary page alerts table, and renders the ResponseOps AlertsTable.
  */
-export const Table = memo(
-  ({ dataView, id, onLoaded, packages, query, ruleResponse }: TableProps) => {
-    const {
-      services: {
-        application,
-        cases,
-        data,
-        fieldFormats,
-        http,
-        licensing,
-        notifications,
-        settings,
-      },
-    } = useKibana();
-    const services = useMemo(
-      () => ({
-        cases,
-        data,
-        http,
-        notifications,
-        fieldFormats,
-        application,
-        licensing,
-        settings,
-      }),
-      [application, cases, data, fieldFormats, http, licensing, notifications, settings]
-    );
+export const Table = memo(({ dataView, id, onLoaded, packages, query }: TableProps) => {
+  const {
+    services: { application, cases, data, fieldFormats, http, licensing, notifications, settings },
+  } = useKibana();
+  const services = useMemo(
+    () => ({
+      cases,
+      data,
+      http,
+      notifications,
+      fieldFormats,
+      application,
+      licensing,
+      settings,
+    }),
+    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+  );
 
-    const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
+  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
-    const additionalContext: AdditionalTableContext = useMemo(
-      () => ({
-        packages,
-        ruleResponse,
-      }),
-      [packages, ruleResponse]
-    );
+  const additionalContext: AdditionalTableContext = useMemo(() => ({ packages }), [packages]);
 
-    const refetchRef = useRef<AlertsTableImperativeApi>(null);
-    const refetch = useCallback(() => {
-      refetchRef.current?.refresh();
-    }, []);
+  const refetchRef = useRef<AlertsTableImperativeApi>(null);
+  const refetch = useCallback(() => {
+    refetchRef.current?.refresh();
+  }, []);
 
-    const bulkActions = useAdditionalBulkActions({ refetch });
+  const bulkActions = useAdditionalBulkActions({ refetch });
 
-    return (
-      <EuiDataGridStyleWrapper>
-        <AlertsTable
-          actionsColumnWidth={ACTION_COLUMN_WIDTH}
-          additionalBulkActions={bulkActions}
-          additionalContext={additionalContext}
-          browserFields={browserFields}
-          casesConfiguration={CASES_CONFIGURATION}
-          columns={columns}
-          consumers={ALERT_TABLE_CONSUMERS}
-          gridStyle={GRID_STYLE}
-          id={id}
-          onLoaded={onLoaded}
-          query={query}
-          ref={refetchRef}
-          renderActionsCell={ActionsCell}
-          renderCellValue={CellValue}
-          rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
-          ruleTypeIds={RULE_TYPE_IDS}
-          services={services}
-          toolbarVisibility={TOOLBAR_VISIBILITY}
-        />
-      </EuiDataGridStyleWrapper>
-    );
-  }
-);
+  const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
+
+  return (
+    <EuiDataGridStyleWrapper>
+      <AlertsTable
+        actionsColumnWidth={ACTION_COLUMN_WIDTH}
+        additionalBulkActions={bulkActions}
+        additionalContext={additionalContext}
+        browserFields={browserFields}
+        casesConfiguration={CASES_CONFIGURATION}
+        columns={columns}
+        consumers={ALERT_TABLE_CONSUMERS}
+        gridStyle={GRID_STYLE}
+        id={id}
+        onLoaded={onLoaded}
+        query={query}
+        ref={refetchRef}
+        renderActionsCell={ActionsCell}
+        renderCellValue={CellValue}
+        rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+        ruleTypeIds={RULE_TYPE_IDS}
+        runtimeMappings={runtimeMappings}
+        services={services}
+        toolbarVisibility={TOOLBAR_VISIBILITY}
+      />
+    </EuiDataGridStyleWrapper>
+  );
+});
 
 Table.displayName = 'Table';

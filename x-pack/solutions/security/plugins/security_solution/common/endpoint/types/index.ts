@@ -12,6 +12,7 @@ import type { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export type * from './trusted_devices';
 export type * from './utility_types';
 export type * from './agents';
 export type * from './sentinel_one';

@@ -21,6 +21,7 @@ import {
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
+import { GRAPH_LABEL_NODE_ID } from '../test_ids';
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, label, interactive, nodeClick, expandButtonClick } =
@@ -28,7 +29,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const text = label ? label : id;
 
   return (
-    <LabelNodeContainer>
+    <LabelNodeContainer data-test-subj={GRAPH_LABEL_NODE_ID}>
       {interactive && <LabelShapeOnHover color={color} />}
       <LabelShape color={color} textAlign="center">
         <EuiTextTruncate

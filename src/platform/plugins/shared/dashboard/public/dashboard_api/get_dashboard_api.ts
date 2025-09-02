@@ -241,6 +241,7 @@ export function getDashboardApi({
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
+      layoutManager.cleanup();
     },
   };
 }
