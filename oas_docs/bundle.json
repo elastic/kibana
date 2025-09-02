@@ -58587,6 +58587,12 @@
                                         },
                                         "type": "array"
                                       },
+                                      "metadata": {
+                                        "additionalProperties": {
+                                          "type": "string"
+                                        },
+                                        "type": "object"
+                                      },
                                       "tags": {
                                         "items": {
                                           "type": "string"
@@ -58595,6 +58601,7 @@
                                       }
                                     },
                                     "required": [
+                                      "metadata",
                                       "tags",
                                       "members"
                                     ],
@@ -59059,6 +59066,12 @@
                         },
                         "type": "array"
                       },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
                       "tags": {
                         "items": {
                           "type": "string"
@@ -59067,6 +59080,7 @@
                       }
                     },
                     "required": [
+                      "metadata",
                       "tags",
                       "members"
                     ],
