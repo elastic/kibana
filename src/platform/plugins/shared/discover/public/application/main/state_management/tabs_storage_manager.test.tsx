@@ -17,17 +17,12 @@ import {
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
-import {
-  DEFAULT_TAB_STATE,
-  fromSavedObjectTabToTabState,
-  fromSavedSearchToSavedObjectTab,
-} from './redux';
-import * as reduxModule from './redux';
+import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
 import {
   getRecentlyClosedTabStateMock,
   getTabStateMock,
 } from './redux/__mocks__/internal_state.mocks';
-import { savedSearchMock } from '@kbn/discover-plugin/public/__mocks__/saved_search';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
