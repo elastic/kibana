@@ -16,6 +16,7 @@ import { InspectOverlay } from './inspect_overlay';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
+import { mockBranch } from '../../../__mocks__/mocks';
 
 jest.mock('../../../lib/dom/get_element_from_point', () => ({
   getElementFromPoint: jest.fn(),
@@ -43,6 +44,7 @@ describe('InspectOverlay', () => {
         core={mockCoreStart}
         setFlyoutOverlayRef={jest.fn()}
         setIsInspecting={jest.fn()}
+        branch={mockBranch}
       />
     );
 
@@ -67,6 +69,7 @@ describe('InspectOverlay', () => {
         core={mockCoreStart}
         setFlyoutOverlayRef={jest.fn()}
         setIsInspecting={jest.fn()}
+        branch={mockBranch}
       />
     );
 
@@ -92,6 +95,7 @@ describe('InspectOverlay', () => {
         core={mockCoreStart}
         setFlyoutOverlayRef={setFlyoutOverlayRef}
         setIsInspecting={setIsInspecting}
+        branch={mockBranch}
       />
     );
 
@@ -115,6 +119,7 @@ describe('InspectOverlay', () => {
         core={mockCoreStart}
         setFlyoutOverlayRef={setFlyoutOverlayRef}
         setIsInspecting={setIsInspecting}
+        branch={mockBranch}
       />
     );
 

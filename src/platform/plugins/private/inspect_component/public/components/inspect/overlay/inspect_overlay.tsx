@@ -25,6 +25,7 @@ import type { ReactFiberNode, SourceComponent } from '../../../lib/fiber/types';
 
 interface Props {
   core: CoreStart;
+  branch: string;
   setFlyoutOverlayRef: Dispatch<SetStateAction<OverlayRef | null>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
@@ -33,7 +34,7 @@ interface Props {
  * InspectOverlay renders an overlay over the entire viewport when inspect mode is enabled.
  * It highlights HTML elements as they get hovered over.
  */
-export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
+export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspecting }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
   const [sourceComponent, setSourceComponent] = useState<SourceComponent | null>(null);
@@ -102,7 +103,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
 
       const flyout = core.overlays.openFlyout(
         toMountPoint(
-          <InspectFlyout componentData={componentData} target={target} />,
+          <InspectFlyout componentData={componentData} target={target} branch={branch} />,
           core.rendering
         ),
         flyoutOptions
@@ -115,7 +116,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       setFlyoutOverlayRef(flyout);
       setIsInspecting(false);
     },
-    [core, sourceComponent, targetFiberNode, setIsInspecting, setFlyoutOverlayRef]
+    [core, branch, sourceComponent, targetFiberNode, setIsInspecting, setFlyoutOverlayRef]
   );
 
   useEffect(() => {

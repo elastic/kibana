@@ -9,7 +9,7 @@
 
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { getComponentCodeowners } from './get_component_codeowners';
+import { getComponentCodeowners, clearCodeownersCache } from './get_component_codeowners';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 jest.mock('fs');
@@ -23,6 +23,7 @@ const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync
 describe('getComponentCodeowners', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearCodeownersCache();
     mockExistsSync.mockReturnValue(true);
   });
 

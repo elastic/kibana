@@ -28,3 +28,5 @@ export const mockComponentData: ComponentData = {
     element: document.createElement('div'),
   },
 };
+
+export const mockBranch = 'main';

@@ -14,15 +14,17 @@ import { InspectHighlight } from './inspect_highlight';
 
 describe('InspectHighlight', () => {
   beforeAll(() => {
-    Object.defineProperty(window, 'innerWidth', {
-      writable: true,
-      configurable: true,
-      value: 1000,
-    });
-    Object.defineProperty(window, 'innerHeight', {
-      writable: true,
-      configurable: true,
-      value: 800,
+    Object.defineProperties(window, {
+      innerWidth: {
+        value: 1000,
+        writable: true,
+        configurable: true,
+      },
+      innerHeight: {
+        value: 800,
+        writable: true,
+        configurable: true,
+      },
     });
   });
 

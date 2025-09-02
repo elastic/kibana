@@ -27,12 +27,13 @@ const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.toolti
 
 interface Props {
   core: CoreStart;
+  branch: string;
 }
 
 /**
  * The entry point for the plugin. Toggles inspect mode.
  */
-export const InspectButton = ({ core }: Props) => {
+export const InspectButton = ({ core, branch }: Props) => {
   const [isInspecting, setIsInspecting] = useState(false);
   const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef | null>(null);
 
@@ -83,6 +84,7 @@ export const InspectButton = ({ core }: Props) => {
       {isInspecting && (
         <InspectOverlay
           core={core}
+          branch={branch}
           setFlyoutOverlayRef={setFlyoutOverlayRef}
           setIsInspecting={setIsInspecting}
         />

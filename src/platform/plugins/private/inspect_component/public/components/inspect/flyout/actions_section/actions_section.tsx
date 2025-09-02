@@ -16,9 +16,10 @@ import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 
 interface Props {
   componentData: ComponentData;
+  branch: string;
 }
 
-export const ActionsSection = ({ componentData }: Props) => {
+export const ActionsSection = ({ componentData, branch }: Props) => {
   const { columnNumber, fileName, lineNumber, relativePath, baseFileName } = componentData.fileData;
 
   return (
@@ -38,6 +39,7 @@ export const ActionsSection = ({ componentData }: Props) => {
         lineNumber={lineNumber}
         columnNumber={columnNumber}
         relativePath={relativePath}
+        branch={branch}
       />
     </>
   );

@@ -16,12 +16,14 @@ export class InspectComponentPluginPublic implements Plugin {
   private readonly isDev: boolean;
   private readonly isEnabled: boolean;
   private readonly logger: Logger;
+  private readonly branch: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     const { enabled } = initializerContext.config.get<ConfigSchema>();
     this.isEnabled = enabled;
     this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
+    this.branch = initializerContext.env.packageInfo.branch;
   }
 
   public setup(_core: CoreSetup) {
@@ -37,7 +39,7 @@ export class InspectComponentPluginPublic implements Plugin {
         .then(([{ InspectButton }, { toMountPoint }]) => {
           core.chrome.navControls.registerRight({
             order: 1002,
-            mount: toMountPoint(<InspectButton core={core} />, core.rendering),
+            mount: toMountPoint(<InspectButton core={core} branch={this.branch} />, core.rendering),
           });
         })
         .catch(() => {

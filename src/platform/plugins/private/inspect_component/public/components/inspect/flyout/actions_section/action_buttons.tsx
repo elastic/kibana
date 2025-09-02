@@ -31,14 +31,21 @@ interface Props {
   lineNumber: number;
   columnNumber: number;
   relativePath: string;
+  branch: string;
 }
 
-export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath }: Props) => {
+export const ActionButtons = ({
+  fileName,
+  lineNumber,
+  columnNumber,
+  relativePath,
+  branch,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const CURSOR_LINK = `cursor://file/${fileName}:${lineNumber}:${columnNumber}`;
-  const GITHUB_DEV_LINK = `https://github.dev/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
-  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
+  const GITHUB_DEV_LINK = `https://github.dev/elastic/kibana/blob/${branch}/${relativePath}#L${lineNumber}`;
+  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/${branch}/${relativePath}#L${lineNumber}`;
   const VSCODE_LINK = `vscode://file/${fileName}:${lineNumber}:${columnNumber}`;
   const WEBSTORM_LINK = `webstorm://open?file=/${fileName}&line=${lineNumber}&column=${columnNumber}`;
 

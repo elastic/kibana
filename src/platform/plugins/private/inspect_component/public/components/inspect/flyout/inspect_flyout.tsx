@@ -25,6 +25,7 @@ import type { ComponentData } from '../../../lib/get_inspected_element_data';
 interface Props {
   componentData: ComponentData;
   target: HTMLElement;
+  branch: string;
 }
 
 export const flyoutOptions: OverlayFlyoutOpenOptions = {
@@ -34,7 +35,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   maxWidth: INSPECT_FLYOUT_MAX_WIDTH,
 };
 
-export const InspectFlyout = ({ componentData, target }: Props) => {
+export const InspectFlyout = ({ componentData, target, branch }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties | null>(null);
   const toastZIndex = Number(euiTheme.levels.toast);
@@ -76,7 +77,7 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
       <EuiFlyoutBody>
         <DataSection componentData={componentData} />
         <EuiSpacer size="xxl" />
-        <ActionsSection componentData={componentData} />
+        <ActionsSection componentData={componentData} branch={branch} />
       </EuiFlyoutBody>
       {highlightPosition && (
         <EuiPortal>

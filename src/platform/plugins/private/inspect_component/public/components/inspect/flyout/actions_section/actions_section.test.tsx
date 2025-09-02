@@ -11,11 +11,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ActionsSection } from './actions_section';
-import { mockComponentData } from '../../../../__mocks__/mocks';
+import { mockBranch, mockComponentData } from '../../../../__mocks__/mocks';
 
 describe('ActionsSection', () => {
   it('should render correctly', () => {
-    renderWithI18n(<ActionsSection componentData={mockComponentData} />);
+    renderWithI18n(<ActionsSection componentData={mockComponentData} branch={mockBranch} />);
 
     const title = screen.getByTestId('inspectComponentActionsTitle');
     const subTitle = screen.getByTestId('inspectComponentActionsSubtitle');

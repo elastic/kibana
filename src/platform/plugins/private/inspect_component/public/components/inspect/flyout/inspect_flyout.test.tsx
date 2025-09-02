@@ -11,7 +11,7 @@ import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { InspectFlyout } from './inspect_flyout';
-import { mockComponentData } from '../../../__mocks__/mocks';
+import { mockBranch, mockComponentData } from '../../../__mocks__/mocks';
 
 describe('InspectFlyout', () => {
   let target: HTMLElement;
@@ -29,13 +29,17 @@ describe('InspectFlyout', () => {
   });
 
   it('should render correctly', () => {
-    renderWithI18n(<InspectFlyout componentData={mockComponentData} target={target} />);
+    renderWithI18n(
+      <InspectFlyout componentData={mockComponentData} target={target} branch={mockBranch} />
+    );
 
     expect(screen.getByTestId('inspectFlyoutHeader')).toBeInTheDocument();
   });
 
   it('should set initial highlight position based on target', () => {
-    renderWithI18n(<InspectFlyout componentData={mockComponentData} target={target} />);
+    renderWithI18n(
+      <InspectFlyout componentData={mockComponentData} target={target} branch={mockBranch} />
+    );
 
     // For fixed positioning, check the container element that has the actual positioning
     const container = screen.getByTestId('inspectHighlightContainer');
@@ -56,7 +60,17 @@ describe('InspectFlyout', () => {
   });
 
   it('should update highlight position on window resize', async () => {
-    renderWithI18n(<InspectFlyout componentData={mockComponentData} target={target} />);
+    renderWithI18n(
+      <InspectFlyout componentData={mockComponentData} target={target} branch={mockBranch} />
+    );
+
+    // Verify initial position
+    const container = screen.getByTestId('inspectHighlightContainer');
+    let containerStyle = window.getComputedStyle(container);
+    expect(containerStyle.top).toBe('10px');
+    expect(containerStyle.left).toBe('20px');
+    expect(containerStyle.width).toBe('100px');
+    expect(containerStyle.height).toBe('50px');
 
     const newRect = {
       top: 50,
@@ -69,8 +83,8 @@ describe('InspectFlyout', () => {
     fireEvent(window, new Event('resize'));
 
     // For fixed positioning, check the container element that has the actual positioning
-    const container = await screen.findByTestId('inspectHighlightContainer');
-    const containerStyle = window.getComputedStyle(container);
+    const updatedContainer = await screen.findByTestId('inspectHighlightContainer');
+    containerStyle = window.getComputedStyle(updatedContainer);
     expect(containerStyle.top).toBe('50px');
     expect(containerStyle.left).toBe('60px');
     expect(containerStyle.width).toBe('200px');

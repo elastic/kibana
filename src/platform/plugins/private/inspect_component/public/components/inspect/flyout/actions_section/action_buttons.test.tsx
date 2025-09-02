@@ -11,12 +11,14 @@ import React from 'react';
 import { screen, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ActionButtons } from './action_buttons';
+import { mockBranch } from '../../../../__mocks__/mocks';
 
 const propsMock = {
   fileName: '/Users/test/kibana/src/components/example/component.tsx',
   lineNumber: 42,
   columnNumber: 15,
   relativePath: 'src/components/example/component.tsx',
+  branch: mockBranch,
 };
 
 describe('ActionButtons', () => {

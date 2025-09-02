@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactHTML } from 'react';
+
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';
 export const INSPECT_OVERLAY_ID = 'inspectOverlay';
 export const INSPECT_FLYOUT_ID = 'inspectComponentFlyout';
@@ -23,7 +25,7 @@ export const EXCLUDED_COMPONENT_TYPES = [
   'Wrapper',
 ];
 
-export const HTML_TAGS = [
+export const HTML_TAGS: (keyof ReactHTML)[] = [
   'a',
   'abbr',
   'address',

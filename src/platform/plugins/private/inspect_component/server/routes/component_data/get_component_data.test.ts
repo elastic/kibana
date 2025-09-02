@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { sep } from 'path';
+import { join, sep } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpResourcesMock } from '@kbn/core/server/mocks';
@@ -21,7 +21,7 @@ jest.mock('../../lib/codeowners/get_component_codeowners');
 describe('getComponentData', () => {
   const mockRequest = {
     body: {
-      path: `${REPO_ROOT}${sep}src${sep}test-file.tsx`,
+      path: join(REPO_ROOT, 'src', 'test-file.tsx'),
     },
   } as KibanaRequest<any, any, GetComponentDataRequestBody>;
 
@@ -35,7 +35,7 @@ describe('getComponentData', () => {
   });
 
   it('should return correct component data', async () => {
-    const expectedPath = `src${sep}test-file.tsx`;
+    const expectedPath = join('src', 'test-file.tsx');
 
     await getComponentData({
       req: mockRequest,
@@ -58,8 +58,8 @@ describe('getComponentData', () => {
   });
 
   it('should handle paths with multiple segments correctly', async () => {
-    const path = `${REPO_ROOT}${sep}src${sep}nested${sep}folder${sep}component.tsx`;
-    const expectedPath = `src${sep}nested${sep}folder${sep}component.tsx`;
+    const path = join(REPO_ROOT, 'src', 'nested', 'folder', 'component.tsx');
+    const expectedPath = join('src', 'nested', 'folder', 'component.tsx');
 
     const customRequest = {
       body: { path },
@@ -82,8 +82,8 @@ describe('getComponentData', () => {
   });
 
   it('should handle edge case with empty file name gracefully', async () => {
-    const path = `${REPO_ROOT}${sep}src${sep}nested${sep}`;
-    const expectedPath = `src${sep}nested${sep}`;
+    const path = join(REPO_ROOT, 'src', 'nested', sep);
+    const expectedPath = join('src', 'nested', sep);
 
     const customRequest = {
       body: { path },
