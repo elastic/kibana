@@ -2389,8 +2389,11 @@ export class CstToAstConverter {
 
     if (keyCtx && valueCtx) {
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
+      const nestedMapCtx = valueCtx.mapExpression();
 
-      const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+      const value = nestedMapCtx
+        ? this.fromMapExpression(nestedMapCtx)
+        : (this.fromConstant(valueCtx.constant()) as ast.ESQLAstExpression);
 
       const entry = Builder.expression.entry(key, value, {
         location: getPosition(ctx.start, ctx.stop),
