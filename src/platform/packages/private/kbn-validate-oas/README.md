@@ -2,8 +2,6 @@
 
 Enhanced OpenAPI Specification (OAS) validation package for Kibana with support for incremental validation, multiple output formats, and git integration.
 
-<!-- TODO: update README to include minimal nescessary documentation from the docs folder -->
-
 ## CLI Usage (Original)
 
 ```bash
