@@ -6465,10 +6465,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/flyout-system-example-plugin@link:examples/flyout_system":
-  version "0.0.0"
-  uid ""
-
 "@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
