@@ -160,7 +160,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
-  policyHasFipsAgents,
+  nonFipsIntegrations,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -260,7 +260,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           fleetServerHost,
           enrollToken,
           rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
-          policyHasFipsAgents,
+          nonFipsIntegrations,
         })
       );
     }
@@ -307,7 +307,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     installManagedCommands,
     gcpProjectId,
     isK8s,
-    policyHasFipsAgents,
+    nonFipsIntegrations,
     onClickViewAgents,
     link,
     enrolledAgentIds,

@@ -29,7 +29,7 @@ interface Props {
   isManaged?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
-  policyHasFipsAgents?: boolean;
+  nonFipsIntegrations: Array<{ name: string; title: string }>;
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({
@@ -42,12 +42,12 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   isManaged = true,
   onCopy,
   rootIntegrations,
-  policyHasFipsAgents,
+  nonFipsIntegrations,
 }) => {
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
-      <FipsIntegrationsCallout policyHasFipsAgents={Boolean(policyHasFipsAgents)} />
+      <FipsIntegrationsCallout nonFipsIntegrations={nonFipsIntegrations} />
       <RootPrivilegesCallout rootIntegrations={rootIntegrations} />
       <UnprivilegedInfo />
       <PlatformSelector

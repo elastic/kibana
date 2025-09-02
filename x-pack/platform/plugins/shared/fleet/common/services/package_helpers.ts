@@ -73,3 +73,14 @@ export const checkIntegrationFipsLooseCompatibility = (
   }
   return false;
 };
+
+export function getNonFipsIntegrations(
+  packagePolicies: PackagePolicy[]
+): Array<{ name: string; title: string }> {
+  return uniqBy(
+    packagePolicies
+      .map((policy) => policy.package)
+      .filter((pkg) => pkg && pkg.fips_compatible === false),
+    (pkg) => pkg!.name
+  ).map((pkg) => ({ name: pkg!.name, title: pkg!.title }));
+}

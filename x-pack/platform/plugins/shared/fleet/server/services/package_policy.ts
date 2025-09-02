@@ -49,6 +49,7 @@ import {
   getNormalizedDataStreams,
   getNormalizedInputs,
   isRootPrivilegesRequired,
+  checkIntegrationFipsLooseCompatibility,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -453,6 +454,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           requires_root: requiresRoot,
         };
       }
+
+      if (enrichedPackagePolicy?.package) {
+        enrichedPackagePolicy.package = {
+          ...enrichedPackagePolicy.package,
+          fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo?.name),
+        };
+      }
     }
 
     const isoDate = new Date().toISOString();
@@ -655,6 +663,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             packagePolicy.package = {
               ...packagePolicy.package,
               requires_root: requiresRoot,
+            };
+          }
+          if (packagePolicy?.package) {
+            packagePolicy.package = {
+              ...packagePolicy.package,
+              fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo?.name),
             };
           }
         }
@@ -1227,6 +1241,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           requires_root: requiresRoot,
         };
       }
+
+      if (restOfPackagePolicy?.package) {
+        restOfPackagePolicy.package = {
+          ...restOfPackagePolicy.package,
+          fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo?.name),
+        };
+      }
     }
 
     for (const policyId of packagePolicyUpdate.policy_ids) {
@@ -1607,6 +1628,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               restOfPackagePolicy.package = {
                 ...restOfPackagePolicy.package,
                 requires_root: requiresRoot,
+              };
+            }
+            if (restOfPackagePolicy?.package) {
+              restOfPackagePolicy.package = {
+                ...restOfPackagePolicy.package,
+                fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo.name),
               };
             }
 

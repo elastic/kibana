@@ -30,7 +30,7 @@ export const InstallManagedAgentStep = ({
   fullCopyButton,
   onCopy,
   rootIntegrations,
-  policyHasFipsAgents,
+  nonFipsIntegrations,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
@@ -43,7 +43,7 @@ export const InstallManagedAgentStep = ({
   fullCopyButton?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
-  policyHasFipsAgents?: boolean;
+  nonFipsIntegrations: Array<{ name: string; title: string }>;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -63,7 +63,7 @@ export const InstallManagedAgentStep = ({
           fullCopyButton={fullCopyButton}
           fleetServerHost={fleetServerHost}
           rootIntegrations={rootIntegrations}
-          policyHasFipsAgents={policyHasFipsAgents}
+          nonFipsIntegrations={nonFipsIntegrations}
         />
       ) : (
         <React.Fragment />

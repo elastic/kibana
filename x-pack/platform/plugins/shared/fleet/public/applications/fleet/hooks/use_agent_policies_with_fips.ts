@@ -7,7 +7,8 @@
 
 import { useGetAgentsQuery } from '../../../hooks';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../constants';
-import type { Agent } from '../types';
+import type { Agent, AgentPolicy } from '../types';
+import { getNonFipsIntegrations } from '../../../../common/services';
 
 export const hasFipsAgents = (agents: Agent[]) =>
   agents.some((agent) => agent.local_metadata?.elastic?.agent?.fips === true);
@@ -32,4 +33,10 @@ export const useAgentPoliciesWithFipsAgents = (policyIds: string[]) => {
   if (!fipsAgentsRes?.data?.items || fipsAgentsRes.data?.items.length === 0) return false;
 
   return hasFipsAgents(fipsAgentsRes.data?.items);
+};
+
+export const useAgentPoliciesWithNonFipsIntegrations = (agentPolicy: AgentPolicy | undefined) => {
+  if (!agentPolicy || !agentPolicy?.package_policies) return [];
+
+  return getNonFipsIntegrations(agentPolicy.package_policies);
 };

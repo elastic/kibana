@@ -84,5 +84,5 @@ export interface InstructionProps extends BaseProps {
   fleetProxy?: FleetProxy;
   downloadSource?: DownloadSource;
   downloadSourceProxy?: FleetProxy;
-  policyHasFipsAgents?: boolean;
+  nonFipsIntegrations: Array<{ name: string; title: string }>;
 }
