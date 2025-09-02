@@ -61,32 +61,4 @@ describe('analyzeDocuments', () => {
     expect(result.eventsCount).toBe(1);
     expect(result.alertsCount).toBe(1);
   });
-
-  it('ignores color and respects given counts', () => {
-    const result = analyzeDocuments({ eventsCount: 1, alertsCount: 1, color: 'danger' });
-
-    expect(result).toEqual({
-      eventsCount: 1,
-      alertsCount: 1,
-      isSingleAlert: false,
-      isSingleEvent: false,
-      isGroupOfEvents: false,
-      isGroupOfAlerts: false,
-      isGroupOfEventsAndAlerts: true,
-    });
-  });
-
-  it('overrides zero counts if color is danger', () => {
-    const result = analyzeDocuments({ eventsCount: 0, alertsCount: 0, color: 'danger' });
-
-    expect(result).toEqual({
-      eventsCount: 0,
-      alertsCount: 1,
-      isSingleAlert: true,
-      isSingleEvent: false,
-      isGroupOfEvents: false,
-      isGroupOfAlerts: false,
-      isGroupOfEventsAndAlerts: false,
-    });
-  });
 });

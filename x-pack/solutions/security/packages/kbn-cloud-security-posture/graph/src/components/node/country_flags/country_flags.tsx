@@ -14,7 +14,6 @@ import { RoundedBadge, ToolTipButton } from '../styles';
 
 export const TEST_SUBJ_BADGE = 'country-flags-badge';
 export const TEST_SUBJ_PLUS_COUNT = 'country-flags-plus-count';
-export const TEST_SUBJ_TOOLTIP = 'country-flags-tooltip';
 export const TEST_SUBJ_TOOLTIP_CONTENT = 'country-flags-tooltip-content';
 export const TEST_SUBJ_TOOLTIP_COUNTRY = 'country-flags-tooltip-country';
 
@@ -76,7 +75,7 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
     ) : null;
 
   return (
-    <EuiToolTip data-test-subj={TEST_SUBJ_TOOLTIP} position="right" content={toolTipContent}>
+    <EuiToolTip position="right" content={toolTipContent}>
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
       <ToolTipButton aria-label={toolTipAriaLabel}>
         <RoundedBadge data-test-subj={TEST_SUBJ_BADGE}>

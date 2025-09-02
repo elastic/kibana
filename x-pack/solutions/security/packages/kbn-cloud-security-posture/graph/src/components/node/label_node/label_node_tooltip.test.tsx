@@ -46,9 +46,9 @@ describe('LabelNodeTooltipContent', () => {
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_SECTION)).not.toBeInTheDocument();
 
-    // Check that the alert icon is present but NOT the count for a single event
+    // Check that alert icon and count are both present for a single event
     expect(screen.getByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toBeInTheDocument();
   });
 
   test('renders with multiple events', () => {

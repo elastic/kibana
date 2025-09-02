@@ -13,7 +13,6 @@ import { ToolTipButton } from '../styles';
 
 export const TEST_SUBJ_TEXT = 'ips-text';
 export const TEST_SUBJ_PLUS_COUNT = 'ips-plus-count';
-export const TEST_SUBJ_TOOLTIP = 'ips-tooltip';
 export const TEST_SUBJ_TOOLTIP_CONTENT = 'ips-tooltip-content';
 export const TEST_SUBJ_TOOLTIP_IP = 'ips-tooltip-ip';
 
@@ -77,11 +76,7 @@ export const Ips = ({ ips }: IpsProps) => {
     ) : null;
 
   return (
-    <EuiToolTip
-      data-test-subj={TEST_SUBJ_TOOLTIP}
-      position="right"
-      content={ips.length > VISIBLE_IPS_LIMIT ? toolTipContent : null}
-    >
+    <EuiToolTip position="right" content={ips.length > VISIBLE_IPS_LIMIT ? toolTipContent : null}>
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
       <ToolTipButton aria-label={toolTipAriaLabel}>
         <EuiFlexGroup

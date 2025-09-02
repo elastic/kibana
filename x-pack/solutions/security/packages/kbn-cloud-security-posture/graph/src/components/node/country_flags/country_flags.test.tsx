@@ -13,7 +13,6 @@ import {
   MAX_COUNTRY_FLAGS_IN_TOOLTIP,
   TEST_SUBJ_BADGE,
   TEST_SUBJ_PLUS_COUNT,
-  TEST_SUBJ_TOOLTIP,
   TEST_SUBJ_TOOLTIP_CONTENT,
   TEST_SUBJ_TOOLTIP_COUNTRY,
 } from './country_flags';
@@ -97,22 +96,7 @@ describe('CountryFlags', () => {
       '🇧🇷 Brazil',
       '🇬🇷 Greece',
       '🇮🇹 Italy',
-      '', // Gap between country names and copy
-      'Open full details in flyout',
     ]); // Russia is omitted for being over the limit
-  });
-
-  test('renders tooltip with correct title', async () => {
-    render(<CountryFlags countryCodes={['us', 'fr', 'es']} />);
-
-    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
-
-    await waitFor(() => {
-      expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
-    });
-
-    const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP);
-    expect(tooltipContent).toHaveTextContent('Geolocation');
   });
 
   test('renders aria-label in focusable button', () => {

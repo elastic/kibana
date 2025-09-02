@@ -59,14 +59,14 @@ describe('LabelNodeBadges', () => {
     expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
   });
 
-  test('renders event badge with counter and alert badge with icon only for one event and one alert', () => {
+  test('renders event badge with counter and alert badge with icon and counter for one event and one alert', () => {
     const analysis = analyzeDocuments({ eventsCount: 1, alertsCount: 1 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('1');
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).toBeInTheDocument();
   });
 
   test('renders event badge with counter and alert badge with icon and counter for multiple events and alerts', () => {

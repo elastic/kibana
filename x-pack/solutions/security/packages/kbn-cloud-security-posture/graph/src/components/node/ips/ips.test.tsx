@@ -12,7 +12,6 @@ import {
   Ips,
   TEST_SUBJ_TEXT,
   TEST_SUBJ_PLUS_COUNT,
-  TEST_SUBJ_TOOLTIP,
   TEST_SUBJ_TOOLTIP_CONTENT,
   TEST_SUBJ_TOOLTIP_IP,
   MAX_IPS_IN_TOOLTIP,
@@ -81,7 +80,7 @@ describe('Ips', () => {
       );
     });
 
-    test('renders tooltip with max number of unique IPs and copy to open details in flyout', async () => {
+    test('renders tooltip with max number of unique IPs', async () => {
       const baseIp = '192.168.1.';
       const testIps = [];
       for (let i = 1; i <= MAX_IPS_IN_TOOLTIP + 1; i++) {
@@ -100,27 +99,8 @@ describe('Ips', () => {
 
       const tooltipIps = screen.getAllByTestId(TEST_SUBJ_TOOLTIP_IP).map((ip) => ip.textContent);
 
-      expect(testIps).toHaveLength(MAX_IPS_IN_TOOLTIP + 1);
       expect(tooltipIps).toHaveLength(MAX_IPS_IN_TOOLTIP);
       expect(tooltipIps).toEqual(testIps.slice(0, MAX_IPS_IN_TOOLTIP));
-
-      expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toHaveTextContent(
-        'Open full details in flyout'
-      );
-    });
-
-    test('renders tooltip with correct title', async () => {
-      const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
-      render(<Ips ips={testIps} />);
-
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
-
-      await waitFor(() => {
-        expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
-      });
-
-      const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP);
-      expect(tooltipContent.firstChild).toHaveTextContent('IP Addresses');
     });
   });
 });

@@ -156,8 +156,7 @@ describe('LabelNode', () => {
   });
 
   describe('Tooltip', () => {
-    // TODO This test is skipped for now until we find a proper solution to show truncated text
-    xtest('shows tooltip when text is truncated', async () => {
+    test('shows tooltip when text is truncated', async () => {
       const props = {
         ...baseProps,
         data: {
