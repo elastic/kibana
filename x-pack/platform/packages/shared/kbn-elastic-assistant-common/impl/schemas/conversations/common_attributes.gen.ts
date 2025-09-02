@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
+import { NonEmptyString, User, NonEmptyTimestamp } from '../common_attributes.gen';
 
 /**
  * Trace Data
@@ -261,6 +261,10 @@ export const Message = z.object({
    */
   role: MessageRole,
   /**
+   * The user who sent the message.
+   */
+  user: User.optional(),
+  /**
    * The timestamp message was sent or received.
    */
   timestamp: NonEmptyTimestamp,
@@ -357,6 +361,10 @@ export const ConversationResponse = z.object({
    */
   createdAt: z.string(),
   replacements: Replacements.optional(),
+  /**
+   * The user who created the conversation.
+   */
+  createdBy: User,
   users: z.array(User),
   /**
    * The conversation messages.
@@ -401,6 +409,7 @@ export const ConversationUpdateProps = z.object({
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
   replacements: Replacements.optional(),
+  users: z.array(User).optional(),
 });
 
 export type ConversationCreateProps = z.infer<typeof ConversationCreateProps>;

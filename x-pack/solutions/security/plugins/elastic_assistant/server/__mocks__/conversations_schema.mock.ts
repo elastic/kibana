@@ -57,6 +57,9 @@ export const getConversationSearchEsMock = () => {
                 name: 'elastic',
               },
             ],
+            created_by: {
+              name: 'elastic',
+            },
           },
         },
       ],
@@ -157,6 +160,9 @@ export const getConversationMock = (params: ConversationMockParams): Conversatio
       name: 'elastic',
     },
   ],
+  createdBy: {
+    name: 'elastic',
+  },
 });
 
 export const getQueryConversationParams = (isUpdate?: boolean): ConversationMockParams => {
@@ -244,6 +250,7 @@ export const getEsCreateConversationSchemaMock = (
   ],
   category: 'assistant',
   users: [{ name: 'elastic' }],
+  created_by: { name: 'elastic' },
   namespace: 'default',
   ...rest,
 });

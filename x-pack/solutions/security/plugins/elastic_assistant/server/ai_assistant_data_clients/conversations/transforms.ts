@@ -21,6 +21,7 @@ export const transformESToConversation = (
   const conversation: ConversationResponse = {
     timestamp: conversationSchema['@timestamp'],
     createdAt: conversationSchema.created_at,
+    createdBy: conversationSchema.created_by,
     users:
       conversationSchema.users?.map((user) => ({
         id: user.id,
@@ -61,6 +62,7 @@ export const transformESToConversation = (
         }),
         ...(message.is_error ? { isError: message.is_error } : {}),
         ...(message.reader ? { reader: message.reader } : {}),
+        ...(message.user ? { user: message.user } : {}),
         role: message.role,
         ...(message.metadata
           ? {
@@ -118,6 +120,8 @@ export const transformFieldNamesToSourceScheme = (fields: string[]) => {
         return '@timestamp';
       case 'apiConfig':
         return 'api_config';
+      case 'createdBy':
+        return 'created_by';
       case 'apiConfig.actionTypeId':
         return 'api_config.action_type_id';
       case 'apiConfig.connectorId':

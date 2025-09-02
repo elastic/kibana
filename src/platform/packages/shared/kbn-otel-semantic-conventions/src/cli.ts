@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { run } from '@kbn/dev-cli-runner';
+/* eslint-disable no-console */
+
 import { runGenerateOtelSemconvCli } from './generate';
 
 export function cli() {
-  return run(async ({ log }) => {
-    return runGenerateOtelSemconvCli({
-      // log: log.withContext('@kbn/otel-semantic-conventions'), // TODO: This function will be available when this PR is merged https://github.com/elastic/kibana/pull/232076
-      log,
-    });
-  });
+  console.log('🚀 Starting OpenTelemetry Semantic Conventions processing...');
+
+  try {
+    runGenerateOtelSemconvCli();
+    console.log('✅ OpenTelemetry semantic conventions generation completed successfully!');
+    process.exit(0);
+  } catch (error) {
+    console.error(`❌ Processing failed: ${error}`);
+    process.exit(1);
+  }
 }

@@ -15,7 +15,8 @@
       "data",
       "fieldFormats",
       "share",
-      "embeddable"
+      "embeddable",
+      "discoverShared"
     ],
     "optionalPlugins": [
       "fieldsMetadata"

@@ -122,7 +122,7 @@ components:
             - 'type'
             - 'href'
           properties:
-            type: 
+            type:
               type: string
               enum: [Href]
             label:
@@ -267,6 +267,9 @@ components:
           $ref: '#/components/schemas/MessageRole'
           description: Message role.
           example: 'assistant'
+        user:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+          description: The user who sent the message.
         timestamp:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
           description: The timestamp message was sent or received.
@@ -362,6 +365,7 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
@@ -390,6 +394,9 @@ components:
           example: '2025-04-30T14:00:00Z'
         replacements:
           $ref: '#/components/schemas/Replacements'
+        createdBy:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+          description: The user who created the conversation.
         users:
           type: array
           items:
@@ -440,6 +447,10 @@ components:
           type: boolean
         replacements:
           $ref: '#/components/schemas/Replacements'
+        users:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
 
     ConversationCreateProps:
       type: object

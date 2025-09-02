@@ -9,7 +9,7 @@ import React, { useCallback, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import { RuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import { convertTranslationResultIntoText } from '../../../utils/translation_results';
 import { StatusFilter } from '../../../types';
 import * as i18n from './translations';
@@ -32,17 +32,17 @@ export const StatusFilterButton: React.FC<StatusFilterButtonProps> = React.memo(
         checked: status === StatusFilter.INSTALLED ? 'on' : undefined,
       },
       {
-        label: convertTranslationResultIntoText(RuleTranslationResult.FULL),
+        label: convertTranslationResultIntoText(MigrationTranslationResult.FULL),
         data: { status: StatusFilter.TRANSLATED },
         checked: status === StatusFilter.TRANSLATED ? 'on' : undefined,
       },
       {
-        label: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
+        label: convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL),
         data: { status: StatusFilter.PARTIALLY_TRANSLATED },
         checked: status === StatusFilter.PARTIALLY_TRANSLATED ? 'on' : undefined,
       },
       {
-        label: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
+        label: convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE),
         data: { status: StatusFilter.UNTRANSLATABLE },
         checked: status === StatusFilter.UNTRANSLATABLE ? 'on' : undefined,
       },

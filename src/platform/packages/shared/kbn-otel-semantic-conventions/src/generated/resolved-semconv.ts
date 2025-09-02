@@ -11,7 +11,7 @@
  * OpenTelemetry semantic conventions field definitions.
  *
  * This file is auto-generated. Do not edit manually.
- * Generated on: 2025-08-27T19:57:01.748Z
+ * Generated on: 2025-08-28T17:17:58.732Z
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 132
  * Metric groups: 347

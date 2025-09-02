@@ -41,6 +41,10 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       name: 'elastic',
     },
   ],
+  createdBy: {
+    id: '1111',
+    name: 'elastic',
+  },
   replacements: undefined,
 });
 
@@ -87,6 +91,10 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
               name: 'elastic',
             },
           ],
+          created_by: {
+            id: '1111',
+            name: 'elastic',
+          },
           replacements: undefined,
         },
       },
@@ -137,5 +145,45 @@ describe('getConversation', () => {
       user: mockUser1,
     });
     expect(conversation).toEqual(null);
+  });
+
+  test('calls search with the expected filter', async () => {
+    const data = getSearchConversationMock();
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockResponse(data);
+    await getConversation({
+      esClient,
+      conversationIndex: '.kibana-elastic-ai-assistant-conversations',
+      id: '1',
+      logger: loggerMock,
+      user: mockUser1,
+    });
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            must: [{ bool: { should: [{ term: { _id: '1' } }] } }],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      nested: {
+                        path: 'users',
+                        query: { bool: { must: [{ match: { 'users.name': 'elastic' } }] } },
+                      },
+                    },
+                    {
+                      bool: { must_not: [{ nested: { path: 'users', query: { match_all: {} } } }] },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
   });
 });

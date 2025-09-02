@@ -15,6 +15,7 @@ generate_resolved_yaml() {
   echo "--- Generating resolved YAML with Docker weaver"
   cd otel-semconv
   docker run --rm \
+    --user $(id -u):$(id -g) \
     --env USER=weaver \
     --env HOME=/home/weaver \
     --mount type=bind,source=./model,target=/home/weaver/source,readonly \
