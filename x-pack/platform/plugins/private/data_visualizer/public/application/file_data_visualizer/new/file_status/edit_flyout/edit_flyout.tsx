@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InputOverrides } from '@kbn/file-upload-plugin/common';
+import type { InputOverrides } from '@kbn/file-upload-common';
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import {

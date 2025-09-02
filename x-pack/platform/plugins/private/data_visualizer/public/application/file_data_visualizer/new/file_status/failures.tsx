@@ -10,7 +10,7 @@ import React, { useState, type FC } from 'react';
 
 import { useEuiTheme, EuiAccordion, EuiPagination, EuiCallOut } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ImportFailure } from '@kbn/file-upload-plugin/common/types';
+import type { ImportFailure } from '@kbn/file-upload-common';
 
 const PAGE_SIZE = 100;
 

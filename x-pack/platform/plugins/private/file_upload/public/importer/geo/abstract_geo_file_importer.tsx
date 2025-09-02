@@ -11,10 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { MB } from '@kbn/file-upload-common/src/constants';
 import { NdjsonReader } from '@kbn/file-upload-common';
+import type {
+  CreateDocsResponse,
+  ImportDoc,
+  ImportFailure,
+  ImportResponse,
+  ImportResults,
+} from '@kbn/file-upload-common';
 import type { GeoFileImporter, GeoFilePreview } from './types';
-import type { CreateDocsResponse, ImportResults } from '../types';
 import { Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
-import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { createChunks } from './create_chunks';
 import { callImportRoute } from '../routes';

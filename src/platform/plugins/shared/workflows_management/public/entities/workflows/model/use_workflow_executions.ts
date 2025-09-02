@@ -18,6 +18,7 @@ export function useWorkflowExecutions(
   const { http } = useKibana().services;
 
   return useQuery<WorkflowExecutionListDto>({
+    networkMode: 'always',
     queryKey: ['workflows', workflowId, 'executions'],
     queryFn: () =>
       http!.get(`/api/workflowExecutions`, {

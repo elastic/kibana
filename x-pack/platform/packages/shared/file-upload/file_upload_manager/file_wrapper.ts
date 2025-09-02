@@ -13,8 +13,9 @@ import type {
   ImportFailure,
   IngestPipeline,
   InputOverrides,
-} from '@kbn/file-upload-plugin/common/types';
+} from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+// import type { DataTableRecord } from '@kbn/discover-utils';
 import { isTikaType } from './tika_utils';
 
 import { STATUS } from './file_manager';
@@ -37,6 +38,7 @@ interface AnalysisResults {
   serverSettings: ReturnType<typeof processResults> | null;
   overrides: FormattedOverrides;
   analysisError?: any;
+  // sampleDocs: DataTableRecord[];
 }
 
 export type FileAnalysis = AnalysisResults & {
@@ -63,6 +65,7 @@ export class FileWrapper {
     analysisStatus: STATUS.NOT_STARTED,
     fileContents: '',
     results: null,
+    // sampleDocs: [],
     explanation: undefined,
     serverSettings: null,
     overrides: {},
@@ -179,6 +182,7 @@ export class FileWrapper {
         serverSettings,
         overrides: resp.overrides ?? {},
         analysisStatus: STATUS.COMPLETED,
+        // sampleDocs: resp.sampleDocs ?? [],
       };
     } catch (e) {
       return {

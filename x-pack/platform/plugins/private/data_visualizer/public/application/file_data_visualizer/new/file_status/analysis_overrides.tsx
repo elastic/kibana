@@ -8,7 +8,7 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import type { InputOverrides } from '@kbn/file-upload-plugin/common';
+import type { InputOverrides } from '@kbn/file-upload-common';
 import type { FileAnalysis } from '@kbn/file-upload';
 import { i18n } from '@kbn/i18n';
 import { EditFlyout } from './edit_flyout';

@@ -31,14 +31,14 @@ export const SearchField: React.FC<SearchFieldProps> = React.memo(
     return (
       <EuiFlexItem grow>
         <EuiFieldSearch
-          aria-label={i18n.SEARCH_MIGRATION_RULES}
+          aria-label={i18n.SEARCH_MIGRATION_ARIAL_LABEL}
           fullWidth
           incremental={false}
-          placeholder={placeholder ?? i18n.SEARCH_MIGRATION_RULES_PLACEHOLDER}
+          placeholder={placeholder ?? i18n.SEARCH_MIGRATION_ITEMS_PLACEHOLDER}
           value={searchText}
           onChange={handleChange}
           onSearch={onSearch}
-          data-test-subj="ruleSearchField"
+          data-test-subj="searchField"
         />
       </EuiFlexItem>
     );

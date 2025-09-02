@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ImportFactoryOptions } from '../..';
 import type { CreateDocsResponse, ImportDocMessage } from './file_reader_base';
 import { FileReaderBase } from './file_reader_base';
 
@@ -12,7 +13,7 @@ export class MessageReader extends FileReaderBase {
   private _excludeLinesRegex: RegExp | null;
   private _multilineStartRegex: RegExp | null;
 
-  constructor(options: { excludeLinesPattern?: string; multilineStartPattern?: string }) {
+  constructor(options: ImportFactoryOptions) {
     super();
 
     this._excludeLinesRegex =
@@ -29,7 +30,7 @@ export class MessageReader extends FileReaderBase {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  protected _createDocs(
+  public _createDocs(
     text: string,
     isLastPart: boolean,
     lineLimit?: number

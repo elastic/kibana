@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common/types';
+import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JsonEditor, EDITOR_MODE } from './json_editor';

@@ -12,6 +12,7 @@ import {
   MAX_TIKA_FILE_SIZE_BYTES,
 } from '@kbn/file-upload-common/src/constants';
 import { omit } from 'lodash';
+import type { IngestPipelineWrapper } from '@kbn/file-upload-common';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
@@ -28,7 +29,6 @@ import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
 import { previewTikaContents } from './preview_tika_contents';
-import type { IngestPipelineWrapper } from '../common/types';
 
 /**
  * Routes for the file upload.
@@ -550,6 +550,49 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
 
           return response.ok({
             body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/index_searchable Check if an index is searchable
+   * @apiName CheckIndexSearchable
+   * @apiDescription Check if an index is searchable
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/index_searchable',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({ index: schema.string(), expectedCount: schema.number() }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { index, expectedCount } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+
+          const { count } = await esClient.asCurrentUser.count({ index });
+          const isSearchable = count >= expectedCount;
+
+          return response.ok({
+            body: { isSearchable },
           });
         } catch (e) {
           return response.customError(wrapError(e));

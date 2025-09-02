@@ -6,9 +6,14 @@
  */
 
 import { fromByteArray } from 'base64-js';
+import type {
+  HasImportPermission,
+  PreviewTikaResponse,
+  AnalysisResult,
+  ImportFactoryOptions,
+} from '@kbn/file-upload-common';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import type { IImporter, ImportFactoryOptions } from '../importer';
-import type { HasImportPermission, PreviewTikaResponse, AnalysisResult } from '../../common/types';
+import type { IImporter } from '../importer';
 import type {
   getMaxBytes,
   getMaxBytesFormatted,
@@ -31,12 +36,17 @@ export interface FileUploadStartApi {
   getTimeFieldRange: typeof getTimeFieldRange;
   analyzeFile: typeof analyzeFile;
   previewTikaFile: typeof previewTikaFile;
+  isIndexSearchable: typeof isIndexSearchable;
 }
 
 export interface GetTimeFieldRangeResponse {
   success: boolean;
   start: { epoch: number; string: string };
   end: { epoch: number; string: string };
+}
+
+export interface IsIndexSearchableResponse {
+  isSearchable: boolean;
 }
 
 export const FileUploadComponent = GeoUploadWizardAsyncWrapper;
@@ -132,6 +142,23 @@ export async function getTimeFieldRange(index: string, query: unknown, timeField
   const fileUploadModules = await lazyLoadModules();
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
     path: `/internal/file_upload/time_field_range`,
+    method: 'POST',
+    version: '1',
+    body,
+  });
+}
+
+export async function isIndexSearchable(
+  index: string,
+  expectedCount: number
+): Promise<IsIndexSearchableResponse> {
+  const { getHttp } = await lazyLoadModules();
+  const body = JSON.stringify({
+    index,
+    expectedCount,
+  });
+  return await getHttp().fetch<IsIndexSearchableResponse>({
+    path: `/internal/file_upload/index_searchable`,
     method: 'POST',
     version: '1',
     body,

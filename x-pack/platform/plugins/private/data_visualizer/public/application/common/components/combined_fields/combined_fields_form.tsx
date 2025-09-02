@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
+import type { IngestPipeline } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { FileAnalysis } from '@kbn/file-upload';
 import { getFieldsFromMappings } from '@kbn/file-upload/file_upload_manager';
