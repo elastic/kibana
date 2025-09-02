@@ -8,8 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { resolveResource } from './steps/resolve_resource';
+import type { MatchResult } from './steps';
 import { performMatchSearch, scoreRelevance, RelevanceScore } from './steps';
-
+import type { MappingField } from './utils';
 
 export interface RelevanceSearchResult {
   /** id of the doc */
