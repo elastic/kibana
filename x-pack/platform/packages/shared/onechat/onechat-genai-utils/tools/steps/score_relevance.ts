@@ -159,8 +159,8 @@ const getRankingPrompt = ({
       ## Instructions
       1.  Carefully review the user's <query>.
       2.  For each <document>, independently evaluate its content against the query.
-        2.2.  Provide a brief, one-sentence analyze or justification in the 'reason' field.
-        2.1.  Assign a score from 0 to 4 based on the scoring criteria in the 'score' field.
+        2.1.  Provide a brief, one-sentence analyze or justification in the 'reason' field.
+        2.2.  Assign a score from 0 to 4 based on the scoring criteria in the 'score' field.
       3.  You MUST respond with a single, valid JSON object that adheres to the schema below. Do not include any other text or explanations before or after the JSON object.
 
       ## JSON Schema
