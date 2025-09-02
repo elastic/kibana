@@ -228,6 +228,13 @@ export const mappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    [ACCESS_CONTROL_TYPE]: {
+      properties: {
+        accessControl: {
+          type: 'object',
+        },
+      },
+    },
   },
 };
 
@@ -383,6 +390,12 @@ export const createRegistry = () => {
   registry.registerType(
     createType(MULTI_NAMESPACE_ENCRYPTED_TYPE, {
       namespaceType: 'multiple',
+    })
+  );
+  registry.registerType(
+    createType(ACCESS_CONTROL_TYPE, {
+      supportsAccessControl: true,
+      namespaceType: 'multiple-isolated',
     })
   );
   return registry;
