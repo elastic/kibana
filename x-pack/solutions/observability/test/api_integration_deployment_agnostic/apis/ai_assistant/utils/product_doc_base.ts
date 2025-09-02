@@ -36,6 +36,7 @@ export async function uninstallProductDoc(supertest: SuperTest.Agent, inferenceI
     .expect(200);
 }
 
+// @TODO: remove
 export async function updateProductDoc(supertest: SuperTest.Agent, inferenceId: string) {
   return supertest
     .post('/internal/product_doc_base/update_all')
