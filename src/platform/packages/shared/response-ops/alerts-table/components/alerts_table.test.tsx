@@ -276,7 +276,7 @@ describe('AlertsTable', () => {
     ruleTypeIds: ['logs'],
     query: {},
     columns,
-    initialPageSize: 10,
+    pageSize: 10,
     renderActionsCell: ({ openAlertInFlyout }) => {
       return (
         <button
@@ -287,15 +287,20 @@ describe('AlertsTable', () => {
         />
       );
     },
-    renderFlyoutBody: ({ alert }) => (
-      <ul>
-        {columns.map((column) => (
-          <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
-            {get(alert as any, column.id, [])[0]}
-          </li>
-        ))}
-      </ul>
-    ),
+    renderExpandedAlertView: (props) => {
+      const alertIndexInPage = props.expandedAlertIndex - props.pageIndex * props.pageSize;
+      const alert = props.alerts[alertIndexInPage];
+
+      return (
+        <ul>
+          {columns.map((column) => (
+            <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
+              {get(alert as any, column.id, [])[0]}
+            </li>
+          ))}
+        </ul>
+      );
+    },
     services: {
       http: httpServiceMock.createStartContract(),
       application: {
@@ -661,7 +666,7 @@ describe('AlertsTable', () => {
       const wrapper = render(<TestComponent {...tableProps} />);
       await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
-      const result = await wrapper.findAllByTestId('alertsFlyout');
+      const result = await wrapper.findAllByTestId('alertFlyout');
       expect(result.length).toBe(1);
 
       expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
@@ -682,13 +687,13 @@ describe('AlertsTable', () => {
         <TestComponent
           {...{
             ...tableProps,
-            initialPageSize: 1,
+            pageSize: 1,
           }}
         />
       );
 
       await userEvent.click(await screen.findByTestId('expandColumnCellOpenFlyoutButton-0'));
-      const result = await screen.findAllByTestId('alertsFlyout');
+      const result = await screen.findAllByTestId('alertFlyout');
       expect(result.length).toBe(1);
 
       mockSearchAlerts.mockClear();
@@ -711,12 +716,12 @@ describe('AlertsTable', () => {
       );
     });
 
-    it('Should be able to go back from last page to n - 1', async () => {
+    it('should be able to go back from last page to n - 1', async () => {
       render(
         <TestComponent
           {...{
             ...tableProps,
-            initialPageSize: 2,
+            pageSize: 2,
           }}
         />
       );
@@ -726,7 +731,7 @@ describe('AlertsTable', () => {
           await screen.findAllByTestId('expandColumnCellOpenFlyoutButton-0')
         )[0]
       );
-      const result = await screen.findAllByTestId('alertsFlyout');
+      const result = await screen.findAllByTestId('alertFlyout');
       expect(result.length).toBe(1);
 
       mockSearchAlerts.mockClear();
@@ -834,7 +839,7 @@ describe('AlertsTable', () => {
     it('should remove sort if the sorting field is removed', async () => {
       const props: BaseAlertsTableProps = {
         ...tableProps,
-        initialSort: [
+        sort: [
           {
             [AlertsField.name]: { order: 'asc' },
           },
