@@ -99,6 +99,7 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          failure_store: true,
         },
         effective_lifecycle: {
           dsl: {},
@@ -107,6 +108,12 @@ describe('WiredStream', () => {
         inherited_fields: {},
         dashboards: [],
         queries: [],
+        failure_store: {
+          enabled: false,
+          retentionPeriod: {
+            default: '30d',
+          },
+        },
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
       expect(WiredStream.GetResponse.is(val)).toBe(true);
@@ -139,6 +146,7 @@ describe('WiredStream', () => {
           monitor: true,
           simulate: true,
           text_structure: true,
+          failure_store: true,
         },
         dashboards: [],
         queries: [],

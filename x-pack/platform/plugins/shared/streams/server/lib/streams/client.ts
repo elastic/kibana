@@ -517,6 +517,7 @@ export class StreamsClient {
               'monitor',
               'manage_data_stream_lifecycle',
               'manage_ilm',
+              'read_failure_store',
             ],
           },
         ],
@@ -531,7 +532,31 @@ export class StreamsClient {
         privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
       text_structure: privileges.cluster.monitor_text_structure,
+      failure_store: privileges.index[name].read_failure_store,
     };
+  }
+
+  /**
+   * Updates the failure store configuration for a stream
+   */
+  async updateFailureStore({
+    name,
+    enabled,
+    customRetentionPeriod,
+  }: {
+    name: string;
+    enabled: boolean;
+    customRetentionPeriod?: string;
+  }): Promise<void> {
+    const { updateFailureStore: updateFailureStoreImpl } = await import('./stream_crud');
+
+    return updateFailureStoreImpl({
+      name,
+      enabled,
+      customRetentionPeriod,
+      scopedClusterClient: this.dependencies.scopedClusterClient,
+      isServerless: this.dependencies.isServerless,
+    });
   }
 
   /**

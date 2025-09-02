@@ -21,6 +21,7 @@ import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
+import { failureStoreRoutes } from './streams/failure_store/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -41,6 +42,7 @@ export const streamsRouteRepository = {
   ...contentRoutes,
   ...significantEventsRoutes,
   ...queryRoutes,
+  ...failureStoreRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;
