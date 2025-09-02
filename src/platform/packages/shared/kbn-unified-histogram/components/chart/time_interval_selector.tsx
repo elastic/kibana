@@ -12,7 +12,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { search } from '@kbn/data-plugin/public';
 import type { UnifiedHistogramChartContext } from '../../types';
-import type { ToolbarSelectorProps, SelectableEntry } from './toolbar_selector';
+import type { SelectableEntry } from './toolbar_selector';
 import { ToolbarSelector } from './toolbar_selector';
 
 export interface TimeIntervalSelectorProps {
@@ -24,8 +24,8 @@ export const TimeIntervalSelector: React.FC<TimeIntervalSelectorProps> = ({
   chart,
   onTimeIntervalChange,
 }) => {
-  const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
-    (chosenOption) => {
+  const onChange = useCallback(
+    (chosenOption?: SelectableEntry) => {
       const selectedOption = chosenOption?.value;
       if (selectedOption) {
         onTimeIntervalChange(selectedOption);

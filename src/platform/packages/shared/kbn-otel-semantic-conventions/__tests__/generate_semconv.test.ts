@@ -10,7 +10,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { processSemconvYaml } from '../src/lib/generate_semconv';
+import { processSemconvYaml, extractFirstExample } from '../src/lib/generate_semconv';
 import type { ResolvedSemconvYaml, YamlGroup } from '../src/types/semconv_types';
 
 // Test data fixtures
@@ -588,6 +588,91 @@ describe('generate_semconv', () => {
           });
         }
       );
+    });
+  });
+
+  describe('extractFirstExample function', () => {
+    describe('JSON compaction', () => {
+      it('should compact the problematic gen_ai.system_instructions multi-line JSON', () => {
+        const problematicExample = `[
+  {
+    "type": "text",
+    "content": "You are an Agent that greet users, always use greetings tool to respond"
+  }
+]`;
+        const result = extractFirstExample([problematicExample]);
+        expect(result).toBe(
+          '[{"type":"text","content":"You are an Agent that greet users, always use greetings tool to respond"}]'
+        );
+        // Ensure no newlines in the result
+        expect(result).not.toContain('\n');
+      });
+
+      it('should compact multi-line JSON objects', () => {
+        const multiLineJson = `{
+  "name": "service-name",
+  "version": "1.0.0"  
+}`;
+        const result = extractFirstExample([multiLineJson]);
+        expect(result).toBe('{"name":"service-name","version":"1.0.0"}');
+        expect(result).not.toContain('\n');
+      });
+
+      it('should handle complex nested JSON arrays', () => {
+        const complexExample = `[
+  {"type": "text", "content": "You are a language translator."},
+  {"type": "text", "content": "Your mission is to translate text."}
+]`;
+        const result = extractFirstExample([complexExample]);
+        expect(result).toBe(
+          '[{"type":"text","content":"You are a language translator."},{"type":"text","content":"Your mission is to translate text."}]'
+        );
+      });
+    });
+
+    describe('string normalization', () => {
+      it('should normalize multi-line strings with extra whitespace', () => {
+        const multiLineString = `This is a
+        multi-line string
+        with    extra    spaces`;
+        const result = extractFirstExample([multiLineString]);
+        expect(result).toBe('This is a multi-line string with extra spaces');
+      });
+
+      it('should trim whitespace from simple strings', () => {
+        const paddedString = '   simple string   ';
+        const result = extractFirstExample([paddedString]);
+        expect(result).toBe('simple string');
+      });
+
+      it('should handle invalid JSON as plain text', () => {
+        const invalidJson = '{ invalid: json, missing: "quotes" }';
+        const result = extractFirstExample([invalidJson]);
+        expect(result).toBe('{ invalid: json, missing: "quotes" }');
+      });
+    });
+
+    describe('edge cases and data types', () => {
+      it('should return undefined for empty or invalid inputs', () => {
+        expect(extractFirstExample([])).toBeUndefined();
+        expect(extractFirstExample(undefined)).toBeUndefined();
+        expect(extractFirstExample([null])).toBeUndefined();
+        expect(extractFirstExample([undefined])).toBeUndefined();
+      });
+
+      it('should handle various data types', () => {
+        expect(extractFirstExample(['simple string'])).toBe('simple string');
+        expect(extractFirstExample([42])).toBe('42');
+        expect(extractFirstExample([true])).toBe('true');
+        expect(extractFirstExample([''])).toBe('');
+      });
+
+      it('should process OpenTelemetry field examples correctly', () => {
+        expect(extractFirstExample(['shoppingcart'])).toBe('shoppingcart');
+        expect(extractFirstExample(['21.0.0'])).toBe('21.0.0');
+        expect(extractFirstExample(['GET'])).toBe('GET');
+        expect(extractFirstExample(['stack'])).toBe('stack');
+      });
     });
   });
 });

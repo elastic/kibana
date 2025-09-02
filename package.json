@@ -101,6 +101,7 @@
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.2.0",
     "@xstate5/react/**/xstate": "^5.19.2",
+    "apache-arrow": "20.x - 21.x",
     "globby/fast-glob": "^3.3.2",
     "pkce-challenge": "3.1.0"
   },
@@ -460,6 +461,7 @@
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/platform/plugins/shared/dashboard_enhanced",
     "@kbn/dashboard-markdown": "link:src/platform/plugins/shared/dashboard_markdown",
     "@kbn/dashboard-plugin": "link:src/platform/plugins/shared/dashboard",
+    "@kbn/dashboards-selector": "link:src/platform/packages/shared/dashboards/dashboards-selector",
     "@kbn/data-forge": "link:x-pack/platform/packages/shared/kbn-data-forge",
     "@kbn/data-grid-in-table-search": "link:src/platform/packages/shared/kbn-data-grid-in-table-search",
     "@kbn/data-plugin": "link:src/platform/plugins/shared/data",
@@ -1003,6 +1005,7 @@
     "@kbn/spaces-plugin": "link:x-pack/platform/plugins/shared/spaces",
     "@kbn/spaces-test-plugin": "link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin",
     "@kbn/spaces-utils": "link:src/platform/packages/shared/kbn-spaces-utils",
+    "@kbn/split-button": "link:src/platform/packages/private/kbn-split-button",
     "@kbn/sse-example-plugin": "link:examples/sse_example",
     "@kbn/sse-utils": "link:src/platform/packages/shared/kbn-sse-utils",
     "@kbn/sse-utils-client": "link:src/platform/packages/shared/kbn-sse-utils-client",

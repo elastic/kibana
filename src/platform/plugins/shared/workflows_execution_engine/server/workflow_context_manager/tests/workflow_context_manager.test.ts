@@ -87,6 +87,41 @@ describe('WorkflowContextManager', () => {
     });
   });
 
+  it('should have inputs from execution context', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [],
+      inputs: [
+        {
+          name: 'name',
+          type: 'string',
+          required: false,
+          default: '',
+        },
+      ],
+    };
+
+    const { underTest, workflowExecutionRuntime } = createTestContainer(workflow);
+    workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
+      stack: [] as string[],
+      workflowDefinition: workflow,
+      context: {
+        inputs: {
+          name: 'test',
+        },
+      } as Record<string, any>,
+    } as EsWorkflowExecution);
+    const stepContext = underTest.getContext();
+    expect(stepContext.inputs).toEqual({
+      name: 'test',
+    });
+  });
+
   describe('workflow context', () => {
     let testContainer: ReturnType<typeof createTestContainer>;
     const workflow: WorkflowYaml = {
