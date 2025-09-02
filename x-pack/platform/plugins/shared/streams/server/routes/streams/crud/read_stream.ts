@@ -37,23 +37,28 @@ export async function readStream({
     assetClient.getAssetLinks([name], ['dashboard', 'rule', 'query']),
   ]);
 
-  const [dashboardLinks, ruleLinks, queryLinks] = assets.reduce(
+  const assetsByType = assets.reduce(
     (acc, asset) => {
-      if (asset[ASSET_TYPE] === 'dashboard') {
-        acc[0].push(asset);
-      } else if (asset[ASSET_TYPE] === 'rule') {
-        acc[1].push(asset);
-      } else if (asset[ASSET_TYPE] === 'query') {
-        acc[2].push(asset);
+      const assetType = asset[ASSET_TYPE];
+      if (assetType === 'dashboard') {
+        acc.dashboards.push(asset);
+      } else if (assetType === 'rule') {
+        acc.rules.push(asset);
+      } else if (assetType === 'query') {
+        acc.queries.push(asset);
       }
       return acc;
     },
-    [[], [], []] as [DashboardLink[], RuleLink[], QueryLink[]]
+    {
+      dashboards: [] as DashboardLink[],
+      rules: [] as RuleLink[],
+      queries: [] as QueryLink[],
+    }
   );
 
-  const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
-  const rules = ruleLinks.map((rule) => rule['asset.id']);
-  const queries = queryLinks.map((query) => {
+  const dashboards = assetsByType.dashboards.map((dashboard) => dashboard['asset.id']);
+  const rules = assetsByType.rules.map((rule) => rule['asset.id']);
+  const queries = assetsByType.queries.map((query) => {
     return query.query;
   });
 

@@ -24,7 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const FIRST_RULE_ASSET_LINKING = '09cef989-3ded-4a1e-b2b0-53d491d13397';
   const SECOND_RULE_ASSET_LINKING = '312638da-43d1-4d6e-8fb8-9cae201cdd3a';
 
-  describe('Asset links', function () {
+  describe('Rule asset linking', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
