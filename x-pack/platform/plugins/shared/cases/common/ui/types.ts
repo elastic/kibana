@@ -362,6 +362,3 @@ export type CaseViewAlertsTableProps = Pick<
   services?: AlertsTableProps['services'];
   caseData: CaseUI;
 };
-export interface CasesSettings {
-  displayIncrementalCaseId: boolean;
-}
