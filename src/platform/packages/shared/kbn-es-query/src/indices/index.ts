@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
-import { dynamic } from '@kbn/shared-ux-utility';
-
-export const LazyUnifiedMetricsExperienceGrid = dynamic(() => import('.'), {
-  fallback: (
-    <EuiDelayRender delay={300}>
-      <EuiSkeletonText />
-    </EuiDelayRender>
-  ),
-});
+export { indexPatternToCcs } from './index_pattern_to_ccs';
