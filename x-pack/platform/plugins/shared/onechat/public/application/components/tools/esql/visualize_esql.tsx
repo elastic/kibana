@@ -14,7 +14,7 @@ import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/pu
 
 import type { ChartType } from '@kbn/visualization-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
@@ -35,13 +35,17 @@ export function VisualizeESQL({
   esqlQuery,
   preferredChartType,
 }: VisualizeESQLProps) {
-  const columns = esqlColumns?.map((column) => {
-    return {
-      id: column.name,
-      name: column.name,
-      meta: { type: esFieldTypeToKibanaFieldType(column.type) },
-    };
-  }) as DatatableColumn[];
+  const columns = useMemo(
+    () =>
+      esqlColumns?.map((column) => {
+        return {
+          id: column.name,
+          name: column.name,
+          meta: { type: esFieldTypeToKibanaFieldType(column.type) },
+        };
+      }) as DatatableColumn[],
+    [esqlColumns]
+  );
 
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
