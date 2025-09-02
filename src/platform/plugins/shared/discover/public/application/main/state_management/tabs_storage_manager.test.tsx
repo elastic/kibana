@@ -17,11 +17,17 @@ import {
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
-import { DEFAULT_TAB_STATE } from './redux';
+import {
+  DEFAULT_TAB_STATE,
+  fromSavedObjectTabToTabState,
+  fromSavedSearchToSavedObjectTab,
+} from './redux';
+import * as reduxModule from './redux';
 import {
   getRecentlyClosedTabStateMock,
   getTabStateMock,
 } from './redux/__mocks__/internal_state.mocks';
+import { savedSearchMock } from '@kbn/discover-plugin/public/__mocks__/saved_search';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -452,5 +458,230 @@ describe('TabsStorageManager', () => {
       ...closedTabsGroup1,
       ...newClosedTabs.map((tab) => ({ ...tab, closedAt: newClosedAt })),
     ]);
+  });
+
+  it('should update discover session id in local storage', () => {
+    const {
+      tabsStorageManager,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+      discoverSessionId: undefined,
+    });
+
+    jest.spyOn(storage, 'set');
+
+    const newDiscoverSessionId = 'session-123';
+    tabsStorageManager.updateDiscoverSessionIdLocally(newDiscoverSessionId);
+
+    expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: newDiscoverSessionId,
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+  });
+
+  it('should not update discover session id when disabled', () => {
+    const urlStateStorage = createKbnUrlStateStorage();
+    const services = createDiscoverServicesMock();
+    services.storage = new Storage(localStorage);
+    const storage = services.storage;
+
+    const tabsStorageManager = createTabsStorageManager({
+      urlStateStorage,
+      storage,
+      enabled: false,
+    });
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [],
+      closedTabs: [],
+    });
+
+    jest.spyOn(storage, 'set');
+
+    tabsStorageManager.updateDiscoverSessionIdLocally('session-123');
+
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('should load open tabs from storage when persisted discover session id matches stored session id', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    const matchingSessionId = 'session-match';
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: matchingSessionId,
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TABS_STATE_URL_KEY, {
+      tabId: mockTab2.id,
+    });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession: {
+        id: matchingSessionId,
+        title: 'title',
+        description: 'description',
+        managed: false,
+        tabs: [],
+      },
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps).toEqual({
+      allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
+      selectedTabId: mockTab2.id,
+      recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
+    });
+  });
+
+  it('should load persisted tabs when persisted discover session id differs from stored session id', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    const { storage } = services;
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: undefined,
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TABS_STATE_URL_KEY, {
+      tabId: mockTab1.id,
+    });
+
+    const persistedTabId = 'persisted-tab';
+    const peristedTab = fromSavedSearchToSavedObjectTab({
+      tab: { id: persistedTabId, label: 'Persisted tab' },
+      savedSearch: savedSearchMock,
+      services,
+    });
+    const persistedDiscoverSession = {
+      id: 'persisted-session',
+      title: 'title',
+      description: 'description',
+      managed: false,
+      tabs: [peristedTab],
+    };
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs.map((t) => t.id)).toEqual([persistedTabId]);
+    expect(loadedProps.selectedTabId).toBe(persistedTabId);
+    expect(loadedProps.allTabs.find((t) => t.id === mockTab1.id)).toBeUndefined();
+  });
+
+  it('should load persisted tabs when persisted discover session id matches stored session id, but target open tab is not found', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    const { storage } = services;
+
+    const persistedSessionId = 'persisted-session';
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: persistedSessionId,
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TABS_STATE_URL_KEY, {
+      tabId: 'bad-tab',
+    });
+
+    const persistedTabId = 'persisted-tab';
+    const peristedTab = fromSavedSearchToSavedObjectTab({
+      tab: { id: persistedTabId, label: 'Persisted tab' },
+      savedSearch: savedSearchMock,
+      services,
+    });
+    const persistedDiscoverSession = {
+      id: persistedSessionId,
+      title: 'title',
+      description: 'description',
+      managed: false,
+      tabs: [peristedTab],
+    };
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs.map((t) => t.id)).toEqual([persistedTabId]);
+    expect(loadedProps.selectedTabId).toBe(persistedTabId);
+    expect(loadedProps.allTabs.find((t) => t.id === mockTab1.id)).toBeUndefined();
+  });
+
+  it('should not load from recently closed tabs when a persisted discover session is provided', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    const { storage } = services;
+
+    const persistedSessionId = 'persisted-session';
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: persistedSessionId,
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    urlStateStorage.set(TABS_STATE_URL_KEY, {
+      tabId: mockRecentlyClosedTab.id,
+    });
+
+    const persistedTabId = 'persisted-tab';
+    const peristedTab = fromSavedSearchToSavedObjectTab({
+      tab: { id: persistedTabId, label: 'Persisted tab' },
+      savedSearch: savedSearchMock,
+      services,
+    });
+    const persistedDiscoverSession = {
+      id: persistedSessionId,
+      title: 'title',
+      description: 'description',
+      managed: false,
+      tabs: [peristedTab],
+    };
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs.map((t) => t.id)).toEqual([persistedTabId]);
+    expect(loadedProps.selectedTabId).toBe(persistedTabId);
+    expect(loadedProps.allTabs.find((t) => t.id === mockTab1.id)).toBeUndefined();
   });
 });
