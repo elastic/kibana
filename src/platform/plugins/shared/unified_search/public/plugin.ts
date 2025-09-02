@@ -12,6 +12,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { initBackgroundSearch } from '@kbn/background-search';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import type { ConfigSchema } from '../server/config';
@@ -68,6 +69,11 @@ export class UnifiedSearchPublicPlugin
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
 
+    const enabled = core.featureFlags.getBooleanValue('search.backgroundSearchEnabled', false);
+    initBackgroundSearch({
+      enabled,
+      state$: data.search.session.state$,
+    });
     /*
      *
      *  unifiedsearch uses global data service to create stateful search bar.
