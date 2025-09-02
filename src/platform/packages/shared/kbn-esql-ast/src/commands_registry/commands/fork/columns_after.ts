@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { col } from '../../../synth';
 import type { ESQLAstQueryExpression } from '../../../types';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';

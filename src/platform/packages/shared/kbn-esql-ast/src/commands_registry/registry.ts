@@ -61,6 +61,7 @@ export interface ICommandMethods<TContext = any> {
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
     query: string,
+    // TODO is there any reason for this context to be here?
     context?: TContext
   ) => ESQLColumnData[];
 }
