@@ -43,6 +43,7 @@ export {
   getLogDocumentOverview,
   getTransactionDocumentOverview,
   getSpanDocumentOverview,
+  getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
