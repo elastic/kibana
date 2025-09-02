@@ -702,22 +702,10 @@
       "enabled": true
     },{
       "groupName": "virtualized",
-      "matchDepNames": [
-        "@tanstack/react-table",
-        "@tanstack/react-virtual",
-        "react-virtualized-auto-sizer"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:SharedUX",
-        "release_note:skip",
-        "backport:all-open"
-      ],
+      "matchDepNames": ["@tanstack/react-table", "@tanstack/react-virtual"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:SharedUX", "release_note:skip", "backport:all-open"],
       "enabled": true
     },
     {
