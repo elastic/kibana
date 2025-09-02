@@ -16,13 +16,25 @@ import {
   trendStatsBatch,
 } from '../apps/synthetics/state';
 import type { SyntheticsSuggestion } from '../../common/types';
+import { setOverviewPageStateAction } from '../apps/synthetics/state/overview';
 import { quietFetchOverviewStatusAction } from '../apps/synthetics/state/overview_status';
 
 const MonitorItem = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const dispatch = useDispatch();
+  const pageState = useSelector(selectOverviewPageState);
+
+  useEffect(() => {
+    if (!pageState.monitorQueryIds?.includes(monitor.monitorQueryId)) {
+      dispatch(
+        setOverviewPageStateAction({
+          ...pageState,
+          monitorQueryIds: [...(pageState.monitorQueryIds || []), monitor.monitorQueryId],
+        })
+      );
+    }
+  }, [dispatch, monitor.monitorQueryId, pageState]);
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
 
-  const pageState = useSelector(selectOverviewPageState);
   useEffect(() => {
     if (!trendData) {
       dispatch(
@@ -38,7 +50,15 @@ const MonitorItem = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   }, [dispatch, monitor.configId, monitor.locationId, monitor.schedule, pageState, trendData]);
 
   useEffect(() => {
-    dispatch(quietFetchOverviewStatusAction.get({ pageState }));
+    dispatch(
+      quietFetchOverviewStatusAction.get({
+        pageState: {
+          ...pageState,
+          // only fetch the monitors that are being suggested
+          monitorQueryIds: pageState.monitorQueryIds ?? [],
+        },
+      })
+    );
   }, [dispatch, pageState]);
 
   return <MetricItem style={{ width: '100%' }} monitor={monitor} onClick={() => {}} />;
