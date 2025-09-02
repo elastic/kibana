@@ -9,21 +9,21 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
+import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
+import { WorkflowEventModal } from '../../../features/run_workflow/ui/workflow_event_modal';
+import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { WorkflowEventModal } from '../../../features/run_workflow/ui/workflow_event_modal';
-import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -49,6 +49,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab } = useWorkflowUrlState();
 
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
+
+  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
+  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
   chrome!.setBreadcrumbs([
     {
@@ -80,12 +86,22 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       });
       return;
     }
-    updateWorkflow.mutate({
-      id,
-      workflow: {
-        yaml: workflowYaml,
+    updateWorkflow.mutate(
+      {
+        id,
+        workflow: {
+          yaml: workflowYaml,
+        },
       },
-    });
+      {
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err as Error, {
+            toastLifeTimeMs: 3000,
+            title: 'Failed to save workflow',
+          });
+        },
+      }
+    );
   };
 
   const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
@@ -161,12 +177,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     false
   );
 
-  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
-  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
-  const [hasChanges, setHasChanges] = useState(false);
-
-  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
-
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
     setHasChanges(false);
@@ -197,6 +207,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}
         canSaveWorkflow={canSaveWorkflow}
+        isValid={workflow?.valid ?? true}
         isEnabled={workflow?.enabled ?? false}
         handleRunClick={handleRunClick}
         handleSave={handleSave}
