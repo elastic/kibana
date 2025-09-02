@@ -77,7 +77,7 @@ export const InputText = ({
       >
         <EuiButton color="success" size="s" onClick={onSubmit} disabled={disabled}>
           <FormattedMessage
-            id="xpack.elasticAssistant.typed.interrupt.input.text.submit.label"
+            id="xpack.elasticAssistantPlugin.typed_interrupt.input_text.submit.label"
             defaultMessage="Submit"
           />
         </EuiButton>
