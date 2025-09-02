@@ -20,6 +20,7 @@ import { useStreamsDetailManagementTabs } from './use_streams_detail_management_
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailDataQualityIndicator } from '../../stream_badges';
 import { useDatasetQualityController } from '../../../hooks/use_dataset_quality_controller';
+import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 
 const classicStreamManagementSubTabs = [
   'enrich',
@@ -27,6 +28,7 @@ const classicStreamManagementSubTabs = [
   'lifecycle',
   'significantEvents',
   'dataQuality',
+  'schemaEditor',
   'references',
 ] as const;
 
@@ -160,6 +162,14 @@ export function ClassicStreamDetailManagement({
           </span>
         </EuiToolTip>
       ),
+    };
+    tabs.schemaEditor = {
+      content: (
+        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+        defaultMessage: 'Schema editor',
+      }),
     };
   }
 

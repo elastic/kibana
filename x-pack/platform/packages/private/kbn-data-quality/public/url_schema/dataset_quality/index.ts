@@ -6,4 +6,3 @@
  */
 
 export * as datasetQualitySerializationSchemaV1 from './url_schema_v1';
-export * as datasetQualitySerializationSchemaV2 from './url_schema_v2';

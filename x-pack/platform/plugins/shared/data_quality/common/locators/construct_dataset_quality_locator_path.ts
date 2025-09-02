@@ -10,7 +10,7 @@ import type { ManagementAppLocatorParams } from '@kbn/management-plugin/common/l
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import {
-  datasetQualityUrlSchemaV2,
+  datasetQualityUrlSchemaV1,
   DATA_QUALITY_URL_STATE_KEY,
   deepCompactObject,
 } from '@kbn/data-quality/common';
@@ -28,9 +28,9 @@ export const constructDatasetQualityLocatorPath = async (params: LocatorPathCons
     managementLocator,
   } = params;
 
-  const pageState = datasetQualityUrlSchemaV2.urlSchemaRT.encode(
+  const pageState = datasetQualityUrlSchemaV1.urlSchemaRT.encode(
     deepCompactObject({
-      v: 2,
+      v: 1,
       filters,
     })
   );
