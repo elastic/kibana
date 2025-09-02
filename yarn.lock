@@ -6409,6 +6409,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flyout-system-example-plugin@link:examples/flyout_system":
+  version "0.0.0"
+  uid ""
+
 "@kbn/foo-plugin@link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin":
   version "0.0.0"
   uid ""
@@ -6458,10 +6462,6 @@
   uid ""
 
 "@kbn/get-repo-files@link:src/platform/packages/private/kbn-get-repo-files":
-  version "0.0.0"
-  uid ""
-
-"@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""
 
