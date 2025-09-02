@@ -40,7 +40,7 @@ describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
   });
 
   beforeEach(async () => {
-    await fs.unlink(logFilePath).catch(() => { });
+    await fs.unlink(logFilePath).catch(() => {});
     jest.clearAllMocks();
   });
 
@@ -126,7 +126,7 @@ describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
                 keyword: 'updated by the migrator',
               };
               return { document: { ...doc, attributes } };
-            }
+            },
           },
         ],
       },
