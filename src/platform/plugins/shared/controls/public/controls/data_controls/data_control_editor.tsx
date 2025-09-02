@@ -30,7 +30,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -38,20 +40,19 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DefaultDataControlState } from '../../../common';
+import type { ControlGroupEditorConfig, DefaultDataControlState } from '../../../common';
 import {
   CONTROL_MENU_TRIGGER,
   addControlMenuTrigger,
-  type ControlTypeAction,
+  type CreateControlTypeAction,
 } from '../../actions/control_panel_actions';
 import { confirmDeleteControl } from '../../common';
-import { dataViewsService, uiActionsService } from '../../services/kibana_services';
+import { coreServices, dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 
-export interface ControlEditorProps<
-  State extends DefaultDataControlState = DefaultDataControlState
-> {
+type DataControlEditorState = DefaultDataControlState & SerializedTitles;
+
+export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
@@ -59,6 +60,7 @@ export interface ControlEditorProps<
   parentApi: unknown;
   onCancel: (newState: Partial<State>) => void;
   onSave: () => void;
+  onUpdate: (newState: Partial<State>) => void;
   ariaLabelledBy: string;
 }
 
@@ -66,7 +68,7 @@ const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
 interface ControlActionRegistry {
-  [type: string]: ControlTypeAction;
+  [type: string]: CreateControlTypeAction;
 }
 const useControlActionRegistry = (): ControlActionRegistry => {
   const [controlActionRegistry, setControlActionRegistry] = useState<ControlActionRegistry>({});
@@ -80,14 +82,14 @@ const useControlActionRegistry = (): ControlActionRegistry => {
         if (!cancelled) {
           setControlActionRegistry(
             controlTypeActions.reduce(
-              (prev, action) => ({ ...prev, [action.type]: action as ControlTypeAction }),
+              (prev, action) => ({ ...prev, [action.type]: action as CreateControlTypeAction }),
               {} as ControlActionRegistry
             )
           );
         }
       })
       .catch(() => {
-        if (!cancelled) setControlActionRegistry([]);
+        if (!cancelled) setControlActionRegistry({});
       });
 
     return () => {
@@ -102,7 +104,7 @@ const CompatibleControlTypesComponent = ({
   fieldName,
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
-}: Partial<DefaultDataControlState> & {
+}: Partial<DataControlEditorState> & {
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
@@ -118,7 +120,7 @@ const CompatibleControlTypesComponent = ({
     [dataViewId, fieldName]
   );
 
-  const sortedActionArray: ControlTypeAction[] = useMemo(() => {
+  const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
     return Object.values(controlActionRegistry ?? {}).sort(
       (
         { order: orderA = 0, getDisplayName: getDisplayNameA },
@@ -188,12 +190,13 @@ const CompatibleControlTypesComponent = ({
   );
 };
 
-export const DataControlEditor = <State extends DefaultDataControlState = DefaultDataControlState>({
+export const DataControlEditor = <State extends DataControlEditorState = DataControlEditorState>({
   initialState,
   controlId,
   controlType, // initial control type
   initialDefaultPanelTitle,
   onSave,
+  onUpdate,
   onCancel,
   parentApi,
   ariaLabelledBy,
@@ -208,9 +211,12 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
-  // TODO get editor config from parent?
-  const editorConfig = useMemo(
-    () => ({ hideAdditionalSettings: false, hideWidthSettings: false }),
+  // TODO: get editor config from parent?
+  const editorConfig = useMemo<ControlGroupEditorConfig>(
+    () => ({
+      hideAdditionalSettings: false,
+      hideWidthSettings: false,
+    }),
     []
   );
 
@@ -232,9 +238,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     if (!editorState.dataViewId) {
       return;
     }
-
     const dataView = await dataViewsService.get(editorState.dataViewId);
-    // const registry = await getDataControlFieldRegistry(dataView);
     return {
       selectedDataView: dataView,
     };
@@ -439,12 +443,23 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 color="primary"
                 disabled={!(controlOptionsValid && Boolean(selectedControlType))}
                 onClick={() => {
-                  controlActionRegistry[selectedControlType!]?.execute({
-                    trigger: addControlMenuTrigger,
-                    embeddable: parentApi,
-                    state: editorState,
-                    controlId,
-                  });
+                  if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
+                    // we need to create a new control from scratch
+                    try {
+                      controlActionRegistry[selectedControlType]?.execute({
+                        trigger: addControlMenuTrigger,
+                        embeddable: parentApi,
+                        state: editorState,
+                      });
+                    } catch (e) {
+                      coreServices.notifications.toasts.addError(e, {
+                        title: DataControlEditorStrings.manageControl.getOnSaveError(),
+                      });
+                    }
+                  } else {
+                    // the control already exists with the expected type, so just update it
+                    onUpdate(editorState);
+                  }
                   onSave();
                 }}
               >

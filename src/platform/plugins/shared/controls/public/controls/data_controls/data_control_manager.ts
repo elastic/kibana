@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, switchMap, tap, type Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, switchMap, tap } from 'rxjs';
 
 import type { Reference } from '@kbn/content-management-utils';
 import {
@@ -17,7 +17,7 @@ import {
 } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators, initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -35,17 +35,7 @@ export const defaultDataControlComparators: StateComparators<DefaultDataControlS
   useGlobalFilters: (a, b) => a ?? true === b ?? true,
 };
 
-export const initializeDataControlManager = async <EditorState extends object = {}>(
-  controlId: string,
-  controlType: string,
-  typeDisplayName: string,
-  state: DefaultDataControlState,
-  getEditorState: () => EditorState,
-  setEditorState: (state: Partial<EditorState>) => void, // TODO: Remove this
-  parentApi: unknown,
-  willHaveInitialFilter?: boolean,
-  getInitialFilter?: (dataView: DataView) => Filter | undefined
-): Promise<{
+export type DataControlStateManager = Omit<StateManager<DefaultDataControlState>, 'api'> & {
   api: StateManager<DefaultDataControlState>['api'] & DataControlApi;
   cleanup: () => void;
   internalApi: {
@@ -53,10 +43,29 @@ export const initializeDataControlManager = async <EditorState extends object = 
     onSelectionChange: () => void;
     setOutputFilter: (filter: Filter | undefined) => void;
   };
-  anyStateChange$: Observable<void>;
-  getLatestState: () => DefaultDataControlState;
-  reinitializeState: (lastState?: DefaultDataControlState) => void;
-}> => {
+};
+
+export const initializeDataControlManager = async <EditorState extends object = object>({
+  controlId,
+  controlType,
+  typeDisplayName,
+  state,
+  parentApi,
+  editorStateManager,
+  titlesManager,
+  willHaveInitialFilter,
+  getInitialFilter,
+}: {
+  controlId: string;
+  controlType: string;
+  typeDisplayName: string;
+  state: DefaultDataControlState;
+  parentApi: unknown;
+  editorStateManager: ReturnType<typeof initializeStateManager<EditorState>>;
+  titlesManager: ReturnType<typeof initializeTitleManager>;
+  willHaveInitialFilter?: boolean;
+  getInitialFilter?: (dataView: DataView) => Filter | undefined;
+}): Promise<DataControlStateManager> => {
   const dataControlStateManager = initializeStateManager<DefaultDataControlState>(
     state,
     {
@@ -154,20 +163,22 @@ export const initializeDataControlManager = async <EditorState extends object = 
     });
 
   const onEdit = async () => {
-    const initialState: DefaultDataControlState & EditorState = {
-      ...dataControlStateManager.getLatestState(),
-      ...getEditorState(),
-    };
-
     // open the editor to get the new state
     openDataControlEditor<DefaultDataControlState & EditorState>({
       initialState: {
-        ...initialState,
+        ...titlesManager.getLatestState(),
+        ...dataControlStateManager.getLatestState(),
+        ...editorStateManager.getLatestState(),
       },
       controlType,
       controlId,
       initialDefaultPanelTitle: defaultTitle$.getValue(),
       parentApi,
+      onUpdate: (newState) => {
+        titlesManager.reinitializeState(newState);
+        dataControlStateManager.reinitializeState(newState);
+        editorStateManager.reinitializeState(newState);
+      },
     });
   };
 

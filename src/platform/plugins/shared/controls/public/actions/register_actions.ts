@@ -46,7 +46,7 @@ export function registerActions(uiActions: UiActionsStart) {
   });
 
   uiActions.addTriggerActionAsync(CONTROL_MENU_TRIGGER, OPTIONS_LIST_ACTION, async () => {
-    const { createOptionsListControlAction } = await import('./options_list_action');
+    const { createOptionsListControlAction } = await import('./create_options_list_action');
     return createOptionsListControlAction();
   });
 }

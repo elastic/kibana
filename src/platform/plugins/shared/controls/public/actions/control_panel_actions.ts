@@ -15,16 +15,24 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DefaultDataControlState } from '../../common';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
 
-export type ControlTypeAction<State extends DefaultDataControlState = DefaultDataControlState> =
-  Action<
-    EmbeddableApiContext & { state: Partial<State>; controlId?: string },
-    {
-      CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
-      isFieldCompatible: (field: DataViewField) => boolean;
-    }
-  > & {
-    getDisplayName: () => string; // remove context from `getDisplayName`
-  };
+export type CreateControlTypeContext<
+  State extends DefaultDataControlState = DefaultDataControlState
+> = EmbeddableApiContext & {
+  state: Partial<State>;
+  controlId?: string;
+};
+
+export type CreateControlTypeAction<
+  State extends DefaultDataControlState = DefaultDataControlState
+> = Action<
+  CreateControlTypeContext<State>,
+  {
+    CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
+    isFieldCompatible: (field: DataViewField) => boolean;
+  }
+> & {
+  getDisplayName: () => string; // remove context from `getDisplayName`
+};
 
 export const CONTROL_MENU_TRIGGER = 'CONTROL_MENU_TRIGGER';
 

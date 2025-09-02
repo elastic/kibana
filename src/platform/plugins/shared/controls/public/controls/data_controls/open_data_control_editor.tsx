@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { openLazyFlyout } from '@kbn/presentation-util';
-import { i18n } from '@kbn/i18n';
 
 import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
@@ -19,16 +20,19 @@ export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
 >({
   initialState,
-  controlType,
-  controlId,
-  initialDefaultPanelTitle,
   parentApi,
+  controlId,
+  controlType,
+  initialDefaultPanelTitle,
+  onUpdate,
 }: {
   initialState: Partial<State>;
-  controlType?: string;
-  controlId?: string;
-  initialDefaultPanelTitle?: string;
   parentApi: unknown;
+  // these props are only provided when the control already exists and is being edited
+  controlId?: string;
+  controlType?: string;
+  initialDefaultPanelTitle?: string;
+  onUpdate?: (newState: Partial<State & SerializedTitles>) => void;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
@@ -73,6 +77,7 @@ export const openDataControlEditor = <
           controlType={controlType}
           controlId={controlId}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
+          onUpdate={(state) => onUpdate?.(state)}
           onCancel={(state) => {
             onCancel(state, closeFlyout);
           }}
