@@ -18,13 +18,15 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import * as i18n from './translations';
-import { SiemDashboardMigrationsService } from './dashboard_migrations_service';
+import {
+  CREATE_MIGRATION_BODY_BATCH_SIZE,
+  SiemDashboardMigrationsService,
+} from './dashboard_migrations_service';
 import type { CreateDashboardMigrationDashboardsRequestBody } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { getMissingCapabilitiesChecker } from '../../common/service/capabilities';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
 import type { ExperimentalFeatures } from '../../../../common';
-import { CREATE_MIGRATION_BODY_BATCH_SIZE } from '../../common/constants';
 
 jest.mock('../api', () => ({
   createDashboardMigration: jest.fn(),
@@ -184,7 +186,9 @@ describe('SiemDashboardMigrationsService', () => {
     });
 
     it('should create migration in batches if body length exceeds the batch size', async () => {
-      const body = new Array(CREATE_MIGRATION_BODY_BATCH_SIZE + 1).fill({ dashboard: 'dashboard' });
+      const body = new Array(CREATE_MIGRATION_BODY_BATCH_SIZE + 1).fill({
+        dashboard: 'dashboard',
+      });
       const name = 'test';
       mockCreateDashboardMigration.mockResolvedValueOnce({ migration_id: 'mig-1' });
       mockAddDashboardsToDashboardMigration.mockResolvedValue(undefined);
@@ -211,7 +215,9 @@ describe('SiemDashboardMigrationsService', () => {
     });
 
     it('should upsert resources in batches', async () => {
-      const body = new Array(CREATE_MIGRATION_BODY_BATCH_SIZE + 1).fill({ resource: 'res' });
+      const body = new Array(CREATE_MIGRATION_BODY_BATCH_SIZE + 1).fill({
+        resource: 'res',
+      });
       mockUpsertDashboardMigrationResources.mockResolvedValue({});
       await service.upsertMigrationResources('mig-1', body);
       expect(mockUpsertDashboardMigrationResources).toHaveBeenCalledTimes(2);

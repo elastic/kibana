@@ -27,10 +27,9 @@ import {
 } from '../../common/service';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
 import { getSuccessToast } from './notification/success_notification';
-import {
-  CREATE_MIGRATION_BODY_BATCH_SIZE,
-  START_STOP_POLLING_SLEEP_SECONDS,
-} from '../../common/constants';
+import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
+
+const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
   public telemetry: SiemRulesMigrationsTelemetry;

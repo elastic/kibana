@@ -7,4 +7,3 @@
 
 export const TASK_STATS_POLLING_SLEEP_SECONDS = 10 as const;
 export const START_STOP_POLLING_SLEEP_SECONDS = 1 as const;
-export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;

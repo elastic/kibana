@@ -28,10 +28,9 @@ import { getMissingCapabilitiesChecker } from '../../common/service/capabilities
 import { requiredDashboardMigrationCapabilities } from './capabilities';
 import { SiemMigrationsServiceBase } from '../../common/service';
 import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
-import {
-  CREATE_MIGRATION_BODY_BATCH_SIZE,
-  START_STOP_POLLING_SLEEP_SECONDS,
-} from '../../common/constants';
+import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
+
+export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
 export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationTaskStats> {
   constructor(
