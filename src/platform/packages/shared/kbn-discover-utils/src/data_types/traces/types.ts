@@ -56,3 +56,11 @@ export interface TraceDocument extends DataTableRecord {
     'span.duration.us'?: string;
   };
 }
+
+export interface TraceIndexes {
+  logs?: string;
+  apm: {
+    errors?: string;
+    traces?: string;
+  };
+}

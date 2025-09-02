@@ -522,7 +522,7 @@ paths:
               schema:
                 type: array
                 items:
-                  - $ref: "#/components/schemas/getParameterResponse"
+                  $ref: "#/components/schemas/getParameterResponse"
               examples:
                 getParametersResponseExample1:
                   summary: Read access
@@ -1311,7 +1311,7 @@ components:
           additionalproperties: true
           properties:
             check:
-              type: objects
+              type: object
               description: The check request settings.
               properties:
                 request:
