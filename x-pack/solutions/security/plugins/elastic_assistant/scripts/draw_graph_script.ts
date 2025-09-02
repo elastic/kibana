@@ -106,6 +106,7 @@ async function getDefendInsightsGraph(logger: Logger): Promise<Drawable> {
     endpointIds: ['mock-endpoint-1'],
     anonymizationFields: [],
     esClient: mockEsClient,
+    kbDataClient: null,
     llm: mockLlm as unknown as ActionsClientLlm,
     logger,
     replacements: {},

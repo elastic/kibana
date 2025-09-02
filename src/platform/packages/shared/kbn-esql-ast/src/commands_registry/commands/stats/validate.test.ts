@@ -86,22 +86,22 @@ describe('STATS Validation', () => {
 
       test('errors when input is not an aggregate function', () => {
         statsExpectErrors('from a_index | stats doubleField ', [
-          'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
+          'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
         ]);
       });
 
       test('various errors', () => {
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats avg(doubleField) by col0 = wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats col0 = avg(fn(number)), count(*)', [
-          'Unknown function [fn]',
+          'Unknown function FN',
         ]);
       });
 
@@ -135,11 +135,11 @@ describe('STATS Validation', () => {
 
       test('various errors', () => {
         statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField, 20)', [
-          'Function [percentile] not allowed in [by]',
+          'Function PERCENTILE not allowed in BY',
         ]);
         statsExpectErrors(
           'from a_index | stats avg(doubleField) by textField, percentile(doubleField, 50) by ipField',
-          ['Function [percentile] not allowed in [by]']
+          ['Function PERCENTILE not allowed in BY']
         );
       });
 
