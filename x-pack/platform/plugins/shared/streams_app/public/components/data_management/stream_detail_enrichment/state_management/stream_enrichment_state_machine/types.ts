@@ -42,7 +42,7 @@ export interface PersistentFieldMapping {
   additionalParameters?: FieldDefinitionConfigAdvancedParameters;
   lastSeenPosition?: number;
   processorId?: string;
-  timestamp: number; 
+  timestamp: number;
 }
 
 export interface StreamEnrichmentContextType {

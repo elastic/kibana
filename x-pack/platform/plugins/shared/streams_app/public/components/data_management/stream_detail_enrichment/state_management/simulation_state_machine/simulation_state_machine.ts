@@ -303,9 +303,7 @@ export const simulationMachine = setup({
     },
 
     simulationCompleted: {
-      entry: [
-        sendParent({ type: 'simulation.completed' }),
-      ],
+      entry: [sendParent({ type: 'simulation.completed' })],
       always: {
         target: 'idle',
       },

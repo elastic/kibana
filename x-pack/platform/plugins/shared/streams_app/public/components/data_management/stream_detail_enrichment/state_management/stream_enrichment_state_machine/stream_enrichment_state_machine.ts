@@ -220,38 +220,37 @@ export const streamEnrichmentMachine = setup({
           context.persistentFieldMappings
         );
 
-
-      const significantReorderings = matchingResult.potentialReorderings.filter(reordering => {
-        const wasRecentlyMapped = Date.now() - reordering.persistentMapping.timestamp < 5000; 
-        return reordering.confidence !== 'low' && !wasRecentlyMapped;
-      });
-
-      if (significantReorderings.length > 0) {
-        self.send({
-          type: 'notifyFieldReordering',
-          reorderings: significantReorderings,
-        });
-      }
-
-      if (matchingResult.exactMatches.length > 0) {
-        const restoredFields = applyFieldRestoration(currentFields, matchingResult.exactMatches);
-
-        context.simulatorRef.send({
-          type: 'simulation.restoreFields',
-          restoredFields,
+        const significantReorderings = matchingResult.potentialReorderings.filter((reordering) => {
+          const wasRecentlyMapped = Date.now() - reordering.persistentMapping.timestamp < 5000;
+          return reordering.confidence !== 'low' && !wasRecentlyMapped;
         });
 
-        const updatedMappings = updateFieldPositions(
-          restoredFields,
-          context.persistentFieldMappings
-        );
-        self.send({
-          type: 'updateFieldPositions',
-          persistentFieldMappings: updatedMappings,
-        });
-      }
+        if (significantReorderings.length > 0) {
+          self.send({
+            type: 'notifyFieldReordering',
+            reorderings: significantReorderings,
+          });
+        }
+
+        if (matchingResult.exactMatches.length > 0) {
+          const restoredFields = applyFieldRestoration(currentFields, matchingResult.exactMatches);
+
+          context.simulatorRef.send({
+            type: 'simulation.restoreFields',
+            restoredFields,
+          });
+
+          const updatedMappings = updateFieldPositions(
+            restoredFields,
+            context.persistentFieldMappings
+          );
+          self.send({
+            type: 'updateFieldPositions',
+            persistentFieldMappings: updatedMappings,
+          });
+        }
       } catch (error) {
-        //do nothing
+        // do nothing
       }
     },
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
@@ -491,13 +490,19 @@ export const streamEnrichmentMachine = setup({
                     'simulation.viewDataPreview': 'viewDataPreview',
                     'simulation.fields.map': {
                       actions: [
-                        { type: 'storePersistentFieldMapping', params: ({ event }) => ({ field: event.field }) },
+                        {
+                          type: 'storePersistentFieldMapping',
+                          params: ({ event }) => ({ field: event.field }),
+                        },
                         forwardTo('simulator'),
                       ],
                     },
                     'simulation.fields.unmap': {
                       actions: [
-                        { type: 'removePersistentFieldMapping', params: ({ event }) => ({ fieldName: event.fieldName }) },
+                        {
+                          type: 'removePersistentFieldMapping',
+                          params: ({ event }) => ({ fieldName: event.fieldName }),
+                        },
                         forwardTo('simulator'),
                       ],
                     },

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SchemaField, MappedSchemaField } from '../../../schema_editor/types';
-import type { PersistentFieldMapping } from './types';
 import { i18n } from '@kbn/i18n';
 import type { IToasts } from '@kbn/core/public';
+import type { SchemaField, MappedSchemaField } from '../../../schema_editor/types';
+import type { PersistentFieldMapping } from './types';
 
 export interface FieldMatchingResult {
   exactMatches: FieldRestoration[];
@@ -139,7 +139,6 @@ export function applyFieldRestoration(
   });
 }
 
-
 export function updateFieldPositions(
   fields: SchemaField[],
   persistentMappings: Map<string, PersistentFieldMapping>
@@ -159,29 +158,29 @@ export function updateFieldPositions(
   return updatedMappings;
 }
 
- export const createFieldReorderingNotifier =
-   ({ toasts }: { toasts: IToasts }) =>
-   (_args: unknown, params: { reorderings: ReorderingDetection[] }) => {
-     try {
-       const reorderedFields = params.reorderings.map((r) => r.fieldName).join(', ');
-       toasts.addWarning({
-         title: i18n.translate(
-           'xpack.streams.streamDetailView.managementTab.enrichment.fieldPositionsChanged.title',
-           {
-             defaultMessage: 'Field positions changed',
-           }
-         ),
-         text: i18n.translate(
-           'xpack.streams.streamDetailView.managementTab.enrichment.fieldPositionsChanged.text',
-           {
-             defaultMessage:
-               'The positions of fields [{reorderedFields}] have changed due to pattern updates, but your field mappings have been preserved.',
-             values: { reorderedFields },
-           }
-         ),
-         toastLifeTimeMs: 4000,
-       });
-     } catch {
-       // Avoid stopping the machine due to toast errors
-     }
-   };
+export const createFieldReorderingNotifier =
+  ({ toasts }: { toasts: IToasts }) =>
+  (_args: unknown, params: { reorderings: ReorderingDetection[] }) => {
+    try {
+      const reorderedFields = params.reorderings.map((r) => r.fieldName).join(', ');
+      toasts.addWarning({
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.fieldPositionsChanged.title',
+          {
+            defaultMessage: 'Field positions changed',
+          }
+        ),
+        text: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.fieldPositionsChanged.text',
+          {
+            defaultMessage:
+              'The positions of fields [{reorderedFields}] have changed due to pattern updates, but your field mappings have been preserved.',
+            values: { reorderedFields },
+          }
+        ),
+        toastLifeTimeMs: 4000,
+      });
+    } catch {
+      // Avoid stopping the machine due to toast errors
+    }
+  };
