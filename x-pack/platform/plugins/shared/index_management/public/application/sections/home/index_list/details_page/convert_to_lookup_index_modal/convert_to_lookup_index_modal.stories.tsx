@@ -10,7 +10,7 @@ import { ConvertToLookupIndexModal } from './convert_to_lookup_index_modal';
 
 const meta: Meta<typeof ConvertToLookupIndexModal> = {
   component: ConvertToLookupIndexModal,
-  title: 'Create Index Modal',
+  title: 'Convert To Lookup Index Modal',
 };
 
 export default meta;
@@ -20,6 +20,6 @@ export const Primary: Story = {
   args: {
     onCloseModal: () => {},
     onConvert: () => {},
-    indexName: 'my-index',
+    sourceIndexName: 'my-index',
   },
 };

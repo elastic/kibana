@@ -34,7 +34,7 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 interface Props {
   onCloseModal: () => void;
   onConvert: (lookupIndexName: string) => void;
-  indexName: string;
+  sourceIndexName: string;
 }
 
 const convertToLookupIndexSchema: FormSchema = {
@@ -59,7 +59,7 @@ const convertToLookupIndexSchema: FormSchema = {
   },
 };
 
-export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, indexName }: Props) => {
+export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, sourceIndexName }: Props) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const onSubmitForm = async () => {
@@ -72,7 +72,7 @@ export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, indexName }
 
   const { form } = useForm({
     defaultValue: {
-      lookupIndexName: `lookup-${indexName}`,
+      lookupIndexName: `lookup-${sourceIndexName}`,
     },
     schema: convertToLookupIndexSchema,
     id: 'convertToLookupIndexForm',
@@ -103,7 +103,11 @@ export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, indexName }
               defaultMessage: 'Source index',
             })}
           >
-            <EuiFieldText defaultValue={indexName} disabled />
+            <EuiFieldText
+              defaultValue={sourceIndexName}
+              disabled
+              data-test-subj="sourceIndexName"
+            />
           </EuiFormRow>
 
           <UseField
@@ -112,6 +116,9 @@ export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, indexName }
             label={i18n.translate('xpack.idxMgmt.convertToLookupIndexModal.lookupIndexNameLabel', {
               defaultMessage: 'Lookup index name',
             })}
+            euiFieldProps={{
+              'data-test-subj': 'lookupIndexName',
+            }}
           />
         </Form>
       </EuiModalBody>
