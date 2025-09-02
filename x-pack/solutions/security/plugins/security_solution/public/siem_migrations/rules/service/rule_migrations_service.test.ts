@@ -30,11 +30,11 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
-import { getMissingCapabilitiesChecker } from '../../common/service/capabilities';
 import * as i18n from './translations';
 import { SiemRulesMigrationsService } from './rule_migrations_service';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../../common/constants';
+import { getMissingCapabilitiesChecker } from '../../common/service';
 
 // --- Mocks for external modules ---
 
@@ -51,7 +51,7 @@ jest.mock('../api', () => ({
 }));
 
 jest.mock('../../common/service/capabilities', () => ({
-  getMissingCapabilities: jest.fn(() => []),
+  getMissingCapabilitiesChecker: jest.fn(() => []),
 }));
 
 jest.mock('../../../common/experimental_features_service', () => ({
@@ -256,7 +256,7 @@ describe('SiemRulesMigrationsService', () => {
       // Spy on startPolling to ensure it is called after starting the migration
       const startPollingSpy = jest.spyOn(service, 'startPolling');
       // @ts-ignore (spying on a private method)
-      const stopMigrationPollingSpy = jest.spyOn(service, 'pollTaskUntil');
+      const stopMigrationPollingSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
 
       const result = await service.startRuleMigration(
         'mig-1',
@@ -302,7 +302,7 @@ describe('SiemRulesMigrationsService', () => {
       });
 
       // @ts-ignore (spying on a private method)
-      const stopMigrationPollingSpy = jest.spyOn(service, 'pollTaskUntil');
+      const stopMigrationPollingSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
 
       const result = await service.stopRuleMigration('mig-1');
 
