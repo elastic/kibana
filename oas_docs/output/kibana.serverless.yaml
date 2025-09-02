@@ -66,7 +66,6 @@ tags:
       Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
       For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
-  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -15318,6 +15317,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -16003,6 +16004,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -16223,6 +16226,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -16928,6 +16933,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -17610,6 +17617,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -18294,6 +18303,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -18516,6 +18527,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -19284,6 +19297,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -20073,6 +20088,10 @@ paths:
                                         type: string
                                       verification_mode:
                                         type: string
+                                  target_directory:
+                                    type: string
+                                  timeout:
+                                    type: string
                                 required:
                                   - sourceURI
                               features:
@@ -20107,12 +20126,20 @@ paths:
                                         type: number
                                   level:
                                     type: string
+                                  metrics:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      period:
+                                        type: string
                                   to_files:
                                     type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  _runtime_experimental:
+                                    type: string
                                   apm: {}
                                   enabled:
                                     type: boolean
@@ -22747,6 +22774,7 @@ paths:
                             - POLICY_CHANGE
                             - INPUT_ACTION
                             - MIGRATE
+                            - PRIVILEGE_LEVEL_CHANGE
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -38082,271 +38110,6 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/fleet/remote_synced_integrations/{outputId}/remote_status:
-    get:
-      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
-      operationId: get-fleet-remote-synced-integrations-outputid-remote-status
-      parameters:
-        - in: path
-          name: outputId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  custom_assets:
-                    additionalProperties:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        is_deleted:
-                          type: boolean
-                        name:
-                          type: string
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        type:
-                          type: string
-                      required:
-                        - type
-                        - name
-                        - package_name
-                        - package_version
-                        - sync_status
-                    type: object
-                  error:
-                    type: string
-                  integrations:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        id:
-                          type: string
-                        install_status:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            main:
-                              type: string
-                            remote:
-                              type: string
-                          required:
-                            - main
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        updated_at:
-                          type: string
-                        warning:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            message:
-                              type: string
-                            title:
-                              type: string
-                          required:
-                            - title
-                      required:
-                        - sync_status
-                        - install_status
-                    type: array
-                  warning:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                      title:
-                        type: string
-                    required:
-                      - title
-                required:
-                  - integrations
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Get CCR Remote synced integrations status by outputId
-      tags:
-        - CCR Remote synced integrations
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/fleet/remote_synced_integrations/status:
-    get:
-      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
-      operationId: get-fleet-remote-synced-integrations-status
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  custom_assets:
-                    additionalProperties:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        is_deleted:
-                          type: boolean
-                        name:
-                          type: string
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        type:
-                          type: string
-                      required:
-                        - type
-                        - name
-                        - package_name
-                        - package_version
-                        - sync_status
-                    type: object
-                  error:
-                    type: string
-                  integrations:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        id:
-                          type: string
-                        install_status:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            main:
-                              type: string
-                            remote:
-                              type: string
-                          required:
-                            - main
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        updated_at:
-                          type: string
-                        warning:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            message:
-                              type: string
-                            title:
-                              type: string
-                          required:
-                            - title
-                      required:
-                        - sync_status
-                        - install_status
-                    type: array
-                  warning:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                      title:
-                        type: string
-                    required:
-                      - title
-                required:
-                  - integrations
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Get CCR Remote synced integrations status
-      tags:
-        - CCR Remote synced integrations
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -70742,15 +70505,13 @@ components:
           type: number
         category_1_count:
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number
@@ -76168,10 +75929,6 @@ components:
       required:
         - message
         - subject
-        - anyOf:
-            - to
-            - cc
-            - bcc
       properties:
         bcc:
           type: array
