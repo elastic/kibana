@@ -16,8 +16,8 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import * as yaml from 'js-yaml';
 import React, { useEffect, useState } from 'react';
+import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import { PLUGIN_NAME } from '../../common';
-import { DebugGraph } from './debug-graph/debug-graph';
 
 interface WorkflowsAppDeps {
   basename: string;
@@ -257,13 +257,12 @@ steps:
                       ignoreTag
                     />
                   </EuiButton>
-                  {workflowYaml && <DebugGraph workflowYaml={workflowYaml} />}
-                  {/* {workflowExecutionId && (
+                  {workflowExecutionId && (
                     <WorkflowExecution
                       workflowExecutionId={workflowExecutionId}
                       workflowYaml={workflowYaml}
                     />
-                  )} */}
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageTemplate.Section>
