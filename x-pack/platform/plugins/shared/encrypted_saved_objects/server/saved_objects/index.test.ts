@@ -12,6 +12,7 @@ import type {
 } from '@kbn/core/server';
 import {
   coreMock,
+  loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
@@ -23,6 +24,9 @@ import { createUnsupportedEncryptedTypeError, setupSavedObjects } from '.';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 
+const mockLoggerFactory = loggingSystemMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
+
 describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;
   let coreStartMock: ReturnType<typeof coreMock.createStart>;
@@ -30,6 +34,7 @@ describe('#setupSavedObjects', () => {
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
   let mockSavedObjectTypeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   let mockEncryptedSavedObjectsService: jest.Mocked<EncryptedSavedObjectsService>;
+
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
 
@@ -45,10 +50,12 @@ describe('#setupSavedObjects', () => {
     mockEncryptedSavedObjectsService = encryptedSavedObjectsServiceMock.createWithTypes([
       { type: 'known-type', attributesToEncrypt: new Set(['attrSecret']) },
     ]);
+
     setupContract = setupSavedObjects({
       service: mockEncryptedSavedObjectsService,
       savedObjects: coreSetupMock.savedObjects,
       getStartServices: coreSetupMock.getStartServices,
+      logger: mockLogger,
     });
   });
 
@@ -146,6 +153,9 @@ describe('#setupSavedObjects', () => {
         })
       ).rejects.toThrowError(`Type 'not-known-type' is not registered as an encrypted type`);
 
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'getDecryptedAsInternalUser called with non-encrypted type: not-known-type'
+      );
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(0);
     });
   });
@@ -268,6 +278,9 @@ describe('#setupSavedObjects', () => {
         });
       }
 
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'createPointInTimeFinderDecryptedAsInternalUser called with non-encrypted types: not-known-type'
+      );
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(0);
     });
 
