@@ -134,13 +134,13 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
     if (!workflowYaml) {
       return null;
     }
-    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-    if (result.error) {
-      console.error(result.error);
-      return null;
-    }
 
     try {
+      const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+      if (result.error) {
+        console.error(result.error);
+        return null;
+      }
       return convertToWorkflowGraph(result.data as any);
     } catch (error) {
       console.error('Error converting workflow YAML to graph:', error);
@@ -151,7 +151,13 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
     if (!workflowExecutionGraph) {
       return null;
     }
-    return applyLayout(workflowExecutionGraph);
+
+    try {
+      return applyLayout(workflowExecutionGraph);
+    } catch (error) {
+      console.error('Error applying layout to graph:', error);
+      return null;
+    }
   }, [workflowExecutionGraph]);
 
   return (
