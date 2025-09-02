@@ -14,9 +14,6 @@ import { Table } from './table';
 import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useCreateDataView } from '../../../../../../../common/hooks/use_create_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../../../../data_view_manager/hooks/use_data_view';
-import { SourcererScopeName } from '../../../../../../../sourcerer/store/model';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../../../common/constants';
 
 const DATAVIEW_ERROR = i18n.translate(
@@ -47,8 +44,6 @@ interface AiForSOCAlertsTabProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const spaceId = useSpaceId();
   const dataViewSpec = useMemo(
     () => ({
@@ -58,14 +53,7 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
     [spaceId]
   );
 
-  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec,
-    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
-  });
-
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView, loading: dataViewLoading } = useCreateDataView({ dataViewSpec });
 
   // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();

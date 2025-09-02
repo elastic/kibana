@@ -17134,7 +17134,8 @@
                               "UPDATE_TAGS",
                               "POLICY_CHANGE",
                               "INPUT_ACTION",
-                              "MIGRATE"
+                              "MIGRATE",
+                              "PRIVILEGE_LEVEL_CHANGE"
                             ],
                             "type": "string"
                           },
@@ -41894,10 +41895,11 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status",
+        "summary": "Get remote synced integrations status",
         "tags": [
-          "CCR Remote synced integrations"
-        ]
+          "Fleet remote synced integrations"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
@@ -42089,10 +42091,11 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status by outputId",
+        "summary": "Get remote synced integrations status by outputId",
         "tags": [
-          "CCR Remote synced integrations"
-        ]
+          "Fleet remote synced integrations"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/service_tokens": {
@@ -58583,9 +58586,16 @@
                                           "type": "string"
                                         },
                                         "type": "array"
+                                      },
+                                      "tags": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
                                       }
                                     },
                                     "required": [
+                                      "tags",
                                       "members"
                                     ],
                                     "type": "object"
@@ -59048,9 +59058,16 @@
                           "type": "string"
                         },
                         "type": "array"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
                       }
                     },
                     "required": [
+                      "tags",
                       "members"
                     ],
                     "type": "object"
@@ -66048,9 +66065,6 @@
       "name": "alerting"
     },
     {
-      "name": "CCR Remote synced integrations"
-    },
-    {
       "name": "connectors"
     },
     {
@@ -66088,6 +66102,9 @@
     },
     {
       "name": "Fleet proxies"
+    },
+    {
+      "name": "Fleet remote synced integrations"
     },
     {
       "name": "Fleet Server hosts"
