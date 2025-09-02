@@ -129,6 +129,11 @@ const componentStyles = {
       height: '100%',
       [euiMaxBreakpoint(themeContext, 'm')]: {
         overflow: 'auto',
+        '.euiFlyoutFooter': {
+          position: 'sticky',
+          bottom: 0,
+          flexGrow: 1,
+        },
       },
     }),
 };
