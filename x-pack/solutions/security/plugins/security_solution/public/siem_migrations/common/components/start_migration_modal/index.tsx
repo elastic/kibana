@@ -13,7 +13,6 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
   EuiFormRow,
-  EuiSwitch,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,34 +29,40 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import type { ConnectorSelectorProps } from '@kbn/security-solution-connectors';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import type { ReactNode } from 'react-markdown';
-import { useAIConnectors } from '../../../../../common/hooks/use_ai_connectors';
-import { getConnectorDescription } from '../../../../../common/utils/connectors/get_connector_description';
-import { useKibana } from '../../../../../common/lib/kibana';
-import * as i18n from '../translations';
-import type { RuleMigrationSettings } from '../../../types';
-import { OnboardingCardId, OnboardingTopicId } from '../../../../../onboarding/constants';
-import { useGetSecuritySolutionLinkProps } from '../../../../../common/components/links';
+import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
+import { getConnectorDescription } from '../../../../common/utils/connectors/get_connector_description';
+import { useKibana } from '../../../../common/lib/kibana';
+import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
+import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
+import type { MigrationSettingsBase } from '../../types';
+import * as i18n from './translations';
 
-interface StartRuleMigrationModalProps {
+interface StartMigrationModalProps {
+  /** Modals title */
+  title: string;
+  /** Modals description message */
+  description: string;
   /** default settings that needs to be selected in the modal */
-  defaultSettings?: Partial<RuleMigrationSettings>;
-  onStartMigrationWithSettings: (settings: RuleMigrationSettings) => void;
+  defaultSettings?: Partial<MigrationSettingsBase>;
+  onStartMigrationWithSettings: (settings: MigrationSettingsBase) => void;
   /** Callback called when closing the modal */
   onClose: () => void;
-  /** Number of rules that will be process in this migration */
-  numberOfRules: number;
+  /** Additional settings component to allow modal customization */
+  additionalSettings?: React.ReactElement;
 }
 
 export const DATA_TEST_SUBJ_PREFIX = 'startMigrationModal';
 
-export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.memo(
-  function StartRuleMigrationModal({
+export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
+  ({
+    title,
+    description,
     defaultSettings = {},
     onClose: closeModal,
     onStartMigrationWithSettings: startMigrationWithSettings,
-    numberOfRules = 0,
-  }) {
-    const { connectorId, skipPrebuiltRulesMatching } = defaultSettings;
+    additionalSettings,
+  }) => {
+    const { connectorId } = defaultSettings;
 
     const {
       triggersActionsUi: { actionTypeRegistry },
@@ -67,14 +72,12 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
     const { aiConnectors, isLoading } = useAIConnectors();
 
     const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
+      // Both `siemMigrations.rules` and `siemMigrations.dashboards` store connector using the same key,
+      // that is why it is does not matter which one we use here to get access to it.
       connectorId || siemMigrations.rules.connectorIdStorage.get() || aiConnectors[0]?.id
     );
 
-    const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
-      !skipPrebuiltRulesMatching
-    );
-
-    const startRuleMigrationModalTitleId = useGeneratedHtmlId();
+    const startMigrationModalTitleId = useGeneratedHtmlId();
 
     const connectorOptions: ConnectorSelectorProps['connectors'] = useMemo(() => {
       return aiConnectors.map((connector) => {
@@ -106,11 +109,10 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
         }
         startMigrationWithSettings({
           connectorId: selectedConnectorId,
-          skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
         });
         closeModal();
       },
-      [startMigrationWithSettings, selectedConnectorId, enablePrebuiltRulesMatching, closeModal]
+      [startMigrationWithSettings, selectedConnectorId, closeModal]
     );
 
     const errors = useMemo(() => {
@@ -129,21 +131,21 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
     return (
       <EuiOutsideClickDetector onOutsideClick={closeModal}>
         <EuiModal
-          aria-labelledby={startRuleMigrationModalTitleId}
+          aria-labelledby={startMigrationModalTitleId}
           onClose={closeModal}
           data-test-subj={DATA_TEST_SUBJ_PREFIX}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle
               data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Title`}
-              id={startRuleMigrationModalTitleId}
+              id={startMigrationModalTitleId}
             >
-              {i18n.REPROCESS_RULES_DIALOG_TITLE(numberOfRules)}
+              {title}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiText>
-              <p>{i18n.REPROCESS_RULES_DIALOG_DESCRIPTION}</p>
+            <EuiText data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Description`}>
+              <p>{description}</p>
             </EuiText>
             <EuiSpacer size="m" />
             <EuiForm
@@ -154,16 +156,16 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
               error={errors}
             >
               <EuiFormRow
-                label={i18n.START_RULE_MIGRATION_MODAL_AI_CONNECTOR_LABEL}
+                label={i18n.START_MIGRATION_MODAL_AI_CONNECTOR_LABEL}
                 helpText={
                   <FormattedMessage
-                    id="xpack.securitySolution.siemMigrations.reprocessFailedRulesDialog.connectorHelpText"
+                    id="xpack.securitySolution.siemMigrations.reprocessFailedDialog.connectorHelpText"
                     defaultMessage={'To setup other LLM connectors, visit {link}.'}
                     values={{
                       link: (
                         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
                         <EuiLink href={setupAIConnectorLink} onClick={onClickSetupAIConnector}>
-                          {i18n.START_RULE_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
+                          {i18n.START_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
                         </EuiLink>
                       ),
                     }}
@@ -181,14 +183,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                   mode={'combobox'}
                 />
               </EuiFormRow>
-              <EuiFormRow>
-                <EuiSwitch
-                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`}
-                  label={i18n.START_RULE_MIGRATION_MODAL_PREBUILT_RULES_LABEL}
-                  checked={enablePrebuiltRulesMatching}
-                  onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
-                />
-              </EuiFormRow>
+              {additionalSettings && <EuiFormRow>{additionalSettings}</EuiFormRow>}
               <EuiSpacer size="m" />
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
@@ -196,7 +191,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                     onClick={closeModal}
                     data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Cancel`}
                   >
-                    {i18n.START_RULE_MIGRATION_MODAL_CANCEL}
+                    {i18n.START_MIGRATION_MODAL_CANCEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -206,7 +201,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                     color="primary"
                     fill
                   >
-                    {i18n.START_RULE_MIGRATION_MODAL_TRANSLATE}
+                    {i18n.START_MIGRATION_MODAL_TRANSLATE}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -217,3 +212,4 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
     );
   }
 );
+StartMigrationModal.displayName = 'StartMigrationModal';

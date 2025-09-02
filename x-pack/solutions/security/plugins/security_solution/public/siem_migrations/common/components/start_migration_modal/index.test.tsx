@@ -7,21 +7,21 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { useSpaceId } from '../../../../../common/hooks/use_space_id';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { fireEvent, render, screen, act } from '@testing-library/react';
-import { DATA_TEST_SUBJ_PREFIX, StartRuleMigrationModal } from './start_rule_migration_modal';
+import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from '.';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { useAIConnectors } from '../../../../../common/hooks/use_ai_connectors';
+import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
-jest.mock('../../../../../common/hooks/use_space_id');
+jest.mock('../../../../common/hooks/use_space_id');
 const useSpaceIdMock = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
 
-jest.mock('../../../../../common/components/links/link_props');
+jest.mock('../../../../common/components/links/link_props');
 
 const startMigrationWithSettingsMock = jest.fn().mockResolvedValue(undefined);
 const onCloseMock = jest.fn();
@@ -42,25 +42,24 @@ const availableConnectorsMock: AIConnector[] = [
   },
 ] as unknown as AIConnector[];
 
-jest.mock('../../../../../common/hooks/use_ai_connectors');
+jest.mock('../../../../common/hooks/use_ai_connectors');
 const useAIConnectorsMock = useAIConnectors as jest.MockedFunction<typeof useAIConnectors>;
 
-const renderTestComponent = (
-  props: Partial<ComponentProps<typeof StartRuleMigrationModal>> = {}
-) => {
+const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigrationModal>> = {}) => {
   const finalProps = {
     onStartMigrationWithSettings: startMigrationWithSettingsMock,
     onClose: onCloseMock,
     defaultSettings: {
       connectorId: 'connector-1',
     },
-    numberOfRules: 10,
+    title: 'Reprocess 10 rules',
+    description: 'Test reprocessing description!',
     ...props,
   };
 
   return render(
     <IntlProvider locale="en">
-      <StartRuleMigrationModal {...finalProps} />
+      <StartMigrationModal {...finalProps} />
     </IntlProvider>
   );
 };
@@ -105,12 +104,11 @@ describe('StartMigrationModal', () => {
     expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-Title`)).toHaveTextContent(
       `Reprocess 10 rules`
     );
+    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-Description`)).toHaveTextContent(
+      `Test reprocessing description!`
+    );
     expect(screen.getByTestId(`connector-selector`)).toBeVisible();
     expect(screen.getByTestId(`connector-selector`)).toHaveTextContent('Connector 1');
-
-    expect(
-      screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`)
-    ).toBeChecked();
   });
 
   it('should list all available connectors', () => {
@@ -125,20 +123,6 @@ describe('StartMigrationModal', () => {
     expect(connectorOptions[1].textContent).toBe('Connector 2Preconfigured');
   });
 
-  it('should render correct value of prebuilt rule match option', async () => {
-    renderTestComponent({
-      defaultSettings: {
-        skipPrebuiltRulesMatching: true,
-      },
-    });
-
-    const prebuiltRuleMatchCheckbox = screen.getByTestId(
-      `${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`
-    );
-
-    expect(prebuiltRuleMatchCheckbox).not.toBeChecked();
-  });
-
   it('should trigger Migration with correct settings on confirm', () => {
     renderTestComponent();
 
@@ -147,7 +131,6 @@ describe('StartMigrationModal', () => {
 
     expect(startMigrationWithSettingsMock).toHaveBeenCalledWith({
       connectorId: 'connector-1',
-      skipPrebuiltRulesMatching: false,
     });
 
     expect(onCloseMock).toHaveBeenCalled();
@@ -165,19 +148,12 @@ describe('StartMigrationModal', () => {
     fireEvent.click(connectorOptions[1]); // Select 'Connector 2'
     expect(screen.getByTestId(`connector-selector`)).toHaveTextContent('Connector 2');
 
-    // skip prebuilt rules matching
-    const prebuiltRuleMatchCheckbox = screen.getByTestId(
-      `${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`
-    );
-    fireEvent.click(prebuiltRuleMatchCheckbox);
-
     const confirmButton = screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-Translate`);
     act(() => {
       fireEvent.click(confirmButton);
     });
     expect(startMigrationWithSettingsMock).toHaveBeenCalledWith({
       connectorId: 'connector-2',
-      skipPrebuiltRulesMatching: true,
     });
 
     expect(onCloseMock).toHaveBeenCalled();
