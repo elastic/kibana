@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import {
+  MigrationTranslationStats,
   MigrationLastExecution,
   MigrationTranslationResult,
   MigrationStatus,
@@ -67,6 +68,12 @@ export const DashboardMigration = z
     id: NonEmptyString,
   })
   .merge(DashboardMigrationData);
+
+/**
+ * The dashboard migration translation stats object.
+ */
+export type DashboardMigrationTranslationStats = z.infer<typeof DashboardMigrationTranslationStats>;
+export const DashboardMigrationTranslationStats = MigrationTranslationStats;
 
 /**
  * The raw dashboard object from different vendors

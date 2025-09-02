@@ -7,23 +7,21 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import {
-  GetRuleMigrationStatsRequestParams,
-  type GetRuleMigrationStatsResponse,
-} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
+import type { GetAllTranslationStatsDashboardMigrationResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { GetAllTranslationStatsDashboardMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from '../../common/api/util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
-export const registerSiemRuleMigrationsStatsRoute = (
+export const registerSiemDashboardMigrationsTranslationStatsRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: SIEM_RULE_MIGRATION_STATS_PATH,
+      path: SIEM_DASHBOARD_MIGRATION_TRANSLATION_STATS_PATH,
       access: 'internal',
       security: { authz },
     })
@@ -31,18 +29,29 @@ export const registerSiemRuleMigrationsStatsRoute = (
       {
         version: '1',
         validate: {
-          request: { params: buildRouteValidationWithZod(GetRuleMigrationStatsRequestParams) },
+          request: {
+            params: buildRouteValidationWithZod(
+              GetAllTranslationStatsDashboardMigrationRequestParams
+            ),
+          },
         },
       },
       withLicense(
         withExistingMigration(
-          async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationStatsResponse>> => {
+          async (
+            context,
+            req,
+            res
+          ): Promise<IKibanaResponse<GetAllTranslationStatsDashboardMigrationResponse>> => {
             const migrationId = req.params.migration_id;
             try {
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+              const dashboardMigrationsClient =
+                ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-              const stats = await ruleMigrationsClient.task.getStats(migrationId);
+              const stats = await dashboardMigrationsClient.data.items.getTranslationStats(
+                migrationId
+              );
 
               if (stats.items.total === 0) {
                 return res.noContent();

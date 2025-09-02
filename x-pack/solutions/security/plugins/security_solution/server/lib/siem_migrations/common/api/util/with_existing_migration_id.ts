@@ -7,7 +7,7 @@
 
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
-import { MIGRATION_ID_NOT_FOUND } from '../../../common/translations';
+import { MIGRATION_ID_NOT_FOUND } from '../../translations';
 
 /**
  * Checks the existence of a valid migration before proceeding with the request.
