@@ -249,6 +249,7 @@ export const basicCase: CaseUI = {
   title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
+  totalEvents: 0,
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',

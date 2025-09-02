@@ -310,6 +310,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 2,
               alerts: 2,
+              events: 0,
             },
           ],
         ])
@@ -338,6 +339,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 1,
               alerts: 3,
+              events: 0,
             },
           ],
         ])
@@ -724,6 +726,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 4,
               alerts: 5,
+              events: 0,
             },
           ],
         ])
@@ -833,6 +836,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 1,
               alerts: 2,
+              events: 0,
             },
           ],
         ])
@@ -865,6 +869,7 @@ describe('CaseCommentModel', () => {
             {
               userComments: 1,
               alerts: 2,
+              events: 0,
             },
           ],
         ])
