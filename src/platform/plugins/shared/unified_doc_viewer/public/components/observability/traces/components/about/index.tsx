@@ -8,60 +8,91 @@
  */
 
 import React from 'react';
-import { TIMESTAMP_FIELD, type DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
   HTTP_RESPONSE_STATUS_CODE,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
+  SPAN_ID,
+  SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
+  TIMESTAMP_US,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
 } from '@kbn/apm-types';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ContentFrameworkTable } from '../../../../content_framework';
-import { aboutFieldConfigurations } from './field_configurations';
+import { isTransaction } from '../../helpers';
+import {
+  sharedFieldConfigurations,
+  spanFieldConfigurations,
+  transactionFieldConfigurations,
+} from './field_configurations';
+
+const spanFieldNames = [
+  SPAN_ID,
+  SPAN_NAME,
+  SERVICE_NAME,
+  SPAN_DURATION,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  TIMESTAMP_US,
+  HTTP_RESPONSE_STATUS_CODE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+];
+
+const transactionFieldNames = [
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
+  TIMESTAMP_US,
+  HTTP_RESPONSE_STATUS_CODE,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
+];
 
 export interface AboutProps
   extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
   hit: DataTableRecord;
-  displayType: 'span' | 'transaction';
   dataView: DocViewRenderProps['dataView'];
 }
 
-// TODO replace the top section in overview with this one
-export const About = ({
-  hit,
-  displayType,
-  dataView,
-  filter,
-  onAddColumn,
-  onRemoveColumn,
-}: AboutProps) => {
-  // TODO: Add any missing field names and distinguish between span and transaction types (displayType).
-  // Not sure yet whether this check should happen here or outside.
-  const fieldNames = [
-    SERVICE_NAME,
-    SPAN_DURATION,
-    SPAN_DESTINATION_SERVICE_RESOURCE,
-    TIMESTAMP_FIELD,
-    HTTP_RESPONSE_STATUS_CODE,
-    SPAN_TYPE,
-    SPAN_SUBTYPE,
-  ];
+export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: AboutProps) => {
+  const { euiTheme } = useEuiTheme();
+  const isSpan = !isTransaction(hit);
+
+  const aboutFieldConfigurations = {
+    ...sharedFieldConfigurations,
+    ...(isSpan ? spanFieldConfigurations : transactionFieldConfigurations),
+  };
 
   return (
-    <EuiPanel hasBorder={true} hasShadow={false}>
-      <ContentFrameworkTable
-        fieldNames={fieldNames}
-        id={'aboutTable'}
-        fieldConfigurations={aboutFieldConfigurations}
-        dataView={dataView}
-        hit={hit}
-        filter={filter}
-        onAddColumn={onAddColumn}
-        onRemoveColumn={onRemoveColumn}
-      />
+    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+      <div
+        css={css`
+          margin-top: calc(${euiTheme.base * -1.5}px);
+          // margin-bottom: calc(${euiTheme.base * -3}px);
+        `}
+      >
+        <ContentFrameworkTable
+          fieldNames={isSpan ? spanFieldNames : transactionFieldNames}
+          id={'aboutTable'}
+          fieldConfigurations={aboutFieldConfigurations}
+          dataView={dataView}
+          hit={hit}
+          filter={filter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+        />
+      </div>
     </EuiPanel>
   );
 };
