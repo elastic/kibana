@@ -24,10 +24,8 @@ export const registerVegaVis = async (
     },
     getServiceSettings: getServiceSettingsLazy,
   };
-  const [{ getVegaInspectorView }, { vegaVisType }] = await Promise.all([
-    import('./vega_inspector'),
-    import('./vega_type'),
-  ]);
+  const { getVegaInspectorView, vegaVisType } = await import('./async_services');
+
   inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
   expressions.registerFunction(() => createVegaFn(visualizationDependencies));
