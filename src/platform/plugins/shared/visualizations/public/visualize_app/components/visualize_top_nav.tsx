@@ -115,8 +115,8 @@ const TopNav = ({
     setHideTryInLensBadge(true);
   }, [setHideTryInLensBadge]);
 
-  const openInspector = useCallback(() => {
-    const session = embeddableHandler.openInspector();
+  const openInspector = useCallback(async () => {
+    const session = await embeddableHandler.openInspector();
     setInspectorSession(session);
   }, [embeddableHandler]);
 

@@ -22,7 +22,7 @@ import type { Adapters } from '../common';
  * A registry that will hold inspector views.
  */
 export class InspectorViewRegistry extends EventEmitter {
-  private views: InspectorViewDescription[] = [];
+  private views: Array<() => Promise<InspectorViewDescription>> = [];
 
   /**
    * Register a new inspector view to the registry. Check the README.md in the
@@ -35,9 +35,12 @@ export class InspectorViewRegistry extends EventEmitter {
     if (!view) {
       return;
     }
-    this.views.push(view);
-    // Keep registry sorted by the order property
-    this.views.sort((a, b) => (a.order || Number.MAX_VALUE) - (b.order || Number.MAX_VALUE));
+    this.views.push(async () => view);
+    this.emit('change');
+  }
+
+  public registerAsync(getView: () => Promise<InspectorViewDescription>) {
+    this.views.push(getView);
     this.emit('change');
   }
 
@@ -46,8 +49,9 @@ export class InspectorViewRegistry extends EventEmitter {
    * @returns {InspectorViewDescription[]} A by `order` sorted list of all registered
    *    inspector views.
    */
-  public getAll(): InspectorViewDescription[] {
-    return this.views;
+  public async getAll(): Promise<InspectorViewDescription[]> {
+    const views = await Promise.all(this.views.map((getView) => getView()));
+    return views.sort((a, b) => (a.order || Number.MAX_VALUE) - (b.order || Number.MAX_VALUE));
   }
 
   /**
@@ -56,10 +60,12 @@ export class InspectorViewRegistry extends EventEmitter {
    * @returns {InspectorViewDescription[]} All inespector view descriptions visible
    *    for the specific adapters.
    */
-  public getVisible(adapters?: Adapters): InspectorViewDescription[] {
+  public async getVisible(adapters?: Adapters): Promise<InspectorViewDescription[]> {
     if (!adapters) {
       return [];
     }
-    return this.views.filter((view) => !view.shouldShow || view.shouldShow(adapters));
+    return await (
+      await this.getAll()
+    ).filter((view) => !view.shouldShow || view.shouldShow(adapters));
   }
 }

@@ -38,8 +38,8 @@ const createStartContract = (): Start => {
   const openResult = {
     onClose: Promise.resolve(undefined),
     close: jest.fn(() => Promise.resolve(undefined)),
-  } as ReturnType<Start['open']>;
-  startContract.open.mockImplementation(() => openResult);
+  };
+  startContract.open.mockImplementation(() => Promise.resolve(openResult));
 
   return startContract;
 };
