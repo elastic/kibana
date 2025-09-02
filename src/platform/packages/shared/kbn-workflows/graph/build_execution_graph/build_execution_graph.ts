@@ -47,6 +47,7 @@ import type {
 } from '../../types/execution';
 
 const flowControlStepTypes = new Set(['if', 'foreach']);
+const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
 interface GraphBuildContext {
@@ -302,7 +303,7 @@ function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
 ): graphlib.Graph | null {
-  if (flowControlStepTypes.has(step.type)) {
+  if (flowControlStepTypes.has(step.type) || disallowedWorkflowLevelOnFailureSteps.has(step.type)) {
     return null;
   }
 

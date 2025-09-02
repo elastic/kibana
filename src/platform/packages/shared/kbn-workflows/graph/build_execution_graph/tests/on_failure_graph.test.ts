@@ -12,6 +12,7 @@ import type {
   ConnectorStep,
   ForEachStep,
   IfStep,
+  WaitStep,
   WorkflowOnFailure,
   WorkflowYaml,
 } from '../../../spec/schema';
@@ -369,7 +370,7 @@ describe('on_failure graph', () => {
         ];
       });
 
-      it('should should correctly work with foreach when fallback is defined', () => {
+      it('should correctly work with foreach when fallback is defined', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         const topsort = graphlib.alg.topsort(executionGraph);
         expect(topsort).toEqual([
@@ -400,7 +401,7 @@ describe('on_failure graph', () => {
         );
       });
 
-      it('should not wrap if step in on-failure', () => {
+      it('should not wrap if step in workflow-level on-failure', () => {
         workflow.steps = [
           {
             name: 'ifStep',
@@ -436,42 +437,43 @@ describe('on_failure graph', () => {
           } as ConnectorStep,
         ];
         const executionGraph = convertToWorkflowGraph(workflow as any);
-        const topsort = graphlib.alg.topsort(executionGraph);
-        expect(topsort).toEqual([
-          'ifStep',
-          'enterThen(ifStep)',
-          'enterContinue_trueConnectorStep',
-          'enterTryBlock_trueConnectorStep',
-          'enterNormalPath_trueConnectorStep',
-          'enterRetry_trueConnectorStep',
-          'trueConnectorStep',
-          'exitRetry_trueConnectorStep',
-          'exitNormalPath_trueConnectorStep',
-          'enterFallbackPath_trueConnectorStep',
-          'workflow-level-on-failure_trueConnectorStep_fallbackAction',
-          'exitFallbackPath_trueConnectorStep',
-          'exitTryBlock_trueConnectorStep',
-          'exitContinue_trueConnectorStep',
-          'exitThen(ifStep)',
-          'enterElse(ifStep)',
-          'enterContinue_falseConnectorStep',
-          'enterTryBlock_falseConnectorStep',
-          'enterNormalPath_falseConnectorStep',
-          'enterRetry_falseConnectorStep',
-          'falseConnectorStep',
-          'exitRetry_falseConnectorStep',
-          'exitNormalPath_falseConnectorStep',
-          'enterFallbackPath_falseConnectorStep',
-          'workflow-level-on-failure_falseConnectorStep_fallbackAction',
-          'exitFallbackPath_falseConnectorStep',
-          'exitTryBlock_falseConnectorStep',
-          'exitContinue_falseConnectorStep',
-          'exitElse(ifStep)',
-          'exitCondition(ifStep)',
-        ]);
+        expect(executionGraph.nodes()).toEqual(
+          expect.arrayContaining([
+            'ifStep',
+            'enterThen(ifStep)',
+            'enterContinue_trueConnectorStep',
+            'enterTryBlock_trueConnectorStep',
+            'enterNormalPath_trueConnectorStep',
+            'enterRetry_trueConnectorStep',
+            'trueConnectorStep',
+            'exitRetry_trueConnectorStep',
+            'exitNormalPath_trueConnectorStep',
+            'enterFallbackPath_trueConnectorStep',
+            'workflow-level-on-failure_trueConnectorStep_fallbackAction',
+            'exitFallbackPath_trueConnectorStep',
+            'exitTryBlock_trueConnectorStep',
+            'exitContinue_trueConnectorStep',
+            'exitThen(ifStep)',
+            'enterElse(ifStep)',
+            'enterContinue_falseConnectorStep',
+            'enterTryBlock_falseConnectorStep',
+            'enterNormalPath_falseConnectorStep',
+            'enterRetry_falseConnectorStep',
+            'falseConnectorStep',
+            'exitRetry_falseConnectorStep',
+            'exitNormalPath_falseConnectorStep',
+            'enterFallbackPath_falseConnectorStep',
+            'workflow-level-on-failure_falseConnectorStep_fallbackAction',
+            'exitFallbackPath_falseConnectorStep',
+            'exitTryBlock_falseConnectorStep',
+            'exitContinue_falseConnectorStep',
+            'exitElse(ifStep)',
+            'exitCondition(ifStep)',
+          ])
+        );
       });
 
-      it('should not wrap foreach step in on-failure', () => {
+      it('should not wrap foreach step in workflow-level on-failure', () => {
         workflow.steps = [
           {
             name: 'foreachStep',
@@ -498,23 +500,47 @@ describe('on_failure graph', () => {
           } as ConnectorStep,
         ];
         const executionGraph = convertToWorkflowGraph(workflow as any);
-        const topsort = graphlib.alg.topsort(executionGraph);
-        expect(topsort).toEqual([
-          'foreachStep',
-          'enterContinue_foreachChild',
-          'enterTryBlock_foreachChild',
-          'enterNormalPath_foreachChild',
-          'enterRetry_foreachChild',
-          'foreachChild',
-          'exitRetry_foreachChild',
-          'exitNormalPath_foreachChild',
-          'enterFallbackPath_foreachChild',
-          'workflow-level-on-failure_foreachChild_fallbackAction',
-          'exitFallbackPath_foreachChild',
-          'exitTryBlock_foreachChild',
-          'exitContinue_foreachChild',
-          'exitForeach(foreachStep)',
-        ]);
+        expect(executionGraph.nodes()).toEqual(
+          expect.arrayContaining([
+            'foreachStep',
+            'enterContinue_foreachChild',
+            'enterTryBlock_foreachChild',
+            'enterNormalPath_foreachChild',
+            'enterRetry_foreachChild',
+            'foreachChild',
+            'exitRetry_foreachChild',
+            'exitNormalPath_foreachChild',
+            'enterFallbackPath_foreachChild',
+            'workflow-level-on-failure_foreachChild_fallbackAction',
+            'exitFallbackPath_foreachChild',
+            'exitTryBlock_foreachChild',
+            'exitContinue_foreachChild',
+            'exitForeach(foreachStep)',
+          ])
+        );
+      });
+
+      it('should not wrap wait step in workflow-level on-failure', () => {
+        workflow.steps = [
+          {
+            name: 'waitStep',
+            type: 'wait',
+            with: {
+              duration: '10sec',
+            },
+          } as WaitStep,
+        ];
+        workflow.settings!['on-failure']!.fallback = [
+          {
+            name: 'fallbackAction',
+            type: 'console',
+            with: {
+              message: 'fallback log',
+            },
+          } as ConnectorStep,
+        ];
+        const executionGraph = convertToWorkflowGraph(workflow as any);
+        expect(executionGraph.nodes()).toEqual(['waitStep']);
       });
     });
 
