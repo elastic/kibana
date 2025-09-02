@@ -15,4 +15,5 @@ export const getTechnicalPreviewWarning = (featureName: string) => {
 export const supportedToolTypes = schema.oneOf([
   schema.literal(ToolType.esql),
   schema.literal(ToolType.builtin),
+  schema.literal(ToolType.index_search),
 ]);

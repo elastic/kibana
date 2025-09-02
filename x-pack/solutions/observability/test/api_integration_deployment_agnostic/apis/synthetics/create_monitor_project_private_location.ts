@@ -32,6 +32,8 @@ import { comparePolicies } from './sample_data/test_policy';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');

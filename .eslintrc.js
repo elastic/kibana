@@ -1142,6 +1142,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/packages/shared/kbn-unified-metrics-grid/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -2423,6 +2424,18 @@ module.exports = {
             ],
           },
         ],
+      },
+    },
+    {
+      // Deployment-agnostic test files must use proper context and services
+      files: [
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+        'x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}',
+      ],
+      rules: {
+        '@kbn/eslint/deployment_agnostic_test_context': 'error',
       },
     },
   ],

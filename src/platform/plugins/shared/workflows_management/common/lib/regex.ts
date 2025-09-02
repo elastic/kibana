@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*\}\}/g;
-export const UNFINISHED_MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*$/g;
+export const VARIABLE_REGEX_GLOBAL = /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"'])\s*\}\}/g;
+export const UNFINISHED_VARIABLE_REGEX_GLOBAL =
+  /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"']?)\s*$/g;
 
 export const ALLOWED_KEY_REGEX =
   /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;

@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: Suggest users API
+  version: '1'
+paths:
+  /internal/elastic_assistant/users/_suggest:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: SuggestUsers
+      description: Suggest users
+      summary: Suggest users
+      tags:
+        - Suggest users API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                searchTerm:
+                  type: string
+                  description: Search term to filter users
+                  example: "James"
+                size:
+                  type: number
+                  description: Number of users to return
+                  example: 10
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Array of user profiles
+                items:
+                  type: object
+                  required:
+                    - uid
+                    - enabled
+                    - user
+                    - data
+                  properties:
+                    uid:
+                      type: string
+                      description: A unique identifier for the user profile.
+                      example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+                    enabled:
+                      type: boolean
+                      description: Indicates whether user profile is enabled or not.
+                      example: true
+                    data:
+                      type: object
+                      additionalProperties: true
+                      description: User specific data associated with the profile.
+                      example: { "avatar": { "color": "#BFDBFF",  "initials": "S" } }
+                    user:
+                      type: object
+                      description: Information about the user that owns profile.
+                      required:
+                        - username
+                      properties:
+                        username:
+                          type: string
+                          description: The username of the user.
+                          example: "james.spiteri"
+                        full_name:
+                          type: string
+                          description: The full name of the user.
+                          example: "James Spiteri"
+                        email:
+                          type: string
+                          description: The email address of the user.
+                          example: "james@elastic.co"
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

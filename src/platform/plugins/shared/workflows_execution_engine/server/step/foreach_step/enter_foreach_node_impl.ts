@@ -8,12 +8,12 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows';
-import type { StepImplementation } from '../step_base';
+import type { StepErrorCatcher, StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
-export class EnterForeachNodeImpl implements StepImplementation {
+export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatcher {
   constructor(
     private step: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
@@ -31,7 +31,10 @@ export class EnterForeachNodeImpl implements StepImplementation {
 
       if (evaluatedItems.length === 0) {
         this.workflowLogger.logDebug(
-          `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`
+          `Foreach step "${this.step.id}" has no items to iterate over. Skipping execution.`,
+          {
+            workflow: { step_id: this.step.id },
+          }
         );
         await this.wfExecutionRuntimeManager.setStepState(this.step.id, {
           items: [],
@@ -43,7 +46,10 @@ export class EnterForeachNodeImpl implements StepImplementation {
       }
 
       this.workflowLogger.logDebug(
-        `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`
+        `Foreach step "${this.step.id}" will iterate over ${evaluatedItems.length} items.`,
+        {
+          workflow: { step_id: this.step.id },
+        }
       );
 
       // Initialize foreach state
@@ -69,6 +75,10 @@ export class EnterForeachNodeImpl implements StepImplementation {
 
     await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
     this.wfExecutionRuntimeManager.goToNextStep();
+  }
+
+  async catchError(): Promise<void> {
+    await this.wfExecutionRuntimeManager.setStepState(this.step.id, undefined);
   }
 
   private getItems(): any[] {

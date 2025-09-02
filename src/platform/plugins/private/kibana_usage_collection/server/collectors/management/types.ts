@@ -173,4 +173,7 @@ export interface UsageStats {
   'observability:enableStreamsUI': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
+  'genAiSettings:defaultAIConnector': string;
+  'genAiSettings:defaultAIConnectorOnly': boolean;
+  'observability:streamsEnableGroupStreams': boolean;
 }

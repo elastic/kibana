@@ -243,9 +243,10 @@ export const useDashboardMenuItems = ({
    * Build ordered menus for view and edit mode.
    */
 
-  const hasExportIntegration = Boolean(
-    shareService?.availableIntegrations('dashboard', 'export')?.length
-  );
+  const hasExportIntegration = useMemo(() => {
+    if (!shareService) return false;
+    return shareService.availableIntegrations('dashboard', 'export').length > 0;
+  }, []);
 
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();

@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body).toMatchObject(
         expect.objectContaining({
           id: migrationId,
-          dashboards: {
+          items: {
             total: 1,
             pending: 1,
             completed: 0,
@@ -50,8 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
         })
       );
 
-      expect(response.body.dashboards?.total).toBe(1);
-      expect(response.body.dashboards?.pending).toBe(1);
+      expect(response.body.items?.total).toBe(1);
+      expect(response.body.items?.pending).toBe(1);
     });
 
     describe('Error handling', () => {

@@ -25,6 +25,7 @@ import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
 
 export { openSearchSessionsFlyout } from './flyout/get_flyout';
+export type { BackgroundSearchOpenedHandler } from './types';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;

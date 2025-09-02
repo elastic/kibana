@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { isSchema } from '@kbn/streams-schema';
+import { useResizeChecker } from '@kbn/react-hooks';
 import { customSamplesDataSourceDocumentsSchema } from '../../../../../common/url_schema';
 import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { useDataSourceSelector } from '../state_management/data_source_state_machine';
@@ -34,6 +35,8 @@ export const CustomSamplesDataSourceCard = ({
     snapshot.matches('disabled')
   );
 
+  const { containerRef, setupResizeChecker, destroyResizeChecker } = useResizeChecker();
+
   const handleChange = (params: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
     dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
   };
@@ -55,33 +58,50 @@ export const CustomSamplesDataSourceCard = ({
       title={DATA_SOURCES_I18N.customSamples.defaultName}
       subtitle={DATA_SOURCES_I18N.customSamples.subtitle}
     >
-      <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.customSamples.callout} />
-      <EuiSpacer size="m" />
-      <NameField
-        onChange={(event) => handleChange({ name: event.target.value })}
-        value={dataSource.name}
-        disabled={isDisabled}
-      />
-      <EuiFormRow
-        label={DATA_SOURCES_I18N.customSamples.label}
-        helpText={DATA_SOURCES_I18N.customSamples.helpText}
-        isDisabled={isDisabled}
-        fullWidth
-      >
-        <CodeEditor
-          dataTestSubj="streamsAppCustomSamplesDataSourceEditor"
-          height={200}
-          value={editorValue}
-          onChange={handleEditorChange}
-          languageId="xjson"
-          options={{
-            tabSize: 2,
-            automaticLayout: true,
-            readOnly: isDisabled,
-          }}
+      <div style={{ minWidth: 0 }}>
+        <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.customSamples.callout} />
+        <EuiSpacer size="m" />
+        <NameField
+          onChange={(event) => handleChange({ name: event.target.value })}
+          value={dataSource.name}
+          disabled={isDisabled}
         />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
+        <EuiFormRow
+          label={DATA_SOURCES_I18N.customSamples.label}
+          helpText={DATA_SOURCES_I18N.customSamples.helpText}
+          isDisabled={isDisabled}
+          fullWidth
+          style={{ minWidth: 0, maxWidth: '100%', flex: '1 1 auto', boxSizing: 'border-box' }}
+        >
+          <div
+            ref={containerRef}
+            style={{
+              width: '100%',
+              height: 200,
+              overflow: 'hidden',
+              minWidth: 0,
+              maxWidth: '100%',
+              flex: '1 1 0%',
+              boxSizing: 'border-box',
+            }}
+          >
+            <CodeEditor
+              dataTestSubj="streamsAppCustomSamplesDataSourceEditor"
+              height={200}
+              value={editorValue}
+              onChange={handleEditorChange}
+              languageId="xjson"
+              options={{
+                tabSize: 2,
+                readOnly: isDisabled,
+              }}
+              editorDidMount={(editor) => setupResizeChecker(editor, { flyoutMode: true })}
+              editorWillUnmount={() => destroyResizeChecker()}
+            />
+          </div>
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+      </div>
     </DataSourceCard>
   );
 };

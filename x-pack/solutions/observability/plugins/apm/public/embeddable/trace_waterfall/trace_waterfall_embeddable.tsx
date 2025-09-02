@@ -12,11 +12,9 @@ import { TraceWaterfall } from '../../components/shared/trace_waterfall';
 
 export function TraceWaterfallEmbeddable({
   serviceName,
-  entryTransactionId,
   rangeFrom,
   rangeTo,
   traceId,
-  displayLimit,
   scrollElement,
   onNodeClick,
   getRelatedErrorsHref,
@@ -26,11 +24,11 @@ export function TraceWaterfallEmbeddable({
       return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
         params: {
           path: { traceId },
-          query: { entryTransactionId, start: rangeFrom, end: rangeTo },
+          query: { start: rangeFrom, end: rangeTo },
         },
       });
     },
-    [entryTransactionId, rangeFrom, rangeTo, traceId]
+    [rangeFrom, rangeTo, traceId]
   );
 
   if (isPending(status)) {
