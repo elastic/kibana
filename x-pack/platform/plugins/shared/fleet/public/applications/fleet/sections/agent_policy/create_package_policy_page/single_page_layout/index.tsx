@@ -605,6 +605,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiCallOut
             size="m"
             color="warning"
+            iconType="warning"
             title={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
@@ -614,7 +615,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           >
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-              defaultMessage="Fleet has detected that the selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration might cause these agents to not ingest data properly."
+              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration might cause these agents to not ingest data properly."
             />
           </EuiCallOut>
 
