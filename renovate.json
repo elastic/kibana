@@ -4446,7 +4446,6 @@
         "email-addresses",
         "json-stringify-safe",
         "murmurhash",
-        "mdast-util-to-hast",
         "pretty-ms",
         "remark-stringify",
         "stats-lite",
