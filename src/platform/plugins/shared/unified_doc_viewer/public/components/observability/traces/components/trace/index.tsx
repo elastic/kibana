@@ -13,6 +13,8 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { ContentFrameworkTable } from '../../../../content_framework';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -48,6 +50,7 @@ export const Trace = ({
   showWaterfall = true,
 }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
+  const { euiTheme } = useEuiTheme();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const isSpan = !isTransaction(hit);
 
@@ -72,6 +75,7 @@ export const Trace = ({
   );
 
   const fieldNames = useMemo(() => [TRACE_ID, ...(isSpan ? [TRANSACTION_ID] : [])], [isSpan]);
+
   const sectionActions = useMemo(
     () =>
       showWaterfall
@@ -100,16 +104,22 @@ export const Trace = ({
         description={showWaterfall ? sectionTip : undefined}
         actions={sectionActions}
       >
-        <ContentFrameworkTable
-          fieldNames={fieldNames}
-          id={'traceTable'}
-          fieldConfigurations={traceFieldConfigurations}
-          dataView={dataView}
-          hit={hit}
-          filter={filter}
-          onAddColumn={onAddColumn}
-          onRemoveColumn={onRemoveColumn}
-        />
+        <div
+          css={css`
+            margin-top: calc(${euiTheme.base * -1.5}px);
+          `}
+        >
+          <ContentFrameworkTable
+            fieldNames={fieldNames}
+            id={'traceTable'}
+            fieldConfigurations={traceFieldConfigurations}
+            dataView={dataView}
+            hit={hit}
+            filter={filter}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
+          />
+        </div>
 
         {showWaterfall && (
           <EmbeddableRenderer

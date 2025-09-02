@@ -33,9 +33,9 @@ import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
-import { Trace } from '../components/trace';
 import { About } from '../components/about';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
+import { Trace } from '../components/trace';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
