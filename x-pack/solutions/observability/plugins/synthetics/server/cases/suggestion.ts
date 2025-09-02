@@ -92,7 +92,7 @@ export function getMonitorByServiceName(
                         },
                       ],
                       // TODO: Limit the suggestion to only the latest run per monitor
-                      // it gives random location at each rune
+                      // it gives random location at each run
                       size: 1,
                       _source: {
                         includes: [
@@ -146,8 +146,7 @@ export function getMonitorByServiceName(
 
           for (const savedObj of monitorsSavedObject.saved_objects) {
             if (!savedObj.error && savedObj.id && savedObj.attributes) {
-              savedObjectsAttrHash[savedObj.id] =
-                savedObj.attributes as unknown as EncryptedSyntheticsMonitorAttributes;
+              savedObjectsAttrHash[savedObj.id] = savedObj.attributes;
             }
           }
 
