@@ -6,13 +6,10 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common';
-import {
-  API_VERSIONS,
-  DEFEND_INSIGHTS,
-  DefendInsightTypeEnum,
-} from '@kbn/elastic-assistant-common';
+import type { DefendInsightsResponse, DefendInsightType } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 
@@ -20,6 +17,7 @@ interface UseTriggerScanPayload {
   endpointId: string;
   connectorId: string;
   actionTypeId: string;
+  insightTypes: DefendInsightType[];
 }
 
 interface UseTriggerScanConfig {
@@ -28,26 +26,67 @@ interface UseTriggerScanConfig {
 
 export const useTriggerScan = ({ onSuccess }: UseTriggerScanConfig) => {
   const { http } = useKibana().services;
+  const defendInsightsPolicyResponseFailureEnabled = useIsExperimentalFeatureEnabled(
+    'defendInsightsPolicyResponseFailure'
+  );
   const toasts = useToasts();
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
-  return useMutation<DefendInsightsResponse, { body?: { error: string } }, UseTriggerScanPayload>(
-    ({ endpointId, connectorId, actionTypeId }: UseTriggerScanPayload) =>
-      http.post<DefendInsightsResponse>(DEFEND_INSIGHTS, {
-        version: API_VERSIONS.internal.v1,
-        body: JSON.stringify({
-          endpointIds: [endpointId],
-          insightType: DefendInsightTypeEnum.incompatible_antivirus,
-          anonymizationFields: anonymizationFields.data,
-          replacements: {},
-          subAction: 'invokeAI',
-          apiConfig: {
-            connectorId,
-            actionTypeId,
-          },
-        }),
-      }),
+  return useMutation<DefendInsightsResponse[], { body?: { error: string } }, UseTriggerScanPayload>(
+    async ({ endpointId, connectorId, actionTypeId, insightTypes }: UseTriggerScanPayload) => {
+      const enabledTypes = insightTypes.filter((type) => {
+        if (type === 'policy_response_failure' && !defendInsightsPolicyResponseFailureEnabled) {
+          return false;
+        }
+        return true;
+      });
+
+      if (enabledTypes.length === 0) {
+        return [];
+      }
+
+      const scanPromises = enabledTypes.map((insightType) =>
+        http.post<DefendInsightsResponse>(DEFEND_INSIGHTS, {
+          version: API_VERSIONS.internal.v1,
+          body: JSON.stringify({
+            endpointIds: [endpointId],
+            insightType,
+            anonymizationFields: anonymizationFields.data,
+            replacements: {},
+            subAction: 'invokeAI',
+            apiConfig: {
+              connectorId,
+              actionTypeId,
+            },
+          }),
+        })
+      );
+
+      const results = await Promise.allSettled(scanPromises);
+
+      const fulfilledResults = results
+        .filter(
+          (result): result is PromiseFulfilledResult<DefendInsightsResponse> =>
+            result.status === 'fulfilled'
+        )
+        .map((result) => result.value);
+
+      const rejectedResults = results.filter(
+        (result): result is PromiseRejectedResult => result.status === 'rejected'
+      );
+
+      if (rejectedResults.length > 0) {
+        rejectedResults.forEach(() => {
+          toasts.addWarning({
+            title: WORKFLOW_INSIGHTS.toasts.partialScanError,
+            text: WORKFLOW_INSIGHTS.toasts.partialScanErrorBody,
+          });
+        });
+      }
+
+      return fulfilledResults;
+    },
     {
       onSuccess,
       onError: (err) => {

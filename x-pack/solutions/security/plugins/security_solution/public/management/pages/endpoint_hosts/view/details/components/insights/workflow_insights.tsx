@@ -133,7 +133,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       if (!userTriggeredScan) {
         setUserTriggeredScan(true);
       }
-      triggerScan({ endpointId, actionTypeId, connectorId });
+      triggerScan({ endpointId, actionTypeId, connectorId, insightTypes: ['incompatible_antivirus'] });
     },
     [
       insightGenerationFailures,
