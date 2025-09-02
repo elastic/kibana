@@ -453,7 +453,9 @@ export class WorkflowsService {
         };
       }
     }
-
+    if (updateData.definition!.inputs === undefined) {
+      updateData.definition!.inputs = [];
+    }
     const response = await savedObjectsClient.update<WorkflowSavedObjectAttributes>(
       WORKFLOW_SAVED_OBJECT_TYPE,
       id,
