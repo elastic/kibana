@@ -25,7 +25,10 @@ function getRootContextSchema(definition: WorkflowYaml) {
     event: EventSchema,
     inputs: z.object({
       ...Object.fromEntries(
-        Object.entries(definition.inputs ?? {}).map(([key, value]) => [key, inferZodType(value)])
+        Object.entries(definition.inputs ?? {}).map(([key, value]) => [
+          value.name ?? key,
+          inferZodType(value.default),
+        ])
       ),
     }),
     steps: z.object({}),
