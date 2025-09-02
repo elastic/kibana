@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import {
   EuiDataGrid,
@@ -21,46 +21,13 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePager } from '@kbn/discover-utils';
-import useWindowSize from 'react-use/lib/useWindowSize';
 import { TableFieldValue } from './table_field_value';
 import { kibanaFlatten } from '../../lib/kibana_flattern';
 import { FieldName } from './field_name';
+import { inferFieldType } from './infer_field_type';
 
 const MIN_NAME_COLUMN_WIDTH = 120;
 const MAX_NAME_COLUMN_WIDTH = 300;
-// Displayed margin of the tab content to the window bottom
-export const DEFAULT_MARGIN_BOTTOM = 16;
-
-/**
- * Infers the field type from a value to determine the field icon
- */
-const inferFieldType = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    return 'unknown';
-  }
-
-  if (typeof value === 'string') {
-    // Check if it looks like a date
-    if (!isNaN(Date.parse(value)) && /\d{4}-\d{2}-\d{2}/.test(value)) {
-      return 'date';
-    }
-    return 'string';
-  }
-
-  if (typeof value === 'number') {
-    return Number.isInteger(value) ? 'long' : 'double';
-  }
-
-  if (typeof value === 'boolean') {
-    return 'boolean';
-  }
-
-  if (typeof value === 'object') {
-    return 'object';
-  }
-
-  return 'string';
-};
 
 /**
  * Props for the JSONDataTable component
@@ -199,13 +166,6 @@ export function JSONDataTable({
   }, [dataTableRecords, searchTerm]);
 
   const { width: containerWidth } = useResizeObserver(containerRef.current);
-  const { height: windowHeight } = useWindowSize();
-  const [containerTop, setContainerTop] = useState(0);
-
-  const containerHeight = containerRef.current
-    ? windowHeight - containerTop - DEFAULT_MARGIN_BOTTOM
-    : 0;
-
   const { curPageIndex, pageSize, changePageIndex, changePageSize } = usePager({
     initialPageSize: 20,
     totalItems: filteredDataTableRecords.length,
@@ -279,69 +239,43 @@ export function JSONDataTable({
   }
 
   return (
-    <div
-      ref={(el) => {
-        containerRef.current = el;
-        setContainerTop(el ? el.getBoundingClientRect().top ?? 0 : 0);
+    <EuiDataGrid
+      className="kbnDocViewer__fieldsGrid"
+      css={styles.fieldsGrid}
+      aria-label={title || 'JSON Data Table'}
+      columns={gridColumns}
+      columnVisibility={{
+        visibleColumns: ['name', 'value'],
+        setVisibleColumns: () => {},
       }}
-      className="kbnDocViewer"
-      data-test-subj={dataTestSubj}
-      css={
-        containerHeight
-          ? css({
-              minBlockSize: 0,
-              height: containerHeight + 'px',
-            })
-          : css({
-              display: 'block',
-            })
-      }
-    >
-      <EuiDataGrid
-        className="kbnDocViewer__fieldsGrid"
-        css={styles.fieldsGrid}
-        aria-label={title || 'JSON Data Table'}
-        columns={gridColumns}
-        columnVisibility={{
-          visibleColumns: ['name', 'value'],
-          setVisibleColumns: () => {},
-        }}
-        rowCount={filteredDataTableRecords.length}
-        renderCellValue={renderCellValue}
-        toolbarVisibility={false}
-        sorting={{ columns: [], onSort: () => {} }}
-        rowHeightsOptions={{ defaultHeight: 'auto' }}
-        gridStyle={{
-          header: 'underline',
-          border: 'horizontal',
-          fontSize: 's',
-          stripes: true,
-        }}
-        pagination={{
-          pageSizeOptions: [20, 50, 100, 200],
-          pageIndex: curPageIndex,
-          pageSize,
-          onChangeItemsPerPage: changePageSize,
-          onChangePage: changePageIndex,
-        }}
-      />
-    </div>
+      rowCount={filteredDataTableRecords.length}
+      renderCellValue={renderCellValue}
+      toolbarVisibility={false}
+      sorting={{ columns: [], onSort: () => {} }}
+      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      gridStyle={{
+        header: 'underline',
+        border: 'horizontal',
+        fontSize: 's',
+        stripes: true,
+      }}
+      pagination={{
+        pageSizeOptions: [20, 50, 100, 200],
+        pageIndex: curPageIndex,
+        pageSize,
+        onChangeItemsPerPage: changePageSize,
+        onChangePage: changePageIndex,
+      }}
+    />
   );
 }
 
 const componentStyles = {
-  fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      minBlockSize: 0,
-      display: 'block',
-    }),
   fieldsGrid: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 's');
 
     // taken from src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/table.tsx
-    // TODO: leave just the styles that are needed for the json data table
-    // FIX: the adjust to work in our case
     return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
@@ -354,10 +288,6 @@ const componentStyles = {
       '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
         paddingTop: 0,
         paddingBottom: 0,
-      },
-
-      '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
-        padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
       },
 
       '.kbnDocViewer__fieldName': {
@@ -373,26 +303,6 @@ const componentStyles = {
       '.kbnDocViewer__fieldName_icon': {
         paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
         lineHeight: euiTheme.font.lineHeightMultiplier,
-      },
-
-      '.kbnDocViewer__fieldName_multiFieldBadge': {
-        margin: `${euiTheme.size.xs} 0`,
-        fontWeight: euiTheme.font.weight.regular,
-        fontFamily: euiTheme.font.family,
-      },
-
-      '.kbnDocViewer__fieldsGrid__pinAction': {
-        opacity: 0,
-      },
-
-      '& [data-gridcell-column-id="pin_field"]:focus-within': {
-        '.kbnDocViewer__fieldsGrid__pinAction': {
-          opacity: 1,
-        },
-      },
-
-      '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
-        opacity: 1,
       },
     });
   },

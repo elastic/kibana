@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useWindowSize from 'react-use/lib/useWindowSize';
+import { css } from '@emotion/react';
 import { JsonDataCode } from './json_data_code';
 import { JSONDataTable } from './json_data_table';
+
+// Displayed margin of the tab content to the window bottom
+const DEFAULT_MARGIN_BOTTOM = 16;
 
 export interface JSONDataViewProps {
   /**
@@ -56,6 +61,18 @@ export function JSONDataView({
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataViewProps) {
   const [viewMode, setViewMode] = useState<'table' | 'json'>('table');
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const { height: windowHeight } = useWindowSize();
+  const [contentTop, setContentTop] = useState(0);
+
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      setContentTop(contentRef.current.getBoundingClientRect().top ?? 0);
+    }
+  }, []);
+
+  // Set the height of the content container to available space in flyout, the data table and the json editor will handle the overflow
+  const contentHeight = contentRef.current ? windowHeight - contentTop - DEFAULT_MARGIN_BOTTOM : 0;
 
   // Convert data to object format if needed
   const jsonObject = useMemo(() => {
@@ -90,6 +107,7 @@ export function JSONDataView({
             <EuiFlexItem>
               <EuiFieldSearch
                 compressed
+                fullWidth
                 placeholder="Filter by field, value"
                 value={searchTerm}
                 onChange={(e) => onSearchTermChange(e.target.value)}
@@ -138,15 +156,30 @@ export function JSONDataView({
 
       <EuiFlexItem grow={true}>
         <EuiSpacer size="s" />
-        {viewMode === 'table' && (
-          <JSONDataTable
-            data={jsonObject}
-            title={title}
-            columns={columns}
-            searchTerm={searchTerm}
-          />
-        )}
-        {viewMode === 'json' && <JsonDataCode json={jsonObject} />}
+        <div
+          ref={contentRef}
+          css={
+            contentHeight
+              ? css({
+                  minBlockSize: 0,
+                  height: contentHeight + 'px',
+                  overflow: 'hidden',
+                })
+              : css({
+                  display: 'block',
+                })
+          }
+        >
+          {viewMode === 'table' && (
+            <JSONDataTable
+              data={jsonObject}
+              title={title}
+              columns={columns}
+              searchTerm={searchTerm}
+            />
+          )}
+          {viewMode === 'json' && <JsonDataCode json={jsonObject} />}
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

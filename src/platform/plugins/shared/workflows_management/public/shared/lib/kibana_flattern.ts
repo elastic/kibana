@@ -12,17 +12,17 @@ import _ from 'lodash';
 /**
  * Takes an object and returns a flattened version, including nested arrays in a kibana way similar to the flattenHit function.
  *
- * @param {Record<string, unknown>} obj - userland data
+ * @param {Record<string, unknown>} obj - object to flatten
  * @param {boolean} deep - whether to look into objects within arrays
- * @returns {Record<string, unknown[]>}
+ * @returns {Record<string, unknown | unknown[]>}
  */
 export function kibanaFlatten(
   obj: Record<string, unknown>,
   deep: boolean = true
-): Record<string, unknown[]> {
-  const flat = {} as Record<string, unknown[]>;
+): Record<string, unknown | unknown[]> {
+  const flat = {} as Record<string, unknown | unknown[]>;
 
-  // recursively merge _source
+  // recursively merge object
   (function flatten(_obj, keyPrefix = '') {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
     _.forOwn(_obj, function (val, key) {
@@ -44,14 +44,14 @@ export function kibanaFlatten(
         if (!flat[key]) {
           flat[key] = val;
         } else if (Array.isArray(flat[key])) {
-          flat[key].push(val);
+          (flat[key] as unknown[]).push(val);
         } else {
           flat[key] = [flat[key], val];
         }
         return;
       }
 
-      flatten(val, key);
+      flatten(val as Record<string, unknown>, key);
     });
   })(obj);
 
