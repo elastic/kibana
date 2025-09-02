@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-export interface SiemReadinessConfig {
-  // Add your type definitions here
-  enabled: boolean;
-}
-
-export interface SiemReadinessStatus {
-  ready: boolean;
-  checks: string[];
-}
-
-export type SiemReadinessCheck = 'indices' | 'rules' | 'dashboards' | 'alerts';
-
 export interface SiemReadinessTask {
   task_id: string;
   status: 'complete' | 'incomplete';

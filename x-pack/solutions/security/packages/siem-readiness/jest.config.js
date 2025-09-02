@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-    preset: '@kbn/test',
-    rootDir: '../../../../../..',
-    roots: ['<rootDir>/x-pack/solutions/security/packages/siem-readiness'],
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/siem-readiness'],
 };

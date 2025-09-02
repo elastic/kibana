@@ -6,5 +6,3 @@
  */
 
 export const SIEM_READINESS_PACKAGE_NAME = '@kbn/siem-readiness';
-
-export const SIEM_READINESS_INDEX = 'security_solution-siem_readiness';
