@@ -9,6 +9,7 @@
 
 import type { Props, ObjectTypeOptions } from './object_type';
 import { ObjectType } from './object_type';
+import { Type } from './type';
 
 export type IntersectionTypeOptions<T extends Props = any> = ObjectTypeOptions<T>;
 
@@ -16,6 +17,9 @@ export class IntersectionType<
   RTS extends Array<ObjectType<any>>,
   T extends Props
 > extends ObjectType<T> {
+  private readonly intersectionTypes: RTS;
+  private readonly intersectionOptions?: IntersectionTypeOptions<T>;
+
   constructor(types: RTS, options?: IntersectionTypeOptions<T>) {
     const props = types.reduce((mergedProps, type) => {
       Object.entries(type.getPropSchemas() as Record<string, any>).forEach(([key, value]) => {
@@ -29,5 +33,13 @@ export class IntersectionType<
     }, {} as T);
 
     super(props, options);
+    this.intersectionTypes = types;
+    this.intersectionOptions = options;
+  }
+
+  public getInputSchema() {    
+    const newIntersectonTypes = this.intersectionTypes.map(type => type.getInputSchema());
+    console.log('Getting input schema for IntersectionType with types:', newIntersectonTypes);
+    return new IntersectionType(newIntersectonTypes as RTS, this.intersectionOptions);
   }
 }

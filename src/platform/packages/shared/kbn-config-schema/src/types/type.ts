@@ -19,6 +19,7 @@ import {
 import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
+import { schema } from '@kbn/config-schema';
 
 /**
  * Meta fields used when introspecting runtime validation. Most notably for
@@ -110,6 +111,7 @@ export abstract class Type<V> {
    * @type {Schema}
    */
   protected readonly internalSchema: Schema;
+  private internal_options: TypeOptions<V>;
 
   protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
     if (options.defaultValue !== undefined) {
@@ -149,6 +151,7 @@ export abstract class Type<V> {
     }
 
     this.internalSchema = schema;
+    this.internal_options = options;
   }
 
   public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {
@@ -188,6 +191,29 @@ export abstract class Type<V> {
 
   public getSchemaStructure() {
     return recursiveGetSchemaStructure(this.internalSchema);
+  }
+
+  /**
+   * Creates a new kbn schema where properties with default values are wrapped in schema.maybe().
+   * This is useful for creating input schemas where properties with defaults can be omitted.
+   * 
+   * @returns A new Type instance representing the input schema
+   */
+  public getInputSchema(): Type<V> | Type<V | undefined> {
+    // clone itself, if internal schema has a default set update it so its optional
+    // If the schema has a default value, we need to make it optional
+    // and wrap it in MaybeType so that it can be omitted in the input
+    // schema. This is a simplification and may not cover all cases,
+    // especially for complex nested schemas.
+    // A more robust solution would require deeper analysis of the schema.
+
+    
+    if (this.internal_options.defaultValue !== undefined) {
+      console.log(`wrapping in maybe: ${this.internalSchema.type} - ${this.type}`, this.internal_options)
+      return schema.maybe(this);
+    }
+
+    return this;
   }
 
   protected handleError(

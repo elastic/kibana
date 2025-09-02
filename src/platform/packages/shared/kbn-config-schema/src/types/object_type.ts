@@ -13,6 +13,7 @@ import { internals } from '../internals';
 import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
 import { Type } from './type';
 import { ValidationError } from '../errors';
+import { MaybeType } from './maybe_type';
 
 export type Props = Record<string, Type<any>>;
 
@@ -110,6 +111,29 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     this.props = props;
     this.propSchemas = schemaKeys;
     this.options = options;
+  }
+
+  public getInputSchema() {
+    // Transform each property to its input schema version
+    console.log('Getting input schema for ObjectType with props:', this.props);
+    const inputProps = Object.entries(this.props).reduce((memo, [key, value]) => {
+      return {
+        ...memo,
+        [key]: value.getInputSchema(),
+      };
+    }, {} as P);
+
+    console.log('Transformed input props:', inputProps);
+
+    // Remove defaultValue from options to avoid circular default handling
+    const inputObjectType = new ObjectType(inputProps, this.options);
+
+    // // If this object has a default value, wrap it in MaybeType
+    // if (this.options.defaultValue !== undefined) {
+    //   return new MaybeType(inputObjectType);
+    // }
+
+    return inputObjectType;
   }
 
   /**
