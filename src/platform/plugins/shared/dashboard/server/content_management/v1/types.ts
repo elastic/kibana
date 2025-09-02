@@ -38,6 +38,7 @@ import {
   dashboardSearchResultsSchema,
   legacyDashboardGetResultSchema,
   dashboardAttributesSchema,
+  dashboardItemAPIRequestSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -87,7 +88,7 @@ export type DashboardGetOut = GetResult<
 
 export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardAttributes>;
 export type DashboardCreateOut = CreateResult<
-  TypeOf<typeof dashboardAttributesSchemaResponse>,
+  TypeOf<typeof dashboardItemAPIRequestSchema>,
   TypeOf<typeof dashboardResponseMetaSchema>
 >;
 export type LegacyDashboardCreateOut = CreateResult<
@@ -98,7 +99,7 @@ export type DashboardCreateOptions = TypeOf<typeof dashboardCreateOptionsSchema>
 
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
 export type DashboardUpdateOut = CreateResult<
-  TypeOf<typeof dashboardAttributesSchemaResponse>,
+  TypeOf<typeof dashboardItemAPIRequestSchema>,
   TypeOf<typeof dashboardResponseMetaSchema>
 >;
 export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>;

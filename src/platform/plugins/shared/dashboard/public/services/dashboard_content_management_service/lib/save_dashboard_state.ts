@@ -62,7 +62,7 @@ export const saveDashboardState = async ({
           },
         });
 
-    const newId = result.id;
+    const newId = result.item.id;
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({
