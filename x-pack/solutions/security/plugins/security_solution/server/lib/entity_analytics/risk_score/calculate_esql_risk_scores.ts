@@ -75,7 +75,11 @@ export const calculateScoresWithESQL = async (
             { afterKey, scores: [] },
           ] satisfies ESQLResults[number]);
         }
-        const query = getESQL(entityType as EntityType, entities);
+        const query = getESQL(
+          entityType as EntityType,
+          entities,
+          params.alertSampleSizePerShard || 10000
+        );
         return esClient.esql
           .query({ query })
           .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType)))
@@ -100,7 +104,6 @@ export const calculateScoresWithESQL = async (
           })
 
           .catch((error) => {
-            // logger.error(`SOMETHING CRAZY HAPPENED IN ${entityType}: ${error.message}`);
             logger.error(
               `Error executing ESQL query for entity type ${entityType}: ${error.message}`
             );
@@ -191,7 +194,7 @@ export const getCompositeQuery = (
   };
 };
 
-export const getESQL = (entityType: EntityType, entities: string[]) => {
+export const getESQL = (entityType: EntityType, entities: string[], sampleSize: number) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
   const query = /* SQL */ `
 
@@ -204,7 +207,7 @@ export const getESQL = (entityType: EntityType, entities: string[]) => {
     | KEEP ${identifierField}, risk_score, rule_name, rule_id, alert_id, time
     | WHERE ${identifierField} IN (${entities.map((e) => `"${e}"`).join(',')})
       AND risk_score IS NOT NULL
-    | EVAL input = CONCAT(""" {"id": """", alert_id, """", "timestamp": """", time::keyword, """", "description": """", rule_name, """\", "risk_score": \"""", risk_score::keyword, """\" } """)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "timestamp": """", time::keyword, """", "description": """", rule_name, """\", "id": \"""", alert_id, """\" } """)
       /** 
        * The pablo fn works on multivalue fields only.
        * We need to agg the risk_score into a mv field, which is why we do TOP.
@@ -212,7 +215,7 @@ export const getESQL = (entityType: EntityType, entities: string[]) => {
        **/
     | STATS
          alert_count = count(risk_score),
-         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${entities.length}, "desc"), 1.5),
+         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), 1.5),
          risk_inputs = TOP(input, 10, "desc")
       BY ${identifierField}
     | SORT scores DESC

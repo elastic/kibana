@@ -126,6 +126,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoringRoutesEnabled: true,
 
   /**
+   * Disables ESQL-based risk scoring
+   */
+  disableESQLRiskScoring: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
