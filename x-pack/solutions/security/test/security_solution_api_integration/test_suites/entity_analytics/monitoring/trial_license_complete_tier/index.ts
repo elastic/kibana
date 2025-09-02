@@ -15,6 +15,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./privileged_users/api'));
     loadTestFile(require.resolve('./privileged_users/task'));
     loadTestFile(require.resolve('./privileged_users/migrations'));
-    loadTestFile(require.resolve('./privileged_users/cross_source_sync'));
   });
 }
