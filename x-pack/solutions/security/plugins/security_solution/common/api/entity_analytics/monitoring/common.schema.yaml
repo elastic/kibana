@@ -23,7 +23,7 @@ components:
         - disabled
         - not_installed
 
-    EngineComponentStatus:
+    MonitoringEngineComponentStatus:
       type: object
       required:
         - id
@@ -35,7 +35,7 @@ components:
         installed:
           type: boolean
         resource:
-          $ref: "#/components/schemas/EngineComponentResource"
+          $ref: "#/components/schemas/MonitoringEngineComponentResource"
         health:
           type: string
           enum:
@@ -53,7 +53,7 @@ components:
               message:
                 type: string
 
-    EngineComponentResource:
+    MonitoringEngineComponentResource:
       type: string
       enum:
         - privmon_engine
