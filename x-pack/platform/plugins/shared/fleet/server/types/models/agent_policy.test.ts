@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-
 import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
-import { getSettings } from '../../services/form_settings';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 
