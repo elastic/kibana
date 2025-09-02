@@ -8,12 +8,16 @@
 import {
   ML_ANOMALIES_INDEX,
   RISK_SCORE_INDEX_PATTERN,
-  privilegedMonitorBaseIndexName,
+  PRIVMON_BASE_INDEX_NAME,
 } from '../constants';
 import { getAlertsIndex } from '../utils';
 
+// Default index for privileged monitoring users.
+export const defaultMonitoringUsersIndex = (namespace: string) =>
+  `entity_analytics.privileged_monitoring.${namespace}`;
+
 export const getPrivilegedMonitorUsersIndex = (namespace: string) =>
-  `${privilegedMonitorBaseIndexName}.users-${namespace}`;
+  `${PRIVMON_BASE_INDEX_NAME}.users-${namespace}`;
 
 // At the moment, this only includes the privileges required for reading dashboards.
 export const getPrivilegeUserMonitoringRequiredEsIndexPrivileges = (namespace: string) => ({
