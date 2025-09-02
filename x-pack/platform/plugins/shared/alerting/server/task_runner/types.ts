@@ -24,7 +24,11 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -193,7 +197,7 @@ export interface TaskRunnerContext {
   isServerless: boolean;
 }
 
-export interface AsyncSearchClient<T extends AsyncSearchParams, R> {
+export interface AsyncSearchClient<T extends AsyncSearchParams> {
   getMetrics: () => {
     numSearches: number;
     esSearchDurationMs: number;
@@ -205,10 +209,10 @@ export interface AsyncSearchClient<T extends AsyncSearchParams, R> {
   }: {
     request: IKibanaSearchRequest<T>;
     options?: ISearchOptions;
-  }) => Promise<R>;
+  }) => Promise<IKibanaSearchResponse['rawResponse']>;
 }
 
-export type PublicAsyncSearchClient<T extends AsyncSearchParams, R> = Omit<
-  AsyncSearchClient<T, R>,
+export type PublicAsyncSearchClient<T extends AsyncSearchParams> = Omit<
+  AsyncSearchClient<T>,
   'getMetrics'
 >;

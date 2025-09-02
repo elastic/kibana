@@ -138,9 +138,9 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   shouldWriteAlerts: () => boolean;
   uiSettingsClient: IUiSettingsClient;
-  getAsyncSearchClient: <T extends AsyncSearchParams, R>(
+  getAsyncSearchClient: <T extends AsyncSearchParams>(
     strategy: AsyncSearchStrategies
-  ) => PublicAsyncSearchClient<T, R>;
+  ) => PublicAsyncSearchClient<T>;
 }
 
 export type AsyncSearchStrategies =

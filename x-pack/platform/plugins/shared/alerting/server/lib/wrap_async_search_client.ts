@@ -13,7 +13,7 @@ import type { AsyncSearchClient } from '../task_runner/types';
 import type { AsyncSearchParams, AsyncSearchStrategies } from '../types';
 import type { RuleInfo } from './types';
 
-export function wrapAsyncSearchClient<P extends AsyncSearchParams, R>({
+export function wrapAsyncSearchClient<P extends AsyncSearchParams>({
   strategy,
   client,
   abortController,
@@ -25,7 +25,7 @@ export function wrapAsyncSearchClient<P extends AsyncSearchParams, R>({
   abortController: AbortController;
   logger: Logger;
   rule: RuleInfo;
-}): AsyncSearchClient<P, R> {
+}): AsyncSearchClient<P> {
   let numSearches = 0;
   let esSearchDurationMs = 0;
   let totalSearchDurationMs = 0;
@@ -76,7 +76,7 @@ export function wrapAsyncSearchClient<P extends AsyncSearchParams, R>({
               return response.rawResponse;
             })
           )
-      ) as R;
+      );
     },
   };
 }
