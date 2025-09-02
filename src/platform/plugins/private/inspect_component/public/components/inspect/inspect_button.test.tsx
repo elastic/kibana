@@ -14,6 +14,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { InspectButton } from './inspect_button';
 import { coreMock } from '@kbn/core/public/mocks';
 import { isKeyboardShortcut } from '../../lib/keyboard_shortcut/keyboard_shortcut';
+import { mockBranch } from '../../__mocks__/mocks';
 
 jest.mock('../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
   isKeyboardShortcut: jest.fn(),
@@ -36,7 +37,7 @@ describe('InspectButton', () => {
   });
 
   it('should render correctly', () => {
-    renderWithI18n(<InspectButton core={mockCoreStart} />);
+    renderWithI18n(<InspectButton core={mockCoreStart} branch={mockBranch} />);
 
     const inspectButton = screen.getByTestId('inspectComponentButton');
 
@@ -44,7 +45,7 @@ describe('InspectButton', () => {
   });
 
   it('should toggle inspect mode when clicked', async () => {
-    renderWithI18n(<InspectButton core={mockCoreStart} />);
+    renderWithI18n(<InspectButton core={mockCoreStart} branch={mockBranch} />);
 
     const inspectButton = screen.getByTestId('inspectComponentButton');
 
@@ -62,7 +63,7 @@ describe('InspectButton', () => {
   });
 
   it('should handle keyboard shortcut to toggle inspect mode', async () => {
-    renderWithI18n(<InspectButton core={mockCoreStart} />);
+    renderWithI18n(<InspectButton core={mockCoreStart} branch={mockBranch} />);
 
     mockedIsKeyboardShortcut.mockReturnValue(true);
     fireEvent.keyDown(window, { code: 'Quote', ctrlKey: true });
@@ -76,7 +77,7 @@ describe('InspectButton', () => {
   });
 
   it('should prevent target from losing focus on mouse down', async () => {
-    renderWithI18n(<InspectButton core={mockCoreStart} />);
+    renderWithI18n(<InspectButton core={mockCoreStart} branch={mockBranch} />);
 
     const inspectButton = screen.getByTestId('inspectComponentButton');
 
@@ -89,7 +90,7 @@ describe('InspectButton', () => {
   });
 
   it('should close flyout overlay and disable inspect mode when overlay closes itself', async () => {
-    renderWithI18n(<InspectButton core={mockCoreStart} />);
+    renderWithI18n(<InspectButton core={mockCoreStart} branch={mockBranch} />);
 
     const inspectButton = screen.getByTestId('inspectComponentButton');
 

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactHTML } from 'react';
 import { EXCLUDED_COMPONENT_TYPES, EUI_COMPONENTS_DOCS_MAP, HTML_TAGS } from './constants';
 
 export const isEui = (type: string) => type.startsWith('Eui');
 
-export const isHtmlTag = (type: string) => HTML_TAGS.includes(type);
+export const isHtmlTag = (type: string) => HTML_TAGS.includes(type as keyof ReactHTML);
 
 export const isExcludedComponent = (type: string) =>
   EXCLUDED_COMPONENT_TYPES.some((t) => type.includes(t));
