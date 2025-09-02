@@ -41,6 +41,7 @@ interface GetDashboardMigrationParams {
 }
 
 type WithSignal<T = undefined> = T & { signal?: AbortSignal };
+
 interface Body<T extends object> {
   body: T;
 }

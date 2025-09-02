@@ -55,11 +55,6 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     return getMissingCapabilities(this.core.application.capabilities, level);
   }
 
-  /** Checks if the user has any missing capabilities for this feature */
-  public hasMissingCapabilities(level?: CapabilitiesLevel): boolean {
-    return this.getMissingCapabilities(level).length > 0;
-  }
-
   /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */
   public isAvailable() {
     const { automaticDashboardsMigration, siemMigrationsDisabled } =

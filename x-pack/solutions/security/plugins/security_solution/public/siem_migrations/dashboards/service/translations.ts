@@ -8,6 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_DASHBOARDS_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.dashboardsService.create.emptyRulesError',
+  'xpack.securitySolution.siemMigrations.dashboardsService.create.emptyDashbaordsError',
   { defaultMessage: 'Can not create a migration without dashboards' }
 );
