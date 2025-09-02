@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './common.gen';
-export * from './list_entities.gen';
-export * from './update_single_entity.gen';
+import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
+
+export class EngineNotRunningError extends Error {
+  constructor(engine: EntityType) {
+    super(`Entity Engine '${engine}' is not running`);
+  }
+}

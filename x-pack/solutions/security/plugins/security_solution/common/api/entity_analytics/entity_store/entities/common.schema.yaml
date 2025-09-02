@@ -250,3 +250,32 @@ components:
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
         - $ref: '#/components/schemas/GenericEntity'
+    CRUDEntity:
+      type: object
+      required:
+        - entity
+      properties:
+        entity:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            type:
+              type: string
+            category:
+              type: string
+            source:
+              type: string
+            attributes:
+              type: object
+              additionalProperties: true
+            behavior: 
+              type: object
+              additionalProperties: true
+            lifecyle:
+              type: object
+              additionalProperties: true

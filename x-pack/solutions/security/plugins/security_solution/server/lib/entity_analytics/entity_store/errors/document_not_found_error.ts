@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './common.gen';
-export * from './list_entities.gen';
-export * from './update_single_entity.gen';
+export class DocumentNotFoundError extends Error {
+  constructor() {
+    super(`Document not found`);
+  }
+}
