@@ -11,6 +11,7 @@ import { graphlib } from '@dagrejs/dagre';
 import type {
   ConnectorStep,
   ForEachStep,
+  IfStep,
   WorkflowOnFailure,
   WorkflowYaml,
 } from '../../../spec/schema';
@@ -337,6 +338,7 @@ describe('on_failure graph', () => {
       },
       steps: [],
     } as Partial<WorkflowYaml>;
+
     describe('fallback handling', () => {
       beforeEach(() => {
         workflow.steps = [
@@ -396,6 +398,123 @@ describe('on_failure graph', () => {
             'workflow-level-on-failure_testRetryConnectorStep_foreachFallbackAction',
           ])
         );
+      });
+
+      it('should not wrap if step in on-failure', () => {
+        workflow.steps = [
+          {
+            name: 'ifStep',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'trueConnectorStep',
+                type: 'console',
+                with: {
+                  message: 'true log',
+                },
+              } as ConnectorStep,
+            ],
+            else: [
+              {
+                name: 'falseConnectorStep',
+                type: 'console',
+                with: {
+                  message: 'false log',
+                },
+              } as ConnectorStep,
+            ],
+          } as IfStep,
+        ];
+        workflow.settings!['on-failure']!.fallback = [
+          {
+            name: 'fallbackAction',
+            type: 'console',
+            with: {
+              message: 'fallback log',
+            },
+          } as ConnectorStep,
+        ];
+        const executionGraph = convertToWorkflowGraph(workflow as any);
+        const topsort = graphlib.alg.topsort(executionGraph);
+        expect(topsort).toEqual([
+          'ifStep',
+          'enterThen(ifStep)',
+          'enterContinue_trueConnectorStep',
+          'enterTryBlock_trueConnectorStep',
+          'enterNormalPath_trueConnectorStep',
+          'enterRetry_trueConnectorStep',
+          'trueConnectorStep',
+          'exitRetry_trueConnectorStep',
+          'exitNormalPath_trueConnectorStep',
+          'enterFallbackPath_trueConnectorStep',
+          'workflow-level-on-failure_trueConnectorStep_fallbackAction',
+          'exitFallbackPath_trueConnectorStep',
+          'exitTryBlock_trueConnectorStep',
+          'exitContinue_trueConnectorStep',
+          'exitThen(ifStep)',
+          'enterElse(ifStep)',
+          'enterContinue_falseConnectorStep',
+          'enterTryBlock_falseConnectorStep',
+          'enterNormalPath_falseConnectorStep',
+          'enterRetry_falseConnectorStep',
+          'falseConnectorStep',
+          'exitRetry_falseConnectorStep',
+          'exitNormalPath_falseConnectorStep',
+          'enterFallbackPath_falseConnectorStep',
+          'workflow-level-on-failure_falseConnectorStep_fallbackAction',
+          'exitFallbackPath_falseConnectorStep',
+          'exitTryBlock_falseConnectorStep',
+          'exitContinue_falseConnectorStep',
+          'exitElse(ifStep)',
+          'exitCondition(ifStep)',
+        ]);
+      });
+
+      it('should not wrap foreach step in on-failure', () => {
+        workflow.steps = [
+          {
+            name: 'foreachStep',
+            type: 'foreach',
+            foreach: '["item1", "item2"]',
+            steps: [
+              {
+                name: 'foreachChild',
+                type: 'console',
+                with: {
+                  message: 'foreach child log',
+                },
+              } as ConnectorStep,
+            ],
+          } as ForEachStep,
+        ];
+        workflow.settings!['on-failure']!.fallback = [
+          {
+            name: 'fallbackAction',
+            type: 'console',
+            with: {
+              message: 'fallback log',
+            },
+          } as ConnectorStep,
+        ];
+        const executionGraph = convertToWorkflowGraph(workflow as any);
+        const topsort = graphlib.alg.topsort(executionGraph);
+        expect(topsort).toEqual([
+          'foreachStep',
+          'enterContinue_foreachChild',
+          'enterTryBlock_foreachChild',
+          'enterNormalPath_foreachChild',
+          'enterRetry_foreachChild',
+          'foreachChild',
+          'exitRetry_foreachChild',
+          'exitNormalPath_foreachChild',
+          'enterFallbackPath_foreachChild',
+          'workflow-level-on-failure_foreachChild_fallbackAction',
+          'exitFallbackPath_foreachChild',
+          'exitTryBlock_foreachChild',
+          'exitContinue_foreachChild',
+          'exitForeach(foreachStep)',
+        ]);
       });
     });
 
