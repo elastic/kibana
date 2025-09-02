@@ -21,6 +21,8 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   createAgentsServiceStartMock,
@@ -41,6 +43,8 @@ describe('ChatService', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let agentService: ReturnType<typeof createAgentsServiceStartMock>;
   let conversationService: ReturnType<typeof createConversationServiceMock>;
+  let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
+  let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
 
   let chatService: ChatService;
 
@@ -50,12 +54,16 @@ describe('ChatService', () => {
     inference = inferenceMock.createStartContract();
     agentService = createAgentsServiceStartMock();
     conversationService = createConversationServiceMock();
+    uiSettings = uiSettingsServiceMock.createStartContract();
+    savedObjects = savedObjectsServiceMock.createStartContract();
 
     chatService = createChatService({
       inference,
       logger,
       agentService,
       conversationService,
+      uiSettings,
+      savedObjects,
     });
 
     const conversation = createEmptyConversation();
