@@ -81,6 +81,7 @@ import {
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import type { ISearchSetup, ISearchStart } from './types';
 import { openSearchSessionsFlyout } from './session/sessions_mgmt';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from './session/constants';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -347,6 +348,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           });
         });
       },
+      isBackgroundSearchEnabled: coreStart.featureFlags.getBooleanValue(
+        BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+        false
+      ),
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
