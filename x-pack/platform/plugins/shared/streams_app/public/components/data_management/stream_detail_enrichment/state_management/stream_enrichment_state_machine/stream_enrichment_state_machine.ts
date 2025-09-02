@@ -28,7 +28,14 @@ import type {
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
+  PersistentFieldMapping,
 } from './types';
+import type { ReorderingDetection } from './persistent_field_mappings_utils';
+import {
+  matchFieldsWithPersistentMappings,
+  applyFieldRestoration,
+  updateFieldPositions,
+} from './persistent_field_mappings_utils';
 import { getDefaultGrokProcessor } from '../../utils';
 import {
   createUpsertStreamActor,
@@ -60,6 +67,7 @@ import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { moveArrayItem } from '../../../../../util/move_array_item';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
+import type { MappedSchemaField } from '../../../schema_editor/types';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -156,6 +164,78 @@ export const streamEnrichmentMachine = setup({
         dataSourceRef.send({ type: 'dataSource.refresh' })
       );
     },
+    clearPersistentMappings: assign(({ context }, params: { fieldName?: string }) => {
+      if (params.fieldName) {
+        const newPersistentMappings = new Map(context.persistentFieldMappings);
+        newPersistentMappings.delete(params.fieldName);
+        return { persistentFieldMappings: newPersistentMappings };
+      } else {
+        return { persistentFieldMappings: new Map() };
+      }
+    }),
+
+    storePersistentFieldMapping: assign(({ context }, params: { field: MappedSchemaField }) => {
+      // Get current field position from simulator
+      const currentFields = context.simulatorRef.getSnapshot().context.detectedSchemaFields;
+      const fieldPosition = currentFields.findIndex((f) => f.name === params.field.name);
+
+      const newPersistentMappings = new Map(context.persistentFieldMappings);
+      newPersistentMappings.set(params.field.name, {
+        fieldName: params.field.name,
+        type: params.field.type,
+        additionalParameters: params.field.additionalParameters,
+        timestamp: Date.now(),
+        lastSeenPosition: fieldPosition >= 0 ? fieldPosition : undefined,
+        processorId: undefined,
+      });
+      return { persistentFieldMappings: newPersistentMappings };
+    }),
+    removePersistentFieldMapping: assign(({ context }, params: { fieldName: string }) => {
+      const newPersistentMappings = new Map(context.persistentFieldMappings);
+      newPersistentMappings.delete(params.fieldName);
+      return { persistentFieldMappings: newPersistentMappings };
+    }),
+    applyFieldRestorationFromPersistentMappings: ({ context, self }) => {
+      const simulatorSnapshot = context.simulatorRef.getSnapshot();
+      const currentFields = simulatorSnapshot.context.detectedSchemaFields;
+
+      if (currentFields.length === 0 && context.persistentFieldMappings.size > 0) {
+        setTimeout(() => {
+          self.send({ type: 'applyFieldRestorationFromPersistentMappings' });
+        }, 1500);
+        return;
+      }
+
+      const matchingResult = matchFieldsWithPersistentMappings(
+        currentFields,
+        context.persistentFieldMappings
+      );
+
+      if (matchingResult.potentialReorderings.length > 0) {
+        self.send({
+          type: 'notifyFieldReordering',
+          reorderings: matchingResult.potentialReorderings,
+        });
+      }
+
+      if (matchingResult.exactMatches.length > 0) {
+        const restoredFields = applyFieldRestoration(currentFields, matchingResult.exactMatches);
+
+        context.simulatorRef.send({
+          type: 'simulation.restoreFields',
+          restoredFields,
+        });
+
+        const updatedMappings = updateFieldPositions(
+          restoredFields,
+          context.persistentFieldMappings
+        );
+        self.send({
+          type: 'updateFieldPositions',
+          persistentFieldMappings: updatedMappings,
+        });
+      }
+    },
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendProcessorsEventToSimulator: enqueueActions(
       ({ context, enqueue }, params: { type: StreamEnrichmentEvent['type'] }) => {
@@ -171,18 +251,39 @@ export const streamEnrichmentMachine = setup({
             type: params.type,
             processors: getProcessorsForSimulation({ processorsRefs: context.processorsRefs }),
           });
+          if (params.type.startsWith('processor.')) {
+            enqueue({ type: 'applyFieldRestorationFromPersistentMappings' });
+          }
         }
       }
     ),
-    sendDataSourcesSamplesToSimulator: sendTo(
-      'simulator',
-      ({ context }) => ({
-        type: 'simulation.receive_samples',
-        samples: getDataSourcesSamples(context),
-      }),
-      { delay: 800, id: 'send-samples-to-simulator' }
-    ),
+    // @ts-expect-error XState 5 type inference issue with enqueueActions - types are correct at runtime
+    sendDataSourcesSamplesToSimulator: enqueueActions(({ context, enqueue }) => {
+      enqueue.sendTo(
+        'simulator',
+        {
+          type: 'simulation.receive_samples',
+          samples: getDataSourcesSamples(context),
+        },
+        { delay: 800, id: 'send-samples-to-simulator' }
+      );
+    }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
+    notifyFieldReordering: ({ system }, params: { reorderings: ReorderingDetection[] }) => {
+      const core = system.get('core');
+      const reorderedFields = params.reorderings.map((r) => r.fieldName).join(', ');
+
+      core.notifications.toasts.addWarning({
+        title: 'Field positions changed',
+        text: `The positions of fields [${reorderedFields}] have changed due to pattern updates, but your field mappings have been preserved.`,
+        toastLifeTimeMs: 8000,
+      });
+    },
+    updateFieldPositions: assign(
+      (_, params: { persistentFieldMappings: Map<string, PersistentFieldMapping> }) => ({
+        persistentFieldMappings: params.persistentFieldMappings,
+      })
+    ),
   },
   guards: {
     canReorderProcessors: and([
@@ -225,6 +326,7 @@ export const streamEnrichmentMachine = setup({
     initialProcessorsRefs: [],
     processorsRefs: [],
     urlState: defaultEnrichmentUrlState,
+    persistentFieldMappings: new Map(),
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {
@@ -347,7 +449,21 @@ export const streamEnrichmentMachine = setup({
               initial: 'viewDataPreview',
               on: {
                 'simulation.refresh': {
-                  actions: [{ type: 'refreshDataSources' }],
+                  actions: [
+                    { type: 'refreshDataSources' },
+                    enqueueActions(({ enqueue }) => {
+                      enqueue({ type: 'applyFieldRestorationFromPersistentMappings' });
+                    }),
+                  ],
+                },
+                'simulation.completed': {
+                  actions: [{ type: 'applyFieldRestorationFromPersistentMappings' }],
+                },
+                notifyFieldReordering: {
+                  actions: [{ type: 'notifyFieldReordering', params: ({ event }: any) => event }],
+                },
+                updateFieldPositions: {
+                  actions: [{ type: 'updateFieldPositions', params: ({ event }: any) => event }],
                 },
               },
               states: {
@@ -365,8 +481,17 @@ export const streamEnrichmentMachine = setup({
                 viewDetectedFields: {
                   on: {
                     'simulation.viewDataPreview': 'viewDataPreview',
-                    'simulation.fields.*': {
-                      actions: forwardTo('simulator'),
+                    'simulation.fields.map': {
+                      actions: [
+                        { type: 'storePersistentFieldMapping', params: ({ event }) => event },
+                        forwardTo('simulator'),
+                      ],
+                    },
+                    'simulation.fields.unmap': {
+                      actions: [
+                        { type: 'removePersistentFieldMapping', params: ({ event }) => event },
+                        forwardTo('simulator'),
+                      ],
                     },
                   },
                 },
