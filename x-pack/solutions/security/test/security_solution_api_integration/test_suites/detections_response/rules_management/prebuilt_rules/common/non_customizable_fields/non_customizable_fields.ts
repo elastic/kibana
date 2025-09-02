@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const retryService = getService('retry');
 
-  const setupPrebuiltPackageAndRules = async () => {
+  const installPrebuiltRulesFromUploadedPackage = async () => {
     const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
       packageName: PREBUILT_RULES_PACKAGE_NAME,
       packageSemver: MOCK_PKG_VERSION,
@@ -41,7 +41,6 @@ export default ({ getService }: FtrProviderContext) => {
       getService,
       packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
     });
-    await installPrebuiltRules(es, supertest);
   };
 
   describe('@ess @serverless @serverlessQA modifying non-customizable fields', () => {
@@ -49,10 +48,12 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
         await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
-        await setupPrebuiltPackageAndRules();
       });
 
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        await installPrebuiltRulesFromUploadedPackage();
+        await installPrebuiltRules(es, supertest);
+
         const { body } = await securitySolutionApi
           .patchRule({
             body: {
@@ -70,10 +71,12 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
         await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
-        await setupPrebuiltPackageAndRules();
       });
 
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        await installPrebuiltRulesFromUploadedPackage();
+        await installPrebuiltRules(es, supertest);
+
         const { body: existingRule } = await securitySolutionApi
           .readRule({
             query: { rule_id: PREBUILT_RULE_ID_A },
