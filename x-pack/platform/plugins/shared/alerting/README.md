@@ -490,7 +490,7 @@ const myRuleType: RuleType<
 		// Query Elasticsearch using a cancellable async search
 		// Below client runs an async ES|QL query,
 		// you can use EQL `EQL_SEARCH_STRATEGY` and Enhanced Es Search `ENHANCED_ES_SEARCH_STRATEGY` as well
- 		const asyncSearchClient = getAsyncSearchClient<ESQLSearchParams>(ESQL_ASYNC_SEARCH_STRATEGY);
+ 		const asyncSearchClient = getAsyncSearchClient<ESQLSearchParams, EsqlTable>(ESQL_ASYNC_SEARCH_STRATEGY);
 		const asyncResponse = await asyncSearchClient.search({
 			request: { params: { query: <- your ES|QL query ->, filter: <- your search filter ->} },
 		});

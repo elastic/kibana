@@ -61,6 +61,7 @@ import type { ElasticsearchError } from '../lib';
 import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import type { RulesSettingsService } from '../rules_settings';
 import type { MaintenanceWindowsService } from './maintenance_windows';
+import { AggregationsAggregate, SearchResponse } from 'elasticsearch-8.x/lib/api/types';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -197,7 +198,7 @@ export interface TaskRunnerContext {
   isServerless: boolean;
 }
 
-export interface AsyncSearchClient<T extends AsyncSearchParams> {
+export interface AsyncSearchClient<T extends AsyncSearchParams, R> {
   getMetrics: () => {
     numSearches: number;
     esSearchDurationMs: number;
@@ -209,10 +210,10 @@ export interface AsyncSearchClient<T extends AsyncSearchParams> {
   }: {
     request: IKibanaSearchRequest<T>;
     options?: ISearchOptions;
-  }) => Promise<IKibanaSearchResponse>;
+  }) => Promise<R>;
 }
 
-export type PublicAsyncSearchClient<T extends AsyncSearchParams> = Omit<
-  AsyncSearchClient<T>,
+export type PublicAsyncSearchClient<T extends AsyncSearchParams, R> = Omit<
+  AsyncSearchClient<T, R>,
   'getMetrics'
 >;

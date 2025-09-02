@@ -91,6 +91,40 @@ describe('wrapScopedClusterClient', () => {
     );
   });
 
+  test('returns the rawResponse', async () => {
+    const abortController = new AbortController();
+    const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
+    client.search = jest.fn().mockImplementation(
+      (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
+        of({
+          isRunning: true,
+          rawResponse: { took: 1, columns: [], values: [] },
+        })
+    );
+
+    const asyncSearchClient = wrapAsyncSearchClient({
+      strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+      client,
+      abortController,
+      rule: {
+        name: 'test-rule',
+        alertTypeId: 'test-type',
+        id: 'foo',
+        spaceId: 'default',
+      },
+      logger,
+    });
+
+    const response = await asyncSearchClient.search({
+      request: {
+        params: { query: '', filter: '', keep_alive: '10m', wait_for_completion_timeout: '10m' },
+      },
+      options: { retrieveResults: true },
+    });
+
+    expect(response).toEqual({ took: 1, columns: [], values: [] });
+  });
+
   test('re-throws error when search throws error', async () => {
     const abortController = new AbortController();
     const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);

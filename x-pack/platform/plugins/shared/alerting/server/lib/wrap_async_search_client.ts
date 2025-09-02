@@ -6,14 +6,14 @@
  */
 
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { catchError, lastValueFrom, tap, throwError } from 'rxjs';
+import { catchError, lastValueFrom, map, tap, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { Logger } from '@kbn/core/server';
 import type { AsyncSearchClient } from '../task_runner/types';
 import type { AsyncSearchParams, AsyncSearchStrategies } from '../types';
 import type { RuleInfo } from './types';
 
-export function wrapAsyncSearchClient<T extends AsyncSearchParams>({
+export function wrapAsyncSearchClient<P extends AsyncSearchParams, R>({
   strategy,
   client,
   abortController,
@@ -25,7 +25,7 @@ export function wrapAsyncSearchClient<T extends AsyncSearchParams>({
   abortController: AbortController;
   logger: Logger;
   rule: RuleInfo;
-}): AsyncSearchClient<T> {
+}): AsyncSearchClient<P, R> {
   let numSearches = 0;
   let esSearchDurationMs = 0;
   let totalSearchDurationMs = 0;
@@ -71,9 +71,12 @@ export function wrapAsyncSearchClient<T extends AsyncSearchParams>({
                 esSearchDurationMs += response.rawResponse.took ?? 0;
                 totalSearchDurationMs += durationMs;
               }
+            }),
+            map((response) => {
+              return response.rawResponse;
             })
           )
-      );
+      ) as R;
     },
   };
 }
