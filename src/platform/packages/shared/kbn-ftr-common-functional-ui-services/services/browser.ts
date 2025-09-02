@@ -17,6 +17,7 @@ import type { Protocol } from 'devtools-protocol';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import {
   WebElementWrapper,
   Browsers,
@@ -714,7 +715,14 @@ class BrowserService extends FtrService {
   }
 
   public async scrollTop() {
-    await this.driver.executeScript('document.documentElement.scrollTop = 0');
+    await this.driver.executeScript(`
+    const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
+    if (container) {
+      container.scrollTop = 0;
+    } else {
+      document.documentElement.scrollTop = 0;
+    }
+  `);
   }
 
   // return promise with REAL scroll position
