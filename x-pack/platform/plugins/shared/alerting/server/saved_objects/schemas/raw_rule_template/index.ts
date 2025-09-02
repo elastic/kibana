@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { rawRuleTemplateSchema as rawRuleTemplateSchemaV1 } from './v1';
+import type { TypeOf } from '@kbn/config-schema';
+
+import { rawRuleTemplateSchema } from './v1';
+
+export { rawRuleTemplateSchema as rawRuleTemplateSchemaV1 };
+export type RawRuleTemplate = TypeOf<typeof rawRuleTemplateSchema>;

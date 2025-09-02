@@ -20,7 +20,7 @@ import { ruleTemplateMappings } from './rule_template_mappings';
 import { maintenanceWindowMappings } from './maintenance_window_mapping';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
-import type { RawRule } from '../types';
+import type { RawRule, RawRuleTemplate } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import type { RuleTypeRegistry } from '../rule_type_registry';
@@ -221,6 +221,9 @@ export function setupSavedObjects(
     namespaceType: 'multiple-isolated',
     management: {
       importableAndExportable: true,
+      getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
+        return `${ruleTemplateSavedObject.attributes.name}`;
+      },
     },
     mappings: ruleTemplateMappings,
     modelVersions: ruleTemplateModelVersions,
