@@ -33,6 +33,7 @@ export interface BaseToolbarProps {
   'data-test-subj': string;
   'data-selected-value'?: string | string[];
   buttonLabel: ReactElement | string;
+  popoverTitleSection?: ReactElement | string;
   popoverTitle?: string;
   options: SelectableEntry[];
   searchable: boolean;
@@ -58,6 +59,7 @@ export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
   'data-selected-value': dataSelectedValue,
   buttonLabel,
+  popoverTitleSection,
   popoverTitle,
   options,
   searchable,
@@ -209,7 +211,9 @@ export const ToolbarSelector = ({
       isOpen={isOpen}
       closePopover={closePopover}
     >
-      {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
+      {(popoverTitleSection || popoverTitle) && (
+        <EuiPopoverTitle paddingSize="s">{popoverTitleSection ?? popoverTitle}</EuiPopoverTitle>
+      )}
       <EuiSelectable<SelectableEntry>
         id={`${dataTestSubj}Selectable`}
         singleSelection={singleSelection ?? true}

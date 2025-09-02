@@ -112,6 +112,7 @@ export const MetricsExperienceGrid = ({
         fields={fields}
         onChange={onDimensionsChange}
         selectedDimensions={dimensions}
+        clearDimensionSelection={() => dispatch(setDimensions([]))}
       />,
       dimensions.length > 0 ? (
         <ValuesSelector
@@ -125,14 +126,15 @@ export const MetricsExperienceGrid = ({
       ) : null,
     ],
     [
-      dimensions,
-      fields,
-      timeRange,
-      indexPattern,
-      onDimensionsChange,
-      onValuesChange,
       renderToggleActions,
+      fields,
+      onDimensionsChange,
+      dimensions,
       valueFilters,
+      onValuesChange,
+      indexPattern,
+      timeRange,
+      dispatch,
     ]
   );
 

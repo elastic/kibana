@@ -8,10 +8,18 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { SelectableEntry } from '@kbn/unified-histogram';
-import { ToolbarSelector } from '@kbn/unified-histogram';
+import { ToolbarSelector, type SelectableEntry } from '@kbn/unified-histogram';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -20,12 +28,14 @@ interface DimensionsFilterProps {
   }>;
   selectedDimensions: string[];
   onChange: (dimensions: string[]) => void;
+  clearDimensionSelection: () => void;
 }
 
 export const DimensionsSelector = ({
   fields,
   selectedDimensions,
   onChange,
+  clearDimensionSelection,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
@@ -116,6 +126,7 @@ export const DimensionsSelector = ({
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
+  const { euiTheme } = useEuiTheme();
 
   return (
     <ToolbarSelector
@@ -131,6 +142,45 @@ export const DimensionsSelector = ({
       options={options}
       singleSelection={false}
       onChange={handleChange}
+      popoverTitle={i18n.translate('metricsExperience.dimensionsSelector.label', {
+        defaultMessage: 'Select dimensions',
+      })}
+      popoverTitleSection={
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="s"
+              color="subdued"
+              css={css`
+                padding: ${euiTheme.size.s};
+              `}
+            >
+              <FormattedMessage
+                id="metricsExperience.dimentionsSelectable.selectedStatusMessage"
+                defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
+                values={{ count: selectedDimensions?.length }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {selectedDimensions?.length > 0 && (
+              <EuiButtonEmpty size="s" flush="both" onClick={clearDimensionSelection}>
+                {i18n.translate(
+                  'metricsExperience.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
+                  {
+                    defaultMessage: 'Clear selection',
+                  }
+                )}
+              </EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
     />
   );
 };
