@@ -11,6 +11,7 @@ import type { FileLayer } from '@elastic/ems-client';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { LayerDescriptor } from '../../../common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -124,7 +125,7 @@ export function ChoroplethChart({
       isTimeAware: false,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
-  };
+  } as LayerDescriptor;
 
   return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
 }

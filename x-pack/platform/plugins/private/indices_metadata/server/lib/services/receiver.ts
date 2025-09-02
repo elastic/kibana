@@ -121,9 +121,17 @@ export class MetadataReceiver {
         filter_path: [
           'indices.*.total.search.query_total',
           'indices.*.total.search.query_time_in_millis',
+
           'indices.*.total.docs.count',
           'indices.*.total.docs.deleted',
           'indices.*.total.store.size_in_bytes',
+
+          'indices.*.primaries.docs.count',
+          'indices.*.primaries.docs.deleted',
+          'indices.*.primaries.store.size_in_bytes',
+
+          'indices.*.total.indexing.index_failed',
+          'indices.*.total.indexing.index_failed_due_to_version_conflict',
         ],
       };
 
@@ -137,6 +145,14 @@ export class MetadataReceiver {
             docs_count: stats.total?.docs?.count,
             docs_deleted: stats.total?.docs?.deleted,
             docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+
+            index_failed: stats.total?.indexing?.index_failed,
+            index_failed_due_to_version_conflict: (stats.total?.indexing as any)
+              ?.index_failed_due_to_version_conflict,
+
+            docs_count_primaries: stats.primaries?.docs?.count,
+            docs_deleted_primaries: stats.primaries?.docs?.deleted,
+            docs_total_size_in_bytes_primaries: stats.primaries?.store?.size_in_bytes,
           } as IndexStats;
         }
       } catch (error) {
