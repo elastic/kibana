@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
+import path from 'path';
 import fs from 'fs/promises';
 import { range } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -16,12 +16,8 @@ import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getSampleAType } from '../fixtures/zdt_base.fixtures';
-import type {
-  SavedObjectModelTransformationDoc,
-  SavedObjectModelUnsafeTransformFn,
-} from '@kbn/core-saved-objects-server';
 
-export const logFilePath = Path.join(__dirname, 'optimistic_concurrency.test.log');
+export const logFilePath = path.join(__dirname, 'optimistic_concurrency.test.log');
 
 interface TestSOType {
   boolean: boolean;
@@ -114,22 +110,19 @@ describe('ZDT & V2 upgrades - optimistic concurrency tests', () => {
 
     const typeA = getSampleAType();
 
-    const transformFunc: SavedObjectModelUnsafeTransformFn<TestSOType, TestSOType> = (
-      doc: SavedObjectModelTransformationDoc<TestSOType>
-    ) => {
-      const attributes = {
-        ...doc.attributes,
-        keyword: 'updated by the migrator',
-      };
-      return { document: { ...doc, attributes } };
-    };
     typeA.modelVersions = {
       ...typeA.modelVersions,
       '2': {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (typeSafeGuard) => typeSafeGuard(transformFunc),
+            transformFn: (doc) => {
+              const attributes = {
+                ...doc.attributes,
+                keyword: 'updated by the migrator',
+              };
+              return { document: { ...doc, attributes } };
+            },
           },
         ],
       },
