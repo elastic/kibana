@@ -36,19 +36,11 @@ export default ({ getService }: FtrProviderContext) => {
     // Global setup and teardown
     before(async () => {
       await dataView.create('security-solution');
-      try {
-        await spaces.create({
-          id: customSpace,
-          name: customSpace,
-          disabledFeatures: [],
-        });
-      } catch (error) {
-        if (error.statusCode === 409) {
-          log.info(`Space ${customSpace} already exists`);
-        } else {
-          throw error;
-        }
-      }
+      await spaces.create({
+        id: customSpace,
+        name: customSpace,
+        disabledFeatures: [],
+      });
       await dataViewWithNamespace.create('security-solution');
       await enablePrivmonSetting(kibanaServer);
     });
