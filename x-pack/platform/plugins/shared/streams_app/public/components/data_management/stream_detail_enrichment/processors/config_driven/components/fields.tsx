@@ -8,14 +8,14 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { configDrivenProcessors } from '..';
-import { ConfigDrivenProcessorType } from '../types';
+import type { ConfigDrivenProcessorType } from '../types';
 import { ProcessorFieldSelector } from '../../processor_field_selector';
 import { FieldsAccordion } from '../../optional_fields_accordion';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../../ignore_toggles';
 import { TextField } from './text_field';
 import { BooleanField } from './boolean_field';
 import { ArrayField } from './array_field';
-import { FieldConfiguration } from '../types';
+import type { FieldConfiguration } from '../types';
 import { ProcessorConditionEditor } from '../../processor_condition_editor';
 
 export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProcessorType }) => {
@@ -28,7 +28,10 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
 
   return (
     <>
-      <ProcessorFieldSelector helpText={processor.fieldOptions.fieldHelpText} />
+      <ProcessorFieldSelector
+        helpText={processor.fieldOptions.fieldHelpText}
+        fieldKey={processor.fieldOptions.fieldKey}
+      />
       {processor.fieldConfigurations
         .filter((fieldConfiguration) => fieldConfiguration.required)
         .map((fieldConfiguration, id) => (

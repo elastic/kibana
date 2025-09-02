@@ -7,8 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useMessages } from '../context/messages_context';
+import { useSendMessage } from '../context/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
@@ -38,7 +37,7 @@ const useConversation = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
-  return conversation?.agent_id ?? oneChatDefaultAgentId;
+  return conversation?.agent_id;
 };
 
 export const useConversationTitle = () => {
@@ -48,7 +47,7 @@ export const useConversationTitle = () => {
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const { pendingMessage, error } = useMessages();
+  const { pendingMessage, error } = useSendMessage();
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];

@@ -6,14 +6,14 @@
  */
 
 import { isBoolean, isString, uniq } from 'lodash';
-import {
+import type {
   Condition,
   FilterCondition,
-  OPERATORS,
   RangeCondition,
   ShorthandBinaryFilterCondition,
   ShorthandUnaryFilterCondition,
 } from '../../types/conditions';
+import { BINARY_OPERATORS } from '../../types/conditions';
 
 // Utility: get the field name from a filter condition
 function safePainlessField(conditionOrField: FilterCondition | string) {
@@ -54,7 +54,7 @@ function generateRangeComparisonClauses(
 // Convert a shorthand binary filter condition to painless
 function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
   // Find which operator is present
-  const op = OPERATORS.find((k) => condition[k] !== undefined);
+  const op = BINARY_OPERATORS.find((k) => condition[k] !== undefined);
   const value = condition[op!];
 
   switch (op) {
@@ -89,11 +89,14 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         condition
       )}.endsWith(${encodeValue(String(value))}))`;
     case 'contains':
+      // Behaviour is "fuzzy"
       return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
         condition
-      )}.toString().contains(${encodeValue(String(value))})) || ${safePainlessField(
-        condition
-      )}.contains(${encodeValue(String(value))}))`;
+      )}.toString().toLowerCase().contains(${encodeValue(
+        String(value).toLowerCase()
+      )})) || ${safePainlessField(condition)}.toLowerCase().contains(${encodeValue(
+        String(value).toLowerCase()
+      )}))`;
     case 'range': {
       const range = value as RangeCondition;
       const field = safePainlessField(condition);
@@ -239,10 +242,10 @@ export function conditionToStatement(condition: Condition, nested = false): stri
 
 export function conditionToPainless(condition: Condition): string {
   // Always/never conditions (if you have them)
-  if ('never' in condition && condition.never === true) {
+  if ('never' in condition) {
     return `return false`;
   }
-  if ('always' in condition && condition.always === true) {
+  if ('always' in condition) {
     return `return true`;
   }
 

@@ -6,20 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GeoJsonProperties } from 'geojson';
-import { DataView } from '@kbn/data-plugin/common';
+import type { GeoJsonProperties } from 'geojson';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { IESAggSource, ESAggsSourceSyncMeta } from './types';
 import { AbstractESSource } from '../es_source';
-import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
+import type { IESAggField } from '../../fields/agg';
+import { esAggFieldsFactory } from '../../fields/agg';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
-import {
+import type {
   AbstractESAggSourceDescriptor,
   AggDescriptor,
   DataFilters,
 } from '../../../../common/descriptor_types';
-import { IField } from '../../fields/field';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import type { IField } from '../../fields/field';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getAggDisplayName } from './get_agg_display_name';
 import { BUCKETS } from '../../layers/vector_layer/mask';
 
@@ -30,11 +31,10 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
 
   static createDescriptor(
     descriptor: Partial<AbstractESAggSourceDescriptor>
-  ): AbstractESAggSourceDescriptor {
+  ): AbstractESAggSourceDescriptor & Required<Pick<AbstractESAggSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
     return {
       ...normalizedDescriptor,
-      type: descriptor.type ? descriptor.type : '',
       metrics:
         descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
     };

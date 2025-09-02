@@ -8,7 +8,8 @@
 import { run } from '@kbn/dev-cli-runner';
 import Fs from 'fs/promises';
 import Path from 'path';
-import yargs, { Argv } from 'yargs';
+import type { Argv } from 'yargs';
+import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../common/tasks/nl_to_esql';

@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-export type FieldType = Extract<MappingProperty, { type: string }>['type'];
-
+/**
+ * Represents the relevant information of an field
+ */
 export interface MappingField {
+  /** the path of the field */
   path: string;
-  type: FieldType;
+  /** the type of the field */
+  type: string;
+  /** meta attached to the field */
+  meta: Record<string, string>;
 }
 
 interface MappingProperties {
   [key: string]: {
     type?: string; // Leaf field (e.g., "text", "keyword", etc.)
     properties?: MappingProperties; // Nested object fields
+    meta?: Record<string, string>; // meta
   };
 }
 
 /**
  * Returns a flattened representation of the mappings, with all fields at the top level.
  */
-export const flattenMappings = ({ mappings }: { mappings: MappingTypeMapping }): MappingField[] => {
-  const properties: MappingProperties = mappings.properties ?? {};
+export const flattenMapping = (mapping: MappingTypeMapping): MappingField[] => {
+  const properties: MappingProperties = mapping.properties ?? {};
 
   function extractFields(obj: MappingProperties, prefix = ''): MappingField[] {
     let fields: MappingField[] = [];
@@ -36,11 +42,13 @@ export const flattenMappings = ({ mappings }: { mappings: MappingTypeMapping }):
       if (value.type) {
         // If it's a leaf field, add it
         fields.push({
-          type: value.type as FieldType,
+          type: value.type,
           path: fieldPath,
+          meta: value.meta ?? {},
         });
-      } else if (value.properties) {
-        // If it's an object, go deeper
+      }
+      if (value.properties) {
+        // If it's an object or has nested props, go deeper
         fields = fields.concat(extractFields(value.properties, fieldPath));
       }
     }
@@ -52,12 +60,21 @@ export const flattenMappings = ({ mappings }: { mappings: MappingTypeMapping }):
 };
 
 /**
- * Remove non-relevant mapping information such as `ignore_above` to reduce overall token length of response
- * @param mapping
+ * Cleanup the given index mapping, removing info supposedly not relevant to an LLM,
+ * such as `ignore_above` and such, to reduce the overall token length of response.
  */
 export const cleanupMapping = (mapping: MappingTypeMapping): MappingTypeMapping => {
   const recurseKeys = ['properties', 'fields'];
-  const fieldsToKeep = ['type', 'dynamic', '_meta', 'enabled'];
+  const fieldsToKeep = [
+    'type',
+    'dynamic',
+    '_meta',
+    'meta',
+    'briefing',
+    'description',
+    'index',
+    'enabled',
+  ];
 
   function recursiveCleanup(obj: Record<string, any>): Record<string, any> {
     if (Array.isArray(obj)) {

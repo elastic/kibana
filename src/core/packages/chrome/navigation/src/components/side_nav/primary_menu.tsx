@@ -8,9 +8,11 @@
  */
 
 import { css } from '@emotion/react';
-import React, { forwardRef, ForwardedRef, ReactNode, useRef, useImperativeHandle } from 'react';
+import type { ForwardedRef, ReactNode } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { useRovingIndex } from '../../utils/use_roving_index';
 
 export interface SideNavPrimaryMenuProps {
@@ -30,8 +32,9 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
     return (
       <nav
         id="primary-navigation"
-        // TODO: translate
-        aria-label="Main navigation"
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
+          defaultMessage: 'Main navigation',
+        })}
         ref={localRef}
         css={css`
           align-items: center;
@@ -39,6 +42,7 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
           flex-direction: column;
           flex: 1;
           gap: ${isCollapsed ? euiTheme.size.xs : euiTheme.size.base};
+          min-height: 0;
         `}
       >
         {children}

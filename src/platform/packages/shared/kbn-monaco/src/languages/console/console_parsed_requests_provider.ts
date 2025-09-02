@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConsoleWorkerProxyService } from './console_worker_proxy';
-import { ErrorAnnotation, ParsedRequest } from './types';
-import { monaco } from '../../monaco_imports';
+import type { ConsoleWorkerProxyService } from './console_worker_proxy';
+import type { ErrorAnnotation, ParsedRequest } from './types';
+import type { monaco } from '../../monaco_imports';
 
 /*
  * This class is a helper interface that is used in the Console plugin.

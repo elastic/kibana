@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -15,7 +15,7 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
 
   return {
     async assertSvlSearchSideNavExists() {
-      await testSubjects.existOrFail('svlSearchSideNav');
+      await testSubjects.existOrFail('~svlSearchSideNav');
     },
     languageClients: {
       async expectLanguagePanelExists(id: string) {

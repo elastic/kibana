@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import type { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import type { functions as serverFunctions } from '../canvas_plugin_src/functions/server';

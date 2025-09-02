@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import React from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';
@@ -42,6 +46,10 @@ export interface NavigationProps {
    * Required by the grid layout to set the width of the navigation slot.
    */
   setWidth: (width: number) => void;
+  /**
+   * Optional data-test-subj attribute for testing purposes.
+   */
+  'data-test-subj'?: string;
 }
 
 export const Navigation = ({
@@ -50,6 +58,7 @@ export const Navigation = ({
   items,
   logo,
   setWidth,
+  ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
@@ -90,7 +99,12 @@ export const Navigation = ({
   };
 
   return (
-    <>
+    <div
+      css={css`
+        display: flex;
+      `}
+      data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
+    >
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
           isActive={activePageId === logo.id}
@@ -120,7 +134,7 @@ export const Navigation = ({
               }
             >
               {(closePopover) => (
-                <SecondaryMenu title={item.label}>
+                <SecondaryMenu title={item.label} badgeType={item.badgeType}>
                   {item.sections?.map((section) => (
                     <SecondaryMenu.Section key={section.id} label={section.label}>
                       {section.items.map((subItem) => (
@@ -151,7 +165,9 @@ export const Navigation = ({
               container={document.documentElement}
               hasContent
               isSidePanelOpen={false}
-              label="More" // TODO: translate
+              label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuLabel', {
+                defaultMessage: 'More',
+              })}
               persistent
               trigger={
                 <SideNav.PrimaryMenuItem
@@ -163,17 +179,27 @@ export const Navigation = ({
                   hasContent
                   href=""
                   id="more-menu"
-                  label="More" // TODO: translate
+                  label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
+                    defaultMessage: 'More',
+                  })}
                 >
-                  {/* TODO: translate */}
-                  More
+                  <FormattedMessage
+                    id="core.ui.chrome.sideNavigation.moreMenuItemText"
+                    defaultMessage="More"
+                  />
                 </SideNav.PrimaryMenuItem>
               }
             >
               {(closePopover) =>
                 isCollapsed ? (
                   <NestedSecondaryMenu>
-                    <NestedSecondaryMenu.Panel id="main" title="More">
+                    <NestedSecondaryMenu.Panel
+                      id="main"
+                      title={i18n.translate(
+                        'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
+                        { defaultMessage: 'More' }
+                      )}
+                    >
                       <NestedSecondaryMenu.Section hasGap label={null}>
                         {overflowMenuItems.map((item) => {
                           const hasSubItems = getHasSubmenu(item);
@@ -232,7 +258,11 @@ export const Navigation = ({
                     ))}
                   </NestedSecondaryMenu>
                 ) : (
-                  <SecondaryMenu title="More">
+                  <SecondaryMenu
+                    title={i18n.translate('core.ui.chrome.sideNavigation.secondaryMenuMoreTitle', {
+                      defaultMessage: 'More',
+                    })}
+                  >
                     <SecondaryMenu.Section hasGap label={null}>
                       {overflowMenuItems.map((item) => (
                         <SideNav.PrimaryMenuItem
@@ -260,58 +290,63 @@ export const Navigation = ({
         </SideNav.PrimaryMenu>
 
         <SideNav.Footer isCollapsed={isCollapsed}>
-          {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item) => {
-            return (
-              <SideNav.Popover
-                key={item.id}
-                hasContent={getHasSubmenu(item)}
-                isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
-                label={item.label}
-                persistent={false}
-                container={document.documentElement}
-                trigger={
-                  <SideNav.FooterItem
-                    isActive={item.id === activePageId}
-                    onClick={() => navigateTo(item)}
-                    hasContent={getHasSubmenu(item)}
-                    onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
-                    {...item}
-                  />
-                }
-              >
-                {(closePopover) => (
-                  <SecondaryMenu title={item.label}>
-                    {item.sections?.map((section) => (
-                      <SecondaryMenu.Section key={section.id} label={section.label}>
-                        {section.items.map((subItem) => (
-                          <SecondaryMenu.Item
-                            key={subItem.id}
-                            isActive={subItem.id === activeSubpageId}
-                            onClick={() => {
-                              if (subItem.href) {
-                                handleSubMenuItemClick(item, subItem);
-                                closePopover();
-                              }
-                            }}
-                            {...subItem}
-                            testSubjPrefix="popoverFooterItem"
-                          >
-                            {subItem.label}
-                          </SecondaryMenu.Item>
-                        ))}
-                      </SecondaryMenu.Section>
-                    ))}
-                  </SecondaryMenu>
-                )}
-              </SideNav.Popover>
-            );
-          })}
+          {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item) => (
+            <SideNav.Popover
+              key={item.id}
+              hasContent={getHasSubmenu(item)}
+              isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
+              label={item.label}
+              persistent={false}
+              container={document.documentElement}
+              trigger={
+                <SideNav.FooterItem
+                  isActive={item.id === sidePanelContent?.id}
+                  onClick={() => navigateTo(item)}
+                  hasContent={getHasSubmenu(item)}
+                  onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
+                  {...item}
+                />
+              }
+            >
+              {(closePopover) => (
+                <SecondaryMenu title={item.label} badgeType={item.badgeType}>
+                  {item.sections?.map((section) => (
+                    <SecondaryMenu.Section key={section.id} label={section.label}>
+                      {section.items.map((subItem) => (
+                        <SecondaryMenu.Item
+                          key={subItem.id}
+                          isActive={
+                            subItem.id === activeSubpageId ||
+                            (subItem.id === activePageId && !activeSubpageId)
+                          }
+                          onClick={() => {
+                            if (subItem.href) {
+                              handleSubMenuItemClick(item, subItem);
+                              closePopover();
+                            }
+                          }}
+                          {...subItem}
+                          testSubjPrefix="popoverFooterItem"
+                        >
+                          {subItem.label}
+                        </SecondaryMenu.Item>
+                      ))}
+                    </SecondaryMenu.Section>
+                  ))}
+                </SecondaryMenu>
+              )}
+            </SideNav.Popover>
+          ))}
         </SideNav.Footer>
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (
         <SideNav.Panel>
-          <SecondaryMenu title={sidePanelContent.label} isPanel>
+          <SecondaryMenu
+            badgeType={sidePanelContent.badgeType}
+            isPanel
+            title={sidePanelContent.label}
+          >
             {sidePanelContent.sections?.map((section) => (
               <SecondaryMenu.Section key={section.id} label={section.label}>
                 {section.items.map((subItem) => (
@@ -334,6 +369,6 @@ export const Navigation = ({
           </SecondaryMenu>
         </SideNav.Panel>
       )}
-    </>
+    </div>
   );
 };

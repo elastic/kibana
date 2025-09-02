@@ -6,9 +6,9 @@
  */
 
 import { fileDownloadInfo } from '@huggingface/hub';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
-import streamWeb from 'stream/web';
+import type streamWeb from 'stream/web';
 
 export interface FileDownloadInfoOptions {
   repo: string;

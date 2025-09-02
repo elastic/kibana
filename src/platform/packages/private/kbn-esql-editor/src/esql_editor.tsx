@@ -22,7 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import type { CodeEditorProps } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import useObservable from 'react-use/lib/useObservable';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -31,15 +32,16 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import { FieldType } from '@kbn/esql-ast';
+import type { FieldType } from '@kbn/esql-ast';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -550,7 +552,8 @@ const ESQLEditorInternal = function ESQLEditor({
         }
 
         return {
-          hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
+          ...ls,
+          hasAtLeast: ls.hasAtLeast.bind(ls),
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
@@ -616,17 +619,25 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     const setQueryToTheCache = async () => {
       if (editor1?.current) {
-        const parserMessages = await parseMessages();
-        const clientParserStatus = parserMessages.errors?.length
-          ? 'error'
-          : parserMessages.warnings.length
-          ? 'warning'
-          : 'success';
+        try {
+          const parserMessages = await parseMessages();
+          const clientParserStatus = parserMessages.errors?.length
+            ? 'error'
+            : parserMessages.warnings.length
+            ? 'warning'
+            : 'success';
 
-        addQueriesToCache({
-          queryString: code,
-          status: clientParserStatus,
-        });
+          addQueriesToCache({
+            queryString: code,
+            status: clientParserStatus,
+          });
+        } catch (error) {
+          // Default to warning when parseMessages fails
+          addQueriesToCache({
+            queryString: code,
+            status: 'warning',
+          });
+        }
       }
     };
     if (isQueryLoading || isLoading) {

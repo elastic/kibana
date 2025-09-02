@@ -7,30 +7,69 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowYaml, getStepId } from '@kbn/workflows';
+import { z } from '@kbn/zod';
+import type { WorkflowYaml, StepContext } from '@kbn/workflows';
+import { WorkflowExecutionContextSchema, WorkflowDataContextSchema } from '@kbn/workflows';
+import { getStepId } from '@kbn/workflows';
 import _ from 'lodash';
 import { getAllPredecessors } from '../../../shared/lib/graph_utils';
-import { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { CurrentStepContext } from '../model/types';
+import type { WorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { EventSchema, getOutputSchemaForStepType } from '../../../../common/schema';
+import { getSchemaAtPath, inferZodType } from '../../../../common/lib/zod_utils';
 
-function getRootContext(definition: WorkflowYaml): CurrentStepContext {
-  return {
-    consts: definition.consts ?? {},
-    steps: {},
-  };
+function getRootContextSchema(definition: WorkflowYaml) {
+  return z.object({
+    execution: WorkflowExecutionContextSchema,
+    workflow: WorkflowDataContextSchema,
+    now: z.date(),
+    event: EventSchema,
+    inputs: z.object({
+      ...Object.fromEntries(
+        (definition.inputs || []).map((input) => {
+          let valueSchema: z.ZodType;
+          switch (input.type) {
+            case 'string':
+              valueSchema = z.string();
+              break;
+            case 'number':
+              valueSchema = z.number();
+              break;
+            case 'boolean':
+              valueSchema = z.boolean();
+              break;
+            case 'choice':
+              const opts = input.options ?? [];
+              valueSchema = z.any();
+              if (opts.length > 0) {
+                const literals = opts.map((o) => z.literal(o)) as [
+                  z.ZodLiteral<any>,
+                  z.ZodLiteral<any>,
+                  ...z.ZodLiteral<any>[]
+                ];
+                valueSchema = z.union(literals);
+              }
+              break;
+            default:
+              valueSchema = z.any();
+              break;
+          }
+          if (input.default) {
+            valueSchema = valueSchema.default(input.default);
+          }
+          return [input.name, valueSchema];
+        })
+      ),
+    }),
+    steps: z.object({}),
+    consts: z.object({
+      ...Object.fromEntries(
+        Object.entries(definition.consts ?? {}).map(([key, value]) => [key, inferZodType(value)])
+      ),
+    }),
+  });
 }
 
-function getOutputSchema(stepType: string) {
-  // TODO: get output schema for connector
-  if (stepType === 'console.log') {
-    return {
-      message: '',
-    };
-  }
-  return {};
-}
-
-function getAvailableOutputs(
+function getAvailableOutputsSchema(
   definition: WorkflowYaml,
   workflowGraph: WorkflowGraph,
   stepName: string
@@ -38,22 +77,23 @@ function getAvailableOutputs(
   const predecessors = getAllPredecessors(workflowGraph, getStepId(stepName));
 
   if (predecessors.length === 0) {
-    return {};
+    return z.object({});
   }
 
-  return predecessors?.reduce((acc, predecessor) => {
+  let contextSchema = z.object({});
+  predecessors.forEach((predecessor) => {
     const node = workflowGraph.node(predecessor);
     // Excluding triggers from the context for now. Maybe they should be included under 'triggers' key?
     if (node.type === 'trigger') {
-      return acc;
+      return;
     }
-    return {
-      ...acc,
-      [predecessor]: {
-        output: getOutputSchema(node.type),
-      },
-    };
-  }, {});
+    contextSchema = contextSchema.extend({
+      [predecessor]: z.object({
+        output: getOutputSchemaForStepType(node.label.stepType),
+      }),
+    });
+  });
+  return contextSchema;
 }
 
 export function getNearestStepPath(path: Array<string | number>) {
@@ -68,31 +108,40 @@ export function getNearestStepPath(path: Array<string | number>) {
   return path.slice(0, path.length - stepsIndex + 1);
 }
 
-export function getContextForPath(
+export function getContextSchemaForPath(
   definition: WorkflowYaml,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>
-): CurrentStepContext {
-  const rootContext = getRootContext(definition);
-  let context = { ...rootContext };
+) {
+  const rootContextSchema = getRootContextSchema(definition);
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
-    return rootContext;
+    return rootContextSchema;
   }
   const nearestStep = _.get(definition, nearestStepPath);
+  let contextSchema = rootContextSchema;
   if (!nearestStep) {
     throw new Error(`Invalid path: ${path.join('.')}`);
   }
-  if (nearestStep?.foreach) {
-    context = {
-      ...context,
-      foreach: {
-        item: nearestStep.foreach,
-      },
-    };
+  const outputsSchema = getAvailableOutputsSchema(definition, workflowGraph, nearestStep.name);
+  if (Object.keys(outputsSchema.shape).length > 0) {
+    contextSchema = contextSchema.extend({
+      steps: outputsSchema,
+    });
   }
-  return {
-    ...context,
-    steps: getAvailableOutputs(definition, workflowGraph, nearestStep.name) ?? {},
-  };
+  // TODO: search graph for foreach steps, which contain this step in their steps array
+  // const somePredecessorIsForEach =
+  if (nearestStep.foreach) {
+    let itemSchema: z.ZodType = z.any();
+    if (nearestStep.foreach.startsWith('steps.') || nearestStep.foreach.startsWith('consts.')) {
+      const schema = getSchemaAtPath(contextSchema, nearestStep.foreach);
+      if (schema instanceof z.ZodArray) {
+        itemSchema = schema.element;
+      }
+    }
+    contextSchema = contextSchema.extend({
+      foreach: z.object({ item: itemSchema }),
+    });
+  }
+  return contextSchema satisfies z.ZodType<StepContext>;
 }

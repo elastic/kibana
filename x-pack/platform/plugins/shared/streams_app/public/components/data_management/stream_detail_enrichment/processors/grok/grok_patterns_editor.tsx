@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { useFormContext, useFieldArray, FieldArrayWithId } from 'react-hook-form';
+import type { FieldArrayWithId } from 'react-hook-form';
+import { useFormContext, useFieldArray } from 'react-hook-form';
+import type { DragDropContextProps, EuiButtonEmptyProps } from '@elastic/eui';
 import {
-  DragDropContextProps,
   EuiFormRow,
   EuiPanel,
   EuiButtonEmpty,
@@ -17,18 +18,18 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiFlexItem,
-  EuiButtonEmptyProps,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
+import type { GrokCollection } from '@kbn/grok-ui';
+import { DraftGrokExpression } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
-import { GrokFormState } from '../../types';
+import type { GrokFormState } from '../../types';
 import { useAIFeatures } from './use_ai_features';
 
 const GrokPatternAISuggestions = dynamic(() =>
@@ -180,7 +181,7 @@ const DraggablePatternInput = ({
                 <EuiIcon type="grab" />
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem style={{ minWidth: 0 }}>
               <Expression
                 draftGrokExpression={draftGrokExpression}
                 grokCollection={grokCollection}

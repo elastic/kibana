@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityDetailsUrlSchemaV1,
@@ -17,10 +17,10 @@ import {
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
   v: 1,
@@ -97,6 +97,7 @@ const texts = {
   datasetLastActivityColumn: 'Last activity',
   datasetActionsColumn: 'Actions',
   datasetIssueColumn: 'Issue',
+  datasetFieldColumn: 'Field',
   datasetDocsCountColumn: 'Docs count',
   datasetLastOccurrenceColumn: 'Last Occurrence',
 };
@@ -146,6 +147,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityTypesSelectable: 'datasetQualityFilterType',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
+    datasetQualityDetailsIssueTypeSelector: 'datasetQualityDetailsIssueTypeSelectorOptions',
+    datasetQualityDetailsIssueTypeSelectorButton: 'datasetQualityDetailsIssueTypeSelectorButton',
+    datasetQualityDetailsFieldSelector: 'datasetQualityDetailsFieldSelectorOptions',
+    datasetQualityDetailsFieldSelectorButton: 'datasetQualityDetailsFieldSelectorButton',
     datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
     datasetQualityDetailsEmptyPromptBody: 'datasetQualityDetailsEmptyPromptBody',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
@@ -375,7 +380,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
       return this.parseTable(table, [
-        '0',
+        '0', // Expand button column
+        texts.datasetFieldColumn,
         texts.datasetIssueColumn,
         texts.datasetDocsCountColumn,
         texts.datasetLastOccurrenceColumn,
@@ -403,6 +409,22 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityQualitiesSelectableButton,
         testSubjectSelectors.datasetQualityQualitiesSelectable,
         qualities
+      );
+    },
+
+    async filterForIssueTypes(issueTypes: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityDetailsIssueTypeSelectorButton,
+        testSubjectSelectors.datasetQualityDetailsIssueTypeSelector,
+        issueTypes
+      );
+    },
+
+    async filterForFields(fields: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityDetailsFieldSelectorButton,
+        testSubjectSelectors.datasetQualityDetailsFieldSelector,
+        fields
       );
     },
 
@@ -533,11 +555,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
-
-      if (isCollapsed) {
-        await fieldExpandButton.click();
-      }
+      await fieldExpandButton.click();
 
       await this.waitUntilDegradedFieldFlyoutLoaded();
     },
@@ -562,11 +580,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
-
-      if (isCollapsed) {
-        await fieldExpandButton.click();
-      }
+      await fieldExpandButton.click();
 
       await this.waitUntilDegradedFieldFlyoutLoaded();
     },
@@ -591,7 +605,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async getQualityIssueSwitchState() {
       const isSelected = await testSubjects.getAttribute(
         testSubjectSelectors.datasetQualityDetailsOverviewDegradedFieldToggleSwitch,
-        'aria-checked'
+        'aria-pressed'
       );
       return isSelected === 'true';
     },

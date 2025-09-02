@@ -7,16 +7,18 @@
 
 import React from 'react';
 import type { ShareContext } from '@kbn/share-plugin/public';
-import type { ExportShareDerivatives } from '@kbn/share-plugin/public/types';
+import type {
+  ExportShareDerivatives,
+  RegisterShareIntegrationArgs,
+} from '@kbn/share-plugin/public/types';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { EuiButton } from '@elastic/eui';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { ReportTypeId } from '../../types';
 import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting_health_query';
 import { queryClient } from '../../query_client';
-import { ScheduledReportFlyoutShareWrapper } from '../components/scheduled_report_flyout_share_wrapper';
 import { SCHEDULE_EXPORT_BUTTON_LABEL } from '../translations';
 import type { ReportingPublicPluginStartDependencies } from '../../plugin';
 import { getReportingHealth } from '../apis/get_reporting_health';
@@ -38,13 +40,16 @@ export const shouldRegisterScheduledReportShareIntegration = async (http: HttpSe
 export const createScheduledReportShareIntegration = ({
   apiClient,
   services,
-}: CreateScheduledReportProviderOptions): ExportShareDerivatives => {
+}: CreateScheduledReportProviderOptions): RegisterShareIntegrationArgs<ExportShareDerivatives> => {
   return {
     id: 'scheduledReports',
     groupId: 'exportDerivatives',
-    shareType: 'integration',
-    config: (shareOpts: ShareContext): ReturnType<ExportShareDerivatives['config']> => {
+    getShareIntegrationConfig: async (shareOpts: ShareContext) => {
+      const { ScheduledReportFlyoutShareWrapper } = await import(
+        '../components/scheduled_report_flyout_share_wrapper'
+      );
       const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
+
       return {
         label: ({ openFlyout }) => (
           <EuiButton iconType="calendar" onClick={openFlyout} data-test-subj="scheduleExport">

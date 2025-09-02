@@ -14,7 +14,6 @@ import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { UnifiedSearchBar } from '../../../../../components/shared/unified_search_bar';
-import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { LimitOptions } from './limit_options';
@@ -24,7 +23,6 @@ import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range
 import { isPending } from '../../../../../hooks/use_fetcher';
 
 export const SearchBar = () => {
-  const { featureFlags } = usePluginConfig();
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit, onPreferredSchemaChange } =
     useUnifiedSearchContext();
   const { onPageRefreshStart } = usePerformanceContext();
@@ -34,24 +32,18 @@ export const SearchBar = () => {
 
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
-    [timeRangeMetadata]
+    [timeRangeMetadata?.schemas]
   );
 
-  // Set preferredSchema in URL if not set and hostOtelEnabled
+  // Set preferredSchema in URL if not set
   useEffect(() => {
-    if (!timeRangeMetadata || schemas.length === 0 || !featureFlags.hostOtelEnabled) return;
+    if (!timeRangeMetadata || schemas.length === 0) return;
     const current = searchCriteria.preferredSchema;
 
     if (current === null) {
       onPreferredSchemaChange(timeRangeMetadata.preferredSchema);
     }
-  }, [
-    timeRangeMetadata,
-    searchCriteria.preferredSchema,
-    onPreferredSchemaChange,
-    schemas,
-    featureFlags.hostOtelEnabled,
-  ]);
+  }, [timeRangeMetadata, searchCriteria.preferredSchema, onPreferredSchemaChange, schemas]);
 
   const handleRefresh = useCallback(
     (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
@@ -69,16 +61,14 @@ export const SearchBar = () => {
   return (
     <StickyContainer>
       <EuiFlexGroup direction="column" gutterSize="s">
-        {featureFlags.hostOtelEnabled && (
-          <EuiFlexItem>
-            <SchemaSelector
-              onChange={onPreferredSchemaChange}
-              schemas={schemas}
-              value={searchCriteria.preferredSchema}
-              isLoading={isLoading}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <SchemaSelector
+            onChange={onPreferredSchemaChange}
+            schemas={schemas}
+            value={searchCriteria.preferredSchema}
+            isLoading={isLoading}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <UnifiedSearchBar
             onQuerySubmit={handleRefresh}
@@ -100,6 +90,7 @@ export const SearchBar = () => {
                 query={searchCriteria.query}
                 filters={searchCriteria.filters}
                 onFiltersChange={onPanelFiltersChange}
+                schema={searchCriteria.preferredSchema}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -11,8 +11,8 @@ import { GET_RESULTS_ERROR_TITLE } from '../../../../../translations';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useIsMountedRef } from '../../../../../hooks/use_is_mounted_ref';
 import { fetchHistoricalResults } from './utils/fetch_historical_results';
-import { FetchHistoricalResultsReducerState, UseHistoricalResultsReturnValue } from './types';
-import { UseHistoricalResultsFetchOpts } from '../../index_check_flyout/types';
+import type { FetchHistoricalResultsReducerState, UseHistoricalResultsReturnValue } from './types';
+import type { UseHistoricalResultsFetchOpts } from '../../index_check_flyout/types';
 import { fetchHistoricalResultsReducer } from './reducers/fetch_historical_results_reducer';
 
 export const initialFetchHistoricalResultsReducerState: FetchHistoricalResultsReducerState = {

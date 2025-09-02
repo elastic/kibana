@@ -19,11 +19,10 @@ import {
   getFunctionSignaturesByReturnType,
   getLiteralsByType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import type { FunctionReturnType, FieldType } from '../../../definitions/types';
 import {
   ESQL_NUMBER_TYPES,
-  FunctionReturnType,
-  FieldType,
   FunctionDefinitionTypes,
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../../definitions/types';
@@ -290,7 +289,7 @@ describe('STATS Autocomplete', () => {
           [
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
+              Location.STATS,
               ESQL_NUMBER_TYPES,
               { scalar: true },
               undefined,
@@ -307,7 +306,7 @@ describe('STATS Autocomplete', () => {
           'from a | stats avg(',
           [
             ...expectedFieldsAvg,
-            ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
+            ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, {
               scalar: true,
             }),
           ],
@@ -315,7 +314,13 @@ describe('STATS Autocomplete', () => {
         );
         await statsExpectSuggestions(
           'TS a | stats avg(',
-          [...expectedFieldsAvg, 'FUNC($0)'],
+          [
+            ...expectedFieldsAvg,
+            ...getFunctionSignaturesByReturnType(Location.STATS_TIMESERIES, AVG_TYPES, {
+              scalar: true,
+            }),
+            'FUNC($0)',
+          ],
           mockCallbacks
         );
         await statsExpectSuggestions(
@@ -663,8 +668,10 @@ describe('STATS Autocomplete', () => {
             ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'double', 'long'], {
               scalar: true,
             }),
-            // categorize is not compatible here
-            ...allGroupingFunctions.filter((f) => !f.includes('CATEGORIZE')),
+            // Filter out functions that are not compatible with this context
+            ...allGroupingFunctions.filter(
+              (f) => !['CATEGORIZE', 'TBUCKET'].some((incompatible) => f.includes(incompatible))
+            ),
           ],
           mockCallbacks
         );

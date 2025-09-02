@@ -168,6 +168,7 @@ Object {
     },
     Object {
       "grok": Object {
+        "ecs_compatibility": "v1",
         "field": "body.message",
         "patterns": Array [
           "%{IP:attributes.client_ip} - %{WORD:attributes.method}",
@@ -189,6 +190,14 @@ Object {
       "dissect": Object {
         "field": "body.log",
         "pattern": "%{attributes.client} %{attributes.method} %{attributes.path}",
+      },
+    },
+    Object {
+      "append": Object {
+        "field": "attributes.tags",
+        "value": Array [
+          "new_tag",
+        ],
       },
     },
     Object {
