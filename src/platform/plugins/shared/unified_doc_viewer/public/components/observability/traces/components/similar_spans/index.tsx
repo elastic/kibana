@@ -13,26 +13,35 @@ import { DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
-import type { SpanLatencyChartData } from '../../doc_viewer_span_overview/hooks/use_span_latency_chart';
+import { useLatencyChart } from '../../hooks/use_latency_chart';
 
 export interface SimilarSpansProps {
-  spanDuration: number;
-  latencyChart: {
-    data: SpanLatencyChartData | null; // TODO move this interface
-    loading: boolean;
-    hasError: boolean;
-  };
-  isOtelSpan: boolean;
-  esqlQuery?: string;
+  duration: number;
+  spanName?: string;
+  serviceName?: string;
+  transactionName?: string;
+  transactionType?: string;
+  isOtelSpan?: boolean;
 }
 
-// This section will be replacing the SpanDurationSummary and TransactionDurationSummary as part of https://github.com/elastic/kibana/issues/228916
 export function SimilarSpans({
-  latencyChart,
-  spanDuration,
-  esqlQuery,
+  duration,
+  spanName,
+  serviceName,
+  transactionName,
+  transactionType,
   isOtelSpan,
 }: SimilarSpansProps) {
+  const latencyChart = useLatencyChart({
+    spanName,
+    serviceName,
+    transactionName,
+    transactionType,
+    isOtelSpan,
+  });
+
+  const esqlQuery = '';
+
   return (
     <ContentFrameworkSection
       id="similarSpans"
@@ -42,17 +51,17 @@ export function SimilarSpans({
       })}
     >
       <ContentFrameworkChart
-        data-test-subj={`docViewerSimilarSpansLatencyChart`}
+        data-test-subj="docViewerSimilarSpansLatencyChart"
         title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans.latency.title', {
           defaultMessage: 'Latency',
         })}
         esqlQuery={!latencyChart.hasError && esqlQuery ? esqlQuery : undefined}
       >
         <DurationDistributionChart
-          data={latencyChart.data?.spanDistributionChartData ?? []}
+          data={latencyChart.data?.distributionChartData ?? []}
           markerValue={latencyChart.data?.percentileThresholdValue ?? 0}
-          markerCurrentEvent={spanDuration}
-          hasData={!!latencyChart.data?.spanDistributionChartData?.length}
+          markerCurrentEvent={duration}
+          hasData={!!latencyChart.data?.distributionChartData?.length}
           loading={latencyChart.loading}
           hasError={latencyChart.hasError}
           eventType={ProcessorEvent.span}
