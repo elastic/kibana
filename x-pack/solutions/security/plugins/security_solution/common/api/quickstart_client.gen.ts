@@ -255,6 +255,12 @@ import type {
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
 import type {
+  UpdateSingleEntityRequestQueryInput,
+  UpdateSingleEntityRequestParamsInput,
+  UpdateSingleEntityRequestBodyInput,
+  UpdateSingleEntityResponse,
+} from './entity_analytics/entity_store/entities/update_single_entity.gen';
+import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
@@ -3015,6 +3021,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Given an entity type, an entity id and the contents of an entity,  update the contents of an entity. By default only a specific set   of fields are allowed to be modified, being that `entity.attributes.*,  entity.lifecyle.* and entity.behavior.*`. If you wish to update any  other field you must use the query parameter `force=true`. Be aware  that some fields always fetch the first seen value, thus your changes won't be seen. And also, due to technical limitations, there is no  guarantee that collected values will end up in the final list of  seen values.
+
+    */
+  async updateSingleEntity(props: UpdateSingleEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateSingleEntity`);
+    return this.kbnClient
+      .request<UpdateSingleEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
     return this.kbnClient
@@ -3464,6 +3488,11 @@ export interface UpdateRuleMigrationIndexPatternProps {
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;
   body: UpdateRuleMigrationRulesRequestBodyInput;
+}
+export interface UpdateSingleEntityProps {
+  query: UpdateSingleEntityRequestQueryInput;
+  params: UpdateSingleEntityRequestParamsInput;
+  body: UpdateSingleEntityRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;
