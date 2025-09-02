@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { registerMonitoringEntitySourceRoutes } from './register_monitoring_entity_source_routes';
+export * from './delete.gen';
+export * from './disable.gen';
+export * from './init.gen';
+export * from './schedule_now.gen';

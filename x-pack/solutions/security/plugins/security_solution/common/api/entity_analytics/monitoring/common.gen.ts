@@ -31,16 +31,16 @@ export const MonitoringEngineDescriptor = z.object({
   status: PrivilegeMonitoringEngineStatus,
 });
 
-export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
-export const EngineComponentResource = z.enum(['privmon_engine', 'index', 'task']);
-export type EngineComponentResourceEnum = typeof EngineComponentResource.enum;
-export const EngineComponentResourceEnum = EngineComponentResource.enum;
+export type MonitoringEngineComponentResource = z.infer<typeof MonitoringEngineComponentResource>;
+export const MonitoringEngineComponentResource = z.enum(['privmon_engine', 'index', 'task']);
+export type MonitoringEngineComponentResourceEnum = typeof MonitoringEngineComponentResource.enum;
+export const MonitoringEngineComponentResourceEnum = MonitoringEngineComponentResource.enum;
 
-export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
-export const EngineComponentStatus = z.object({
+export type MonitoringEngineComponentStatus = z.infer<typeof MonitoringEngineComponentStatus>;
+export const MonitoringEngineComponentStatus = z.object({
   id: z.string(),
   installed: z.boolean(),
-  resource: EngineComponentResource,
+  resource: MonitoringEngineComponentResource,
   health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
   errors: z
     .array(
