@@ -13,7 +13,10 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
+import {
+  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+} from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
@@ -177,6 +180,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
     false
   );
+  const isExecutionGraphEnabled = uiSettings?.get<boolean>(
+    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+    false
+  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -243,7 +250,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 />
               </React.Suspense>
             </EuiFlexItem>
-            {true && workflow && (
+            {isVisualEditorEnabled && workflow && (
               <EuiFlexItem css={styles.workflowVisualEditorColumn}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <WorkflowVisualEditor
@@ -253,7 +260,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 </React.Suspense>
               </EuiFlexItem>
             )}
-            {true && workflow && (
+            {isExecutionGraphEnabled && workflow && (
               <EuiFlexItem css={styles.workflowVisualEditorColumn}>
                 <React.Suspense fallback={<EuiLoadingSpinner />}>
                   <ExecutionGraph workflowYaml={yamlValue} />
