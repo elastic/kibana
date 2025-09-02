@@ -45,6 +45,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-analytics",
     "@kbn/spaces-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
   ],
   "exclude": [
     "target/**/*",
