@@ -135,13 +135,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can create private location in multiple spaces', async () => {
-      const apiResponse = await testPrivateLocations.addFleetPolicy();
-      const agentPolicyId = apiResponse.body.item.id;
-
       const { SPACE_ID } = await monitorTestService.addsNewSpace([
         'minimal_all',
         'can_manage_private_locations',
       ]);
+      const apiResponse = await testPrivateLocations.addFleetPolicy(undefined, [
+        'default',
+        SPACE_ID,
+      ]);
+      const agentPolicyId = apiResponse.body.item.id;
 
       const location: Omit<PrivateLocation, 'id'> = {
         label: 'Test private location 11',
@@ -161,13 +163,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('validation errors works in multiple spaces as well', async () => {
-      const apiResponse = await testPrivateLocations.addFleetPolicy();
-      const agentPolicyId = apiResponse.body.item.id;
-
       const { username, password, SPACE_ID } = await monitorTestService.addsNewSpace([
         'minimal_all',
         'can_manage_private_locations',
       ]);
+      const apiResponse = await testPrivateLocations.addFleetPolicy(undefined, [
+        'default',
+        SPACE_ID,
+      ]);
+      const agentPolicyId = apiResponse.body.item.id;
 
       const location: Omit<PrivateLocation, 'id'> = {
         label: 'Test private location 12',
@@ -191,6 +195,34 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send({ ...location, spaces: [SPACE_ID] });
       expect(response1.status).to.be(400);
+    });
+
+    it('cannot create private location in multiple spaces if the agent policy does not belong to those spaces', async () => {
+      const { SPACE_ID } = await monitorTestService.addsNewSpace([
+        'minimal_all',
+        'can_manage_private_locations',
+      ]);
+      const apiResponse = await testPrivateLocations.addFleetPolicy();
+      const agentPolicyId = apiResponse.body.item.id;
+
+      const location: Omit<PrivateLocation, 'id'> = {
+        label: 'Test private location 13',
+        agentPolicyId: agentPolicyId!,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        spaces: [SPACE_ID, 'default'],
+      };
+      const response = await supertest
+        .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+        .set('kbn-xsrf', 'true')
+        .send(location);
+
+      expect(response.body.message).to.be(
+        `Invalid spaces. Private location spaces [${SPACE_ID}, default] must be fully contained within agent policy ${agentPolicyId} spaces [default].`
+      );
+      expect(response.status).to.be(400);
     });
   });
 }

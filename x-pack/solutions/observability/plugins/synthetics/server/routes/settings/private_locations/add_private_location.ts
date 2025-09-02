@@ -49,6 +49,43 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   handler: async (routeContext) => {
     const { response, request, server } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+    const location = request.body as PrivateLocationObject;
+    const agentPolicy = await server.fleet?.agentPolicyService.get(
+      internalSOClient,
+      location.agentPolicyId
+    );
+
+    if (!agentPolicy) {
+      return response.badRequest({
+        body: {
+          message: `Agent policy with id ${location.agentPolicyId} not found, this should never happen`,
+        },
+      });
+    }
+
+    const policySpaces =
+      agentPolicy.space_ids && agentPolicy.space_ids.length > 0
+        ? agentPolicy.space_ids
+        : [agentPolicy.namespace];
+
+    const newId = uuidV4();
+    const formattedLocation = toSavedObjectContract({
+      ...location,
+      id: newId,
+      spaces: location.spaces || policySpaces,
+    });
+
+    if (!formattedLocation.spaces!.every((s) => policySpaces.includes(s))) {
+      return response.badRequest({
+        body: {
+          message: `Invalid spaces. Private location spaces [${location.spaces?.join(
+            ', '
+          )}] must be fully contained within agent policy ${
+            location.agentPolicyId
+          } spaces [${policySpaces.join(', ')}].`,
+        },
+      });
+    }
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
     const repo = new PrivateLocationRepository(routeContext);
@@ -58,24 +95,12 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       return invalidError;
     }
 
-    const location = request.body as PrivateLocationObject;
-    const newId = uuidV4();
-    const formattedLocation = toSavedObjectContract({ ...location, id: newId });
-    const { spaces } = location;
-
     try {
       const result = await repo.createPrivateLocation(formattedLocation, newId);
 
       return toClientContract(result);
     } catch (error) {
       if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
-        if (spaces?.includes('*')) {
-          return response.badRequest({
-            body: {
-              message: `You do not have permission to create a location in all spaces.`,
-            },
-          });
-        }
         return response.customError({
           statusCode: error.output.statusCode,
           body: {
