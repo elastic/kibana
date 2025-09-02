@@ -24,14 +24,7 @@ import {
   stateSchemaByVersion,
   type LatestTaskStateSchema as EntityStoreFieldRetentionTaskState,
 } from './state';
-import {
-  SCOPE,
-  TIMEOUT,
-  TYPE,
-  VERSION,
-  MAX_ATTEMPTS,
-  SCHEDULE,
-} from './constants';
+import { SCOPE, TIMEOUT, TYPE, VERSION, MAX_ATTEMPTS, SCHEDULE } from './constants';
 import { createEntitySnapshotIndex } from '../../elasticsearch_assets/entity_snapshot_index';
 import { getEntitiesIndexName, getEntitiesResetIndexName } from '../../utils';
 import { FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT } from '../../../../telemetry/event_based/events';
@@ -102,7 +95,7 @@ export async function startEntityStoreSnapshotTask({
 
   log('attempting to schedule');
   try {
-    await taskManager.ensureScheduled({
+    const task = await taskManager.ensureScheduled({
       id: taskId,
       taskType: TYPE,
       scope: SCOPE,
@@ -114,6 +107,7 @@ export async function startEntityStoreSnapshotTask({
         entityType,
       },
     });
+    log(`scheduled ${task.id} with schedule ${JSON.stringify(task.schedule)}`);
   } catch (e) {
     logger.warn(`[Entity Store]  [task ${taskId}]: error scheduling task, received ${e.message}`);
     throw e;
@@ -189,12 +183,6 @@ export async function runTask({
       return { state: updatedState };
     }
 
-    // TODO(kuba):
-    // - NEEDS esClient here
-    // - create the index:
-    //   - create a new function in ../../elasticsearch_assets that can create, update, and delete Snapshot Indices with mappings
-    //   - call it here
-    //   - ERROR if index exists
     debugLog('creating snapshot index');
     const { index: snapshotIndex } = await createEntitySnapshotIndex({
       esClient,
@@ -202,9 +190,7 @@ export async function runTask({
       namespace,
       snapshotDate,
     });
-    // - reindex the entities: snapshot
-    //   - DO WE? update timestamps on reindex because we start AFTER MIDNIGHT
-    // TODO(kuba): potential for running a script, modifying docs
+
     debugLog(`reindexing entities to ${snapshotIndex}`);
     await esClient.reindex({
       source: {
@@ -216,7 +202,6 @@ export async function runTask({
       conflicts: 'proceed',
     });
 
-    // - (later) reindex the entities: reset index
     const resetIndex = getEntitiesResetIndexName(entityType, namespace);
     debugLog(`reindexing entities to ${resetIndex}`);
     await esClient.reindex({
@@ -239,11 +224,11 @@ export async function runTask({
           }
 
           // Set the @timestamp field to the current time
-          newDoc['@timestamp'] = Instant.now().toString();
+          newDoc['@timestamp'] = new Date();
 
           // Set the entity.last_seen_timestamp field to the current time
           if (newDoc.entity != null) {
-            newDoc.entity.last_seen_timestamp = Instant.now().toString();
+            newDoc.entity.last_seen_timestamp = new Date();
           }
 
           // Replace the existing document with the new filtered document
@@ -258,12 +243,13 @@ export async function runTask({
     updatedState.lastSnapshotTookSeconds = taskDurationInSeconds;
     log(`task run completed in ${taskDurationInSeconds} seconds`);
 
-    // TODO(kuba):
-    // INTRODUCE NEW TELEMETRY THINGIE
+    // TODO(kuba): Add custom telemetry to the new task?
+    /* 
     telemetry.reportEvent(FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT.eventType, {
       duration: taskDurationInSeconds,
       interval: context.taskInstance.schedule?.interval,
     });
+    */
 
     return {
       state: updatedState,
@@ -322,15 +308,4 @@ function rewindToYesterday(d: Date): Date {
   yesterday.setUTCHours(0, 0, 0, 0);
   yesterday.setUTCSeconds(d.getUTCSeconds() - 60);
   return yesterday;
-}
-
-/**
- * Takes a date and returns a date just before midnight the day before. We run
- * snapshot task just after midnight, so we effectively need previous day's
- * date.
- * @param d - The date snapshot task started
- * @returns d - 1 day
- */
-function rewindMomentToYesterday(d: moment.Moment): moment.Moment {
-  return d.clone().utc().startOf('day').subtract(1, 'minute');
 }
