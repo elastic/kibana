@@ -3268,9 +3268,339 @@
         "signature": [
           "{ currentLayerType: string; hasSpatialJoins: boolean; numberOfJoins: number; onChange: (...args: ",
           "OnSourceChangeArgs",
-          "[]) => Promise<void>; onStyleDescriptorChange: (styleDescriptor: ",
-          "StyleDescriptor",
-          ") => void; style: ",
+          "[]) => Promise<void>; onStyleDescriptorChange: (styleDescriptor: Readonly<{} & { type: string; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".EMS_VECTOR_TILE; color: string; }> | Readonly<{ colorRampName?: \"Blues\" | \"Greens\" | \"Greys\" | \"Reds\" | \"Yellow to Red\" | \"Green to Red\" | \"Blue to Red\" | \"theclassic\" | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".HEATMAP; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".VECTOR; properties: Readonly<{ symbolizeAs?: Readonly<{} & { options: Readonly<{ value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; } & {}>; }> | undefined; fillColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineWidth?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }> | undefined; iconSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { orientation: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelText?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>; }> | undefined; labelZoomRange?: Readonly<{} & { options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }> | undefined; labelColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderSize?: Readonly<{} & { options: Readonly<{} & { size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }>; }> | undefined; labelPosition?: Readonly<{} & { options: Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }>; }> | undefined; } & {}>; isTimeAware: boolean; }>) => void; style: ",
           "IStyle",
           "; }"
         ],
@@ -3676,7 +4006,7 @@
                 "section": "def-server.StorageContext",
                 "text": "StorageContext"
               },
-              ", id: string) => Promise<Readonly<{} & { meta: Readonly<{ aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; } & { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; }>; item: Readonly<{ [x: string]: any; } & {}>; }>>"
+              ", id: string) => Promise<Readonly<{} & { meta: Readonly<{ aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; } & { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; }>; item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -3755,7 +4085,7 @@
               },
               ", data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ [x: string]: any; } & {}>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -3805,7 +4135,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>"
+                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
                 "deprecated": false,
@@ -3833,7 +4163,7 @@
               },
               ", id: string, data: ",
               "MapAttributes",
-              ", options: Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ [x: string]: any; } & {}>; }>>"
+              ", options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | null | undefined; mapStateJSON?: string | undefined; layerListJSON?: string | undefined; uiStateJSON?: string | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
             "deprecated": false,
@@ -3898,7 +4228,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ references?: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined; } & {}>"
+                  "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
                 "deprecated": false,
@@ -4204,7 +4534,332 @@
       }
     ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.Category",
+        "type": "Interface",
+        "tags": [],
+        "label": "Category",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.Category.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.Category.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.CustomIcon",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomIcon",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.CustomIcon.symbolId",
+            "type": "string",
+            "tags": [],
+            "label": "symbolId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.CustomIcon.svg",
+            "type": "string",
+            "tags": [],
+            "label": "svg",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.CustomIcon.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.CustomIcon.cutoff",
+            "type": "number",
+            "tags": [],
+            "label": "cutoff",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.CustomIcon.radius",
+            "type": "number",
+            "tags": [],
+            "label": "radius",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.DynamicStyleProperties",
+        "type": "Interface",
+        "tags": [],
+        "label": "DynamicStyleProperties",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.DynamicStyleProperties.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.STYLE_TYPE",
+                "text": "STYLE_TYPE"
+              },
+              ".DYNAMIC"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.DynamicStyleProperties.options",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Readonly<{ type?: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.COLOR_MAP_TYPE",
+                "text": "COLOR_MAP_TYPE"
+              },
+              " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.FIELD_ORIGIN",
+                "text": "FIELD_ORIGIN"
+              },
+              "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+              "DATA_MAPPING_FUNCTION",
+              " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.FIELD_ORIGIN",
+                "text": "FIELD_ORIGIN"
+              },
+              "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.FIELD_ORIGIN",
+                "text": "FIELD_ORIGIN"
+              },
+              "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+              "ICON_SOURCE",
+              " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.FIELD_ORIGIN",
+                "text": "FIELD_ORIGIN"
+              },
+              "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.FIELD_ORIGIN",
+                "text": "FIELD_ORIGIN"
+              },
+              "; }> | undefined; } & {}>"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.RangeFieldMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "RangeFieldMeta",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.RangeFieldMeta.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.RangeFieldMeta.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.RangeFieldMeta.delta",
+            "type": "number",
+            "tags": [],
+            "label": "delta",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.RangeFieldMeta.isMinOutsideStdRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isMinOutsideStdRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.RangeFieldMeta.isMaxOutsideStdRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isMaxOutsideStdRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.StyleMetaDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "StyleMetaDescriptor",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.StyleMetaDescriptor.geometryTypes",
+            "type": "Object",
+            "tags": [],
+            "label": "geometryTypes",
+            "description": [],
+            "signature": [
+              "GeometryTypes",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-server.StyleMetaDescriptor.fieldMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldMeta",
+            "description": [],
+            "signature": [
+              "FieldMeta"
+            ],
+            "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -4479,6 +5134,182 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-server.CategoryColorStop",
+        "type": "Type",
+        "tags": [],
+        "label": "CategoryColorStop",
+        "description": [],
+        "signature": [
+          "{ readonly color: string; readonly stop: string | null; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ColorDynamicOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorDynamicOptions",
+        "description": [],
+        "signature": [
+          "{ readonly type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; readonly color?: string | undefined; readonly field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; readonly invert?: boolean | undefined; readonly customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; readonly useCustomColorRamp?: boolean | undefined; readonly dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; readonly colorCategory?: string | undefined; readonly customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; readonly useCustomColorPalette?: boolean | undefined; readonly otherCategoryColor?: string | undefined; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ColorDynamicStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorDynamicStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; readonly options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ColorStaticOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorStaticOptions",
+        "description": [],
+        "signature": [
+          "{ readonly color: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ColorStaticStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorStaticStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; readonly options: Readonly<{} & { color: string; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.ColorStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ColorStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-server.CountAggDescriptor",
         "type": "Type",
         "tags": [],
@@ -4498,6 +5329,73 @@
           ".COUNT; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.DynamicStylePropertyOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "DynamicStylePropertyOptions",
+        "description": [],
+        "signature": [
+          "Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }> | Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4544,6 +5442,29 @@
           ".EMS_TMS; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.EMSVectorTileStyleDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "EMSVectorTileStyleDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".EMS_VECTOR_TILE; readonly color: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5146,6 +6067,146 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-server.FieldMetaOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldMetaOptions",
+        "description": [],
+        "signature": [
+          "{ readonly percentiles?: number[] | undefined; readonly sigma?: number | undefined; readonly isEnabled: boolean; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.HeatmapStyleDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "HeatmapStyleDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly colorRampName?: \"Blues\" | \"Greens\" | \"Greys\" | \"Reds\" | \"Yellow to Red\" | \"Green to Red\" | \"Blue to Red\" | \"theclassic\" | undefined; readonly type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".HEATMAP; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.IconDynamicOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "IconDynamicOptions",
+        "description": [],
+        "signature": [
+          "{ readonly field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; readonly customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; readonly useCustomIconMap?: boolean | undefined; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; readonly iconPaletteId: string | null; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.IconStaticOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "IconStaticOptions",
+        "description": [],
+        "signature": [
+          "{ readonly label?: string | undefined; readonly svg?: string | undefined; readonly iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; readonly value: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.IconStop",
+        "type": "Type",
+        "tags": [],
+        "label": "IconStop",
+        "description": [],
+        "signature": [
+          "{ readonly iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; readonly stop: string | null; readonly icon: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.IconStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "IconStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-server.JoinSourceDescriptor",
         "type": "Type",
         "tags": [],
@@ -5340,6 +6401,144 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-server.LabelBorderSizeOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "LabelBorderSizeOptions",
+        "description": [],
+        "signature": [
+          "{ readonly size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.LabelDynamicOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "LabelDynamicOptions",
+        "description": [],
+        "signature": [
+          "{ readonly field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.LabelPositionStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "LabelPositionStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly options: Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.LabelStaticOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "LabelStaticOptions",
+        "description": [],
+        "signature": [
+          "{ readonly value: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.LabelStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "LabelStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.LabelZoomRangeStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "LabelZoomRangeStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "{ readonly options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-server.MVTFieldDescriptor",
         "type": "Type",
         "tags": [],
@@ -5351,6 +6550,98 @@
           "; readonly name: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.OrdinalColorStop",
+        "type": "Type",
+        "tags": [],
+        "label": "OrdinalColorStop",
+        "description": [],
+        "signature": [
+          "{ readonly color: string; readonly stop: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.OrientationDynamicOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "OrientationDynamicOptions",
+        "description": [],
+        "signature": [
+          "{ readonly field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.OrientationStaticOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "OrientationStaticOptions",
+        "description": [],
+        "signature": [
+          "{ readonly orientation: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.OrientationStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "OrientationStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { orientation: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5376,6 +6667,98 @@
           ".PERCENTILE; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.PercentilesFieldMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "PercentilesFieldMeta",
+        "description": [],
+        "signature": [
+          "{ percentile: string; value: number; }[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.SizeDynamicOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "SizeDynamicOptions",
+        "description": [],
+        "signature": [
+          "{ readonly field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; readonly invert?: boolean | undefined; readonly minSize: number; readonly maxSize: number; readonly fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.SizeStaticOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "SizeStaticOptions",
+        "description": [],
+        "signature": [
+          "{ readonly size: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.SizeStylePropertyDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "SizeStylePropertyDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5717,6 +7100,471 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-server.StaticStylePropertyOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "StaticStylePropertyOptions",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { color: string; }> | Readonly<{} & { size: number; }> | Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }> | Readonly<{} & { orientation: number; }> | Readonly<{} & { value: string; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.StyleDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "StyleDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { type: string; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".EMS_VECTOR_TILE; color: string; }> | Readonly<{ colorRampName?: \"Blues\" | \"Greens\" | \"Greys\" | \"Reds\" | \"Yellow to Red\" | \"Green to Red\" | \"Blue to Red\" | \"theclassic\" | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".HEATMAP; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".VECTOR; properties: Readonly<{ symbolizeAs?: Readonly<{} & { options: Readonly<{ value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; } & {}>; }> | undefined; fillColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineWidth?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }> | undefined; iconSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { orientation: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelText?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>; }> | undefined; labelZoomRange?: Readonly<{} & { options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }> | undefined; labelColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderSize?: Readonly<{} & { options: Readonly<{} & { size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }>; }> | undefined; labelPosition?: Readonly<{} & { options: Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }>; }> | undefined; } & {}>; isTimeAware: boolean; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.StylePropertyField",
+        "type": "Type",
+        "tags": [],
+        "label": "StylePropertyField",
+        "description": [],
+        "signature": [
+          "{ readonly name: string; readonly origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.StylePropertyOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "StylePropertyOptions",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }> | Readonly<{} & { size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }> | Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }> | ",
+          {
+            "pluginId": "maps",
+            "scope": "server",
+            "docId": "kibMapsPluginApi",
+            "section": "def-server.DynamicStylePropertyOptions",
+            "text": "DynamicStylePropertyOptions"
+          },
+          " | ",
+          {
+            "pluginId": "maps",
+            "scope": "server",
+            "docId": "kibMapsPluginApi",
+            "section": "def-server.StaticStylePropertyOptions",
+            "text": "StaticStylePropertyOptions"
+          },
+          " | Readonly<{ value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; } & {}>"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.SymbolizeAsOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "SymbolizeAsOptions",
+        "description": [],
+        "signature": [
+          "{ readonly value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-server.TiledSingleLayerVectorSourceDescriptor",
         "type": "Type",
         "tags": [],
@@ -5736,6 +7584,668 @@
           ".MVT_SINGLE_LAYER; readonly urlTemplate: string; readonly layerName: string; readonly minSourceZoom: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.VectorStyleDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "VectorStyleDescriptor",
+        "description": [],
+        "signature": [
+          "Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".VECTOR; properties: Readonly<{ symbolizeAs?: Readonly<{} & { options: Readonly<{ value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; } & {}>; }> | undefined; fillColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineWidth?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }> | undefined; iconSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { orientation: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelText?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>; }> | undefined; labelZoomRange?: Readonly<{} & { options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }> | undefined; labelColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderSize?: Readonly<{} & { options: Readonly<{} & { size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }>; }> | undefined; labelPosition?: Readonly<{} & { options: Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }>; }> | undefined; } & {}>; isTimeAware: boolean; }> & { __styleMeta?: ",
+          {
+            "pluginId": "maps",
+            "scope": "server",
+            "docId": "kibMapsPluginApi",
+            "section": "def-server.StyleMetaDescriptor",
+            "text": "StyleMetaDescriptor"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-server.VectorStylePropertiesDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "VectorStylePropertiesDescriptor",
+        "description": [],
+        "signature": [
+          "{ symbolizeAs?: Readonly<{} & { options: Readonly<{ value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; } & {}>; }> | undefined; fillColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineWidth?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }> | undefined; iconSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { orientation: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelText?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>; }> | undefined; labelZoomRange?: Readonly<{} & { options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }> | undefined; labelColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderSize?: Readonly<{} & { options: Readonly<{} & { size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }>; }> | undefined; labelPosition?: Readonly<{} & { options: Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }>; }> | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5872,6 +8382,18 @@
         "type": "Enum",
         "tags": [],
         "label": "LABEL_POSITIONS",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.LAYER_STYLE_TYPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "LAYER_STYLE_TYPE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/common/constants.ts",
         "deprecated": false,
@@ -6571,9 +9093,339 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".MVT_SINGLE_LAYER; urlTemplate: string; layerName: string; minSourceZoom: number; }> | Readonly<{} & { type: string; }> | null; type?: string | undefined; visible?: boolean | undefined; style?: ",
-          "StyleDescriptor",
-          " | null | undefined; query?: ",
+          ".MVT_SINGLE_LAYER; urlTemplate: string; layerName: string; minSourceZoom: number; }> | Readonly<{} & { type: string; }> | null; type?: string | undefined; visible?: boolean | undefined; style?: Readonly<{} & { type: string; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".EMS_VECTOR_TILE; color: string; }> | Readonly<{ colorRampName?: \"Blues\" | \"Greens\" | \"Greys\" | \"Reds\" | \"Yellow to Red\" | \"Green to Red\" | \"Blue to Red\" | \"theclassic\" | undefined; } & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".HEATMAP; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".VECTOR; properties: Readonly<{ symbolizeAs?: Readonly<{} & { options: Readonly<{ value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; } & {}>; }> | undefined; fillColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineWidth?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }> | undefined; iconSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { orientation: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelText?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>; }> | undefined; labelZoomRange?: Readonly<{} & { options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }> | undefined; labelColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderSize?: Readonly<{} & { options: Readonly<{} & { size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }>; }> | undefined; labelPosition?: Readonly<{} & { options: Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }>; }> | undefined; } & {}>; isTimeAware: boolean; }> | null | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6715,9 +9567,9 @@
           ">[] | undefined; style: ",
           {
             "pluginId": "maps",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibMapsPluginApi",
-            "section": "def-common.VectorStyleDescriptor",
+            "section": "def-server.VectorStyleDescriptor",
             "text": "VectorStyleDescriptor"
           },
           "; disableTooltips?: boolean | undefined; }"
@@ -6765,14 +9617,333 @@
         "label": "VectorStyleDescriptor",
         "description": [],
         "signature": [
-          "StyleDescriptor",
-          " & { properties: ",
-          "VectorStylePropertiesDescriptor",
-          "; isTimeAware: boolean; __styleMeta?: ",
-          "StyleMetaDescriptor",
+          "Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LAYER_STYLE_TYPE",
+            "text": "LAYER_STYLE_TYPE"
+          },
+          ".VECTOR; properties: Readonly<{ symbolizeAs?: Readonly<{} & { options: Readonly<{ value?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.SYMBOLIZE_AS_TYPES",
+            "text": "SYMBOLIZE_AS_TYPES"
+          },
+          " | undefined; } & {}>; }> | undefined; fillColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; lineWidth?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; icon?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{ label?: string | undefined; svg?: string | undefined; iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; customIconStops?: Readonly<{ iconSource?: ",
+          "ICON_SOURCE",
+          " | undefined; } & { stop: string | null; icon: string; }>[] | undefined; useCustomIconMap?: boolean | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; iconPaletteId: string | null; }>; }> | undefined; iconSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; iconOrientation?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { orientation: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelText?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { value: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; } & {}>; }> | undefined; labelZoomRange?: Readonly<{} & { options: Readonly<{} & { minZoom: number; maxZoom: number; useLayerZoomRange: boolean; }>; }> | undefined; labelColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelSize?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { size: number; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; } & { minSize: number; maxSize: number; fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderColor?: Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".STATIC; options: Readonly<{} & { color: string; }>; }> | Readonly<{} & { type: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.STYLE_TYPE",
+            "text": "STYLE_TYPE"
+          },
+          ".DYNAMIC; options: Readonly<{ type?: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.COLOR_MAP_TYPE",
+            "text": "COLOR_MAP_TYPE"
+          },
+          " | undefined; color?: string | undefined; field?: Readonly<{} & { name: string; origin: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.FIELD_ORIGIN",
+            "text": "FIELD_ORIGIN"
+          },
+          "; }> | undefined; invert?: boolean | undefined; customColorRamp?: Readonly<{} & { color: string; stop: number; }>[] | undefined; useCustomColorRamp?: boolean | undefined; dataMappingFunction?: ",
+          "DATA_MAPPING_FUNCTION",
+          " | undefined; colorCategory?: string | undefined; customColorPalette?: Readonly<{} & { color: string; stop: string | null; }>[] | undefined; useCustomColorPalette?: boolean | undefined; otherCategoryColor?: string | undefined; } & { fieldMetaOptions: Readonly<{ percentiles?: number[] | undefined; sigma?: number | undefined; } & { isEnabled: boolean; }>; }>; }> | undefined; labelBorderSize?: Readonly<{} & { options: Readonly<{} & { size: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_BORDER_SIZES",
+            "text": "LABEL_BORDER_SIZES"
+          },
+          "; }>; }> | undefined; labelPosition?: Readonly<{} & { options: Readonly<{} & { position: ",
+          {
+            "pluginId": "maps",
+            "scope": "common",
+            "docId": "kibMapsPluginApi",
+            "section": "def-common.LABEL_POSITIONS",
+            "text": "LABEL_POSITIONS"
+          },
+          "; }>; }> | undefined; } & {}>; isTimeAware: boolean; }> & { __styleMeta?: ",
+          {
+            "pluginId": "maps",
+            "scope": "server",
+            "docId": "kibMapsPluginApi",
+            "section": "def-server.StyleMetaDescriptor",
+            "text": "StyleMetaDescriptor"
+          },
           " | undefined; }"
         ],
-        "path": "x-pack/platform/plugins/shared/maps/common/descriptor_types/style_property_descriptor_types.ts",
+        "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/style_schemas/vector_style_schemas/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

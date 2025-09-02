@@ -66,5 +66,9 @@ export const ProfileTree = memo(({ data, target, onHighlight, onDataInitError }:
     }
   }
 
-  return <div className="prfDevTool__main__profiletree">{content}</div>;
+  return (
+    <div data-test-subj="profileTree" className="prfDevTool__main__profiletree">
+      {content}
+    </div>
+  );
 });

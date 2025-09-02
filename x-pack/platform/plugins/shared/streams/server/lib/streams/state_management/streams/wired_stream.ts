@@ -149,6 +149,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                 {
                   destination: this._definition.name,
                   where: { never: {} },
+                  status: 'disabled',
                 },
               ],
             },
@@ -207,6 +208,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                     {
                       destination: this._definition.name,
                       where: { never: {} },
+                      status: 'disabled',
                     },
                   ],
                 },

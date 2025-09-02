@@ -14,9 +14,9 @@ import {
   type GetRuleMigrationResourcesResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
-import { authz } from '../../../common/utils/authz';
-import { withLicense } from '../../../common/utils/with_license';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
+import { authz } from '../../../common/api/util/authz';
+import { withLicense } from '../../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsResourceGetRoute = (
   router: SecuritySolutionPluginRouter,

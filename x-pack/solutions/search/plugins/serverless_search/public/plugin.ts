@@ -120,7 +120,7 @@ export class ServerlessSearchPlugin
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
@@ -137,7 +137,7 @@ export class ServerlessSearchPlugin
       appRoute: '/app/web_crawlers',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/web_crawlers');
         const [coreStart, services] = await core.getStartServices();

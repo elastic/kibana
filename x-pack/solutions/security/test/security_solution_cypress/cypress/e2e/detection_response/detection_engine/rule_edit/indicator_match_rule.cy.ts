@@ -176,7 +176,7 @@ describe(
         });
         getIndicatorDeleteButton(1).click();
 
-        cy.contains('Conditions with AND clauses must have at least one MATCHES entry.');
+        cy.contains('Entries with AND clauses must have at least one MATCHES condition.');
       });
 
       it('shows error when 2 identical entries with different match operator configured', () => {
@@ -189,7 +189,7 @@ describe(
         });
 
         cy.contains(
-          'When forming an AND statement with MATCHES and DOES NOT MATCH entries, avoid selecting identical field values for comparison from the source and indicator indices.'
+          'DOES NOT MATCH and MATCHES entries that are connected by an AND clause cannot use the same threat mappings. Choose a different threat mapping for one of the entries.'
         );
       });
     });
