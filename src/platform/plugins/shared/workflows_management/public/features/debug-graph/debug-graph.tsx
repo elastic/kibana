@@ -38,6 +38,7 @@ const nodeTypes = [...mainScopeNodes, ...secondaryScopeNodes, ...atomicNodes].re
   {} as Record<string, React.FC<any>>
 );
 const edgeTypes = {
+  default: WorkflowGraphEdge,
   workflowEdge: WorkflowGraphEdge,
 };
 
@@ -49,10 +50,13 @@ function applyLayout(graph: dagre.graphlib.Graph) {
 
   // Set graph direction and spacing
   dagreGraph.setGraph({
-    rankdir: 'TB',
+    rankdir: 'BT', // Bottom-to-Top direction (reversed)
     nodesep: 40,
     ranksep: 40,
     edgesep: 40,
+    // align: 'UL', // Align nodes to Upper-Left within their ranks
+    marginx: 20,
+    marginy: 20,
   });
 
   const stack = [] as string[];
@@ -92,7 +96,12 @@ function applyLayout(graph: dagre.graphlib.Graph) {
       })
     );
 
-  graph.edges().forEach((edge) => dagreGraph.setEdge(edge.v, edge.w));
+  graph.edges().forEach((edge) => {
+    // Reverse source and destination for BT layout
+    dagreGraph.setEdge(edge.w, edge.v, {
+      type: 'workflowEdge',
+    });
+  });
 
   dagre.layout(dagreGraph);
 
@@ -107,8 +116,9 @@ function applyLayout(graph: dagre.graphlib.Graph) {
         step: graphNode?.configuration,
         label: graphNode?.label || id,
       },
-      targetPosition: Position.Top,
-      sourcePosition: Position.Bottom,
+      // See this: https://github.com/dagrejs/dagre/issues/287
+      targetPosition: Position.Bottom, // Reversed due to BT layout
+      sourcePosition: Position.Top, // Reversed due to BT layout
       style: {
         width: dagreNode.width as number,
         height: dagreNode.height as number,
