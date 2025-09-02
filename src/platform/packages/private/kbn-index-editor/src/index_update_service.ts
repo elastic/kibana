@@ -20,7 +20,6 @@ import {
   Subject,
   Subscription,
   combineLatest,
-  distinctUntilChanged,
   filter,
   firstValueFrom,
   from,
@@ -95,6 +94,7 @@ type Action =
   | { type: 'add-column' }
   | { type: 'edit-column'; payload: ColumnUpdate }
   | { type: 'delete-column'; payload: ColumnUpdate }
+  | { type: 'recalculate-column-placeholders' }
   | { type: 'discard-unsaved-changes' }
   | { type: 'new-row-added'; payload: Record<string, any> };
 
@@ -191,6 +191,8 @@ export class IndexUpdateService {
 
   private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
   public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
+
+  private placeholderIndex = 0;
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
   public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
@@ -374,6 +376,9 @@ export class IndexUpdateService {
     switchMap(([indexName]) => {
       return from(this.getDataView(indexName!));
     }),
+    tap(() => {
+      this.addAction('recalculate-column-placeholders');
+    }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -446,6 +451,7 @@ export class IndexUpdateService {
 
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
+
     return newDataView;
   }
 
@@ -699,70 +705,60 @@ export class IndexUpdateService {
     // Maintains a list of pending columns to be saved,
     // ensuring placeholder columns are displayed correctly.
     this._subscription.add(
-      combineLatest([
-        this._refreshSubject$.pipe(startWith(0)), // Emits immediately one time on loading
-        this.dataView$,
-      ])
+      this._actions$
         .pipe(
-          // Only emits again when refresh subject changes, not when dataView changes.
-          // Otherwhise it will erase unsaved columns when changing the index name.
-          distinctUntilChanged(([prevRefresh], [currRefresh]) => prevRefresh === currRefresh),
-          switchMap(([refresh, dataView]) => {
-            let placeholderIndex = 0;
-            const columnsCount = dataView.fields.filter(
-              // @ts-ignore
-              (field) => field.spec.metadata_field !== true && !field.spec.subType
-            ).length;
-
-            const completeWithPlaceholders = (currentColumnsCount: number) => {
-              const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - currentColumnsCount;
-              return missingPlaceholders > 0
-                ? times(missingPlaceholders, () => ({
-                    name: `${COLUMN_PLACEHOLDER_PREFIX}${placeholderIndex++}`,
-                  }))
-                : [];
-            };
-
-            const initialPlaceholders = completeWithPlaceholders(columnsCount);
-
-            return this._actions$.pipe(
-              scan((acc: ColumnAddition[], action) => {
-                if (action.type === 'add-column') {
-                  return [...acc, { name: `${COLUMN_PLACEHOLDER_PREFIX}${placeholderIndex++}` }];
-                }
-                if (action.type === 'edit-column') {
-                  return acc.map((column) =>
-                    column.name === action.payload.previousName
-                      ? { ...column, name: action.payload.name }
-                      : column
-                  );
-                }
-                if (action.type === 'delete-column') {
-                  return acc.filter((column) => column.name !== action.payload.name);
-                }
-                if (action.type === 'saved') {
-                  // Filter out columns that were saved with a value.
-                  return acc.filter((column) =>
-                    action.payload.updates.every(
-                      (update) => update.value[column.name] === undefined
-                    )
-                  );
-                }
-                if (action.type === 'new-row-added') {
-                  // Filter out columns that were populated when adding a new row
-                  return acc.filter((column) => action.payload[column.name] === undefined);
-                }
-                if (action.type === 'discard-unsaved-changes') {
-                  return completeWithPlaceholders(0);
-                }
-                return acc;
-              }, initialPlaceholders),
-              startWith(initialPlaceholders)
-            );
-          })
+          withLatestFrom(this.dataView$.pipe(startWith(undefined))),
+          scan((acc: ColumnAddition[], [action, dataView]) => {
+            if (!dataView) {
+              return this.completeWithPlaceholders(0);
+            }
+            if (action.type === 'add-column') {
+              return [...acc, { name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}` }];
+            }
+            if (action.type === 'edit-column') {
+              return acc.map((column) =>
+                column.name === action.payload.previousName
+                  ? { ...column, name: action.payload.name }
+                  : column
+              );
+            }
+            if (action.type === 'delete-column') {
+              return acc.filter((column) => column.name !== action.payload.name);
+            }
+            if (action.type === 'saved') {
+              // Filter out columns that were saved with a value.
+              return acc.filter((column) =>
+                action.payload.updates.every((update) => update.value[column.name] === undefined)
+              );
+            }
+            if (action.type === 'new-row-added') {
+              // Filter out columns that were populated when adding a new row
+              return acc.filter((column) => action.payload[column.name] === undefined);
+            }
+            if (action.type === 'discard-unsaved-changes') {
+              return this.completeWithPlaceholders(0);
+            }
+            if (action.type === 'recalculate-column-placeholders') {
+              const columnsCount = dataView.fields.filter(
+                // @ts-ignore
+                (field) => field.spec.metadata_field !== true && !field.spec.subType
+              ).length;
+              return this.completeWithPlaceholders(columnsCount);
+            }
+            return acc;
+          }, [])
         )
         .subscribe(this._pendingColumnsToBeSaved$)
     );
+  }
+
+  private completeWithPlaceholders(currentColumnsCount: number) {
+    const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - currentColumnsCount;
+    return missingPlaceholders > 0
+      ? times(missingPlaceholders, () => ({
+          name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}`,
+        }))
+      : [];
   }
 
   private buildPlaceholderRow(): DataTableRecord {
@@ -778,8 +774,6 @@ export class IndexUpdateService {
     };
   }
 
-  // Refresh will re-fetch index data but also discard unsaved columns.
-  // Use only when sure they are already saved or are ok to discard.
   public refresh() {
     this._isFetching$.next(true);
     this._refreshSubject$.next(Date.now());
@@ -966,6 +960,7 @@ export class IndexUpdateService {
         const dataView = await firstValueFrom(this.dataView$);
         await this.data.dataViews.refreshFields(dataView, false, true);
         this.refresh();
+        this.addAction('recalculate-column-placeholders');
         this._isSaving$.next(false);
       }, 2000);
     } else {
