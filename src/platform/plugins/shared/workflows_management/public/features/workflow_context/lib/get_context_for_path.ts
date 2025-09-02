@@ -25,7 +25,7 @@ function getRootContextSchema(definition: WorkflowYaml) {
     event: EventSchema,
     inputs: z.object({
       ...Object.fromEntries(
-        Object.entries(definition.inputs ?? {}).map(([_index, input]) => {
+        (definition.inputs || []).map((input) => {
           let valueSchema: z.ZodType;
           switch (input.type) {
             case 'string':
