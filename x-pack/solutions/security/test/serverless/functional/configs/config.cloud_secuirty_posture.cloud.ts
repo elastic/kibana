@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';;
+import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
 import { services } from '../services';
 import { pageObjects } from '../page_objects';
 
