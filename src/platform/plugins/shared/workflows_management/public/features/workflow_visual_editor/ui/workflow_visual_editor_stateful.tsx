@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 
 interface WorkflowVisualEditorStatefulProps {
   workflowYaml: string;
