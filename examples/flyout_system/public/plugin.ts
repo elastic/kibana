@@ -11,7 +11,7 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-const PLUGIN_NAME = 'GlobalFlyoutOrchestratorExample';
+const PLUGIN_NAME = 'FlyoutSystemExamples';
 
 interface StartDeps {
   navigation: NavigationPublicPluginStart;
@@ -20,13 +20,11 @@ interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
-export class GlobalFlyoutOrchestratorExamplePlugin
-  implements Plugin<void, void, SetupDeps, StartDeps>
-{
+export class FlyoutSystemExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps): void {
     // Register an application into the side navigation menu
     core.application.register({
-      id: 'globalFlyoutOrchestratorExample',
+      id: 'flyoutSystemExamples',
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
         // Load application bundle
@@ -39,9 +37,9 @@ export class GlobalFlyoutOrchestratorExamplePlugin
     });
 
     deps.developerExamples.register({
-      appId: 'globalFlyoutOrchestratorExample',
-      title: 'Global Flyout Orchestrator Example Application',
-      description: `Demonstrates the impressive Global Flyout Orchestrator.`,
+      appId: 'flyoutSystemExamples',
+      title: 'Flyout System Example Application',
+      description: `Demonstrates the impressive Flyout System.`,
     });
   }
 

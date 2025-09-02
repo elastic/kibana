@@ -26,7 +26,7 @@ export const App = ({ basename, navigation }: AppDeps) => {
   return (
     <Router basename={basename}>
       <navigation.ui.TopNavMenu
-        appName="global_flyout_orchestrator_example"
+        appName="flyout_system_example"
         showSearchBar={false}
         useDefaultBehaviors={true}
       />

@@ -6461,7 +6461,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-flyout-orchestrator-example-plugin@link:examples/global_flyout_orchestrator":
+"@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""
 
