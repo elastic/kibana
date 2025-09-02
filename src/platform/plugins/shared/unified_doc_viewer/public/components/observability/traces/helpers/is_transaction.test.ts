@@ -8,28 +8,28 @@
  */
 
 import { isTransaction } from './is_transaction';
-import { TRANSACTION_ID } from '@kbn/apm-types';
+import { TRANSACTION_NAME } from '@kbn/apm-types';
 
 describe('isTransaction', () => {
-  it('returns true if TRANSACTION_ID exists in flattened', () => {
+  it('returns true if TRANSACTION_NAME exists in flattened', () => {
     const hit = {
       flattened: {
-        [TRANSACTION_ID]: 'abc123',
+        [TRANSACTION_NAME]: 'abc123',
       },
     } as any;
     expect(isTransaction(hit)).toBe(true);
   });
 
-  it('returns false if TRANSACTION_ID is null', () => {
+  it('returns false if TRANSACTION_NAME is null', () => {
     const hit = {
       flattened: {
-        [TRANSACTION_ID]: null,
+        [TRANSACTION_NAME]: null,
       },
     } as any;
     expect(isTransaction(hit)).toBe(false);
   });
 
-  it('returns false if TRANSACTION_ID is undefined', () => {
+  it('returns false if TRANSACTION_NAME is undefined', () => {
     const hit = {
       flattened: {},
     } as any;

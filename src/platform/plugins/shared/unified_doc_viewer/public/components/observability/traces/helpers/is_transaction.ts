@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TRANSACTION_ID } from '@kbn/apm-types';
+import { TRANSACTION_NAME } from '@kbn/apm-types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 export function isTransaction(hit: DataTableRecord) {
-  return hit.flattened?.[TRANSACTION_ID] != null;
+  return hit.flattened?.[TRANSACTION_NAME] != null;
 }
