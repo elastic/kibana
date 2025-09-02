@@ -59,11 +59,20 @@ describe('TitlesAndTextPopover', () => {
   const mockSetState = jest.fn();
 
   const renderToolbarOptions = (state: MetricVisualizationState) => {
-    return {
-      ...render(<TitlesAndTextPopover state={state} setState={mockSetState} />, {
+    const { rerender, ...rtlRest } = render(
+      <TitlesAndTextPopover state={state} setState={mockSetState} />,
+      {
         // fails in concurrent mode
         legacyRoot: true,
-      }),
+      }
+    );
+    return {
+      ...rtlRest,
+      rerender: (stateOverrides: Partial<MetricVisualizationState>) => {
+        return rerender(
+          <TitlesAndTextPopover state={{ ...state, ...stateOverrides }} setState={mockSetState} />
+        );
+      },
     };
   };
 
@@ -171,12 +180,7 @@ describe('TitlesAndTextPopover', () => {
       'right',
     ]);
 
-    rerender(
-      <TitlesAndTextPopover
-        state={{ ...fullState, secondaryMetricAccessor: undefined }}
-        setState={mockSetState}
-      />
-    );
+    rerender({ secondaryMetricAccessor: undefined });
 
     expect(screen.queryByTestId('lens-secondary-metric-alignment-btn')).not.toBeInTheDocument();
   });
@@ -197,7 +201,7 @@ describe('TitlesAndTextPopover', () => {
   });
 
   it('should set iconAlign', async () => {
-    renderToolbarOptions({ ...fullState, icon: 'sortUp' });
+    const { rerender } = renderToolbarOptions({ ...fullState, icon: 'sortUp' });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
@@ -205,6 +209,13 @@ describe('TitlesAndTextPopover', () => {
 
     expect(iconAlignBtnGroup.selected.textContent).toBe('Left');
 
+    // Don't call setState if the option is already selected
+    iconAlignBtnGroup.select('Left');
+    iconAlignBtnGroup.select('Right');
+
+    rerender({ iconAlign: 'right' });
+
+    // Don't call setState if the option is already selected
     iconAlignBtnGroup.select('Right');
     iconAlignBtnGroup.select('Left');
 
