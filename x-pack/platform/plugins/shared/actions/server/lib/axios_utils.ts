@@ -15,6 +15,7 @@ import type {
 } from 'axios';
 import { AxiosHeaders } from 'axios';
 import type { Logger } from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorUsageCollector, SSLSettings } from '../types';
@@ -146,6 +147,13 @@ export const throwIfResponseIsNotValid = ({
    */
   if (statusCode === 204) {
     return;
+  }
+
+  if (statusCode === 422) {
+    throw createTaskRunError(
+      new Error(`Received Unprocessable Entity error from external API ${res.config.url}`),
+      TaskErrorSource.USER
+    );
   }
 
   /**
