@@ -1,3 +1,5 @@
+/* eslint-disable @kbn/eslint/require-license-header */
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,29 +7,31 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { InstallPrivilegedAccessDetectionPackageResponse } from '../../../../../../common/api/entity_analytics';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
-
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import {
+  type GetEntitySourceResponse,
+  GetEntitySourceRequestParams,
+} from '../../../../../../common/api/entity_analytics';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
-export const padInstallRoute = (
+export const getMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
   config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
-    .post({
+    .get({
       access: 'public',
-      path: '/api/entity_analytics/privileged_user_monitoring/pad/install',
+      path: `${MONITORING_ENTITY_SOURCE_URL}/{id}`,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -37,34 +41,27 @@ export const padInstallRoute = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {},
+        validate: {
+          request: {
+            params: GetEntitySourceRequestParams,
+          },
+        },
       },
-
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<InstallPrivilegedAccessDetectionPackageResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
-
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
 
         try {
-          const clientResponse = await secSol
-            .getPadPackageInstallationClient()
-            .installPrivilegedAccessDetectionPackage();
-          return response.ok({
-            body: {
-              ...clientResponse,
-            },
-          });
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+          const secSol = await context.securitySolution;
+          const client = secSol.getMonitoringEntitySourceDataClient();
+          const body = await client.get(request.params.id);
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
-          logger.error(`Error PAD installation: ${error.message}`);
+          logger.error(`Error getting monitoring entity source sync config: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
