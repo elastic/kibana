@@ -8,13 +8,19 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { ConnectorStep, WorkflowOnFailure, WorkflowYaml } from '../../../spec/schema';
+import type {
+  ConnectorStep,
+  ForEachStep,
+  WorkflowOnFailure,
+  WorkflowYaml,
+} from '../../../spec/schema';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
 describe('on_failure graph', () => {
   describe.each([
     {
       name: 'workflow level on-failure',
+      fallbackActionNodeId: 'workflow-level-on-failure_testRetryConnectorStep_fallbackAction',
       workflow: {
         settings: {
           'on-failure': {
@@ -48,6 +54,7 @@ describe('on_failure graph', () => {
     },
     {
       name: 'step level on-failure',
+      fallbackActionNodeId: 'fallbackAction',
       workflow: {
         steps: [
           {
@@ -79,6 +86,7 @@ describe('on_failure graph', () => {
     },
     {
       name: 'step level on-failure should override workflow level on-failure',
+      fallbackActionNodeId: 'fallbackAction',
       workflow: {
         settings: {
           'on-failure': {
@@ -142,7 +150,7 @@ describe('on_failure graph', () => {
         'exitRetry_testRetryConnectorStep',
         'exitNormalPath_testRetryConnectorStep',
         'enterFallbackPath_testRetryConnectorStep',
-        'fallbackAction',
+        testCase.fallbackActionNodeId,
         'exitFallbackPath_testRetryConnectorStep',
         'exitTryBlock_testRetryConnectorStep',
         'exitContinue_testRetryConnectorStep',
@@ -196,10 +204,10 @@ describe('on_failure graph', () => {
           },
           {
             v: 'enterFallbackPath_testRetryConnectorStep',
-            w: 'fallbackAction',
+            w: testCase.fallbackActionNodeId,
           },
           {
-            v: 'fallbackAction',
+            v: testCase.fallbackActionNodeId,
             w: 'exitFallbackPath_testRetryConnectorStep',
           },
         ])
@@ -258,7 +266,7 @@ describe('on_failure graph', () => {
         expect(enterNormalPathNode).toEqual({
           id: 'enterNormalPath_testRetryConnectorStep',
           type: 'enter-normal-path',
-          enterZoneNodeId: 'enterNormalPath_testRetryConnectorStep',
+          enterZoneNodeId: 'enterTryBlock_testRetryConnectorStep',
           enterFailurePathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
@@ -299,7 +307,7 @@ describe('on_failure graph', () => {
     });
   });
 
-  it('should not set workflow level on-failure for steps inside fallback', () => {
+  describe('workflow level on-failure', () => {
     const workflow = {
       settings: {
         'on-failure': {
@@ -309,7 +317,7 @@ describe('on_failure graph', () => {
           },
           fallback: [
             {
-              name: 'workflowLevel_fallbackAction',
+              name: 'fallbackAction',
               type: 'console',
               with: {
                 message: 'fallback log',
@@ -319,7 +327,42 @@ describe('on_failure graph', () => {
           continue: true,
         } as WorkflowOnFailure,
       },
-      steps: [
+      steps: [],
+    } as Partial<WorkflowYaml>;
+
+    it('should should correctly work with foreach when fallback is defined', () => {
+      workflow.steps = [
+        {
+          name: 'outer_foreach',
+          type: 'foreach',
+          foreach: '["outer1", "outer2"]',
+          steps: [
+            {
+              name: 'testRetryConnectorStep',
+              type: 'slack',
+              connectorId: 'slack',
+              with: {
+                message: 'Hello from retry step',
+              },
+            } as ConnectorStep,
+          ],
+        } as ForEachStep,
+      ];
+      workflow.settings!['on-failure']!.fallback = [
+        {
+          name: 'foreachFallbackAction',
+          type: 'console',
+          with: {
+            message: 'fallback log',
+          },
+        } as ConnectorStep,
+      ];
+      const executionGraph = convertToWorkflowGraph(workflow as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+    });
+
+    it('should not set workflow level on-failure for steps inside fallback', () => {
+      workflow.steps = [
         {
           name: 'testRetryConnectorStep',
           type: 'slack',
@@ -344,23 +387,24 @@ describe('on_failure graph', () => {
             message: 'Hello from retry step',
           },
         } as ConnectorStep,
-      ],
-    } as Partial<WorkflowYaml>;
-    const executionGraph = convertToWorkflowGraph(workflow as any);
-    const topsort = graphlib.alg.topsort(executionGraph);
-    expect(topsort).toEqual([
-      'enterContinue_testRetryConnectorStep',
-      'enterTryBlock_testRetryConnectorStep',
-      'enterNormalPath_testRetryConnectorStep',
-      'enterRetry_testRetryConnectorStep',
-      'testRetryConnectorStep',
-      'exitRetry_testRetryConnectorStep',
-      'exitNormalPath_testRetryConnectorStep',
-      'enterFallbackPath_testRetryConnectorStep',
-      'fallbackAction',
-      'exitFallbackPath_testRetryConnectorStep',
-      'exitTryBlock_testRetryConnectorStep',
-      'exitContinue_testRetryConnectorStep',
-    ]);
+      ];
+
+      const executionGraph = convertToWorkflowGraph(workflow as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      expect(topsort).toEqual([
+        'enterContinue_testRetryConnectorStep',
+        'enterTryBlock_testRetryConnectorStep',
+        'enterNormalPath_testRetryConnectorStep',
+        'enterRetry_testRetryConnectorStep',
+        'testRetryConnectorStep',
+        'exitRetry_testRetryConnectorStep',
+        'exitNormalPath_testRetryConnectorStep',
+        'enterFallbackPath_testRetryConnectorStep',
+        'fallbackAction',
+        'exitFallbackPath_testRetryConnectorStep',
+        'exitTryBlock_testRetryConnectorStep',
+        'exitContinue_testRetryConnectorStep',
+      ]);
+    });
   });
 });
