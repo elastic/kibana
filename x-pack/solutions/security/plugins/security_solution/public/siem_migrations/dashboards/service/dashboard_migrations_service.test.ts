@@ -137,7 +137,7 @@ describe('SiemDashboardMigrationsService', () => {
     });
 
     it('should return false when experimental `siemMigrationsDisabled` feature is true', () => {
-      mockExperimentalFeaturesSpy.mockReturnValueOnce({
+      mockExperimentalFeaturesSpy.mockReturnValue({
         automaticDashboardsMigration: true,
         siemMigrationsDisabled: true,
       } as unknown as ExperimentalFeatures);

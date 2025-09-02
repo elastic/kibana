@@ -8,11 +8,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
-import {
-  SecurityPageName,
-  useNavigation,
-  NavigationProvider,
-} from '@kbn/security-solution-navigation';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,7 +25,7 @@ export const getSuccessToast = (
   title: i18n.translate(
     'xpack.securitySolution.siemMigrations.dashboardsService.polling.successTitle',
     {
-      defaultMessage: 'Rules translation complete.',
+      defaultMessage: 'Dashboards translation complete.',
     }
   ),
   text: toMountPoint(
@@ -43,15 +39,10 @@ export const getSuccessToast = (
 const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStats }> = ({
   migrationStats,
 }) => {
-  // TODO: update path when we have dedicated page.
-  const navigation = { deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationStats.id };
-
-  const { navigateTo, getAppUrl } = useNavigation();
   const onClick: React.MouseEventHandler = (ev) => {
     ev.preventDefault();
-    navigateTo(navigation);
+    // TODO: need to add navigation once `Translated Dashboards` page complete
   };
-  const url = getAppUrl(navigation);
 
   return (
     <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="s">
@@ -63,8 +54,7 @@ const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStat
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiButton onClick={onClick} href={url} color="success">
+        <EuiButton onClick={onClick} color="success">
           {i18n.translate(
             'xpack.securitySolution.siemMigrations.dashboardsService.polling.successLinkText',
             { defaultMessage: 'Go to translated dashboards' }

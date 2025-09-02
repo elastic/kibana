@@ -62,9 +62,11 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
   /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */
   public isAvailable() {
+    const { automaticDashboardsMigration, siemMigrationsDisabled } =
+      ExperimentalFeaturesService.get();
     return (
-      ExperimentalFeaturesService.get().automaticDashboardsMigration &&
-      !ExperimentalFeaturesService.get().siemMigrationsDisabled &&
+      automaticDashboardsMigration &&
+      !siemMigrationsDisabled &&
       licenseService.isEnterprise() &&
       !this.hasMissingCapabilities('all')
     );
@@ -92,8 +94,8 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     data: CreateDashboardMigrationDashboardsRequestBody,
     migrationName: string
   ): Promise<string> {
-    const rulesCount = data.length;
-    if (rulesCount === 0) {
+    const dashboardsCount = data.length;
+    if (dashboardsCount === 0) {
       throw new Error(i18n.EMPTY_DASHBOARDS_ERROR);
     }
 
@@ -169,7 +171,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     return result;
   }
 
-  /** Stops a running rule migration task and waits for the task to completely stop */
+  /** Stops a running dashboard migration task and waits for the task to completely stop */
   public async stopDashboardMigration(
     migrationId: string
   ): Promise<StopDashboardsMigrationResponse> {
