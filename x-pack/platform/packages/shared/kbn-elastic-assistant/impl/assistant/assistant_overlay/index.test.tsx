@@ -85,4 +85,25 @@ describe('AssistantOverlay', () => {
     const flyout = queryByTestId('ai-assistant-flyout');
     expect(flyout).not.toBeInTheDocument();
   });
+
+  it('opens modal and reports telemetry when assistant param is present in URL', () => {
+    // Simulate URL with ?assistant=test-id
+    const originalLocation = window.location;
+    // @ts-ignore
+    delete window.location;
+    // @ts-ignore
+    window.location = { search: '?assistant=test-id' };
+
+    const { getByTestId } = render(
+      <TestProviders providerContext={{ assistantTelemetry }}>
+        <AssistantOverlay />
+      </TestProviders>
+    );
+    const flyout = getByTestId('ai-assistant-flyout');
+    expect(flyout).toBeInTheDocument();
+    expect(reportAssistantInvoked).toHaveBeenCalledWith({ invokedBy: 'url' });
+
+    // Restore original location
+    window.location = originalLocation;
+  });
 });

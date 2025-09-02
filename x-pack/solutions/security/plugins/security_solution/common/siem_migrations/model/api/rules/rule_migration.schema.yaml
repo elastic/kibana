@@ -654,7 +654,6 @@ paths:
           required: false
           schema:
             $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceType'
-
         - name: names
           in: query
           required: false

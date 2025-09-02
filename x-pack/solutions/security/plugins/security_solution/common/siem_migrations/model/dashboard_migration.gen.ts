@@ -17,7 +17,13 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
-import { MigrationLastExecution, MigrationStatus, MigrationTaskStatus } from './common.gen';
+import {
+  MigrationLastExecution,
+  MigrationTranslationResult,
+  MigrationStatus,
+  MigrationComments,
+  MigrationTaskStats,
+} from './common.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
@@ -84,21 +90,44 @@ export const OriginalDashboard = z.object({
    */
   description: z.string(),
   /**
-   * The data of the dashboard, format could depend on the vendor
+   * The data of the dashboard in the specified format
    */
   data: z.string(),
   /**
    * The last updated timestamp of the dashboard
    */
-  last_updated: z.string(),
+  last_updated: z.string().optional(),
   /**
-   * The format of the dashboard (e.g., 'json', 'xml')
+   * The format of the dashboard data (e.g., 'json', 'xml')
    */
   format: z.string(),
   /**
    * Additional properties specific to the splunk
    */
   splunk_properties: SplunkOriginalDashboardProperties.optional(),
+});
+
+/**
+ * The elastic dashboard translation.
+ */
+export type ElasticDashboard = z.infer<typeof ElasticDashboard>;
+export const ElasticDashboard = z.object({
+  /**
+   * The unique identifier for the dashboard installed Saved Object
+   */
+  id: z.string().optional(),
+  /**
+   * The title of the dashboard
+   */
+  title: z.string(),
+  /**
+   * The description of the dashboard
+   */
+  description: z.string().optional(),
+  /**
+   * The data of the dashboard, format could depend on the vendor
+   */
+  data: z.string().optional(),
 });
 
 /**
@@ -123,9 +152,21 @@ export const DashboardMigrationDashboardData = z.object({
    */
   original_dashboard: OriginalDashboard,
   /**
+   * The translated elastic dashboard.
+   */
+  elastic_dashboard: ElasticDashboard.optional(),
+  /**
+   * The rule translation result.
+   */
+  translation_result: MigrationTranslationResult.optional(),
+  /**
    * The status of the dashboard migration process.
    */
   status: MigrationStatus.default('pending'),
+  /**
+   * The comments for the migration including a summary from the LLM in markdown.
+   */
+  comments: MigrationComments.optional(),
   /**
    * The moment of the last update
    */
@@ -153,52 +194,25 @@ export const DashboardMigrationDashboard = z
  * The dashboard migration task stats object.
  */
 export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
-export const DashboardMigrationTaskStats = z.object({
+export const DashboardMigrationTaskStats = MigrationTaskStats;
+
+/**
+ * The dashboard migration task execution settings.
+ */
+export type DashboardMigrationTaskExecutionSettings = z.infer<
+  typeof DashboardMigrationTaskExecutionSettings
+>;
+export const DashboardMigrationTaskExecutionSettings = z.object({
   /**
-   * The migration id
+   * The connector ID used in the last execution.
    */
-  id: NonEmptyString,
-  /**
-   * The migration name
-   */
-  name: NonEmptyString,
-  /**
-   * Indicates if the migration task status.
-   */
-  status: MigrationTaskStatus,
-  /**
-   * The dashboards migration stats.
-   */
-  dashboards: z
-    .object({
-      /**
-       * The total number of dashboards to migrate.
-       */
-      total: z.number().int(),
-      /**
-       * The number of dashboards that are pending migration.
-       */
-      pending: z.number().int(),
-      /**
-       * The number of dashboards that are being migrated.
-       */
-      processing: z.number().int(),
-      /**
-       * The number of dashboards that have been migrated successfully.
-       */
-      completed: z.number().int(),
-      /**
-       * The number of dashboards that have failed migration.
-       */
-      failed: z.number().int(),
-    })
-    .optional(),
-  /**
-   * The moment the migration was created.
-   */
-  created_at: z.string(),
-  /**
-   * The moment of the last update.
-   */
-  last_updated_at: z.string(),
+  connector_id: z.string(),
 });
+
+/**
+ * Indicates the filter to retry the migrations dashboards translation
+ */
+export type DashboardMigrationRetryFilter = z.infer<typeof DashboardMigrationRetryFilter>;
+export const DashboardMigrationRetryFilter = z.enum(['failed', 'not_fully_translated']);
+export type DashboardMigrationRetryFilterEnum = typeof DashboardMigrationRetryFilter.enum;
+export const DashboardMigrationRetryFilterEnum = DashboardMigrationRetryFilter.enum;

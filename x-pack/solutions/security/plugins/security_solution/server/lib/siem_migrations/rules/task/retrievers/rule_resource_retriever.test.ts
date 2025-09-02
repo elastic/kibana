@@ -27,7 +27,7 @@ describe('RuleResourceRetriever', () => {
       resources: { searchBatches: jest.fn().mockReturnValue({ next: jest.fn(() => []) }) },
     } as unknown as jest.Mocked<RuleMigrationsDataClient>;
 
-    retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient);
+    retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient.resources);
 
     MockResourceIdentifier.mockImplementation(() => ({
       fromOriginal: jest.fn().mockReturnValue([]),
@@ -39,7 +39,7 @@ describe('RuleResourceRetriever', () => {
   });
 
   it('throws an error if initialize is not called before getResources', async () => {
-    await expect(retriever.getResources(migration)).rejects.toThrow(
+    await expect(retriever.getResources(migration.original_rule)).rejects.toThrow(
       'initialize must be called before calling getResources'
     );
   });
@@ -49,7 +49,7 @@ describe('RuleResourceRetriever', () => {
     mockResourceIdentifier.fromOriginal.mockResolvedValue([]);
     await retriever.initialize(); // Pretend initialize has been called
 
-    const result = await retriever.getResources(migration);
+    const result = await retriever.getResources(migration.original_rule);
     expect(result).toEqual({});
   });
 
@@ -71,7 +71,7 @@ describe('RuleResourceRetriever', () => {
       fromResources: jest.fn().mockReturnValue([]),
     }));
 
-    const result = await retriever.getResources(migration);
+    const result = await retriever.getResources(migration.original_rule);
     expect(result).toEqual({
       macro: [{ name: 'macro1', type: 'macro' }],
       lookup: [{ name: 'lookup1', type: 'lookup' }],
@@ -107,7 +107,7 @@ describe('RuleResourceRetriever', () => {
       fromResources: jest.fn().mockReturnValue([]).mockReturnValueOnce(mockNestedResources),
     }));
 
-    const result = await retriever.getResources(migration);
+    const result = await retriever.getResources(migration.original_rule);
     expect(result).toEqual({
       macro: [
         { name: 'macro1', type: 'macro' },
