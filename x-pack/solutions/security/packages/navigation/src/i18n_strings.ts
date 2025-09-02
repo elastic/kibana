@@ -21,6 +21,11 @@ export const i18nStrings = {
       }),
     },
   },
+  migrations: {
+    title: i18n.translate('securitySolutionPackages.navLinks.migrations', {
+      defaultMessage: 'Migrations',
+    }),
+  },
   investigations: {
     title: i18n.translate('securitySolutionPackages.navLinks.investigations', {
       defaultMessage: 'Investigations',

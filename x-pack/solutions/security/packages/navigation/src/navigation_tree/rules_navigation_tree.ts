@@ -47,10 +47,6 @@ export const createRulesNavigationTree = (): NodeDefinition => ({
           id: SecurityPageName.exceptions,
           link: securityLink(SecurityPageName.exceptions),
         },
-        {
-          id: SecurityPageName.siemMigrationsRules,
-          link: securityLink(SecurityPageName.siemMigrationsRules),
-        },
       ],
     },
     {
