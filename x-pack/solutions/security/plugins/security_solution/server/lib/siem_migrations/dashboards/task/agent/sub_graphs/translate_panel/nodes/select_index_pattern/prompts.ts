@@ -8,21 +8,8 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const SELECT_INDEX_PATTERN_PROMPT = ChatPromptTemplate.fromTemplate(
-  `You are a cybersecurity expert familiar with both Splunk and Elasticsearch.
-
-Your task is:
-
-- Analyze the provided Splunk query and its context.
-
-- Determine the most specific Elastic index pattern that would support this query in the current Elastic cluster.
-
-Instructions:
-
-- Respond only with the index pattern string.
-
-- Do not add explanations, comments, or extra formatting.
-
-- Prioritize specificity: choose the narrowest index pattern that captures the relevant data.
+  `This is a ES|QL query for an Elastic dashboard panel, so you also provided with the \`title\` and \`description\` and \`query\` of the visualization panel, as context.
+The index pattern in the context \`query\` is a dummy temporary index pattern, please ignore it, it will be replaced later.
 
 <context>
   <title>{title}</title>

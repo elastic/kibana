@@ -11,6 +11,7 @@ import type { ChatModel } from '../../../../../../../common/task/util/actions_cl
 import type { DashboardMigrationTelemetryClient } from '../../../../../dashboard_migrations_telemetry_client';
 import type { GraphNode } from '../../types';
 import { SELECT_INDEX_PATTERN_PROMPT } from './prompts';
+import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
 
 interface GetSelectIndexPatternParams {
   model: ChatModel;
@@ -28,26 +29,29 @@ export const getSelectIndexPatternNode = (params: GetSelectIndexPatternParams): 
   });
 
   return async (state, config) => {
-    const selectIndexPatternGraph = await selectIndexPatternGraphPromise; // This will only be awaited the first time the node is executed
-
-    if (!state.inline_query) {
+    if (!state.esql_query) {
       return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
     }
+
     const question = await SELECT_INDEX_PATTERN_PROMPT.format({
-      query: state.inline_query,
+      query: state.esql_query,
       title: state.parsed_panel.title,
       description: state.description ?? '',
     });
+
+    const selectIndexPatternGraph = await selectIndexPatternGraphPromise; // This will only be awaited the first time the node is executed
     const { selectedIndexPattern } = await selectIndexPatternGraph.invoke(
       { input: { question } },
       config
     );
 
-    if (!selectedIndexPattern) {
-      return { index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
-    }
-    return {
-      index_pattern: selectedIndexPattern,
-    };
+    const indexPattern = selectedIndexPattern ?? MISSING_INDEX_PATTERN_PLACEHOLDER;
+
+    const esqlQuery = state.esql_query.replace(
+      `FROM ${TRANSLATION_INDEX_PATTERN}`, // Will always be at the beginning of the query
+      `FROM ${indexPattern}`
+    );
+
+    return { index_pattern: indexPattern, esql_query: esqlQuery };
   };
 };

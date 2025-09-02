@@ -18,9 +18,6 @@ import type { TranslatePanelGraphParams, TranslateDashboardPanelState } from './
 import { migrateDashboardConfigSchema } from '../../state';
 import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
 
-// How many times we will try to self-heal when validation fails, to prevent infinite graph recursions
-const MAX_VALIDATION_ITERATIONS = 3;
-
 export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const translateQueryNode = getTranslateQueryNode(params);
   const inlineQueryNode = getInlineQueryNode(params);
@@ -36,29 +33,25 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   )
     // Nodes
     .addNode('inlineQuery', inlineQueryNode)
-    .addNode('selectIndexPattern', selectIndexPatternNode)
     .addNode('translateQuery', translateQueryNode)
     .addNode('validation', validationNode)
     .addNode('fixQueryErrors', fixQueryErrorsNode)
     .addNode('ecsMapping', ecsMappingNode)
+    .addNode('selectIndexPattern', selectIndexPatternNode)
     .addNode('translationResult', translationResultNode)
 
     // Edges
     .addEdge(START, 'inlineQuery')
-    .addConditionalEdges('inlineQuery', translatableRouter, [
-      'selectIndexPattern',
-      'translationResult',
-    ])
-    .addEdge('inlineQuery', 'selectIndexPattern')
-    .addEdge('selectIndexPattern', 'translateQuery')
+    .addConditionalEdges('inlineQuery', translatableRouter, ['translateQuery', 'translationResult'])
     .addEdge('translateQuery', 'validation')
     .addEdge('fixQueryErrors', 'validation')
     .addEdge('ecsMapping', 'validation')
     .addConditionalEdges('validation', validationRouter, [
       'fixQueryErrors',
       'ecsMapping',
-      'translationResult',
+      'selectIndexPattern',
     ])
+    .addEdge('selectIndexPattern', 'translationResult')
     .addEdge('translationResult', END);
 
   const graph = translateDashboardPanelGraph.compile();
@@ -70,19 +63,15 @@ const translatableRouter = (state: TranslateDashboardPanelState) => {
   if (!state.inline_query) {
     return 'translationResult';
   }
-  return 'selectIndexPattern';
+  return 'translateQuery';
 };
 
 const validationRouter = (state: TranslateDashboardPanelState) => {
-  if (
-    state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    !isEmpty(state.validation_errors?.esql_errors)
-  ) {
+  if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
-
-  return 'translationResult';
+  return 'selectIndexPattern';
 };

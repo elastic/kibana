@@ -8,8 +8,8 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const ESQL_CONVERT_CIM_TO_ECS_PROMPT =
-  ChatPromptTemplate.fromTemplate(`You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk SPL to Elasticsearch ESQL.
-Your task is to look at the new ESQL query already generated from its initial Splunk SPL query and translate the Splunk CIM field names to the Elastic Common Schema (ECS) fields.
+  ChatPromptTemplate.fromTemplate(`You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate SPL queries from Splunk to Elasticsearch ES|QL.
+Your task is to look at the new ES|QL query already generated from its initial Splunk SPL query and translate the Splunk CIM field names to the Elastic Common Schema (ECS) fields.
 Below is the relevant context used when deciding which Elastic Common Schema field to use when translating from Splunk CIM fields:
 
 <context>
@@ -30,6 +30,7 @@ Go through the current esql query above and translate the current field names th
 - Go through each part of the ESQL query, if a part is determined to be related to a splunk CIM field or datamodel use the cim to ecs map above to determine the equivalent ECS field.
 - If a field is not in the cim to ecs map, or no datamodel is used, try to use your existing knowledge about Elastic Common Schema to determine if and which ECS field to use.
 - Do not reuse the same ECS field name for multiple Splunk CIM fields, always try to find the most appropriate ECS field.
+- When mapping to ECS fields, try to use the more specific ECS fields, considering the usage in the query. For example: \`host.name == "some_host"\` is better than \`host == "some_host"\`.
 - If you are uncertain about a field mapping, leave it as is and mention it in the summary.
 
 <guidelines>
@@ -41,6 +42,7 @@ Go through the current esql query above and translate the current field names th
 
 <expected_output>
 - First, the updated ES|QL query inside an \`\`\`esql code block.
-- At the end, the summary of the the field mapping process followed in markdown, starting with "## Field Mapping Summary". This would include the reason, original field names, the target ECS field name and any fields that were left as is.
+- After, the summary of the the field mapping process followed in markdown, starting with "## Field Mapping Summary". This would include the reason, original field names, the target ECS field name and any fields that were left as is.
+- Don't add any other information or explanation before or after these two outputs.
 </expected_output>
 `);

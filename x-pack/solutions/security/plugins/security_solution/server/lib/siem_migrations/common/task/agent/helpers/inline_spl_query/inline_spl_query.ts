@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { isEmpty } from 'lodash/fp';
 import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
@@ -42,12 +41,6 @@ export const getInlineSplQuery: NodeHelperCreator<
         isUnsupported: true,
         comments: [generateAssistantComment(unsupportedComment)],
       };
-    }
-
-    if (isEmpty(resources.macro) && isEmpty(resources.lookup)) {
-      // No resources identified in the query, no need to replace anything
-      const summary = '## Inlining Summary\n\nNo macro or lookup found in the query.';
-      return { inlineQuery: query, comments: [generateAssistantComment(summary)] };
     }
 
     const replaceQueryParser = new StringOutputParser();

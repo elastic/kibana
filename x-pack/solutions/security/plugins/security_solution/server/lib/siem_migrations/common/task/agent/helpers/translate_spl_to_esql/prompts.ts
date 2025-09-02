@@ -58,15 +58,26 @@ Go through each step and part of the splunk_query while following the below guid
 <guidelines>
 - Analyze the SPL query and identify the key components.
 - Do NOT translate the field names of the SPL query.
-- Always start the resulting ES|QL query by filtering using FROM and with the following index pattern: {index_pattern}
+- Always start the resulting ES|QL query with "FROM {index_pattern}". We will set the correct index pattern later on, so do not mention anything about index patterns in the summary.
 - Always remember to leave placeholders defined in the placeholders_syntax context as they are, don't replace them.
 - Always remember to translate any lookup (that are not inside a placeholder) using the lookup_syntax rules above.
 </guidelines>
 
-<expected_output>
+<output_format>
 - First, the ES|QL query inside an \`\`\`esql code block.
 - At the end, the summary of the translation process followed in markdown, starting with "## Translation Summary".
   - Inside SPL language code blocks, Please add a line break before each pipe (|) character in the query.
   - Make sure the Markdown is formatted correctly and the values properly escaped.
-</expected_output>
+</output_format>
+
+<example_output>
+\`\`\`esql
+FROM {index_pattern}
+| STATS count = COUNT(*) BY event.dataset, service.type
+| LIMIT 100
+\`\`\`
+## Translation Summary
+- The original SPL query was analyzed and the intent was determined.
+- The resulting ES|QL query was constructed by following the guidelines.
+</example_output>
 `);

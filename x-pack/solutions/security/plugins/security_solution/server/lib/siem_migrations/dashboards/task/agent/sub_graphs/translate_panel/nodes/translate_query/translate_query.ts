@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import {
   getTranslateSplToEsql,
   TASK_DESCRIPTION,
   type GetTranslateSplToEsqlParams,
 } from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
+import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
 import type { GraphNode } from '../../types';
 
 export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): GraphNode => {
@@ -24,7 +24,7 @@ export const getTranslateQueryNode = (params: GetTranslateSplToEsqlParams): Grap
       description: state.description ?? '',
       taskDescription: TASK_DESCRIPTION.migrate_dashboard,
       inlineQuery: state.inline_query,
-      indexPattern: state.index_pattern || MISSING_INDEX_PATTERN_PLACEHOLDER,
+      indexPattern: TRANSLATION_INDEX_PATTERN,
     });
 
     if (!esqlQuery) {

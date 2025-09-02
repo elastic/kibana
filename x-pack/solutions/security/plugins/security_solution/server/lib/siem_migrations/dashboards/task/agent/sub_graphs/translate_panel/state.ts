@@ -26,7 +26,7 @@ export const translateDashboardPanelState = Annotation.Root({
   esql_query: Annotation<string | undefined>(),
   validation_errors: Annotation<ValidationErrors>({
     reducer: (current, value) => value ?? current,
-    default: () => ({ iterations: 0 }),
+    default: () => ({ retries_left: 3 }), // Max self-healing ES|QL validation retries
   }),
   translation_result: Annotation<MigrationTranslationResult>({
     reducer: (current, value) => value ?? current,

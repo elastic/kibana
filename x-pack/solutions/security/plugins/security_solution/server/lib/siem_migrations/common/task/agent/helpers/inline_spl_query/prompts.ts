@@ -14,7 +14,10 @@ interface ResourceContext {
 }
 
 export const getResourcesContext = (resources: MigrationResources): ResourceContext => {
-  const context: ResourceContext = { macros: '', lookups: '' };
+  const context: ResourceContext = {
+    macros: 'No macros provided',
+    lookups: 'No lookups provided',
+  };
 
   // Process macros
   if (resources.macro?.length) {
@@ -46,22 +49,30 @@ Here are some context for you to reference for your task, read it carefully as y
 You have to replace the macros syntax in the SPL query and use their value inline, if provided.
 
 Always follow the below guidelines when replacing macros:
-- Macros names have the number of arguments in parentheses, e.g., \`macroName(2)\`. You must replace the correct macro accounting for the number of arguments. 
-- Divide the query up into separate sections and go through each section one at a time to identify the macros used that need to be replaced, using one of two scenarios:
-  - The macro is provided in the list of available macros: Replace it using its actual content.
-  - The macro is not in the list of available macros: add a placeholder ("missing placeholder" from now on) in the query with the format [macro:<macro_name>(argumentCount)] including the [] keys,
-    Example: \`get_duration(firstDate,secondDate)\` -> [macro:get_duration(2)]
+- The macros are always identified by backticks (\`).
+- Macros names can be in any case: 
+  - camelCase eg. \`someMacroName\`
+  - snake_case eg. \`some_macro_name\`
+  - kebab-case eg. \`some-macro-name\`
+  - or any other as long as they are between backticks
+- Macros names have the number of arguments in parentheses, e.g., \`macroName(2)\`. You must replace the correct macro accounting for the number of arguments.
+- When you find a macro there are two scenarios:
+- The macro is provided in the list of available macros -> Replace it using its actual content.
+- The macro is not in the list of available macros -> Replace it by the "missing placeholder" in the query with the format [macro:<macro_name>(argumentCount)] including the [] keys,
+  Example: \`get_duration(firstDate,secondDate)\` -> [macro:get_duration(2)]
+- There must not be any macro call with backticks in the final query.
 
 Having the following macros:
-  \`someSource\`: sourcetype="somesource"
+  \`some_source\`: sourcetype="somesource"
   \`searchTitle(1)\`: search title="$value$"
   \`searchTitle\`: search title=*
   \`searchType\`: search type=*
 
 And the following SPL query:
   \`\`\`spl
-  \`someSource\` \`someFilter\`
+  \`some_source\` \`some_filter\`
   | \`searchTitle("sometitle")\`
+  | \`searchTitle\`
   | \`searchType("sometype")\`
   | \`anotherMacro("someParam","someOtherParam", 10)\`
   | table *
@@ -69,9 +80,9 @@ And the following SPL query:
 
 The correct replacement would be:
   \`\`\`spl
-  sourcetype="somesource" \`someFilter\`
+  sourcetype="somesource" [macro:some_filter]
   | search title="sometitle"
-  | \`searchType("sometype")\`
+  | [macro:searchType(1)]
   | [macro:anotherMacro(3)]
   | table *
   \`\`\`

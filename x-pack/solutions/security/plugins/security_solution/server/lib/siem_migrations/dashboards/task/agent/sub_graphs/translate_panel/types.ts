@@ -33,6 +33,6 @@ export interface TranslatePanelGraphParams {
 }
 
 export interface ValidationErrors {
-  iterations: number;
+  retries_left: number;
   esql_errors?: string;
 }
