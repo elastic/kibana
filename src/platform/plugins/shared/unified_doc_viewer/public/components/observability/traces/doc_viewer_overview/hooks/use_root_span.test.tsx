@@ -18,7 +18,7 @@ jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_data_sources', () => ({
+jest.mock('../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'test-index' } },
   }),
