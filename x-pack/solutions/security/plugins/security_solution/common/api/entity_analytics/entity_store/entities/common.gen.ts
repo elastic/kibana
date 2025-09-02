@@ -134,3 +134,17 @@ export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity, Ge
 
 export type Entity = z.infer<typeof EntityInternal>;
 export const Entity = EntityInternal as z.ZodType<Entity>;
+
+export type CRUDEntity = z.infer<typeof CRUDEntity>;
+export const CRUDEntity = z.object({
+  entity: z.object({
+    id: z.string(),
+    name: z.string().optional(),
+    type: z.string().optional(),
+    category: z.string().optional(),
+    source: z.string().optional(),
+    attributes: z.object({}).catchall(z.unknown()).optional(),
+    behavior: z.object({}).catchall(z.unknown()).optional(),
+    lifecyle: z.object({}).catchall(z.unknown()).optional(),
+  }),
+});

@@ -215,6 +215,11 @@ import type {
   UpdateRuleMigrationRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import type {
+  UpdateSingleEntityRequestQueryInput,
+  UpdateSingleEntityRequestParamsInput,
+  UpdateSingleEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/update_single_entity.gen';
+import type {
   UpdateWorkflowInsightRequestParamsInput,
   UpdateWorkflowInsightRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
@@ -2295,6 +2300,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Given an entity type, an entity id and the contents of an entity,  update the contents of an entity. By default only a specific set   of fields are allowed to be modified, being that `entity.attributes.*,  entity.lifecyle.* and entity.behavior.*`. If you wish to update any  other field you must use the query parameter `force=true`. Be aware  that some fields always fetch the first seen value, thus your changes won't be seen. And also, due to technical limitations, there is no  guarantee that collected values will end up in the final list of  seen values.
+
+      */
+    updateSingleEntity(props: UpdateSingleEntityProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(
+          getRouteUrlForSpace(
+            replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
+        .query(props.query);
+    },
     updateWorkflowInsight(props: UpdateWorkflowInsightProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
@@ -2732,6 +2755,11 @@ export interface UpdateRuleMigrationIndexPatternProps {
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;
   body: UpdateRuleMigrationRulesRequestBodyInput;
+}
+export interface UpdateSingleEntityProps {
+  query: UpdateSingleEntityRequestQueryInput;
+  params: UpdateSingleEntityRequestParamsInput;
+  body: UpdateSingleEntityRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;

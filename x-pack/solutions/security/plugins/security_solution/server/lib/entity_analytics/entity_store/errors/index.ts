@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './common.gen';
-export * from './list_entities.gen';
-export * from './update_single_entity.gen';
+export { BadCRUDRequestError } from './bad_crud_request_error';
+export { EngineNotRunningError } from './engine_not_running_error';
+export { DocumentNotFoundError } from './document_not_found_error';
