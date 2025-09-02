@@ -130,6 +130,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             dashboards: [],
             queries: [],
+            rules: [],
           });
         });
 
