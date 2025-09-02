@@ -96,6 +96,7 @@ export interface AssistantProviderProps {
   docLinks: DocLinksStart;
   getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
+  commentActionsMounter?: React.FC<{ message: ClientMessage }>;
   http: HttpSetup;
   inferenceEnabled?: boolean;
   nameSpace?: string;
@@ -131,6 +132,7 @@ export interface UseAssistantContext {
   basePath: string;
   currentUser?: User;
   getComments: GetAssistantMessages;
+  commentActionsMounter?: React.FC<{ message: ClientMessage }>;
   getUrlForApp: GetUrlForApp;
   http: HttpSetup;
   inferenceEnabled: boolean;
@@ -191,6 +193,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     basePath,
     basePromptContexts = [],
     getComments,
+    commentActionsMounter,
     getUrlForApp,
     http,
     inferenceEnabled = false,
@@ -336,6 +339,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       currentUser,
       docLinks,
       getComments,
+      commentActionsMounter,
       getUrlForApp,
       http,
       inferenceEnabled,
@@ -388,6 +392,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       currentUser,
       docLinks,
       getComments,
+      commentActionsMounter,
       getUrlForApp,
       http,
       inferenceEnabled,

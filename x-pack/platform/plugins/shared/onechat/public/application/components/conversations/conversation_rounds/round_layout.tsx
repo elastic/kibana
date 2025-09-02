@@ -10,11 +10,15 @@ import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import type { ClientMessage } from '@kbn/elastic-assistant';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
 
 interface RoundLayoutProps {
   input: ReactNode;
   outputIcon: ReactNode;
   output: ReactNode;
+  message?: ClientMessage; // Add message prop to pass to comment actions
 }
 
 const labels = {
@@ -26,8 +30,18 @@ const labels = {
   }),
 };
 
-export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, outputIcon, output }) => {
+export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, outputIcon, output, message }) => {
   const { euiTheme } = useEuiTheme();
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the commentActionsMounter
+  const conversationSettings = useObservable(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const commentActionsMounter = conversationSettings?.commentActionsMounter;
+
   const inputContainerStyles = css`
     width: 100%;
     align-self: end;
@@ -53,6 +67,10 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, outputIcon, out
         <EuiFlexGroup direction="row" gutterSize="m">
           <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem>
           <EuiFlexItem>{output}</EuiFlexItem>
+          {/* Render comment actions if available and message is provided */}
+          {commentActionsMounter && output && (
+            <EuiFlexItem grow={false}>{commentActionsMounter({ message: output })}</EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

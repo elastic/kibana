@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type React from 'react';
 import type { AgentService } from './agents';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
@@ -26,6 +27,7 @@ export interface ConversationSettings {
   selectedConnectorId: string | undefined;
   setLastConversation: (lastConversation: LastConversation) => void;
   defaultAgentId: string | undefined;
+  commentActionsMounter: React.FC<{ message: string }> | undefined;
 }
 
 export interface OnechatInternalService {
