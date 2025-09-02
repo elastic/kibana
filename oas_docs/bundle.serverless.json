@@ -8588,6 +8588,9 @@
                                           },
                                           "type": "array"
                                         },
+                                        "fips_compatible": {
+                                          "type": "boolean"
+                                        },
                                         "name": {
                                           "description": "Package name",
                                           "type": "string"
@@ -9925,6 +9928,9 @@
                                         },
                                         "type": "array"
                                       },
+                                      "fips_compatible": {
+                                        "type": "boolean"
+                                      },
                                       "name": {
                                         "description": "Package name",
                                         "type": "string"
@@ -10970,6 +10976,9 @@
                                             "type": "object"
                                           },
                                           "type": "array"
+                                        },
+                                        "fips_compatible": {
+                                          "type": "boolean"
                                         },
                                         "name": {
                                           "description": "Package name",
@@ -12262,6 +12271,9 @@
                                           "type": "object"
                                         },
                                         "type": "array"
+                                      },
+                                      "fips_compatible": {
+                                        "type": "boolean"
                                       },
                                       "name": {
                                         "description": "Package name",
@@ -13601,6 +13613,9 @@
                                         },
                                         "type": "array"
                                       },
+                                      "fips_compatible": {
+                                        "type": "boolean"
+                                      },
                                       "name": {
                                         "description": "Package name",
                                         "type": "string"
@@ -14740,6 +14755,9 @@
                                           "type": "object"
                                         },
                                         "type": "array"
+                                      },
+                                      "fips_compatible": {
+                                        "type": "boolean"
                                       },
                                       "name": {
                                         "description": "Package name",
@@ -35097,6 +35115,9 @@
                                 },
                                 "type": "array"
                               },
+                              "fips_compatible": {
+                                "type": "boolean"
+                              },
                               "name": {
                                 "description": "Package name",
                                 "type": "string"
@@ -35615,6 +35636,9 @@
                             },
                             "type": "array"
                           },
+                          "fips_compatible": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "description": "Package name",
                             "type": "string"
@@ -35874,6 +35898,9 @@
                               "type": "object"
                             },
                             "type": "array"
+                          },
+                          "fips_compatible": {
+                            "type": "boolean"
                           },
                           "name": {
                             "description": "Package name",
@@ -36397,6 +36424,9 @@
                                 "type": "object"
                               },
                               "type": "array"
+                            },
+                            "fips_compatible": {
+                              "type": "boolean"
                             },
                             "name": {
                               "description": "Package name",
@@ -37112,6 +37142,9 @@
                                 },
                                 "type": "array"
                               },
+                              "fips_compatible": {
+                                "type": "boolean"
+                              },
                               "name": {
                                 "description": "Package name",
                                 "type": "string"
@@ -37442,6 +37475,9 @@
                               "type": "object"
                             },
                             "type": "array"
+                          },
+                          "fips_compatible": {
+                            "type": "boolean"
                           },
                           "name": {
                             "description": "Package name",
@@ -38278,6 +38314,9 @@
                                       },
                                       "type": "array"
                                     },
+                                    "fips_compatible": {
+                                      "type": "boolean"
+                                    },
                                     "name": {
                                       "description": "Package name",
                                       "type": "string"
@@ -38753,6 +38792,9 @@
                                         "type": "object"
                                       },
                                       "type": "array"
+                                    },
+                                    "fips_compatible": {
+                                      "type": "boolean"
                                     },
                                     "name": {
                                       "description": "Package name",
@@ -39449,6 +39491,9 @@
                               },
                               "type": "array"
                             },
+                            "fips_compatible": {
+                              "type": "boolean"
+                            },
                             "name": {
                               "description": "Package name",
                               "type": "string"
@@ -39974,6 +40019,9 @@
                             },
                             "type": "array"
                           },
+                          "fips_compatible": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "description": "Package name",
                             "type": "string"
@@ -40232,6 +40280,9 @@
                               "type": "object"
                             },
                             "type": "array"
+                          },
+                          "fips_compatible": {
+                            "type": "boolean"
                           },
                           "name": {
                             "description": "Package name",
@@ -40754,6 +40805,9 @@
                                 "type": "object"
                               },
                               "type": "array"
+                            },
+                            "fips_compatible": {
+                              "type": "boolean"
                             },
                             "name": {
                               "description": "Package name",
