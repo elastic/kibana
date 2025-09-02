@@ -91,7 +91,7 @@ describe('checking changes on all registered encrypted SO types', () => {
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // There are tests in core which will catch when an SO type is changed, and help the Core team enforce when
   // a model version needs to be added. This purpose of this test is to ensure that new model versions for ESOs
-  // are implmented to the security team's guidelines to adhere to all zero-downtime upgrade considerations.
+  // are implemented to the security team's guidelines to adhere to all zero-downtime upgrade considerations.
   it('detecting new model versions in registered encrypted types', () => {
     const esoTypes = esoService.getRegisteredTypes();
     const soTypestoCheck = typeRegistry
