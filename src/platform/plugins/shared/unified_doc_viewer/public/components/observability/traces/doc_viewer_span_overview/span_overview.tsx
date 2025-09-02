@@ -8,27 +8,27 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import {
-  OTEL_DURATION,
-  SERVICE_NAME_FIELD,
-  SPAN_DURATION_FIELD,
-  SPAN_ID_FIELD,
-  SPAN_NAME_FIELD,
-  TRACE_ID_FIELD,
-  TRANSACTION_ID_FIELD,
-  getSpanDocumentOverview,
-} from '@kbn/discover-utils';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
-import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
+import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
+import {
+  DURATION,
+  SERVICE_NAME,
+  SPAN_DURATION,
+  SPAN_ID,
+  SPAN_NAME,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '@kbn/apm-types';
 import { SpanLinks } from '../components/span_links';
 import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { RootSpanProvider } from './hooks/use_root_span';
-import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
@@ -36,6 +36,8 @@ import {
 import { About } from '../components/about';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { Trace } from '../components/trace';
+import { SimilarSpans } from '../components/similar_spans';
+import { isTransaction } from '../helpers';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -55,25 +57,24 @@ export function SpanOverview({
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: SpanOverviewProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats } = getUnifiedDocViewerServices();
-  const { flattenedDoc } = useMemo(
-    () => ({
-      formattedDoc: getSpanDocumentOverview(hit, { dataView, fieldFormats }),
-      flattenedDoc: getFlattenedSpanDocumentOverview(hit),
-    }),
-    [dataView, fieldFormats, hit]
-  );
+  const flattenedHit = useMemo(() => getFlattenedTraceDocumentOverview(hit), [hit]);
 
-  const isOtelSpan =
-    flattenedDoc[SPAN_DURATION_FIELD] == null && flattenedDoc[OTEL_DURATION] != null;
+  // This logic is meant to be used for both spans and transactions and be
+  // adapted once the Unify Span/Transaction into single Overview tab PR
+  //  is merged https://github.com/elastic/kibana/pull/233716
 
-  const spanDuration = isOtelSpan
-    ? flattenedDoc[OTEL_DURATION]! * 0.001
-    : flattenedDoc[SPAN_DURATION_FIELD];
+  const isSpan = !isTransaction(hit);
 
-  const traceId = flattenedDoc[TRACE_ID_FIELD];
-  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
-  const spanId = flattenedDoc[SPAN_ID_FIELD];
+  const traceId = flattenedHit[TRACE_ID];
+  const transactionId = flattenedHit[TRANSACTION_ID];
+  const spanId = flattenedHit[SPAN_ID];
+  const docId = isSpan ? spanId : transactionId;
+
+  const duration = isSpan
+    ? flattenedHit[SPAN_DURATION] || flattenedHit[SPAN_DURATION]
+    : flattenedHit[TRANSACTION_DURATION];
+
+  const isOtelSpan = flattenedHit[SPAN_DURATION] == null && flattenedHit[DURATION] != null;
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
@@ -107,17 +108,18 @@ export function SpanOverview({
               />
             </EuiFlexItem>
 
-            {spanDuration && ( // TODO change with new section for Similar spans / Latency (still to be created)
-              <EuiFlexItem>
-                <EuiSpacer size="m" />
-                <SpanDurationSummary
-                  spanDuration={spanDuration}
-                  spanName={flattenedDoc[SPAN_NAME_FIELD]}
-                  serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
-                  isOtelSpan={isOtelSpan}
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <SimilarSpans
+                spanName={flattenedHit[SPAN_NAME]}
+                serviceName={flattenedHit[SERVICE_NAME]}
+                transactionName={flattenedHit[TRANSACTION_NAME]}
+                transactionType={flattenedHit[TRANSACTION_TYPE]}
+                isOtelSpan={isOtelSpan}
+                duration={duration || 0}
+              />
+            </EuiFlexItem>
+
             <EuiFlexItem>
               <EuiSpacer size="m" />
               <Trace
@@ -132,13 +134,13 @@ export function SpanOverview({
             <EuiFlexItem>
               <EuiSpacer size="m" />
               {/* // I realized that if the section does not load (when no results) we still keep the spacer*/}
-              <SpanLinks traceId={traceId} docId={spanId} />
+              <SpanLinks traceId={traceId} docId={docId || ''} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiSpacer size="m" />
               <TraceContextLogEvents
-                traceId={flattenedDoc[TRACE_ID_FIELD]}
-                spanId={flattenedDoc[SPAN_ID_FIELD]}
+                traceId={traceId}
+                spanId={spanId}
                 transactionId={transactionId}
               />
             </EuiFlexItem>

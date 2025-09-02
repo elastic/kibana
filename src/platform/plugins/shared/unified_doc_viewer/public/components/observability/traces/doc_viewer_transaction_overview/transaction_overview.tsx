@@ -10,23 +10,21 @@
 import React, { useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import {
-  SERVICE_NAME_FIELD,
-  TRACE_ID_FIELD,
-  TRANSACTION_DURATION_FIELD,
-  TRANSACTION_NAME_FIELD,
-  TRANSACTION_TYPE_FIELD,
-  getTransactionDocumentOverview,
-  TRANSACTION_ID_FIELD,
-} from '@kbn/discover-utils';
+import { TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
-import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
+import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
-import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
-import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
+import {
+  DURATION,
+  SERVICE_NAME,
+  SPAN_DURATION,
+  SPAN_NAME,
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '@kbn/apm-types';
 import { RootTransactionProvider } from './hooks/use_root_transaction';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { Trace } from '../components/trace';
 
@@ -37,6 +35,8 @@ import {
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { SpanLinks } from '../components/span_links';
 import { About } from '../components/about';
+import { SimilarSpans } from '../components/similar_spans';
+import { isTransaction } from '../helpers';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -56,19 +56,22 @@ export function TransactionOverview({
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: TransactionOverviewProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats } = getUnifiedDocViewerServices();
-  const { formattedDoc, flattenedDoc } = useMemo(
-    () => ({
-      formattedDoc: getTransactionDocumentOverview(hit, { dataView, fieldFormats }),
-      flattenedDoc: getFlattenedTransactionDocumentOverview(hit),
-    }),
-    [dataView, fieldFormats, hit]
-  );
+  const flattenedHit = useMemo(() => getFlattenedTraceDocumentOverview(hit), [hit]);
 
-  const transactionDuration = flattenedDoc[TRANSACTION_DURATION_FIELD];
+  // This logic is meant to be used for both spans and transactions and be
+  // adapted once the Unify Span/Transaction into single Overview tab PR
+  //  is merged https://github.com/elastic/kibana/pull/233716
 
-  const traceId = flattenedDoc[TRACE_ID_FIELD];
-  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
+  const isSpan = !isTransaction(hit);
+
+  const traceId = flattenedHit[TRACE_ID_FIELD];
+  const transactionId = flattenedHit[TRANSACTION_ID_FIELD];
+
+  const duration = isSpan
+    ? flattenedHit[SPAN_DURATION] || flattenedHit[SPAN_DURATION]
+    : flattenedHit[TRANSACTION_DURATION];
+
+  const isOtelSpan = flattenedHit[SPAN_DURATION] == null && flattenedHit[DURATION] != null;
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
@@ -77,73 +80,67 @@ export function TransactionOverview({
   return (
     <DataSourcesProvider indexes={indexes}>
       <RootTransactionProvider traceId={traceId}>
-        <FieldActionsProvider
-          columns={columns}
-          filter={filter}
-          onAddColumn={onAddColumn}
-          onRemoveColumn={onRemoveColumn}
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          ref={setContainerRef}
+          css={
+            containerHeight
+              ? css`
+                  max-height: ${containerHeight}px;
+                  overflow: auto;
+                `
+              : undefined
+          }
         >
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="m"
-            ref={setContainerRef}
-            css={
-              containerHeight
-                ? css`
-                    max-height: ${containerHeight}px;
-                    overflow: auto;
-                  `
-                : undefined
-            }
-          >
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <About
-                hit={hit}
-                dataView={dataView}
-                filter={filter}
-                onAddColumn={onAddColumn}
-                onRemoveColumn={onRemoveColumn}
-              />
-            </EuiFlexItem>
-            {transactionDuration !== undefined && (
-              <EuiFlexItem>
-                <TransactionDurationSummary
-                  transactionDuration={transactionDuration}
-                  transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-                  transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
-                  serviceName={formattedDoc[SERVICE_NAME_FIELD]}
-                />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              {traceId && transactionId && (
-                <>
-                  <EuiSpacer size="m" />
-                  <Trace
-                    hit={hit}
-                    showWaterfall={showWaterfall}
-                    dataView={dataView}
-                    filter={filter}
-                    onAddColumn={onAddColumn}
-                    onRemoveColumn={onRemoveColumn}
-                  />
-                </>
-              )}
-            </EuiFlexItem>
+          <EuiFlexItem>
             <EuiSpacer size="m" />
-            <SpanLinks
-              traceId={traceId}
-              docId={transactionId}
-              processorEvent={ProcessorEvent.transaction}
+            <About
+              hit={hit}
+              dataView={dataView}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
             />
-            <EuiFlexItem />
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <TraceContextLogEvents traceId={traceId} transactionId={transactionId} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </FieldActionsProvider>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SimilarSpans
+              spanName={flattenedHit[SPAN_NAME]}
+              serviceName={flattenedHit[SERVICE_NAME]}
+              transactionName={flattenedHit[TRANSACTION_NAME]}
+              transactionType={flattenedHit[TRANSACTION_TYPE]}
+              isOtelSpan={isOtelSpan}
+              duration={duration || 0}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            {traceId && transactionId && (
+              <>
+                <EuiSpacer size="m" />
+                <Trace
+                  hit={hit}
+                  showWaterfall={showWaterfall}
+                  dataView={dataView}
+                  filter={filter}
+                  onAddColumn={onAddColumn}
+                  onRemoveColumn={onRemoveColumn}
+                />
+              </>
+            )}
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          <SpanLinks
+            traceId={traceId}
+            docId={transactionId || ''}
+            processorEvent={ProcessorEvent.transaction}
+          />
+          <EuiFlexItem />
+          <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <TraceContextLogEvents traceId={traceId} transactionId={transactionId} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </RootTransactionProvider>
     </DataSourcesProvider>
   );
