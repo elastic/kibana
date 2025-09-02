@@ -14,96 +14,45 @@ const STORAGE_KEY = 'core.chrome.sidenav_v2.panel_state';
  * Provides persistence across browser sessions using sessionStorage.
  */
 export class PanelStateManager {
-  private cache: Record<string, string> = {};
-  private isStorageAvailable: boolean;
+  private state: Record<string, string> = {};
 
   constructor() {
-    this.isStorageAvailable = this.checkStorageAvailability();
-    this.loadFromStorage();
+    this.load();
   }
 
-  /**
-   * Gets the last active item ID for a panel opener.
-   * @param panelId - The panel opener node ID
-   * @returns The last active item ID, or undefined if not found
-   */
   getPanelLastActive(panelId: string): string | undefined {
-    return this.cache[panelId];
+    return this.state[panelId];
   }
 
-  /**
-   * Sets the last active item for a panel opener.
-   * @param panelId - The panel opener node ID
-   * @param itemId - The active item ID
-   */
   setPanelLastActive(panelId: string, itemId: string): void {
-    this.cache[panelId] = itemId;
-    this.saveToStorage();
+    this.state[panelId] = itemId;
+    this.save();
   }
 
-  /**
-   * Clears all panel state.
-   */
-  clearPanelState(): void {
-    this.cache = {};
-    this.removeFromStorage();
-  }
-
-  /**
-   * Clears state for a specific panel.
-   * @param panelId - The panel opener node ID
-   */
-  clearPanelLastActive(panelId: string): void {
-    delete this.cache[panelId];
-    this.saveToStorage();
-  }
-
-  private checkStorageAvailability(): boolean {
-    try {
-      if (typeof window === 'undefined' || !window.sessionStorage) {
-        return false;
-      }
-      // Test if we can actually use sessionStorage
-      const testKey = '__kibana_storage_test__';
-      window.sessionStorage.setItem(testKey, 'test');
-      window.sessionStorage.removeItem(testKey);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private loadFromStorage(): void {
-    if (!this.isStorageAvailable) return;
-
-    try {
-      const stored = window.sessionStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        this.cache = JSON.parse(stored);
-      }
-    } catch {
-      // Ignore parsing errors, start with empty cache
-      this.cache = {};
-    }
-  }
-
-  private saveToStorage(): void {
-    if (!this.isStorageAvailable) return;
-
-    try {
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.cache));
-    } catch {
-      // Ignore storage errors (quota exceeded, etc.)
-    }
-  }
-
-  private removeFromStorage(): void {
-    if (!this.isStorageAvailable) return;
-
+  clear(): void {
+    this.state = {};
     try {
       window.sessionStorage.removeItem(STORAGE_KEY);
     } catch {
-      // Ignore removal errors
+      // Ignore storage errors
+    }
+  }
+
+  private load(): void {
+    try {
+      const stored = window.sessionStorage.getItem(STORAGE_KEY);
+      this.state = stored ? JSON.parse(stored) : {};
+    } catch {
+      // Ignore parsing errors, start with empty cache
+      this.state = {};
+    }
+  }
+
+  private save(): void {
+    try {
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+    } catch {
+      // Ignore storage errors
     }
   }
 }
