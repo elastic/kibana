@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import type { LanguageDefinition } from '../types';
-import './select_client.scss';
+import * as Styles from './styles';
 
 interface SelectClientProps {
   language: LanguageDefinition;
@@ -45,10 +45,10 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
         <EuiPanel
           hasBorder
           borderRadius="m"
-          className={
+          css={
             isSelectedLanguage
-              ? 'serverlessSearchSelectClientPanelSelectedBorder'
-              : 'serverlessSearchSelectClientPanelBorder'
+              ? Styles.searchSelectClientPanelSelectedBorder(euiTheme)
+              : Styles.searchSelectClientPanelBorder(euiTheme)
           }
           onClick={() => setSelectedLanguage(language)}
           color={isSelectedLanguage ? 'primary' : 'plain'}

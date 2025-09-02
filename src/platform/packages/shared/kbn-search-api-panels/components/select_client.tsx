@@ -20,7 +20,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { OverviewPanel } from './overview_panel';
-import './select_client.scss';
 
 export interface SelectClientPanelProps {
   docLinks: { elasticsearchClients: string; kibanaRunApiInConsole: string };
