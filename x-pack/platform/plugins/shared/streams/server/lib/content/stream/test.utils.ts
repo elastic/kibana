@@ -24,6 +24,7 @@ export const testContentPackEntry = ({
   request: {
     queries,
     dashboards: [],
+    rules: [],
     stream: {
       description: '',
       ingest: {

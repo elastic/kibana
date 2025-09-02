@@ -122,6 +122,7 @@ const upsertGroupRoute = createServerRoute({
         group,
       },
       queries,
+      rules: [],
     };
 
     return await streamsClient.upsertStream({

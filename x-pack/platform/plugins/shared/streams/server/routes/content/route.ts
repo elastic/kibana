@@ -117,6 +117,7 @@ function asContentPackEntry({
       stream: { ...omit(stream, ['name']) },
       queries: queryLinks.map(({ query }) => query),
       dashboards: [],
+      rules: [],
     },
   };
 }

@@ -107,6 +107,7 @@ describe('WiredStream', () => {
         inherited_fields: {},
         dashboards: [],
         queries: [],
+        rules: [],
       },
     ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
       expect(WiredStream.GetResponse.is(val)).toBe(true);
@@ -153,6 +154,7 @@ describe('WiredStream', () => {
       {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
