@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const UNKNOWN_MIGRATION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.unknownMigrationTitle',
+  'xpack.securitySolution.siemMigrations.common.unknownMigrationTitle',
   {
     defaultMessage: 'Unknown migration',
   }
 );
 
 export const UNKNOWN_MIGRATION_BODY = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.unknownMigrationBodyTitle',
+  'xpack.securitySolution.siemMigrations.common.unknownMigrationBodyTitle',
   {
     defaultMessage:
-      'Selected migration does not exist. Please select one of the available migraitons',
+      'Selected migration does not exist. Please select one of the available migrations',
   }
 );

@@ -31,7 +31,7 @@ export const EmptyMigration: React.FC = React.memo(() => {
           title={<h2>{i18n.NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL}</h2>}
           titleSize="s"
           body={i18n.NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL_BODY}
-          data-test-subj="noRulesTranslationAvailableForInstall"
+          data-test-subj="noTranslationAvailableForInstall"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -42,7 +42,7 @@ export const EmptyMigration: React.FC = React.memo(() => {
           onClick={onClickLink}
           data-test-subj="goToSiemMigrationsButton"
         >
-          {i18n.GO_BACK_TO_RULES_TABLE_BUTTON}
+          {i18n.GO_BACK_TO_AUTOMATIC_MIGRATIONS_BUTTON}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

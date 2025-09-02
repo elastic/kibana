@@ -10,13 +10,13 @@ import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
-import type { RuleMigrationStats } from '../../types';
 
 export const SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID = 'siemMigrationsSelectMigrationButton';
 
 const migrationStatsToComboBoxOption = (
-  stats: RuleMigrationStats
+  stats: MigrationTaskStats
 ): EuiComboBoxOptionOption<string> => ({
   value: stats.id,
   label: stats.name,
@@ -24,30 +24,30 @@ const migrationStatsToComboBoxOption = (
 });
 
 export interface HeaderButtonsProps {
-  /** Available rule migrations stats */
-  ruleMigrationsStats: RuleMigrationStats[];
-  /** Selected rule migration id */
+  /** Available migrations stats */
+  migrationsStats: MigrationTaskStats[];
+  /** Selected migration id */
   selectedMigrationId: string | undefined;
   /** Handles migration selection changes */
   onMigrationIdChange: (selectedId?: string) => void;
 }
 export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
-  ({ ruleMigrationsStats, selectedMigrationId, onMigrationIdChange }) => {
+  ({ migrationsStats, selectedMigrationId, onMigrationIdChange }) => {
     const migrationOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
-      () => ruleMigrationsStats.map(migrationStatsToComboBoxOption),
-      [ruleMigrationsStats]
+      () => migrationsStats.map(migrationStatsToComboBoxOption),
+      [migrationsStats]
     );
 
     const selectedMigrationOption = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-      const stats = ruleMigrationsStats.find(({ id }) => id === selectedMigrationId);
+      const stats = migrationsStats.find(({ id }) => id === selectedMigrationId);
       return stats ? [migrationStatsToComboBoxOption(stats)] : [];
-    }, [ruleMigrationsStats, selectedMigrationId]);
+    }, [migrationsStats, selectedMigrationId]);
 
     const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
       onMigrationIdChange(selected[0].value);
     };
 
-    if (!ruleMigrationsStats.length) {
+    if (!migrationsStats.length) {
       return null;
     }
 
