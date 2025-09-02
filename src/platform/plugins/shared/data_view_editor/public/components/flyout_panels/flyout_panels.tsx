@@ -17,8 +17,9 @@ import React, {
   useLayoutEffect,
 } from 'react';
 import { css } from '@emotion/react';
-import type { EuiFlexGroupProps } from '@elastic/eui';
-import { EuiFlexGroup, useEuiMaxBreakpoint } from '@elastic/eui';
+import type { EuiFlexGroupProps, UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, euiBreakpoint } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Panel {
   width?: number;
@@ -51,6 +52,8 @@ export interface Props {
 }
 
 export const Panels: FC<PropsWithChildren<Props>> = ({ maxWidth, flyoutClassName, ...props }) => {
+  const styles = useMemoCss(componentStyles);
+
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 
@@ -120,13 +123,12 @@ export const useFlyoutPanelsContext = (): Context => {
   return ctx;
 };
 
-const styles = {
-  flyoutPanels: () => {
-    return css({
+const componentStyles = {
+  flyoutPanels: (themeContext: UseEuiTheme) =>
+    css({
       height: '100%',
-      [useEuiMaxBreakpoint('m')]: {
+      [euiBreakpoint(themeContext, ['m'])]: {
         overflow: 'auto',
       },
-    });
-  },
+    }),
 };
