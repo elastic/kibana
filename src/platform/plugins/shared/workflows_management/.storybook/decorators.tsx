@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { Decorator } from '@storybook/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { action } from '@storybook/addon-actions';
+import { CommonGlobalAppStyles } from '@kbn/core-chrome-layout/layouts/common/global_app_styles';
 import { mockUiSettingsService } from '../public/shared/mocks/mock_ui_settings_service';
 
 const createMockWebStorage = () => ({
@@ -48,6 +49,7 @@ export const kibanaReactDecorator: Decorator = (story: Function) => {
           } as unknown as CoreStart
         }
       >
+        <CommonGlobalAppStyles />
         {story()}
       </KibanaContextProvider>
     </I18nProvider>

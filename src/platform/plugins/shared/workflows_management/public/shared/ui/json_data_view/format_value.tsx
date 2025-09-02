@@ -7,37 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Infers the field type from a value to determine the field icon
- */
-export function inferFieldType(value: unknown): string {
+export function formatValue(value: unknown): string {
   if (value === null || value === undefined) {
-    return 'unknown';
+    return '-';
   }
-
   if (Array.isArray(value)) {
-    return inferFieldType(value[0]);
+    return `<span class="ffArray__highlight">[</span>${value
+      .map(formatValue)
+      .join(
+        `<span class="ffArray__highlight">, </span>`
+      )}<span class="ffArray__highlight">]</span>`;
   }
-
-  if (typeof value === 'string') {
-    // Check if it looks like a date
-    if (!isNaN(Date.parse(value)) && /\d{4}-\d{2}-\d{2}/.test(value)) {
-      return 'date';
-    }
-    return 'string';
-  }
-
-  if (typeof value === 'number') {
-    return Number.isInteger(value) ? 'long' : 'double';
-  }
-
-  if (typeof value === 'boolean') {
-    return 'boolean';
-  }
-
   if (typeof value === 'object') {
-    return 'object';
+    return JSON.stringify(value);
   }
-
-  return 'string';
+  return String(value);
 }

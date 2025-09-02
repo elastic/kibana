@@ -22,9 +22,11 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePager } from '@kbn/discover-utils';
 import { TableFieldValue } from './table_field_value';
-import { kibanaFlatten } from '../../lib/kibana_flattern';
+import { kibanaFlatten } from '../../lib/kibana_flatten';
 import { FieldName } from './field_name';
 import { inferFieldType } from './infer_field_type';
+import { formatValue } from './format_value';
+import { useGetFormattedDateTime } from '../use_formatted_date';
 
 const MIN_NAME_COLUMN_WIDTH = 120;
 const MAX_NAME_COLUMN_WIDTH = 300;
@@ -115,6 +117,7 @@ export function JSONDataTable({
 }: JSONDataTableProps) {
   const styles = useMemoCss(componentStyles);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const getFormattedDateTime = useGetFormattedDateTime();
 
   // Create DataTableRecord from JSON - each field becomes a row
   const dataTableRecords = useMemo((): JSONDataTableRecord[] => {
@@ -132,13 +135,9 @@ export function JSONDataTable({
       const value = flattened[fieldName];
       const fieldType = inferFieldType(value);
       const displayValue =
-        value === null
-          ? '-'
-          : value === undefined
-          ? '-'
-          : typeof value === 'object'
-          ? JSON.stringify(value)
-          : String(value);
+        fieldType === 'date'
+          ? getFormattedDateTime(new Date(value as string)) ?? ''
+          : formatValue(value);
 
       return {
         id: `field-${index}`,
@@ -154,7 +153,7 @@ export function JSONDataTable({
         },
       };
     });
-  }, [jsonObject, title, columns]);
+  }, [jsonObject, columns, getFormattedDateTime, title]);
 
   const filteredDataTableRecords = useMemo(() => {
     return dataTableRecords.filter((record) => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { kibanaFlatten } from './kibana_flattern';
+import { kibanaFlatten } from './kibana_flatten';
 
 describe('kibanaFlatten', () => {
   it('should flatten simple object', () => {
