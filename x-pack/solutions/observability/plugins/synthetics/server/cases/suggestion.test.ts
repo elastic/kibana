@@ -235,13 +235,18 @@ describe('getMonitorByServiceName', () => {
                   'meta.space_id': [mockSpaceId],
                 },
               },
+              {
+                terms: {
+                  'summary.final_attempt': [true],
+                },
+              },
             ],
           },
         },
         aggs: {
           by_monitor: {
             terms: {
-              field: 'observer.name',
+              field: 'monitor.name',
               size: 5,
             },
             aggs: {
