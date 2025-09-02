@@ -66,3 +66,10 @@ export type ToolResult =
   | QueryResult
   | OtherResult
   | ErrorResult;
+
+export const visualizationElement = {
+  tagName: 'visualization',
+  attributes: {
+    toolResultId: 'tool-result-id',
+  },
+};

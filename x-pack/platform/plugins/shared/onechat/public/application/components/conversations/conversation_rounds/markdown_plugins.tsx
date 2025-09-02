@@ -9,7 +9,10 @@ import type { Node } from 'unist';
 import { css } from '@emotion/css';
 import React from 'react';
 import { ChartType } from '@kbn/visualization-utils';
-import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import {
+  visualizationElement,
+  type TabularDataResult,
+} from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
 import { useEuiTheme } from '@elastic/eui';
@@ -29,16 +32,19 @@ export const visualizationPlugin = () => {
 
     // find <visualization> nodes
     const value = (node as any).value as string | undefined;
-    if (!value || !value.trim().toLowerCase().startsWith('<visualization')) {
+    if (!value || !value.trim().toLowerCase().startsWith(`<${visualizationElement.tagName}`)) {
       return;
     }
 
     // extract attributes
-    const toolResultAttrValue = value.match(/tool-result-id="([^"]*)"/i);
-    const toolResultId = toolResultAttrValue ? toolResultAttrValue[1] : undefined;
+    const toolResultRegex = new RegExp(
+      `${visualizationElement.attributes.toolResultId}="([^"]*)"`,
+      'i'
+    );
+    const toolResultId = value.match(toolResultRegex)?.[1];
 
     // transform the node from type `html` to (custom) type `visualization`
-    (node as any).type = 'visualization';
+    (node as any).type = visualizationElement.tagName;
     (node as any).toolResultId = toolResultId;
     delete (node as any).value; // remove the raw HTML value
   };

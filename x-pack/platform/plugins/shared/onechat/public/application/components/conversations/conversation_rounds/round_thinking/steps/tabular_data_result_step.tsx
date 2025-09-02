@@ -31,15 +31,15 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
 }) => {
   return (
     <EuiBasicTable
-      columns={data.result.columns.map((column) => {
+      columns={data.columns.map((column) => {
         return {
           field: column.name,
           name: column.name,
           render: (value: unknown) => formatCellValue(value),
         };
       })}
-      items={data.result.values.map((row) => {
-        return Object.fromEntries(data.result.columns.map((col, idx) => [col.name, row[idx]]));
+      items={data.values.map((row) => {
+        return Object.fromEntries(data.columns.map((col, idx) => [col.name, row[idx]]));
       })}
     />
   );

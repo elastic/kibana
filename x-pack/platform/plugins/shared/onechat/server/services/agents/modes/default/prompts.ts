@@ -6,8 +6,9 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { builtinToolIds } from '@kbn/onechat-common';
+import { ToolResultType, builtinToolIds } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 
 const tools = {
@@ -61,23 +62,26 @@ Search tools targeting Elasticsearch have an **optional** \`index\` parameter. Y
 };
 
 function renderVisualizationPrompt() {
-  return `#### Rendering Visualizations with the <visualization> Element
-      When a tool call returns a ToolResult of type "tabular_data", you may render a visualization in the UI by emitting a custom XML element:
+  const { tabularData } = ToolResultType;
+  const { tagName, attributes } = visualizationElement;
 
-      <visualization tool-result-id="TOOL_RESULT_ID_HERE" />
+  return `#### Rendering Visualizations with the <${tagName}> Element
+      When a tool call returns a result of type "${tabularData}", you may render a visualization in the UI by emitting a custom XML element:
+
+      <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
 
       **Rules**
-      * The \`<visualization>\` element must only be used to render tool results of type \`tabular_data\`.
-      * You must copy the \`toolResultId\` from the tool's response into the \`tool-result-id\` attribute verbatim.
-      * Do not invent, alter, or guess IDs. You must use the exact ID provided in the tool response.
-      * You must not include any other attributes or content within the \`<visualization>\` element.
+      * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\`.
+      * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
+      * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
+      * You must not include any other attributes or content within the \`<${tagName}>\` element.
 
       **Example Usage:**
 
       Tool response includes:
       {
-        "toolResultId": "LiDo",
-        "type": "tabular_data",
+        "tool_result_id": "LiDo",
+        "type": "${tabularData}",
         "data": {
           "source": "esql",
           "query": "FROM traces-apm* | STATS count() BY BUCKET(@timestamp, 1h)",
@@ -86,5 +90,5 @@ function renderVisualizationPrompt() {
       }
 
       To visualize this response your reply should be:
-      <visualization tool-result-id="LiDo" />`;
+      <${tagName} ${attributes.toolResultId}="LiDo" />`;
 }
