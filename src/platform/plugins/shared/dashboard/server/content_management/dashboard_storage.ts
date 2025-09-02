@@ -33,7 +33,7 @@ import type {
   DashboardItem,
   LegacyDashboardGetOut,
 } from './latest';
-import { DashboardSearchAPIResult } from './v1/types';
+import type { DashboardSearchAPIResult } from './v1/types';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
