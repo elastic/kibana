@@ -44,9 +44,13 @@ export const StorageSizeCard = ({
           hasPrivileges={definition.privileges.monitor}
           title="totalDocCount"
         >
-          {statsError || !stats || !stats.totalDocs
-            ? '-'
-            : `${formatNumber(stats.totalDocs, '0,0')} documents`}
+          {' '}
+          {i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
+            defaultMessage: '{totalDocs} documents',
+            values: {
+              totalDocs: stats && stats.totalDocs ? formatNumber(stats.totalDocs, '0,0') : '-',
+            },
+          })}
         </PrivilegesWarningIconWrapper>
       ),
       'data-test-subj': 'storageSize',
