@@ -144,6 +144,7 @@ class ChatServiceImpl implements ChatService {
           savedObjects: this.savedObjects,
           request,
           connectorId,
+          inference: this.inference,
         })
       ).pipe(
         switchMap((selectedConnectorId) => {

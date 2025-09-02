@@ -8,45 +8,86 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import { NO_DEFAULT_CONNECTOR } from '@kbn/gen-ai-settings-plugin/common/constants';
 
-/**
- * Resolves the connectorId to use, given the GenAI settings.
- */
+const selectDefaultConnector = ({ connectors }: { connectors: InferenceConnector[] }) => {
+  const inferenceConnector = connectors.find(
+    (connector) => connector.type === InferenceConnectorType.Inference
+  );
+  if (inferenceConnector) return inferenceConnector;
+
+  const openAIConnector = connectors.find(
+    (connector) => connector.type === InferenceConnectorType.OpenAI
+  );
+  if (openAIConnector) return openAIConnector;
+
+  return connectors[0];
+};
+
+const tryGetInferenceDefault = async (
+  inference: InferenceServerStart,
+  request: KibanaRequest
+): Promise<string | undefined> => {
+  try {
+    const defaultConnector = await inference.getDefaultConnector(request);
+    return defaultConnector.connectorId;
+  } catch {
+    return undefined;
+  }
+};
+
+const tryGetFallbackConnector = async (
+  inference: InferenceServerStart,
+  request: KibanaRequest
+): Promise<string | undefined> => {
+  try {
+    const connectors = await inference.getConnectorList(request);
+    if (connectors.length > 0) {
+      const fallbackConnector = selectDefaultConnector({ connectors });
+      return fallbackConnector.connectorId;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return undefined;
+};
+
 export const resolveSelectedConnectorId = async ({
   uiSettings,
   savedObjects,
   request,
   connectorId,
+  inference,
 }: {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   request: KibanaRequest;
   connectorId?: string;
+  inference: InferenceServerStart;
 }): Promise<string | undefined> => {
   const soClient = savedObjects.getScopedClient(request);
   const uiSettingsClient = uiSettings.asScopedToClient(soClient);
 
-  const [defaultConnectorSetting, defaultOnly] = await Promise.all([
+  const [defaultConnectorSetting, defaultConnectorOnly] = await Promise.all([
     uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR),
     uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY),
   ]);
 
-  if (defaultOnly && defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR) {
-    return defaultConnectorSetting;
-  }
+  const hasValidDefaultConnector =
+    defaultConnectorSetting && defaultConnectorSetting !== 'NO_DEFAULT_CONNECTOR';
 
-  if (connectorId) {
-    return connectorId;
-  }
+  if (defaultConnectorOnly && hasValidDefaultConnector) return defaultConnectorSetting;
+  if (connectorId) return connectorId;
+  if (hasValidDefaultConnector) return defaultConnectorSetting;
 
-  if (defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR) {
-    return defaultConnectorSetting;
-  }
-
-  return undefined;
+  return (
+    (await tryGetInferenceDefault(inference, request)) ||
+    (await tryGetFallbackConnector(inference, request))
+  );
 };
