@@ -60,12 +60,12 @@ export class PrivateLocationTestService {
   async createPrivateLocation({
     policyId,
     label,
-    spaceId,
-  }: { policyId?: string; label?: string; spaceId?: string } = {}) {
+    spaces,
+  }: { policyId?: string; label?: string; spaces?: string[] } = {}) {
     let agentPolicyId = policyId;
 
     if (!agentPolicyId) {
-      const apiResponse = await this.addFleetPolicy();
+      const apiResponse = await this.addFleetPolicy(undefined, spaces);
       agentPolicyId = apiResponse.body.item.id;
     }
 
@@ -76,7 +76,7 @@ export class PrivateLocationTestService {
         lat: 0,
         lon: 0,
       },
-      ...(spaceId ? { spaces: [spaceId] } : {}),
+      ...(spaces ? { spaces } : {}),
     };
 
     const response = await this.supertest
@@ -88,7 +88,7 @@ export class PrivateLocationTestService {
 
     const { isInvalid, ...loc } = response.body;
 
-    if (spaceId) {
+    if (spaces) {
       return omit(loc, ['spaces']);
     }
 
