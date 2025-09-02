@@ -152,11 +152,11 @@ export const getSearchQueryString = (esql: string) => {
   const queryParts = searchFunctions
     .map((func) => {
       if (func.args.length > 0 && isStringLiteral(func.args[0])) {
-        return func.args[0].valueUnquoted;
+        return func.args[0].valueUnquoted.trim();
       }
       return '';
     })
-    .filter((query) => query.trim() !== '');
+    .filter((query) => query !== '');
 
   if (!queryParts.length) {
     return undefined;

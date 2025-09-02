@@ -25,6 +25,7 @@ import {
   getArgsFromRenameFunction,
   getCategorizeField,
   findClosestColumn,
+  getSearchQueryString,
 } from './query_parsing_helpers';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLColumn } from '@kbn/esql-ast';
@@ -199,6 +200,34 @@ describe('esql query helpers', () => {
           'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
         )
       ).toBe('date_nanos');
+    });
+  });
+
+  describe('getSearchQueryString', () => {
+    it('should return undefined for a regular ES|QL query', () => {
+      expect(getSearchQueryString('from a | where field == "value"')).toBeUndefined();
+    });
+
+    it('should return undefined if there are no search functions', () => {
+      expect(getSearchQueryString('from a | eval b = 1')).toBeUndefined();
+    });
+
+    it("should return a KQL query when it's embedded in ES|QL query", () => {
+      expect(getSearchQueryString('FROM a | WHERE KQL("""field : "value" """)')).toBe(
+        'field : "value"'
+      );
+    });
+
+    it("should return a Lucene query when it's embedded in ES|QL query", () => {
+      expect(getSearchQueryString('FROM a | WHERE QSTR("""field:value""")')).toBe('field:value');
+    });
+
+    it("should join multiple embedded queries with 'AND' operator and wrap each in parentheses", () => {
+      expect(
+        getSearchQueryString(
+          'FROM a | WHERE KQL("""field : "value" """) AND QSTR("""field:value""")'
+        )
+      ).toBe('(field : "value") AND (field:value)');
     });
   });
 
