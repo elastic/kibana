@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -23,9 +23,14 @@ export const UpdateMissingIndex = ({
   missingIndexPatternSelected,
   numberOfSelectedRules,
 }: UpdateMissingIndexProps) => {
+  const onClick = useCallback(() => {
+    setMissingIndexPatternFlyoutOpen?.();
+  }, [setMissingIndexPatternFlyoutOpen]);
+
   if (numberOfRulesWithMissingIndex === 0) {
     return null;
   }
+
   const isSelected = numberOfSelectedRules > 0;
   const isDisabled =
     isTableLoading || (numberOfSelectedRules > 0 && missingIndexPatternSelected === 0);
@@ -37,7 +42,7 @@ export const UpdateMissingIndex = ({
       <EuiButtonEmpty
         iconType="documentEdit"
         color={'primary'}
-        onClick={() => setMissingIndexPatternFlyoutOpen?.()}
+        onClick={onClick}
         disabled={isDisabled}
         isLoading={isTableLoading}
         data-test-subj="updateMissingIndexPatternButton"
