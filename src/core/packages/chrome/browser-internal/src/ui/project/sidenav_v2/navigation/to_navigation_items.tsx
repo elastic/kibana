@@ -68,13 +68,25 @@ export const toNavigationItems = (
   let deepestActiveItemId: string | undefined;
   let currentActiveItemIdLevel = -1;
 
+  const isActive = (navNode: ChromeProjectNavigationNode) =>
+    isActiveFromUrl(navNode.path, activeNodes, false);
+
   const maybeMarkActive = (navNode: ChromeProjectNavigationNode, level: number) => {
     if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
-      if (isActiveFromUrl(navNode.path, activeNodes, false)) {
+      if (isActive(navNode)) {
         deepestActiveItemId = navNode.id;
         currentActiveItemIdLevel = level;
       }
     }
+  };
+
+  const getTestSubj = (navNode: ChromeProjectNavigationNode): string => {
+    const { id, path, deepLink } = navNode;
+    return classnames(`nav-item`, `nav-item-${path}`, {
+      [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+      [`nav-item-id-${id}`]: id,
+      [`nav-item-isActive`]: isActive(navNode),
+    });
   };
 
   if (navigationTree.body.length === 1) {
@@ -111,9 +123,10 @@ export const toNavigationItems = (
 
   const logoItem: SideNavLogo = {
     href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
-    iconType: warnIfMissing(logoNode, ['iconV2', 'icon'], 'logoKibana') as string,
+    iconType: getIcon(logoNode),
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
+    'data-test-subj': logoNode ? getTestSubj(logoNode) : undefined,
   };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
@@ -277,14 +290,7 @@ export const toNavigationItems = (
     return {
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
-      iconType: warnIfMissing(
-        {
-          iconV2: AppDeepLinkIdToIcon[navNode.id],
-          ...navNode,
-        },
-        ['iconV2', 'icon'],
-        'broom'
-      ),
+      iconType: getIcon(navNode),
       href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
@@ -306,6 +312,9 @@ export const toNavigationItems = (
         .join(', ')}`
     );
   }
+
+  // Check for duplicate icons
+  warnAboutDuplicateIcons(logoItem, primaryItems);
 
   return { logoItem, navItems: { primaryItems, footerItems }, activeItemId: deepestActiveItemId };
 };
@@ -406,11 +415,55 @@ const isRecentlyAccessedDefinition = (
 const filterEmpty = <T,>(arr: Array<T | null | undefined>): T[] =>
   arr.filter((item) => item !== null && item !== undefined) as T[];
 
-const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): string => {
-  const { id, path, deepLink } = navNode;
-  return classnames(`nav-item`, `nav-item-${path}`, {
-    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
-    [`nav-item-id-${id}`]: id,
-    [`nav-item-isActive`]: isActive,
+function warnAboutDuplicateIcons(logoItem: SideNavLogo, primaryItems: MenuItem[]) {
+  // Collect all items with icons
+  const itemsWithIcons = [logoItem, ...primaryItems]
+    .filter((item) => item.iconType && item.iconType !== FALLBACK_ICON)
+    .map((item) => ({ id: item.id, icon: String(item.iconType) }));
+
+  // Group items by icon and warn about duplicates
+  const iconGroups = new Map<string, string[]>();
+  itemsWithIcons.forEach(({ id, icon }) => {
+    const items = iconGroups.get(icon) || [];
+    iconGroups.set(icon, [...items, id]);
   });
+
+  iconGroups.forEach((itemIds, iconType) => {
+    if (itemIds.length > 1) {
+      warnOnce(
+        `Icon "${iconType}" is used by multiple navigation items: ${itemIds.join(
+          ', '
+        )}. Consider using unique icons for better UX.`
+      );
+    }
+  });
+}
+
+const FALLBACK_ICON = 'broom' as const;
+const getIcon = (node: ChromeProjectNavigationNode | null): string => {
+  if (node?.iconV2) {
+    return node.iconV2 as string;
+  }
+
+  if (node?.icon) {
+    return node.icon as string;
+  }
+
+  if (node && AppDeepLinkIdToIcon[node.id]) {
+    return AppDeepLinkIdToIcon[node.id];
+  }
+
+  if (node?.deepLink?.euiIconType) {
+    return node.deepLink.euiIconType;
+  }
+
+  if (node?.deepLink?.icon) {
+    return node.deepLink.icon;
+  }
+
+  warnOnce(
+    `No icon found for node "${node?.id}". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon "broom".`
+  );
+
+  return FALLBACK_ICON;
 };
