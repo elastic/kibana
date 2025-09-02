@@ -41,9 +41,19 @@ export default function ({ getService }: FtrProviderContext) {
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
 
+    let username: string;
+    let password: string;
+    let SPACE_ID: string;
+    let roleName: string;
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
+      const res = await monitorTestService.addsNewSpace();
+      username = res.username;
+      password = res.password;
+      SPACE_ID = res.SPACE_ID;
+      roleName = res.roleName;
 
       _httpMonitorJson = getFixtureJson('http_monitor');
     });
@@ -53,22 +63,20 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      pvtLoc = await testPrivateLocations.createPrivateLocation();
+      pvtLoc = await testPrivateLocations.createPrivateLocation({ spaces: [SPACE_ID, 'default'] });
       testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
       const testResponse: Array<PrivateLocation | ServiceLocation> = [
         ...getDevLocation('mockDevUrl'),
-        { ...pvtLoc, isInvalid: false },
+        { ...pvtLoc, spaces: ['default', SPACE_ID], isInvalid: false },
       ];
 
       expect(apiResponse.body.locations).eql(testResponse);
     });
 
     it('handles spaces', async () => {
-      const { username, password, SPACE_ID, roleName } = await monitorTestService.addsNewSpace();
-
       let monitorId = '';
       const monitor = {
         ...httpMonitorJson,
@@ -116,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: monitorId,
             location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
-            spaceId: SPACE_ID,
+            spaceIds: ['default', SPACE_ID],
           })
         );
         await supertestWithoutAuth
