@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { registerMonitoringEntitySourceRoutes } from './register_monitoring_entity_source_routes';
+export * from './common.gen';
+export * from './create.gen';
+export * from './delete.gen';
+export * from './list.gen';
+export * from './update.gen';
+export * from './upload_csv.gen';
