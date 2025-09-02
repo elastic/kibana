@@ -45,6 +45,22 @@ const tableTitle = i18n.translate('indexPatternManagement.dataViewTable.tableTit
   defaultMessage: 'Data views selected for deletion',
 });
 
+export const spacesWarningText = i18n.translate(
+  'indexPatternManagement.dataViewTable.deleteWarning',
+  {
+    defaultMessage:
+      'Deleting a data view permanently removes it from all spaces and prevents all users from using it in any Kibana app such as Discover, Dashboards, or Lens. This action cannot be undone.',
+  }
+);
+
+export const relationshipCalloutText = i18n.translate(
+  'indexPatternManagement.dataViewTable.deleteDanger',
+  {
+    defaultMessage:
+      'At least one of the data views you want to delete is used by another Kibana object. Review the list of affected objects to avoid any disruptions for other Kibana users relying on them. Deleting data views permanently removes them from all spaces and cannot be undone.',
+  }
+);
+
 interface ModalProps {
   views: RemoveDataViewProps[];
   hasSpaces: boolean;
@@ -184,19 +200,6 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
     name: view.getName(),
     relationships: relationships[index],
   }));
-
-  const spacesWarningText = i18n.translate('indexPatternManagement.dataViewTable.deleteWarning', {
-    defaultMessage:
-      'Deleting a data view affects every saved object that uses it, and it is deleted from every space it is shared in. This action cannot be undone.',
-  });
-
-  const relationshipCalloutText = i18n.translate(
-    'indexPatternManagement.dataViewTable.deleteDanger',
-    {
-      defaultMessage:
-        'Deleting a data view affects every saved object that uses it, and it is deleted from every space it is shared in. One or more data views are used by other objects in Kibana. Please review each relationship before deleting. This action cannot be undone.',
-    }
-  );
 
   const showRelationshipsCallout = Object.keys(relationships).some(
     (key) => relationships[key].length > 0

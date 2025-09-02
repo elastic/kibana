@@ -10,7 +10,11 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { DeleteModalContent } from './delete_data_view_flyout_content';
+import {
+  DeleteModalContent,
+  relationshipCalloutText,
+  spacesWarningText,
+} from './delete_data_view_flyout_content';
 import type { RemoveDataViewProps } from '../edit_index_pattern';
 
 const mockViews: RemoveDataViewProps[] = [
@@ -61,9 +65,7 @@ describe('DeleteModalContent', () => {
         />
       </IntlProvider>
     );
-    expect(
-      screen.getByText(/Deleting a data view affects every saved object that uses it/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(spacesWarningText)).toBeInTheDocument();
     expect(screen.getByText(/Successfully deleted 2 data views/i)).toBeInTheDocument();
   });
 
@@ -79,9 +81,7 @@ describe('DeleteModalContent', () => {
         />
       </IntlProvider>
     );
-    expect(
-      screen.getByText(/One or more data views are used by other objects in Kibana/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(relationshipCalloutText)).toBeInTheDocument();
   });
 
   it('renders table with data view names and spaces', () => {
