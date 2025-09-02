@@ -8,15 +8,14 @@
  */
 
 import { EuiFlexItem, EuiText, EuiLoadingChart } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TimeSeriesChart } from './time_series_chart';
+import type { ChartData, SeriesData } from '../../hooks/use_metric_data_query';
 
 interface ChartContentProps {
   isLoading: boolean;
   error: Error | null;
-  data:
-    | Array<{ x: number; y: number }>
-    | Array<{ key: string; data: Array<{ x: number; y: number }> }>;
+  data: ChartData[] | SeriesData[];
   metricName: string;
   isSupported: boolean;
   unit?: string;
@@ -24,10 +23,10 @@ interface ChartContentProps {
   chartType?: string;
   timeRange: { from?: string; to?: string };
   colorIndex?: number;
-  displayDensity?: 'normal' | 'compact' | 'row';
+  size?: 'm' | 's';
 }
 
-export const ChartContent: React.FC<ChartContentProps> = ({
+export const ChartContent = ({
   isLoading,
   error,
   data,
@@ -38,18 +37,18 @@ export const ChartContent: React.FC<ChartContentProps> = ({
   chartType,
   timeRange,
   colorIndex,
-  displayDensity = 'normal',
-}) => {
+  size = 'm',
+}: ChartContentProps) => {
   // TODO: replace with value from useEuiTheme OR useKibana
   const colorMode = 'light';
 
   // Get chart height based on display density
-  const getChartHeight = () => {
-    if (displayDensity !== 'normal') {
+  const chartHeight = useMemo(() => {
+    if (size !== 'm') {
       return 100;
     }
     return 150; // normal and row use same height
-  };
+  }, [size]);
 
   if (!isSupported) {
     return (
@@ -63,7 +62,7 @@ export const ChartContent: React.FC<ChartContentProps> = ({
     return (
       <EuiFlexItem
         style={{
-          height: getChartHeight(),
+          height: chartHeight,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -78,7 +77,7 @@ export const ChartContent: React.FC<ChartContentProps> = ({
     return (
       <EuiFlexItem
         style={{
-          height: getChartHeight(),
+          height: chartHeight,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -92,12 +91,12 @@ export const ChartContent: React.FC<ChartContentProps> = ({
   }
 
   return (
-    <div style={{ width: '100%', height: getChartHeight() }}>
+    <div style={{ width: '100%', height: chartHeight }}>
       <TimeSeriesChart
         data={data}
         timeRange={timeRange}
         colorMode={colorMode}
-        height={getChartHeight()}
+        height={chartHeight}
         width="100%"
         isLoading={isLoading}
         error={error ? (error as Error).message : null}

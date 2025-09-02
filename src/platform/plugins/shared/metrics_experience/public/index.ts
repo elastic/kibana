@@ -8,6 +8,12 @@
  */
 
 import { MetricsExperiencePlugin } from './plugin';
+export type {
+  MetricsExperienceClient,
+  MetricsExperiencePluginSetup,
+  MetricsExperiencePluginStart,
+} from './types';
+
 export const plugin = () => new MetricsExperiencePlugin();
 
 export { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';
