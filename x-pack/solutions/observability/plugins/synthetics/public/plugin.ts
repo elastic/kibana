@@ -239,7 +239,7 @@ export class SyntheticsPlugin
 
     if (plugins.cases?.attachmentFramework) {
       import('./cases/suggestion_definition').then(({ syntheticsSuggestionDefinition }) => {
-        plugins.cases!.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
+        plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
           syntheticsSuggestionDefinition
         );
       });

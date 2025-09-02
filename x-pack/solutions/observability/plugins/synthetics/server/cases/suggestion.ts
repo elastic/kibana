@@ -12,8 +12,10 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
+import { SYNTHETICS_SUGGESTION_COMPONENT_ID } from '../../common/constants/cases';
 import { syntheticsMonitorSavedObjectType } from '../../common/types/saved_objects';
 import type {
+  EncryptedSyntheticsMonitor,
   EncryptedSyntheticsMonitorAttributes,
   OverviewStatusMetaData,
 } from '../../common/runtime_types';
@@ -74,9 +76,9 @@ export function getMonitorByServiceName(
             aggs: {
               by_monitor: {
                 terms: {
-                  field: 'observer.name',
+                  field: 'monitor.name',
                   // TODO: TBD
-                  // it limits suggestions to the top 5 monitors
+                  // it limits suggestions to 5 monitors
                   size: 5,
                 },
                 aggs: {
@@ -89,6 +91,8 @@ export function getMonitorByServiceName(
                           },
                         },
                       ],
+                      // TODO: Limit the suggestion to only the latest run per monitor
+                      // it gives random location at each rune
                       size: 1,
                       _source: {
                         includes: [
@@ -133,16 +137,16 @@ export function getMonitorByServiceName(
           }
 
           const monitorsSavedObject = await scopedSavedObjectsClient.bulkGet<{
-            monitor: Record<string, any>;
+            monitor: EncryptedSyntheticsMonitor;
           }>(bulkGetRequests);
 
           if (bulkGetRequests.length === 0) {
-            logger.debug(`No Synthetics SavedObjects found for the related tests runs`);
+            logger.error(`No Synthetics SavedObjects found for the related tests runs`);
             return { suggestions: [] };
           }
 
           for (const savedObj of monitorsSavedObject.saved_objects) {
-            if (!savedObj.error && savedObj.id) {
+            if (!savedObj.error && savedObj.id && savedObj.attributes) {
               savedObjectsAttrHash[savedObj.id] =
                 savedObj.attributes as unknown as EncryptedSyntheticsMonitorAttributes;
             }
@@ -150,30 +154,41 @@ export function getMonitorByServiceName(
 
           const monitorsOverviewMetaData: Array<
             OverviewStatusMetaData & { service: { name: string } }
-          > = monitors.map((monitor) => {
-            const source = monitor.latest_run.hits.hits[0]._source;
-            const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes =
-              savedObjectsAttrHash[source.config_id];
+          > = monitors.flatMap((monitor) => {
+            return monitor.latest_run.hits.hits.flatMap((hit) => {
+              const source = hit._source;
+              const relatedSavedObjectAttr: EncryptedSyntheticsMonitorAttributes =
+                savedObjectsAttrHash[source.config_id];
 
-            return {
-              monitorQueryId: source.monitor.id,
-              configId: source.config_id,
-              service: { name: source.service.name },
-              status: source.monitor.status ?? 'unknown',
-              name: source.monitor.name,
-              isEnabled: relatedSavedObjectAttr.enabled,
-              isStatusAlertEnabled: relatedSavedObjectAttr.alert?.status?.enabled ?? false,
-              type: source.monitor.type,
-              schedule: relatedSavedObjectAttr.schedule.number,
-              tags: relatedSavedObjectAttr.tags ?? [],
-              maintenanceWindows: relatedSavedObjectAttr.maintenance_windows ?? [],
-              timestamp: source['@timestamp'],
-              spaces: source.meta.space_id,
-              locationLabel: source.observer.geo.name,
-              locationId: source.observer.name,
-              urls: source.url.full,
-              projectId: relatedSavedObjectAttr.project_id,
-            };
+              if (!relatedSavedObjectAttr) {
+                logger.debug(
+                  `No related saved object found for config_id ${source.config_id} - possible deleted config, old run etc.`
+                );
+                return [];
+              }
+
+              return [
+                {
+                  monitorQueryId: source.monitor.id,
+                  configId: source.config_id,
+                  service: { name: source.service.name },
+                  status: source.monitor.status ?? 'unknown',
+                  name: source.monitor.name,
+                  isEnabled: relatedSavedObjectAttr.enabled,
+                  isStatusAlertEnabled: relatedSavedObjectAttr.alert?.status?.enabled ?? false,
+                  type: source.monitor.type,
+                  schedule: relatedSavedObjectAttr.schedule.number,
+                  tags: relatedSavedObjectAttr.tags ?? [],
+                  maintenanceWindows: relatedSavedObjectAttr.maintenance_windows ?? [],
+                  timestamp: source['@timestamp'],
+                  spaces: source.meta.space_id,
+                  locationLabel: source.observer.geo.name,
+                  locationId: source.observer.name,
+                  urls: source.url.full,
+                  projectId: relatedSavedObjectAttr.project_id,
+                },
+              ];
+            });
           });
 
           const suggestions = monitorsOverviewMetaData.flatMap((monitor) => {
@@ -183,11 +198,12 @@ export function getMonitorByServiceName(
               spaceId: monitor.spaces ?? [],
             });
             if (!url) {
-              logger.debug(
+              logger.error(
                 `No URL found for monitor ${monitor.name} with service ${monitor.service.name}`
               );
               return [];
             }
+
             const item: AttachmentItem<SyntheticsSuggestion> = {
               description: `Synthetic ${monitor.name} is ${monitor.status} for the service: ${monitor.service.name}`,
               payload: monitor,
@@ -214,7 +230,7 @@ export function getMonitorByServiceName(
             return [
               {
                 id: `synthetics-monitors-suggestion-${monitor.monitorQueryId}-${monitor.locationId}-${monitor.service.name}`,
-                componentId: 'synthetics',
+                componentId: SYNTHETICS_SUGGESTION_COMPONENT_ID,
                 description: i18n.translate(
                   'xpack.synthetics.addToCase.caseAttachmentDescription',
                   {
