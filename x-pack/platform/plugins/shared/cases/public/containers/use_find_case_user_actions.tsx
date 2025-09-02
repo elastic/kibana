@@ -13,7 +13,6 @@ import { useCasesToast } from '../common/use_cases_toast';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 
-
 export const useFindCaseUserActions = (
   caseId: string,
   params: {
