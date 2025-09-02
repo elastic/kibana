@@ -30,6 +30,16 @@ export interface ConnectorFormState {
   preSubmitValidator: ConnectorValidationFunc | null;
 }
 
+interface InternalConnectorForm {
+  __internal__?: {
+    headers?: Array<{
+      key: string;
+      value: string;
+      type: 'config' | 'secret';
+    }>;
+  };
+}
+
 export type ResetForm = (
   options?:
     | {
@@ -101,67 +111,7 @@ const useSecretHeaders = (connectorId?: string) => {
  */
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
-// const formDeserializer =
-//   (secretHeaders: Array<{ key: string; value: string; type: 'secret' }>) =>
-//   (data: ConnectorFormSchema): ConnectorFormSchema => {
-//     const overrides = connectorOverrides(data.actionTypeId);
-//     if (overrides?.formDeserializer) {
-//       return overrides.formDeserializer(data);
-//     }
-
-//     if (
-//       data.actionTypeId !== '.webhook' &&
-//       data.actionTypeId !== '.cases-webhook' &&
-//       data.actionTypeId !== '.gen-ai'
-//     ) {
-//       return data;
-//     }
-
-//     const webhookData = data as { config: { headers?: Record<string, string> } };
-
-//     console.log('deserializer, data: ', data);
-//     /**
-//      * access to the form data
-//      * be -> ui
-//      * merge the headers using a new api to get the keys from the secrets.secretheaders
-//      */
-//     // const headers = Object.entries(webhookData?.config?.headers ?? {}).map(([key, value]) => ({
-//     //   key,
-//     //   value,
-//     // }));
-
-//     const configHeaders = Object.entries(webhookData?.config?.headers ?? {}).map(
-//       ([key, value]) => ({
-//         key,
-//         value,
-//         type: 'config' as const,
-//       })
-//     );
-
-//     console.log('deserializer, secretHeaders: ', secretHeaders);
-
-//     const headers = [...configHeaders, ...secretHeaders];
-
-//     const returnedData = {
-//       ...(data as any),
-//       __internal__: {
-//         ...((data as any).__internal__ ?? {}),
-//         headers,
-//       },
-//     };
-
-//     console.log('deserializer, returnedData: ', returnedData);
-//     return {
-//       ...(data as any),
-//       __internal__: {
-//         ...((data as any).__internal__ ?? {}),
-//         headers,
-//       },
-//     };
-//   };
-
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
-  // should convert the record<string, string> to array
   const overrides = connectorOverrides(data.actionTypeId);
   if (overrides?.formDeserializer) {
     return overrides.formDeserializer(data);
@@ -232,35 +182,6 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
       return acc;
     }, {} as Record<string, string>);
 
-  /**
-   * ui -> be
-   * split the secrets to get the headers
-   * check if i have access to __internal
-   * console.log
-   * not internal, rename to headers and convert
-   * only for webhook, cases webhook
-   * array -> records
-   * split the headers
-   */
-
-  const returnedSerializerData = {
-    ...formData,
-    config: {
-      ...formData.config,
-      headers: isEmpty(configHeaders)
-        ? formData.actionTypeId !== '.gen-ai'
-          ? null
-          : undefined
-        : configHeaders,
-    },
-    secrets: {
-      ...formData.secrets,
-      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
-    },
-  };
-
-  console.log('serializer -> returnedSerializerData: ', returnedSerializerData);
-
   return {
     ...formData,
     config: {
@@ -297,6 +218,8 @@ const ConnectorFormComponent: React.FC<Props> = ({
     null
   );
 
+  const [hasMergedSecretHeaders, setHasMergedSecretHeaders] = useState(false);
+
   const registerPreSubmitValidator = useCallback((validator: ConnectorValidationFunc) => {
     setPreSubmitValidator(() => validator);
   }, []);
@@ -319,39 +242,32 @@ const ConnectorFormComponent: React.FC<Props> = ({
   }, [isFormModified, onFormModifiedChange]);
 
   useEffect(() => {
-    const currentFormData = form.getFormData() as {
-      __internal__?: {
-        headers?: Array<{
-          key: string;
-          value: string;
-          type: 'config' | 'secret';
-        }>;
-      };
-    };
-    const currentHeaders = currentFormData.__internal__?.headers ?? [];
-    const existingKeys = currentHeaders.map((header) => header.key);
+    if (secretHeaders.length === 0 || hasMergedSecretHeaders) return;
+    const currentFormData = form.getFormData() as InternalConnectorForm;
 
-    const mergedHeaders = [
-      ...currentHeaders,
-      ...secretHeaders.filter((header) => !existingKeys.includes(header.key)),
-    ];
+    const configHeaders = Object.keys(
+      (connector.config?.headers ?? {}) as Record<string, string>
+    ).map((key) => ({
+      key,
+      value: (connector.config?.headers as Record<string, string>)[key],
+      type: 'config' as const,
+    }));
 
-    console.log('connector form comp -> test mergedHeaders: ', mergedHeaders);
+    const mergedHeaders = [...configHeaders, ...secretHeaders].filter(Boolean);
 
     form.updateFieldValues(
       {
         ...currentFormData,
         __internal__: {
           ...currentFormData.__internal__,
+          hasHeaders: mergedHeaders.length > 0,
           headers: mergedHeaders,
         },
-      }
-      // { runDeserializer: false }
+      },
+      { runDeserializer: false }
     );
-
-    console.log('connector form comp, inside useEffect -> secretHeaders: ', secretHeaders);
-    console.log('connector form comp, inside useEffect, fields: ', form.getFields());
-  }, [secretHeaders, form]);
+    setHasMergedSecretHeaders(true);
+  }, [secretHeaders, form, connector, hasMergedSecretHeaders]);
 
   useEffect(() => {
     if (setResetForm) {
