@@ -33,6 +33,7 @@ import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_
 import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
+import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -187,6 +188,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   async function handleSave() {
     try {
       await saveAll();
+      // TODO: Figure out if we need to reload after each UI setting change.
+      window.location.reload();
     } catch (e) {
       const error = e as Error;
       notifications.toasts.addDanger({
@@ -324,6 +327,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 </EuiFormRow>
               </EuiDescribedFormGroup>
             )}
+            <EuiFlexItem>
+              <AIAssistantVisibility />
+            </EuiFlexItem>
           </EuiPanel>
         </EuiPageSection>
       </div>

@@ -21,6 +21,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
 } from '@kbn/management-settings-ids';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -39,6 +40,7 @@ const useSettingsContext = () => {
 const SETTING_KEYS = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
 ];
 
 export const SettingsContextProvider = ({ children }: { children: React.ReactNode }) => {
