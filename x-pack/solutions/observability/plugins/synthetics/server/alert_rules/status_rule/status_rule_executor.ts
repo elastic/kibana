@@ -566,6 +566,16 @@ export class StatusRuleExecutor {
       });
     }
 
+    const grouping: Record<string, unknown> = {
+      monitor: { id: monitorSummary.monitorId, config_id: monitorSummary.configId },
+    };
+    if (locationIds.length === 1) {
+      grouping.location = { id: locationIds[0] };
+    }
+    if (monitorSummary.serviceName) {
+      grouping.service = { name: monitorSummary.serviceName };
+    }
+
     const context = {
       ...monitorSummary,
       idWithLocation,
@@ -575,6 +585,7 @@ export class StatusRuleExecutor {
         : '',
       [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
       [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
+      grouping,
     };
 
     // downThreshold and checks are only available for down alerts
@@ -591,7 +602,8 @@ export class StatusRuleExecutor {
       locationNames,
       locationIds,
       useLatestChecks,
-      'downThreshold' in params ? params.downThreshold : 1
+      'downThreshold' in params ? params.downThreshold : 1,
+      grouping
     );
 
     alertsClient.setAlertData({

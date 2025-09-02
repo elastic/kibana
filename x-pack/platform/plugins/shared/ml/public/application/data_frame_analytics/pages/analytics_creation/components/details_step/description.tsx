@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
@@ -17,6 +17,7 @@ export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) =
   const {
     services: { docLinks },
   } = useMlKibana();
+  const { euiTheme } = useEuiTheme();
   const docsUrl = docLinks.links.ml.customUrls;
   const title = i18n.translate(
     'xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrls.title',
@@ -25,20 +26,40 @@ export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) =
     }
   );
 
-  const cssOverride = css({
-    '> .euiFlexGroup': {
-      '> .euiFlexItem': {
-        '&:last-child': {
-          flexBasis: '50%',
-        },
-      },
-    },
-  });
+  const styles = {
+    describeForm: css`
+      /* Apply column layout only on screens wider than 768px */
+      @media (min-width: 769px) {
+        &.euiDescribedFormGroup {
+          flex-direction: column;
+        }
+      }
+
+      /* Widen the Custom URL fields */
+      .euiDescribedFormGroup__fieldWrapper,
+      .euiDescribedFormGroup__fields {
+        max-width: none;
+        width: 100%;
+      }
+
+      > .euiFlexGroup {
+        > .euiFlexItem {
+          &:last-child {
+            flex-basis: 50%;
+          }
+        }
+      }
+    `,
+    formRow: css`
+      margin: 0 ${euiTheme.size.s};
+    `,
+  };
 
   return (
     <EuiDescribedFormGroup
+      gutterSize="xs"
       fullWidth
-      css={cssOverride}
+      css={styles.describeForm}
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
@@ -57,7 +78,7 @@ export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) =
         />
       }
     >
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth css={styles.formRow}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

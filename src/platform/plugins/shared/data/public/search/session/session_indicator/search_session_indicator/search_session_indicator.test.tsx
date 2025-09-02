@@ -7,129 +7,114 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React from 'react';
 import { screen, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEventDep from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SearchSessionIndicator } from './search_session_indicator';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SearchSessionState } from '../../../..';
 
-function Container({ children }: { children?: ReactNode }) {
-  return <IntlProvider locale="en">{children}</IntlProvider>;
+function setup(props: Partial<React.ComponentProps<typeof SearchSessionIndicator>> = {}) {
+  const user = userEventDep.setup();
+  const onCancel = jest.fn();
+  const onSaveResults = jest.fn();
+
+  render(
+    <IntlProvider locale="en">
+      <SearchSessionIndicator
+        hasBackgroundSearchEnabled={false}
+        state={SearchSessionState.Loading}
+        onCancel={onCancel}
+        onSaveResults={onSaveResults}
+        {...props}
+      />
+    </IntlProvider>
+  );
+
+  return { userEvent: user, onCancel, onSaveResults };
 }
 
-test('Loading state', async () => {
-  const onCancel = jest.fn();
-  render(
-    <Container>
-      <SearchSessionIndicator state={SearchSessionState.Loading} onCancel={onCancel} />
-    </Container>
-  );
+describe('<SearchSessionIndicator />', () => {
+  test('Loading state', async () => {
+    const { onCancel, userEvent } = setup();
 
-  await userEvent.click(screen.getByLabelText('Search session loading'));
-  await waitForEuiPopoverOpen();
-  await userEvent.click(screen.getByText('Stop session'));
+    await userEvent.click(screen.getByLabelText('Search session loading'));
+    await waitForEuiPopoverOpen();
+    await userEvent.click(screen.getByText('Stop session'));
 
-  expect(onCancel).toBeCalled();
-});
+    expect(onCancel).toHaveBeenCalled();
+  });
 
-test('Completed state', async () => {
-  const onSave = jest.fn();
-  render(
-    <Container>
-      <SearchSessionIndicator state={SearchSessionState.Completed} onSaveResults={onSave} />
-    </Container>
-  );
+  test('Completed state', async () => {
+    const { onSaveResults, userEvent } = setup({ state: SearchSessionState.Completed });
 
-  await userEvent.click(screen.getByLabelText('Search session complete'));
-  await waitForEuiPopoverOpen();
-  await userEvent.click(screen.getByText('Save session'));
+    await userEvent.click(screen.getByLabelText('Search session complete'));
+    await waitForEuiPopoverOpen();
+    await userEvent.click(screen.getByText('Save session'));
 
-  expect(onSave).toBeCalled();
-});
+    expect(onSaveResults).toHaveBeenCalled();
+  });
 
-test('Loading in the background state', async () => {
-  const onCancel = jest.fn();
-  render(
-    <Container>
-      <SearchSessionIndicator state={SearchSessionState.BackgroundLoading} onCancel={onCancel} />
-    </Container>
-  );
+  test('Loading in the background state', async () => {
+    const { onCancel, userEvent } = setup({ state: SearchSessionState.BackgroundLoading });
 
-  await userEvent.click(screen.getByLabelText(/Saved session in progress/));
-  await waitForEuiPopoverOpen();
-  await userEvent.click(screen.getByText('Stop session'));
+    await userEvent.click(screen.getByLabelText(/Saved session in progress/));
+    await waitForEuiPopoverOpen();
+    await userEvent.click(screen.getByText('Stop session'));
 
-  expect(onCancel).toBeCalled();
-});
+    expect(onCancel).toHaveBeenCalled();
+  });
 
-test('BackgroundCompleted state', async () => {
-  render(
-    <Container>
-      <SearchSessionIndicator
-        state={SearchSessionState.BackgroundCompleted}
-        viewSearchSessionsLink={'__link__'}
-      />
-    </Container>
-  );
+  test('BackgroundCompleted state', async () => {
+    const { userEvent } = setup({
+      state: SearchSessionState.BackgroundCompleted,
+      viewSearchSessionsLink: '__link__',
+    });
 
-  await userEvent.click(screen.getByLabelText(/Saved session complete/));
-  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
-    '__link__'
-  );
-});
+    await userEvent.click(screen.getByLabelText(/Saved session complete/));
+    expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
+      '__link__'
+    );
+  });
 
-test('Restored state', async () => {
-  render(
-    <Container>
-      <SearchSessionIndicator
-        state={SearchSessionState.Restored}
-        viewSearchSessionsLink={'__link__'}
-      />
-    </Container>
-  );
+  test('Restored state', async () => {
+    const { userEvent } = setup({
+      state: SearchSessionState.Restored,
+      viewSearchSessionsLink: '__link__',
+    });
 
-  await userEvent.click(screen.getByLabelText(/Saved session restored/));
+    await userEvent.click(screen.getByLabelText(/Saved session restored/));
 
-  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
-    '__link__'
-  );
-});
+    expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
+      '__link__'
+    );
+  });
 
-test('Canceled state', async () => {
-  render(
-    <Container>
-      <SearchSessionIndicator
-        state={SearchSessionState.Canceled}
-        viewSearchSessionsLink={'__link__'}
-      />
-    </Container>
-  );
+  test('Canceled state', async () => {
+    const { userEvent } = setup({
+      state: SearchSessionState.Canceled,
+      viewSearchSessionsLink: '__link__',
+    });
 
-  await userEvent.click(screen.getByLabelText(/Search session stopped/));
-  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
-    '__link__'
-  );
-});
+    await userEvent.click(screen.getByLabelText(/Search session stopped/));
+    expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
+      '__link__'
+    );
+  });
 
-test('Disabled state', async () => {
-  const { rerender } = render(
-    <Container>
-      <SearchSessionIndicator state={SearchSessionState.Loading} saveDisabled={true} />
-    </Container>
-  );
+  describe('when saveDisabled is true', () => {
+    const saveDisabled = true;
 
-  await userEvent.click(screen.getByLabelText('Search session loading'));
-
-  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
-
-  rerender(
-    <Container>
-      <SearchSessionIndicator state={SearchSessionState.Completed} saveDisabled={true} />
-    </Container>
-  );
-
-  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+    describe.each([
+      { state: SearchSessionState.Loading, text: 'Search session loading' },
+      { state: SearchSessionState.Completed, text: 'Search session complete' },
+    ])('when the state is $state', ({ state, text }) => {
+      it('the button should be disabled', async () => {
+        const { userEvent } = setup({ state, saveDisabled });
+        await userEvent.click(screen.getByLabelText(text));
+        expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+      });
+    });
+  });
 });

@@ -22,6 +22,14 @@ export interface WorkflowsPluginSetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPluginStart {}
 
-export interface AppPluginStartDependencies {
+export interface WorkflowsPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+}
+
+export interface WorkflowsSearchParams {
+  limit: number;
+  page: number;
+  query?: string;
+  createdBy?: string[];
+  enabled?: boolean[];
 }

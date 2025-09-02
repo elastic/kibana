@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import * as i18n from './translations';
@@ -32,7 +32,7 @@ interface RuleMigrationsUploadMissingPanelProps {
 }
 export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadMissingPanelProps>(
   ({ migrationStats, topSpacerSize }) => {
-    const [missingResources, setMissingResources] = useState<RuleMigrationResourceBase[]>([]);
+    const [missingResources, setMissingResources] = useState<SiemMigrationResourceBase[]>([]);
     const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
 
     useEffect(() => {
@@ -56,7 +56,7 @@ RuleMigrationsUploadMissingPanel.displayName = 'RuleMigrationsUploadMissingPanel
 
 interface RuleMigrationsUploadMissingPanelContentProps
   extends RuleMigrationsUploadMissingPanelProps {
-  missingResources: RuleMigrationResourceBase[];
+  missingResources: SiemMigrationResourceBase[];
 }
 const RuleMigrationsUploadMissingPanelContent =
   React.memo<RuleMigrationsUploadMissingPanelContentProps>(

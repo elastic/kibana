@@ -13,16 +13,17 @@ import type { AssetDetailsProps } from '../types';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 import { useMetadataStateContext } from './use_metadata_state';
 import { useTimeRangeMetadataContext } from '../../../hooks/use_time_range_metadata';
+import { isPending } from '../../../hooks/use_fetcher';
 
 export type UseAssetDetailsRenderProps = Pick<
   AssetDetailsProps,
-  'entityId' | 'entityName' | 'entityType' | 'overrides' | 'renderMode'
+  'entityId' | 'entityName' | 'entityType' | 'overrides' | 'renderMode' | 'preferredSchema'
 >;
 
 export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
   const [urlState] = useAssetDetailsUrlState();
   const { metadata } = useMetadataStateContext();
-  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
+  const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
   const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { entityId, entityName, entityType, ...rest } = props;
 
@@ -31,13 +32,22 @@ export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
     return timeRangeMetadata.preferredSchema;
   }, [timeRangeMetadata]);
 
+  const contextSchema = props.preferredSchema ? props.preferredSchema : urlState?.preferredSchema;
+  const selectedSchema =
+    timeRangeMetadata?.schemas && timeRangeMetadata?.schemas.length > 1 && contextSchema
+      ? contextSchema
+      : schema;
+
   useEffect(() => {
-    updateTopbarMenuVisibilityBySchema(schema);
-  }, [schema, updateTopbarMenuVisibilityBySchema]);
+    updateTopbarMenuVisibilityBySchema(selectedSchema);
+  }, [selectedSchema, updateTopbarMenuVisibilityBySchema]);
+
+  const isLoadingTimeRangeMetadata = isPending(status);
 
   // When the asset entity.name is known we can load the page faster
   // Otherwise we need to use metadata response.
-  const loading = !entityName && !urlState?.name && !metadata?.name;
+  const loading = (!entityName && !urlState?.name && !metadata?.name) || isLoadingTimeRangeMetadata;
+
   return {
     ...rest,
     entity: {
@@ -45,7 +55,7 @@ export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
       name: entityName || urlState?.name || metadata?.name || '',
       type: entityType,
     },
-    schema,
+    schema: selectedSchema,
     loading,
   };
 }

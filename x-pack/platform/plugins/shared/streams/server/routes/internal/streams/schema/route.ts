@@ -171,7 +171,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
     const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => ({
-      _index: params.path.name,
+      // Direct writes to child streams are not allowed. This must be set to logs.
+      _index: 'logs',
       _id: hit._id,
       _source: Object.fromEntries(
         Object.entries(getFlattenedObject(hit._source as SampleDocument)).filter(
@@ -192,8 +193,20 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           },
         },
       },
-      // prevent double-processing
       pipeline_substitutions: {
+        // The sampleResults are already gathered directly from the child stream index. But, we can't
+        // simulate an _index other than logs, this reroutes the documents back to the child stream.
+        // This is incase processing took place on the documents that may break re-routing them.
+        ['logs@stream.reroutes']: {
+          processors: [
+            {
+              reroute: {
+                destination: params.path.name,
+              },
+            },
+          ],
+        },
+        // prevent double-processing
         [`${params.path.name}@stream.processing`]: {
           processors: [],
         },

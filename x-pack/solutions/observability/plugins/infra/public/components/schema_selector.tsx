@@ -4,46 +4,89 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
   EuiToken,
   EuiToolTip,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   DataSchemaFormatEnum,
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
 const PrependLabel = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          {i18n.translate('xpack.infra.schemaSelector.label', {
-            defaultMessage: 'Schema',
-          })}
+        <EuiText size="xs">
+          <strong>
+            {i18n.translate('xpack.infra.schemaSelector.label', {
+              defaultMessage: 'Schema',
+            })}
+          </strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIconTip
-          content={i18n.translate('xpack.infra.schemaSelector.description', {
-            defaultMessage: 'Select which data collection schema your entities are observed with.',
-          })}
-          position="right"
-        />
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              data-test-subj="infraSchemaSelectorHelpButton"
+              aria-label={i18n.translate('xpack.infra.schemaSelector.helpButton.ariaLabel', {
+                defaultMessage: 'See schema documentation',
+              })}
+              size="s"
+              onClick={() => setIsPopoverOpen((popoverValue) => !popoverValue)}
+            >
+              <EuiIcon type="question" color="text" />
+            </EuiButtonEmpty>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          anchorPosition="rightCenter"
+        >
+          <FormattedMessage
+            id="xpack.infra.schemaSelector.description"
+            defaultMessage="Select which data collection schema your entities are observed with.{nextLine} See {documentation} for more information."
+            values={{
+              nextLine: <br />,
+              documentation: (
+                <EuiLink
+                  data-test-subj="infraSchemaSelectorDocumentationLink"
+                  href={
+                    'https://www.elastic.co/docs/solutions/observability/infra-and-hosts/analyze-compare-hosts#select-data-collection-schema'
+                  }
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.infra.schemaSelector.documentation', {
+                    defaultMessage: 'documentation',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -87,8 +130,7 @@ const InvalidDisplay = ({ value }: { value: string }) => {
     </EuiFlexGroup>
   );
 };
-
-const schemaTranslationMap = {
+export const schemaTranslationMap = {
   [DataSchemaFormatEnum.ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
     defaultMessage: 'Elastic System Integration',
   }),
@@ -120,6 +162,10 @@ export const SchemaSelector = ({
   value: DataSchemaFormat | null;
   isLoading: boolean;
 }) => {
+  const {
+    services: { telemetry },
+  } = useKibanaContextForPlugin();
+  const { euiTheme } = useEuiTheme();
   const options = useMemo(
     () =>
       schemas.map((schema) => ({
@@ -147,6 +193,15 @@ export const SchemaSelector = ({
             },
             ...options,
           ]
+        : options.length === 0
+        ? [
+            {
+              inputDisplay: i18n.translate('xpack.infra.schemaSelector.noHostsReturned', {
+                defaultMessage: 'No hosts returned',
+              }),
+              value: 'unknown',
+            },
+          ]
         : options,
     [isInvalid, options, value]
   );
@@ -155,10 +210,23 @@ export const SchemaSelector = ({
     (selectedValue: SelectOptions) => {
       if (selectedValue !== 'unknown') {
         onChange(selectedValue);
+        telemetry.reportSchemaSelectorInteraction({
+          interaction: 'select schema',
+          schema_selected: selectedValue,
+          schemas_available: schemas,
+        });
       }
     },
-    [onChange]
+    [onChange, schemas, telemetry]
   );
+
+  const handleSchemaSelectorClick = useCallback(() => {
+    telemetry.reportSchemaSelectorInteraction({
+      interaction: 'open dropdown',
+      schema_selected: value,
+      schemas_available: schemas,
+    });
+  }, [value, schemas, telemetry]);
 
   return (
     <>
@@ -170,22 +238,27 @@ export const SchemaSelector = ({
                 aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
                   defaultMessage: 'Schema selector for data collection',
                 })}
-                css={{ minWidth: '356px' }}
+                css={{ minWidth: '300px' }}
                 helpText={
-                  (options.length > 1 || isInvalid) &&
+                  options.length > 1 &&
                   i18n.translate('xpack.infra.schemaSelector.select.helpText', {
                     defaultMessage: 'There are hosts available in another schema',
                   })
                 }
               >
                 <EuiSuperSelect
+                  onClickCapture={handleSchemaSelectorClick}
                   data-test-subj="infraSchemaSelect"
                   id={'infraSchemaSelectorSelect'}
                   options={displayOptions}
-                  valueOfSelected={isInvalid ? 'unknown' : value ?? 'ecs'}
+                  valueOfSelected={isInvalid ? 'unknown' : value ?? 'semconv'}
                   onChange={onSelect}
                   isLoading={isLoading}
                   fullWidth
+                  css={{
+                    fontSize: useEuiFontSize('xs').fontSize,
+                    fontWeight: euiTheme.font.weight.medium,
+                  }}
                   prepend={<PrependLabel />}
                 />
               </EuiFormRow>
@@ -193,7 +266,7 @@ export const SchemaSelector = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
     </>
   );
 };

@@ -12,7 +12,7 @@ export { SearchPlaygroundQueryKeys, SearchPlaygroundMutationKeys } from './query
 
 export const PLUGIN_ID = 'searchPlayground';
 export const PLUGIN_NAME = i18n.translate('xpack.searchPlayground.plugin.name', {
-  defaultMessage: 'Playground',
+  defaultMessage: 'RAG Playground',
 });
 export const PLUGIN_PATH = '/app/search_playground';
 

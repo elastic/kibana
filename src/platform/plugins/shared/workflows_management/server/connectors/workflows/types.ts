@@ -16,6 +16,7 @@ export type WorkflowsActionParamsType = ExecutorParams;
 
 export interface RunWorkflowParams {
   workflowId: string;
+  spaceId: string;
   alerts?: any[];
   inputs?: Record<string, unknown>;
   [key: string]: unknown;

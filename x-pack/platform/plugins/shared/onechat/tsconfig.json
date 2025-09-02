@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/actions-plugin",
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/onechat-server",
@@ -25,7 +24,6 @@
     "@kbn/onechat-common",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-server",
-    "@kbn/inference-common",
     "@kbn/logging-mocks",
     "@kbn/zod",
     "@kbn/inference-langchain",
@@ -60,5 +58,6 @@
     "@kbn/cloud-plugin",
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
+    "@kbn/inference-common",
   ]
 }
