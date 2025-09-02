@@ -101,7 +101,7 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Workflow ID')).toBeInTheDocument();
+      expect(screen.getByText('Select Workflow')).toBeInTheDocument();
       expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
     });
   });

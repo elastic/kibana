@@ -110,7 +110,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
   let retentionMs = 0;
-  const lc = node.effective_lifecycle;
+  const lc = node.effective_lifecycle!;
   if (isDslLifecycle(lc)) {
     retentionMs = lc.dsl.data_retention
       ? parseDurationInSeconds(lc.dsl.data_retention) * 1000

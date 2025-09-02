@@ -13,6 +13,7 @@ import {
   CLASH_ERROR_TYPE,
 } from './merge_tools';
 import type { FileWrapper, FileAnalysis } from './file_wrapper';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 
 describe('merge_tools', () => {
   describe('createMergedMappings', () => {
@@ -123,6 +124,106 @@ describe('merge_tools', () => {
           },
         },
       ]);
+    });
+
+    it('should handle existing index mappings with no clashes', () => {
+      const files = [
+        {
+          getFileName: () => 'file1',
+          getMappings: () => ({
+            properties: { field1: { type: 'text' }, field3: { type: 'boolean' } },
+          }),
+        } as never as FileWrapper,
+      ];
+
+      const existingIndexMappings = {
+        properties: { field1: { type: 'text' }, field2: { type: 'number' } },
+      } as never as FindFileStructureResponse['mappings'];
+
+      const result = createMergedMappings(files, existingIndexMappings);
+
+      expect(result.mergedMappings).toEqual({
+        properties: {
+          field1: { type: 'text' },
+          field2: { type: 'number' },
+          field3: { type: 'boolean' },
+        },
+      });
+      expect(result.mappingClashes).toEqual([]);
+      expect(result.existingIndexChecks).toBeDefined();
+      expect(result.existingIndexChecks?.existingFields.sort()).toEqual(
+        ['field1', 'field2'].sort()
+      );
+      expect(result.existingIndexChecks?.newFieldsPerFile).toEqual([
+        { fileName: 'file1', fileIndex: 0, fields: ['field3'] },
+      ]);
+      expect(result.existingIndexChecks?.commonFieldsPerFile).toEqual([
+        { fileName: 'file1', fileIndex: 0, fields: ['field1'] },
+      ]);
+      expect(result.existingIndexChecks?.unmappedFieldsPerFile).toEqual([
+        { fileName: 'file1', fileIndex: 0, fields: ['field2'] },
+      ]);
+      expect(result.existingIndexChecks?.mappingClashes).toEqual([]);
+    });
+
+    it('should handle existing index mappings with clashes', () => {
+      const files = [
+        {
+          getFileName: () => 'file1',
+          getMappings: () => ({ properties: { field1: { type: 'number' } } }),
+        } as never as FileWrapper,
+      ];
+
+      const existingIndexMappings = {
+        properties: { field1: { type: 'text' } },
+      } as never as FindFileStructureResponse['mappings'];
+
+      const result = createMergedMappings(files, existingIndexMappings);
+
+      expect(result.mergedMappings).toEqual({
+        properties: {
+          field1: { type: 'text' },
+        },
+      });
+      expect(result.mappingClashes).toEqual([
+        {
+          fieldName: 'field1',
+          existingType: 'text',
+          clashingType: { fileName: undefined, newType: 'number', fileIndex: 1 },
+        },
+      ]);
+      expect(result.existingIndexChecks).toBeDefined();
+      expect(result.existingIndexChecks?.mappingClashes).toEqual([
+        {
+          fieldName: 'field1',
+          existingType: 'text',
+          clashingType: { fileName: 'file1', newType: 'number', fileIndex: 0 },
+        },
+      ]);
+    });
+
+    it('should handle existing index mappings with text/keyword compatibility', () => {
+      const files = [
+        {
+          getFileName: () => 'file1',
+          getMappings: () => ({ properties: { field1: { type: 'keyword' } } }),
+        } as never as FileWrapper,
+      ];
+
+      const existingIndexMappings = {
+        properties: { field1: { type: 'text' } },
+      } as never as FindFileStructureResponse['mappings'];
+
+      const result = createMergedMappings(files, existingIndexMappings);
+
+      expect(result.mergedMappings).toEqual({
+        properties: {
+          field1: { type: 'text' },
+        },
+      });
+      expect(result.mappingClashes).toEqual([]);
+      expect(result.existingIndexChecks).toBeDefined();
+      expect(result.existingIndexChecks?.mappingClashes).toEqual([]);
     });
   });
 

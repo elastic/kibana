@@ -8,8 +8,8 @@
  */
 
 import type { ExitForeachNode } from '@kbn/workflows';
-import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 
 describe('ExitForeachNodeImpl', () => {
   let step: ExitForeachNode;
@@ -132,7 +132,8 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(logDebug).toHaveBeenCalledWith(
-        `Exiting foreach step ${step.startNodeId} after processing all items.`
+        `Exiting foreach step ${step.startNodeId} after processing all items.`,
+        { workflow: { step_id: step.startNodeId } }
       );
     });
 
