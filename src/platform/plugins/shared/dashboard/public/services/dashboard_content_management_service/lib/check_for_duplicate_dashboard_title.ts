@@ -68,7 +68,7 @@ export async function checkForDuplicateDashboardTitle({
   });
 
   const duplicate = Boolean(
-    hits.find((hit) => hit.data.title.toLowerCase() === title.toLowerCase())
+    hits.find((hit) => hit.attributes.title.toLowerCase() === title.toLowerCase())
   );
 
   if (!duplicate) {

@@ -15,15 +15,13 @@ import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
-import {
-  dashboardGetResultSchema,
-  dashboardCreateResultSchema,
-  dashboardSearchResultsSchema,
-  DashboardItem,
-} from '../content_management/v1';
+import { dashboardGetResultSchema, DashboardItem } from '../content_management/v1';
 import {
   dashboardAttributesSchemaRequest,
   dashboardCreateRequestAttributesSchema,
+  dashboardCreateResultSchema,
+  dashboardListResultAPISchema,
+  dashboardUpdateResultSchema,
 } from '../content_management/v1/cm_services';
 
 interface RegisterAPIRoutesArgs {
@@ -144,10 +142,10 @@ export function registerAPIRoutes({
 
         return res.badRequest({ body: e });
       }
-
       const formattedResult = formatResult(result.item);
+      const response = { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } };
       return res.ok({
-        body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
+        body: response,
       });
     }
   );
@@ -174,7 +172,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
-            body: () => dashboardCreateResultSchema,
+            body: () => dashboardUpdateResultSchema,
           },
         },
       },
@@ -239,11 +237,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
-            body: () =>
-              schema.object({
-                items: schema.arrayOf(dashboardSearchResultsSchema),
-                total: schema.number(),
-              }),
+            body: () => dashboardListResultAPISchema,
           },
         },
       },

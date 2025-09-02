@@ -394,7 +394,10 @@ export const dashboardItemSchema = schema.object({
   type: schema.string(),
   id: schema.string(),
 });
-export const dashboardCreateResultSchema = dashboardItemSchema;
+
+export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
+  attributes: searchResultsAttributesSchema,
+});
 
 export const mayBeDashboardItemSchema = schema.oneOf([
   dashboardItemSchema,
@@ -431,7 +434,17 @@ export const dashboardGetResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardSearchResultsSchema = dashboardItemSchema;
+export const dashboardCreateResultSchema = schema.object(
+  {
+    id: schema.string(),
+    type: schema.string(),
+    data: dashboardAttributesSchemaResponse,
+    meta: dashboardResponseMetaSchema,
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardUpdateResultSchema = dashboardCreateResultSchema;
 
 export const dashboardItemAPIResponseSchema = schema.object(
   {
@@ -444,7 +457,7 @@ export const dashboardItemAPIResponseSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardResponseAttributesSchema,
+    attributes: dashboardAttributesSchemaRequest,
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
@@ -470,6 +483,35 @@ export const dashboardItemAPIRequestSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+export const legacyDashboardGetResultSchema = schema.object(
+  {
+    item: dashboardItemAPIResponseSchema,
+    meta: schema.object(
+      {
+        outcome: schema.oneOf([
+          schema.literal('exactMatch'),
+          schema.literal('aliasMatch'),
+          schema.literal('conflict'),
+        ]),
+        aliasTargetId: schema.maybe(schema.string()),
+        aliasPurpose: schema.maybe(
+          schema.oneOf([
+            schema.literal('savedObjectConversion'),
+            schema.literal('savedObjectImport'),
+          ])
+        ),
+      },
+      { unknowns: 'forbid' }
+    ),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardListResultAPISchema = schema.object({
+  items: schema.arrayOf(dashboardItemSchema),
+  total: schema.number(),
+});
 
 export const dashboardGetResultAPISchema = schema.object(
   {

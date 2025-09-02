@@ -23,15 +23,13 @@ import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
-  DashboardCreateOut,
   DashboardCreateOptions,
-  DashboardGetOut,
-  DashboardSearchOut,
   DashboardUpdateOptions,
-  DashboardUpdateOut,
   DashboardSearchOptions,
   DashboardItem,
+  LegacyDashboardGetOut,
 } from './latest';
+import { DashboardSearchAPIResult } from './v1/types';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -173,7 +171,7 @@ export class DashboardStorage {
     return combinedTagNames;
   }
 
-  async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
+  async get(ctx: StorageContext, id: string): Promise<LegacyDashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -206,8 +204,8 @@ export class DashboardStorage {
 
     // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<
-      DashboardGetOut,
-      DashboardGetOut
+      LegacyDashboardGetOut,
+      LegacyDashboardGetOut
     >(
       response,
       undefined, // do not override version
@@ -229,7 +227,7 @@ export class DashboardStorage {
     ctx: StorageContext,
     data: DashboardAttributes,
     options: DashboardCreateOptions
-  ): Promise<DashboardCreateOut> {
+  ): Promise<LegacyDashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -309,7 +307,7 @@ export class DashboardStorage {
     id: string,
     data: DashboardAttributes,
     options: DashboardUpdateOptions
-  ): Promise<DashboardUpdateOut> {
+  ): Promise<LegacyDashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -372,8 +370,8 @@ export class DashboardStorage {
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
-      DashboardUpdateOut,
-      DashboardUpdateOut
+      LegacyDashboardGetOut,
+      LegacyDashboardGetOut
     >(
       { item },
       undefined, // do not override version
@@ -401,7 +399,7 @@ export class DashboardStorage {
     ctx: StorageContext,
     query: SearchQuery,
     options: DashboardSearchOptions
-  ): Promise<DashboardSearchOut> {
+  ): Promise<DashboardSearchAPIResult> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -449,8 +447,8 @@ export class DashboardStorage {
 
     // Validate the response and DOWN transform to the request version
     const { value, error: resultError } = transforms.search.out.result.down<
-      DashboardSearchOut,
-      DashboardSearchOut
+      DashboardSearchAPIResult,
+      DashboardSearchAPIResult
     >(
       response,
       undefined, // do not override version

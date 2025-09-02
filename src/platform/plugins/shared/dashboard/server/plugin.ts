@@ -39,7 +39,7 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
-import { dashboardAttributesSchemaResponse } from './content_management/v1/cm_services';
+import { dashboardItemAPIResponseSchema } from './content_management/v1/cm_services';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -79,7 +79,7 @@ export class DashboardPlugin
 
     void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
       const { contentClient } = plugins.contentManagement.register<
-        ContentStorage<TypeOf<typeof dashboardAttributesSchemaResponse>>
+        ContentStorage<TypeOf<typeof dashboardItemAPIResponseSchema>>
       >({
         id: CONTENT_ID,
         storage: new DashboardStorage({

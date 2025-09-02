@@ -10,7 +10,7 @@
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import { getDashboardContentManagementCache } from '..';
-import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
+import type { DashboardGetIn, LegacyDashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
@@ -40,18 +40,18 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent: DashboardGetOut['data'];
-  let resolveMeta: DashboardGetOut['meta'];
+  let rawDashboardContent: LegacyDashboardGetOut['item'];
+  let resolveMeta: LegacyDashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
 
   if (cachedDashboard) {
     /** If the dashboard exists in the cache, use the cached version to load the dashboard */
-    ({ data: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
+    ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
   } else {
     /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
     const result = await contentManagementService.client
-      .get<DashboardGetIn, DashboardGetOut>({
+      .get<DashboardGetIn, LegacyDashboardGetOut>({
         contentTypeId: DASHBOARD_CONTENT_ID,
         id,
       })
@@ -63,7 +63,7 @@ export const loadDashboardState = async ({
         throw new Error(message);
       });
 
-    ({ data: rawDashboardContent, meta: resolveMeta } = result);
+    ({ item: rawDashboardContent, meta: resolveMeta } = result);
     const { outcome: loadOutcome } = resolveMeta;
     if (loadOutcome !== 'aliasMatch') {
       /**
@@ -83,7 +83,7 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references: references = [], ...attributes } = rawDashboardContent;
+  const { references, attributes, managed } = rawDashboardContent;
 
   const {
     refreshInterval,
@@ -108,7 +108,7 @@ export const loadDashboardState = async ({
   const { filters, query } = searchSource || {};
 
   return {
-    managed: resolveMeta.managed,
+    managed,
     references,
     resolveMeta,
     dashboardInput: {

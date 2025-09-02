@@ -26,13 +26,11 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
     dataViews
       .get(decodeURIComponent(props.match.params.id), undefined, true)
       .then((ip: DataView) => {
-        console.log('DataView loaded===========:', ip);
         dataViewMgmtService.setDataView(ip);
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));
       })
       .catch((err) => {
-        console.error('Error loading DataView===========:', err);
         setError(err);
       });
   }, [dataViews, props.match.params.id, setBreadcrumbs, setError, dataViewMgmtService]);

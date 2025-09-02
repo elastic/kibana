@@ -804,8 +804,6 @@ export class DataViewsService {
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
-    console.log('savedobjecttospec------', JSON.stringify(savedObject, null, 2));
-
     const {
       id,
       version,
@@ -870,7 +868,6 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
-    console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2));
     return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
   };
 
@@ -1315,7 +1312,6 @@ export class DataViewsService {
         indexPattern.version = response.version;
       })
       .catch(async (err) => {
-        console.error('Error updating saved object:', err);
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.getDataViewLazy(indexPattern.id!);
           // What keys changed from now and what the server returned

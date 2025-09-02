@@ -11,12 +11,13 @@ import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 import type {
-  FindDashboardsByIdResponseAttributes,
+  LegacyDashboardAttributes,
   DashboardGetIn,
-  DashboardGetOut,
   DashboardSearchIn,
   DashboardSearchOut,
   DashboardSearchOptions,
+  DashboardSearchAPIResult,
+  LegacyDashboardGetOut,
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
@@ -41,11 +42,14 @@ export async function searchDashboards({
   options,
   search,
   size,
-}: SearchDashboardsArgs): Promise<SearchDashboardsResponse> {
+}: SearchDashboardsArgs): Promise<{
+  total: DashboardSearchAPIResult['pagination']['total'];
+  hits: DashboardSearchAPIResult['hits'];
+}> {
   const {
     hits,
     pagination: { total },
-  } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchOut>({
+  } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchAPIResult>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
       text: search ? `${search}*` : undefined,
@@ -64,7 +68,7 @@ export async function searchDashboards({
 }
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: FindDashboardsByIdResponseAttributes; references: Reference[] }
+  | { status: 'success'; attributes: LegacyDashboardAttributes; references: Reference[] }
   | { status: 'error'; error: SavedObjectError }
 );
 
@@ -73,36 +77,35 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
 
   /** If the dashboard exists in the cache, then return the result from that */
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
-  const { ...attributes } = cachedDashboard?.data;
-  const references = cachedDashboard?.data.references ?? [];
   if (cachedDashboard) {
     return {
       id,
       status: 'success',
-      attributes,
-      references,
+      attributes: cachedDashboard.item.attributes,
+      references: cachedDashboard.item.references,
     };
   }
 
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
-    const response = await contentManagementService.client.get<DashboardGetIn, DashboardGetOut>({
+    const response = await contentManagementService.client.get<
+      DashboardGetIn,
+      LegacyDashboardGetOut
+    >({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
-    if ('error' in response) {
-      throw response.error;
+
+    if ('error' in response.item) {
+      throw response.item.error;
     }
 
     dashboardContentManagementCache.addDashboard(response);
-    const {
-      data: { references: responseReferences = [], ...responseAttributes },
-    } = response;
     return {
       id,
       status: 'success',
-      attributes: responseAttributes,
-      references: responseReferences,
+      attributes: response.item.attributes,
+      references: response.item.references ?? [],
     };
   } catch (e) {
     return {
@@ -134,10 +137,10 @@ export async function findDashboardIdByTitle(title: string): Promise<{ id: strin
 
   const { hits } = result;
   // The search isn't an exact match, lets see if we can find a single exact match to use
-  const matchingDashboardIndex = hits.findIndex(
-    (hit) => hit.data.title.toLowerCase() === title.toLowerCase()
+  const matchingDashboards = hits.filter(
+    (hit) => hit.attributes.title.toLowerCase() === title.toLowerCase()
   );
-  if (matchingDashboardIndex >= 0) {
-    return { id: hits[matchingDashboardIndex].id };
+  if (matchingDashboards.length === 1) {
+    return { id: matchingDashboards[0].id };
   }
 }

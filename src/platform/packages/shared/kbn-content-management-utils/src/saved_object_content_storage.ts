@@ -286,7 +286,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-    console.log('saved object content storage get-----');
 
     return value;
   }
@@ -368,14 +367,12 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
   ): Promise<Types['UpdateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
-    console.log('SOContentStorage update called with-----', JSON.stringify(data, null, 2));
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
       Types['Attributes'],
       Types['Attributes']
     >(data);
     if (dataError) {
-      console.error('Data error in update:', dataError);
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 

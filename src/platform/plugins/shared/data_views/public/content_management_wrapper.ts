@@ -43,7 +43,6 @@ export class ContentMagementWrapper implements PersistenceAPI {
         fields: options.fields,
       },
     });
-    console.log('ContentMagementWrapper find------', JSON.stringify(results, null, 2));
 
     return results.hits;
   }
@@ -69,8 +68,6 @@ export class ContentMagementWrapper implements PersistenceAPI {
     if (response.meta.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-
-    console.log('ContentMagementWrapper------', JSON.stringify(response, null, 2));
 
     return response.item;
   }

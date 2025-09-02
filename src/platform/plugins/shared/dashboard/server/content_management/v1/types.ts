@@ -35,6 +35,9 @@ import {
   mayBeDashboardItemSchema,
   dashboardCreateRequestAttributesSchema,
   dashboardItemAPIResponseSchema,
+  dashboardSearchResultsSchema,
+  legacyDashboardGetResultSchema,
+  dashboardAttributesSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -55,6 +58,9 @@ export type DashboardAttributes = Omit<
   TypeOf<typeof dashboardCreateRequestAttributesSchema>,
   'panels'
 > & {
+  panels: Array<DashboardPanel | DashboardSection>;
+};
+export type LegacyDashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
 export type FindDashboardsByIdResponseAttributes = Omit<
@@ -84,6 +90,10 @@ export type DashboardCreateOut = CreateResult<
   TypeOf<typeof dashboardAttributesSchemaResponse>,
   TypeOf<typeof dashboardResponseMetaSchema>
 >;
+export type LegacyDashboardCreateOut = CreateResult<
+  TypeOf<typeof dashboardItemAPIResponseSchema>,
+  TypeOf<typeof dashboardResponseMetaSchema>
+>;
 export type DashboardCreateOptions = TypeOf<typeof dashboardCreateOptionsSchema>;
 
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
@@ -95,4 +105,7 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
-export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardAttributesSchemaResponse>>;
+export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
+export type LegacyDashboardGetOut = TypeOf<typeof legacyDashboardGetResultSchema>;
+
+export type DashboardSearchAPIResult = SearchResult<TypeOf<typeof dashboardItemAPIResponseSchema>>;
