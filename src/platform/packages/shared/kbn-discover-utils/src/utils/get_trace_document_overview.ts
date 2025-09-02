@@ -29,14 +29,12 @@ import {
   TRANSACTION_TYPE,
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
+  DURATION,
+  KIND,
+  RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/apm-types';
 import type { DataTableRecord, TraceDocumentOverview } from '../types';
 import { getFlattenedFields } from './get_flattened_fields';
-import {
-  OTEL_DURATION,
-  OTEL_SPAN_KIND,
-  OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
-} from '../field_constants';
 
 const fields: Array<keyof TraceDocumentOverview> = [
   AT_TIMESTAMP,
@@ -62,9 +60,9 @@ const fields: Array<keyof TraceDocumentOverview> = [
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
   PROCESSOR_EVENT,
-  OTEL_DURATION,
-  OTEL_SPAN_KIND,
-  OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
+  DURATION,
+  KIND,
+  RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 ];
 
 export function getFlattenedTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {

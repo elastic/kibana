@@ -12,3 +12,5 @@ export const EXCEPTION_TYPE = 'exception.type';
 export const EXCEPTION_MESSAGE = 'exception.message';
 export const DURATION = 'duration';
 export const KIND = 'kind';
+export const RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
+  'resource.attributes.telemetry.sdk.language';
