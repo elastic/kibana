@@ -48,7 +48,10 @@ describe('getDefendInsight', () => {
   });
 
   it('should return null if no defend insights found', async () => {
-    mockEsClient.search.mockResolvedValueOnce({ ...mockResponse, hits: { max_score: null, hits: [] } });
+    mockEsClient.search.mockResolvedValueOnce({
+      ...mockResponse,
+      hits: { max_score: null, hits: [] },
+    });
 
     const response = await getDefendInsight(mockRequest);
 

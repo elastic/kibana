@@ -365,9 +365,7 @@ describe('runTask', () => {
       hits: {
         total: { relation: 'eq', value: 2 },
         max_score: 1,
-        hits: [
-          getMockAlert({ id: 'mno', searchAfter: ['555'] }),
-        ],
+        hits: [getMockAlert({ id: 'mno', searchAfter: ['555'] })],
       },
     });
     esClient.search.mockResolvedValueOnce({

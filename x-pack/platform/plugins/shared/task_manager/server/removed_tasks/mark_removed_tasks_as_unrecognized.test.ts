@@ -99,7 +99,11 @@ describe('markRemovedTasksAsUnrecognizedTask', () => {
     ]);
     // @ts-expect-error
     esClient.client.asInternalUser.search.mockResponse({
-      hits: { hits: [createTaskDoc('123'), createTaskDoc('456'), createTaskDoc('789')], total: 3, max_score: 1 },
+      hits: {
+        hits: [createTaskDoc('123'), createTaskDoc('456'), createTaskDoc('789')],
+        total: 3,
+        max_score: 1,
+      },
     });
 
     const runner = taskRunner(logger, coreSetup.getStartServices)();
@@ -234,7 +238,11 @@ describe('markRemovedTasksAsUnrecognizedTask', () => {
     ]);
     // @ts-expect-error
     esClient.client.asInternalUser.search.mockResponse({
-      hits: { hits: [createTaskDoc('123'), createTaskDoc('456'), createTaskDoc('789')], total: 3, max_score: 1 },
+      hits: {
+        hits: [createTaskDoc('123'), createTaskDoc('456'), createTaskDoc('789')],
+        total: 3,
+        max_score: 1,
+      },
     });
 
     const runner = taskRunner(logger, coreSetup.getStartServices)();

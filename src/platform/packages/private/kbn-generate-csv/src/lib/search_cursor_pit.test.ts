@@ -114,7 +114,10 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('can update internal cursor ID', () => {
-      cursor.updateIdFromResults({ pit_id: 'very-typical-pit-id', hits: { max_score: null, hits: [] } });
+      cursor.updateIdFromResults({
+        pit_id: 'very-typical-pit-id',
+        hits: { max_score: null, hits: [] },
+      });
       expect(cursor.getCursorId()).toBe('very-typical-pit-id');
     });
 

@@ -106,7 +106,7 @@ describe('<DocViewer />', () => {
       },
     });
     const renderProps = {
-      hit: buildDataTableRecord({ _index: 't', _score: 1,_id: '1' }),
+      hit: buildDataTableRecord({ _index: 't', _score: 1, _id: '1' }),
     } as DocViewRenderProps;
     render(<WrappedDocViewer docViews={registry.getAll()} {...renderProps} />);
     expect(screen.queryByTestId('sectionErrorBoundaryPromptBody')).not.toBeInTheDocument();

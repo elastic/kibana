@@ -126,10 +126,10 @@ describe('files service', () => {
       });
 
       const files = [
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep1', _score: 1, },
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep2', _score: 1, },
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete1', _score: 1, },
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete2', _score: 1, },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep1', _score: 1 },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep2', _score: 1 },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete1', _score: 1 },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete2', _score: 1 },
       ];
       const { fileIdsByIndex: deletedFileIdsByIndex, allFileIds: allDeletedFileIds } =
         await fileIdsWithoutChunksByIndex(esClientMock, abortController, files);
