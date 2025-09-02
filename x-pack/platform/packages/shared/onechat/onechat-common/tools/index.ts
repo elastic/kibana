@@ -7,7 +7,14 @@
 
 export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
 export { isReservedToolId, isBuiltInToolId, idRegexp } from './tool_ids';
-export { builtinToolIds, builtinTags, builtInToolIdPrefix, defaultAgentToolIds } from './constants';
+export {
+  builtinToolIds,
+  builtinTags,
+  builtInToolIdPrefix,
+  activeToolsCountWarningThreshold,
+  defaultAgentToolIds,
+  editableToolTypes,
+} from './constants';
 export {
   type ByIdsToolSelection,
   type ToolSelection,
@@ -27,6 +34,12 @@ export {
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
 } from './esql';
+export {
+  isIndexSearchTool,
+  type IndexSearchToolDefinition,
+  type IndexSearchToolDefinitionWithSchema,
+  type IndexSearchToolConfig,
+} from './index_search';
 export {
   ToolResultType,
   type ToolResult,

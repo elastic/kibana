@@ -46,6 +46,10 @@ export interface NavigationProps {
    * Required by the grid layout to set the width of the navigation slot.
    */
   setWidth: (width: number) => void;
+  /**
+   * Optional data-test-subj attribute for testing purposes.
+   */
+  'data-test-subj'?: string;
 }
 
 export const Navigation = ({
@@ -54,6 +58,7 @@ export const Navigation = ({
   items,
   logo,
   setWidth,
+  ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
@@ -98,7 +103,7 @@ export const Navigation = ({
       css={css`
         display: flex;
       `}
-      data-test-subj="navigation-root"
+      data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
     >
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
@@ -188,7 +193,13 @@ export const Navigation = ({
               {(closePopover) =>
                 isCollapsed ? (
                   <NestedSecondaryMenu>
-                    <NestedSecondaryMenu.Panel id="main" title="More">
+                    <NestedSecondaryMenu.Panel
+                      id="main"
+                      title={i18n.translate(
+                        'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
+                        { defaultMessage: 'More' }
+                      )}
+                    >
                       <NestedSecondaryMenu.Section hasGap label={null}>
                         {overflowMenuItems.map((item) => {
                           const hasSubItems = getHasSubmenu(item);
@@ -247,7 +258,11 @@ export const Navigation = ({
                     ))}
                   </NestedSecondaryMenu>
                 ) : (
-                  <SecondaryMenu title="More">
+                  <SecondaryMenu
+                    title={i18n.translate('core.ui.chrome.sideNavigation.secondaryMenuMoreTitle', {
+                      defaultMessage: 'More',
+                    })}
+                  >
                     <SecondaryMenu.Section hasGap label={null}>
                       {overflowMenuItems.map((item) => (
                         <SideNav.PrimaryMenuItem
