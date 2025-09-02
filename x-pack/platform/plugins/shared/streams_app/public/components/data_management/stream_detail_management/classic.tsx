@@ -142,6 +142,9 @@ export function ClassicStreamDetailManagement({
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;
   }
+  if (isValidManagementSubTab(tab)) {
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  }
 
   if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
     if (isLoading) {
