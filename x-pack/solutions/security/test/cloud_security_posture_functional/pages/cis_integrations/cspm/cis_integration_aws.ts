@@ -15,6 +15,7 @@ import {
   ADVANCED_OPTION_ACCORDION_TEST_SUBJ,
   NAMESPACE_INPUT_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
+import { waitFor } from '@testing-library/react';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { policiesSavedObjects } from '../constants';
 
@@ -43,12 +44,41 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
+    describe('CIS_AWS pasting direct and secret access keys enables the save button', async () => {
+      it.only('CIS_AWS pasting direct and secret access keys enables the save button', async () => {
+        const directAccessKeyId = 'directAccessKeyIdTest';
+        const directAccessSecretKey = 'directAccessSecretKeyTest';
+
+        await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
+        await cisIntegration.selectValue(
+          AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+          'direct_access_keys'
+        );
+        expect(cisIntegration.isSaveButtonEnabled()).to.be(false);
+
+        await cisIntegration.pasteTextInField(
+          AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID,
+          directAccessKeyId
+        );
+        await cisIntegration.pasteTextInField(
+          AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY,
+          directAccessSecretKey
+        );
+
+        await waitFor(() => {
+          expect(cisIntegration.isSaveButtonEnabled()).to.be(true);
+        });
+      });
+    });
+
     describe('CIS_AWS Organization Cloud Formation', () => {
       it('Initial form state, AWS Org account, and CloudFormation should be selected by default', async () => {
         expect((await cisIntegration.isRadioButtonChecked('cloudbeat/cis_aws')) === true);
         expect((await cisIntegration.isRadioButtonChecked('organization-account')) === true);
         expect((await cisIntegration.isRadioButtonChecked('cloud_formation')) === true);
       });
+
       it('CIS_AWS Single Cloud Formation workflow', async () => {
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);

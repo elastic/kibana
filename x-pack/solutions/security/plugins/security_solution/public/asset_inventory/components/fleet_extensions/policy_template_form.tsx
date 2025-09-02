@@ -97,12 +97,12 @@ export const CloudAssetInventoryPolicyTemplateForm =
           isValid?: boolean;
         }) => {
           onChange({
-            isValid: isValid !== undefined ? isValid : isValidFormState,
+            isValid,
             updatedPolicy,
             isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : true,
           });
         },
-        [isValidFormState, onChange]
+        [onChange]
       );
 
       return (

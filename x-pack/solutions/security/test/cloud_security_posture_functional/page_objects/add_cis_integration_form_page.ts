@@ -420,6 +420,10 @@ export function AddCisIntegrationFormPageProvider({
     return await testSubjects.exists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
   };
 
+  const pasteTextInField = async (selector: string, text: string) => {
+    await testSubjects.setValue(selector, text);
+  };
+
   const fillInTextField = async (selector: string, text: string) => {
     const textField = await testSubjects.find(selector);
     await textField.clearValueWithKeyboard();
@@ -685,6 +689,7 @@ export function AddCisIntegrationFormPageProvider({
     clickAccordianButton,
     getPostInstallModal,
     fillInTextField,
+    pasteTextInField,
     chooseDropDown,
     getFieldValueInEditPage,
     doesStringExistInCodeBlock,
