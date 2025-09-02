@@ -56750,7 +56750,61 @@ paths:
                                             classic:
                                               additionalProperties: false
                                               type: object
-                                              properties: {}
+                                              properties:
+                                                field_overrides:
+                                                  additionalProperties:
+                                                    allOf:
+                                                      - additionalProperties:
+                                                          anyOf:
+                                                            - anyOf:
+                                                                - type: string
+                                                                - type: number
+                                                                - type: boolean
+                                                                - enum:
+                                                                    - 'null'
+                                                                  nullable: true
+                                                                - not: {}
+                                                            - items:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                  - enum:
+                                                                      - 'null'
+                                                                    nullable: true
+                                                                  - not: {}
+                                                              type: array
+                                                            - {}
+                                                        type: object
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              format:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - keyword
+                                                                  - match_only_text
+                                                                  - long
+                                                                  - double
+                                                                  - date
+                                                                  - boolean
+                                                                  - ip
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              type:
+                                                                enum:
+                                                                  - system
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                  type: object
                                           required:
                                             - classic
                                       required:
@@ -61704,7 +61758,61 @@ paths:
                             classic:
                               additionalProperties: false
                               type: object
-                              properties: {}
+                              properties:
+                                field_overrides:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
                           required:
                             - classic
               required:
