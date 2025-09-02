@@ -19,6 +19,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { TelemetryServiceStart } from './src/common/lib/telemetry/telemetry_service';
 
 export interface ElasticAssistantPublicPluginSetupDependencies {
@@ -36,6 +37,7 @@ export interface ElasticAssistantPublicPluginStartDependencies {
   discover: DiscoverStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  onechat: OnechatPluginStart;
 }
 
 export type StartServices = CoreStart &

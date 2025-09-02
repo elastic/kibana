@@ -39,6 +39,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     chrome,
     productDocBase,
     elasticAssistantSharedState,
+    onechat: { internalServices: onechatServices },
   } = useKibana().services;
 
   const inferenceEnabled = useInferenceEnabled();
@@ -108,6 +109,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     userProfileService: userProfile,
     chrome,
     getUrlForApp,
+    onechatServices,
   });
 
   useEffect(() => {

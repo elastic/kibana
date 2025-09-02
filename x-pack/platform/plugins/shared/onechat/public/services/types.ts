@@ -27,7 +27,7 @@ export interface ConversationSettings {
   selectedConnectorId: string | undefined;
   setLastConversation: (lastConversation: any) => void;
   defaultAgentId: string | undefined;
-  commentActionsMounter: (args: { message: { content: string } }) => React.JSX.Element;
+  commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
 }
 
 export interface OnechatInternalService {

@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import type { OnechatInternalService } from '@kbn/onechat-plugin/public/services/types';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -107,6 +108,7 @@ export interface AssistantProviderProps {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  onechatServices?: OnechatInternalService;
 }
 
 export interface UserAvatar {
@@ -168,6 +170,7 @@ export interface UseAssistantContext {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  onechatServices?: OnechatInternalService;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -205,6 +208,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     currentAppId,
     userProfileService,
     chrome,
+    onechatServices,
   } = props;
 
   const defaultTraceOptions: TraceOptions = {
@@ -379,6 +383,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       codeBlockRef,
       userProfileService,
       chrome,
+      onechatServices,
     }),
     [
       actionTypeRegistry,
@@ -406,10 +411,10 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       localStorageStreaming,
       setLocalStorageStreaming,
       setLocalStorageKnowledgeBase,
-      showAnonymizedValues,
-      setShowAnonymizedValues,
       contentReferencesVisible,
       setContentReferencesVisible,
+      showAnonymizedValues,
+      setShowAnonymizedValues,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       showOneChatOverlay,
@@ -418,9 +423,9 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       sessionStorageTraceOptions,
       unRegisterPromptContext,
       currentAppId,
-      codeBlockRef,
       userProfileService,
       chrome,
+      onechatServices,
     ]
   );
 

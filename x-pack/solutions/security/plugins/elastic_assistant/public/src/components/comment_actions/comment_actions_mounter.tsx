@@ -23,7 +23,6 @@ export const CommentActionsMounter = ({ message, getActions$ }: Props) => {
 
   const actionMountPointRef = useRef<HTMLDivElement>(null);
 
-  console.log('message', message);
   useEffect(() => {
     const mountPoint = actionMountPointRef.current;
     const unmountActions = mountPoint

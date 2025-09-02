@@ -10,8 +10,7 @@ import { EuiFlyoutResizable } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { OnechatServicesContext } from '@kbn/onechat-plugin/public';
+import { OnechatServicesContext, OnechatConversationsView } from '@kbn/onechat-plugin/public';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { createGlobalStyle } from 'styled-components';
@@ -57,13 +56,10 @@ export const OneChatOverlay = React.memo(() => {
     http,
     toasts,
     commentActionsMounter,
+    onechatServices,
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
-
-  const { services } = useKibana();
-  const OnechatConversationsView = services.onechat?.OnechatConversationsView;
-  const onechatServices = services.onechat?.internalServices;
 
   // Bind `showOneChatOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
