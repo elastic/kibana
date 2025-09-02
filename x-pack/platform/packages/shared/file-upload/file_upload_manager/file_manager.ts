@@ -258,7 +258,7 @@ export class FileUploadManager {
   }
 
   async addFile(file: File) {
-    const f = new FileWrapper(file, this.fileUpload);
+    const f = new FileWrapper(file, this.fileUpload, this.data);
     const files = this.getFiles();
     files.push(f);
     this.files$.next(files);

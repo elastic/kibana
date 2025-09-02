@@ -16,12 +16,15 @@ import type {
 } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 // import type { DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord } from '@kbn/discover-utils';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isTikaType } from './tika_utils';
 
 import { STATUS } from './file_manager';
 import { analyzeTikaFile } from './tika_analyzer';
 import { FileSizeChecker } from './file_size_check';
 import { processResults, readFile, isSupportedFormat } from '../src/utils';
+import { getSampleDocs } from './docs_preview';
 
 interface FileSizeInfo {
   fileSize: number;
@@ -38,7 +41,7 @@ interface AnalysisResults {
   serverSettings: ReturnType<typeof processResults> | null;
   overrides: FormattedOverrides;
   analysisError?: any;
-  // sampleDocs: DataTableRecord[];
+  sampleDocs: DataTableRecord[];
 }
 
 export type FileAnalysis = AnalysisResults & {
@@ -65,7 +68,7 @@ export class FileWrapper {
     analysisStatus: STATUS.NOT_STARTED,
     fileContents: '',
     results: null,
-    // sampleDocs: [],
+    sampleDocs: [],
     explanation: undefined,
     serverSettings: null,
     overrides: {},
@@ -96,7 +99,11 @@ export class FileWrapper {
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
   private fileSizeChecker: FileSizeChecker;
 
-  constructor(private file: File, private fileUpload: FileUploadStartApi) {
+  constructor(
+    private file: File,
+    private fileUpload: FileUploadStartApi,
+    private data: DataPublicPluginStart
+  ) {
     this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
     this.analyzedFile$.next({
       ...this.analyzedFile$.getValue(),
@@ -154,6 +161,7 @@ export class FileWrapper {
     return {
       fileContents: tikaResults.content,
       results: standardResults.results,
+      sampleDocs: [],
       explanation: standardResults.results.explanation,
       serverSettings,
       overrides: {},
@@ -174,6 +182,7 @@ export class FileWrapper {
       );
 
       const serverSettings = processResults(resp);
+      const sampleDocs = await getSampleDocs(this.data, resp, this.file.name);
 
       return {
         fileContents,
@@ -182,12 +191,13 @@ export class FileWrapper {
         serverSettings,
         overrides: resp.overrides ?? {},
         analysisStatus: STATUS.COMPLETED,
-        // sampleDocs: resp.sampleDocs ?? [],
+        sampleDocs,
       };
     } catch (e) {
       return {
         fileContents,
         results: null,
+        sampleDocs: [],
         explanation: undefined,
         serverSettings: null,
         analysisError: e,

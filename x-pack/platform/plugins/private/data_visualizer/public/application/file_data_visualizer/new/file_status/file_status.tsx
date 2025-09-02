@@ -22,8 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common';
+import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
+import { ResultsPreview } from '@kbn/file-upload/file_upload_manager/docs_preview';
 import { FileClashIcon, FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
@@ -224,11 +225,17 @@ export const FileStatus: FC<Props> = ({
                   <EuiSpacer size="s" />
 
                   {selectedTab === TAB.PREVIEW ? (
-                    <FileContents
-                      fileContents={fileStatus.fileContents}
-                      results={fileStatus.results!}
-                      showTitle={false}
-                    />
+                    <>
+                      {fileStatus.sampleDocs.length ? (
+                        <ResultsPreview sampleDocs={fileStatus.sampleDocs} />
+                      ) : (
+                        <FileContents
+                          fileContents={fileStatus.fileContents}
+                          results={fileStatus.results!}
+                          showTitle={false}
+                        />
+                      )}
+                    </>
                   ) : null}
 
                   {selectedTab === TAB.STATS ? (
