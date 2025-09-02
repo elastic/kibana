@@ -14,7 +14,7 @@ const SiemReadinessDashboard = () => {
   const { logReadinessTask } = useLogReadinessTask();
 
   const handleLogTask = useCallback(async () => {
-    logReadinessTask({ task_id: '3', status: 'complete', meta: {} });
+    logReadinessTask({ task_id: '3', status: 'complete', meta: { test: "test" } });
   }, [logReadinessTask]);
 
   return (

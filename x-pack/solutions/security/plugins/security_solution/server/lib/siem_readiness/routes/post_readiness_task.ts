@@ -46,7 +46,6 @@ export const postReadinessTaskRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          // Write request body to the siem readiness index
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
