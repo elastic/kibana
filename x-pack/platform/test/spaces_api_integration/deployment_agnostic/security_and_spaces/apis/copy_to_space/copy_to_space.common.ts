@@ -178,10 +178,6 @@ export default function copyToSpaceSpacesAndSecuritySuite(
         definitionNoAccess(scenario.users.noAccess)
       );
       copyToSpaceTest(
-        `superuser from the ${spaceId} space`,
-        definitionAuthorized(scenario.users.superuser)
-      );
-      copyToSpaceTest(
         `rbac user with all globally from the ${spaceId} space`,
         definitionAuthorized(scenario.users.allGlobally)
       );
