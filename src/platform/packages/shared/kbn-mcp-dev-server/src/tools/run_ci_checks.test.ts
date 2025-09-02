@@ -31,7 +31,7 @@ describe('runCiChecksTool', () => {
   it('should have default values for optional parameters', () => {
     const schema = runCiChecksTool.inputSchema;
     const defaults = schema.parse({});
-    
+
     expect(defaults.checks).toEqual([
       'build',
       'quick_checks',
@@ -49,7 +49,7 @@ describe('runCiChecksTool', () => {
     const customChecks = schema.parse({
       checks: ['build', 'type_check'],
     });
-    
+
     expect(customChecks.checks).toEqual(['build', 'type_check']);
     expect(customChecks.parallel).toBe(true);
   });
@@ -59,7 +59,7 @@ describe('runCiChecksTool', () => {
     const sequential = schema.parse({
       parallel: false,
     });
-    
+
     expect(sequential.parallel).toBe(false);
   });
 });
