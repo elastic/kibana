@@ -53,7 +53,7 @@ async function updateWiredIngest({
   name: string;
   ingest: WiredIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
@@ -93,7 +93,7 @@ async function updateClassicIngest({
   name: string;
   ingest: ClassicIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
