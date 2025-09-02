@@ -705,12 +705,26 @@ class BrowserService extends FtrService {
   }
 
   public async getScrollTop() {
-    const scrollSize = await this.driver.executeScript<string>('return document.body.scrollTop');
+    const scrollSize = await this.driver.executeScript<string>(`
+      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
+      if (container) {
+        return container.scrollTop;
+      } else {
+        return document.documentElement.scrollTop;
+      }
+    `);
     return parseInt(scrollSize, 10);
   }
 
   public async getScrollLeft() {
-    const scrollSize = await this.driver.executeScript<string>('return document.body.scrollLeft');
+    const scrollSize = await this.driver.executeScript<string>(`
+      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
+      if (container) {
+        return container.scrollLeft;
+      } else {
+        return document.documentElement.scrollLeft;
+      }
+    `);
     return parseInt(scrollSize, 10);
   }
 
@@ -727,7 +741,14 @@ class BrowserService extends FtrService {
 
   // return promise with REAL scroll position
   public async setScrollTop(scrollSize: number | string) {
-    await this.driver.executeScript('document.body.scrollTop = ' + scrollSize);
+    await this.driver.executeScript(`
+      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
+      if (container) {
+        container.scrollTop = ${scrollSize};
+      } else {
+        document.documentElement.scrollTop = ${scrollSize};
+      }
+    `);
     return this.getScrollTop();
   }
 
@@ -738,7 +759,14 @@ class BrowserService extends FtrService {
   }
 
   public async setScrollLeft(scrollSize: number | string) {
-    await this.driver.executeScript('document.body.scrollLeft = ' + scrollSize);
+    await this.driver.executeScript(`
+      const container = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}");
+      if (container) {
+        container.scrollLeft = ${scrollSize};
+      } else {
+        document.documentElement.scrollLeft = ${scrollSize};
+      }
+    `);
     return this.getScrollLeft();
   }
 
