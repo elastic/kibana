@@ -11,6 +11,8 @@ import {
   MAX_FILE_SIZE_BYTES,
   MAX_TIKA_FILE_SIZE_BYTES,
 } from '@kbn/file-upload-common/src/constants';
+import { omit } from 'lodash';
+import type { IngestPipelineWrapper } from '@kbn/file-upload-common';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
@@ -27,7 +29,6 @@ import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
 import { previewTikaContents } from './preview_tika_contents';
-import type { IngestPipelineWrapper } from '../common/types';
 
 /**
  * Routes for the file upload.
@@ -119,7 +120,14 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       async (context, request, response) => {
         try {
           const esClient = (await context.core).elasticsearch.client;
-          const result = await analyzeFile(esClient, request.body, request.query);
+          const { includePreview } = request.query;
+          const result = await analyzeFile(
+            esClient,
+            logger,
+            request.body,
+            omit(request.query, 'includePreview'),
+            includePreview === true
+          );
           return response.ok({ body: result });
         } catch (e) {
           return response.customError(wrapError(e));

@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-/**
- * @internal
- */
-export type {
-  AnalysisResult,
-  FindFileStructureErrorResponse,
-  FindFileStructureResponse,
-  InputOverrides,
-  IngestPipeline,
-} from './types';
+export { FileReaderBase } from './file_reader_base';
+export { MessageReader } from './message_reader';
+export { NdjsonReader } from './ndjson_reader';
+export { TikaReader } from './tika_reader';
