@@ -20,6 +20,7 @@ import {
   Subject,
   Subscription,
   combineLatest,
+  distinctUntilChanged,
   filter,
   firstValueFrom,
   from,
@@ -445,7 +446,6 @@ export class IndexUpdateService {
 
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
-
     return newDataView;
   }
 
@@ -696,11 +696,18 @@ export class IndexUpdateService {
         })
     );
 
-    // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
+    // Maintains a list of pending columns to be saved,
+    // ensuring placeholder columns are displayed correctly.
     this._subscription.add(
-      combineLatest([this.dataView$, this._refreshSubject$])
+      combineLatest([
+        this._refreshSubject$.pipe(startWith(0)), // Emits immediately one time on loading
+        this.dataView$,
+      ])
         .pipe(
-          switchMap(([dataView]) => {
+          // Only emits again when refresh subject changes, not when dataView changes.
+          // Otherwhise it will erase unsaved columns when changing the index name.
+          distinctUntilChanged(([prevRefresh], [currRefresh]) => prevRefresh === currRefresh),
+          switchMap(([refresh, dataView]) => {
             let placeholderIndex = 0;
             const columnsCount = dataView.fields.filter(
               // @ts-ignore
@@ -771,6 +778,8 @@ export class IndexUpdateService {
     };
   }
 
+  // Refresh will re-fetch index data but also discard unsaved columns.
+  // Use only when sure they are already saved or are ok to discard.
   public refresh() {
     this._isFetching$.next(true);
     this._refreshSubject$.next(Date.now());
@@ -939,7 +948,6 @@ export class IndexUpdateService {
   public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
-
       await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
 
       this.setIndexCreated(true);
