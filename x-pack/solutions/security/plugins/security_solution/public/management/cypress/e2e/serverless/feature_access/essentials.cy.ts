@@ -18,13 +18,9 @@ describe(
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
-        // This is not needed for this test, but it's a good example of
-        // how to enable experimental features in the Cypress tests.
-        // kbnServerArgs: [
-        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        //     'featureFlagName',
-        //   ])}`,
-        // ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
+        ],
       },
     },
   },

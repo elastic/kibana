@@ -22,6 +22,12 @@ const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   return { text };
 };
 
+const assertReprint = (src: string, expected: string = src) => {
+  const { text } = reprint(src);
+
+  expect(text).toBe(expected);
+};
+
 describe('commands', () => {
   describe('JOIN', () => {
     test('with short identifiers', () => {
@@ -164,43 +170,42 @@ FROM index
     });
   });
 
-  /**
-   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-   * get back to it after 9.1 release.
-   */
-  describe.skip('RERANK', () => {
+  describe('RERANK', () => {
     test('default example', () => {
-      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH {"inference_id": "model"}`);
 
-      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH {"inference_id": "model"}');
     });
 
     test('wraps long query', () => {
       const { text } = reprint(
-        `FROM a | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf" ON field1 WITH some_id`
+        `FROM a | RERANK "this is a very long long long long long long long long long long long long text" ON field1 WITH {"inference_id": "model"}`
       );
 
       expect(text).toBe(`FROM a
-  | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf"
+  | RERANK
+      "this is a very long long long long long long long long long long long long text"
         ON field1
-        WITH some_id`);
+        WITH {"inference_id": "model"}`);
     });
 
     test('two fields', () => {
-      const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+      const { text } = reprint(
+        `FROM a | RERANK "query" ON field1,field2 WITH {"inference_id": "model"}`
+      );
 
-      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH {"inference_id": "model"}');
     });
 
     test('wraps many fields', () => {
       const { text } = reprint(
-        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH some_id`
+        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH {"inference_id": "model"}`
       );
       expect(text).toBe(`FROM a
   | RERANK "query"
         ON field1, field2, field3, field4, field5, field6, field7, field8, field9,
           field10, field11, field12
-        WITH some_id`);
+        WITH {"inference_id": "model"}`);
     });
   });
 });
@@ -1052,6 +1057,68 @@ FROM a
           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
         )`);
     });
+  });
+});
+
+describe('unary operator precedence and grouping', () => {
+  test('NOT should not parenthesize literals', () => {
+    assertReprint('ROW NOT a');
+    assertReprint(
+      `FROM a
+  | STATS
+      NOT aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
+    );
+  });
+
+  test('NOT should not parenthesize literals unnecessarily', () => {
+    assertReprint('ROW NOT (a)', 'ROW NOT a');
+  });
+
+  test('NOT should parenthesize OR expressions', () => {
+    assertReprint(
+      `ROW
+  NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa OR
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+    );
+  });
+
+  test('NOT should parenthesize AND expressions', () => {
+    assertReprint(
+      `ROW
+  NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AND
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+    );
+  });
+
+  test('NOT should not parenthesize expressions with higher precedence', () => {
+    assertReprint(
+      `ROW
+  NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`,
+      `ROW
+  NOT aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`
+    );
+  });
+
+  test('NOT should parenthesize OR expressions on the right side', () => {
+    assertReprint(
+      `ROW
+  NOT aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa OR
+    NOT (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ==
+      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa OR
+      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ==
+        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)`
+    );
+  });
+
+  test('unary minus should parenthesize addition', () => {
+    assertReprint(
+      `ROW
+  -2 *
+    (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa +
+      bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb)`
+    );
   });
 });
 
