@@ -269,7 +269,7 @@ export function InternalDashboardTopNav({
     showResetChange,
   });
 
-  console.log(editModeTopNavConfig, '!!editModeTopNavConfig')
+  console.log(editModeTopNavConfig, '!!editModeTopNavConfig');
 
   UseUnmount(() => {
     dashboardApi.clearOverlays();
