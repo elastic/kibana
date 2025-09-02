@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import { css } from '@emotion/react';
 import type { EuiFlexGroupProps, UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, euiBreakpoint } from '@elastic/eui';
+import { EuiFlexGroup, euiMaxBreakpoint } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Panel {
@@ -127,7 +127,7 @@ const componentStyles = {
   flyoutPanels: (themeContext: UseEuiTheme) =>
     css({
       height: '100%',
-      [euiBreakpoint(themeContext, ['m'])]: {
+      [euiMaxBreakpoint(themeContext, 'm')]: {
         overflow: 'auto',
       },
     }),
