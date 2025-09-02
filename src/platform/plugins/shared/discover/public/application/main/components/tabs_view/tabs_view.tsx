@@ -15,6 +15,7 @@ import {
   internalStateActions,
   selectAllTabs,
   selectRecentlyClosedTabs,
+  selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -28,6 +29,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+  const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -50,6 +52,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
       items={items}
       selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
+      hideTabsBar={hideTabsBar}
       createItem={createItem}
       getPreviewData={getPreviewData}
       renderContent={renderContent}

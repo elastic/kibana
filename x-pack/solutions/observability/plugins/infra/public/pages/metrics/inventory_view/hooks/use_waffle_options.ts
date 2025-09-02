@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { type InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
 import type {
   InventoryView,
   InventoryViewOptions,
@@ -21,6 +23,7 @@ import {
   type InventoryOptionsState,
   type InventorySortOption,
   inventoryOptionsStateRT,
+  staticInventoryViewId,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import type {
@@ -51,6 +54,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   source: 'default',
   sort: { by: 'name', direction: 'desc' },
   timelineOpen: false,
+  preferredSchema: null,
 };
 
 function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
@@ -68,7 +72,15 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
+    preferredSchema,
   } = savedView.attributes;
+
+  // forces the default view to be set with what the time range metadata endpoint returns
+  const preferredSchemaValue =
+    nodeType === 'host' && savedView.id === staticInventoryViewId
+      ? preferredSchema ?? null
+      : // otherwise, use the preferred schema from the saved view
+        preferredSchema;
 
   return {
     metric,
@@ -84,26 +96,47 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
+    preferredSchema: preferredSchemaValue,
   };
 }
 
 export const useWaffleOptions = () => {
   const { currentView } = useInventoryViewsContext();
+  const {
+    inventoryPrefill: { setPrefillState },
+  } = useAlertPrefillContext();
 
+  const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
     defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
+    writeDefaultState: true,
   });
 
-  const previousViewId = useRef<string | undefined>(currentView?.id);
+  const [preferredSchema, setPreferredSchema] = useState<DataSchemaFormat | null>(null);
+
+  const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState(mapInventoryViewToState(currentView));
+      const state = mapInventoryViewToState(currentView);
+      updateTopbarMenuVisibilityBySchema(state.preferredSchema);
+      setUrlState(state);
       previousViewId.current = currentView.id;
+
+      setPreferredSchema(currentView?.attributes.preferredSchema ?? null);
     }
-  }, [currentView, setUrlState]);
+  }, [currentView, setUrlState, updateTopbarMenuVisibilityBySchema]);
+
+  // there is a lot going on with the url state management on this hook
+  // when the state resets, many things need to be synchronized
+  // to avoid problems, we sync the url state manually.
+  useEffect(() => {
+    if (urlState.preferredSchema !== preferredSchema) {
+      setUrlState((previous) => ({ ...previous, preferredSchema }));
+    }
+  }, [preferredSchema, setUrlState, urlState.preferredSchema]);
 
   const changeMetric = useCallback(
     (metric: SnapshotMetricInput) => setUrlState((previous) => ({ ...previous, metric })),
@@ -174,17 +207,34 @@ export const useWaffleOptions = () => {
     [setUrlState]
   );
 
-  const { inventoryPrefill } = useAlertPrefillContext();
+  const changePreferredSchema = useCallback(
+    (schema: DataSchemaFormat | null) => {
+      // the URL state can't be patched here because when the page reloads via clicking on the side nav
+      // this will be called before the hydration of the URL state, causing the page to crash
+      setPreferredSchema(schema);
+      updateTopbarMenuVisibilityBySchema(schema);
+    },
+    [setPreferredSchema, updateTopbarMenuVisibilityBySchema]
+  );
+
   useEffect(() => {
-    const { setNodeType, setMetric, setCustomMetrics, setAccountId, setRegion } = inventoryPrefill;
-    setNodeType(urlState.nodeType);
-    setMetric(urlState.metric);
-    setCustomMetrics(urlState.customMetrics);
-    // only shows for AWS when there are accounts info
-    setAccountId(urlState.accountId);
-    // only shows for AWS when there are regions info
-    setRegion(urlState.region);
-  }, [urlState, inventoryPrefill]);
+    setPrefillState({
+      nodeType: urlState.nodeType,
+      metric: urlState.metric,
+      customMetrics: urlState.customMetrics,
+      accountId: urlState.accountId,
+      region: urlState.region,
+      schema: urlState.preferredSchema,
+    });
+  }, [
+    setPrefillState,
+    urlState.accountId,
+    urlState.customMetrics,
+    urlState.metric,
+    urlState.nodeType,
+    urlState.preferredSchema,
+    urlState.region,
+  ]);
 
   const changeTimelineOpen = useCallback(
     (timelineOpen: boolean) => setUrlState((previous) => ({ ...previous, timelineOpen })),
@@ -206,6 +256,7 @@ export const useWaffleOptions = () => {
     changeLegend,
     changeSort,
     changeTimelineOpen,
+    changePreferredSchema,
     setWaffleOptionsState: setUrlState,
   };
 };
@@ -217,6 +268,7 @@ export type WaffleOptionsState = InventoryOptionsState;
 const encodeUrlState = (state: InventoryOptionsState) => {
   return inventoryOptionsStateRT.encode(state);
 };
+
 const decodeUrlState = (value: unknown) => {
   const state = pipe(inventoryOptionsStateRT.decode(value), fold(constant(undefined), identity));
   if (state) {

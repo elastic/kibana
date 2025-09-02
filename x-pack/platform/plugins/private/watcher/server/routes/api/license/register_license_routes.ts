@@ -6,7 +6,7 @@
  */
 
 import { registerRefreshRoute } from './register_refresh_route';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 export function registerLicenseRoutes(deps: RouteDependencies) {
   registerRefreshRoute(deps);

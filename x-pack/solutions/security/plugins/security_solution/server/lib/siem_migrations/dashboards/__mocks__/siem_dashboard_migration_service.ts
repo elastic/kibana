@@ -7,4 +7,4 @@
 
 import { MockSiemDashboardMigrationsService } from './mocks';
 
-export const SiemDashboardMigrationService = MockSiemDashboardMigrationsService;
+export const SiemDashboardMigrationsService = MockSiemDashboardMigrationsService;

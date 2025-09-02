@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FIELD_TYPES, FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 import { fieldFormatters, fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isBiggerThanGlobalMaxRetention } from './validations';

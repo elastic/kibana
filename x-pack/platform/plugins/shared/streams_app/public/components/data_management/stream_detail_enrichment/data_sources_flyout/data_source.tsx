@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import {
-  DataSourceActorRef,
-  useDataSourceSelector,
-} from '../state_management/data_source_state_machine';
+import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
+import { useDataSourceSelector } from '../state_management/data_source_state_machine';
 import { RandomSamplesDataSourceCard } from './random_samples_data_source_card';
 import { KqlSamplesDataSourceCard } from './kql_samples_data_source_card';
 import { CustomSamplesDataSourceCard } from './custom_samples_data_source_card';

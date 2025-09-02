@@ -8,7 +8,7 @@
  */
 
 import { flow } from 'lodash';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 

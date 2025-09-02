@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiFlexGroup, EuiStat, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { css } from '@emotion/react';
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
+import type { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
 
 const statCss = css`

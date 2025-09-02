@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
-import { MlInferenceHistoryItem } from '../../../../../../common/types/pipelines';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
+import type { MlInferenceHistoryItem } from '../../../../../../common/types/pipelines';
+import type { Actions } from '../../../../shared/api_logic/create_api_logic';
+import type {
   FetchMlInferencePipelineHistoryApiLogicArgs,
   FetchMlInferencePipelineHistoryApiLogicResponse,
-  FetchMlInferencePipelineHistoryApiLogic,
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
+import { FetchMlInferencePipelineHistoryApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
 import { IndexNameLogic } from '../index_name_logic';
 
 export interface InferenceHistoryActions {

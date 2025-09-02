@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
 import type {
   IErrorObject,
   RuleTypeParams,
@@ -30,6 +29,8 @@ import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/format
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { GenericAggType } from '@kbn/observability-plugin/public';
 import { RuleConditionChart } from '@kbn/observability-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import {
   useMetricsDataViewContext,
@@ -37,12 +38,10 @@ import {
   withSourceProvider,
 } from '../../../containers/metrics_source';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import type { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
-const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -113,12 +112,14 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const onFilterChange = useCallback(
-    (filter: any) => {
-      setRuleParams('filterQueryText', filter);
+    (payload: { query?: Query }) => {
+      const kuery = payload.query?.query as string;
+
+      setRuleParams('filterQueryText', kuery);
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
+          convertKueryToElasticSearchQuery(kuery, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
@@ -126,11 +127,6 @@ export const Expressions: React.FC<Props> = (props) => {
     },
     [setRuleParams, metricsView?.dataViewReference]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
@@ -252,7 +248,8 @@ export const Expressions: React.FC<Props> = (props) => {
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) =>
+      onFilterChange({ query: { query: e.target.value, language: 'kuery' } }),
     [onFilterChange]
   );
 
@@ -346,6 +343,9 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.infra.expressions.addconditionButton.ariaLabel', {
+            defaultMessage: 'Add condition',
+          })}
           data-test-subj="infraExpressionsAddConditionButton"
           color="primary"
           iconSide="left"
@@ -407,10 +407,10 @@ export const Expressions: React.FC<Props> = (props) => {
         display="rowCompressed"
       >
         {(metadata && (
-          <MetricsExplorerKueryBar
-            onChange={debouncedOnFilterChange}
-            onSubmit={onFilterChange}
-            value={ruleParams.filterQueryText}
+          <UnifiedSearchBar
+            onQuerySubmit={onFilterChange}
+            useDefaultBehaviors={false}
+            query={{ query: ruleParams.filterQueryText || '', language: 'kuery' }}
           />
         )) || (
           <EuiFieldSearch

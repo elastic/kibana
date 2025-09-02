@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { MonitorSummary } from '../../../../../../common/runtime_types';
+import type { MonitorSummary } from '../../../../../../common/runtime_types';
 
 interface Props {
   summary: MonitorSummary;

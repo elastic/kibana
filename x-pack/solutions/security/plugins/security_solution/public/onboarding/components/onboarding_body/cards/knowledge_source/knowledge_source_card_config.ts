@@ -22,7 +22,6 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
         defaultMessage: 'Connect internal data to enrich the AI Assistant’s context',
       }
     ),
-    // FIXME: update the video
     asset: {
       type: CardAssetType.video,
       source: 'https://ela.st/ai4dsoc-gs1',
@@ -47,7 +46,7 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
     ),
     asset: {
       type: CardAssetType.video,
-      source: 'http://ela.st/ai4dsoc-gs2',
+      source: 'https://ela.st/ai4dsoc-gs2',
       alt: i18n.translate(
         'xpack.securitySolution.onboarding.knowledgeSourceCards.create.description',
         {

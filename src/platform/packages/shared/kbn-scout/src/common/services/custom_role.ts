@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsClient, KbnClient } from '.';
+import type { EsClient, KbnClient } from '.';
 
 export interface KibanaRole {
   elasticsearch: {

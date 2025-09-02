@@ -7,7 +7,7 @@
 
 import { addBasePath } from '../../../services';
 import { deserializeAutoFollowStats } from '../../../lib/ccr_stats_serialization';
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 /**
  * Returns Auto-follow stats

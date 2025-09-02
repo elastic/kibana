@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { StructuredTool, tool as toTool } from '@langchain/core/tools';
-import { Logger } from '@kbn/logging';
+import type { StructuredTool } from '@langchain/core/tools';
+import { tool as toTool } from '@langchain/core/tools';
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolProvider, ExecutableTool, RunToolReturn } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -53,7 +54,7 @@ export const toolsToLangchain = async ({
 };
 
 export const sanitizeToolId = (toolId: string): string => {
-  return toolId.replace(/[^a-zA-Z0-9_-]/g, '');
+  return toolId.replace('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
 };
 
 /**
@@ -103,7 +104,7 @@ export const toolToLangchain = ({
           results: [
             {
               type: ToolResultType.error,
-              data: { message: e.message, stack: e.stack },
+              data: { message: e.message },
             },
           ],
         };
@@ -115,6 +116,7 @@ export const toolToLangchain = ({
       name: toolId ?? tool.id,
       schema: tool.schema,
       description: tool.description,
+      verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',
       metadata: {
         toolId: tool.id,

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Visitor } from '../../../visitor';
-import {
+import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../../commands_registry/types';
-import {
+import type {
   ESQLFunction,
   ESQLAst,
   ESQLAstItem,

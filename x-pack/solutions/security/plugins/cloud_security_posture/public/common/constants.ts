@@ -5,23 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
-import {
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_GCP,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_VULN_MGMT_AWS,
-  VULN_MGMT_POLICY_TEMPLATE,
-  CLOUDBEAT_AKS,
-  CLOUDBEAT_GKE,
-} from '../../common/constants';
-
-import eksLogo from '../assets/icons/cis_eks_logo.svg';
-import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
+import type { CLOUDBEAT_AKS, CLOUDBEAT_GKE } from '../../common/constants';
 
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
@@ -53,7 +38,7 @@ export interface CloudPostureIntegrationProps {
   policyTemplate: CloudSecurityPolicyTemplate;
   name: string;
   shortName: string;
-  options: Array<{
+  options?: Array<{
     type: PostureInput | typeof CLOUDBEAT_AKS | typeof CLOUDBEAT_GKE;
     name: string;
     benchmark: string;
@@ -65,103 +50,6 @@ export interface CloudPostureIntegrationProps {
   }>;
 }
 
-export const cloudPostureIntegrations: CloudPostureIntegrations = {
-  cspm: {
-    policyTemplate: CSPM_POLICY_TEMPLATE,
-    name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
-      defaultMessage: 'Cloud Security Posture Management',
-    }),
-    shortName: i18n.translate('xpack.csp.cspmIntegration.integration.shortNameTitle', {
-      defaultMessage: 'CSPM',
-    }),
-    options: [
-      {
-        type: CLOUDBEAT_AWS,
-        name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'AWS',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
-          defaultMessage: 'CIS AWS',
-        }),
-        icon: 'logoAWS',
-        testId: 'cisAwsTestId',
-      },
-      {
-        type: CLOUDBEAT_GCP,
-        name: i18n.translate('xpack.csp.cspmIntegration.gcpOption.nameTitle', {
-          defaultMessage: 'GCP',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
-          defaultMessage: 'CIS GCP',
-        }),
-        icon: googleCloudLogo,
-        testId: 'cisGcpTestId',
-      },
-      {
-        type: CLOUDBEAT_AZURE,
-        name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
-          defaultMessage: 'Azure',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
-          defaultMessage: 'CIS Azure',
-        }),
-        icon: 'logoAzure',
-        testId: 'cisAzureTestId',
-      },
-    ],
-  },
-  kspm: {
-    policyTemplate: KSPM_POLICY_TEMPLATE,
-    name: i18n.translate('xpack.csp.kspmIntegration.integration.nameTitle', {
-      defaultMessage: 'Kubernetes Security Posture Management',
-    }),
-    shortName: i18n.translate('xpack.csp.kspmIntegration.integration.shortNameTitle', {
-      defaultMessage: 'KSPM',
-    }),
-    options: [
-      {
-        type: CLOUDBEAT_VANILLA,
-        name: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.nameTitle', {
-          defaultMessage: 'Self-Managed',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
-          defaultMessage: 'CIS Kubernetes',
-        }),
-        icon: 'logoKubernetes',
-        testId: 'cisK8sTestId',
-      },
-      {
-        type: CLOUDBEAT_EKS,
-        name: i18n.translate('xpack.csp.kspmIntegration.eksOption.nameTitle', {
-          defaultMessage: 'EKS',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.eksOption.benchmarkTitle', {
-          defaultMessage: 'CIS EKS',
-        }),
-        icon: eksLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
-          defaultMessage: 'Elastic Kubernetes Service',
-        }),
-        testId: 'cisEksTestId',
-      },
-    ],
-  },
-  vuln_mgmt: {
-    policyTemplate: VULN_MGMT_POLICY_TEMPLATE,
-    name: 'Vulnerability Management', // TODO: we should use i18n and fix this
-    shortName: 'VULN_MGMT', // TODO: we should use i18n and fix this
-    options: [
-      {
-        type: CLOUDBEAT_VULN_MGMT_AWS,
-        name: i18n.translate('xpack.csp.vulnMgmtIntegration.awsOption.nameTitle', {
-          defaultMessage: 'Amazon Web Services',
-        }),
-        icon: 'logoAWS',
-        benchmark: 'N/A', // TODO: change benchmark to be optional
-      },
-    ],
-  },
-};
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
 export const MIN_VERSION_GCP_CIS = '1.5.2';
 

@@ -14,7 +14,7 @@ import {
   INITIAL_REST_VERSION,
 } from '@kbn/data-view-field-editor-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../../shared/services';
+import type { RoleCredentials } from '../../../shared/services';
 
 const INDEX_NAME = 'api-integration-test-field-preview';
 

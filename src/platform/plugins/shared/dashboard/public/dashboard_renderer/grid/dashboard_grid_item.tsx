@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingChart, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
@@ -134,11 +135,17 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       );
     }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
 
+    const { euiTheme } = useEuiTheme();
+    const hoverActionsHeight = euiTheme.base * 2;
+
     const focusStyles = blurPanel
       ? styles.focusPanelBlur
       : css({
           scrollMarginTop: `${
-            dashboardContainerTopOffset + globalNavTopOffset + DASHBOARD_MARGIN_SIZE
+            dashboardContainerTopOffset +
+            globalNavTopOffset +
+            DASHBOARD_MARGIN_SIZE +
+            hoverActionsHeight
           }px`,
         });
 

@@ -19,9 +19,9 @@ import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import {
+import type { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type {
   ISavedObjectsSecurityExtension,
   SavedObjectsRawDocSource,
   AuthorizationTypeEntry,
@@ -66,7 +66,7 @@ import {
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

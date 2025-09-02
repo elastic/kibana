@@ -6,13 +6,13 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import {
+import type {
   KibanaFeatureConfig,
-  KibanaFeatureScope,
   ElasticsearchFeatureConfig,
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { AlertConsumers, DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';

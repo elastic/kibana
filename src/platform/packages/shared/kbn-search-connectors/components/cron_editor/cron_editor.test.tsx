@@ -15,7 +15,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import { CronEditor } from './cron_editor';
-import { Frequency } from '../../types/cron_editor';
+import type { Frequency } from '../../types/cron_editor';
 
 describe('CronEditor', () => {
   ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'].forEach((unit) => {

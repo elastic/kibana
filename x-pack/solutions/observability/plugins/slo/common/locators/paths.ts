@@ -37,7 +37,6 @@ export const paths = {
     }
     return `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}?${qs.toString()}`;
   },
-
   sloDetailsHistory: ({
     id,
     instanceId,

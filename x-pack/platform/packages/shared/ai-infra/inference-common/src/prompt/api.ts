@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { Overwrite, Assign } from 'utility-types';
-import {
+import type { z } from '@kbn/zod';
+import type { Overwrite, Assign } from 'utility-types';
+import type {
   ChatCompleteOptions,
   Message,
   ToolChoice,
   ToolDefinition,
   ToolOptions,
 } from '../chat_complete';
-import { Prompt, ToolOptionsOfPrompt } from './types';
-import {
+import type { Prompt, ToolOptionsOfPrompt } from './types';
+import type {
   ChatCompleteAPIResponse,
   ChatCompleteCompositeResponse,
   ChatCompleteResponse,

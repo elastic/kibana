@@ -14,7 +14,7 @@ import {
   LENS_APP_LOCATOR,
   VISUALIZE_APP_LOCATOR,
 } from '@kbn/deeplinks-analytics';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',

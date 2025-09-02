@@ -8,12 +8,14 @@
  */
 
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DataViewField, DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';
-import { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',

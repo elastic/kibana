@@ -9,13 +9,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
 import { INVALID_FIELD_ID } from './field_select_utils';

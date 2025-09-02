@@ -8,9 +8,9 @@
  */
 
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import { FieldType } from '@kbn/esql-ast';
-import { monaco } from '../../../../../monaco_imports';
-import { HoverMonacoModel } from '../hover';
+import type { FieldType } from '@kbn/esql-ast';
+import type { monaco } from '../../../../../monaco_imports';
+import type { HoverMonacoModel } from '../hover';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 

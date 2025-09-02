@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
+import type { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
 
 /**
  * Allowed configurations for OTLP tracing exporters

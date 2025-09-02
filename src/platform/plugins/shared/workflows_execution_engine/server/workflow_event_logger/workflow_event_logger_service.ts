@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  WorkflowEventLogger,
-  IWorkflowEventLogger,
-  WorkflowEventLoggerContext,
-} from './workflow_event_logger';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { IWorkflowEventLogger, WorkflowEventLoggerContext } from './workflow_event_logger';
+import { WorkflowEventLogger } from './workflow_event_logger';
 import { createIndexWithMappings } from './create_index';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
 
@@ -176,22 +173,6 @@ export class WorkflowEventLoggerService {
           {
             term: {
               'workflow.step_id': stepId,
-            },
-          },
-        ],
-      },
-    };
-
-    return this.searchLogs(query);
-  }
-
-  public async getWorkflowLogs(workflowId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.id': workflowId,
             },
           },
         ],

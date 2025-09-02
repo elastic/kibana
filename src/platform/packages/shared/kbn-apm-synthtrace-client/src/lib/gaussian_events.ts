@@ -8,9 +8,9 @@
  */
 
 import { castArray } from 'lodash';
-import { SynthtraceGenerator } from '../types';
-import { Fields } from './entity';
-import { Serializable } from './serializable';
+import type { SynthtraceGenerator } from '../types';
+import type { Fields } from './entity';
+import type { Serializable } from './serializable';
 
 export class GaussianEvents<TFields extends Fields = Fields> {
   constructor(

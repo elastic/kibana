@@ -17,12 +17,33 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       },
+      {
+        name: 'classic-stream-with-fields',
+        description: '',
+        ingest: {
+          lifecycle: {
+            inherit: {},
+          },
+          processing: {
+            steps: [],
+          },
+          classic: {
+            field_overrides: {
+              xxx: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
     ])('is valid', (val) => {
-      expect(ClassicStream.Definition.is(val)).toBe(true);
+      expect(ClassicStream.Definition.asserts(val)).toBe(true);
       expect(ClassicStream.Definition.right.parse(val)).toEqual(val);
     });
 
@@ -34,7 +55,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       },
@@ -52,13 +75,15 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
           wired: {},
         },
       },
     ])('is not valid', (val) => {
-      expect(ClassicStream.Definition.is(val as any)).toBe(false);
+      expect(() => ClassicStream.Definition.asserts(val as any)).toThrow();
     });
   });
 
@@ -72,7 +97,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },
@@ -103,7 +128,9 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -137,7 +164,9 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -158,7 +187,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },

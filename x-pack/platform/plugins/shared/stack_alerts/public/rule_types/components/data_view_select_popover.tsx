@@ -23,7 +23,7 @@ import {
   useEuiPaddingCSS,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
   DataView,
   DataViewSpec,
@@ -31,7 +31,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
-import { EsQueryRuleMetaData } from '../es_query/types';
+import type { EsQueryRuleMetaData } from '../es_query/types';
 
 const DESKTOP_WIDTH = 450;
 const MOBILE_WIDTH = 350;

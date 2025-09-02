@@ -6,6 +6,6 @@
  */
 
 import { createContext } from 'react';
-import { OnechatInternalService } from '../../services';
+import type { OnechatInternalService } from '../../services';
 
 export const OnechatServicesContext = createContext<OnechatInternalService | undefined>(undefined);

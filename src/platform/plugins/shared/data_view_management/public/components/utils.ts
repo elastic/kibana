@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   DataViewsContract,
   DataView,
   DataViewField,
   DataViewListItem,
-  DataViewType,
 } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
 

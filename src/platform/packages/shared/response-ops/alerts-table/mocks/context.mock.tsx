@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
-import { AlertsField, RowSelectionState } from '../types';
-import { AdditionalContext, RenderContext } from '../types';
+import type { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
+import type { RowSelectionState } from '../types';
+import { AlertsField } from '../types';
+import type { AdditionalContext, RenderContext } from '../types';
 import { createCasesServiceMock, getCasesMapMock } from './cases.mock';
 import { getMaintenanceWindowsMock } from './maintenance_windows.mock';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { identity } from 'lodash';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import {
   ALERT_CASE_IDS,
   ALERT_FLAPPING,

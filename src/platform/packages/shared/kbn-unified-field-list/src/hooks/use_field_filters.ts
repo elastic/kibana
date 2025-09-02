@@ -13,7 +13,8 @@ import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
-import { type FieldListItem, GetCustomFieldType } from '../types';
+import type { GetCustomFieldType } from '../types';
+import { type FieldListItem } from '../types';
 import { useRestorableState } from '../restorable_state';
 
 const htmlId = htmlIdGenerator('fieldList');

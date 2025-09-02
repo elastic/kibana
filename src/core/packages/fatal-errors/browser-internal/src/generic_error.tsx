@@ -19,7 +19,7 @@ import {
   EuiPageSection,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FatalError } from '@kbn/core-fatal-errors-browser';
+import type { FatalError } from '@kbn/core-fatal-errors-browser';
 import { formatError, formatStack } from './utils';
 
 interface GenericErrorProps {

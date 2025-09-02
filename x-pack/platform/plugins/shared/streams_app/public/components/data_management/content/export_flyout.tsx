@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { Streams } from '@kbn/streams-schema';
-import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,

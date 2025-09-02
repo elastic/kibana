@@ -44,6 +44,10 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
+  DEFAULT_VALUE_REPORT_MINUTES,
+  DEFAULT_VALUE_REPORT_RATE,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -343,6 +347,51 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.continueSuppressionWindowAdvancedSettingEnabled
+      ? {
+          [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
+              {
+                defaultMessage: 'Default suppression behavior on alert closure',
+              }
+            ),
+            value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
+              {
+                defaultMessage:
+                  'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
+              }
+            ),
+            type: 'select',
+            schema: schema.oneOf([
+              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
+              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
+            ]),
+            options: [
+              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
+            ],
+            optionLabels: {
+              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
+                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+                {
+                  defaultMessage: 'Restart suppression',
+                }
+              ),
+              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
+                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+                {
+                  defaultMessage: 'Continue suppression until window ends',
+                }
+              ),
+            },
+            category: [APP_ID],
+            requiresPageReload: false,
+          },
+        }
+      : {}),
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
         defaultMessage: 'Related integrations',
@@ -545,7 +594,6 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           description: i18n.translate(
             'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
             {
-              // TODO update this copy, waiting on James Spiteri's input
               defaultMessage:
                 'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
             }
@@ -560,3 +608,39 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
         },
       }
     : null;
+
+export const getDefaultValueReportSettings = (): SettingsConfig => ({
+  [DEFAULT_VALUE_REPORT_MINUTES]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueMinutesLabel', {
+      defaultMessage: 'Value report minutes per alert',
+    }),
+    value: 8,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.defaultValueMinutesDescription',
+      {
+        defaultMessage:
+          'The average review time for an analyst to review an alert. Used for calculations in the Value report.',
+      }
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+  [DEFAULT_VALUE_REPORT_RATE]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateLabel', {
+      defaultMessage: 'Value report analyst hourly rate',
+    }),
+    value: 75,
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateDescription', {
+      defaultMessage:
+        'The average hourly rate for a security analyst. Used for calculations in the Value report.',
+    }),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+});

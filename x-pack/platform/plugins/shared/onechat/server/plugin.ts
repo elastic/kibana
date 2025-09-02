@@ -55,6 +55,7 @@ export class OnechatPlugin
       router,
       coreSetup,
       logger: this.logger,
+      pluginsSetup,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -73,13 +74,12 @@ export class OnechatPlugin
 
   start(
     { elasticsearch, security }: CoreStart,
-    { actions, inference }: OnechatStartDependencies
+    { inference }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
-      actions,
       inference,
     });
 

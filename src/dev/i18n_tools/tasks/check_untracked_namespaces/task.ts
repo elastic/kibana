@@ -8,7 +8,7 @@
  */
 
 import { PRESET_TIMER } from 'listr2';
-import { TaskSignature } from '../../types';
+import type { TaskSignature } from '../../types';
 import { ErrorReporter } from '../../utils/error_reporter';
 import {
   extractUntrackedMessages,

@@ -27,7 +27,7 @@ import {
 import type { FileJSON } from '@kbn/files-plugin/common';
 import { css } from '@emotion/react';
 import type { MyImageMetadata } from '../../common';
-import { FileClients } from '../types';
+import type { FileClients } from '../types';
 import { Image } from '../imports';
 
 interface Props {

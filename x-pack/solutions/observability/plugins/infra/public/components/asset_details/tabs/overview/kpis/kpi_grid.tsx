@@ -17,6 +17,7 @@ import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
 import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
 import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
+import { useAssetDetailsRenderPropsContext } from '../../../hooks/use_asset_details_render_props';
 
 interface Props {
   dataView?: DataView;
@@ -27,6 +28,7 @@ interface Props {
 
 export const KPIGrid = ({ entityId, entityType, dataView, dateRange }: Props) => {
   const { reloadRequestTime } = useReloadRequestTimeContext();
+  const { schema } = useAssetDetailsRenderPropsContext();
 
   const filters = useMemo(() => {
     return [
@@ -46,6 +48,7 @@ export const KPIGrid = ({ entityId, entityType, dataView, dateRange }: Props) =>
           filters={filters}
           dateRange={dateRange}
           lastReloadRequestTime={reloadRequestTime}
+          schema={schema}
         />
       ) : (
         <ContainerKpiCharts

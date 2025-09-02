@@ -17,18 +17,24 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useToolTags } from '../../../../hooks/tools/use_tool_tags';
+import { useToolsTags } from '../../../../hooks/tools/use_tool_tags';
 import { OnechatEsqlEditorField } from './components/esql_editor_field';
-import { OnechatEsqlToolFormData } from './types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from './types/esql_tool_form_types';
+
+export enum OnechatEsqlToolFormMode {
+  Create = 'create',
+  Edit = 'edit',
+}
 
 export interface OnechatEsqlToolFormProps {
+  mode: OnechatEsqlToolFormMode;
   formId: string;
   saveTool: (data: OnechatEsqlToolFormData) => void;
 }
 
-export const OnechatEsqlToolForm = ({ formId, saveTool }: OnechatEsqlToolFormProps) => {
+export const OnechatEsqlToolForm = ({ mode, formId, saveTool }: OnechatEsqlToolFormProps) => {
   const { euiTheme } = useEuiTheme();
-  const { tags, isLoading: isLoadingTags } = useToolTags();
+  const { tags, isLoading: isLoadingTags } = useToolsTags();
   const {
     control,
     handleSubmit,
@@ -38,6 +44,7 @@ export const OnechatEsqlToolForm = ({ formId, saveTool }: OnechatEsqlToolFormPro
   return (
     <EuiForm component="form" id={formId} onSubmit={handleSubmit(saveTool)} fullWidth>
       <EuiFormRow
+        isDisabled={mode === OnechatEsqlToolFormMode.Edit}
         label={i18n.translate('xpack.onechat.tools.newTool.nameLabel', {
           defaultMessage: 'Name',
         })}
@@ -48,7 +55,12 @@ export const OnechatEsqlToolForm = ({ formId, saveTool }: OnechatEsqlToolFormPro
           control={control}
           name="name"
           render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
-            <EuiFieldText {...field} inputRef={ref} isInvalid={invalid} />
+            <EuiFieldText
+              disabled={mode === OnechatEsqlToolFormMode.Edit}
+              {...field}
+              inputRef={ref}
+              isInvalid={invalid}
+            />
           )}
         />
       </EuiFormRow>

@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
 import { parseReferenceName } from '../../controls/data_controls/reference_name_utils';

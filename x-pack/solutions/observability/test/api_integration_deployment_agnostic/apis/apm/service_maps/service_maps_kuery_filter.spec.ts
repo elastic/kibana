@@ -6,17 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { timerange, serviceMap } from '@kbn/apm-synthtrace-client';
-import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import {
-  extractExitSpansConnections,
-  getElements,
-  getIds,
-  getSpans,
-  partitionElements,
-} from './utils';
+import { extractExitSpansConnections } from './utils';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -84,33 +78,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(status).to.be(200);
 
-      const { nodes, edges } = partitionElements(getElements({ body }));
-
-      expect(getIds(nodes)).to.eql([
-        '>elasticsearch',
-        '>redis',
-        'synthbeans-go',
-        'synthbeans-java',
-        'synthbeans-node',
-      ]);
-      expect(getIds(edges)).to.eql([
-        'synthbeans-go~>elasticsearch',
-        'synthbeans-go~>redis',
-        'synthbeans-go~synthbeans-java',
-        'synthbeans-go~synthbeans-node',
-        'synthbeans-java~synthbeans-go',
-        'synthbeans-node~>redis',
-        'synthbeans-node~synthbeans-java',
-      ]);
-    });
-
-    it('returns full service map when no kuery is defined (api v2)', async () => {
-      const { status, body } = await callApi({ query: { useV2: true } });
-
-      expect(status).to.be(200);
-
-      const spans = getSpans({ body });
-
+      const { spans } = body;
       const exitSpansConnections = extractExitSpansConnections(spans);
       expect(exitSpansConnections).to.eql([
         {
@@ -163,18 +131,28 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(status).to.be(200);
 
-      const { nodes, edges } = partitionElements(getElements({ body }));
+      const { spans } = body;
+      const exitSpansConnections = extractExitSpansConnections(spans);
 
-      expect(getIds(nodes)).to.eql([
-        '>elasticsearch',
-        'synthbeans-go',
-        'synthbeans-java',
-        'synthbeans-node',
-      ]);
-      expect(getIds(edges)).to.eql([
-        'synthbeans-go~>elasticsearch',
-        'synthbeans-java~synthbeans-go',
-        'synthbeans-node~synthbeans-java',
+      expect(exitSpansConnections).to.eql([
+        {
+          serviceName: 'synthbeans-go',
+          spanDestinationServiceResource: 'elasticsearch',
+        },
+        {
+          destinationService: {
+            serviceName: 'synthbeans-go',
+          },
+          serviceName: 'synthbeans-java',
+          spanDestinationServiceResource: 'synthbeans-go',
+        },
+        {
+          destinationService: {
+            serviceName: 'synthbeans-java',
+          },
+          serviceName: 'synthbeans-node',
+          spanDestinationServiceResource: 'synthbeans-java',
+        },
       ]);
     });
   });

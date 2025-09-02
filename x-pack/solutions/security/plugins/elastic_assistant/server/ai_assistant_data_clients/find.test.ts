@@ -10,7 +10,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { findDocuments } from './find';
-import { EsConversationSchema } from './conversations/types';
+import type { EsConversationSchema } from './conversations/types';
 
 export const getSearchConversationMock = (): estypes.SearchResponse<EsConversationSchema> => ({
   _scroll_id: '123',
@@ -42,9 +42,6 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
             model: 'test',
             provider: 'Azure OpenAI',
           },
-          summary: {
-            content: 'test',
-          },
           category: 'assistant',
           users: [
             {
@@ -52,6 +49,10 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
               name: 'elastic',
             },
           ],
+          created_by: {
+            id: '1111',
+            name: 'elastic',
+          },
           replacements: undefined,
         },
       },
@@ -116,9 +117,6 @@ describe('findDocuments', () => {
                 messages: [],
                 namespace: 'default',
                 replacements: undefined,
-                summary: {
-                  content: 'test',
-                },
                 title: 'title-1',
                 updated_at: '2020-04-20T15:25:31.830Z',
                 users: [
@@ -127,6 +125,10 @@ describe('findDocuments', () => {
                     name: 'elastic',
                   },
                 ],
+                created_by: {
+                  id: '1111',
+                  name: 'elastic',
+                },
               },
             },
           ],

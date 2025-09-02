@@ -16,5 +16,6 @@
   "kbn_references": [
     "@kbn/metrics-config",
     "@kbn/std",
+    "@kbn/core-http-server",
   ]
 }

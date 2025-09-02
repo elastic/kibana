@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Params } from '../types';
+import type { Params } from '../types';
 import { append } from '../pipeline/append';
 
+/**
+ * Appends a `WHERE` command to the ESQL composer pipeline.
+ *
+ * @param body The body of the `WHERE` command.
+ * @param params The parameters to use in the `WHERE` command.
+ * @returns A `QueryPipeline` instance with the `WHERE` command appended.
+ */
 export function where<TQuery extends string, TParams extends Params<TQuery>>(
   body: TQuery,
   params?: TParams

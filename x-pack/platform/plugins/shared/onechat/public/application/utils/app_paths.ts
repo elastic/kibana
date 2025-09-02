@@ -18,11 +18,18 @@ export const appPaths = {
   },
   chat: {
     new: `/conversations/${newConversationId}`,
+    newWithAgent: ({ agentId }: { agentId: string }) => {
+      return `/conversations/${newConversationId}?agent_id=${agentId}`;
+    },
     conversation: ({ conversationId }: { conversationId: string }) => {
       return `/conversations/${conversationId}`;
     },
   },
   tools: {
     list: '/tools',
+    new: '/tools/new',
+    edit: ({ toolId }: { toolId: string }) => {
+      return `/tools/${toolId}`;
+    },
   },
 };

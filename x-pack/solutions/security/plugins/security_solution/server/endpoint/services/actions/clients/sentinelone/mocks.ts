@@ -16,8 +16,12 @@ import {
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { merge } from 'lodash';
+import { merge, pick } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import type {
+  RunScriptActionRequestBody,
+  SentinelOneRunScriptActionRequestParams,
+} from '../../../../../../common/api/endpoint';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../../common/endpoint/types';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
@@ -69,7 +73,7 @@ const createSentinelOneAgentDetailsMock = (
       groupId: '9999999999999',
       groupIp: '108.77.84.x',
       groupName: 'Default Group',
-      id: '1845174760470303882',
+      id: '1-2-3',
       inRemoteShellSession: false,
       infected: false,
       installerType: '.deb',
@@ -346,9 +350,31 @@ const createKillProcessOptionsMock = (
   });
 };
 
+const createRunScriptOptionsMock = (
+  overrides: Partial<RunScriptActionRequestBody<SentinelOneRunScriptActionRequestParams>> = {}
+): RunScriptActionRequestBody<SentinelOneRunScriptActionRequestParams> => {
+  const mock =
+    responseActionsClientMock.createRunScriptOptions<SentinelOneRunScriptActionRequestParams>({
+      parameters: {
+        scriptId: createSentinelOneGetRemoteScriptsApiResponseMock().data[0].id,
+        scriptInput: '--some-option=abc',
+      },
+      ...overrides,
+    });
+
+  // Ensure only S1 parameters are defined
+  mock.parameters = pick(mock.parameters, ['scriptId', 'scriptInput']);
+
+  return mock;
+};
+
 const getOptionsForResponseActionMethodMockOverride = (method: ResponseActionsClientMethods) => {
   if (method === 'killProcess') {
     return createKillProcessOptionsMock();
+  }
+
+  if (method === 'runscript') {
+    return createRunScriptOptionsMock();
   }
 
   return responseActionsClientMock.getOptionsForResponseActionMethod(method);
@@ -358,6 +384,7 @@ export const sentinelOneMock = {
   ...responseActionsClientMock,
 
   createKillProcessOptions: createKillProcessOptionsMock,
+  createRunScriptOptions: createRunScriptOptionsMock,
   getOptionsForResponseActionMethod: getOptionsForResponseActionMethodMockOverride,
 
   createGetAgentsResponse: createSentinelOneGetAgentsApiResponseMock,

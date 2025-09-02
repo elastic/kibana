@@ -11,7 +11,7 @@ import { resetContext } from 'kea';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { FlashMessagesLogic } from './flash_messages_logic';
-import { IFlashMessage } from './types';
+import type { IFlashMessage } from './types';
 
 const history = mockHistory;
 

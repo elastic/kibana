@@ -7,10 +7,10 @@
 
 import * as rt from 'io-ts';
 import stringify from 'json-stable-stringify';
-import { JsonValue } from '@kbn/utility-types';
+import type { JsonValue } from '@kbn/utility-types';
 import { jsonValueRT } from '../../common/typed_json';
-import { SearchStrategyError } from '../../common/search_strategies/common/errors';
-import { ShardFailure } from './elasticsearch_runtime_types';
+import type { SearchStrategyError } from '../../common/search_strategies/common/errors';
+import type { ShardFailure } from './elasticsearch_runtime_types';
 
 export const jsonFromBase64StringRT = new rt.Type<JsonValue, string, string>(
   'JSONFromBase64String',

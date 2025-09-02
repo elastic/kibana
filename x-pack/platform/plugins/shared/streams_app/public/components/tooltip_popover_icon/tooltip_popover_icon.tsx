@@ -7,16 +7,8 @@
 
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import {
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiPopover,
-  EuiToolTip,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiButtonIconPropsForButton,
-  IconType,
-} from '@elastic/eui';
+import type { EuiButtonIconProps, EuiButtonIconPropsForButton, IconType } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 
 export const TooltipOrPopoverIcon = ({
   title,

@@ -1508,6 +1508,44 @@ ssl.test: 123
     `);
   });
 
+  it('should not override advanced yaml ssl fields for elasticsearch output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+        config_yaml:
+          'ssl:\n  verification_mode: "none"\n  certificate_authorities: ["/tmp/ssl/ca.crt"] ',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "preset": "balanced",
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [
+            "/tmp/ssl/ca.crt",
+          ],
+          "verification_mode": "none",
+        },
+        "type": "elasticsearch",
+      }
+    `);
+  });
+
   it('should work with kafka output', () => {
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',

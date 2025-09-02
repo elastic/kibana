@@ -6,7 +6,7 @@
  */
 
 import type { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');

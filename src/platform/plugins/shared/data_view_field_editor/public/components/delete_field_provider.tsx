@@ -9,9 +9,9 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 
-import { DataView } from '../shared_imports';
-import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
-import { CloseEditor } from '../types';
+import type { DataView } from '../shared_imports';
+import type { OpenFieldDeleteModalOptions } from '../open_delete_modal';
+import type { CloseEditor } from '../types';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 export interface Props {

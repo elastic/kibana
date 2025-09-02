@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   GEMINI_REGION_DOC_LINK,
   GEMINI_PROJECT_ID_DOC_LINK,

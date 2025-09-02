@@ -9,7 +9,7 @@
 
 import { parse } from '..';
 import { EsqlQuery } from '../../query';
-import { ESQLColumn, ESQLCommand, ESQLFunction, ESQLInlineCast } from '../../types';
+import type { ESQLColumn, ESQLCommand, ESQLFunction, ESQLInlineCast } from '../../types';
 import { Walker } from '../../walker';
 
 describe('WHERE', () => {

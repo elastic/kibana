@@ -9,7 +9,7 @@
 
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Datatable } from '@kbn/expressions-plugin/public';

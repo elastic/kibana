@@ -9,15 +9,14 @@
 
 import { compact, shuffle } from 'lodash';
 import { Readable } from 'stream';
+import type { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
 import {
   apm,
-  ApmFields,
   ApmSynthtracePipelineSchema,
   generateLongId,
   generateShortId,
-  Serializable,
 } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';

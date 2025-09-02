@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { isHumanMessage, isAIMessage, AIMessage, ToolMessage } from '@langchain/core/messages';
-import {
-  ToolCallWithResult,
-  ToolCallStep,
-  ConversationRoundStepType,
-  ConversationRound,
-} from '@kbn/onechat-common';
+import type { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { isHumanMessage, isAIMessage } from '@langchain/core/messages';
+import type { ToolCallWithResult, ToolCallStep, ConversationRound } from '@kbn/onechat-common';
+import { ConversationRoundStepType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
-import { ToolResult, ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('conversationLangchainMessages', () => {
   const makeRoundInput = (message: string) => ({ message });
@@ -94,12 +92,16 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-1');
     // ToolMessage type guard is not imported, so just check property
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-1');
-    expect(toolCallToolMessage.content).toEqual([
-      {
-        type: ToolResultType.other,
-        data: 'result!',
-      },
-    ]);
+    expect(toolCallToolMessage.content).toEqual(
+      JSON.stringify({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: 'result!',
+          },
+        ],
+      })
+    );
     expect(isAIMessage(assistantMessage)).toBe(true);
     expect(assistantMessage.content).toBe('done!');
     expect(isHumanMessage(nextHumanMessage)).toBe(true);
@@ -148,7 +150,9 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-2');
-    expect(toolCallToolMessage.content).toEqual([{ type: ToolResultType.other, data: 'found!' }]);
+    expect(toolCallToolMessage.content).toEqual(
+      JSON.stringify({ results: [{ type: ToolResultType.other, data: 'found!' }] })
+    );
     expect(isAIMessage(secondAssistantMessage)).toBe(true);
     expect(secondAssistantMessage.content).toBe('done with bar');
     expect(isHumanMessage(lastHumanMessage)).toBe(true);

@@ -8,14 +8,14 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
@@ -31,12 +31,8 @@ import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
-import {
-  DASHBOARD_API_TYPE,
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardInternalApi,
-} from './types';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
+import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
@@ -96,8 +92,8 @@ export function getDashboardApi({
     creationOptions
   );
   const unsavedChangesManager = initializeUnsavedChangesManager({
-    viewModeManager,
-    creationOptions,
+    viewMode$: viewModeManager.api.viewMode$,
+    storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
     lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
@@ -174,6 +170,7 @@ export function getDashboardApi({
       }
 
       if (saveResult) {
+        references$.next(saveResult.references);
         unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
@@ -185,8 +182,6 @@ export function getDashboardApi({
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
-
-        references$.next(saveResult.references);
       }
 
       return saveResult;
@@ -203,8 +198,8 @@ export function getDashboardApi({
       });
 
       if (saveResult?.error) return;
-      unsavedChangesManager.internalApi.onSave(dashboardState);
       references$.next(saveResult.references);
+      unsavedChangesManager.internalApi.onSave(dashboardState);
 
       return;
     },
@@ -218,6 +213,7 @@ export function getDashboardApi({
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
+    getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
@@ -245,6 +241,7 @@ export function getDashboardApi({
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
+      layoutManager.cleanup();
     },
   };
 }

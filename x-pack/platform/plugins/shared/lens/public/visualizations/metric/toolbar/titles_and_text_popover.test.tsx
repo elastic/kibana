@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MetricVisualizationState } from '../types';
+import type { MetricVisualizationState } from '../types';
 import { TitlesAndTextPopover } from './titles_and_text_popover';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 

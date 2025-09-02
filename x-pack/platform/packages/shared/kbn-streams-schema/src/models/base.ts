@@ -7,8 +7,10 @@
 
 import { z } from '@kbn/zod';
 import type { IModel, OmitName } from './core';
-import { StreamQuery, streamQuerySchema } from '../queries';
-import { ModelValidation, modelValidation } from './validation/model_validation';
+import type { StreamQuery } from '../queries';
+import { streamQuerySchema } from '../queries';
+import type { ModelValidation } from './validation/model_validation';
+import { modelValidation } from './validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {

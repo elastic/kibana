@@ -8,7 +8,8 @@
  */
 
 import { groups } from './groups.json';
-import { BuildkiteStep, expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
+import type { BuildkiteStep } from '#pipeline-utils';
+import { expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {

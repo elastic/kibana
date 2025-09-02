@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { APIRequestContext } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 import { getCommonHeadersWithApiVersion } from './headers';
 
 /**

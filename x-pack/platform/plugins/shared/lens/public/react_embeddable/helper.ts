@@ -6,11 +6,11 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
-  ViewMode,
   type PublishingSubject,
   apiHasExecutionContext,
   findSavedObjectRef,
@@ -18,7 +18,7 @@ import {
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { RenderMode } from '@kbn/expressions-plugin/common';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import type {
   LensEmbeddableStartServices,
   LensRuntimeState,
@@ -26,9 +26,9 @@ import type {
   StructuredDatasourceStates,
 } from './types';
 import { loadESQLAttributes } from './esql';
-import { DatasourceStates, GeneralDatasourceStates } from '../state_management';
-import { FormBasedPersistedState } from '../datasources/form_based/types';
-import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
+import type { DatasourceStates, GeneralDatasourceStates } from '../state_management';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import { DOC_TYPE } from '../../common/constants';
 
 export function createEmptyLensState(

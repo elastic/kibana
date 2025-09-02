@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation, header } = getPageObjects([
@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spaces = getService('spaces');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('o11y sidenav', () => {
     let cleanUp: () => Promise<unknown>;
@@ -39,7 +40,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
-        await solutionNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
+        await retry.waitFor('redirect or status response', async () => {
+          await solutionNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
+          return (await browser.getCurrentUrl()).includes('/app/observabilityAIAssistant');
+        });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
 
         // check Other Tools section

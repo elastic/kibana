@@ -11,9 +11,11 @@ import { castArray, once } from 'lodash';
 import { Metadata } from '@grpc/grpc-js';
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
-import { api, metrics, resources } from '@elastic/opentelemetry-node/sdk';
-import type { MetricsConfig } from '@kbn/metrics-config';
+import type { resources } from '@elastic/opentelemetry-node/sdk';
+import { api, metrics } from '@elastic/opentelemetry-node/sdk';
+import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
+import { PrometheusExporter } from './prometheus_exporter';
 
 /**
  * Options to the initMetrics method
@@ -23,8 +25,14 @@ export interface InitMetricsOptions {
    * The OpenTelemetry resource information
    */
   resource: resources.Resource;
-  /** The OpenTelemetry metrics configuration */
+  /**
+   * The OpenTelemetry metrics configuration
+   */
   metricsConfig: MetricsConfig;
+  /**
+   * The config of the Monitoring Collection plugin
+   */
+  monitoringCollectionConfig: MonitoringCollectionConfig;
 }
 
 /**
@@ -32,38 +40,89 @@ export interface InitMetricsOptions {
  * @param initMetricsOptions {@link InitMetricsOptions}
  */
 export function initMetrics(initMetricsOptions: InitMetricsOptions) {
-  const { resource, metricsConfig } = initMetricsOptions;
+  const { resource, metricsConfig, monitoringCollectionConfig } = initMetricsOptions;
 
-  const exportIntervalMillis = metricsConfig.interval.asMilliseconds();
+  const globalExportIntervalMillis = metricsConfig.interval.asMilliseconds();
 
-  const readers = castArray(metricsConfig.exporters).map((exporterConfig) => {
-    const variant = fromExternalVariant(exporterConfig);
+  const readers: metrics.IMetricReader[] = [];
 
-    let exporter: metrics.PushMetricExporter;
-    switch (variant.type) {
-      case 'grpc': {
-        const metadata = new Metadata();
-        Object.entries(variant.value.headers || {}).forEach(([key, value]) => {
-          metadata.add(key, value);
-        });
-        exporter = new OTLPMetricExporterGrpc({
-          metadata,
-          url: variant.value.url,
-          temporalityPreference: metrics.AggregationTemporality.DELTA,
-        });
-        break;
-      }
-      case 'http':
-        exporter = new OTLPMetricExporterHttp({
-          headers: variant.value.headers,
-          url: variant.value.url,
-          temporalityPreference: metrics.AggregationTemporality.DELTA,
-        });
-        break;
+  // OTel requires all readers to be initialized when initializing the SDK.
+  // If the monitoring collection plugin requires the prometheus exporter, we need to initialize it now.
+  if (
+    monitoringCollectionConfig.enabled &&
+    monitoringCollectionConfig.opentelemetry.metrics.prometheus.enabled
+  ) {
+    readers.push(PrometheusExporter.get());
+  }
+
+  const exporters = metricsConfig.enabled ? castArray(metricsConfig.exporters) : [];
+
+  if (monitoringCollectionConfig.enabled) {
+    // For BWC reasons, we want to support the OTLP configuration present in the monitoring collection plugin.
+    const otlpConfig = monitoringCollectionConfig.opentelemetry.metrics.otlp;
+
+    const {
+      url = process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ??
+        process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+      headers,
+      exportIntervalMillis,
+    } = otlpConfig;
+
+    if (url) {
+      const temporalityPreference =
+        (process.env.OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE as 'cumulative' | 'delta') ??
+        'cumulative';
+
+      // We just need to push it as another grpc config
+      exporters.push({
+        grpc: { url, headers, exportIntervalMillis, temporalityPreference },
+      });
     }
+  }
 
-    return new metrics.PeriodicExportingMetricReader({ exporter, exportIntervalMillis });
-  });
+  readers.push(
+    ...exporters.map((exporterConfig) => {
+      const variant = fromExternalVariant(exporterConfig);
+
+      const commonConfig = {
+        temporalityPreference:
+          variant.value.temporalityPreference === 'delta'
+            ? metrics.AggregationTemporality.DELTA
+            : metrics.AggregationTemporality.CUMULATIVE,
+      };
+
+      let exporter: metrics.PushMetricExporter;
+      switch (variant.type) {
+        case 'grpc': {
+          const metadata = new Metadata();
+          Object.entries(variant.value.headers || {}).forEach(([key, value]) => {
+            metadata.add(key, value);
+          });
+          exporter = new OTLPMetricExporterGrpc({
+            ...commonConfig,
+            metadata,
+            url: variant.value.url,
+          });
+          break;
+        }
+        case 'http':
+          exporter = new OTLPMetricExporterHttp({
+            ...commonConfig,
+            headers: variant.value.headers,
+            url: variant.value.url,
+          });
+          break;
+      }
+
+      const exportInterval = variant.value.exportIntervalMillis ?? globalExportIntervalMillis;
+
+      return new metrics.PeriodicExportingMetricReader({
+        exporter,
+        exportIntervalMillis:
+          typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds(),
+      });
+    })
+  );
 
   const meterProvider = new metrics.MeterProvider({
     readers,

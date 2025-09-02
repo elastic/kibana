@@ -10,23 +10,22 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
+import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBreadcrumb,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPopover,
-  EuiToolTipProps,
-  UseEuiTheme,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MountPoint } from '@kbn/core/public';
+import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
@@ -43,9 +42,9 @@ import {
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
+import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
-import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
@@ -352,12 +351,12 @@ export function InternalDashboardTopNav({
 
   return (
     <div css={styles.container}>
-      <h1
-        id="dashboardTitle"
-        className="euiScreenReaderOnly"
-        ref={dashboardTitleRef}
-        tabIndex={-1}
-      >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      <EuiScreenReaderOnly>
+        <h1
+          id="dashboardTitle"
+          ref={dashboardTitleRef}
+        >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      </EuiScreenReaderOnly>
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}

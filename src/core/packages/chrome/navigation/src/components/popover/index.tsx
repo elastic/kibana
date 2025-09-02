@@ -9,15 +9,8 @@
 
 import { EuiPopover, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, {
-  useRef,
-  useMemo,
-  useCallback,
-  cloneElement,
-  ReactNode,
-  ReactElement,
-  useEffect,
-} from 'react';
+import type { ReactNode, ReactElement } from 'react';
+import React, { useRef, useMemo, useCallback, cloneElement, useEffect } from 'react';
 
 import { focusFirstElement } from '../../utils/focus_first_element';
 import { blurPopover } from './blur_popover';
@@ -25,11 +18,12 @@ import { usePopoverOpen } from './use_popover_open';
 import { useKeyboardManagement } from './use_keyboard_management';
 import { usePopoverHover } from './use_popover_hover';
 import { usePersistentPopover } from './use_persistent_popover';
-
-const TOP_BAR_HEIGHT = 48;
-const TOP_BAR_POPOVER_GAP = 8;
-const BOTTOM_POPOVER_GAP = 4;
-const POPOVER_OFFSET = 5;
+import {
+  BOTTOM_POPOVER_GAP,
+  POPOVER_OFFSET,
+  TOP_BAR_HEIGHT,
+  TOP_BAR_POPOVER_GAP,
+} from '../../constants';
 
 export interface SideNavPopoverProps {
   container: HTMLElement;
@@ -152,6 +146,7 @@ export const SideNavPopover = ({
         offset={POPOVER_OFFSET}
         ownFocus={false}
         panelPaddingSize="none"
+        repositionOnScroll
       >
         <div
           ref={popoverRef}

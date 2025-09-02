@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import useAsync from 'react-use/lib/useAsync';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine';
 

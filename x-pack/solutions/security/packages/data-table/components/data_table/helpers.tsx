@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
+import type {
   ColumnHeaderOptions,
   TimelineItem,
   TimelineNonEcsData,

@@ -19,8 +19,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { WithGuidedOnboardingTour } from '../../../../../../../components';
-import { useIsGuidedOnboardingActive } from '../../../../../../../hooks';
 import type { PackageInfo } from '../../../../../types';
 
 const toTitleCase = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
@@ -30,7 +28,6 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
   onCancel: () => void;
   packageInfo: PackageInfo;
 }> = ({ onConfirm, onCancel, packageInfo }) => {
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo.name);
   const modalTitleId = useGeneratedHtmlId();
 
   return (
@@ -73,25 +70,17 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
           />
         </EuiButtonEmpty>
 
-        <WithGuidedOnboardingTour
-          packageKey={packageInfo.name}
-          tourType="agentModalButton"
-          isTourVisible={isGuidedOnboardingActive}
-          tourPosition="downCenter"
-          tourOffset={-20}
+        <EuiButton
+          data-test-subj="confirmModalConfirmButton"
+          onClick={onConfirm}
+          fill
+          color="primary"
         >
-          <EuiButton
-            data-test-subj="confirmModalConfirmButton"
-            onClick={onConfirm}
-            fill
-            color="primary"
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentPolicy.postInstallAddAgentModalConfirmButtonLabel"
-              defaultMessage="Add Elastic Agent to your hosts"
-            />
-          </EuiButton>
-        </WithGuidedOnboardingTour>
+          <FormattedMessage
+            id="xpack.fleet.agentPolicy.postInstallAddAgentModalConfirmButtonLabel"
+            defaultMessage="Add Elastic Agent to your hosts"
+          />
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );

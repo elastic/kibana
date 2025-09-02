@@ -89,7 +89,12 @@
     "@kbn/inference-langchain",
     "@kbn/security-solution-features",
     "@kbn/core-http-server-mocks",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/licensing-types",
+    "@kbn/user-profile-components",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*",

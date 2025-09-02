@@ -12,16 +12,18 @@ import type {
   RunToolParams,
   RunAgentParams,
 } from '@kbn/onechat-server';
-import {
-  createScopedRunnerDepsMock,
-  createMockedTool,
-  createMockedAgent,
+import type {
   CreateScopedRunnerDepsMock,
   MockedTool,
   MockedAgent,
   AgentClientMock,
-  createMockedAgentClient,
   ToolRegistryMock,
+} from '../../test_utils';
+import {
+  createScopedRunnerDepsMock,
+  createMockedTool,
+  createMockedAgent,
+  createMockedAgentClient,
   createToolRegistryMock,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';

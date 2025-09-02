@@ -8,10 +8,11 @@
 import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
-import { Capabilities as UICapabilities } from '@kbn/core/server';
-import { KibanaFeatureConfig, KibanaFeatureScope } from '../common';
-import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
-import { AlertingKibanaPrivilege } from '../common/alerting_kibana_privilege';
+import type { Capabilities as UICapabilities } from '@kbn/core/server';
+import type { KibanaFeatureConfig } from '../common';
+import { KibanaFeatureScope } from '../common';
+import type { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
+import type { AlertingKibanaPrivilege } from '../common/alerting_kibana_privilege';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -217,7 +218,7 @@ const kibanaSubFeatureSchema = schema.object({
   ),
 });
 
-// NOTE: This schema intentionally omits the `composedOf` and `hidden` properties to discourage consumers from using
+// NOTE: This schema intentionally omits the `composedOf` property to discourage consumers from using
 // them during feature registration. This is because these properties should only be set via configuration overrides.
 const kibanaFeatureSchema = schema.object({
   id: schema.string({
@@ -233,6 +234,9 @@ const kibanaFeatureSchema = schema.object({
   name: schema.string(),
   category: appCategorySchema,
   scope: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+  // The hidden flag is only supported for explicit configuration for features with reserved privileges.
+  // All other usages are via configuration overrides.
+  hidden: schema.maybe(schema.boolean()),
   description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
@@ -321,6 +325,14 @@ const elasticsearchFeatureSchema = schema.object({
 
 export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   kibanaFeatureSchema.validate(feature);
+
+  // The `hidden` attribute is ONLY permitted for features with reserved privileges, AND without normal privileges.
+  // The original intent of the hidden flag was to support serverless configuration overrides. There is now (>=9.0) an additional,
+  // maybe temporary use case for the legacy reporting authorization mode, which registers as a reserved privilege.
+  const { hidden, privileges, reserved } = feature;
+  if (hidden && (privileges !== null || typeof reserved === 'undefined')) {
+    throw new Error(`Feature ${feature.id} cannot be hidden.`);
+  }
 
   const unknownScopesEntries = difference(feature.scope ?? [], Object.values(KibanaFeatureScope));
 

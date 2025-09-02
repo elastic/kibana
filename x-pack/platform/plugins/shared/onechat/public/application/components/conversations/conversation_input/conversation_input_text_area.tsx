@@ -9,6 +9,7 @@ import { EuiFlexItem, EuiTextArea, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
+import { useConversationId } from '../../../hooks/use_conversation_id';
 
 const inputContainerStyles = css`
   display: flex;
@@ -31,22 +32,25 @@ const textareaStyles = css`
 `;
 
 interface ConversationInputTextAreaProps {
-  message: string;
-  setMessage: (message: string) => void;
-  handleSubmit: () => void;
+  input: string;
+  setInput: (input: string) => void;
+  onSubmit: () => void;
 }
 
 export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps> = ({
-  message,
-  setMessage,
-  handleSubmit,
+  input,
+  setInput,
+  onSubmit,
 }) => {
+  const conversationId = useConversationId();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
+    // Auto focus the text area when the user switches conversations
     setTimeout(() => {
       textAreaRef.current?.focus();
     }, 200);
-  }, []);
+  }, [conversationId]);
   return (
     <EuiFlexItem css={inputContainerStyles}>
       <EuiTextArea
@@ -56,14 +60,14 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
         })}
         css={textareaStyles}
         data-test-subj="onechatAppConversationInputFormTextArea"
-        value={message}
+        value={input}
         onChange={(event) => {
-          setMessage(event.currentTarget.value);
+          setInput(event.currentTarget.value);
         }}
         onKeyDown={(event) => {
           if (!event.shiftKey && event.key === keys.ENTER) {
             event.preventDefault();
-            handleSubmit();
+            onSubmit();
           }
         }}
         placeholder={i18n.translate('xpack.onechat.conversationInputForm.placeholder', {

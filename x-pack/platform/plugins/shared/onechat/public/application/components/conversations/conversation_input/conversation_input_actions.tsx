@@ -5,29 +5,43 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useConversation } from '../../../hooks/use_conversation';
+import { css } from '@emotion/react';
+import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
-
+import { useSendMessage } from '../../../context/send_message_context';
 interface ConversationInputActionsProps {
-  handleSubmit: () => void;
-  submitDisabled: boolean;
+  onSubmit: () => void;
+  isSubmitDisabled: boolean;
+  resetToPendingMessage: () => void;
 }
 
+const labels = {
+  cancel: i18n.translate('xpack.onechat.conversationInputForm.cancel', {
+    defaultMessage: 'Cancel',
+  }),
+  submit: i18n.translate('xpack.onechat.conversationInputForm.submit', {
+    defaultMessage: 'Submit',
+  }),
+};
+
 export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
-  handleSubmit,
-  submitDisabled,
+  onSubmit,
+  isSubmitDisabled,
+  resetToPendingMessage,
 }) => {
-  const {
-    conversation,
-    hasActiveConversation,
-    actions: { setAgentId },
-  } = useConversation();
-  const agentId = conversation?.agent_id ?? oneChatDefaultAgentId;
+  const { setAgentId } = useConversationActions();
+  const agentId = useAgentId();
+  const hasActiveConversation = useHasActiveConversation();
+  const { canCancel, cancel } = useSendMessage();
+  const { euiTheme } = useEuiTheme();
+  const cancelButtonStyles = css`
+    background-color: ${euiTheme.colors.backgroundLightText};
+  `;
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
@@ -44,17 +58,32 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.onechat.conversationInputForm.submit', {
-              defaultMessage: 'Submit',
-            })}
-            data-test-subj="onechatAppConversationInputFormSubmitButton"
-            iconType="sortUp"
-            display="fill"
-            size="m"
-            disabled={submitDisabled}
-            onClick={handleSubmit}
-          />
+          {canCancel ? (
+            <EuiButtonIcon
+              aria-label={labels.cancel}
+              data-test-subj="onechatAppConversationInputFormCancelButton"
+              iconType="stopFilled"
+              size="m"
+              color="text"
+              css={cancelButtonStyles}
+              onClick={() => {
+                if (canCancel) {
+                  cancel();
+                  resetToPendingMessage();
+                }
+              }}
+            />
+          ) : (
+            <EuiButtonIcon
+              aria-label={labels.submit}
+              data-test-subj="onechatAppConversationInputFormSubmitButton"
+              iconType="sortUp"
+              display="fill"
+              size="m"
+              disabled={isSubmitDisabled}
+              onClick={onSubmit}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

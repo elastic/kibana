@@ -31,4 +31,10 @@ export const STACK_NODE_HORIZONTAL_PADDING = 20;
  */
 export const STACK_NODE_MIN_HEIGHT = 60;
 
-export { NODE_WIDTH, NODE_HEIGHT, NODE_LABEL_WIDTH, NODE_LABEL_HEIGHT } from './node/styles';
+export {
+  NODE_WIDTH,
+  NODE_HEIGHT,
+  ENTITY_NODE_TOTAL_HEIGHT,
+  NODE_LABEL_WIDTH,
+  NODE_LABEL_HEIGHT,
+} from './node/styles';

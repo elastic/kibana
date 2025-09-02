@@ -6,7 +6,7 @@
  */
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';

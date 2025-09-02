@@ -6,15 +6,16 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { RoutingDefinition } from '@kbn/streams-schema';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import { RoutingDefinitionWithUIAttributes } from './types';
+import type { RoutingDefinitionWithUIAttributes } from './types';
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TRoutingDefinition extends RoutingDefinition>(
   routingDefinition: TRoutingDefinition
 ): RoutingDefinitionWithUIAttributes => ({
   id: createId(),
+  status: routingDefinition.status ?? 'enabled',
   ...routingDefinition,
 });
 

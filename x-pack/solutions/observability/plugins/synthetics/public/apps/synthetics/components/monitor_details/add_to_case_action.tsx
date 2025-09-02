@@ -5,24 +5,34 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type TimeRange, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { type TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
+import { AddPageAttachmentToCaseModal } from '@kbn/observability-shared-plugin/public';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useGetUrlParams, useMonitorDetailLocator } from '../../hooks';
 
 export function AddToCaseContextItem() {
-  const {
-    services: { cases },
-  } = useKibana<ClientPluginsStart>();
-  const getCasesContext = cases?.ui?.getCasesContext;
+  const [isAddToCaseModalOpen, setIsAddToCaseModalOpen] = useState(false);
+  const services = useKibana<ClientPluginsStart>().services;
+  const observabilityAIAssistant = services.observabilityAIAssistant;
+  const cases = services.cases;
   const canUseCases = cases?.helpers?.canUseCases;
+  const notifications = services.notifications;
+
+  const { monitor } = useSelectedMonitor();
+  const { dateRangeEnd, dateRangeStart, locationId } = useGetUrlParams();
+  const timeRange: TimeRange = useMemo(
+    () => ({
+      from: dateRangeStart,
+      to: dateRangeEnd,
+    }),
+    [dateRangeStart, dateRangeEnd]
+  );
 
   const casesPermissions: CasesPermissions = useMemo(() => {
     if (!canUseCases) {
@@ -42,43 +52,17 @@ export function AddToCaseContextItem() {
     }
     return canUseCases();
   }, [canUseCases]);
-  const hasCasesPermissions =
-    casesPermissions.read && casesPermissions.update && casesPermissions.push;
-  const CasesContext = useMemo(() => {
-    if (!getCasesContext) {
-      return React.Fragment;
-    }
-    return getCasesContext();
-  }, [getCasesContext]);
 
-  if (!cases) {
-    return null;
-  }
-
-  return hasCasesPermissions ? (
-    <CasesContext permissions={casesPermissions} owner={['observability']}>
-      <AddToCaseButtonContent />
-    </CasesContext>
-  ) : null;
-}
-function AddToCaseButtonContent() {
-  const { monitor } = useSelectedMonitor();
-  const { dateRangeEnd, dateRangeStart, locationId } = useGetUrlParams();
-  const services = useKibana<ClientPluginsStart>().services;
-  const notifications = services.notifications;
-  // type checked in wrapper component
-  const useCasesAddToExistingCaseModal = services.cases?.hooks?.useCasesAddToExistingCaseModal!;
-  const casesModal = useCasesAddToExistingCaseModal();
-  const timeRange: TimeRange = {
-    from: dateRangeStart,
-    to: dateRangeEnd,
-  };
+  const hasCasesPermissions = useMemo(() => {
+    return casesPermissions.read && casesPermissions.update && casesPermissions.push;
+  }, [casesPermissions.read, casesPermissions.update, casesPermissions.push]);
 
   const redirectUrl = useMonitorDetailLocator({
     configId: monitor?.config_id ?? '',
-    timeRange: convertToAbsoluteTimeRange(timeRange),
+    timeRange,
     locationId,
     tabId: 'history',
+    useAbsoluteDate: true,
   });
 
   const onClick = useCallback(() => {
@@ -91,63 +75,58 @@ function AddToCaseButtonContent() {
       });
       return;
     }
+    setIsAddToCaseModalOpen(true);
+  }, [setIsAddToCaseModalOpen, redirectUrl, monitor?.name, notifications.toasts]);
 
-    casesModal.open({
-      getAttachments: () => {
-        const persistableStateAttachmentState: PageAttachmentPersistedState = {
-          type: 'synthetics_monitor',
-          url: {
-            pathAndQuery: redirectUrl,
-            label: monitor.name,
-            actionLabel: i18n.translate(
-              'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryActionLabel',
-              {
-                defaultMessage: 'Go to Monitor History',
-              }
-            ),
-            iconType: 'uptimeApp',
-          },
-        };
-        return [
+  const onCloseModal = useCallback(() => {
+    setIsAddToCaseModalOpen(false);
+  }, [setIsAddToCaseModalOpen]);
+
+  const pageState = useMemo(() => {
+    if (!redirectUrl || !monitor?.name) {
+      return null;
+    }
+    return {
+      type: 'synthetics_monitor',
+      url: {
+        pathAndQuery: redirectUrl,
+        label: monitor.name,
+        actionLabel: i18n.translate(
+          'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryLinkLabel',
           {
-            persistableStateAttachmentState,
-            persistableStateAttachmentTypeId: '.page',
-            type: 'persistableState',
-          },
-        ] as CaseAttachmentsWithoutOwner;
+            defaultMessage: 'Go to Monitor History',
+          }
+        ),
+        iconType: 'uptimeApp',
       },
-    });
-  }, [casesModal, notifications.toasts, monitor?.name, redirectUrl]);
+    };
+  }, [monitor, redirectUrl]);
 
-  return (
-    <EuiContextMenuItem
-      key="addToCase"
-      data-test-subj="syntheticsMonitorAddToCaseButton"
-      icon="plusInCircle"
-      onClick={onClick}
-    >
-      {i18n.translate('xpack.synthetics.cases.addToCaseModal.buttonLabel', {
-        defaultMessage: 'Add to case',
-      })}
-    </EuiContextMenuItem>
-  );
-}
-
-export const convertToAbsoluteTimeRange = (timeRange?: TimeRange): TimeRange | undefined => {
-  if (!timeRange) {
-    return;
+  if (!monitor || !redirectUrl || !cases || !hasCasesPermissions || !pageState) {
+    return null; // Ensure monitor and redirectUrl are available before rendering
   }
 
-  const absRange = getAbsoluteTimeRange(
-    {
-      from: timeRange.from,
-      to: timeRange.to,
-    },
-    { forceNow: new Date() }
+  return (
+    <>
+      <EuiContextMenuItem
+        key="addToCase"
+        data-test-subj="syntheticsMonitorAddToCaseButton"
+        icon="plusInCircle"
+        onClick={onClick}
+      >
+        {i18n.translate('xpack.synthetics.cases.addToCaseModal.buttonLabel', {
+          defaultMessage: 'Add to case',
+        })}
+      </EuiContextMenuItem>
+      {isAddToCaseModalOpen && (
+        <AddPageAttachmentToCaseModal
+          pageAttachmentState={pageState}
+          cases={cases}
+          onCloseModal={onCloseModal}
+          notifications={notifications}
+          observabilityAIAssistant={observabilityAIAssistant}
+        />
+      )}
+    </>
   );
-
-  return {
-    from: absRange.from,
-    to: absRange.to,
-  };
-};
+}

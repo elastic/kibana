@@ -13,7 +13,7 @@ import type {
   IntervalHistogram,
   OpsProcessMetrics,
 } from '@kbn/core-metrics-server';
-import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
+import type { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 // internal duplicate of metricsCollectorMock
 const createCollector = <T = any>(
