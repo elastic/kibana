@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
@@ -22,8 +21,11 @@ import {
 } from '../translations';
 import { LabelWithTooltip } from './label_with_tooltip';
 
-export const RuleDashboards = () => {
-  const { services } = useKibana();
+export interface Props {
+  dashboardStart: DashboardStart;
+}
+
+export const RuleDashboards = ({ dashboardStart }: Props) => {
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
   const dashboardsFormData = useMemo(
@@ -62,8 +64,7 @@ export const RuleDashboards = () => {
             labelAppend={OptionalFieldLabel}
           >
             <DashboardsSelector
-              // services contains dashboard here, does this mean we need to change the CoreStart type?
-              dashboardStart={(services as { dashboard: DashboardStart }).dashboard}
+              dashboardStart={dashboardStart}
               dashboardsFormData={dashboardsFormData}
               onChange={onChange}
               placeholder={ALERT_LINK_DASHBOARDS_PLACEHOLDER}

@@ -17,6 +17,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
   RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
@@ -34,6 +36,7 @@ import { RuleDashboards } from './rule_dashboards';
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
+  const { services } = useKibana<{ dashboard?: DashboardStart }>();
   const { formData, baseErrors } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
@@ -159,7 +162,7 @@ export const RuleDetails = () => {
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
         />
       </EuiFormRow>
-      <RuleDashboards />
+      {services.dashboard && <RuleDashboards dashboardStart={services.dashboard} />}
       <EuiSpacer size="xxl" />
     </>
   );
