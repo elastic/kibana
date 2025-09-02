@@ -81,3 +81,7 @@ export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
     defaultMessage: 'Sorry about that, something went wrong.',
   }
 );
+
+export const LEGACY_LABEL = i18n.translate('xpack.triggersActionsUI.legacyTitleLabel', {
+  defaultMessage: '(Legacy)',
+});
