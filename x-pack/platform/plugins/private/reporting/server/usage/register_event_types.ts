@@ -235,6 +235,29 @@ const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[FieldType.DURATION_MS],
     },
   },
+  {
+    eventType: EventType.REPORT_NOTIFICATION,
+    schema: {
+      ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
+      ...fields[FieldType.EXPORT_TYPE],
+      ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.BYTE_SIZE],
+      ...fields[FieldType.SCHEDULE_TYPE],
+    },
+  },
+  {
+    eventType: EventType.REPORT_NOTIFICATION_ERROR,
+    schema: {
+      ...fields[FieldType.REPORT_ID],
+      ...fields[FieldType.SCHEDULED_TASK_ID],
+      ...fields[FieldType.EXPORT_TYPE],
+      ...fields[FieldType.OBJECT_TYPE],
+      ...fields[FieldType.SCHEDULE_TYPE],
+      ...fields[FieldType.BYTE_SIZE],
+      ...fields[FieldType.ERROR_MESSAGE],
+    },
+  },
 ];
 
 export function registerReportingEventTypes(core: CoreSetup) {

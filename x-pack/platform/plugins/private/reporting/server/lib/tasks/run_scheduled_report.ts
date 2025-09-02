@@ -159,9 +159,25 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             spaceId,
           },
         });
+
+        // event tracking of successful notification
+        const eventTracker = this.getEventTracker(report);
+        eventTracker?.completeNotification({
+          byteSize,
+          scheduledTaskId: report.scheduled_report_id,
+          scheduleType: ScheduleType.SCHEDULED,
+        });
       }
     } catch (error) {
       const message = `Error sending notification for scheduled report: ${error.message}`;
+      // event tracking of successful notification
+      const eventTracker = this.getEventTracker(report);
+      eventTracker?.failedNotification({
+        byteSize,
+        scheduledTaskId: report.scheduled_report_id,
+        scheduleType: ScheduleType.SCHEDULED,
+        errorMessage: message,
+      });
       this.saveExecutionWarning(
         report,
         {

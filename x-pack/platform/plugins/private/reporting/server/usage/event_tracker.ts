@@ -35,6 +35,16 @@ interface FailureOpts {
   scheduleType: ScheduleType;
 }
 
+interface NotificationOpts {
+  byteSize: number;
+  scheduledTaskId?: string;
+  scheduleType: ScheduleType;
+}
+
+type NotificationErrorOpts = NotificationOpts & {
+  errorMessage: string;
+};
+
 export class EventTracker {
   constructor(
     private analytics: AnalyticsServiceStart,
@@ -160,6 +170,31 @@ export class EventTracker {
       [FieldType.ERROR_MESSAGE]: errorMessage,
       [FieldType.ERROR_CODE]: errorCode,
       [FieldType.SCHEDULE_TYPE]: scheduleType,
+      ...(scheduledTaskId ? { [FieldType.SCHEDULED_TASK_ID]: scheduledTaskId } : {}),
+    });
+  }
+
+  public completeNotification(opts: NotificationOpts) {
+    const { byteSize, scheduledTaskId, scheduleType } = opts;
+    this.track(EventType.REPORT_NOTIFICATION, {
+      [FieldType.REPORT_ID]: this.reportId,
+      [FieldType.EXPORT_TYPE]: this.exportType,
+      [FieldType.OBJECT_TYPE]: this.objectType,
+      [FieldType.BYTE_SIZE]: byteSize,
+      [FieldType.SCHEDULE_TYPE]: scheduleType,
+      ...(scheduledTaskId ? { [FieldType.SCHEDULED_TASK_ID]: scheduledTaskId } : {}),
+    });
+  }
+
+  public failedNotification(opts: NotificationErrorOpts) {
+    const { byteSize, errorMessage, scheduledTaskId, scheduleType } = opts;
+    this.track(EventType.REPORT_NOTIFICATION_ERROR, {
+      [FieldType.REPORT_ID]: this.reportId,
+      [FieldType.EXPORT_TYPE]: this.exportType,
+      [FieldType.OBJECT_TYPE]: this.objectType,
+      [FieldType.SCHEDULE_TYPE]: scheduleType,
+      [FieldType.BYTE_SIZE]: byteSize,
+      [FieldType.ERROR_MESSAGE]: errorMessage,
       ...(scheduledTaskId ? { [FieldType.SCHEDULED_TASK_ID]: scheduledTaskId } : {}),
     });
   }

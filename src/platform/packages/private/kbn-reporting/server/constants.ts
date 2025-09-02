@@ -41,6 +41,8 @@ export enum EventType {
   REPORT_ERROR = 'report_error',
   REPORT_DOWNLOAD = 'report_download',
   REPORT_DELETION = 'report_deletion',
+  REPORT_NOTIFICATION = 'report_notification',
+  REPORT_NOTIFICATION_ERROR = 'report_notification_error',
 }
 export enum FieldType {
   REPORT_ID = 'report_id',
