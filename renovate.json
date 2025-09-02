@@ -183,12 +183,7 @@
         "langsmith",
         "openai",
         "@types/json-schema",
-        "table",
-        "@huggingface/hub",
-        "cache-manager",
-        "cache-manager-fs-hash",
-        "keyv",
-        "@types/cache-manager-fs-hash"
+        "table"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -755,8 +750,6 @@
         "js-search",
         "openpgp",
         "remark-gfm",
-        "rehype-raw",
-        "rehype-sanitize",
         "yaml",
         "@types/js-search"
       ],
@@ -885,8 +878,6 @@
         "fp-ts",
         "getos",
         "joi-to-json",
-        "@apidevtools/json-schema-ref-parser",
-        "@fast-check/jest",
         "json5",
         "load-json-file",
         "mock-fs",
@@ -1200,27 +1191,6 @@
         "backport:prev-minor",
         "Team:Operations",
         "Team:Core"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch (CI clients)",
-      "matchDepNames": [
-        "elasticsearch-8.x"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:appex-qa"
-      ],
-      "allowedVersions": "<9.0.0",
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:prev-minor",
-        "Team:Operations",
-        "Team:QA"
       ],
       "enabled": true
     },
@@ -2327,28 +2297,6 @@
       "enabled": true
     },
     {
-      "groupName": "workchat gen-ai dependencies",
-      "matchDepNames": [
-        "@modelcontextprotocol/sdk",
-        "@n8n/json-schema-to-zod",
-        "expr-eval"
-      ],
-      "reviewers": [
-        "team:search-kibana"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Search",
-        "Team:Enterprise Search",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "vinyl",
       "matchDepNames": [
         "vinyl",
@@ -3342,24 +3290,6 @@
       "enabled": true
     },
     {
-      "groupName": "p-timeout",
-      "matchDepNames": [
-        "p-timeout"
-      ],
-      "reviewers": [
-        "team:obs-ai-assistant"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "redux-actions",
       "matchDepNames": [
         "redux-actions",
@@ -4296,25 +4226,6 @@
       "enabled": true
     },
     {
-      "groupName": "Oniguruma to es",
-      "matchDepNames": [
-        "oniguruma-to-es"
-      ],
-      "reviewers": [
-        "team:obs-ux-logs-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:obs-ux-logs",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
@@ -4459,24 +4370,6 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "Kibana ES|QL Highlighting",
-      "matchDepNames": [
-        "@elastic/monaco-esql"
-      ],
-      "reviewers": [
-        "team:kibana-esql"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:ESQL",
-        "release_note:skip",
-        "backport:version"
-      ],
       "enabled": true
     },
     {
@@ -4630,25 +4523,6 @@
         "Team:Operations",
         "backport:prev-minor",
         "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "chrome-remote-interface",
-      "matchDepNames": [
-        "chrome-remote-interface",
-        "@types/chrome-remote-interface"
-      ],
-      "reviewers": [
-        "team:obs-knowledge-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
