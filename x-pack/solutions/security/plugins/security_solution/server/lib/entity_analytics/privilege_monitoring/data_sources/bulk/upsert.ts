@@ -72,7 +72,7 @@ export const bulkUpsertOperationsFactory =
         ops.push(
           { index: { _index: userIndexName } },
           {
-            '@timestamp': new Date().toISOString(),
+            '@timestamp': now,
             user: { name: user.username, is_privileged: true },
             labels: {
               sources: ['index'],
