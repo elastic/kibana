@@ -39,29 +39,29 @@ export interface ToolUpdateParams<TConfig extends object = {}> {
   configuration?: Partial<TConfig>;
 }
 
-// TODO: duplicate ? delete?
-export type ToolTypeCreateParams<TConfig extends object = {}> = Omit<
-  ToolCreateParams<TConfig>,
-  'type'
->;
+export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
 
 /**
  * Defines a provider for a given tool type
  */
-export type ToolTypeDefinition<TType extends ToolType = ToolType, TConfig extends object = {}> = {
+export type ToolSource<T extends ToolType = ToolType> = {
   /**
-   * The type associated with this provider.
+   * Unique identifier for this source
    */
-  toolType: TType;
+  id: string;
+  /**
+   * List of tool types provided by this source
+   */
+  toolTypes: T[];
 } & (
   | {
       readonly?: false | undefined;
-      getClient(opts: { request: KibanaRequest }): MaybePromise<ToolTypeClient<TConfig>>;
+      getClient(opts: { request: KibanaRequest }): MaybePromise<ToolTypeClient>;
     }
   | {
       readonly: true;
-      getClient(opts: { request: KibanaRequest }): MaybePromise<ReadonlyToolTypeClient<TConfig>>;
+      getClient(opts: { request: KibanaRequest }): MaybePromise<ReadonlyToolTypeClient>;
     }
 );
 
