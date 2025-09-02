@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/types';
+import { StatusFilter } from '../../../../common/types';
+import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/rules/types';
 import type { FilterOptions } from '../../../types';
-import { AuthorFilter, StatusFilter } from '../../../types';
+import { AuthorFilter } from '../../../types';
 
 const AUTHOR_FILTERS: Record<AuthorFilter, RuleMigrationFilters> = {
   [AuthorFilter.ELASTIC]: { prebuilt: true },
