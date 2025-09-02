@@ -18,7 +18,7 @@ import {
   createMergeNonConflictingAllOfItemsProcessor,
   createUnfoldSingleAllOfItemProcessor,
 } from './process_document/document_processors/reduce_all_of_items';
-import { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
+import type { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
 import { createIncludeLabelsProcessor } from './process_document/document_processors/include_labels';
 import { createNamespaceComponentsProcessor } from './process_document/document_processors/namespace_components';
 

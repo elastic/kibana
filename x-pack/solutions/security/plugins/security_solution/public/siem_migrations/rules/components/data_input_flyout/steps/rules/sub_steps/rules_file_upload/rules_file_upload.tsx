@@ -75,6 +75,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
         <EuiFlexItem>
           <EuiFormRow isInvalid={error != null} fullWidth error={error}>
             <EuiFilePicker
+              isInvalid={error != null}
               id="rulesFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth

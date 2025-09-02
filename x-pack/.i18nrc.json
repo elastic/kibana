@@ -166,7 +166,10 @@
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
     "xpack.upgradeAssistant": [
       "platform/plugins/private/upgrade_assistant",
-      "platform/packages/private/upgrade-assistant"
+      "platform/plugins/private/reindex_service",
+      "platform/packages/private/upgrade-assistant/common",
+      "platform/packages/private/upgrade-assistant/public",
+      "platform/packages/private/upgrade-assistant/server"
     ],
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"
@@ -187,6 +190,7 @@
   "translations": [
     "@kbn/translations-plugin/translations/zh-CN.json",
     "@kbn/translations-plugin/translations/ja-JP.json",
-    "@kbn/translations-plugin/translations/fr-FR.json"
+    "@kbn/translations-plugin/translations/fr-FR.json",
+    "@kbn/translations-plugin/translations/de-DE.json"
   ]
 }

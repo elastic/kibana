@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { add820Indices, remove890Indices } from './migrations';
-import { SavedObject, SavedObjectMigrationContext } from '@kbn/core/server';
-import { DynamicSettingsAttributes } from '../../../runtime_types/settings';
+import type { SavedObject, SavedObjectMigrationContext } from '@kbn/core/server';
+import type { DynamicSettingsAttributes } from '../../../runtime_types/settings';
 
 describe('add820Indices migration', () => {
   const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;

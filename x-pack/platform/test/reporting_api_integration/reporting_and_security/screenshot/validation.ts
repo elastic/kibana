@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import supertest from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type supertest from 'supertest';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const createPdfV2Params = (testWidth: number | string, layoutId = 'preserve_layout') =>
   `(browserTimezone:UTC,layout:` +
@@ -48,7 +48,6 @@ const createPngV2Params = (testWidth: number | string) =>
   `title:\'Tag Cloud of Names\',` +
   `version:\'8.2.0\')`;
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const retry = getService('retry');

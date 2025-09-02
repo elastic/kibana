@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -106,6 +107,7 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
                 isInvalid={!!addFieldFormErrors}
               >
                 <EuiFieldText
+                  isInvalid={!!addFieldFormErrors}
                   placeholder={FIELD_NAME_PLACEHOLDER}
                   onChange={handleChange}
                   value={rawFieldName}

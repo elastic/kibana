@@ -16,6 +16,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 import { DATA_SOURCES_I18N } from './translations';
@@ -31,11 +32,13 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
     (snapshot) => snapshot.context.dataSourcesRefs
   );
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyoutResizable onClose={onClose} size="m">
+    <EuiFlyoutResizable onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{DATA_SOURCES_I18N.flyout.title}</h2>
+          <h2 id={flyoutTitleId}>{DATA_SOURCES_I18N.flyout.title}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText component="p" color="subdued">

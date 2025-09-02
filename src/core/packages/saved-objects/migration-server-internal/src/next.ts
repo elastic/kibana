@@ -118,7 +118,12 @@ export const nextActionMap = (
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     REFRESH_SOURCE: (state: RefreshSource) =>
       Actions.refreshIndex({ client, index: state.sourceIndex.value }),
-    CHECK_CLUSTER_ROUTING_ALLOCATION: () => Actions.checkClusterRoutingAllocationEnabled(client),
+    REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
+    CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
+    RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -252,6 +257,7 @@ export const nextActionMap = (
         batchSize: state.batchSize,
         searchAfter: state.lastHitSortValue,
         maxResponseSizeBytes: state.maxReadBatchSizeBytes,
+        seqNoPrimaryTerm: true,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
       Actions.closePit({ client, pitId: state.pitId }),

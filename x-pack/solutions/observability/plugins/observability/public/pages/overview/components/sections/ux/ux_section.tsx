@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { SERVICE_NAME, TRANSACTION_DURATION } from '@kbn/observability-shared-plugin/common';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { UX_APP } from '../../../../../context/constants';
-import { ObservabilityPublicPluginsStart } from '../../../../..';
+import type { ObservabilityPublicPluginsStart } from '../../../../..';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
@@ -28,8 +28,6 @@ interface Props {
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
   const { services } = useKibana<ObservabilityPublicPluginsStart>();
-
-  const { ExploratoryViewEmbeddable } = services.exploratoryView;
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
@@ -79,9 +77,10 @@ export function UXSection({ bucketSize }: Props) {
     ]
   );
 
-  if (!uxHasDataResponse?.hasData) {
+  if (!uxHasDataResponse?.hasData || !services.exploratoryView) {
     return null;
   }
+  const ExploratoryViewEmbeddable = services.exploratoryView.ExploratoryViewEmbeddable;
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

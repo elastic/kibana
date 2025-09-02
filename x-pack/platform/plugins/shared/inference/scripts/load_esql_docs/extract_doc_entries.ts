@@ -8,13 +8,15 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 import fastGlob from 'fast-glob';
-import $, { load, Cheerio, AnyNode } from 'cheerio';
+import type { Cheerio, AnyNode } from 'cheerio';
+import $, { load } from 'cheerio';
 import { partition } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import pLimit from 'p-limit';
-import { ScriptInferenceClient } from '../util/kibana_client';
+import type { ScriptInferenceClient } from '../util/kibana_client';
 import { convertToMarkdownPrompt } from './prompts/convert_to_markdown';
-import { bindOutput, PromptCaller } from './utils/output_executor';
+import type { PromptCaller } from './utils/output_executor';
+import { bindOutput } from './utils/output_executor';
 
 /**
  * The pages that will be extracted but only used as context
@@ -60,10 +62,12 @@ export async function extractDocEntries({
   log: ToolingLog;
   inferenceClient: ScriptInferenceClient;
 }): Promise<ExtractionOutput> {
-  const path = `${builtDocsDir}/html/en/elasticsearch/reference/current/esql*.html`;
-  const files = await fastGlob(path);
+  const paths = ['esql*.html', '_lookup_join.html'].map(
+    (path) => `${builtDocsDir}/html/en/elasticsearch/reference/current/${path}`
+  );
+  const files = await fastGlob(paths);
   if (!files.length) {
-    throw new Error(`No files found at path: ${path}`);
+    throw new Error(`No files found at paths: ${paths}`);
   }
 
   const output: ExtractionOutput = {
@@ -129,11 +133,24 @@ async function processFile({
       limiter,
       executePrompt,
     });
+  } else if (basename === '_lookup_join.html') {
+    const $element = load(fileContent)('*');
+    const command: ExtractedCommandOrFunc = {
+      name: 'lookup-join',
+      markdownContent: await executePrompt(
+        convertToMarkdownPrompt({ htmlContent: getSimpleText($element) })
+      ),
+      command: true,
+    };
+    output.commands.push(command);
   } else if (contextArticles.includes(basename)) {
     const $element = load(fileContent)('*');
     output.pages.push({
       sourceFile: basename,
-      name: basename === 'esql.html' ? 'overview' : basename.substring(5, basename.length - 5),
+      name:
+        basename === 'esql.html'
+          ? 'overview'
+          : basename.replace(/^esql-/, '').replace(/\.html$/, ''),
       content: getSimpleText($element),
     });
   } else {

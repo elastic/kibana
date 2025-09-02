@@ -10,7 +10,7 @@
 import { parse } from '../../parser';
 import { Parser } from '../../parser/parser';
 import { EsqlQuery } from '../../query';
-import {
+import type {
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -18,7 +18,6 @@ import {
   ESQLLiteral,
   ESQLSource,
   ESQLList,
-  ESQLTimeInterval,
   ESQLInlineCast,
   ESQLUnknownItem,
   ESQLIdentifier,
@@ -494,7 +493,8 @@ describe('structurally can walk all nodes', () => {
       });
 
       test('can walk through all literals', () => {
-        const query = 'FROM index | STATS a = 123, b = "foo", c = true AND false';
+        const query =
+          'FROM index | STATS a = 123, b = "foo", c = true AND false, d = 1 day, e = 4 seconds';
         const { ast } = parse(query);
         const columns: ESQLLiteral[] = [];
 
@@ -502,7 +502,7 @@ describe('structurally can walk all nodes', () => {
           visitLiteral: (node) => columns.push(node),
         });
 
-        expect(columns).toMatchObject([
+        expect(columns).toMatchObject<Array<Partial<ESQLLiteral>>>([
           {
             type: 'literal',
             literalType: 'keyword',
@@ -527,6 +527,18 @@ describe('structurally can walk all nodes', () => {
             type: 'literal',
             literalType: 'boolean',
             value: 'false',
+          },
+          {
+            type: 'literal',
+            literalType: 'date_period',
+            unit: 'day',
+            quantity: 1,
+          },
+          {
+            type: 'literal',
+            literalType: 'time_duration',
+            unit: 'seconds',
+            quantity: 4,
           },
         ]);
       });
@@ -803,63 +815,6 @@ describe('structurally can walk all nodes', () => {
             },
           ]);
         });
-      });
-    });
-
-    describe('time interval', () => {
-      test('can visit time interval nodes', () => {
-        const query = 'FROM index | STATS a = 123 BY 1h';
-        const { ast } = parse(query);
-        const intervals: ESQLTimeInterval[] = [];
-
-        walk(ast, {
-          visitTimeIntervalLiteral: (node) => intervals.push(node),
-        });
-
-        expect(intervals).toMatchObject([
-          {
-            type: 'timeInterval',
-            quantity: 1,
-            unit: 'h',
-          },
-        ]);
-      });
-
-      test('"visitAny" can capture time interval expressions', () => {
-        const query = 'FROM index | STATS a = 123 BY 1h';
-        const { ast } = parse(query);
-        const intervals: ESQLTimeInterval[] = [];
-
-        walk(ast, {
-          visitAny: (node) => {
-            if (node.type === 'timeInterval') intervals.push(node);
-          },
-        });
-
-        expect(intervals).toMatchObject([
-          {
-            type: 'timeInterval',
-            quantity: 1,
-            unit: 'h',
-          },
-        ]);
-      });
-
-      test('"visitAny" does not capture time interval node if type-specific callback provided', () => {
-        const query = 'FROM index | STATS a = 123 BY 1h';
-        const { ast } = parse(query);
-        const intervals1: ESQLTimeInterval[] = [];
-        const intervals2: ESQLTimeInterval[] = [];
-
-        walk(ast, {
-          visitTimeIntervalLiteral: (node) => intervals1.push(node),
-          visitAny: (node) => {
-            if (node.type === 'timeInterval') intervals2.push(node);
-          },
-        });
-
-        expect(intervals1.length).toBe(1);
-        expect(intervals2.length).toBe(0);
       });
     });
 

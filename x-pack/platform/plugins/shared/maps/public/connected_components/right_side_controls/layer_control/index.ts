@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { LayerControl } from './layer_control';
 
@@ -25,7 +25,7 @@ import {
   getFlyoutDisplay,
 } from '../../../selectors/ui_selectors';
 import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
-import { MapStoreState } from '../../../reducers/store';
+import type { MapStoreState } from '../../../reducers/store';
 import { DRAW_MODE } from '../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState) {

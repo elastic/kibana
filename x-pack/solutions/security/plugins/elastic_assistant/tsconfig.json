@@ -86,7 +86,15 @@
     "@kbn/deeplinks-security",
     "@kbn/core-application-browser",
     "@kbn/ai-security-labs-content",
-    "@kbn/inference-langchain"
+    "@kbn/inference-langchain",
+    "@kbn/security-solution-features",
+    "@kbn/core-http-server-mocks",
+    "@kbn/inference-common",
+    "@kbn/licensing-types",
+    "@kbn/user-profile-components",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*",

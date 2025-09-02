@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import Path, { join } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   DefinitionUrlParams,
   EndpointDefinition,

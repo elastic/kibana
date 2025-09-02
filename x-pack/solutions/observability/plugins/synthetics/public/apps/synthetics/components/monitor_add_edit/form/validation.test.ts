@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  ConfigKey,
-  MonitorTypeEnum,
-  HTTPFields,
-  BrowserFields,
-  MonitorFields,
-  ScheduleUnit,
-} from '../types';
+import type { HTTPFields, BrowserFields, MonitorFields } from '../types';
+import { ConfigKey, MonitorTypeEnum, ScheduleUnit } from '../types';
 import { validate } from './validation';
 
 describe('[Monitor Management] validation', () => {

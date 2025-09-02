@@ -7,6 +7,9 @@
 
 import React from 'react';
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { useGeneratedHtmlId } from '@elastic/eui';
+
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -17,13 +20,12 @@ import {
   EuiFlyoutBody,
   EuiText,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringValidation } from '@kbn/search-connectors';
+import type { FilteringValidation } from '@kbn/search-connectors';
 
 import { AdvancedSyncRules } from './advanced_sync_rules';
 import { EditSyncRulesTab } from './edit_sync_rules_tab';
@@ -51,6 +53,8 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
   revertLocalAdvancedFiltering,
   setIsEditing,
 }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   const tabs: EuiTabbedContentTab[] = [
     ...(hasBasicFilteringFeature
       ? [
@@ -91,10 +95,15 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
   ];
 
   return (
-    <EuiFlyout ownFocus onClose={() => setIsEditing(false)} aria-labelledby="rulesFlyout" size="l">
+    <EuiFlyout
+      ownFocus
+      onClose={() => setIsEditing(false)}
+      aria-labelledby={flyoutTitleId}
+      size="l"
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id="rulesFlyout">
+          <h2 id={flyoutTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.title',
               {

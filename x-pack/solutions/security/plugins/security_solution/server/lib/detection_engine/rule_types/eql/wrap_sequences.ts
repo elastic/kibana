@@ -10,9 +10,9 @@ import type { SecuritySharedParams, SignalSource } from '../types';
 import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
 import type { EqlRuleParams } from '../../rule_schema';
 import type {
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
@@ -26,9 +26,7 @@ export const wrapSequences = ({
   buildReasonMessage: BuildReasonMessage;
 }) =>
   sequences.reduce<
-    Array<
-      WrappedFieldsLatest<EqlShellFieldsLatest> | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
-    >
+    Array<WrappedAlert<EqlShellAlertLatest> | WrappedAlert<EqlBuildingBlockAlertLatest>>
   >((acc, sequence) => {
     const { shellAlert, buildingBlocks } = buildAlertGroupFromSequence({
       sharedParams,

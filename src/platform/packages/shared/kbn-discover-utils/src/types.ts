@@ -128,6 +128,9 @@ export interface SpanDocumentOverview
   'transaction.name'?: string;
   duration?: number;
   kind?: string;
+  'resource.attributes.telemetry.sdk.language'?: string;
+  'links.trace_id'?: string;
+  'links.span_id'?: string;
 }
 
 export interface TraceFields {
@@ -159,6 +162,8 @@ export interface SpanFields {
   'span.type': string;
   'span.subtype': string;
   'span.destination.service.resource': string;
+  'span.links.span.id'?: string;
+  'span.links.trace.id'?: string;
 }
 
 export interface UserAgentFields {

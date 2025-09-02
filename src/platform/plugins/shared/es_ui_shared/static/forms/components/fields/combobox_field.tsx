@@ -9,9 +9,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
+import type { FieldHook, FieldValidateResponse } from '../../hook_form_lib';
+import { VALIDATION_TYPES } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
@@ -82,6 +84,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
       {...rest}
     >
       <EuiComboBox
+        isInvalid={isInvalid}
         noSuggestions
         placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',

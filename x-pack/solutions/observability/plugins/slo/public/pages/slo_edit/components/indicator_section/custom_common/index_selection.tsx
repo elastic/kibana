@@ -6,15 +6,15 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { SLOPublicPluginsStart } from '../../../../..';
+import type { SLOPublicPluginsStart } from '../../../../..';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { getDataViewPatternOrId, useAdhocDataViews } from './use_adhoc_data_views';
 
 const BTN_MAX_WIDTH = 515;

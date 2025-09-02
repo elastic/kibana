@@ -6,7 +6,7 @@
  */
 
 import { faker } from '@faker-js/faker';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { URL } from 'node:url';
 
 //  $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"

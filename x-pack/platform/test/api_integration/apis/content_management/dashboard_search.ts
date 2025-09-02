@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { sampleDashboard } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('can specify references to return', async () => {
       const searchPayload = {
         contentTypeId: 'dashboard',
-        version: 3,
+        version: 1,
         query: {},
         options: {},
       };

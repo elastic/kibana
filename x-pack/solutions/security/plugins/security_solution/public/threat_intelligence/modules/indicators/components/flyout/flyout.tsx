@@ -161,7 +161,7 @@ export const IndicatorsFlyout: FC<IndicatorsFlyoutProps> = ({
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiTabs data-test-subj={INDICATORS_FLYOUT_TABS_TEST_ID} style={{ marginBottom: '-25px' }}>
+        <EuiTabs data-test-subj={INDICATORS_FLYOUT_TABS_TEST_ID} css={{ marginBottom: '-25px' }}>
           {renderTabs}
         </EuiTabs>
       </EuiFlyoutHeader>

@@ -5,30 +5,19 @@
  * 2.0.
  */
 
-import {
+import type {
   Message,
   ToolDefinition,
   ToolChoice,
   ToolCallsOf,
-  withoutChunkEvents,
-  withoutTokenCountEvents,
   ToolMessage,
   MessageOf,
-  MessageRole,
 } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-common';
-import { Logger } from '@kbn/logging';
-import {
-  defer,
-  last,
-  merge,
-  Observable,
-  of,
-  OperatorFunction,
-  share,
-  switchMap,
-  toArray,
-} from 'rxjs';
+import { withoutChunkEvents, withoutTokenCountEvents, MessageRole } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type { Observable, OperatorFunction } from 'rxjs';
+import { defer, last, merge, of, share, switchMap, toArray } from 'rxjs';
 
 interface CallToolOptions extends CallToolTools {
   system: string;

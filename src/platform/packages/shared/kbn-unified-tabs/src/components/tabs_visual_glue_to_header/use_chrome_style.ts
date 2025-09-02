@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
-import { TabsServices } from '../../types';
+import type { TabsServices } from '../../types';
 
 export const useChromeStyle = (services: TabsServices) => {
   const chrome = services.core?.chrome;

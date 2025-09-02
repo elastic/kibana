@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { TimeScaleUnit } from '../../../../../common/expressions';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
+import type { TimeScaleUnit } from '../../../../../common/expressions';
+import type { OperationDefinition, ParamEditorProps } from '.';
+import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField } from '../../../../types';
 import {
   getInvalidFieldMessage,
@@ -131,7 +131,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       dataType: 'number',
       operationType: COUNT_ID,
       isBucketed: false,
-      scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
@@ -151,7 +150,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CountIndexPatternColumn>) => {
+    euiTheme,
+  }: ParamEditorProps<CountIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -166,7 +166,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}

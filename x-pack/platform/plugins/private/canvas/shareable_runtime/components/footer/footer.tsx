@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBottomBar } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
 import { Scrubber } from './scrubber';

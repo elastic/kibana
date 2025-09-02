@@ -34,7 +34,7 @@ export const AlertSuppressionLabel = ({ label, ruleType }: AlertSuppressionLabel
             type={'warning'}
             size="l"
             color="danger"
-            style={{ marginLeft: '8px' }}
+            css={{ marginLeft: '8px' }}
             data-test-subj="alertSuppressionInsufficientLicensingIcon"
           />
         </EuiToolTip>

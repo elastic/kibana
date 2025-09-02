@@ -6,12 +6,8 @@
  */
 
 import { filter, map, tap, defer } from 'rxjs';
-import {
-  Message,
-  MessageRole,
-  createInferenceInternalError,
-  ToolChoiceType,
-} from '@kbn/inference-common';
+import type { Message } from '@kbn/inference-common';
+import { MessageRole, createInferenceInternalError, ToolChoiceType } from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
 import type {
   Message as BedRockConverseMessage,
@@ -21,14 +17,13 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ImageBlock } from '@aws-sdk/client-bedrock-runtime';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DocumentType as JsonMember } from '@smithy/types';
-import { InferenceConnectorAdapter } from '../../types';
+import type { Readable } from 'stream';
+import type { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
 import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
-import {
-  ConverseCompletionChunk,
-  processConverseCompletionChunks,
-} from './process_completion_chunks';
+import type { ConverseCompletionChunk } from './process_completion_chunks';
+import { processConverseCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
 
@@ -61,7 +56,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
-      tools: bedRockTools,
+      tools: bedRockTools?.length ? bedRockTools : undefined,
       toolChoice: toolChoiceToConverse(toolChoice),
       temperature,
       model: modelName,
@@ -69,11 +64,13 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       signal: abortSignal,
     };
 
-    return defer(() => {
-      return executor.invoke({
+    return defer(async () => {
+      const res = await executor.invoke({
         subAction: 'converseStream',
         subActionParams,
       });
+      const result = res.data as { stream: Readable };
+      return { ...res, data: result?.stream };
     }).pipe(
       handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {

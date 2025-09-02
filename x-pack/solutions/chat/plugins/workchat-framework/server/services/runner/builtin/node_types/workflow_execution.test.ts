@@ -17,14 +17,16 @@ import {
   type WorkflowDefinition,
 } from '@kbn/wc-framework-types-server';
 import { getWorkflowExecutionNodeTypeDefinition } from './workflow_execution';
+import type {
+  MockedNodeFactoryBaseServices,
+  MockedState,
+  NodeEventReporterMock,
+} from '../../test_utils';
 import {
   createMockFactoryServices,
   createMockedState,
   createMockedNodeEventReporter,
   createExecutionState,
-  MockedNodeFactoryBaseServices,
-  MockedState,
-  NodeEventReporterMock,
 } from '../../test_utils';
 
 describe('Node type: workflowExecution', () => {

@@ -8,20 +8,20 @@
  */
 
 import React from 'react';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import { DashboardSaveOptions } from './types';
+import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import type { DashboardSaveOptions } from './types';
 import {
   coreServices,
   dataService,
   savedObjectsTaggingService,
 } from '../../services/kibana_services';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { DashboardState } from '../../../common';
+import type { DashboardState } from '../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
 import { DashboardSaveModal } from './save_modal';
@@ -36,7 +36,6 @@ export async function openSaveModal({
   isManaged,
   lastSavedId,
   panelReferences,
-  searchSourceReferences,
   viewMode,
 }: {
   controlGroupReferences?: Reference[];
@@ -44,108 +43,115 @@ export async function openSaveModal({
   isManaged: boolean;
   lastSavedId: string | undefined;
   panelReferences: Reference[];
-  searchSourceReferences: Reference[];
   viewMode: ViewMode;
 }) {
-  if (viewMode === 'edit' && isManaged) {
-    return undefined;
-  }
-  const dashboardContentManagementService = getDashboardContentManagementService();
-  const saveAsTitle = lastSavedId
-    ? await getSaveAsTitle(dashboardState.title)
-    : dashboardState.title;
-  return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
-    (resolve, reject) => {
-      const onSaveAttempt = async ({
-        newTags,
-        newTitle,
-        newDescription,
-        newCopyOnSave,
-        newTimeRestore,
-        onTitleDuplicate,
-        isTitleDuplicateConfirmed,
-      }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
+  try {
+    if (viewMode === 'edit' && isManaged) {
+      return undefined;
+    }
+    const dashboardContentManagementService = getDashboardContentManagementService();
+    const saveAsTitle = lastSavedId
+      ? await getSaveAsTitle(dashboardState.title)
+      : dashboardState.title;
+    return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
+      (resolve) => {
+        const onSaveAttempt = async ({
+          newTags,
+          newTitle,
+          newDescription,
+          newCopyOnSave,
+          newTimeRestore,
           onTitleDuplicate,
-          saveAsCopy: lastSavedId ? true : newCopyOnSave,
-        };
-
-        try {
-          if (
-            !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
-              title: newTitle,
-              onTitleDuplicate,
-              lastSavedTitle: dashboardState.title,
-              copyOnSave: saveOptions.saveAsCopy,
-              isTitleDuplicateConfirmed,
-            }))
-          ) {
-            return {};
-          }
-
-          const dashboardStateToSave: DashboardState = {
-            ...dashboardState,
-            title: newTitle,
-            tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
-            description: newDescription,
-            timeRestore: newTimeRestore,
-            timeRange: newTimeRestore
-              ? dataService.query.timefilter.timefilter.getTime()
-              : undefined,
-            refreshInterval: newTimeRestore
-              ? dataService.query.timefilter.timefilter.getRefreshInterval()
-              : undefined,
+          isTitleDuplicateConfirmed,
+        }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+            saveAsCopy: lastSavedId ? true : newCopyOnSave,
           };
 
-          // TODO If this is a managed dashboard - unlink all by reference embeddables on clone
-          // https://github.com/elastic/kibana/issues/190138
+          try {
+            if (
+              !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
+                title: newTitle,
+                onTitleDuplicate,
+                lastSavedTitle: dashboardState.title,
+                copyOnSave: saveOptions.saveAsCopy,
+                isTitleDuplicateConfirmed,
+              }))
+            ) {
+              return {};
+            }
 
-          const beforeAddTime = window.performance.now();
+            const dashboardStateToSave: DashboardState = {
+              ...dashboardState,
+              title: newTitle,
+              tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
+              description: newDescription,
+              timeRestore: newTimeRestore,
+              timeRange: newTimeRestore
+                ? dataService.query.timefilter.timefilter.getTime()
+                : undefined,
+              refreshInterval: newTimeRestore
+                ? dataService.query.timefilter.timefilter.getRefreshInterval()
+                : undefined,
+            };
 
-          const saveResult = await dashboardContentManagementService.saveDashboardState({
-            controlGroupReferences,
-            panelReferences,
-            searchSourceReferences,
-            saveOptions,
-            dashboardState: dashboardStateToSave,
-            lastSavedId,
-          });
+            // TODO If this is a managed dashboard - unlink all by reference embeddables on clone
+            // https://github.com/elastic/kibana/issues/190138
 
-          const addDuration = window.performance.now() - beforeAddTime;
+            const beforeAddTime = window.performance.now();
 
-          reportPerformanceMetricEvent(coreServices.analytics, {
-            eventName: SAVED_OBJECT_POST_TIME,
-            duration: addDuration,
-            meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
-            },
-          });
+            const saveResult = await dashboardContentManagementService.saveDashboardState({
+              controlGroupReferences,
+              panelReferences,
+              saveOptions,
+              dashboardState: dashboardStateToSave,
+              lastSavedId,
+            });
 
-          resolve({ ...saveResult, savedState: dashboardStateToSave });
-          return saveResult;
-        } catch (error) {
-          reject(error);
-          return error;
-        }
-      };
+            const addDuration = window.performance.now() - beforeAddTime;
 
-      showSaveModal(
-        <DashboardSaveModal
-          tags={dashboardState.tags}
-          title={saveAsTitle}
-          onClose={() => resolve(undefined)}
-          timeRestore={dashboardState.timeRestore}
-          showStoreTimeOnSave={!lastSavedId}
-          description={dashboardState.description ?? ''}
-          showCopyOnSave={false}
-          onSave={onSaveAttempt}
-          customModalTitle={getCustomModalTitle(viewMode)}
-        />
-      );
-    }
-  );
+            reportPerformanceMetricEvent(coreServices.analytics, {
+              eventName: SAVED_OBJECT_POST_TIME,
+              duration: addDuration,
+              meta: {
+                saved_object_type: DASHBOARD_CONTENT_ID,
+              },
+            });
+
+            resolve({ ...saveResult, savedState: dashboardStateToSave });
+            return saveResult;
+          } catch (error) {
+            coreServices.notifications.toasts.addDanger(
+              generateDashboardNotSavedToast(dashboardState.title, error.message)
+            );
+            return error;
+          }
+        };
+
+        showSaveModal(
+          <DashboardSaveModal
+            tags={dashboardState.tags}
+            title={saveAsTitle}
+            onClose={() => resolve(undefined)}
+            timeRestore={dashboardState.timeRestore}
+            showStoreTimeOnSave={!lastSavedId}
+            description={dashboardState.description ?? ''}
+            showCopyOnSave={false}
+            onSave={onSaveAttempt}
+            customModalTitle={getCustomModalTitle(viewMode)}
+          />
+        );
+      }
+    );
+  } catch (error) {
+    coreServices.notifications.toasts.addDanger(
+      generateDashboardNotSavedToast(dashboardState.title, error.message)
+    );
+    return undefined;
+  }
 }
 
 function getCustomModalTitle(viewMode: ViewMode) {
@@ -159,6 +165,19 @@ function getCustomModalTitle(viewMode: ViewMode) {
       defaultMessage: 'Duplicate dashboard',
     });
   return undefined;
+}
+
+function generateDashboardNotSavedToast(title: string, errorMessage: any) {
+  return {
+    title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+      defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+      values: {
+        title,
+        errorMessage,
+      },
+    }),
+    'data-test-subj': 'saveDashboardFailure',
+  };
 }
 
 async function getSaveAsTitle(title: string) {

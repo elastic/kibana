@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_editor.scss';
-import { EventEmitter } from 'events';
-import React, { RefObject, useCallback, useEffect } from 'react';
+import type { EventEmitter } from 'events';
+import type { RefObject } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
+import { euiBreakpoint, EuiScreenReaderOnly, type UseEuiTheme } from '@elastic/eui';
+import type { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
 import { getUISettings } from '../../services';
 import { VizChartWarning } from './viz_chart_warning';
-import {
+import type {
   SavedVisInstance,
   VisualizeAppState,
   VisualizeServices,
@@ -33,6 +35,68 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import { visualizeStyle } from '../../vis.styles';
+
+const flexParentStyle = css({
+  flex: '1 1 auto',
+  display: 'flex',
+  flexDirection: 'column',
+
+  '> *': {
+    flexShrink: 0,
+  },
+});
+
+const visEditorCommonStyles = {
+  base: (euiThemeContext: UseEuiTheme) =>
+    css`
+      height: '100%';
+      ${flexParentStyle};
+      ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+        .visualization {
+          // While we are on a small screen the visualization is below the
+          // editor. In this cases it needs a minimum height, since it would otherwise
+          // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+          min-height: calc(${euiThemeContext.euiTheme.size.l} * 10);
+        }
+      }
+      > .visualize {
+        height: 100%;
+        flex: 1 1 auto;
+        display: flex;
+        z-index: 0; // Without setting this to 0 you will run into a bug where the filter bar modal is hidden under a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457
+      }
+    `,
+  content: css`
+    width: 100%;
+    z-index: 0;
+    ${flexParentStyle};
+  `,
+  visType: (euiThemeContext: UseEuiTheme) =>
+    css({
+      '&.visEditor--timelion': {
+        '.visEditorSidebar__timelionOptions': {
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      },
+      '&.visEditor--vega': {
+        '.visEditorSidebar__config': {
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'row',
+          overflow: 'hidden',
+
+          minHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+
+          [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+            maxHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+          },
+        },
+      },
+    }),
+};
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -71,6 +135,7 @@ export const VisualizeEditorCommon = ({
   visEditorRef,
   eventEmitter,
 }: VisualizeEditorCommonProps) => {
+  const styles = useMemoCss(visEditorCommonStyles);
   const { services } = useKibana<VisualizeServices>();
 
   useEffect(() => {
@@ -135,7 +200,10 @@ export const VisualizeEditorCommon = ({
   const hasLegacyChartsEnabled = chartToken ? getUISettings().get(chartToken) : true;
 
   return (
-    <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
+    <div
+      className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}
+      css={[styles.base, styles.visType]}
+    >
       {visInstance && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
@@ -198,7 +266,11 @@ export const VisualizeEditorCommon = ({
           </h1>
         </EuiScreenReaderOnly>
       )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
+      <div
+        className={isChromeVisible ? 'visEditor__content' : 'visualize'}
+        ref={visEditorRef}
+        css={isChromeVisible ? styles.content : visualizeStyle}
+      />
     </div>
   );
 };

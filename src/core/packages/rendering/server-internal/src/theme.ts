@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseThemeTags, ThemeName, ThemeTag } from '@kbn/core-ui-settings-common';
+import type { ThemeName, ThemeTag } from '@kbn/core-ui-settings-common';
+import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
 export const getThemeTag = ({ name, darkMode }: { name: string; darkMode: boolean }) => {
   // Amsterdam theme is called `v8` internally

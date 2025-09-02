@@ -14,9 +14,12 @@ import { useDatePickerContext } from './use_date_picker';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 import { useRequestObservable } from './use_request_observable';
 
-export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'assetId' | 'assetType'>;
+export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'entityId' | 'entityType'>;
 
-export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderProps) {
+export function useMetadataProvider({
+  entityId: entityId,
+  entityType: entityType,
+}: UseMetadataProviderProps) {
   const { request$ } = useRequestObservable();
   const [, setUrlState] = useAssetDetailsUrlState();
   const { getDateRangeInTimestamp } = useDatePickerContext();
@@ -25,8 +28,8 @@ export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderP
   const timeRange = useMemo(() => getDateRangeInTimestamp(), [getDateRangeInTimestamp]);
 
   const { loading, error, metadata, reload } = useMetadata({
-    assetId,
-    assetType,
+    entityId,
+    entityType,
     sourceId,
     timeRange,
     request$,

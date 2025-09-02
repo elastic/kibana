@@ -12,6 +12,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useBulkDisable } from './use_bulk_disable';
 import { bulkDisableScheduledReports } from '../apis/bulk_disable_scheduled_reports';
 import { testQueryClient } from '../test_utils/test_query_client';
+import { useKibana } from '@kbn/reporting-public';
+
+jest.mock('@kbn/reporting-public', () => ({
+  useKibana: jest.fn(),
+}));
 
 jest.mock('../apis/bulk_disable_scheduled_reports', () => ({
   bulkDisableScheduledReports: jest.fn(),
@@ -26,6 +31,14 @@ describe('useBulkDisable', () => {
   );
 
   beforeEach(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        http,
+        notifications: {
+          toasts,
+        },
+      },
+    });
     jest.clearAllMocks();
   });
 
@@ -36,7 +49,7 @@ describe('useBulkDisable', () => {
       total: 1,
     });
 
-    const { result } = renderHook(() => useBulkDisable({ http, toasts }), {
+    const { result } = renderHook(() => useBulkDisable(), {
       wrapper,
     });
 
@@ -59,7 +72,7 @@ describe('useBulkDisable', () => {
   it('throws error', async () => {
     (bulkDisableScheduledReports as jest.Mock).mockRejectedValueOnce({});
 
-    const { result } = renderHook(() => useBulkDisable({ http, toasts }), {
+    const { result } = renderHook(() => useBulkDisable(), {
       wrapper,
     });
 

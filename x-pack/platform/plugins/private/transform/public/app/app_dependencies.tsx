@@ -15,7 +15,6 @@ import type {
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
-  SavedObjectsStart,
   ScopedHistory,
   ThemeServiceStart,
   UserProfileService,
@@ -54,7 +53,6 @@ export interface AppDependencies {
   i18n: I18nStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
-  savedObjects: SavedObjectsStart;
   savedSearch: SavedSearchPublicPluginStart;
   storage: Storage;
   overlays: OverlayStart;

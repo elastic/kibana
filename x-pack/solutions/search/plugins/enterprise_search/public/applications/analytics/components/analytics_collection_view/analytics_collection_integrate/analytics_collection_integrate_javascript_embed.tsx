@@ -12,7 +12,7 @@ import { EuiCodeBlock, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AnalyticsConfig } from './analytics_collection_integrate_view';
+import type { AnalyticsConfig } from './analytics_collection_integrate_view';
 
 export const javascriptEmbedSteps = (webClientSrc: string, analyticsConfig: AnalyticsConfig) => [
   {

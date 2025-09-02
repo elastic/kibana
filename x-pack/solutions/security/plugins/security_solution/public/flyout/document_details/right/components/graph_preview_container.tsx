@@ -111,7 +111,7 @@ export const GraphPreviewContainer: React.FC = () => {
             )}
           />
         ),
-        iconType: allowFlyoutExpansion ? 'arrowStart' : 'indexMapping',
+        iconType: allowFlyoutExpansion ? 'arrowStart' : undefined,
         ...(allowFlyoutExpansion && {
           link: {
             callback: navigateToGraphVisualization,

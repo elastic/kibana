@@ -6,13 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 interface NPSScoreInputProps {
   /**
@@ -56,7 +52,9 @@ export function NPSScoreInput({
       }
     >
       <EuiButtonGroup
-        legend="Survey about user satisfaction"
+        legend={i18n.translate('xpack.productIntercept.npsSurvey.legend', {
+          defaultMessage: 'Survey for customer satisfaction score',
+        })}
         type="single"
         options={options}
         idSelected={selectedOption}

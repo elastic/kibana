@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect, Page } from '@elastic/synthetics';
+import type { Page } from '@elastic/synthetics';
+import { expect } from '@elastic/synthetics';
 
 export type Locator = ReturnType<Page['locator']>;
 

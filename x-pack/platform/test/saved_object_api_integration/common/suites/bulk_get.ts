@@ -10,7 +10,7 @@ import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_da
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BulkGetTestDefinition extends TestDefinition {

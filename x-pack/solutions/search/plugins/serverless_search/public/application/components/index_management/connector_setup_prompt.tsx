@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';

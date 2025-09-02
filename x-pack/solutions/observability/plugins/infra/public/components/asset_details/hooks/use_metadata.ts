@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
@@ -13,9 +13,9 @@ import { InfraMetadataRT } from '../../../../common/http_api/metadata_api';
 import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
 
 interface UseMetadataProps {
-  assetId: string;
-  assetType: InventoryItemType;
-  requiredMetrics?: InventoryMetric[];
+  entityId: string;
+  entityType: InventoryItemType;
+  requiredTsvb?: InventoryTsvbType[];
   sourceId: string;
   timeRange: {
     from: number;
@@ -24,11 +24,11 @@ interface UseMetadataProps {
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
 }
 export function useMetadata({
-  assetId,
-  assetType,
+  entityId,
+  entityType,
   sourceId,
   timeRange,
-  requiredMetrics = [],
+  requiredTsvb = [],
   request$,
 }: UseMetadataProps) {
   const { data, status, error, refetch } = useFetcher(
@@ -36,15 +36,15 @@ export function useMetadata({
       const response = await callApi('/api/infra/metadata', {
         method: 'POST',
         body: JSON.stringify({
-          nodeId: assetId,
-          nodeType: assetType,
+          nodeId: entityId,
+          nodeType: entityType,
           sourceId,
           timeRange,
         }),
       });
       return decodeOrThrow(InfraMetadataRT)(response);
     },
-    [assetId, assetType, sourceId, timeRange],
+    [entityId, entityType, sourceId, timeRange],
     {
       requestObservable$: request$,
     }
@@ -53,7 +53,7 @@ export function useMetadata({
   return {
     name: (data && data.name) || '',
     filteredRequiredMetrics:
-      data && requiredMetrics.length > 0 ? getFilteredMetrics(requiredMetrics, data.features) : [],
+      data && requiredTsvb.length > 0 ? getFilteredMetrics(requiredTsvb, data.features) : [],
     error: (error && error.message) || null,
     loading: isPending(status),
     metadata: data,

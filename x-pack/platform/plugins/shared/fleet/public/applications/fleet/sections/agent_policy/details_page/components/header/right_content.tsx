@@ -218,7 +218,10 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                   '',
               },
               { isDivider: true },
-              ...(canEnableAutomaticAgentUpgrades && authz.fleet.allAgentPolicies
+              ...(canEnableAutomaticAgentUpgrades &&
+              authz.fleet.allAgentPolicies &&
+              authz.fleet.allAgents &&
+              !agentPolicy.is_managed
                 ? [
                     {
                       label: i18n.translate('xpack.fleet.policyDetails.summary.autoUpgrade', {

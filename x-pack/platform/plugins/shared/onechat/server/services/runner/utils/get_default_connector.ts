@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
 /**
  * Naive utility function to consistently return the "best" default connector for onechat features.

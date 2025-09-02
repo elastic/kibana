@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiPageTemplate,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   useEuiTheme,
   EuiButton,
 } from '@elastic/eui';
@@ -256,7 +256,7 @@ export const SearchIndexDetailsPage = () => {
                       >
                         <FormattedMessage
                           id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
-                          defaultMessage="Search in Playground"
+                          defaultMessage="Search in RAG Playground"
                         />
                       </EuiButton>
                     </EuiFlexItem>

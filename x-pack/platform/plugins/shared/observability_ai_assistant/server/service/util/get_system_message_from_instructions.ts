@@ -6,9 +6,9 @@
  */
 
 import { compact, uniqBy } from 'lodash';
-import { Instruction } from '../../../common/types';
+import type { Instruction } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { InstructionOrCallback } from '../types';
+import type { InstructionOrCallback } from '../types';
 
 export const USER_INSTRUCTIONS_HEADER = `## User instructions
           
@@ -27,14 +27,11 @@ export function getSystemMessageFromInstructions({
   // instructions provided by the user via the API. These will be displayed after the application instructions and only if they fit within the token budget
   apiUserInstructions,
   availableFunctionNames,
-  // instructions for anonymization
-  anonymizationInstruction,
 }: {
   applicationInstructions: InstructionOrCallback[];
   kbUserInstructions: Instruction[];
   apiUserInstructions: Instruction[];
   availableFunctionNames: string[];
-  anonymizationInstruction: string;
 }): string {
   const allApplicationInstructions = compact(
     applicationInstructions.flatMap((instruction) => {
@@ -58,10 +55,8 @@ export function getSystemMessageFromInstructions({
 
     // user instructions
     ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),
-
-    // anonymization instructions
-    ...(anonymizationInstruction ? [anonymizationInstruction] : []),
   ]
+
     .map((instruction) => {
       return typeof instruction === 'string' ? instruction : instruction.text;
     })

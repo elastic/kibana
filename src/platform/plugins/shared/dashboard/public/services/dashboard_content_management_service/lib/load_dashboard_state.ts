@@ -7,44 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { has } from 'lodash';
 
 import { getDashboardContentManagementCache } from '..';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
-import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import {
-  contentManagementService,
-  dataService,
-  savedObjectsTaggingService,
-} from '../../kibana_services';
-import type {
-  DashboardSearchSource,
-  LoadDashboardFromSavedObjectProps,
-  LoadDashboardReturn,
-} from '../types';
-import { convertNumberToDashboardVersion } from './dashboard_versioning';
-
-export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
-  // Lucene was the only option before, so language-less queries are all lucene
-  if (!has(query, 'language')) {
-    return { query, language: 'lucene' };
-  }
-
-  return query as Query;
-}
+import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
+import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 
 export const loadDashboardState = async ({
   id,
 }: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardReturn> => {
-  const {
-    search: dataSearchService,
-    query: { queryString },
-  } = dataService;
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
   const savedObjectId = id;
@@ -111,38 +85,14 @@ export const loadDashboardState = async ({
 
   const { references, attributes, managed } = rawDashboardContent;
 
-  /**
-   * Create search source and pull filters and query from it.
-   */
-  let searchSourceValues = attributes.kibanaSavedObjectMeta.searchSource;
-  const searchSource = await (async () => {
-    if (!searchSourceValues) {
-      return await dataSearchService.searchSource.create();
-    }
-    try {
-      searchSourceValues = injectSearchSourceReferences(
-        searchSourceValues,
-        references
-      ) as DashboardSearchSource;
-      return await dataSearchService.searchSource.create(searchSourceValues);
-    } catch (error) {
-      return await dataSearchService.searchSource.create();
-    }
-  })();
-
-  const filters = cleanFiltersForSerialize((searchSource?.getOwnField('filter') as Filter[]) ?? []);
-
-  const query = migrateLegacyQuery(
-    searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
-  );
   const {
     refreshInterval,
     description,
     timeRestore,
     options,
     panels,
+    kibanaSavedObjectMeta: { searchSource },
     timeFrom,
-    version,
     timeTo,
     title,
   } = attributes;
@@ -155,12 +105,13 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
+  const { filters, query } = searchSource || {};
+
   return {
     managed,
     references,
     resolveMeta,
     dashboardInput: {
-      ...DEFAULT_DASHBOARD_STATE,
       ...options,
       refreshInterval,
       timeRestore,
@@ -170,14 +121,10 @@ export const loadDashboardState = async ({
       panels,
       query,
       title,
-
-      viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:
         savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 
       controlGroupInput: attributes.controlGroupInput,
-
-      ...(version && { version: convertNumberToDashboardVersion(version) }),
     },
     dashboardFound: true,
     dashboardId: savedObjectId,

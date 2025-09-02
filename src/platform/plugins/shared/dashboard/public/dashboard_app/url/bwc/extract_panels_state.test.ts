@@ -11,9 +11,33 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
+  describe('< 9.2 panels state', () => {
+    test('should create saved object reference', () => {
+      const { savedObjectReferences } = extractPanelsState({
+        panels: [
+          {
+            embeddableConfig: {
+              savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+            },
+            gridData: {},
+            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            type: 'links',
+          },
+        ],
+      });
+      expect(savedObjectReferences).toEqual([
+        {
+          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+          name: 'c505cc42-fbde-451d-8720-302dc78d7e0d:savedObjectRef',
+          type: 'links',
+        },
+      ]);
+    });
+  });
+
   describe('< 8.19 panels state', () => {
     test('should move id and title to panelConfig', () => {
-      const dashboardState = extractPanelsState({
+      const { panels } = extractPanelsState({
         panels: [
           {
             embeddableConfig: {
@@ -30,7 +54,7 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState.panels).toEqual([
+      expect(panels).toEqual([
         {
           panelConfig: {
             savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
@@ -50,7 +74,7 @@ describe('extractPanelsState', () => {
 
   describe('< 8.17 panels state', () => {
     test('should convert embeddableConfig to panelConfig', () => {
-      const dashboardState = extractPanelsState({
+      const { panels } = extractPanelsState({
         panels: [
           {
             embeddableConfig: {
@@ -65,7 +89,7 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState.panels).toEqual([
+      expect(panels).toEqual([
         {
           panelConfig: {
             timeRange: {
@@ -83,7 +107,7 @@ describe('extractPanelsState', () => {
 
   describe('< 7.3 panels state', () => {
     test('should ignore state and notify user', () => {
-      const dashboardState = extractPanelsState({
+      const { panels } = extractPanelsState({
         panels: [
           {
             col: 1,
@@ -105,7 +129,7 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState).toEqual({});
+      expect(panels).toBeUndefined();
       expect(coreServices.notifications.toasts.addWarning).toHaveBeenCalled();
     });
   });

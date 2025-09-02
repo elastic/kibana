@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect, EuiComboBox } from '@elastic/eui';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import type { CrowdstrikeActionParams } from '../../../common/crowdstrike/types';
 import * as i18n from './translations';

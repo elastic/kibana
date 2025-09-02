@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, RefCallback, useCallback, useState } from 'react';
+import type { FC, RefCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ShapeDrawerComponent } from '../../../canvas_plugin_src/renderers/shape/components';
-import { getDefaultShapeData, SvgConfig, ShapeRef, ViewBoxParams } from '../shape_drawer';
+import type { SvgConfig, ShapeRef, ViewBoxParams } from '../shape_drawer';
+import { getDefaultShapeData } from '../shape_drawer';
 
 interface Props {
   shape?: string;

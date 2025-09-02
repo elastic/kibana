@@ -9,8 +9,8 @@ import rison from '@kbn/rison';
 import {
   getPdfReportParams,
   getPngReportParams,
-} from '@kbn/reporting-public/share/share_context_menu/register_pdf_png_modal_reporting';
-import { getCsvReportParams } from '@kbn/reporting-public/share/share_context_menu/register_csv_modal_reporting';
+} from '@kbn/reporting-public/share/shared/get_png_pdf_job_params';
+import { getCsvReportParams } from '@kbn/reporting-public/share/integrations/csv/csv_export_config';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ReportTypeId } from '../types';
 
@@ -18,6 +18,7 @@ const reportParamsProviders = {
   pngV2: getPngReportParams,
   printablePdfV2: getPdfReportParams,
   csv_searchsource: getCsvReportParams,
+  csv_v2: getCsvReportParams,
 } as const;
 
 export const supportedReportTypes = Object.keys(reportParamsProviders) as ReportTypeId[];

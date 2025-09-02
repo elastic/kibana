@@ -18,25 +18,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "@kbn/core-application-common",
-        "id": "def-common.GlobalAppStyle",
-        "type": "Function",
-        "tags": [],
-        "label": "GlobalAppStyle",
-        "description": [],
-        "signature": [
-          "() => React.JSX.Element"
-        ],
-        "path": "src/core/packages/application/common/src/global_app_style.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-application-common",

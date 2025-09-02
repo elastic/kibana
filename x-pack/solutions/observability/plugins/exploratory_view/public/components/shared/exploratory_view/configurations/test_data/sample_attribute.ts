@@ -58,7 +58,6 @@ export const sampleAttribute = {
                   ],
                   type: 'histogram',
                 },
-                scale: 'interval',
                 sourceField: 'transaction.duration.us',
               },
               'y-axis-column-layer0-0': {
@@ -99,7 +98,6 @@ export const sampleAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
-                scale: 'ratio',
                 sourceField: RECORDS_FIELD,
                 timeScale: undefined,
                 timeShift: undefined,
@@ -118,7 +116,6 @@ export const sampleAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
-                scale: 'ratio',
                 sourceField: RECORDS_FIELD,
                 timeScale: undefined,
                 timeShift: undefined,
@@ -131,7 +128,6 @@ export const sampleAttribute = {
                 operationType: 'overall_sum',
                 params: undefined,
                 references: ['y-axis-column-layer0X1'],
-                scale: 'ratio',
               },
               'y-axis-column-layer0X3': {
                 customLabel: true,
@@ -152,7 +148,6 @@ export const sampleAttribute = {
                   },
                 },
                 references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-                scale: 'ratio',
               },
             },
             incompleteColumns: {},
@@ -175,7 +170,6 @@ export const sampleAttribute = {
                 params: {
                   percentile: 50,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '75th-percentile-reference-line-layer0-reference-lines': {
@@ -187,7 +181,6 @@ export const sampleAttribute = {
                 params: {
                   percentile: 75,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '90th-percentile-reference-line-layer0-reference-lines': {
@@ -199,7 +192,6 @@ export const sampleAttribute = {
                 params: {
                   percentile: 90,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '95th-percentile-reference-line-layer0-reference-lines': {
@@ -211,7 +203,6 @@ export const sampleAttribute = {
                 params: {
                   percentile: 95,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '99th-percentile-reference-line-layer0-reference-lines': {
@@ -223,7 +214,6 @@ export const sampleAttribute = {
                 params: {
                   percentile: 99,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
             },

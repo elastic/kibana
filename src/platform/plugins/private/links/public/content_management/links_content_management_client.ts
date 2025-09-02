@@ -8,14 +8,17 @@
  */
 
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import { SerializableAttributes, VisualizationClient } from '@kbn/visualizations-plugin/public';
-import { CONTENT_ID as contentTypeId, CONTENT_ID } from '../../common';
+import type {
+  SerializableAttributes,
+  VisualizationClient,
+} from '@kbn/visualizations-plugin/public';
+import { CONTENT_ID } from '../../common';
 import type { LinksCrudTypes } from '../../common/content_management';
 import { contentManagement } from '../services/kibana_services';
 
 const get = async (id: string) => {
   return contentManagement.client.get<LinksCrudTypes['GetIn'], LinksCrudTypes['GetOut']>({
-    contentTypeId,
+    contentTypeId: CONTENT_ID,
     id,
   });
 };
@@ -25,7 +28,7 @@ const create = async ({ data, options }: Omit<LinksCrudTypes['CreateIn'], 'conte
     LinksCrudTypes['CreateIn'],
     LinksCrudTypes['CreateOut']
   >({
-    contentTypeId,
+    contentTypeId: CONTENT_ID,
     data,
     options,
   });
@@ -37,7 +40,7 @@ const update = async ({ id, data, options }: Omit<LinksCrudTypes['UpdateIn'], 'c
     LinksCrudTypes['UpdateIn'],
     LinksCrudTypes['UpdateOut']
   >({
-    contentTypeId,
+    contentTypeId: CONTENT_ID,
     id,
     data,
     options,
@@ -47,14 +50,14 @@ const update = async ({ id, data, options }: Omit<LinksCrudTypes['UpdateIn'], 'c
 
 const deleteLinks = async (id: string) => {
   await contentManagement.client.delete<LinksCrudTypes['DeleteIn'], LinksCrudTypes['DeleteOut']>({
-    contentTypeId,
+    contentTypeId: CONTENT_ID,
     id,
   });
 };
 
 const search = async (query: SearchQuery = {}, options?: LinksCrudTypes['SearchOptions']) => {
   return contentManagement.client.search<LinksCrudTypes['SearchIn'], LinksCrudTypes['SearchOut']>({
-    contentTypeId,
+    contentTypeId: CONTENT_ID,
     query,
     options,
   });

@@ -6,14 +6,8 @@
  */
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiDataGrid,
-  EuiPanel,
-  EuiDataGridColumn,
-  EuiText,
-  EuiBadge,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiPanel, EuiText, EuiBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_ID_COLUMN } from '../../../../common';
 

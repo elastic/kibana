@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { convertToBuildEsQuery, buildGlobalQuery } from '.';
+import { buildGlobalQuery, convertToBuildEsQuery } from '.';
 import { mockDataViewSpec } from '../../mock';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 describe('convertToBuildEsQuery', () => {
   /**
@@ -60,6 +61,7 @@ describe('convertToBuildEsQuery', () => {
   it('should, by default, build a query where the `nested` fields syntax includes the `"ignore_unmapped":true` option', () => {
     const [converted, _] = convertToBuildEsQuery({
       config,
+      dataView: createStubDataView({ spec: {} }),
       queries: queryWithNestedFields,
       dataViewSpec: mockDataViewSpec,
       filters,
@@ -175,6 +177,7 @@ describe('convertToBuildEsQuery', () => {
 
     const [converted, _] = convertToBuildEsQuery({
       config: configWithOverride,
+      dataView: createStubDataView({ spec: {} }),
       queries: queryWithNestedFields,
       dataViewSpec: mockDataViewSpec,
       filters,

@@ -13,6 +13,7 @@ import type {
   NodeDefinition,
   EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -71,7 +72,7 @@ export const getNavigationTreeDefinition = ({
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
-    homePage: 'enterpriseSearch',
+    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -83,16 +84,31 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  link: SEARCH_HOMEPAGE,
+                  title,
+                  icon,
+                  renderAs: 'home',
+                  sideNavVersion: 'v2',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
+                    );
+                  },
+                },
+                {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return (
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                     );
                   },
-                  link: 'enterpriseSearch',
+                  link: SEARCH_HOMEPAGE,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
                     defaultMessage: 'Home',
                   }),
+                  sideNavVersion: 'v1',
                 },
                 {
                   link: 'discover',
@@ -105,6 +121,18 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    { link: 'onechat:conversations' },
+                    { link: 'onechat:tools' },
+                    { link: 'onechat:agents' },
+                  ],
+                  id: 'chat',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
+                    defaultMessage: 'Chat',
+                  }),
+                  renderAs: 'accordion',
+                },
+                {
+                  children: [
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         return (
@@ -114,12 +142,16 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'elasticsearchIndexManagement',
+                      iconV2: 'indexManagementApp',
                     },
                     {
                       breadcrumbStatus: 'hidden',
                       link: 'searchPlayground',
                     },
-                    { link: 'enterpriseSearchContent:connectors' },
+                    {
+                      link: 'enterpriseSearchContent:connectors',
+                      iconV2: 'link' /* TODO: review icon */,
+                    },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         const someSubItemSelected = searchApps?.some((app) =>
@@ -134,13 +166,8 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
+                      iconV2: 'searchProfilerApp' /* TODO: review icon */,
                       renderAs: 'item',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
-                        {
-                          defaultMessage: 'Search applications',
-                        }
-                      ),
                       ...(searchApps
                         ? {
                             children: searchApps.map(euiItemTypeToNodeDefinition),
@@ -227,6 +254,7 @@ export const getNavigationTreeDefinition = ({
                       ),
                     },
                     {
+                      iconV2: 'managementApp',
                       children: [
                         {
                           children: [
@@ -280,11 +308,17 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:objects' },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
-                            { link: 'management:aiAssistantManagementSelection' },
                             { link: 'management:spaces' },
                             { link: 'management:settings' },
                           ],
                           title: 'Kibana',
+                        },
+                        {
+                          children: [
+                            { link: 'management:genAiSettings' },
+                            { link: 'management:aiAssistantManagementSelection' },
+                          ],
+                          title: 'AI',
                         },
                         {
                           children: [

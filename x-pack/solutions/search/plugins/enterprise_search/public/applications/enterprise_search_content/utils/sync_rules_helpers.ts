@@ -23,6 +23,7 @@ export const isAdvancedSyncRuleSnippetEmpty = (snippet: string | undefined | nul
     } else if (typeof parsedJson === 'object') {
       return Object.keys(parsedJson).length === 0;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // we have somewhat invalid JSON in the advanced snippet,
     // it is not empty and cause problems somewhere else

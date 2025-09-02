@@ -11,11 +11,12 @@ import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs';
-import { OptimizerUpdate } from '@kbn/optimizer';
+import type { OptimizerUpdate } from '@kbn/optimizer';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createReplaceSerializer } from '@kbn/jest-serializers';
 
-import { Optimizer, Options } from './optimizer';
+import type { Options } from './optimizer';
+import { Optimizer } from './optimizer';
 
 jest.mock('@kbn/optimizer');
 const realOptimizer = jest.requireActual('@kbn/optimizer');

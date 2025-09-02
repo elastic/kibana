@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isObject, isArray } from 'lodash';
+import { isArray } from 'lodash';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { MetricsAPIRequest, MetricsExplorerRequestBody } from '../../../../common/http_api';
 import { afterKeyObjectRT } from '../../../../common/http_api';
 import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';
@@ -43,21 +44,26 @@ export const convertRequestToMetricsAPIOptions = (
       : [options.groupInstance];
   }
 
-  if (options.filterQuery) {
+  if (options.kuery) {
     try {
-      const filterObject = JSON.parse(options.filterQuery);
-      if (isObject(filterObject)) {
-        metricsApiOptions.filters = [filterObject as any];
-      }
-    } catch (err) {
-      metricsApiOptions.filters = [
-        {
-          query_string: {
-            query: options.filterQuery,
-            analyze_wildcard: true,
-          },
+      metricsApiOptions.filters = {
+        bool: {
+          filter: [...kqlQuery(options.kuery)],
         },
-      ];
+      };
+    } catch (err) {
+      metricsApiOptions.filters = {
+        bool: {
+          must: [
+            {
+              query_string: {
+                query: options.kuery,
+                analyze_wildcard: true,
+              },
+            },
+          ],
+        },
+      };
     }
   }
 

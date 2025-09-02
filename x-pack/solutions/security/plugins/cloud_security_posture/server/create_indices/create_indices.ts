@@ -18,9 +18,9 @@ import { createPipelineIfNotExists } from './create_processor';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from './ingest_pipelines';
 import { latestIndexConfigs } from './latest_indices';
-import { IndexConfig, IndexTemplateParams } from './types';
+import type { IndexConfig, IndexTemplateParams } from './types';
 
-import { CloudSecurityPostureConfig } from '../config';
+import type { CloudSecurityPostureConfig } from '../config';
 
 interface IndexTemplateSettings {
   index: {
@@ -40,8 +40,10 @@ export const initializeCspIndices = async (
   latestFindingsIndexAutoCreated: boolean,
   logger: Logger
 ) => {
-  await createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger);
-
+  await Promise.allSettled([
+    createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
+    createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
+  ]);
   const [createVulnerabilitiesLatestIndexPromise, createBenchmarkScoreIndexPromise] =
     await Promise.allSettled([
       createLatestIndex(
@@ -62,7 +64,6 @@ export const initializeCspIndices = async (
 
   if (!latestFindingsIndexAutoCreated) {
     try {
-      await createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger);
       await createLatestIndex(
         esClient,
         latestIndexConfigs.findings,
@@ -142,9 +143,12 @@ const createLatestIndex = async (
       name: indexName,
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { template, composed_of, _meta } =
-      indexTemplateResponse.index_templates[0].index_template;
+    const {
+      template,
+      _meta,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      composed_of = [],
+    } = indexTemplateResponse.index_templates[0].index_template;
 
     const indexTemplateParams = {
       template,

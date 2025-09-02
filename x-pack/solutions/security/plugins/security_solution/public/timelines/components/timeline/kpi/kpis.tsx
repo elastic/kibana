@@ -107,7 +107,7 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
           </EuiToolTip>
         </StatsContainer>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
+      <EuiFlexItem grow={false} css={{ minWidth: 100 }}>
         <StatsContainer>
           {`${i18n.DESTINATION_IP_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.destinationIp}>

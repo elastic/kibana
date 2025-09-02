@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './apm_base_doc';
-export * from './error_raw';
-export * from './event_raw';
-export * from './metric_raw';
-export * from './span_raw';
-export * from './transaction_raw';
+export type * from './apm_base_doc';
+export type * from './error_raw';
+export type * from './event_raw';
+export type * from './metric_raw';
+export type * from './span_raw';
+export type * from './transaction_raw';

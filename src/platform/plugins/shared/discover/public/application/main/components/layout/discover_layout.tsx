@@ -59,9 +59,16 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
-import { TABS_ENABLED } from '../../../../constants';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const queryClient = new QueryClient();
@@ -82,6 +89,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
+    core,
     dataViews,
     data,
     uiSettings,
@@ -105,6 +113,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -303,9 +312,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
   }, [dataState.error, isEsqlMode]);
 
-  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
-  const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
-
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
 
@@ -347,7 +353,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           viewMode={viewMode}
           onAddFilter={onFilter}
           onFieldEdited={onFieldEdited}
-          container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
           panelsToggle={panelsToggle}
         />
@@ -362,7 +367,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     viewMode,
     onFilter,
     onFieldEdited,
-    mainContainer,
     onDropFieldToTable,
     panelsToggle,
   ]);
@@ -377,6 +381,20 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
+  const dispatch = useInternalStateDispatch();
+  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
+  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
+  const onInitialStateChange = useCallback(
+    (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
+      dispatch(
+        setLayoutUiState({
+          layoutUiState: newLayoutUiState,
+        })
+      );
+    },
+    [dispatch, setLayoutUiState]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -386,7 +404,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
           }
         `,
       ]}
@@ -417,7 +435,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
-        <div ref={setSidebarContainer} css={styles.sidebarContainer}>
+        <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
@@ -429,7 +447,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             history={history}
           />
           <DiscoverResizableLayout
-            container={sidebarContainer}
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
@@ -484,7 +501,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 ) : (
                   <EuiPanel
                     role="main"
-                    panelRef={setMainContainer}
                     paddingSize="none"
                     borderRadius="none"
                     hasShadow={false}
@@ -497,6 +513,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 )}
               </div>
             }
+            initialState={layoutUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </div>
       </EuiPageBody>

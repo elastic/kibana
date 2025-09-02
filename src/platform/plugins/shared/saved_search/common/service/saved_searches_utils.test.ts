@@ -12,10 +12,29 @@ import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_sear
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 import type { SavedSearch, SavedSearchAttributes } from '../types';
+import type { DiscoverSessionTab } from '../../server';
 
 describe('saved_searches_utils', () => {
   describe('fromSavedSearchAttributes', () => {
     test('should convert attributes into SavedSearch', () => {
+      const tabs: DiscoverSessionTab[] = [
+        {
+          id: 'tab-1',
+          label: 'Tab 1',
+          attributes: {
+            kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+            sort: [],
+            columns: ['a', 'b'],
+            grid: {},
+            hideChart: true,
+            isTextBasedQuery: false,
+            usesAdHocDataView: false,
+            rowsPerPage: 250,
+            sampleSize: 1000,
+            breakdownField: 'extension.keyword',
+          },
+        },
+      ];
       const attributes: SavedSearchAttributes = {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         title: 'saved search',
@@ -29,6 +48,7 @@ describe('saved_searches_utils', () => {
         rowsPerPage: 250,
         sampleSize: 1000,
         breakdownField: 'extension.keyword',
+        tabs,
       };
 
       expect(
@@ -88,6 +108,29 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
+          "tabs": Array [
+            Object {
+              "attributes": Object {
+                "breakdownField": "extension.keyword",
+                "columns": Array [
+                  "a",
+                  "b",
+                ],
+                "grid": Object {},
+                "hideChart": true,
+                "isTextBasedQuery": false,
+                "kibanaSavedObjectMeta": Object {
+                  "searchSourceJSON": "{}",
+                },
+                "rowsPerPage": 250,
+                "sampleSize": 1000,
+                "sort": Array [],
+                "usesAdHocDataView": false,
+              },
+              "id": "tab-1",
+              "label": "Tab 1",
+            },
+          ],
           "tags": Array [
             "tags-1",
             "tags-2",
@@ -119,41 +162,39 @@ describe('saved_searches_utils', () => {
         managed: false,
       };
 
-      expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
-        Object {
-          "breakdownField": undefined,
-          "columns": Array [
-            "c",
-            "d",
-          ],
-          "density": undefined,
-          "description": "description",
-          "grid": Object {},
-          "headerRowHeight": undefined,
-          "hideAggregatedPreview": undefined,
-          "hideChart": true,
-          "isTextBasedQuery": true,
-          "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{}",
+      const result = toSavedSearchAttributes(savedSearch, '{}');
+      expect(result).toEqual({
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+        title: 'title',
+        sort: [['a', 'asc']],
+        columns: ['c', 'd'],
+        description: 'description',
+        grid: {},
+        hideChart: true,
+        isTextBasedQuery: true,
+        usesAdHocDataView: false,
+        timeRestore: false,
+        tabs: [
+          {
+            id: expect.any(String),
+            label: 'Untitled',
+            attributes: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: '{}',
+              },
+              sort: [['a', 'asc']],
+              columns: ['c', 'd'],
+              grid: {},
+              hideChart: true,
+              isTextBasedQuery: true,
+              usesAdHocDataView: false,
+              timeRestore: false,
+            },
           },
-          "refreshInterval": undefined,
-          "rowHeight": undefined,
-          "rowsPerPage": undefined,
-          "sampleSize": undefined,
-          "sort": Array [
-            Array [
-              "a",
-              "asc",
-            ],
-          ],
-          "timeRange": undefined,
-          "timeRestore": false,
-          "title": "title",
-          "usesAdHocDataView": false,
-          "viewMode": undefined,
-          "visContext": undefined,
-        }
-      `);
+        ],
+      });
     });
   });
 });

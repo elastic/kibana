@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { RefreshInterval } from '@kbn/data-service-server';
 export {
   DEFAULT_QUERY_LANGUAGE,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
@@ -524,7 +525,6 @@ export {
   ESQL_TABLE_TYPE,
 } from './search';
 export type {
-  RefreshInterval,
   TimeRangeBounds,
   TimeRange,
   GetConfigFn,

@@ -29,6 +29,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
+import { Timestamp } from '@kbn/apm-ui-shared';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -39,13 +40,11 @@ import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
-import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { ErrorMetadata } from '../../../shared/metadata_table/error_metadata';
 import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
-import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import type { ErrorTab } from './error_tabs';
 import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
@@ -53,6 +52,7 @@ import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
+import { OpenErrorInDiscoverButton } from '../../../shared/links/discover_links/open_error_in_discover_button';
 
 const TransactionLinkName = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
@@ -197,23 +197,7 @@ export function ErrorSampleDetails({
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
         <EuiFlexItem grow={false}>
-          <DiscoverErrorLink error={error} kuery={kuery}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <EuiIcon type="discoverApp" />
-              </EuiFlexItem>
-              <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
-                {i18n.translate(
-                  'xpack.apm.errorSampleDetails.viewOccurrencesInDiscoverButtonLabel',
-                  {
-                    defaultMessage:
-                      'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover',
-                    values: { occurrencesCount },
-                  }
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </DiscoverErrorLink>
+          <OpenErrorInDiscoverButton dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -225,7 +209,10 @@ export function ErrorSampleDetails({
       ) : (
         <Summary
           items={[
-            <TimestampTooltip time={errorData ? error.timestamp.us / 1000 : 0} />,
+            <Timestamp
+              timestamp={errorData ? error.timestamp.us / 1000 : 0}
+              renderMode="tooltip"
+            />,
             errorUrl ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,

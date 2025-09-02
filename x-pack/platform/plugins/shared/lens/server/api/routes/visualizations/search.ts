@@ -16,7 +16,7 @@ import {
   PUBLIC_API_ACCESS,
 } from '../../constants';
 import { lensSavedObjectSchema } from '../../../content_management/v1';
-import { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,

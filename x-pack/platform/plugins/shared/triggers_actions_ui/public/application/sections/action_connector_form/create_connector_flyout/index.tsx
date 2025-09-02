@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -21,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { CreateConnectorFilter } from './create_connector_filter';
-import {
+import type {
   ActionConnector,
   ActionType,
   ActionTypeModel,
@@ -32,8 +33,9 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
-import { ConnectorForm, ConnectorFormState, ResetForm } from '../connector_form';
-import { ConnectorFormSchema } from '../types';
+import type { ConnectorFormState, ResetForm } from '../connector_form';
+import { ConnectorForm } from '../connector_form';
+import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -44,6 +46,7 @@ export interface CreateConnectorFlyoutProps {
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -156,7 +159,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
       const { actionTypeId, name, config, secrets } = data;
       const validConnector = {
         actionTypeId,
@@ -258,6 +260,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiSpacer size="xs" />
               </>
             )}
+
             {showFormErrors && (
               <>
                 <EuiCallOut
@@ -265,6 +268,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   color="danger"
                   iconType="warning"
                   data-test-subj="connector-form-header-error-label"
+                  role="alert"
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.connectorFormErrorDialog',
+                    {
+                      defaultMessage: 'Connector form error notification',
+                    }
+                  )}
                   title={i18n.translate(
                     'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
                     {

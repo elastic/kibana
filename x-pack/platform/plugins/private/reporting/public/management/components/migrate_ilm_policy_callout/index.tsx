@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
-import { NotificationsSetup } from '@kbn/core/public';
+import type { NotificationsSetup } from '@kbn/core/public';
 
 import { useIlmPolicyStatus } from '../../../lib/ilm_policy_status_context';
 
@@ -20,7 +20,7 @@ interface Props {
 }
 
 export const MigrateIlmPolicyCallOut: FunctionComponent<Props> = ({ toasts }) => {
-  const { isLoading, recheckStatus, status } = useIlmPolicyStatus(true);
+  const { isLoading, recheckStatus, status } = useIlmPolicyStatus();
 
   if (isLoading || !status || status === 'ok') {
     return null;

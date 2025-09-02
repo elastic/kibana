@@ -11,26 +11,24 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerObservabilityTracesSpanOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { TraceIndexes } from '@kbn/discover-utils/src/data_types/traces/types';
 import type { DocumentProfileProvider } from '../../../../../profiles';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
 export const createGetDocViewer =
-  (indexes: {
-    apm: { errors: string; traces: string };
-    logs: string;
-  }): DocumentProfileProvider['profile']['getDocViewer'] =>
+  (indexes: TraceIndexes): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
-
+    const tabTitle = i18n.translate('discover.docViews.observability.traces.spanOverview.title', {
+      defaultMessage: 'Span overview',
+    });
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_obs_traces_span_overview',
-          title: i18n.translate('discover.docViews.observability.traces.spanOverview.title', {
-            defaultMessage: 'Span overview',
-          }),
+          title: tabTitle,
           order: 0,
           component: (props) => {
             return <UnifiedDocViewerObservabilityTracesSpanOverview {...props} indexes={indexes} />;

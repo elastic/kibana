@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { RouteComponentProps } from 'react-router-dom';
-import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createMemoryHistory, createLocation } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-import TriggersActionsUIHome, { MatchParams } from './home';
-import { hasShowActionsCapability } from './lib/capabilities';
-import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+import { createLocation, createMemoryHistory } from 'history';
+import * as React from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
+import type { MatchParams } from './home';
+import TriggersActionsUIHome from './home';
+import { hasShowActionsCapability } from './lib/capabilities';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');
@@ -31,6 +31,9 @@ jest.mock('./components/health_check', () => ({
 }));
 jest.mock('./context/health_context', () => ({
   HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+jest.mock('@kbn/ebt-tools', () => ({
+  PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
@@ -78,9 +81,7 @@ describe('home', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('rulesListComponents')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
   });
 
   it('shows the correct number of tabs', async () => {

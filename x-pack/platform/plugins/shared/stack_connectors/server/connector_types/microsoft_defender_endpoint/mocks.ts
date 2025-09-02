@@ -237,7 +237,22 @@ const createMicrosoftMachineAction = (
     creationDateTimeUtc: '2019-01-02T14:39:38.2262283Z',
     lastUpdateDateTimeUtc: '2019-01-02T14:40:44.6596267Z',
     externalID: 'abc',
-    commands: ['RunScript'],
+    commands: [
+      {
+        index: 0,
+        startTime: '2025-07-07T18:50:10.186354Z',
+        endTime: '2025-07-07T18:50:21.811356Z',
+        commandStatus: 'Completed',
+        errors: [],
+        command: {
+          type: 'RunScript',
+          params: [
+            { key: 'ScriptName', value: 'hello.sh' },
+            { key: 'Args', value: '--noargs' },
+          ],
+        },
+      },
+    ],
     cancellationRequestor: '',
     cancellationComment: '',
     cancellationDateTimeUtc: '',

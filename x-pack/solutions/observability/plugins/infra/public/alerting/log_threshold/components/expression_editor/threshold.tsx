@@ -100,6 +100,8 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
                   error={errors.value as string[]}
                 >
                   <EuiFieldNumber
+                    // @ts-expect-error upgrade typescript v5.1.6
+                    isInvalid={errors.value.length > 0}
                     data-test-subj="infraThresholdFieldNumber"
                     compressed
                     value={value}

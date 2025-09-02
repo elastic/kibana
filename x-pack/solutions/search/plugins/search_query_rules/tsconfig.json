@@ -32,6 +32,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",

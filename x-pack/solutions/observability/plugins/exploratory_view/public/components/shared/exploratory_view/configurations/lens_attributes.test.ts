@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LayerConfig, LensAttributes } from './lens_attributes';
+import type { LayerConfig } from './lens_attributes';
+import { LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
@@ -21,8 +22,8 @@ import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } fro
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
-import { Query } from '@kbn/es-query';
+import type { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
+import type { Query } from '@kbn/es-query';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -129,7 +130,6 @@ describe('Lens Attribute', () => {
           interval: 'auto',
           includeEmptyRows: true,
         },
-        scale: 'interval',
         sourceField: '@timestamp',
       },
       ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
@@ -146,7 +146,6 @@ describe('Lens Attribute', () => {
           params: {
             percentile: Number(rank.slice(0, 2)),
           },
-          scale: 'ratio',
           sourceField: 'transaction.duration.us',
         };
         return acc;
@@ -266,7 +265,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -288,7 +286,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -303,7 +300,6 @@ describe('Lens Attribute', () => {
         interval: 'auto',
         includeEmptyRows: true,
       },
-      scale: 'interval',
       sourceField: '@timestamp',
     });
   });
@@ -325,7 +321,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -513,7 +508,6 @@ describe('Lens Attribute', () => {
                 isBucketed: false,
                 label: 'Count of records',
                 operationType: 'count',
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               orderBy: {
@@ -523,7 +517,6 @@ describe('Lens Attribute', () => {
               otherBucket: true,
               size: 10,
             },
-            scale: 'ordinal',
             sourceField: 'user_agent.name',
           },
           'x-axis-column-layer0': {
@@ -542,7 +535,6 @@ describe('Lens Attribute', () => {
               ],
               type: 'histogram',
             },
-            scale: 'interval',
             sourceField: LCP_FIELD,
           },
           'y-axis-column-layer0-0': {
@@ -583,7 +575,6 @@ describe('Lens Attribute', () => {
             params: {
               emptyAsNull: false,
             },
-            scale: 'ratio',
             sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
@@ -600,7 +591,6 @@ describe('Lens Attribute', () => {
             params: {
               emptyAsNull: false,
             },
-            scale: 'ratio',
             sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
@@ -610,7 +600,6 @@ describe('Lens Attribute', () => {
             label: 'Part of Pages loaded',
             operationType: 'overall_sum',
             references: ['y-axis-column-layer0X1'],
-            scale: 'ratio',
           },
           'y-axis-column-layer0X3': {
             customLabel: true,
@@ -631,7 +620,6 @@ describe('Lens Attribute', () => {
               },
             },
             references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-            scale: 'ratio',
           },
         },
         incompleteColumns: {},

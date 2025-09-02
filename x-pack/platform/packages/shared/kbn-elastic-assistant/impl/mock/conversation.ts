@@ -6,8 +6,18 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { ClientMessage, Conversation } from '../..';
-
+import type { ClientMessage, Conversation } from '../..';
+export const MOCK_CURRENT_USER = { id: '123', name: 'elastic' };
+export const MOCK_USER_PROFILE = {
+  data: {},
+  enabled: true,
+  uid: 'u_SIqviHw6akpDTNddWASJ4aylPSWusCGHlsXCoBkNo_Q_0',
+  user: {
+    email: 'test_vernie_borer@elastic.co',
+    full_name: 'Vernie Borer',
+    username: 'test_vernie_borer',
+  },
+};
 export const alertConvo: Conversation = {
   id: 'alert-convo',
   title: 'Alert summary',
@@ -30,6 +40,9 @@ export const alertConvo: Conversation = {
     '67bf8338-261a-4de6-b43e-d30b59e884a7': '192.168.0.1',
     '0b2e352b-35fc-47bd-a8d4-43019ed38a25': 'Stephs-MacBook-Pro.local',
   },
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
+  createdAt: '2025-08-06T17:33:12.110Z',
 };
 
 export const messageWithContentReferences: ClientMessage = {
@@ -57,6 +70,9 @@ export const emptyWelcomeConvo: Conversation = {
     actionTypeId: '.gen-ai',
     provider: OpenAiProviderType.OpenAi,
   },
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
+  createdAt: '2025-08-06T17:33:12.110Z',
 };
 
 export const conversationWithContentReferences: Conversation = {
@@ -72,6 +88,7 @@ export const welcomeConvo: Conversation = {
       content:
         'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\nhow do i write host.name: * in EQL?',
       role: 'user',
+      user: MOCK_CURRENT_USER,
       timestamp: '2024-03-18T18:59:18.174Z',
     },
     {
@@ -94,4 +111,7 @@ export const customConvo: Conversation = {
     actionTypeId: '.gen-ai',
     provider: OpenAiProviderType.OpenAi,
   },
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
+  createdAt: '2025-08-06T17:33:12.110Z',
 };

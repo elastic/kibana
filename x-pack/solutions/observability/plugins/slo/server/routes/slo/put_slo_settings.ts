@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  PutSLOSettingsParams,
-  putSLOServerlessSettingsParamsSchema,
-  putSLOSettingsParamsSchema,
-} from '@kbn/slo-schema';
+import type { PutSLOSettingsParams } from '@kbn/slo-schema';
+import { putSLOServerlessSettingsParamsSchema, putSLOSettingsParamsSchema } from '@kbn/slo-schema';
 import { storeSloSettings } from '../../services/slo_settings';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
-import { ToolingLog } from '@kbn/tooling-log';
+import { SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { extendToolingLog } from '@kbn/apm-synthtrace';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 
 export interface SynthtraceEsClients {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;
@@ -31,37 +31,30 @@ export async function setupSynthtrace({
   target: string;
 }): Promise<SynthtraceEsClients> {
   const logger = extendToolingLog(log);
-  const kibanaClient = new ApmSynthtraceKibanaClient({
-    target,
-    logger,
-  });
 
-  const latestVersion = await kibanaClient.fetchLatestApmPackageVersion();
-
-  await kibanaClient.installApmPackage(latestVersion);
-
-  const apmSynthtraceEsClient = new ApmSynthtraceEsClient({
-    logger,
-    client,
-    version: latestVersion,
-    refreshAfterIndex: true,
-  });
-
-  const logsSynthtraceEsClient = new LogsSynthtraceEsClient({
+  const clientManager = new SynthtraceClientsManager({
     client,
     logger,
     refreshAfterIndex: true,
   });
 
-  const infraSynthtraceEsClient = new InfraSynthtraceEsClient({
-    client,
-    logger,
-    refreshAfterIndex: true,
+  const { apmEsClient, infraEsClient, logsEsClient } = clientManager.getClients({
+    clients: ['apmEsClient', 'infraEsClient', 'logsEsClient'],
+    kibana: {
+      target,
+    },
+  });
+
+  await clientManager.initFleetPackageForClient({
+    clients: {
+      apmEsClient,
+    },
+    skipInstallation: false,
   });
 
   return {
-    apmSynthtraceEsClient,
-    logsSynthtraceEsClient,
-    infraSynthtraceEsClient,
+    apmSynthtraceEsClient: apmEsClient,
+    logsSynthtraceEsClient: logsEsClient,
+    infraSynthtraceEsClient: infraEsClient,
   };
 }

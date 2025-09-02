@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
-import { SearchQueryRulesQueryRule } from '../../types';
+import type { SearchQueryRulesQueryRule } from '../../types';
 import { normalizeQueryRuleset } from '../../utils/query_rules_utils';
 
 const createEmptyRuleset = (

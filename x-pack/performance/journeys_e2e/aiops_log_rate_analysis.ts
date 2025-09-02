@@ -12,7 +12,7 @@ import dataView from '../kbn_archives/large_arrays_data_view.json';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/large_arrays_data_view'],
-  esArchives: ['x-pack/test/functional/es_archives/large_arrays'],
+  esArchives: ['x-pack/platform/test/fixtures/es_archives/large_arrays'],
 })
   .step('Go to AIOps Log Rate Analysis', async ({ page, kbnUrl, kibanaPage }) => {
     // Navigate to Log Rate Analysis with just a prepopulated time range.

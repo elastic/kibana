@@ -24,7 +24,8 @@ import {
 
 import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
-import { DevToolsSettings } from '../../../services';
+import type { DevToolsSettings } from '../../../services';
+import type { EsHostService } from '../../lib';
 
 const DEBOUNCE_DELAY = 500;
 const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
@@ -61,6 +62,7 @@ export interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
+  esHostService: EsHostService;
 }
 
 export const SettingsEditor = (props: Props) => {
@@ -82,6 +84,25 @@ export const SettingsEditor = (props: Props) => {
   const [isAccessibilityOverlayEnabled, setIsAccessibilityOverlayEnabled] = useState(
     props.settings.isAccessibilityOverlayEnabled
   );
+  const [selectedHost, setSelectedHost] = useState(props.settings.selectedHost);
+  const [availableHosts, setAvailableHosts] = useState<string[]>([]);
+
+  // Get available hosts from esHostService after it's initialized
+  useEffect(() => {
+    const loadHosts = async () => {
+      if (props.esHostService) {
+        await props.esHostService.waitForInitialization();
+        const hosts = props.esHostService.getAllHosts();
+        setAvailableHosts(hosts);
+        // If no host is selected, default to the first one
+        if (!props.settings.selectedHost && hosts.length > 0) {
+          setSelectedHost(hosts[0]);
+        }
+      }
+    };
+
+    loadHosts();
+  }, [props.esHostService, props.settings.selectedHost]);
 
   const autoCompleteCheckboxes = [
     {
@@ -134,6 +155,7 @@ export const SettingsEditor = (props: Props) => {
       isHistoryEnabled,
       isKeyboardShortcutsEnabled,
       isAccessibilityOverlayEnabled,
+      selectedHost,
     });
   };
   const debouncedSaveSettings = debounce(saveSettings, DEBOUNCE_DELAY);
@@ -144,6 +166,7 @@ export const SettingsEditor = (props: Props) => {
     } else {
       isMounted.current = true;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     fontSize,
     wrapMode,
@@ -157,7 +180,7 @@ export const SettingsEditor = (props: Props) => {
     isHistoryEnabled,
     isKeyboardShortcutsEnabled,
     isAccessibilityOverlayEnabled,
-    debouncedSaveSettings,
+    selectedHost,
   ]);
 
   const onPollingIntervalChange = useCallback((value: string) => {
@@ -237,6 +260,23 @@ export const SettingsEditor = (props: Props) => {
           label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
           checked={isAccessibilityOverlayEnabled}
           onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
+        />
+      </SettingsFormRow>
+      <SettingsFormRow
+        label={i18n.translate('console.settingsPage.elasticsearchHostLabel', {
+          defaultMessage: 'Elasticsearch host',
+        })}
+      >
+        <EuiSuperSelect
+          css={{ minWidth: '220px' }}
+          compressed
+          disabled={availableHosts.length < 2}
+          options={availableHosts.map((host) => ({
+            value: host,
+            inputDisplay: host,
+          }))}
+          valueOfSelected={selectedHost || (availableHosts.length > 0 ? availableHosts[0] : '')}
+          onChange={(value) => setSelectedHost(value)}
         />
       </SettingsFormRow>
 

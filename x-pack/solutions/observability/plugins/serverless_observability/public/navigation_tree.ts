@@ -11,9 +11,11 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
+  isCasesAvailable = true,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
+  isCasesAvailable?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -54,18 +56,22 @@ export const createNavigationTree = ({
           {
             link: 'observability-overview:alerts',
           },
-          {
-            link: 'observability-overview:cases',
-            renderAs: 'item',
-            children: [
-              {
-                link: 'observability-overview:cases_configure',
-              },
-              {
-                link: 'observability-overview:cases_create',
-              },
-            ],
-          },
+          ...(isCasesAvailable
+            ? [
+                {
+                  link: 'observability-overview:cases' as const,
+                  renderAs: 'item' as const,
+                  children: [
+                    {
+                      link: 'observability-overview:cases_configure' as const,
+                    },
+                    {
+                      link: 'observability-overview:cases_create' as const,
+                    },
+                  ],
+                },
+              ]
+            : []),
           {
             title: i18n.translate('xpack.serverlessObservability.nav.slo', {
               defaultMessage: 'SLOs',
@@ -97,20 +103,27 @@ export const createNavigationTree = ({
               ]
             : []),
           {
-            id: 'apm',
-            link: 'apm:services',
+            id: 'applications',
             title: i18n.translate('xpack.serverlessObservability.nav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
                 children: [
                   {
                     link: 'apm:services',
                     title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
-                      defaultMessage: 'Service Inventory',
+                      defaultMessage: 'Service inventory',
                     }),
+                  },
+                  {
+                    link: 'apm:service-map',
+                    title: i18n.translate('xpack.serverlessObservability.nav.apm.serviceMap', {
+                      defaultMessage: 'Service map',
+                    }),
+                    sideNavStatus: 'hidden',
                   },
                   { link: 'apm:traces' },
                   { link: 'apm:dependencies' },
@@ -164,7 +177,7 @@ export const createNavigationTree = ({
                     title: i18n.translate(
                       'xpack.serverlessObservability.nav.infrastructureInventory',
                       {
-                        defaultMessage: 'Infrastructure Inventory',
+                        defaultMessage: 'Infrastructure inventory',
                       }
                     ),
                   },
@@ -256,6 +269,33 @@ export const createNavigationTree = ({
                     ),
                   },
                 ],
+              },
+            ],
+          },
+          {
+            id: 'otherTools',
+            title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
+              defaultMessage: 'Other tools',
+            }),
+            renderAs: 'panelOpener',
+            children: [
+              {
+                link: 'logs:anomalies',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.otherTools.logsAnomalies',
+                  {
+                    defaultMessage: 'Logs anomalies',
+                  }
+                ),
+              },
+              {
+                link: 'logs:log-categories',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.otherTools.logsCategories',
+                  {
+                    defaultMessage: 'Logs categories',
+                  }
+                ),
               },
             ],
           },
@@ -358,6 +398,19 @@ export const createNavigationTree = ({
                     ],
                   },
                   {
+                    title: 'AI',
+                    children: [
+                      {
+                        link: 'management:genAiSettings',
+                        breadcrumbStatus: 'hidden',
+                      },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
                     title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
                       defaultMessage: 'Content',
                     }),
@@ -375,13 +428,7 @@ export const createNavigationTree = ({
                       defaultMessage: 'Other',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                      },
-                    ],
+                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
                   },
                 ],
               },

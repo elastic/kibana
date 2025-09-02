@@ -142,5 +142,8 @@
     "@kbn/core-analytics-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-browser",
+    "@kbn/core-saved-objects-server",
+    "@kbn/presentation-util",
+    "@kbn/licensing-types",
   ]
 }

@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiTitle, EuiCode } from '@elastic/eui';
-import { RepositorySettingsValidation } from '../../../../services/validation';
+import type { RepositorySettingsValidation } from '../../../../services/validation';
 
 interface Props {
   isInvalid: boolean;
@@ -67,6 +67,7 @@ export const MaxRestoreField: React.FunctionComponent<Props> = ({
         }
       >
         <EuiFieldText
+          isInvalid={isInvalid}
           defaultValue={defaultValue}
           fullWidth
           onChange={(e) => updateSettings('maxRestoreBytesPerSec', e.target.value)}

@@ -9,11 +9,11 @@
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DataType, TermsParams } from '../../types';
+import type { DataType, TermsParams } from '../../types';
 import { getFieldNameFromField, isColumnWithMeta } from '../utils';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import { convertMetricToColumns } from '../metrics';
-import { CommonBucketConverterArgs, TermsColumn } from './types';
+import type { CommonBucketConverterArgs, TermsColumn } from './types';
 
 interface OrderByWithAgg {
   orderAgg?: TermsParams['orderAgg'];

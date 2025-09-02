@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import type { PostTransformsPreviewRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../services/ml/common_api';
 import { USER } from '../../services/transform/security_common';
 
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('/internal/transform/transforms/_preview', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.api.waitForIndicesToExist('ft_farequote');
     });

@@ -7,7 +7,6 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ActionsConfig } from './config';
-import { DEFAULT_USAGE_API_URL } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -41,9 +40,6 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-  usage: {
-    url: DEFAULT_USAGE_API_URL,
-  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -517,6 +513,63 @@ describe('validateEmailAddresses()', () => {
     expect(message).toMatchInlineSnapshot(
       `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
     );
+  });
+
+  describe('recipient_allowlist', () => {
+    const recipientAllowlist = ['dev.*@company.co'];
+    const validRecipientEmails = ['dev.team@company.co', 'dev.backend@company.co'];
+
+    test('return no error message when only valid emails are present', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: recipientAllowlist,
+        },
+      });
+
+      const message = acu.validateEmailAddresses(validRecipientEmails);
+      expect(message).toBe(undefined);
+    });
+
+    test('return no error message when the recipient_allowlist is all', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: ['*'],
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsOk, ...testEmailsNotAllowed]);
+      expect(message).toBe(undefined);
+    });
+
+    test('return error message when invalid and not allowed emails are present', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: recipientAllowlist,
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsAll, ...validRecipientEmails]);
+      expect(message).toMatchInlineSnapshot(
+        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
+      );
+    });
+
+    test('no allowed recipient emails if config set to empty array', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: {
+          recipient_allowlist: [],
+        },
+      });
+
+      const message = acu.validateEmailAddresses([...testEmailsAll, ...validRecipientEmails]);
+      expect(message).toMatchInlineSnapshot(
+        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org, dev.team@company.co, dev.backend@company.co"`
+      );
+    });
   });
 });
 

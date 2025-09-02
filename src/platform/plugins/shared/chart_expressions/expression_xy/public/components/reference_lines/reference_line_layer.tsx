@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FC } from 'react';
+import React from 'react';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy } from 'lodash';
-import { Position } from '@elastic/charts';
-import { ReferenceLineLayerConfig } from '../../../common/types';
+import type { Position } from '@elastic/charts';
+import type { ReferenceLineLayerConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
-import { LayerAccessorsTitles, GroupsConfiguration, AxesMap } from '../../helpers';
-import { FormattersMap, getAxisGroupForReferenceLine } from './utils';
+import type { LayerAccessorsTitles, GroupsConfiguration, AxesMap } from '../../helpers';
+import type { FormattersMap } from './utils';
+import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineLayerProps {
   layer: ReferenceLineLayerConfig;

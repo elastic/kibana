@@ -9,7 +9,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import type { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 
 export type HttpResourcesMock = jest.Mocked<PublicMethodsOf<HttpResourcesService>>;

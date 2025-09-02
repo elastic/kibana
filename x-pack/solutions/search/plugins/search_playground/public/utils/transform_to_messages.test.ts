@@ -6,7 +6,8 @@
  */
 
 import { transformFromChatMessages } from './transform_to_messages';
-import { MessageRole, UseChatHelpers, Message, AIMessage } from '../types';
+import type { UseChatHelpers, Message, AIMessage } from '../types';
+import { MessageRole } from '../types';
 
 describe('transformFromChatMessages', () => {
   it('transforms messages correctly', () => {

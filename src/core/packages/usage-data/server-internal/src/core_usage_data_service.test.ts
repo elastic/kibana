@@ -8,11 +8,11 @@
  */
 
 import type { ConfigPath } from '@kbn/config';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-import { HotObservable } from 'rxjs/internal/testing/HotObservable';
+import type { HotObservable } from 'rxjs/internal/testing/HotObservable';
 
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';

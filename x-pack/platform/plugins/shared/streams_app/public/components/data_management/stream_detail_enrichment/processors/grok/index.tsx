@@ -7,32 +7,19 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { GrokPatternDefinition } from './grok_pattern_definition';
 import { GrokPatternsEditor } from './grok_patterns_editor';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
-import { CustomSampleData } from './grok_custom_sample_data';
 
 export const GrokProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector />
+      <ProcessorFieldSelector fieldKey={'from'} />
       <GrokPatternsEditor />
       <EuiSpacer size="m" />
-
-      <FieldsAccordion
-        buttonContent={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.customSampleDataAccordionButtonText',
-          { defaultMessage: 'Custom sample data (optional)' }
-        )}
-      >
-        <CustomSampleData />
-      </FieldsAccordion>
       <FieldsAccordion>
-        <GrokPatternDefinition />
         <EuiSpacer size="m" />
         <ProcessorConditionEditor />
       </FieldsAccordion>

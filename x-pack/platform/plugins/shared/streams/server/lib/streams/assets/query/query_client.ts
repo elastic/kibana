@@ -6,16 +6,18 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { StreamQuery } from '@kbn/streams-schema';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { buildEsqlQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
 import pLimit from 'p-limit';
-import { QueryLink } from '../../../../../common/assets';
-import { EsqlRuleParams } from '../../../rules/esql/types';
-import { AssetClient, getAssetLinkUuid } from '../asset_client';
+import type { QueryLink } from '../../../../../common/assets';
+import type { EsqlRuleParams } from '../../../rules/esql/types';
+import type { AssetClient } from '../asset_client';
+import { getAssetLinkUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
-import { getKqlAsCommandArg, getRuleIdFromQueryLink } from './helpers/query';
+import { getRuleIdFromQueryLink } from './helpers/query';
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
   return currentQuery.kql.query !== nextQuery.kql.query;
@@ -57,7 +59,10 @@ export class QueryClient {
      * - If a query is updated without a breaking change, it updates the existing rule.
      * - If a query is deleted, it removes the associated rule.
      */
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const nextIds = new Set(queries.map((query) => query.id));
 
@@ -122,6 +127,22 @@ export class QueryClient {
     await this.bulk(stream, [{ delete: { id: queryId } }]);
   }
 
+  public async deleteAll(stream: string) {
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping deleteAll for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
+    const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
+    await this.bulk(stream, queriesToDelete);
+  }
+
   public async bulk(
     stream: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
@@ -133,7 +154,10 @@ export class QueryClient {
       return;
     }
 
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
       operations
@@ -216,6 +240,8 @@ export class QueryClient {
 
   private toCreateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
+
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       data: {
         name: query.query.title,
@@ -224,12 +250,10 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-            query.query.kql.query
-          )}\")`,
+          query: esqlQuery,
         },
         enabled: true,
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },
@@ -242,6 +266,7 @@ export class QueryClient {
 
   private toUpdateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       id: ruleId,
       data: {
@@ -249,11 +274,9 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-            query.query.kql.query
-          )}\")`,
+          query: esqlQuery,
         },
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },

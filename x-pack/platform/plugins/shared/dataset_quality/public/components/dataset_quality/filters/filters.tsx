@@ -70,9 +70,9 @@ export default function Filters() {
           integrations={integrations}
           onIntegrationsChange={onIntegrationsChange}
         />
-        {isDatasetQualityAllSignalsAvailable && (
+        {isDatasetQualityAllSignalsAvailable && types.length > 1 && (
           <Selector
-            data-test-subj="datasetQualityFilterType"
+            dataTestSubj="datasetQualityFilterTypeSelectable"
             label={typesLabel}
             searchPlaceholder={typesSearchPlaceholder}
             noneMatchingMessage={typesNoneMatching}

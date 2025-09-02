@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -21,8 +21,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = pageObjects.findings.latestFindingsTable;
+
       await findings.navigateToLatestFindingsPage();
-      await findings.waitForPluginInitialized();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('Findings - Querying data', () => {

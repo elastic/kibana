@@ -35,7 +35,7 @@ export class ServiceManager {
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup(),
+      tools: this.services.tools.setup({ logger }),
       agents: this.services.agents.setup({ logger }),
     };
 
@@ -46,7 +46,6 @@ export class ServiceManager {
     logger,
     security,
     elasticsearch,
-    actions,
     inference,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
@@ -64,17 +63,20 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      elasticsearch,
     });
 
     const agents = this.services.agents.start({
+      security,
+      elasticsearch,
       getRunner,
+      toolsService: tools,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
-      actions,
       inference,
       toolsService: tools,
       agentsService: agents,
@@ -89,7 +91,6 @@ export class ServiceManager {
 
     const chat = createChatService({
       logger: logger.get('chat'),
-      actions,
       inference,
       conversationService: conversations,
       agentService: agents,
