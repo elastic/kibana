@@ -321,10 +321,7 @@ function handleWorkflowLevelOnFailure(
   }
 
   context.stack.push(stackEntry);
-  const result = visitOnFailure(step, context.settings!['on-failure']!, {
-    ...context,
-    parentKey: [stackEntry.type, stepId].join('_'),
-  });
+  const result = visitOnFailure(step, context.settings!['on-failure']!, context);
   context.stack.pop();
   return result;
 }
@@ -397,6 +394,9 @@ function createFallbackPath(
   fallbackSteps: BaseStep[],
   context: GraphBuildContext
 ): graphlib.Graph {
+  const workflowLevelOnFailure = context.stack.find(
+    (node) => node.type === 'workflow-level-on-failure'
+  );
   const graph = new graphlib.Graph({ directed: true });
   const enterFallbackPathNodeId = `enterFallbackPath_${id}`;
   const exitFallbackPathNodeId = `exitFallbackPath_${id}`;
@@ -414,7 +414,10 @@ function createFallbackPath(
   };
   graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
   graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
-  const fallbackPathGraph = createStepsSequence(fallbackSteps, context);
+  const fallbackPathGraph = createStepsSequence(fallbackSteps, {
+    ...context,
+    parentKey: workflowLevelOnFailure ? workflowLevelOnFailure.type : '',
+  });
   insertGraphBetweenNodes(
     graph,
     fallbackPathGraph,
