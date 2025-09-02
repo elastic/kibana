@@ -8,7 +8,7 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { POST_SIEM_READINESS_TASK_API_PATH } from '../../../plugins/security_solution/common/api/siem_readiness/constants';
+import { POST_SIEM_READINESS_TASK_API_PATH } from './constants';
 import type { SiemReadinessTask } from './types';
 
 /**

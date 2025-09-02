@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/constants';
 export * from './src/log_readiness_task';

@@ -8,5 +8,5 @@
 export interface SiemReadinessTask {
   task_id: string;
   status: 'complete' | 'incomplete';
-  meta: Record<string, any>;
+  meta: Record<string, unknown>;
 }
