@@ -113,26 +113,6 @@ export interface LogCloudFields {
   'cloud.instance.id'?: string;
 }
 
-export interface TransactionDocumentOverview
-  extends TraceFields,
-    ServiceFields,
-    TransactionFields,
-    UserAgentFields {}
-
-export interface SpanDocumentOverview
-  extends TraceFields,
-    ServiceFields,
-    SpanFields,
-    UserAgentFields {
-  'transaction.id'?: string;
-  'transaction.name'?: string;
-  duration?: number;
-  kind?: string;
-  'resource.attributes.telemetry.sdk.language'?: string;
-  'links.trace_id'?: string;
-  'links.span_id'?: string;
-}
-
 export interface TraceDocumentOverview
   extends TraceFields,
     Partial<ServiceFields>,
@@ -142,6 +122,8 @@ export interface TraceDocumentOverview
   duration?: number;
   kind?: string;
   'resource.attributes.telemetry.sdk.language'?: string;
+  'links.trace_id'?: string;
+  'links.span_id'?: string;
 }
 
 export interface TraceFields {

@@ -40,11 +40,7 @@ export const createObservabilityTracesDocumentProfileProvider = ({
       return { isMatch: false };
     }
 
-    const isTraceRecord = resolveTraceRecord({
-      record,
-    });
-
-    if (!isTraceRecord) {
+    if (!isTraceDocument(record)) {
       return { isMatch: false };
     }
 
@@ -56,10 +52,6 @@ export const createObservabilityTracesDocumentProfileProvider = ({
     };
   },
 });
-
-const resolveTraceRecord = ({ record }: { record: DataTableRecord }) => {
-  return isTraceDocument(record);
-};
 
 const isTraceDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);

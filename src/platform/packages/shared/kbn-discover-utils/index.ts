@@ -41,8 +41,6 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
-  getTransactionDocumentOverview,
-  getSpanDocumentOverview,
   getTraceDocumentOverview,
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,

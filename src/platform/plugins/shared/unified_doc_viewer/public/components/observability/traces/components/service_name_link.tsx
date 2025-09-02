@@ -16,7 +16,7 @@ import { ServiceNameWithIcon } from './service_name_with_icon';
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
 
 interface ServiceNameLinkProps {
-  serviceName?: string;
+  serviceName: string;
   agentName?: string;
   formattedServiceName: React.ReactNode;
 }
