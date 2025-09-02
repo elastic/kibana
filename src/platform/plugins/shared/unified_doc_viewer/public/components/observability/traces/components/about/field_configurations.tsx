@@ -9,6 +9,7 @@
 import React from 'react';
 
 import {
+  AT_TIMESTAMP,
   HTTP_RESPONSE_STATUS_CODE,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -17,7 +18,6 @@ import {
   SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-  TIMESTAMP_US,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
@@ -50,7 +50,7 @@ export const sharedFieldConfigurations: ContentFrameworkTableProps['fieldConfigu
       />
     ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
   },
-  [TIMESTAMP_US]: {
+  [AT_TIMESTAMP]: {
     title: i18n.translate('unifiedDocViewer.observability.traces.timestamp.title', {
       defaultMessage: 'Start time',
     }), // TODO check timestamp formatter, something is happening here

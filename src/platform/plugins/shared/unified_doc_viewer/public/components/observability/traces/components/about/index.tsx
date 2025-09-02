@@ -11,6 +11,7 @@ import React from 'react';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
+  AT_TIMESTAMP,
   HTTP_RESPONSE_STATUS_CODE,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -19,7 +20,6 @@ import {
   SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-  TIMESTAMP_US,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
@@ -42,7 +42,7 @@ const spanFieldNames = [
   SERVICE_NAME,
   SPAN_DURATION,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  TIMESTAMP_US,
+  AT_TIMESTAMP,
   HTTP_RESPONSE_STATUS_CODE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
@@ -53,7 +53,7 @@ const transactionFieldNames = [
   TRANSACTION_NAME,
   SERVICE_NAME,
   TRANSACTION_DURATION,
-  TIMESTAMP_US,
+  AT_TIMESTAMP,
   HTTP_RESPONSE_STATUS_CODE,
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
