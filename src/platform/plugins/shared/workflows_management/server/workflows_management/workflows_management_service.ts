@@ -416,7 +416,6 @@ export class WorkflowsService {
           description: updatedWorkflow.description,
           enabled: updatedWorkflow.enabled,
           tags: updatedWorkflow.tags || [],
-          inputs: updatedWorkflow.inputs || [],
           yaml,
           definition: updatedWorkflow.definition,
           lastUpdatedBy: getAuthenticatedUser(request, this.security),
@@ -454,8 +453,8 @@ export class WorkflowsService {
         };
       }
     }
-    if (updateData.definition?.inputs === undefined) {
-      updateData.definition.inputs = [];
+    if (updateData.definition!.inputs === undefined) {
+      updateData.definition!.inputs = [];
     }
     const response = await savedObjectsClient.update<WorkflowSavedObjectAttributes>(
       WORKFLOW_SAVED_OBJECT_TYPE,

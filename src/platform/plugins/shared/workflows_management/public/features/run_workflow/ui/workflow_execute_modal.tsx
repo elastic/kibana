@@ -43,7 +43,7 @@ export function WorkflowExecuteModal({
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const enabledTriggers =
-    workflow?.definition.triggers.filter((t: any) => t.enabled).map((t: any) => t.type) || [];
+    workflow?.definition!.triggers.filter((t: any) => t.enabled).map((t: any) => t.type) || [];
 
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(enabledTriggers[0]);
 

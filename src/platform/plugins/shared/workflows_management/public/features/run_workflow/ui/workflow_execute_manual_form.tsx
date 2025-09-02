@@ -55,8 +55,8 @@ const defaultWorkflowInputsMappings: Record<string, any> = {
 const getDefaultWorkflowInput = (workflow: WorkflowDetailDto | WorkflowListItemDto): string => {
   const inputPlaceholder: Record<string, any> = {};
 
-  if (workflow?.definition.inputs) {
-    workflow.definition.inputs.forEach((input: any) => {
+  if (workflow?.definition!.inputs) {
+    workflow.definition!.inputs.forEach((input: any) => {
       let placeholder: string | number | boolean | ((input: any) => string) =
         defaultWorkflowInputsMappings[input.type];
       if (typeof placeholder === 'function') {
@@ -77,14 +77,14 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(workflow.definition.inputs || []),
-    [workflow?.definition.inputs]
+    () => makeWorkflowInputsValidator(workflow?.definition!.inputs || []),
+    [workflow?.definition]
   );
 
   const handleChange = useCallback(
     (data: string) => {
       setValue(data);
-      if (workflow?.definition.inputs) {
+      if (workflow?.definition!.inputs) {
         try {
           const res = inputsValidator.safeParse(JSON.parse(data));
           if (!res.success) {
@@ -99,7 +99,7 @@ export const WorkflowExecuteManualForm = ({
         }
       }
     },
-    [setValue, workflow?.definition.inputs, inputsValidator, setErrors]
+    [setValue, workflow?.definition, inputsValidator, setErrors]
   );
 
   useEffect(() => {
