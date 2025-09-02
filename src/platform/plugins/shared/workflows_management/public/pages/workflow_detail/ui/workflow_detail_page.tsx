@@ -203,6 +203,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     <div css={styles.pageContainer}>
       <WorkflowDetailHeader
         name={workflow?.name}
+        yaml={yamlValue}
         isLoading={isLoadingWorkflow}
         activeTab={activeTab}
         canRunWorkflow={canRunWorkflow}

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
 import React, { useMemo } from 'react';
 import dagre from '@dagrejs/dagre';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, Position, ReactFlow } from '@xyflow/react';
+import { useEuiTheme } from '@elastic/eui';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { WorkflowGraphEdge, WorkflowGraphNode } from './nodes';
@@ -27,7 +27,7 @@ import {
 import '@xyflow/react/dist/style.css';
 
 export interface WorkflowExecutionProps {
-  workflowYaml: string;
+  workflowYaml: string | undefined;
 }
 
 const nodeTypes = [...mainScopeNodes, ...secondaryScopeNodes, ...atomicNodes].reduce(
@@ -134,12 +134,60 @@ function applyLayout(graph: dagre.graphlib.Graph) {
     target: e.w,
     label: graph.edge(e)?.label,
   }));
-
-  console.log('Edges in graph:', edges);
   return { nodes, edges };
 }
 
+// Wrapper component to handle ReactFlow initialization timing
+const ReactFlowWrapper: React.FC<{
+  nodes: Node[];
+  edges: any[];
+  nodeTypesMap: any;
+  edgeTypesMap: any;
+}> = ({ nodes, edges, nodeTypesMap, edgeTypesMap }) => {
+  const [isReady, setIsReady] = React.useState(false);
+
+  // Use a small delay to ensure ReactFlow is properly initialized
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 50); // Small delay to ensure proper initialization
+
+    return () => clearTimeout(timer);
+  }, [nodes, edges]);
+
+  const onInit = React.useCallback((reactFlowInstance: any) => {
+    // Fit view once the instance is ready
+    setTimeout(() => {
+      reactFlowInstance.fitView({ padding: 0.1 });
+    }, 100);
+  }, []);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      nodeTypes={nodeTypesMap}
+      edgeTypes={edgeTypesMap}
+      onInit={onInit}
+      fitView={isReady}
+      fitViewOptions={{ padding: 0.1 }}
+      proOptions={{
+        hideAttribution: true,
+      }}
+      onError={(error) => {
+        // eslint-disable-next-line no-console
+        console.error('ReactFlow error:', error);
+      }}
+    >
+      <Background />
+      <Controls />
+    </ReactFlow>
+  );
+};
+
 export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) => {
+  const { euiTheme } = useEuiTheme();
+
   const workflowExecutionGraph: { result: any; error: any } | null = useMemo(() => {
     if (!workflowYaml) {
       return null;
@@ -151,7 +199,7 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
       if (parsingResult.error) {
         error = parsingResult.error;
       }
-      result = convertToWorkflowGraph(parsingResult.data as any);
+      result = convertToWorkflowGraph((parsingResult as { data: any }).data);
     } catch (e) {
       error = e;
     }
@@ -181,41 +229,37 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
   return (
     <>
       {layoutResult?.error && (
-        <div style={{ color: 'red' }}>
+        <div style={{ color: euiTheme.colors.danger }}>
           Error generating graph layout: {String(layoutResult.error)}
         </div>
       )}
       {layoutResult?.result && (
         <div
-          style={{ width: '100%', height: '600px', border: '1px solid #ddd', position: 'relative' }}
+          style={{
+            width: '100%',
+            height: '600px',
+            border: `1px solid ${euiTheme.border.color}`,
+            position: 'relative',
+          }}
         >
           <div
             style={{
               position: 'absolute',
               bottom: 10,
               left: 10,
-              backgroundColor: 'white',
+              backgroundColor: euiTheme.colors.emptyShade,
               padding: 5,
               zIndex: 10,
             }}
           >
             Nodes: {layoutResult.result.nodes.length}, Edges: {layoutResult.result.edges.length}
           </div>
-          <ReactFlow
+          <ReactFlowWrapper
             nodes={layoutResult.result.nodes}
             edges={layoutResult.result.edges}
-            fitViewOptions={{ padding: 1 }}
-            nodeTypes={nodeTypes as any as NodeTypes}
-            edgeTypes={edgeTypes}
-            proOptions={{
-              hideAttribution: true,
-            }}
-            fitView
-            onError={(error) => console.error('ReactFlow error:', error)}
-          >
-            <Background />
-            <Controls />
-          </ReactFlow>
+            nodeTypesMap={nodeTypes as any as NodeTypes}
+            edgeTypesMap={edgeTypes}
+          />
         </div>
       )}
       {!layoutResult && (
