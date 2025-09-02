@@ -156,7 +156,7 @@ export class DashboardStorage {
       error: transformDashboardError,
     } = transformDashboardIn({
       dashboardState: dataToLatest,
-      references: options.references,
+      incomingReferences: options.references,
     });
     if (transformDashboardError) {
       throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);
@@ -232,7 +232,7 @@ export class DashboardStorage {
       error: transformDashboardError,
     } = transformDashboardIn({
       dashboardState: dataToLatest,
-      references: options.references,
+      incomingReferences: options.references,
     });
     if (transformDashboardError) {
       throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);

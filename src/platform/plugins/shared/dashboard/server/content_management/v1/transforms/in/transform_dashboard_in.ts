@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardAttributes } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
@@ -17,10 +18,10 @@ import { transformTagsIn } from './transform_tags_in';
 
 export const transformDashboardIn = ({
   dashboardState,
-  references = [],
+  incomingReferences = [],
 }: {
   dashboardState: DashboardAttributes;
-  references?: SavedObjectReference[];
+  incomingReferences?: SavedObjectReference[];
 }):
   | {
       attributes: DashboardSavedObjectAttributes;
@@ -38,8 +39,14 @@ export const transformDashboardIn = ({
 
     const tagReferences = transformTagsIn({
       tags,
-      references,
+      references: incomingReferences,
     });
+
+    // TODO - remove once all references are provided server side
+    const nonTagIncomingReferences = incomingReferences.filter(
+      ({ type }) => type !== tagSavedObjectTypeName
+    );
+
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
     const { searchSourceJSON, references: searchSourceReferences } =
@@ -63,7 +70,12 @@ export const transformDashboardIn = ({
     };
     return {
       attributes,
-      references: [...tagReferences, ...panelReferences, ...searchSourceReferences],
+      references: [
+        ...tagReferences,
+        ...nonTagIncomingReferences,
+        ...panelReferences,
+        ...searchSourceReferences,
+      ],
       error: null,
     };
   } catch (e) {
