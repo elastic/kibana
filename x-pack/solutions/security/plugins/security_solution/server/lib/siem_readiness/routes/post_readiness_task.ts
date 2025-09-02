@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { API_VERSIONS } from '../../../../common/constants';
-import { POST_SIEM_READINESS_TASK_API_PATH } from "../constants"
+import { POST_SIEM_READINESS_TASK_API_PATH } from "../../../../common/api/siem_readiness/constants"
 import { schema } from '@kbn/config-schema';
 import { SiemReadinessRoutesDeps } from "../types"
 
@@ -33,7 +33,7 @@ export const postReadinessTaskRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: schema.object({task_id: schema.string()}),
+            body: schema.object({task_id: schema.string(), status: schema.string(), meta: schema.object({})}),
           },
         },
       },
@@ -57,6 +57,7 @@ export const postReadinessTaskRoute = (
           };
 
           await esClient.index({
+            id: request.body.task_id,
             index: SIEM_READINESS_INDEX,
             body: indexDocument,
           });

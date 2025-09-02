@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { POST_SIEM_READINESS_TASK_API_PATH } from '../../../plugins/security_solution/common/api/siem_readiness/constants';
 import type { SiemReadinessTask } from './types';
-import { SIEM_READINESS_INDEX } from './constants';
-
+//x-pack/solutions/security/plugins/security_solution/common/api/siem_readiness/constants
 /**
- * Logs a SIEM readiness task to Elasticsearch
- * @param esClient - Elasticsearch client instance from Kibana core
- * @param task - The task object to log
- * @returns Promise that resolves when the task is logged
+ * Hook for logging SIEM readiness tasks via API endpoint
+ * @param options - TanStack mutation options
+ * @returns Mutation hook for logging readiness tasks
  */
-export async function logReadinessTask(
-  esClient: ElasticsearchClient,
-  task: SiemReadinessTask
-): Promise<void> {
-  try {
-    await esClient.index({
-      index: SIEM_READINESS_INDEX,
-      body: {
-        ...task,
-        '@timestamp': new Date().toISOString(),
-      },
-      id: task.task_id,
-    });
-  } catch (error) {
-    throw new Error(`Failed to log SIEM readiness task: ${error}`);
+export const useLogReadinessTask = (
+  options?: UseMutationOptions<void, unknown, SiemReadinessTask>
+) => {
+  const { http } = useKibana<CoreStart>().services;
+  
+  const { mutate: logReadinessTask } = useMutation<void, unknown, SiemReadinessTask>(
+    (task: SiemReadinessTask) =>
+      http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {
+        body: JSON.stringify({
+          ...task,
+          // '@timestamp': new Date().toISOString(),
+        }),
+      }),
+    options
+  );
+
+  return {
+    logReadinessTask
   }
-}
+};

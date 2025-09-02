@@ -5,28 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { logReadinessTask } from '@kbn/siem-readiness';
-import { useKibana } from '../../common/lib/kibana';
-import {
-  EuiPageHeader,
-  EuiPageSection,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiButton,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { useLogReadinessTask } from '@kbn/siem-readiness';
+import { EuiPageHeader, EuiPageSection, EuiEmptyPrompt, EuiText, EuiButton } from '@elastic/eui';
 
 const SiemReadinessDashboard = () => {
-
-  // const t = useKibana().services.data.search;
-  // console.log(t)
+  const { logReadinessTask } = useLogReadinessTask();
 
   const handleLogTask = useCallback(async () => {
-    // logReadinessTask({ taskId: '1', status: 'complete', meta: {} });
-  }, []);
+    logReadinessTask({ task_id: '1', status: 'complete', meta: {} });
+  }, [logReadinessTask]);
 
   return (
     <>
@@ -59,7 +48,7 @@ const SiemReadinessDashboard = () => {
             </EuiText>
           }
           actions={
-            <EuiButton color="primary" fill onClick={handleLogTask} >
+            <EuiButton color="primary" fill onClick={handleLogTask}>
               <FormattedMessage
                 id="xpack.securitySolution.siemReadiness.logTestTask"
                 defaultMessage="Log Test Task"

@@ -1,1 +1,0 @@
-export const POST_SIEM_READINESS_TASK_API_PATH = 'siem_readiness/post'
