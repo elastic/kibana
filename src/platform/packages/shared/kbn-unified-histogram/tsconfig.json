@@ -18,6 +18,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/core",
     "@kbn/shared-ux-button-toolbar",
+    "@kbn/shared-ux-toolbar-selector",
     "@kbn/es-query",
     "@kbn/presentation-publishing",
     "@kbn/inspector-plugin",

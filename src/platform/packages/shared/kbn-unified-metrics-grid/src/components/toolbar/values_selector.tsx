@@ -9,7 +9,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import type { SelectableEntry } from '@kbn/unified-histogram';
-import { ToolbarSelector } from '@kbn/unified-histogram';
+import { ToolbarSelector } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
