@@ -93,7 +93,7 @@ export const getActPrompt = ({
           - After each tool output, assess coverage; perform additional targeted calls if gaps remain.
         Step 3 — Synthesize & verify
           - Map tool outputs to each user sub-question.
-          - If a sub-part is unanswered: attempt a targeted follow-ups.
+          - If a sub-part is unanswered: attempt targeted follow-ups.
           - Compose the final answer using ONLY tool outputs or user-provided content.
         Step 4 — Iterate or conclude
           - (IMPORTANT) **If the initial output is insufficient, refine your plan by trying a different tool or adjusting parameters. You may make several attempts.**.
