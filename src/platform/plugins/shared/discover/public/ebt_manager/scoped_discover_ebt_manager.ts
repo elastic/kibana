@@ -15,7 +15,7 @@ import {
   isOfAggregateQueryType,
   isOfQueryType,
 } from '@kbn/es-query';
-import { getQueryColumnsFromESQLQuery, getSearchQueryString } from '@kbn/esql-utils';
+import { getQueryColumnsFromESQLQuery, getSearchQueries } from '@kbn/esql-utils';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -245,7 +245,7 @@ export class ScopedDiscoverEBTManager {
       }
 
       const esqlColumns = getQueryColumnsFromESQLQuery(query.esql);
-      const embeddedQueryString = getSearchQueryString(query.esql); // KQL or Lucene embedded within ES|QL query
+      const embeddedQueryString = getSearchQueries(query.esql); // KQL or Lucene embedded within ES|QL query
       const embeddedQueryColumns = embeddedQueryString
         ? getKqlFieldNamesFromExpression(embeddedQueryString)
         : [];

@@ -45,7 +45,7 @@ export {
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,
-  getSearchQueryString,
+  getSearchQueries,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

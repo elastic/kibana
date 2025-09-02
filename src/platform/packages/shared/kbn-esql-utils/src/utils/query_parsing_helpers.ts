@@ -133,7 +133,7 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   return columnName;
 };
 
-export const getSearchQueryString = (esql: string) => {
+export const getSearchQueries = (esql: string) => {
   const { ast } = parse(esql);
   const functions: ESQLFunction[] = [];
 
@@ -145,11 +145,11 @@ export const getSearchQueryString = (esql: string) => {
   const searchFunctions = functions.filter(({ name }) => queryStringFunctions.includes(name));
 
   if (!searchFunctions.length) {
-    return undefined;
+    return [];
   }
 
   // Extract query strings from all search functions
-  const queryParts = searchFunctions
+  const searchQueries = searchFunctions
     .map((func) => {
       if (func.args.length > 0 && isStringLiteral(func.args[0])) {
         return func.args[0].valueUnquoted.trim();
@@ -158,16 +158,11 @@ export const getSearchQueryString = (esql: string) => {
     })
     .filter((query) => query !== '');
 
-  if (!queryParts.length) {
-    return undefined;
+  if (!searchQueries.length) {
+    return [];
   }
 
-  if (queryParts.length === 1) {
-    return queryParts[0];
-  } else {
-    // If multiple queries - wrap each part in parentheses and join with AND
-    return queryParts.map((part) => `(${part})`).join(' AND ');
-  }
+  return searchQueries;
 };
 
 export const isQueryWrappedByPipes = (query: string): boolean => {
