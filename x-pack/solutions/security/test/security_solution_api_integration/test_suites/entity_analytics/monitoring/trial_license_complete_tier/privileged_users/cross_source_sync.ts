@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const privMonUtils = PrivMonUtils(getService);
 
-  describe('@ess @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const kibanaServer = getService('kibanaServer');
     const index1 = 'privmon_index1';
     const user1 = { name: 'user_1' };
