@@ -18,6 +18,7 @@
     "@kbn/field-types",
     "@kbn/zod",
     "@kbn/es-types",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/utility-types"
   ]
 }
