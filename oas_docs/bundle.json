@@ -28271,6 +28271,9 @@
                                   "logstash"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28739,6 +28742,9 @@
                               },
                               "version": {
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -29442,6 +29448,9 @@
                           "logstash"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29910,6 +29919,9 @@
                       },
                       "version": {
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -30546,6 +30558,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31014,6 +31029,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31815,6 +31833,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32283,6 +32304,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32964,6 +32988,9 @@
                           "logstash"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -33427,6 +33454,9 @@
                       },
                       "version": {
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -34060,6 +34090,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -34528,6 +34561,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
