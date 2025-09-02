@@ -2390,7 +2390,7 @@ export class CstToAstConverter {
     if (keyCtx && valueCtx) {
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
 
-      const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+      const value = this.fromConstant(valueCtx.constant()) as ast.ESQLAstExpression;
 
       const entry = Builder.expression.entry(key, value, {
         location: getPosition(ctx.start, ctx.stop),
