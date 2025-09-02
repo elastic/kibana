@@ -113,7 +113,8 @@
     "@kbn/esql-editor",
     "@kbn/core-application-browser",
     "@kbn/metrics-experience-plugin",
-    "@kbn/unified-metrics-grid"
+    "@kbn/unified-metrics-grid",
+    "@kbn/discover-plugin"
   ],
   "exclude": ["target/**/*"]
 }
