@@ -73,7 +73,7 @@ export default {
       id: 'observability',
       href: LOGO.href,
       label: LOGO.label,
-      iconType: LOGO.type,
+      iconType: LOGO.iconType,
     },
     setWidth: () => {},
   },
