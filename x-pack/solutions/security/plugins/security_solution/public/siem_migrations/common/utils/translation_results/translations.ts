@@ -8,28 +8,28 @@
 import { i18n } from '@kbn/i18n';
 
 export const SIEM_TRANSLATION_RESULT_FULL_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationResult.full',
+  'xpack.securitySolution.siemMigrations.common.translationResult.full',
   {
     defaultMessage: 'Translated',
   }
 );
 
 export const SIEM_TRANSLATION_RESULT_PARTIAL_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationResult.partially',
+  'xpack.securitySolution.siemMigrations.common.translationResult.partially',
   {
     defaultMessage: 'Partially translated',
   }
 );
 
 export const SIEM_TRANSLATION_RESULT_UNTRANSLATABLE_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationResult.untranslatable',
+  'xpack.securitySolution.siemMigrations.common.translationResult.untranslatable',
   {
     defaultMessage: 'Not translated',
   }
 );
 
 export const SIEM_TRANSLATION_RESULT_UNKNOWN_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationResult.unknown',
+  'xpack.securitySolution.siemMigrations.common.translationResult.unknown',
   {
     defaultMessage: 'Unknown',
   }
@@ -37,7 +37,7 @@ export const SIEM_TRANSLATION_RESULT_UNKNOWN_LABEL = i18n.translate(
 
 export const SIEM_TRANSLATION_RESULT_UNKNOWN_ERROR = (status?: string) => {
   return i18n.translate(
-    'xpack.securitySolution.siemMigrations.rules.translationResult.unknownError',
+    'xpack.securitySolution.siemMigrations.common.translationResult.unknownError',
     {
       defaultMessage: 'Unknown translation result status: ({status})',
       values: { status },
