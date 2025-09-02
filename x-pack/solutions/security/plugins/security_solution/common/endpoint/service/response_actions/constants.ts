@@ -115,7 +115,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
   runscript: 'writeExecuteOperations',
-  cancel: 'canReadActionsLogManagement',
+  cancel: 'readActionsLogManagement',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
