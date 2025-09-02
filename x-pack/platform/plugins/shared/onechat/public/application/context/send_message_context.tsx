@@ -17,6 +17,7 @@ import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
 import { useAgentId } from '../hooks/use_conversation';
 import { useConversationActions } from '../hooks/use_conversation_actions';
 import { useConversationId } from '../hooks/use_conversation_id';
@@ -176,8 +177,17 @@ interface SendMessageState {
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+  const { conversationSettingsService } = useOnechatServices();
+
+  const conversationSettings = useObservable(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const connectorId = conversationSettings?.selectedConnectorId;
+
   const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
-    useSendMessageMutation();
+    useSendMessageMutation({ connectorId });
 
   return (
     <SendMessageContext.Provider

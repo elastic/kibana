@@ -59,5 +59,6 @@
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
     "@kbn/inference-common",
+    "@kbn/spaces-plugin",
   ]
 }

@@ -6,13 +6,27 @@
  */
 
 import React from 'react';
-import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import { EuiPageHeaderSection, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
+import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { NewConversationButton } from './new_conversation_button';
 
 export const ConversationActions: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const { conversationSettingsService } = useOnechatServices();
+  const hasActiveConversation = useHasActiveConversation();
+
+  // Subscribe to conversation settings to get the settingsMenuComponent
+  const conversationSettings = useObservable(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const settingsMenuComponent = conversationSettings?.settingsMenuComponent;
+  const isFlyoutMode = conversationSettings?.isFlyoutMode;
 
   const actionsContainerStyles = css`
     display: flex;
@@ -30,7 +44,14 @@ export const ConversationActions: React.FC<{}> = () => {
 
   return (
     <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
-      <NewConversationButton />
+      <EuiFlexGroup>
+        {hasActiveConversation && (
+          <EuiFlexItem grow={false}>
+            <NewConversationButton />
+          </EuiFlexItem>
+        )}
+        {settingsMenuComponent && <EuiFlexItem grow={false}>{settingsMenuComponent}</EuiFlexItem>}
+      </EuiFlexGroup>
     </EuiPageHeaderSection>
   );
 };

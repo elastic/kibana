@@ -60,6 +60,7 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "onechat"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

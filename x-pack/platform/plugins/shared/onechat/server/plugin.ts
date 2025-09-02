@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { OnechatConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -14,6 +15,7 @@ import type {
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
+  OnechatRequestHandlerContext,
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
@@ -42,6 +44,7 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
+    const { spaces: spacesSetup } = pluginsSetup;
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
     });
@@ -50,7 +53,22 @@ export class OnechatPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    const router = coreSetup.http.createRouter();
+    const router = coreSetup.http.createRouter<OnechatRequestHandlerContext>();
+
+    // Register spaces context for route handlers
+    coreSetup.http.registerRouteHandlerContext('onechat', async (_context, request) => {
+      const [, { spaces }] = await coreSetup.getStartServices();
+
+      const getSpaceId = (): string =>
+        spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+
+      return {
+        spaces: {
+          getSpaceId,
+        },
+      };
+    });
+
     registerRoutes({
       router,
       coreSetup,

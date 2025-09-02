@@ -24,6 +24,7 @@ const storageSettings = {
       created_at: types.date({}),
       updated_at: types.date({}),
       rounds: types.object({ dynamic: true }),
+      space_id: types.keyword({}),
     },
   },
 } satisfies IndexStorageSettings;
@@ -36,6 +37,7 @@ export interface ConversationProperties {
   created_at: string;
   updated_at: string;
   rounds: Array<ConversationRound<string>>;
+  space_id?: string;
 }
 
 export type ConversationStorageSettings = typeof storageSettings;

@@ -16,6 +16,7 @@ import type {
 import { OnechatPlugin } from './plugin';
 
 export type { OnechatPluginSetup, OnechatPluginStart };
+export { OnechatServicesContext } from './application/context/onechat_services_context';
 
 export const plugin: PluginInitializer<
   OnechatPluginSetup,

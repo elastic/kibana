@@ -29,11 +29,12 @@ import {
 } from './converters';
 
 export interface ConversationClient {
-  get(conversationId: string): Promise<Conversation>;
+  get(conversationId: string, spaceId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  delete(conversationId: string, spaceId?: string): Promise<void>;
 }
 
 export const createClient = ({
@@ -56,7 +57,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
-    const { agentId } = options;
+    const { agentId, spaceId } = options;
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
@@ -73,6 +74,7 @@ class ConversationClientImpl implements ConversationClient {
                 : { user_id: this.user.id },
             },
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
+            ...(spaceId ? [{ term: { space_id: spaceId } }] : []),
           ],
         },
       },
@@ -81,10 +83,15 @@ class ConversationClientImpl implements ConversationClient {
     return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
   }
 
-  async get(conversationId: string): Promise<Conversation> {
+  async get(conversationId: string, spaceId?: string): Promise<Conversation> {
     const document = await this.storage.getClient().get({ id: conversationId });
 
     if (!hasAccess({ conversation: document, user: this.user })) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    // If spaceId is provided, verify the conversation belongs to that space
+    if (spaceId && document._source?.space_id !== spaceId) {
       throw createConversationNotFoundError({ conversationId });
     }
 
@@ -119,7 +126,7 @@ class ConversationClientImpl implements ConversationClient {
       document: attributes,
     });
 
-    return this.get(id);
+    return this.get(id, conversation.spaceId);
   }
 
   async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {
@@ -144,6 +151,21 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     return this.get(conversationUpdate.id);
+  }
+
+  async delete(conversationId: string, spaceId?: string): Promise<void> {
+    const document = await this.storage.getClient().get({ id: conversationId });
+
+    if (!hasAccess({ conversation: document, user: this.user })) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    // If spaceId is provided, verify the conversation belongs to that space
+    if (spaceId && document._source?.space_id !== spaceId) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    await this.storage.getClient().delete({ id: conversationId });
   }
 }
 

@@ -7,16 +7,31 @@
 
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import { newConversationId } from '../utils/new_conversation';
+import { useOnechatServices } from './use_onechat_service';
 
 export const useConversationId = () => {
+  const { conversationSettingsService } = useOnechatServices();
+
+  const conversationSettings = useObservable(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+  const isFlyoutMode = conversationSettings?.isFlyoutMode;
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
 
   // TODO: Add logic to resume most recent conversation when no conversationId is provided
   // For now, if no conversationId is provided, we will create a new conversation
   const conversationId = useMemo(() => {
-    return conversationIdParam === newConversationId ? undefined : conversationIdParam;
-  }, [conversationIdParam]);
+    return isFlyoutMode
+      ? conversationSettings?.selectedConversationId === ''
+        ? undefined
+        : conversationSettings?.selectedConversationId
+      : conversationIdParam === newConversationId
+      ? undefined
+      : conversationIdParam;
+  }, [conversationIdParam, conversationSettings?.selectedConversationId, isFlyoutMode]);
 
   return conversationId;
 };

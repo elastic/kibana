@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
+import { EuiFlyoutHeader } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { ConversationActions } from './conversation_actions';
 import { ConversationGrid } from './conversation_grid';
 import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
@@ -22,15 +25,28 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   onToggleSidebar,
 }) => {
   const hasActiveConversation = useHasActiveConversation();
-  return (
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the isFlyoutMode
+  const conversationSettings = useObservable(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const isFlyoutMode = conversationSettings?.isFlyoutMode;
+
+  const headerContent = (
     <ConversationGrid>
       <ConversationSidebarToggle isSidebarOpen={isSidebarOpen} onToggle={onToggleSidebar} />
-      {hasActiveConversation && (
-        <>
-          <ConversationTitle />
-          <ConversationActions />
-        </>
-      )}
+      {hasActiveConversation && <ConversationTitle />}
+      <ConversationActions />
     </ConversationGrid>
   );
+
+  // Conditionally wrap with EuiFlyoutHeader if in flyout mode
+  if (isFlyoutMode) {
+    return <EuiFlyoutHeader hasBorder>{headerContent}</EuiFlyoutHeader>;
+  }
+
+  return headerContent;
 };

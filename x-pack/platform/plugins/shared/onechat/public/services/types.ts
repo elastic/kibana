@@ -10,9 +10,31 @@ import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
 
+export interface StarterPrompt {
+  description: string;
+  title: string;
+  icon: string;
+  prompt: string;
+}
+
+export interface ConversationSettings {
+  isFlyoutMode: boolean;
+  settingsMenuComponent: React.ReactNode | undefined;
+  selectedConversationId: string | undefined;
+  newConversationSubtitle: string | undefined;
+  newConversationPrompts: StarterPrompt[] | undefined;
+  selectedConnectorId: string | undefined;
+  setLastConversation: (lastConversation: LastConversation) => void;
+  defaultAgentId: string | undefined;
+}
+
 export interface OnechatInternalService {
   agentService: AgentService;
   chatService: ChatService;
   conversationsService: ConversationsService;
   toolsService: ToolsService;
+  conversationSettingsService: {
+    setConversationSettings: (conversationSettings: ConversationSettings) => () => void;
+    getConversationSettings$: () => any;
+  };
 }

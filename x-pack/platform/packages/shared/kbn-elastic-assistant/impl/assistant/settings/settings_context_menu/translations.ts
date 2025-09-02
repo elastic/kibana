@@ -98,3 +98,10 @@ export const CLEAR_CHAT_CONFIRMATION = i18n.translate(
       'Are you sure you want to clear the current chat? All conversation data will be lost.',
   }
 );
+
+export const CONNECTOR_SELECTOR = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.connectorSelector',
+  {
+    defaultMessage: 'Connector',
+  }
+);

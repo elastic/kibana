@@ -16,6 +16,9 @@ import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 import { registerAnalytics, registerApp } from './register';
 import type { OnechatInternalService } from './services';
 import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
+import { ConversationSettingsService } from './services/conversations/conversations_settings';
+import { OnechatConversationsView } from './application/components/conversations/conversations_view';
+
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -35,9 +38,11 @@ export class OnechatPlugin
 {
   logger: Logger;
   private internalServices?: OnechatInternalService;
+  private conversationSettingsService: ConversationSettingsService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.conversationSettingsService = new ConversationSettingsService();
   }
   setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
     const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
@@ -63,6 +68,7 @@ export class OnechatPlugin
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
+    const conversationSettingsService = this.conversationSettingsService.start();
     const toolsService = new ToolsService({ http });
 
     this.internalServices = {
@@ -70,8 +76,16 @@ export class OnechatPlugin
       chatService,
       conversationsService,
       toolsService,
+      conversationSettingsService,
     };
 
-    return {};
+    return {
+      OnechatConversationsView,
+      internalServices: this.internalServices,
+    };
+  }
+
+  stop() {
+    this.conversationSettingsService.stop();
   }
 }

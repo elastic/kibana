@@ -5,14 +5,24 @@
  * 2.0.
  */
 
+import type { OnechatInternalService } from './services';
+import type { OnechatServicesContext } from './application/context/onechat_services_context';
+
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
-export interface OnechatSetupDependencies {}
+export interface OnechatSetupDependencies {
+  spaces: SpacesPluginSetup;
+}
 
 export interface OnechatStartDependencies {}
 
 export interface OnechatPluginSetup {}
 
-export interface OnechatPluginStart {}
+export interface OnechatPluginStart {
+  OnechatConversationsView: React.ComponentType;
+  internalServices: OnechatInternalService;
+}
+
+export type { OnechatServicesContext };

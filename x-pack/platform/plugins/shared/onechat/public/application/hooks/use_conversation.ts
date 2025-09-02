@@ -66,5 +66,5 @@ export const useConversationRounds = () => {
 export const useHasActiveConversation = () => {
   const conversationId = useConversationId();
   const conversationRounds = useConversationRounds();
-  return Boolean(conversationId || conversationRounds.length > 0);
+  return Boolean(conversationId && conversationRounds.length > 0);
 };

@@ -21,12 +21,14 @@ export const createConversation$ = ({
   conversationId,
   title$,
   roundCompletedEvents$,
+  spaceId,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
   conversationId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
+  spaceId?: string;
 }) => {
   return forkJoin({
     title: title$,
@@ -38,6 +40,7 @@ export const createConversation$ = ({
         title,
         agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
+        spaceId,
       });
     }),
     switchMap((createdConversation) => {

@@ -90,6 +90,10 @@ export interface ChatConverseParams {
    * Request bound to this call.
    */
   request: KibanaRequest;
+  /**
+   * Optional space ID for space-specific conversations.
+   */
+  spaceId?: string;
 }
 
 export const createChatService = (options: ChatServiceOptions): ChatService => {
@@ -117,6 +121,7 @@ class ChatServiceImpl implements ChatService {
     abortSignal,
     nextInput,
     autoCreateConversationWithId = false,
+    spaceId,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { inference } = this;
     const isNewConversation = !conversationId;
@@ -180,6 +185,7 @@ class ChatServiceImpl implements ChatService {
                     conversationId,
                     title$,
                     roundCompletedEvents$,
+                    spaceId,
                   })
                 : updateConversation$({
                     conversationClient,

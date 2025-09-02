@@ -8,7 +8,7 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSendMessage } from '../../../context/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationContent } from '../conversation_grid';
@@ -17,16 +17,27 @@ import { ConversationInputTextArea } from './conversation_input_text_area';
 
 interface ConversationInputFormProps {
   onSubmit: () => void;
+  starterPrompt?: string;
 }
 
 const fullHeightStyles = css`
   height: 100%;
 `;
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
+  onSubmit,
+  starterPrompt,
+}) => {
   const isSendingMessage = useIsSendingMessage();
   const [input, setInput] = useState('');
   const { sendMessage, pendingMessage } = useSendMessage();
+
+  // Populate input with starter prompt when it changes
+  useEffect(() => {
+    if (starterPrompt) {
+      setInput(starterPrompt);
+    }
+  }, [starterPrompt]);
   const { euiTheme } = useEuiTheme();
   const isSubmitDisabled = !input.trim() || isSendingMessage;
 

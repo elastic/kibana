@@ -59,11 +59,24 @@ export interface ShowAssistantOverlayProps {
   selectedConversation?: SelectedConversation;
 }
 
+export interface ShowOneChatOverlayProps {
+  showOverlay: boolean;
+  promptContextId?: string;
+  // id if the conversation exists in the data stream, title if it's a new conversation
+  selectedConversation?: SelectedConversation;
+}
+
 type ShowAssistantOverlay = ({
   showOverlay,
   promptContextId,
   selectedConversation,
 }: ShowAssistantOverlayProps) => void;
+
+type ShowOneChatOverlay = ({
+  showOverlay,
+  promptContextId,
+  selectedConversation,
+}: ShowOneChatOverlayProps) => void;
 
 type GetUrlForApp = ApplicationStart['getUrlForApp'];
 
@@ -136,6 +149,8 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
+  setShowOneChatOverlay: (showOneChatOverlay: ShowOneChatOverlay) => void;
+  showOneChatOverlay: ShowOneChatOverlay;
   setTraceOptions: (traceOptions: {
     apmUrl: string;
     langSmithProject: string;
@@ -275,6 +290,11 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
 
   /**
+   * Global One Chat Overlay actions
+   */
+  const [showOneChatOverlay, setShowOneChatOverlay] = useState<ShowOneChatOverlay>(() => {});
+
+  /**
    * Current User Avatar
    */
   const { data: currentUser } = useQuery({
@@ -343,8 +363,10 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
+      setShowOneChatOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
+      showOneChatOverlay,
       title,
       toasts,
       traceOptions: sessionStorageTraceOptions,
@@ -385,6 +407,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       setContentReferencesVisible,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
+      showOneChatOverlay,
       title,
       toasts,
       sessionStorageTraceOptions,

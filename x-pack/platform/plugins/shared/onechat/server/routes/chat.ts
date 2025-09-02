@@ -47,11 +47,13 @@ export function registerChatRoutes({
     request,
     chatService,
     abortSignal,
+    spaceId,
   }: {
     chatService: ChatService;
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     abortSignal: AbortSignal;
+    spaceId?: string;
   }) => {
     const {
       agent_id: agentId,
@@ -67,6 +69,7 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: { message: input },
       request,
+      spaceId,
     });
   };
 
@@ -95,6 +98,8 @@ export function registerChatRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
+        const context = await ctx.onechat;
+        const spaceId = context.spaces.getSpaceId();
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -106,6 +111,7 @@ export function registerChatRoutes({
           payload,
           request,
           abortSignal: abortController.signal,
+          spaceId,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -156,6 +162,8 @@ export function registerChatRoutes({
         const [, { cloud }] = await coreSetup.getStartServices();
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
+        const context = await ctx.onechat;
+        const spaceId = context.spaces.getSpaceId();
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -167,6 +175,7 @@ export function registerChatRoutes({
           payload,
           request,
           abortSignal: abortController.signal,
+          spaceId,
         });
 
         return response.ok({

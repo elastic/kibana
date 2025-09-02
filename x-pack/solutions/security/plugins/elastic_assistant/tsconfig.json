@@ -94,7 +94,8 @@
     "@kbn/user-profile-components",
     "@kbn/core-user-profile-common",
     "@kbn/core-analytics-server-mocks",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/onechat-plugin"
   ],
   "exclude": [
     "target/**/*",
