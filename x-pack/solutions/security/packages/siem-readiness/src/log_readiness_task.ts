@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { POST_SIEM_READINESS_TASK_API_PATH } from '../../../plugins/security_solution/common/api/siem_readiness/constants';
 import type { SiemReadinessTask } from './types';
-//x-pack/solutions/security/plugins/security_solution/common/api/siem_readiness/constants
+
 /**
  * Hook for logging SIEM readiness tasks via API endpoint
  * @param options - TanStack mutation options
@@ -24,10 +24,7 @@ export const useLogReadinessTask = (
   const { mutate: logReadinessTask } = useMutation<void, unknown, SiemReadinessTask>(
     (task: SiemReadinessTask) =>
       http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {
-        body: JSON.stringify({
-          ...task,
-          // '@timestamp': new Date().toISOString(),
-        }),
+        body: JSON.stringify(task),
       }),
     options
   );

@@ -33,7 +33,11 @@ export const postReadinessTaskRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: schema.object({task_id: schema.string(), status: schema.string(), meta: schema.object({})}),
+            body: schema.object({
+              task_id: schema.string(),
+              status: schema.oneOf([schema.literal('complete'), schema.literal('incomplete')]),
+              meta: schema.object({}, { unknowns: 'allow' }),
+            }),
           },
         },
       },
@@ -49,15 +53,9 @@ export const postReadinessTaskRoute = (
           const indexDocument = {
             ...request.body,
             '@timestamp': new Date().toISOString(),
-            event: {
-              action: 'siem_readiness_task_created',
-              category: ['configuration'],
-              type: ['creation'],
-            },
           };
 
           await esClient.index({
-            id: request.body.task_id,
             index: SIEM_READINESS_INDEX,
             body: indexDocument,
           });
