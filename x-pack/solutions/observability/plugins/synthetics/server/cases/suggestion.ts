@@ -136,9 +136,8 @@ export function getMonitorByServiceName(
             });
           }
 
-          const monitorsSavedObject = await scopedSavedObjectsClient.bulkGet<{
-            monitor: EncryptedSyntheticsMonitor;
-          }>(bulkGetRequests);
+          const monitorsSavedObject =
+            await scopedSavedObjectsClient.bulkGet<EncryptedSyntheticsMonitor>(bulkGetRequests);
 
           if (bulkGetRequests.length === 0) {
             logger.error(`No Synthetics SavedObjects found for the related tests runs`);
