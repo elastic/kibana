@@ -6,7 +6,6 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import _ from 'lodash';
 import { casesMutationsKeys } from './constants';
 import type { ServerError } from '../types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
