@@ -18,6 +18,7 @@ import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { traceFieldConfigurations } from './field_configurations';
+import { isTransaction } from '../../helpers';
 
 const fullScreenButtonLabel = i18n.translate(
   'unifiedDocViewer.observability.traces.trace.fullScreen.button',
@@ -34,7 +35,6 @@ const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.d
 export interface Trace2Props
   extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
   hit: DataTableRecord;
-  displayType: 'span' | 'transaction';
   dataView: DocViewRenderProps['dataView'];
   showWaterfall?: boolean;
 }
@@ -42,7 +42,6 @@ export interface Trace2Props
 // TODO replace Trace With Trace2 in the overviews and rename it once everything is ready
 export const Trace2 = ({
   hit,
-  displayType,
   dataView,
   filter,
   onAddColumn,
@@ -51,9 +50,10 @@ export const Trace2 = ({
 }: Trace2Props) => {
   const { data } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
+  const isSpan = !isTransaction(hit);
 
   const traceId = hit.flattened[TRACE_ID] as string;
-  const docId = hit.flattened[displayType === 'span' ? SPAN_ID : TRANSACTION_ID] as string;
+  const docId = hit.flattened[isSpan ? SPAN_ID : TRANSACTION_ID] as string;
   const serviceName = hit.flattened[SERVICE_NAME] as string;
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
@@ -72,10 +72,7 @@ export const Trace2 = ({
     [docId, rangeFrom, rangeTo, traceId]
   );
 
-  const fieldNames = useMemo(
-    () => [TRACE_ID, ...(displayType === 'span' ? [TRANSACTION_ID] : [])],
-    [displayType]
-  );
+  const fieldNames = useMemo(() => [TRACE_ID, ...(isSpan ? [TRANSACTION_ID] : [])], [isSpan]);
   const sectionActions = useMemo(
     () =>
       showWaterfall
@@ -84,6 +81,7 @@ export const Trace2 = ({
               label: fullScreenButtonLabel,
               icon: 'fullScreen',
               ariaLabel: fullScreenButtonLabel,
+              dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
               onClick: () => {
                 setShowFullScreenWaterfall(true);
               },

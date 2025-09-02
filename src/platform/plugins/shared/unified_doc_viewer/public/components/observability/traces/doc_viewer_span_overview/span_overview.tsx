@@ -123,7 +123,6 @@ export function SpanOverview({
               <EuiSpacer size="m" />
               <Trace2
                 hit={hit}
-                displayType="span" // TODO I think it should be the section itself who decides the "displayType" as it has access to the whole hit
                 showWaterfall={showWaterfall}
                 dataView={dataView}
                 filter={filter}
