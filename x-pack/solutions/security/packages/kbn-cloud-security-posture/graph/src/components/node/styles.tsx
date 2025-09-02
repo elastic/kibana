@@ -357,6 +357,7 @@ const ThemedRoundedBadge = styled.div<{
 }>`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 
   height: 20px;
   min-width: 20px;
