@@ -188,7 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
         listed.forEach((user) => {
           privmonUtils.assertIsPrivileged(user, true);
           expect(user['@timestamp']).to.be.a('string');
-          expect(user.event.ingested).to.be.a('string');
+          expect(user.event?.ingested).to.be.a('string');
           expect(user.labels?.sources).to.contain('csv');
         });
       });
@@ -243,7 +243,14 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
 
-        log.info(`Uploading second CSV to soft delete users`);
+        const {
+          body: [user3Before],
+        } = await api.listPrivMonUsers({
+          query: { kql: `user.name: csv_user_3` },
+        });
+        log.info(`User 3 before soft delete: ${JSON.stringify(user3Before)}`);
+
+        log.info(`Uploading second CSV to soft delete user`);
         const csv2 = ['csv_user_1', 'csv_user_2'].join('\n');
         const res2 = await privmonUtils.bulkUploadUsersCsv(csv2);
         if (res2.status !== 200) {
@@ -264,13 +271,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(listRes.status).eql(200);
         expect(listRes.body.length).to.be(3);
         const listed = listRes.body as ListPrivMonUsersResponse;
-        listed.forEach(({ user, labels }) => {
-          if (user?.name === 'csv_user_3') {
-            expect(user?.is_privileged).to.be(false);
-            expect(labels?.sources).to.be.empty();
+        listed.forEach((user) => {
+          if (user.user?.name === 'csv_user_3') {
+            log.info(`User 3 after soft delete: ${JSON.stringify(user)}`);
+            privmonUtils.assertIsPrivileged(user, false);
+            privmonUtils.expectTimestampsHaveBeenUpdated(user3Before, user);
           } else {
-            expect(user?.is_privileged).to.be(true);
-            expect(labels?.sources).to.contain('csv');
+            privmonUtils.assertIsPrivileged(user, true);
+            expect(user?.labels?.sources).to.contain('csv');
           }
         });
       });

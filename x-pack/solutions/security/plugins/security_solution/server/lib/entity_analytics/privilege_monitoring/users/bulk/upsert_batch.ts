@@ -35,7 +35,7 @@ export const bulkUpsertBatch =
             {
               '@timestamp': timestamp,
               user: { name: u.username, is_privileged: true },
-              labels: { sources: ['csv'] },
+              labels: { sources: ['csv'], source_ids: [] },
               ...labelField,
             },
             /* eslint-disable @typescript-eslint/no-explicit-any */
