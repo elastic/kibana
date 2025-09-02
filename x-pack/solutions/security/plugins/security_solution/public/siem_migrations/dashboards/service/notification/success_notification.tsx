@@ -43,6 +43,7 @@ export const getSuccessToast = (
 const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStats }> = ({
   migrationStats,
 }) => {
+  // TODO: update path when we have dedicated page.
   const navigation = { deepLinkId: SecurityPageName.siemMigrationsRules, path: migrationStats.id };
 
   const { navigateTo, getAppUrl } = useNavigation();

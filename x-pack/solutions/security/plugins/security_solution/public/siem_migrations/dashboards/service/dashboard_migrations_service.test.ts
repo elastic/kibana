@@ -13,7 +13,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { firstValueFrom } from 'rxjs';
 import * as api from '../api';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -21,11 +20,11 @@ import type { StartPluginsDependencies } from '../../../types';
 import * as i18n from './translations';
 import { SiemDashboardMigrationsService } from './dashboard_migrations_service';
 import type { CreateDashboardMigrationDashboardsRequestBody } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import {
-  CREATE_MIGRATION_BODY_BATCH_SIZE,
-  TASK_STATS_POLLING_SLEEP_SECONDS,
-} from '../../common/constants';
 import { getMissingCapabilitiesChecker } from '../../common/service/capabilities';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
+import { licenseService } from '../../../common/hooks/use_license';
+import type { ExperimentalFeatures } from '../../../../common';
+import { CREATE_MIGRATION_BODY_BATCH_SIZE } from '../../common/constants';
 
 jest.mock('../api', () => ({
   createDashboardMigration: jest.fn(),
@@ -94,10 +93,18 @@ describe('SiemDashboardMigrationsService', () => {
   let mockPlugins: StartPluginsDependencies;
   let mockNotifications: CoreStart['notifications'];
   const mockTelemetry = createTelemetryServiceMock();
+  const mockExperimentalFeaturesSpy = jest.spyOn(ExperimentalFeaturesService, 'get');
+  const mockLicenseServiceIsEnterpriseSpy = jest.spyOn(licenseService, 'isEnterprise');
 
   beforeEach(async () => {
     jest.useRealTimers();
     jest.clearAllMocks();
+
+    mockExperimentalFeaturesSpy.mockReturnValue({
+      automaticDashboardsMigration: true,
+      siemMigrationsDisabled: false,
+    } as unknown as ExperimentalFeatures);
+
     mockNotifications = {
       toasts: { add: jest.fn(), addError: jest.fn(), addSuccess: jest.fn() },
     } as unknown as CoreStart['notifications'];
@@ -119,12 +126,36 @@ describe('SiemDashboardMigrationsService', () => {
     await Promise.resolve();
   });
 
-  describe('latestStats$', () => {
-    it('should be initialized to null', async () => {
-      const testService = new SiemDashboardMigrationsService(mockCore, mockPlugins, mockTelemetry);
-      // @ts-expect-error accessing private property for test
-      expect(await firstValueFrom(testService.latestStats$)).toBeNull();
-      await Promise.resolve();
+  describe('isAvailable', () => {
+    it('should return false when experimental `automaticDashboardsMigration` feature is disabled', () => {
+      mockExperimentalFeaturesSpy.mockReturnValue({
+        automaticDashboardsMigration: false,
+        siemMigrationsDisabled: false,
+      } as unknown as ExperimentalFeatures);
+
+      expect(service.isAvailable()).toBe(false);
+    });
+
+    it('should return false when experimental `siemMigrationsDisabled` feature is true', () => {
+      mockExperimentalFeaturesSpy.mockReturnValueOnce({
+        automaticDashboardsMigration: true,
+        siemMigrationsDisabled: true,
+      } as unknown as ExperimentalFeatures);
+
+      expect(service.isAvailable()).toBe(false);
+    });
+
+    it('should return false when license is not enterprise', () => {
+      mockLicenseServiceIsEnterpriseSpy.mockReturnValue(false);
+
+      expect(service.isAvailable()).toBe(false);
+    });
+
+    it('should return false if there are missing capabilities ', () => {
+      mockGetMissingCapabilitiesChecker.mockReturnValue(() => [
+        { capability: 'cap', description: 'desc' },
+      ]);
+      expect(service.isAvailable()).toBe(false);
     });
   });
 
@@ -200,7 +231,7 @@ describe('SiemDashboardMigrationsService', () => {
       mockGetMissingCapabilitiesChecker.mockReturnValue(() => [
         { capability: 'cap', description: 'desc' },
       ]);
-      const result = await service.startRuleMigration('mig-1');
+      const result = await service.startDashboardMigration('mig-1');
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ started: false });
     });
@@ -208,7 +239,7 @@ describe('SiemDashboardMigrationsService', () => {
     it('should notify and not start migration if connectorId is missing', async () => {
       jest.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
       jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
-      const result = await service.startRuleMigration('mig-1');
+      const result = await service.startDashboardMigration('mig-1');
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ started: false });
     });
@@ -226,14 +257,15 @@ describe('SiemDashboardMigrationsService', () => {
         return { ...defaultMigrationStats, status: SiemMigrationTaskStatus.RUNNING };
       });
       const startPollingSpy = jest.spyOn(service, 'startPolling');
-      const pollTaskUntilSpy = jest.spyOn(service as any, 'pollTaskUntil');
-      const result = await service.startRuleMigration('mig-1');
+      /* @ts-expect-error spying on protected property */
+      const migrationStatsTaskPollUntilSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
+      const result = await service.startDashboardMigration('mig-1');
       expect(mockStartDashboardMigration).toHaveBeenCalledWith({
         migrationId: 'mig-1',
         settings: { connectorId: 'connector-123' },
       });
       expect(startPollingSpy).toHaveBeenCalled();
-      expect(pollTaskUntilSpy).toHaveBeenCalled();
+      expect(migrationStatsTaskPollUntilSpy).toHaveBeenCalled();
       expect(mockGetDashboardMigrationStats).toHaveBeenCalledTimes(statsCalls);
       expect(result).toEqual({ started: true });
     });
@@ -260,10 +292,11 @@ describe('SiemDashboardMigrationsService', () => {
         }
         return { ...defaultMigrationStats, status: SiemMigrationTaskStatus.FINISHED };
       });
-      const pollTaskUntilSpy = jest.spyOn(service as any, 'pollTaskUntil');
+      /* @ts-expect-error Spying on protecting property */
+      const migrationStatsTaskPollUntilSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
       const result = await service.stopDashboardMigration('mig-1');
       expect(mockStopDashboardMigration).toHaveBeenCalledWith({ migrationId: 'mig-1' });
-      expect(pollTaskUntilSpy).toHaveBeenCalled();
+      expect(migrationStatsTaskPollUntilSpy).toHaveBeenCalled();
       expect(mockGetDashboardMigrationStats).toHaveBeenCalledTimes(statsCalls);
       expect(result).toEqual({ stopped: true });
     });
@@ -276,114 +309,12 @@ describe('SiemDashboardMigrationsService', () => {
         { id: 'mig-2', status: SiemMigrationTaskStatus.FINISHED, name: 'test 2' },
       ];
       mockGetDashboardMigrationAllStats.mockResolvedValue(statsArray);
-      const result = await service.getDashboardMigrationAllStats();
+      /* @ts-expect-error acccessing protected property */
+      const result = await service.fetchMigrationsStatsAll();
       expect(api.getDashboardMigrationAllStats).toHaveBeenCalled();
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('test 1');
       expect(result[1].name).toBe('test 2');
-      // @ts-expect-error accessing private property for test
-      expect(await firstValueFrom(service.latestStats$)).toEqual(result);
-    });
-  });
-
-  describe('Polling behavior', () => {
-    it('should poll and send a success toast when a migration finishes', async () => {
-      jest.useFakeTimers();
-      const runningMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.RUNNING };
-      const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
-      const getStatsMock = jest
-        .fn()
-        .mockResolvedValue([finishedMigration])
-        .mockResolvedValueOnce([runningMigration]);
-      service.getDashboardMigrationAllStats = getStatsMock;
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
-      service.startPolling();
-      await Promise.resolve();
-      jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(getStatsMock).toHaveBeenCalledTimes(2);
-      expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
-    });
-
-    it('should not auto-resume interrupted migration if migration had errors', async () => {
-      jest.useFakeTimers();
-      const interruptedMigration = {
-        id: 'mig-1',
-        status: SiemMigrationTaskStatus.INTERRUPTED,
-        last_execution: { error: 'some failure' },
-      };
-      const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
-      service.getDashboardMigrationAllStats = jest
-        .fn()
-        .mockResolvedValue([finishedMigration])
-        .mockResolvedValueOnce([interruptedMigration]);
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
-      service.startPolling();
-      await Promise.resolve();
-      jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
-      await Promise.resolve();
-      expect(mockStartDashboardMigration).not.toHaveBeenCalled();
-    });
-
-    it('should not auto-resume interrupted migration if no connector configured', async () => {
-      jest.useFakeTimers();
-      const interruptedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
-      const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
-      service.getDashboardMigrationAllStats = jest
-        .fn()
-        .mockResolvedValue([finishedMigration])
-        .mockResolvedValueOnce([interruptedMigration]);
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
-      service.startPolling();
-      await Promise.resolve();
-      jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
-      await Promise.resolve();
-      expect(mockStartDashboardMigration).not.toHaveBeenCalled();
-    });
-
-    it('should not auto-resume interrupted migration if user is missing capabilities', async () => {
-      jest.useFakeTimers();
-      const interruptedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
-      const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
-      service.getDashboardMigrationAllStats = jest
-        .fn()
-        .mockResolvedValue([finishedMigration])
-        .mockResolvedValueOnce([interruptedMigration]);
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
-      mockGetMissingCapabilitiesChecker.mockReturnValue(() => [
-        { capability: 'cap', description: 'desc' },
-      ]);
-      service.startPolling();
-      await Promise.resolve();
-      jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
-      await Promise.resolve();
-      expect(mockStartDashboardMigration).not.toHaveBeenCalled();
-    });
-
-    it('should automatically start the interrupted migration with last_execution values', async () => {
-      jest.useFakeTimers();
-      const interruptedMigration = {
-        id: 'mig-1',
-        status: SiemMigrationTaskStatus.INTERRUPTED,
-        last_execution: {
-          connector_id: 'connector-last',
-        },
-      };
-      const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
-      service.getDashboardMigrationAllStats = jest
-        .fn()
-        .mockResolvedValue([finishedMigration])
-        .mockResolvedValueOnce([interruptedMigration]);
-      jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
-      service.startPolling();
-      await Promise.resolve();
-      jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
-      await Promise.resolve();
-      expect(mockStartDashboardMigration).toHaveBeenCalledWith({
-        migrationId: 'mig-1',
-        settings: { connectorId: 'connector-last' },
-      });
     });
   });
 });
