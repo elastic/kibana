@@ -10,7 +10,6 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import '@testing-library/jest-dom';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { NoDataCardProvider } from '@kbn/shared-ux-card-no-data';

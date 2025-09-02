@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { getNoDataPageServicesMock } from '@kbn/shared-ux-page-no-data-mocks';
 
 import { NoDataPage } from './no_data_page';

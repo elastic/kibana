@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 
 import { NoDataCard } from './no_data_card.component';
 

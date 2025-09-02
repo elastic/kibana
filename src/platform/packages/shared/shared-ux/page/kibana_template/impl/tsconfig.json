@@ -6,6 +6,7 @@
       "jest",
       "node",
       "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [

@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
 
 import { KibanaNoDataPage } from './kibana_no_data_page';
