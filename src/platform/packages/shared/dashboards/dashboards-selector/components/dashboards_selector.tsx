@@ -6,12 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import { dashboardServiceProvider, type DashboardItem } from '../services/dashboard_service';
+import type { DashboardStart, SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
 
 interface DashboardOption {
   value: string;
@@ -19,12 +18,12 @@ interface DashboardOption {
 }
 
 export function DashboardsSelector({
-  contentManagement,
+  dashboardStart,
   dashboardsFormData,
   onChange,
   placeholder,
 }: {
-  contentManagement: ContentManagementPublicStart;
+  dashboardStart: DashboardStart;
   dashboardsFormData: { id: string }[];
   onChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
   placeholder?: string;
@@ -40,16 +39,16 @@ export function DashboardsSelector({
   const [isComboBoxOpen, setIsComboBoxOpen] = useState(false);
 
   const fetchDashboardTitles = useCallback(async () => {
-    if (!dashboardsFormData?.length || !contentManagement) {
+    if (!dashboardsFormData?.length) {
       return;
     }
 
     try {
       const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
         try {
-          const fetchedDashboard = await dashboardServiceProvider(contentManagement).fetchDashboard(
-            dashboard.id
-          );
+          const findDashboardsService = await dashboardStart.findDashboardsService();
+
+          const fetchedDashboard = await findDashboardsService.findById(dashboard.id);
 
           // Only return the dashboard if it exists, fetch was successful, and has a title
           if (
@@ -83,7 +82,7 @@ export function DashboardsSelector({
       // Set empty array or handle the error appropriately
       setSelectedDashboards([]);
     }
-  }, [dashboardsFormData, contentManagement]);
+  }, [dashboardStart, dashboardsFormData]);
 
   useEffect(() => {
     fetchDashboardTitles();
@@ -104,24 +103,23 @@ export function DashboardsSelector({
     []
   );
 
-  const getDashboardItem = (dashboard: DashboardItem) => ({
+  const getDashboardItem = (dashboard: SearchDashboardsResponse['hits'][number]) => ({
     value: dashboard.id,
     label: dashboard.attributes.title,
   });
 
   const loadDashboards = useCallback(async () => {
-    if (contentManagement) {
-      setLoading(true);
-      const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
-        .catch(() => {});
-      const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
-        getDashboardItem(dashboard)
-      );
-      setDashboardList(dashboardOptions);
-      setLoading(false);
-    }
-  }, [contentManagement, searchValue]);
+    setLoading(true);
+    const findDashboardsService = await dashboardStart.findDashboardsService();
+
+    const dashboards = await findDashboardsService.search({ size: 100, search: searchValue });
+
+    const dashboardOptions = (dashboards.hits ?? []).map((dashboard) =>
+      getDashboardItem(dashboard)
+    );
+    setDashboardList(dashboardOptions);
+    setLoading(false);
+  }, [dashboardStart, searchValue]);
 
   useEffect(() => {
     if (isComboBoxOpen) {

@@ -163,7 +163,7 @@ export function SloEditFormDescriptionSection() {
           defaultValue={undefined}
           render={({ field }) => (
             <DashboardsSelector
-              contentManagement={services.contentManagement}
+              dashboardStart={services.dashboard}
               dashboardsFormData={field.value ?? []}
               placeholder={DASHBOARDS_COMBOBOX_PLACEHOLDER}
               onChange={(selected) => field.onChange(selected.map((d) => ({ id: d.value })))}
