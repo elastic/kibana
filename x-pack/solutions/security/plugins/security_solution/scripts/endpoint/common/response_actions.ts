@@ -295,7 +295,6 @@ type ResponseOutput<
 
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
-  console.log({ AC: action.command });
 
   switch (action.command) {
     case 'running-processes':
