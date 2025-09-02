@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
-import { EXPORT_REPORT, METRICS_OVER_TIME } from '../components/ai_value/translations';
+import { EXPORT_REPORT } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueMetrics } from '../components/ai_value';
@@ -27,7 +28,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
-import { getTimeRangeAsDays } from '../components/ai_value/metrics';
 
 /**
  * The dashboard includes key performance metrics such as:
@@ -62,7 +62,21 @@ const AIValueComponent = () => {
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
-  const subtitle = useMemo(() => METRICS_OVER_TIME(getTimeRangeAsDays({ from, to })), [from, to]);
+  const subtitle = useMemo(() => {
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    const currentLocale = i18nLib.getLocale();
+
+    return `${fromDate.toLocaleDateString(currentLocale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })} - ${toDate.toLocaleDateString(currentLocale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })}`;
+  }, [from, to]);
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
   if (!canReadAlerts && !canReadCases) {
