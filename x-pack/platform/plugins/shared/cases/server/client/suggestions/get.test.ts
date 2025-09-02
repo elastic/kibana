@@ -6,14 +6,14 @@
  */
 import type { KibanaRequest } from '@kbn/core/server';
 import { getAllForOwners } from './get';
-import type { SuggestionResponse } from '../../../common/types/domain';
+import type { SuggestionHandlerResponse } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
 import type { GetAllForOwnersArgs } from './types';
 import { loggerMock } from '@kbn/logging-mocks';
 
 describe('getAllForOwners', () => {
   it('calls attachmentSuggestionRegistry.getAllSuggestionsForOwners and returns suggestions', async () => {
-    const mockSuggestions: SuggestionResponse = {
+    const mockSuggestions: SuggestionHandlerResponse = {
       suggestions: [
         {
           id: 'test-id',
@@ -35,6 +35,7 @@ describe('getAllForOwners', () => {
     const args: GetAllForOwnersArgs = {
       owners: ['observability'],
       context: {
+        spaceId: 'default',
         'service.name': ['my-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',

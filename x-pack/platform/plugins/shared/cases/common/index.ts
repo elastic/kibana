@@ -66,14 +66,17 @@ export {
   ConnectorTypes,
   AttachmentType,
   ExternalReferenceStorageType,
-  type SuggestionRequest,
-  type SuggestionResponse,
   type SuggestionContext,
   type SuggestionItem,
+  type SuggestionHandlerResponse,
 } from './types/domain';
 export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
-export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
+export type {
+  SingleCaseMetricsResponse,
+  CasesMetricsResponse,
+  SuggestionResponse,
+} from './types/api';
 export type { CaseViewAlertsTableProps } from './ui/types';

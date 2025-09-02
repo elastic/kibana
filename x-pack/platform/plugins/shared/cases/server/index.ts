@@ -16,7 +16,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     markdownPlugins: true,
     files: { maxSize: true, allowedMimeTypes: true },
     stack: { enabled: true },
-    unsafe: { enableCaseSummary: true, enableCaseSuggestionsenableCaseSuggestions: true },
+    unsafe: { enableCaseSummary: true, enableCaseSuggestions: true },
   },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
