@@ -40,7 +40,7 @@ const normalizeCommonResponseFields = (rule: RuleResponse) => {
     risk_score_mapping: rule.risk_score_mapping?.map((mapping) => requiredOptional(mapping)) ?? [],
     references: rule.references ?? [],
     false_positives: rule.false_positives ?? [],
-    threat: normalizeThreatArray(rule.threat) ?? [],
+    threat: normalizeThreatArray(rule.threat),
     note: rule.note ?? '',
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],

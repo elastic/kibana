@@ -11,8 +11,8 @@ import type {
   ThreatTechnique,
 } from '../../../../api/detection_engine/model/rule_schema';
 
-export const normalizeThreatArray = (threatArray: ThreatArray): ThreatArray =>
-  threatArray.map((threat) => {
+export const normalizeThreatArray = (threatArray: ThreatArray | undefined): ThreatArray =>
+  (threatArray ?? []).map((threat) => {
     if (threat.technique && threat.technique.length) {
       return {
         ...threat,
@@ -20,11 +20,12 @@ export const normalizeThreatArray = (threatArray: ThreatArray): ThreatArray =>
         technique: trimTechniqueArray(threat.technique),
       };
     }
+    // If `technique` is an empty array, remove the field from the `threat` object
     return {
       ...threat,
       tactic: { ...threat.tactic, reference: normalizeThreatReference(threat.tactic.reference) },
       technique: undefined,
-    }; // If `technique` is an empty array, remove the field from the `threat` object
+    };
   });
 
 const trimTechniqueArray = (techniqueArray: ThreatTechnique[]): ThreatTechnique[] => {

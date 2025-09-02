@@ -348,7 +348,10 @@ interface FieldAssertParams {
  * Asserts provided non-customized `diffableRuleFieldName` doesn't have a conflict
  * and ready for upgrade (`AAB` diff case)
  */
-function expectAABFieldDiff(ruleDiff: PartialThreeWayRuleDiff, fieldAssertParams: FieldAssertParams): void {
+function expectAABFieldDiff(
+  ruleDiff: PartialThreeWayRuleDiff,
+  fieldAssertParams: FieldAssertParams
+): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 2, // counts <fieldName> + version field
     num_fields_with_conflicts: 0,
@@ -374,7 +377,10 @@ function expectAABFieldDiff(ruleDiff: PartialThreeWayRuleDiff, fieldAssertParams
  * Asserts provided customized `diffableRuleFieldName` without an upgrade doesn't have a conflict
  * and ready for upgrade (`ABA` diff case)
  */
-function expectABAFieldDiff(ruleDiff: PartialThreeWayRuleDiff, fieldAssertParams: FieldAssertParams): void {
+function expectABAFieldDiff(
+  ruleDiff: PartialThreeWayRuleDiff,
+  fieldAssertParams: FieldAssertParams
+): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 1, // counts version field
     num_fields_with_conflicts: 0,
@@ -400,7 +406,10 @@ function expectABAFieldDiff(ruleDiff: PartialThreeWayRuleDiff, fieldAssertParams
  * Asserts provided customized `diffableRuleFieldName` with the matching update
  * doesn't have a conflict and is ready for upgrade (`ABB` diff case)
  */
-function expectABBFieldDiff(ruleDiff: PartialThreeWayRuleDiff, fieldAssertParams: FieldAssertParams): void {
+function expectABBFieldDiff(
+  ruleDiff: PartialThreeWayRuleDiff,
+  fieldAssertParams: FieldAssertParams
+): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 1, // counts version field
     num_fields_with_conflicts: 0,
