@@ -10,7 +10,7 @@
 import { kibanaFlatten } from './kibana_flattern';
 
 describe('kibanaFlatten', () => {
-  it('should flatten siple object', () => {
+  it('should flatten simple object', () => {
     const obj = {
       a: 1,
       b: { c: 2 },

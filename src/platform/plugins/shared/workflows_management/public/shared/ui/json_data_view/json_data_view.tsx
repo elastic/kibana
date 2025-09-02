@@ -111,7 +111,9 @@ export function JSONDataView({
                 value={searchTerm}
                 onChange={(e) => onSearchTermChange(e.target.value)}
                 isClearable
-                aria-label="Use aria labels when no actual label is in use"
+                aria-label={i18n.translate('workflows.jsonDataTable.searchAriaLabel', {
+                  defaultMessage: 'Search fields and values',
+                })}
               />
             </EuiFlexItem>
           )}
