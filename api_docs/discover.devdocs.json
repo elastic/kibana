@@ -1996,13 +1996,7 @@
                 "text": "FrequentCompatibilityChangeAction"
               },
               "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "UiActionsService",
               "; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
@@ -2196,6 +2190,27 @@
               " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
               "SavedObject",
               "<{}>>; } | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.metricsExperience",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsExperience",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "metricsExperience",
+                "scope": "public",
+                "docId": "kibMetricsExperiencePluginApi",
+                "section": "def-public.MetricsExperiencePluginStart",
+                "text": "MetricsExperiencePluginStart"
+              },
+              " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
