@@ -22,7 +22,6 @@ import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ProcessListAPIResponseRT } from '../../../../../common/http_api';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';
@@ -47,7 +46,6 @@ export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { featureFlags } = usePluginConfig();
   const { entity, schema } = useAssetDetailsRenderPropsContext();
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
@@ -135,7 +133,7 @@ export const Processes = () => {
 
   const isLoading = isPending(status);
 
-  const hideSummaryTable = schema === 'semconv' && featureFlags.hostOtelEnabled;
+  const hideSummaryTable = schema === 'semconv';
 
   return (
     <ProcessListContextProvider hostTerm={hostTerm} to={toTimestamp}>
@@ -188,7 +186,7 @@ export const Processes = () => {
               }),
             }}
             filters={
-              schema === 'semconv' && featureFlags.hostOtelEnabled
+              schema === 'semconv'
                 ? []
                 : [
                     {
@@ -214,7 +212,6 @@ export const Processes = () => {
               setSortBy={setSortBy}
               clearSearchBar={clearSearchBar}
               schema={schema}
-              isHostOtelEnabled={featureFlags.hostOtelEnabled}
             />
           ) : (
             <EuiEmptyPrompt
