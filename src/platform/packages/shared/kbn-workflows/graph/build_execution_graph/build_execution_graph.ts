@@ -49,6 +49,13 @@ interface GraphBuildContext {
   stack: string[];
 }
 
+interface FallbackStep extends BaseStep {
+  name: string;
+  type: 'fallback';
+  normalPathSteps: BaseStep[];
+  fallbackPathSteps: BaseStep[];
+}
+
 function getNodeId(node: BaseStep): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
   // We should ensure that all steps have an `id` field in the future - either explicitly set or generated from name.
