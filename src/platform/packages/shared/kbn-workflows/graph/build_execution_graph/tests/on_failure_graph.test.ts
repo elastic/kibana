@@ -220,6 +220,7 @@ describe('on_failure graph', () => {
       expect(retryNode).toEqual({
         id: 'enterRetry_testRetryConnectorStep',
         type: 'enter-retry',
+        stepId: 'testRetryConnectorStep',
         exitNodeId: 'exitRetry_testRetryConnectorStep',
         configuration: {
           'max-attempts': 3,
@@ -234,6 +235,7 @@ describe('on_failure graph', () => {
       expect(continueNode).toEqual({
         id: 'enterContinue_testRetryConnectorStep',
         type: 'enter-continue',
+        stepId: 'testRetryConnectorStep',
         exitNodeId: 'exitContinue_testRetryConnectorStep',
       });
     });
@@ -245,6 +247,7 @@ describe('on_failure graph', () => {
         expect(enterTryBlockNode).toEqual({
           id: 'enterTryBlock_testRetryConnectorStep',
           exitNodeId: 'exitTryBlock_testRetryConnectorStep',
+          stepId: 'testRetryConnectorStep',
           type: 'enter-try-block',
           enterNormalPathNodeId: 'enterNormalPath_testRetryConnectorStep',
         });
@@ -256,6 +259,7 @@ describe('on_failure graph', () => {
         expect(exitTryBlockNode).toEqual({
           type: 'exit-try-block',
           id: 'exitTryBlock_testRetryConnectorStep',
+          stepId: 'testRetryConnectorStep',
           enterNodeId: 'enterTryBlock_testRetryConnectorStep',
         });
       });
@@ -266,6 +270,7 @@ describe('on_failure graph', () => {
         expect(enterNormalPathNode).toEqual({
           id: 'enterNormalPath_testRetryConnectorStep',
           type: 'enter-normal-path',
+          stepId: 'testRetryConnectorStep',
           enterZoneNodeId: 'enterTryBlock_testRetryConnectorStep',
           enterFailurePathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
@@ -277,6 +282,7 @@ describe('on_failure graph', () => {
         expect(exitNormalPathNode).toEqual({
           id: 'exitNormalPath_testRetryConnectorStep',
           type: 'exit-normal-path',
+          stepId: 'testRetryConnectorStep',
           enterNodeId: 'enterNormalPath_testRetryConnectorStep',
           exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });
@@ -290,6 +296,7 @@ describe('on_failure graph', () => {
         expect(enterFallbackPathNode).toEqual({
           id: 'enterFallbackPath_testRetryConnectorStep',
           type: 'enter-fallback-path',
+          stepId: 'testRetryConnectorStep',
           enterZoneNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
@@ -300,6 +307,7 @@ describe('on_failure graph', () => {
         expect(exitFallbackPathNode).toEqual({
           id: 'exitFallbackPath_testRetryConnectorStep',
           type: 'exit-fallback-path',
+          stepId: 'testRetryConnectorStep',
           enterNodeId: 'enterFallbackPath_testRetryConnectorStep',
           exitOnFailureZoneNodeId: 'exitTryBlock_testRetryConnectorStep',
         });

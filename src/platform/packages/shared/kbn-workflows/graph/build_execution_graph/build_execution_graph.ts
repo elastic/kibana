@@ -247,9 +247,9 @@ function visitOnFailure(
   onFailureConfiguration: WorkflowOnFailure,
   context: GraphBuildContext
 ): any {
-  const id = getNodeId(currentStep, context);
+  const stepId = getNodeId(currentStep, context);
   const onFailureGraphNode: GraphNode = {
-    id: `onFailure_${id}`,
+    id: `onFailure_${stepId}`,
     type: 'on-failure',
   };
 
@@ -265,15 +265,15 @@ function visitOnFailure(
   );
 
   if (onFailureConfiguration?.retry) {
-    graph = createRetry(id, graph, onFailureConfiguration.retry);
+    graph = createRetry(stepId, graph, onFailureConfiguration.retry);
   }
 
   if (onFailureConfiguration.fallback?.length) {
-    graph = createFallback(id, graph, onFailureConfiguration.fallback, context);
+    graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
   if (onFailureConfiguration.continue) {
-    graph = createContinue(id, graph);
+    graph = createContinue(stepId, graph);
   }
 
   context.stack.pop();
@@ -325,17 +325,19 @@ function handleWorkflowLevelOnFailure(
   return result;
 }
 
-function createContinue(id: string, innerGraph: graphlib.Graph): graphlib.Graph {
+function createContinue(stepId: string, innerGraph: graphlib.Graph): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
-  const enterContinueNodeId = `enterContinue_${id}`;
-  const exitNodeId = `exitContinue_${id}`;
+  const enterContinueNodeId = `enterContinue_${stepId}`;
+  const exitNodeId = `exitContinue_${stepId}`;
   const enterContinueNode: EnterContinueNode = {
     id: enterContinueNodeId,
     type: 'enter-continue',
+    stepId,
     exitNodeId,
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',
+    stepId,
     id: exitNodeId,
   };
   graph.setNode(enterContinueNode.id, enterContinueNode);
@@ -344,19 +346,25 @@ function createContinue(id: string, innerGraph: graphlib.Graph): graphlib.Graph 
   return graph;
 }
 
-function createRetry(id: string, innerGraph: graphlib.Graph, retry: WorkflowRetry): graphlib.Graph {
+function createRetry(
+  stepId: string,
+  innerGraph: graphlib.Graph,
+  retry: WorkflowRetry
+): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
-  const enterRetryNodeId = `enterRetry_${id}`;
-  const exitNodeId = `exitRetry_${id}`;
+  const enterRetryNodeId = `enterRetry_${stepId}`;
+  const exitNodeId = `exitRetry_${stepId}`;
   const enterRetryNode: EnterRetryNode = {
     id: enterRetryNodeId,
     type: 'enter-retry',
+    stepId,
     exitNodeId,
     configuration: retry,
   };
   const exitRetryNode: ExitRetryNode = {
     type: 'exit-retry',
     id: exitNodeId,
+    stepId,
     startNodeId: enterRetryNodeId,
   };
   graph.setNode(enterRetryNode.id, enterRetryNode);
@@ -365,21 +373,23 @@ function createRetry(id: string, innerGraph: graphlib.Graph, retry: WorkflowRetr
   return graph;
 }
 
-function createNormalPath(id: string, normalPathGraph: graphlib.Graph): graphlib.Graph {
+function createNormalPath(stepId: string, normalPathGraph: graphlib.Graph): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
-  const enterNormalPathNodeId = `enterNormalPath_${id}`;
-  const exitNormalPathNodeId = `exitNormalPath_${id}`;
+  const enterNormalPathNodeId = `enterNormalPath_${stepId}`;
+  const exitNormalPathNodeId = `exitNormalPath_${stepId}`;
   const enterNormalPathNode: EnterNormalPathNode = {
     id: enterNormalPathNodeId,
     type: 'enter-normal-path',
-    enterZoneNodeId: `enterTryBlock_${id}`,
-    enterFailurePathNodeId: `enterFallbackPath_${id}`,
+    stepId,
+    enterZoneNodeId: `enterTryBlock_${stepId}`,
+    enterFailurePathNodeId: `enterFallbackPath_${stepId}`,
   };
   const exitNormalPathNode: ExitNormalPathNode = {
     id: exitNormalPathNodeId,
+    stepId,
     type: 'exit-normal-path',
     enterNodeId: enterNormalPathNodeId,
-    exitOnFailureZoneNodeId: `exitTryBlock_${id}`,
+    exitOnFailureZoneNodeId: `exitTryBlock_${stepId}`,
   };
   graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
   graph.setNode(exitNormalPathNode.id, exitNormalPathNode);
@@ -389,7 +399,7 @@ function createNormalPath(id: string, normalPathGraph: graphlib.Graph): graphlib
 }
 
 function createFallbackPath(
-  id: string,
+  stepId: string,
   fallbackSteps: BaseStep[],
   context: GraphBuildContext
 ): graphlib.Graph {
@@ -397,25 +407,27 @@ function createFallbackPath(
     (node) => node.type === 'workflow-level-on-failure'
   );
   const graph = new graphlib.Graph({ directed: true });
-  const enterFallbackPathNodeId = `enterFallbackPath_${id}`;
-  const exitFallbackPathNodeId = `exitFallbackPath_${id}`;
+  const enterFallbackPathNodeId = `enterFallbackPath_${stepId}`;
+  const exitFallbackPathNodeId = `exitFallbackPath_${stepId}`;
   const enterFallbackPathNode: EnterFallbackPathNode = {
     id: enterFallbackPathNodeId,
+    stepId,
     type: 'enter-fallback-path',
     enterZoneNodeId: enterFallbackPathNodeId,
   };
   context.stack.push(enterFallbackPathNode);
   const exitFallbackPathNode: ExitFallbackPathNode = {
     id: exitFallbackPathNodeId,
+    stepId,
     type: 'exit-fallback-path',
     enterNodeId: enterFallbackPathNodeId,
-    exitOnFailureZoneNodeId: `exitTryBlock_${id}`,
+    exitOnFailureZoneNodeId: `exitTryBlock_${stepId}`,
   };
   graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
   graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
   const fallbackPathGraph = createStepsSequence(fallbackSteps, {
     ...context,
-    parentKey: workflowLevelOnFailure ? [workflowLevelOnFailure.type, id].join('_') : '',
+    parentKey: workflowLevelOnFailure ? [workflowLevelOnFailure.type, stepId].join('_') : '',
   });
   insertGraphBetweenNodes(
     graph,
@@ -428,34 +440,36 @@ function createFallbackPath(
 }
 
 function createFallback(
-  id: string,
+  stepId: string,
   normalPathGraph: graphlib.Graph,
   fallbackPathSteps: BaseStep[],
   context: GraphBuildContext
 ): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
-  const enterTryBlockNodeId = `enterTryBlock_${id}`;
-  const exitTryBlockNodeId = `exitTryBlock_${id}`;
-  const enterNormalPathNodeId = `enterNormalPath_${id}`;
+  const enterTryBlockNodeId = `enterTryBlock_${stepId}`;
+  const exitTryBlockNodeId = `exitTryBlock_${stepId}`;
+  const enterNormalPathNodeId = `enterNormalPath_${stepId}`;
 
   const enterTryBlockNode: EnterTryBlockNode = {
     id: enterTryBlockNodeId,
     exitNodeId: exitTryBlockNodeId,
+    stepId,
     type: 'enter-try-block',
     enterNormalPathNodeId,
   };
   graph.setNode(enterTryBlockNodeId, enterTryBlockNode);
   const exitTryBlockNode: ExitTryBlockNode = {
-    type: 'exit-try-block',
     id: exitTryBlockNodeId,
+    type: 'exit-try-block',
+    stepId,
     enterNodeId: enterTryBlockNodeId,
   };
   graph.setNode(exitTryBlockNodeId, exitTryBlockNode);
 
-  const normalPathGraphWithNodes = createNormalPath(id, normalPathGraph);
+  const normalPathGraphWithNodes = createNormalPath(stepId, normalPathGraph);
   insertGraphBetweenNodes(graph, normalPathGraphWithNodes, enterTryBlockNodeId, exitTryBlockNodeId);
 
-  const fallbackPathGraph = createFallbackPath(id, fallbackPathSteps, context);
+  const fallbackPathGraph = createFallbackPath(stepId, fallbackPathSteps, context);
   insertGraphBetweenNodes(graph, fallbackPathGraph, enterTryBlockNodeId, exitTryBlockNodeId);
 
   return graph;
