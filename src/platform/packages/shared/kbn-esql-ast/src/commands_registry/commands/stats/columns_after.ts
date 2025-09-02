@@ -15,7 +15,8 @@ import type { ESQLColumnData, ESQLUserDefinedColumn, ICommandContext } from '../
 
 const getUserDefinedColumns = (
   command: ESQLCommand | ESQLCommandOption,
-  typeOf: (thing: ESQLAstItem) => SupportedDataType | 'unknown'
+  typeOf: (thing: ESQLAstItem) => SupportedDataType | 'unknown',
+  query: string
 ): ESQLUserDefinedColumn[] => {
   const columns = [];
 
@@ -33,13 +34,13 @@ const getUserDefinedColumns = (
     }
 
     if (isOptionNode(expression) && expression.name === 'by') {
-      columns.push(...getUserDefinedColumns(expression, typeOf));
+      columns.push(...getUserDefinedColumns(expression, typeOf, query));
       continue;
     }
 
     if (!isOptionNode(expression) && !Array.isArray(expression)) {
       const newColumn: ESQLUserDefinedColumn = {
-        name: expression.text,
+        name: query.substring(expression.location.min, expression.location.max + 1),
         type: typeOf(expression),
         location: expression.location,
         userDefined: true,
@@ -64,5 +65,5 @@ export const columnsAfter = (
   const typeOf = (thing: ESQLAstItem) => getExpressionType(thing, columnMap);
 
   // TODO - is this uniqby helpful? Does it do what we expect?
-  return uniqBy([...previousColumns, ...getUserDefinedColumns(command, typeOf)], 'name');
+  return uniqBy([...getUserDefinedColumns(command, typeOf, query)], 'name');
 };
