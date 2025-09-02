@@ -112,6 +112,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
         goNext={goNext}
         goPrevious={goPrevious}
         setSelectedStepId={setSelectedStep}
+        isLoading={isLoading}
       />
     );
   }, [
@@ -121,6 +122,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
     setSelectedStep,
     selectedStepExecutionId,
     setSelectedStepExecution,
+    isLoading,
   ]);
 
   const closeSidePanel = useCallback(() => {

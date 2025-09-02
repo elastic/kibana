@@ -24,105 +24,362 @@ const meta: Meta<typeof WorkflowStepExecutionList> = {
 
 export default meta;
 
+const yaml = `
+name: Print famous people
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: analysis
+    type: inference.completion
+    connector-id: openai
+    with:
+      input: |
+        - Output JSON array with multiple object
+        - Each item in the array must follow { "name": "Luisa", "surname": "Sampton" } structure
+        - Generate random count of elements from 3 to 5
+        - Generate some famous name and surname (Brad Pitt, etc)
+        - Don't include anything else except JSON into the response
+        - It MUST!!! be just raw JSON string, no formatting, no anything else
+
+  - name: debug_ai_response
+    type: console
+    with:
+      message: '{{ steps.analysis.output[0].result }}'
+
+  - name: print-enter-dash
+    type: slack
+    connector-id: slacky
+    with:
+      message: '-------------------hellow-------'
+  - name: log-name-surname-1
+    type: console
+    with:
+      message: '{{ foreach.item.name }} {{ steps.foreachstep.item.surname}}'
+  - name: foreachstep
+    type: foreach
+    foreach: steps.analysis.output.0.result
+    steps:
+      - name: log-name-surname
+        type: console
+        with:
+          message: '{{ foreach.item.name }} {{ steps.foreachstep.item.surname}}'
+
+      - name: slack_it
+        type: slack
+        connector-id: slacky
+        with:
+          message: '{{ foreach.item.name }} {{ steps.foreachstep.item.surname }}'
+
+  - name: print-exit-dash
+    type: slack
+    connector-id: slacky
+    with:
+      message: '--------------------------'
+`;
+const result = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).data;
+
 export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
   args: {
     execution: {
-      id: '1',
-      status: ExecutionStatus.COMPLETED,
-      startedAt: new Date().toISOString(),
-      finishedAt: new Date().toISOString(),
-      duration: 1000,
+      id: 'db38b255-ec34-4048-8b77-776081cb3a97',
       spaceId: 'default',
-      yaml: '',
+      workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+      workflowDefinition: definition,
+      yaml,
+      context: {
+        spaceId: 'default',
+        inputs: {},
+      },
+      status: ExecutionStatus.COMPLETED,
+      createdAt: '2025-09-02T20:43:54.613Z',
+      createdBy: '',
+      lastUpdatedAt: '2025-09-02T20:43:54.613Z',
+      lastUpdatedBy: '',
+      triggeredBy: 'manual',
+      traceId: '4b2f5c40fef59b826f95c2cabb7e3c97',
+      stack: [],
+      entryTransactionId: 'ccf0694a6d0dafc2',
+      startedAt: '2025-09-02T20:43:57.441Z',
+      currentNodeId: 'print-exit-dash',
+      finishedAt: '2025-09-02T20:44:15.945Z',
+      duration: 18504,
       stepExecutions: [
         {
-          id: '3',
-          status: ExecutionStatus.RUNNING,
-          startedAt: new Date(Date.now() - 1000).toISOString(),
-          completedAt: new Date(Date.now() - 100).toISOString(),
-          stepId: 'new_alert_slack',
-          workflowRunId: 'workflow-run-1',
-          workflowId: 'workflow-1',
-          topologicalIndex: 1,
-          executionIndex: 0,
-          spaceId: 'default',
-        },
-        {
-          id: '1',
-          status: ExecutionStatus.COMPLETED,
-          startedAt: new Date(Date.now() - 2000).toISOString(),
-          completedAt: new Date().toISOString(),
-          stepId: 'check_ip',
-          workflowRunId: 'workflow-run-1',
-          workflowId: 'workflow-1',
-          topologicalIndex: 2,
-          executionIndex: 0,
-          spaceId: 'default',
-        },
-        {
-          id: '2',
-          status: ExecutionStatus.FAILED,
-          startedAt: new Date(Date.now() - 3000).toISOString(),
-          completedAt: new Date(Date.now() - 2000).toISOString(),
-          stepId: 'analysis_check_if_malicious',
-          workflowRunId: 'workflow-run-1',
-          workflowId: 'workflow-1',
-          topologicalIndex: 3,
-          executionIndex: 0,
-          spaceId: 'default',
-        },
-        {
-          id: '4',
+          stepId: 'analysis',
+          topologicalIndex: 0,
           status: ExecutionStatus.PENDING,
-          startedAt: new Date(Date.now() - 4000).toISOString(),
-          completedAt: new Date(Date.now() - 3000).toISOString(),
-          stepId: 'send_malicious_result_to_slack',
-          workflowRunId: 'workflow-run-1',
-          workflowId: 'workflow-1',
-          topologicalIndex: 4,
+          startedAt: '2025-09-02T20:43:57.466Z',
+          id: '61d229be-d8d8-4af5-adeb-5454564bf000',
           executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: [
+            {
+              result:
+                '[{"name":"Brad","surname":"Pitt"},{"name":"Angelina","surname":"Jolie"},{"name":"Leonardo","surname":"DiCaprio"},{"name":"Scarlett","surname":"Johansson"}]',
+            },
+          ],
+          input: {
+            input:
+              '- Output JSON array with multiple object\n- Each item in the array must follow { "name": "Luisa", "surname": "Sampton" } structure\n- Generate random count of elements from 3 to 5\n- Generate some famous name and surname (Brad Pitt, etc)\n- Don\'t include anything else except JSON into the response\n- It MUST!!! be just raw JSON string, no formatting, no anything else\n',
+          },
+          completedAt: '2025-09-02T20:44:01.245Z',
+          executionTimeMs: 3779,
           spaceId: 'default',
         },
         {
-          id: '5',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          startedAt: new Date(Date.now() - 5000).toISOString(),
-          completedAt: new Date(Date.now() - 4000).toISOString(),
-          stepId: 'add_note',
-          workflowRunId: 'workflow-run-1',
-          workflowId: 'workflow-1',
-          topologicalIndex: 5,
-          executionIndex: 0,
-          spaceId: 'default',
-        },
-        {
-          id: '6',
-          status: ExecutionStatus.CANCELLED,
-          startedAt: new Date(Date.now() - 6000).toISOString(),
-          completedAt: new Date(Date.now() - 5000).toISOString(),
-          stepId: 'summarize_with_ai',
-          workflowRunId: 'workflow-run-1',
-          workflowId: 'workflow-1',
-          topologicalIndex: 6,
-          executionIndex: 0,
-          spaceId: 'default',
-        },
-        {
-          id: '7',
-          status: ExecutionStatus.SKIPPED,
-          startedAt: new Date(Date.now() - 7000).toISOString(),
-          completedAt: new Date(Date.now() - 6000).toISOString(),
           stepId: 'debug_ai_response',
-          workflowRunId: 'workflow-run-1',
-          workflowId: 'workflow-1',
-          topologicalIndex: 7,
+          topologicalIndex: 1,
+          status: ExecutionStatus.RUNNING,
+          startedAt: '2025-09-02T20:44:02.142Z',
+          id: '6b035884-16ec-4df7-ac72-8de259b2e8a4',
           executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output:
+            '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
+          input: {
+            message:
+              '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
+          },
+          completedAt: '2025-09-02T20:44:02.167Z',
+          executionTimeMs: 25,
+        },
+        {
+          stepId: 'print-enter-dash',
+          topologicalIndex: 2,
+          status: ExecutionStatus.COMPLETED,
+          startedAt: '2025-09-02T20:44:03.171Z',
+          id: '765f1b7a-34ed-4716-9418-175e2c8543f4',
+          executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: {
+            text: 'ok',
+          },
+          input: {
+            message: '-------------------hellow-------',
+          },
+          completedAt: '2025-09-02T20:44:03.627Z',
+          executionTimeMs: 456,
           spaceId: 'default',
+        },
+        {
+          stepId: 'log-name-surname-1',
+          topologicalIndex: 3,
+          status: ExecutionStatus.FAILED,
+          startedAt: '2025-09-02T20:44:04.201Z',
+          id: '7c08bf0e-c78f-4b6e-8ef5-23863cb1923a',
+          executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: ' ',
+          input: {
+            message: ' ',
+          },
+          completedAt: '2025-09-02T20:44:04.229Z',
+          executionTimeMs: 28,
+          spaceId: 'default',
+        },
+        {
+          stepId: 'foreachstep',
+          topologicalIndex: 4,
+          status: ExecutionStatus.SKIPPED,
+          startedAt: '2025-09-02T20:44:05.233Z',
+          id: '58ecc47e-3a98-4b6e-b018-2b44b6e366a6',
+          executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          state: {
+            item: {
+              surname: 'Johansson',
+              name: 'Scarlett',
+            },
+            total: 4,
+            index: 3,
+            items: [
+              {
+                surname: 'Pitt',
+                name: 'Brad',
+              },
+              {
+                surname: 'Jolie',
+                name: 'Angelina',
+              },
+              {
+                surname: 'DiCaprio',
+                name: 'Leonardo',
+              },
+              {
+                surname: 'Johansson',
+                name: 'Scarlett',
+              },
+            ],
+          },
+          completedAt: '2025-09-02T20:44:14.522Z',
+          executionTimeMs: 9289,
+          spaceId: 'default',
+        },
+        {
+          stepId: 'log-name-surname',
+          topologicalIndex: 5,
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          startedAt: '2025-09-02T20:44:12.598Z',
+          id: 'f71b2778-a92d-4d4d-a5e7-8cbf5c0794e4',
+          executionIndex: 3,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: 'Scarlett Johansson',
+          input: {
+            message: 'Scarlett Johansson',
+          },
+          completedAt: '2025-09-02T20:44:12.694Z',
+          executionTimeMs: 96,
+        },
+        {
+          stepId: 'log-name-surname',
+          topologicalIndex: 5,
+          status: ExecutionStatus.WAITING,
+          startedAt: '2025-09-02T20:44:10.456Z',
+          id: 'aedd1aff-54d2-4238-ba05-6f72a82d6613',
+          executionIndex: 2,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: 'Leonardo DiCaprio',
+          input: {
+            message: 'Leonardo DiCaprio',
+          },
+          completedAt: '2025-09-02T20:44:10.491Z',
+          executionTimeMs: 35,
+        },
+        {
+          stepId: 'log-name-surname',
+          topologicalIndex: 5,
+          status: 'completed',
+          startedAt: '2025-09-02T20:44:08.396Z',
+          id: 'e8739d72-5a1e-4a19-8382-a15ffaf12bb0',
+          executionIndex: 1,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: 'Angelina Jolie',
+          input: {
+            message: 'Angelina Jolie',
+          },
+          completedAt: '2025-09-02T20:44:08.423Z',
+          executionTimeMs: 27,
+        },
+        {
+          stepId: 'log-name-surname',
+          topologicalIndex: 5,
+          status: 'completed',
+          startedAt: '2025-09-02T20:44:06.265Z',
+          id: '7e36c4c3-6d99-4d2f-a0b8-8229904ef0cf',
+          executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: 'Brad Pitt',
+          input: {
+            message: 'Brad Pitt',
+          },
+          completedAt: '2025-09-02T20:44:06.293Z',
+          executionTimeMs: 28,
+        },
+        {
+          stepId: 'slack_it',
+          topologicalIndex: 6,
+          status: 'completed',
+          startedAt: '2025-09-02T20:44:13.480Z',
+          id: 'a44f84d1-0b7f-4aed-8060-b7ef12aa267c',
+          executionIndex: 3,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: {
+            text: 'ok',
+          },
+          input: {
+            message: 'Scarlett Johansson',
+          },
+          completedAt: '2025-09-02T20:44:13.895Z',
+          executionTimeMs: 415,
+        },
+        {
+          stepId: 'slack_it',
+          topologicalIndex: 6,
+          status: 'completed',
+          startedAt: '2025-09-02T20:44:11.422Z',
+          id: 'fe7786c2-95f4-49d6-9935-b1a897ed9390',
+          executionIndex: 2,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: {
+            text: 'ok',
+          },
+          input: {
+            message: 'Leonardo DiCaprio',
+          },
+          completedAt: '2025-09-02T20:44:11.823Z',
+          executionTimeMs: 401,
+        },
+        {
+          stepId: 'slack_it',
+          topologicalIndex: 6,
+          status: 'completed',
+          startedAt: '2025-09-02T20:44:09.363Z',
+          id: '57b14a10-93c6-471a-b9d2-d027cf340d31',
+          executionIndex: 1,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: {
+            text: 'ok',
+          },
+          input: {
+            message: 'Angelina Jolie',
+          },
+          completedAt: '2025-09-02T20:44:09.756Z',
+          executionTimeMs: 393,
+        },
+        {
+          stepId: 'slack_it',
+          topologicalIndex: 6,
+          status: 'completed',
+          startedAt: '2025-09-02T20:44:07.300Z',
+          id: '4e76f94d-2092-41bb-9c07-171b9207de98',
+          executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: {
+            text: 'ok',
+          },
+          input: {
+            message: 'Brad Pitt',
+          },
+          completedAt: '2025-09-02T20:44:07.692Z',
+          executionTimeMs: 392,
+        },
+        {
+          stepId: 'print-exit-dash',
+          topologicalIndex: 8,
+          status: 'completed',
+          startedAt: '2025-09-02T20:44:15.553Z',
+          id: '16b8cb55-9946-4adb-b086-ebc37c60fa86',
+          executionIndex: 0,
+          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
+          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
+          output: {
+            text: 'ok',
+          },
+          input: {
+            message: '--------------------------',
+          },
+          completedAt: '2025-09-02T20:44:15.945Z',
+          executionTimeMs: 392,
         },
       ],
     },
+    selectedId: '7c08bf0e-c78f-4b6e-8ef5-23863cb1923a',
     onStepExecutionClick: () => {},
-    selectedId: '2',
   },
 };
 
@@ -152,138 +409,5 @@ export const ErrorStory: StoryObj<typeof WorkflowStepExecutionList> = {
     isLoading: false,
     error: new Error('Internal server error'),
     selectedId: null,
-  },
-};
-
-const workflowYaml = `
-name: Loop Test
-enabled: true
-triggers:
-  - type: manual
-inputs:
-  - name: say-hi
-    type: boolean
-    default: true
-steps:
-  - name: if
-    type: if
-    condition: 'inputs.say-hi: true'
-    steps:
-    - name: foreach
-      type: foreach
-      foreach: '[1, 2, 3]'
-      steps:
-        - name: hi
-          type: console
-          with:
-            message: hey {{foreach.item}}
-    else:
-      - name: bye
-        type: console
-        with:
-          message: sorry, no hi today
-`;
-const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).data;
-
-export const Loop: StoryObj<typeof WorkflowStepExecutionList> = {
-  args: {
-    execution: {
-      id: '1',
-      status: ExecutionStatus.COMPLETED,
-      startedAt: new Date().toISOString(),
-      finishedAt: new Date().toISOString(),
-      duration: 1000,
-      workflowDefinition: definition!,
-      yaml: workflowYaml,
-      stepExecutions: [
-        {
-          stepId: 'if',
-          topologicalIndex: 0,
-          status: ExecutionStatus.COMPLETED,
-          startedAt: '2025-09-02T17:19:26.144Z',
-          id: '17a832c6-8b55-4e93-af4b-666835406499',
-          executionIndex: 0,
-          workflowRunId: '4245d981-80fe-4861-9cbc-59241cc5c246',
-          workflowId: 'd6f9ddf8-c14e-4939-9752-9a67db5ba655',
-          completedAt: '2025-09-02T17:19:32.477Z',
-          executionTimeMs: 6333,
-          spaceId: 'default',
-        },
-        {
-          stepId: 'foreach',
-          topologicalIndex: 2,
-          status: ExecutionStatus.COMPLETED,
-          startedAt: '2025-09-02T17:19:27.338Z',
-          id: '0006ff39-4c9d-40db-90cb-05aafa2c300a',
-          executionIndex: 0,
-          workflowRunId: '4245d981-80fe-4861-9cbc-59241cc5c246',
-          workflowId: 'd6f9ddf8-c14e-4939-9752-9a67db5ba655',
-          state: {
-            item: 3,
-            total: 3,
-            index: 2,
-            items: [1, 2, 3],
-          },
-          completedAt: '2025-09-02T17:19:31.426Z',
-          executionTimeMs: 4088,
-          spaceId: 'default',
-        },
-        {
-          stepId: 'hi',
-          topologicalIndex: 3,
-          status: ExecutionStatus.COMPLETED,
-          startedAt: '2025-09-02T17:19:28.326Z',
-          id: 'bdc56199-279f-42a6-8d13-0ecbcbe2a1e1',
-          executionIndex: 0,
-          workflowRunId: '4245d981-80fe-4861-9cbc-59241cc5c246',
-          workflowId: 'd6f9ddf8-c14e-4939-9752-9a67db5ba655',
-          output: 'hey 1',
-          input: {
-            message: 'hey 1',
-          },
-          completedAt: '2025-09-02T17:19:28.356Z',
-          executionTimeMs: 30,
-          spaceId: 'default',
-        },
-        {
-          stepId: 'hi',
-          topologicalIndex: 3,
-          status: ExecutionStatus.COMPLETED,
-          startedAt: '2025-09-02T17:19:29.435Z',
-          id: '13dfc949-0623-4206-8399-99ba904e63c8',
-          executionIndex: 1,
-          workflowRunId: '4245d981-80fe-4861-9cbc-59241cc5c246',
-          workflowId: 'd6f9ddf8-c14e-4939-9752-9a67db5ba655',
-          output: 'hey 2',
-          input: {
-            message: 'hey 2',
-          },
-          completedAt: '2025-09-02T17:19:29.462Z',
-          executionTimeMs: 27,
-          spaceId: 'default',
-        },
-        {
-          stepId: 'hi',
-          topologicalIndex: 3,
-          status: ExecutionStatus.COMPLETED,
-          startedAt: '2025-09-02T17:19:30.453Z',
-          id: '6e34560d-423d-410e-aa2c-61436178622d',
-          executionIndex: 2,
-          workflowRunId: '4245d981-80fe-4861-9cbc-59241cc5c246',
-          workflowId: 'd6f9ddf8-c14e-4939-9752-9a67db5ba655',
-          output: 'hey 3',
-          input: {
-            message: 'hey 3',
-          },
-          completedAt: '2025-09-02T17:19:30.479Z',
-          executionTimeMs: 26,
-          spaceId: 'default',
-        },
-      ],
-      spaceId: 'default',
-    },
-    selectedId: 'bdc56199-279f-42a6-8d13-0ecbcbe2a1e1',
-    onStepExecutionClick: () => {},
   },
 };

@@ -9,7 +9,7 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, euiFontSize } from '@elastic/eui';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus, type EsWorkflowStepExecution } from '@kbn/workflows';
 import React from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -30,6 +30,9 @@ export function StepExecutionTreeItemLabel({
   const duration = stepExecution.completedAt
     ? new Date(stepExecution.completedAt).getTime() - new Date(stepExecution.startedAt).getTime()
     : null;
+  const isDangerousStatus =
+    stepExecution.status === ExecutionStatus.FAILED ||
+    stepExecution.status === ExecutionStatus.CANCELLED;
   return (
     <EuiFlexGroup
       alignItems="baseline"
@@ -38,7 +41,13 @@ export function StepExecutionTreeItemLabel({
       responsive={false}
       css={styles.label}
     >
-      <EuiFlexItem css={[styles.stepName, selected && styles.selectedStepName]}>
+      <EuiFlexItem
+        css={[
+          styles.stepName,
+          selected && styles.selectedStepName,
+          isDangerousStatus && styles.dangerousStepName,
+        ]}
+      >
         {/* {stepType} */}
         {stepExecution.stepId}
         {stepExecution.executionIndex > 0 && (
@@ -67,6 +76,10 @@ const componentStyles = {
   selectedStepName: css({
     fontWeight: 'bold',
   }),
+  dangerousStepName: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.danger,
+    }),
   duration: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.textDisabled,

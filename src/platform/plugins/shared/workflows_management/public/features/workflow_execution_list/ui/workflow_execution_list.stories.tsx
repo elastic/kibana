@@ -11,7 +11,7 @@ import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { Meta, StoryObj } from '@storybook/react';
 import { parseDuration } from '@kbn/workflows-execution-engine/server/utils/parse-duration/parse-duration';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { WorkflowExecutionList } from './workflow_execution_list';
+import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 
 const meta: Meta<typeof WorkflowExecutionList> = {
   component: WorkflowExecutionList,
@@ -22,6 +22,11 @@ const meta: Meta<typeof WorkflowExecutionList> = {
 export default meta;
 
 type Story = StoryObj<typeof WorkflowExecutionList>;
+
+const mockFilters: WorkflowExecutionListProps['filters'] = {
+  status: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_INPUT],
+  executionType: [ExecutionType.PRODUCTION],
+};
 
 export const Default: Story = {
   args: {
@@ -34,6 +39,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1m28s'),
+          workflowDefinition: {},
         },
         {
           id: '1',
@@ -42,6 +48,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1h2m'),
+          workflowDefinition: {},
         },
         {
           id: '2',
@@ -50,6 +57,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1d2h'),
+          workflowDefinition: {},
         },
         {
           id: '4',
@@ -58,6 +66,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1w2d'),
           spaceId: 'default',
+          workflowDefinition: {},
         },
         {
           id: '5',
@@ -66,6 +75,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1m28s'),
           spaceId: 'default',
+          workflowDefinition: {},
         },
         {
           id: '6',
@@ -74,6 +84,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('280ms'),
           spaceId: 'default',
+          workflowDefinition: {},
         },
         {
           id: '7',
@@ -82,6 +93,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('28s'),
           spaceId: 'default',
+          workflowDefinition: {},
         },
       ],
       _pagination: {
@@ -92,40 +104,43 @@ export const Default: Story = {
     },
     onExecutionClick: () => {},
     selectedId: '2',
-    filters: {
-      status: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_INPUT],
-      executionType: [ExecutionType.PRODUCTION],
-    },
+    filters: mockFilters,
     onFiltersChange: () => {},
   },
 };
 
-export const Empty = {
+export const Empty: Story = {
   args: {
     executions: {
       results: [],
       _pagination: {
-        offset: 0,
+        page: 1,
         limit: 10,
         total: 0,
       },
     },
     selectedId: null,
+    filters: mockFilters,
+    onFiltersChange: () => {},
   },
 };
 
-export const Loading = {
+export const Loading: Story = {
   args: {
     isLoading: true,
     error: null,
     selectedId: null,
+    filters: mockFilters,
+    onFiltersChange: () => {},
   },
 };
 
-export const ErrorStory = {
+export const ErrorStory: Story = {
   args: {
     isLoading: false,
     error: new Error('Internal server error'),
     selectedId: null,
+    filters: mockFilters,
+    onFiltersChange: () => {},
   },
 };

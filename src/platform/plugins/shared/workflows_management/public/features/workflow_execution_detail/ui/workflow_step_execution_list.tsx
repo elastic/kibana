@@ -22,7 +22,7 @@ import {
   useEuiTheme,
   EuiTreeView,
 } from '@elastic/eui';
-import React, { useRef } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsWorkflowStepExecution, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { css } from '@emotion/react';
@@ -115,7 +115,6 @@ export const WorkflowStepExecutionList = ({
 }: WorkflowStepExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
-  const treeViewRef = useRef<typeof EuiTreeView | null>(null);
 
   let content: React.ReactNode = null;
 
@@ -134,9 +133,7 @@ export const WorkflowStepExecutionList = ({
         }
       />
     );
-  }
-
-  if (error) {
+  } else if (error) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -152,8 +149,7 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  }
-  if (!execution || !execution.stepExecutions.length) {
+  } else if (!execution || !execution.stepExecutions.length) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -168,7 +164,7 @@ export const WorkflowStepExecutionList = ({
         }
       />
     );
-  } else {
+  } else if (execution.workflowDefinition) {
     const stepExecutionMap = new Map<string, EsWorkflowStepExecution[]>();
     for (const stepExecution of execution.stepExecutions) {
       if (stepExecutionMap.has(stepExecution.stepId)) {
@@ -188,12 +184,27 @@ export const WorkflowStepExecutionList = ({
     content = (
       <EuiFlexGroup direction="column" gutterSize="s" justifyContent="spaceBetween">
         <div css={styles.treeViewContainer}>
-          <EuiTreeView items={items} showExpansionArrows expandByDefault display="compressed" />
+          <EuiTreeView items={items} showExpansionArrows expandByDefault />
         </div>
         <EuiButton onClick={onClose} css={styles.doneButton}>
           <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
         </EuiButton>
       </EuiFlexGroup>
+    );
+  } else {
+    content = (
+      <EuiEmptyPrompt
+        {...emptyPromptCommonProps}
+        icon={<EuiIcon type="error" size="l" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.workflowStepExecutionList.errorLoadingStepExecutions"
+              defaultMessage="Error loading execution graph"
+            />
+          </h2>
+        }
+      />
     );
   }
 
