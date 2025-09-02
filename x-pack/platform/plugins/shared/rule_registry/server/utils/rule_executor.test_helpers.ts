@@ -88,10 +88,6 @@ export const createDefaultAlertExecutorOptions = <
     shouldStopExecution: () => false,
     shouldWriteAlerts: () => shouldWriteAlerts,
     uiSettingsClient: uiSettingsServiceMock.createClient(),
-    getAsyncSearchClient: () => ({
-      search: jest.fn(),
-      getMetrics: jest.fn(),
-    }),
   },
   state,
   previousStartedAt: null,
