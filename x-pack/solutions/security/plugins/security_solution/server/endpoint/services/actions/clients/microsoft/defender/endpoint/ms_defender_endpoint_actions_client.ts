@@ -1109,18 +1109,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       const searchResult = await this.options.esClient.search(searchQuery);
 
-      const actionHasBeenCanceled = searchResult.hits.hits.length > 0;
-
-      if (actionHasBeenCanceled) {
-        const existingCancelId = searchResult.hits.hits[0]._source?.EndpointActions?.action_id;
-        this.log.debug(
-          `Found already successful cancel action [${existingCancelId}] for target [${targetActionId}]`
-        );
-      } else {
-        this.log.debug(`No already successful cancel actions found for target [${targetActionId}]`);
-      }
-
-      return actionHasBeenCanceled;
+      return searchResult.hits.hits.length > 0;
     } catch (error) {
       this.log.warn(`Error checking for existing cancel actions: ${error.message}`);
       // On ES query error, allow cancel to proceed (fail open)
