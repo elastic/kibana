@@ -158,7 +158,6 @@ components:
       description: The dashboard migration task stats object.
       $ref: './common.schema.yaml#/components/schemas/MigrationTaskStats'
 
-
     DashboardMigrationTaskExecutionSettings:
       type: object
       description: The dashboard migration task execution settings.
