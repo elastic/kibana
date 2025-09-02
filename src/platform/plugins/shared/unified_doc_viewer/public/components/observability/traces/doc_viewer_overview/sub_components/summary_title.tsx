@@ -52,6 +52,16 @@ const FieldContent = ({
   );
 };
 
+const Title = ({ isTitle, children }: { isTitle: boolean; children: React.ReactNode }) => {
+  return isTitle ? (
+    <EuiTitle size="xs">
+      <h2>{children}</h2>
+    </EuiTitle>
+  ) : (
+    children
+  );
+};
+
 export const SummaryTitle = ({
   spanName,
   transactionName,
@@ -73,21 +83,19 @@ export const SummaryTitle = ({
     nameContent = (
       <>
         <FieldContent title={name} value={name} field={nameField} showActions={showActions}>
-          <EuiTitle size="xs">
-            <h2>
-              <HighlightField textSize="m" value={name} formattedValue={formattedName} as="strong">
-                {transactionName && serviceName
-                  ? ({ content }) => (
-                      <TransactionNameLink
-                        serviceName={serviceName}
-                        transactionName={transactionName}
-                        renderContent={() => content}
-                      />
-                    )
-                  : undefined}
-              </HighlightField>
-            </h2>
-          </EuiTitle>
+          <Title isTitle>
+            <HighlightField textSize="m" value={name} formattedValue={formattedName} as="strong">
+              {transactionName && serviceName
+                ? ({ content }) => (
+                    <TransactionNameLink
+                      serviceName={serviceName}
+                      transactionName={transactionName}
+                      renderContent={() => content}
+                    />
+                  )
+                : undefined}
+            </HighlightField>
+          </Title>
         </FieldContent>
       </>
     );
@@ -99,7 +107,7 @@ export const SummaryTitle = ({
         field={SERVICE_NAME_FIELD}
         showActions={showActions}
       >
-        {serviceName}
+        <Title isTitle>{serviceName}</Title>
       </FieldContent>
     );
   }
@@ -107,7 +115,9 @@ export const SummaryTitle = ({
   if (id) {
     idContent = (
       <FieldContent title={id} value={id} field={idField} showActions={showActions}>
-        <HighlightField value={id} formattedValue={formattedId} />
+        <Title isTitle={!name && !serviceName}>
+          <HighlightField value={id} formattedValue={formattedId} />
+        </Title>
       </FieldContent>
     );
   }

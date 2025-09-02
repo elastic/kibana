@@ -60,7 +60,7 @@ describe('SpanSummaryTitle', () => {
     );
 
     expect(getByText('123')).toBeInTheDocument();
-    expect(container.querySelector('h2')?.innerHTML).toBe('<mark>123</mark>');
+    expect(container.querySelector('h2')?.innerHTML).toBe('<span><mark>123</mark></span>');
   });
 
   it('renders FieldHoverActionPopover for spanName and id', () => {
