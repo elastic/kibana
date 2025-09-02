@@ -134,6 +134,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
         setInvalidFields((current) => ({ ...current, name: true }));
         setName('');
       } else {
+        setInvalidFields((current) => ({ ...current, name: false }));
         setName(integrationSettings?.title ?? '');
       }
     }, [integrationSettings?.title]);
