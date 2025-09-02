@@ -93,10 +93,10 @@ Elastic Fleet is a centralized management solution for Elastic Agents, enabling 
  * Configuration for the Fleet system initialization document
  */
 const FLEET_SYSTEM_DOC_CONFIG = {
-  packageName: '__fleet_system_dummy__',
+  packageName: '__fleet_system_generic__',
   filename: 'fleet_system_overview.md',
   version: '1.0.0',
-  documentId: '__fleet_system_dummy_doc__',
+  documentId: '__fleet_system_generic_doc__',
 } as const;
 
 export async function saveKnowledgeBaseContentToIndex({
@@ -238,7 +238,7 @@ export async function deletePackageKnowledgeBase(esClient: ElasticsearchClient, 
 }
 
 /**
- * Initialize the knowledge base index with a dummy document with generic information about fleet during Fleet setup.
+ * Initialize the knowledge base index with a document with generic information about fleet during Fleet setup.
  * This ensures the index exists and prevents issues with inference model deployment
  * when the index is empty.
  */
@@ -246,7 +246,7 @@ export async function initializeKnowledgeBaseIndex(esClient: ElasticsearchClient
   const logger = appContextService.getLogger();
 
   try {
-    // Check if the dummy document already exists
+    // Check if the generic document already exists
     try {
       const existingDoc = await esClient.get({
         index: INTEGRATION_KNOWLEDGE_INDEX,
@@ -264,8 +264,8 @@ export async function initializeKnowledgeBaseIndex(esClient: ElasticsearchClient
       }
     }
 
-    // Create the dummy document to initialize the index
-    const dummyDocument = {
+    // Create the generic document to initialize the index
+    const genericDocument = {
       package_name: FLEET_SYSTEM_DOC_CONFIG.packageName,
       filename: FLEET_SYSTEM_DOC_CONFIG.filename,
       content: FLEET_SYSTEM_INITIALIZATION_CONTENT,
@@ -278,14 +278,14 @@ export async function initializeKnowledgeBaseIndex(esClient: ElasticsearchClient
         esClient.index({
           index: INTEGRATION_KNOWLEDGE_INDEX,
           id: FLEET_SYSTEM_DOC_CONFIG.documentId,
-          document: dummyDocument,
+          document: genericDocument,
           refresh: 'wait_for',
         }),
       { logger }
     );
 
     logger.debug(
-      `Initialized knowledge base index ${INTEGRATION_KNOWLEDGE_INDEX} with dummy document`
+      `Initialized knowledge base index ${INTEGRATION_KNOWLEDGE_INDEX} with generic fleet knowledge document`
     );
   } catch (error: any) {
     logger.warn(`Failed to initialize knowledge base index: ${error.message}`);
