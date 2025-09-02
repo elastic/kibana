@@ -69,7 +69,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
     );
 
     const getTooltipContent = () => {
-      if (isHorizontal || (isCollapsed && hasContent)) return null;
+      if (isHorizontal || hasContent) return null;
       if (isCollapsed) return badgeType ? getLabelWithBeta(children) : children;
       if (!isCollapsed && badgeType)
         return getLabelWithBeta(
