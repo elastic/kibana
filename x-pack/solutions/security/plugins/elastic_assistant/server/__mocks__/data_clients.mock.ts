@@ -139,11 +139,13 @@ const createKnowledgeBaseDataClientMock = () => {
     isInferenceEndpointExists: jest.fn(),
     isModelInstalled: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
+    isDefendInsightsDocsLoaded: jest.fn(),
     isSetupAvailable: jest.fn(),
     isSetupInProgress: jest.fn().mockReturnValue(false)(),
     isUserDataExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
     getLoadedSecurityLabsDocsCount: jest.fn(),
+    getLoadedDefendInsightsDocsCount: jest.fn(),
     getProductDocumentationStatus: jest.fn(),
   };
 

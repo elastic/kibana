@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await synthtrace.clean();
     });
 
-    it('shows poor, warning and good count as 0 and all dataset as healthy', async () => {
+    it('shows poor, degraded and good count as 0 and all dataset as healthy', async () => {
       await PageObjects.datasetQuality.refreshTable();
       // Sometimes the summary flashes with wrong count, retry to stabilize. This should be fixed at the root, but for now we retry.
       await retry.try(async () => {
@@ -69,21 +69,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         expect(summary).to.eql({
           datasetHealthPoor: '0',
-          datasetHealthWarning: '0',
+          datasetHealthDegraded: '0',
           datasetHealthGood: '3',
           activeDatasets: '0 of 3',
         });
       });
     });
 
-    it('shows updated count for poor, warning and good datasets and updates active datasets', async () => {
+    it('shows updated count for poor, degraded and good datasets and updates active datasets', async () => {
       await ingestDataForSummary();
       await PageObjects.datasetQuality.refreshTable();
 
       const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
       expect(summary).to.eql({
         datasetHealthPoor: '1',
-        datasetHealthWarning: '1',
+        datasetHealthDegraded: '1',
         datasetHealthGood: '1',
         activeDatasets: '2 of 3',
       });

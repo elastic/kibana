@@ -33,7 +33,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core-application-common",
     "@kbn/security-plugin-types-server",
-    "@kbn/react-kibana-context-render",
     "@kbn/spaces-plugin",
     "@kbn/css-utils",
     "@kbn/triggers-actions-ui-plugin",
@@ -42,7 +41,9 @@
     "@kbn/logging-mocks",
     "@kbn/discover-utils",
     "@kbn/field-utils",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/core-security-browser",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }

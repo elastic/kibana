@@ -60,7 +60,7 @@ export const storybookAliases = {
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
   ['response-ops']: 'src/platform/packages/shared/response-ops/.storybook',
   security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
-  // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'src/platform/packages/shared/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',

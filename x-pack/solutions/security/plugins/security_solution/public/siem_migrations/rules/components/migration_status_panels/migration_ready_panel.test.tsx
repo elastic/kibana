@@ -27,7 +27,7 @@ jest.mock('../../service/hooks/use_start_migration');
 const useStartMigrationMock = useStartMigration as jest.Mock;
 const mockStartMigration = jest.fn();
 
-const mockMigrationStateWithError = {
+const mockMigrationStateWithError: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.READY,
   last_execution: {
     error:
@@ -35,16 +35,16 @@ const mockMigrationStateWithError = {
   },
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
 
-const mockMigrationStatsStopped = {
+const mockMigrationStatsStopped: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.STOPPED,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
@@ -53,7 +53,7 @@ const mockMigrationStatsReady: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.READY,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
