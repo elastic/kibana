@@ -130,40 +130,55 @@ function applyLayout(graph: dagre.graphlib.Graph) {
 }
 
 export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) => {
-  const workflowExecutionGraph = useMemo(() => {
+  const workflowExecutionGraph: { result: any; error: any } | null = useMemo(() => {
     if (!workflowYaml) {
       return null;
     }
-
+    let result = null;
+    let error = null;
     try {
-      const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-      if (result.error) {
-        console.error(result.error);
-        return null;
+      const parsingResult = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+      if (parsingResult.error) {
+        error = parsingResult.error;
       }
-      return convertToWorkflowGraph(result.data as any);
-    } catch (error) {
-      console.error('Error converting workflow YAML to graph:', error);
+      result = convertToWorkflowGraph(parsingResult.data as any);
+    } catch (e) {
+      error = e;
     }
+
+    return { result, error };
   }, [workflowYaml]);
 
-  const layout = useMemo(() => {
+  const layoutResult: { result: any; error: string } | null = useMemo(() => {
     if (!workflowExecutionGraph) {
       return null;
     }
 
-    try {
-      return applyLayout(workflowExecutionGraph);
-    } catch (error) {
-      console.error('Error applying layout to graph:', error);
-      return null;
+    if (workflowExecutionGraph.error) {
+      return { result: null, error: workflowExecutionGraph.error };
     }
+
+    let result = null;
+    let error = null;
+    try {
+      result = applyLayout(workflowExecutionGraph.result);
+    } catch (e) {
+      error = e.message;
+    }
+    return { result, error };
   }, [workflowExecutionGraph]);
 
   return (
     <>
-      {layout && (
-        <div style={{ width: '100%', height: '600px', border: '1px solid #ddd' }}>
+      {layoutResult?.error && (
+        <div style={{ color: 'red' }}>
+          Error generating graph layout: {String(layoutResult.error)}
+        </div>
+      )}
+      {layoutResult?.result && (
+        <div
+          style={{ width: '100%', height: '600px', border: '1px solid #ddd', position: 'relative' }}
+        >
           <div
             style={{
               position: 'absolute',
@@ -174,11 +189,11 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
               zIndex: 10,
             }}
           >
-            Nodes: {layout.nodes.length}, Edges: {layout.edges.length}
+            Nodes: {layoutResult.result.nodes.length}, Edges: {layoutResult.result.edges.length}
           </div>
           <ReactFlow
-            nodes={layout.nodes}
-            edges={layout.edges}
+            nodes={layoutResult.result.nodes}
+            edges={layoutResult.result.edges}
             fitViewOptions={{ padding: 1 }}
             nodeTypes={nodeTypes as any as NodeTypes}
             edgeTypes={edgeTypes}
@@ -193,7 +208,7 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
           </ReactFlow>
         </div>
       )}
-      {!layout && (
+      {!layoutResult && (
         <div
           style={{
             display: 'flex',
