@@ -54,6 +54,7 @@ describe('useDiscoverUrl', () => {
           index: 'logs-data-view',
           query,
         },
+        criteria: [{ metrics: [{ filter: 'service.name:test' }] }],
       },
     } as unknown as Rule;
 
@@ -70,7 +71,19 @@ describe('useDiscoverUrl', () => {
       dataViewId: 'logs-data-view',
       timeRange: expectedTimeRange,
       query,
-      filters: [],
+      filters: [
+        {
+          $state: { store: 'appState' },
+          bool: { minimum_should_match: 1, should: [{ match: { 'service.name': 'test' } }] },
+          meta: {
+            alias: null,
+            disabled: true,
+            index: 'logs-data-view',
+            negate: false,
+            type: 'custom',
+          },
+        },
+      ],
     });
     expect(result.current.discoverUrl).toBe('discover-url');
   });

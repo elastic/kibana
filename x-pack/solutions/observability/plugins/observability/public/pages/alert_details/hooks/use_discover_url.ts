@@ -11,6 +11,13 @@ import moment from 'moment';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import {
+  buildCustomFilter,
+  FilterStateStore,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  type Filter,
+} from '@kbn/es-query';
 import { getViewInAppLocatorParams } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import type { TopAlert } from '../../../typings/alerts';
 import { useKibana } from '../../../utils/kibana_react';
@@ -42,14 +49,34 @@ const getLocatorParamsMap: Record<
       dataViewId = index.title;
     }
 
-    return getViewInAppLocatorParams({
-      dataViewId,
-      searchConfiguration: {
-        index: ruleParams.searchConfiguration.index as DataViewSpec | string,
-        query: ruleParams.searchConfiguration.query,
-        filter: ruleParams.searchConfiguration.filter,
-      },
-    });
+    const filters = ruleParams.criteria
+      .flatMap(({ metrics }) =>
+        metrics.map((metric) => {
+          return metric.filter
+            ? buildCustomFilter(
+                dataViewId!,
+                toElasticsearchQuery(fromKueryExpression(metric.filter)),
+                true,
+                false,
+                null,
+                FilterStateStore.APP_STATE
+              )
+            : undefined;
+        })
+      )
+      .filter((f): f is Filter => f !== undefined);
+
+    return {
+      ...getViewInAppLocatorParams({
+        dataViewId,
+        searchConfiguration: {
+          index: ruleParams.searchConfiguration.index as DataViewSpec | string,
+          query: ruleParams.searchConfiguration.query,
+          filter: ruleParams.searchConfiguration.filter,
+        },
+      }),
+      filters,
+    };
   },
 };
 
