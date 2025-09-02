@@ -14,9 +14,11 @@ import React from 'react';
 
 type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   isMainButtonLoading?: boolean;
+  isMainButtonDisabled?: boolean;
   iconOnly?: boolean;
 
   isSecondaryButtonLoading?: boolean;
+  isSecondaryButtonDisabled?: boolean;
   secondaryButtonIcon: string;
   secondaryButtonAriaLabel?: string;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
@@ -32,12 +34,14 @@ export const SplitButton = ({
 
   // Secondary button props
   isSecondaryButtonLoading = false,
+  isSecondaryButtonDisabled = false,
   secondaryButtonIcon,
   secondaryButtonAriaLabel,
   onSecondaryButtonClick,
 
   // Primary button props
   isMainButtonLoading = false,
+  isMainButtonDisabled = false,
   iconOnly = false,
   iconType,
   ...mainButtonProps
@@ -57,7 +61,7 @@ export const SplitButton = ({
     },
     color,
     size,
-    isDisabled: areButtonsDisabled,
+    isDisabled: areButtonsDisabled || isMainButtonDisabled,
     isLoading: isLoading || isMainButtonLoading,
     'data-icon': iconType,
     ...mainButtonProps,
@@ -84,7 +88,7 @@ export const SplitButton = ({
         size={size}
         iconType={secondaryButtonIcon}
         onClick={onSecondaryButtonClick}
-        isDisabled={areButtonsDisabled}
+        isDisabled={areButtonsDisabled || isSecondaryButtonDisabled}
         isLoading={isLoading || isSecondaryButtonLoading}
       />
     </div>
