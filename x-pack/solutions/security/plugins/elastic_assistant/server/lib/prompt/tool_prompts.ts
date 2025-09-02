@@ -214,4 +214,24 @@ The tool provides detailed vulnerability findings including severity counts, CVE
 Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive vulnerability and security risk information.`,
     },
   },
+  {
+    promptId: 'AssetSecurityIncidentTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to get detailed security incident and alert information about a specific asset. This includes active security alerts, attack patterns, MITRE ATT&CK techniques, and incident status.
+
+Use this tool when users ask about:
+- Security incidents for an asset
+- Active alerts and their status  
+- Attack patterns targeting an asset
+- Recent security events and threats
+- MITRE ATT&CK techniques observed on an asset
+- Security alert correlation with asset vulnerabilities/compliance
+- Incident response context for an asset
+
+The tool searches across the security alerts index to provide comprehensive security incident insights including severity breakdowns, workflow status, and threat intelligence context.
+
+Provide the asset identifier (hostname, entity ID, username, or service name) to get comprehensive security incident and threat information.`,
+    },
+  },
 ];

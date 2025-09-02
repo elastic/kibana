@@ -17,6 +17,7 @@ import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs
 import { ASSET_INVENTORY_TOOL } from './asset_inventory_simple/asset_inventory_simple';
 import { ASSET_COMPLIANCE_TOOL } from './asset_compliance_tool/asset_compliance_tool';
 import { ASSET_VULNERABILITY_TOOL } from './asset_vulnerability_tool';
+import { ASSET_SECURITY_INCIDENT_TOOL } from './asset_security_incident_tool';
 
 // any new tool should also be added to telemetry schema in
 // x-pack/solutions/security/plugins/elastic_assistant/server/lib/telemetry/event_based_telemetry.ts
@@ -25,6 +26,7 @@ export const assistantTools = [
   ASSET_INVENTORY_TOOL,
   ASSET_COMPLIANCE_TOOL,
   ASSET_VULNERABILITY_TOOL,
+  ASSET_SECURITY_INCIDENT_TOOL,
   KNOWLEDGE_BASE_RETRIEVAL_TOOL,
   KNOWLEDGE_BASE_WRITE_TOOL,
   GENERATE_ESQL_TOOL,
