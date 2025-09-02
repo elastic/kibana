@@ -1243,7 +1243,7 @@
     "elastic-apm-node": "^4.13.0",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^3.0.0",
-    "execa": "^5.1.1",
+    "execa": "^9.6.0",
     "exponential-backoff": "^3.1.1",
     "expr-eval": "^2.0.2",
     "extract-zip": "^2.0.1",
