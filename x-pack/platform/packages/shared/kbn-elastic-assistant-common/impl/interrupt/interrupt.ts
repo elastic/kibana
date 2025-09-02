@@ -15,12 +15,12 @@ import { InterruptResumeValue } from '../schemas';
  */
 export const typedInterrupt = async <T extends InterruptType>(
   interruptValue: { type: T } & InterruptValue
-): Promise<{ type: T; } & InterruptResumeValue> => {
+): Promise<{ type: T } & InterruptResumeValue> => {
   if (typeof window !== 'undefined') {
     throw new Error('typedInterrupt is only available on the server side');
   }
 
-    const { interrupt } = await import('@langchain/langgraph'); // Ensures this is only imported server side.
+  const { interrupt } = await import('@langchain/langgraph'); // Ensures this is only imported server side.
 
   const result = interrupt(interruptValue);
 

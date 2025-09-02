@@ -76,7 +76,10 @@ export const InputText = ({
         justifyContent="flexStart"
       >
         <EuiButton color="success" size="s" onClick={onSubmit} disabled={disabled}>
-            <FormattedMessage id="xpack.elasticAssistant.typed.interrupt.input.text.submit.label" defaultMessage="Submit" />
+          <FormattedMessage
+            id="xpack.elasticAssistant.typed.interrupt.input.text.submit.label"
+            defaultMessage="Submit"
+          />
         </EuiButton>
 
         {outcome && <EuiBadge>{outcome}</EuiBadge>}
