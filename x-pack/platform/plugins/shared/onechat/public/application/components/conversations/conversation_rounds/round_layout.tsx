@@ -28,7 +28,6 @@ const labels = {
 
 export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, outputIcon, output }) => {
   const { euiTheme } = useEuiTheme();
-
   const inputContainerStyles = css`
     width: 100%;
     align-self: end;

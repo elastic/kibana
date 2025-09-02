@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// import type { ClientMessage } from '@kbn/elastic-assistant';
 import { useSendMessage } from '../../../context/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';

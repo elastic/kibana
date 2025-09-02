@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { OnechatInternalService } from './services';
 import type { OnechatServicesContext } from './application/context/onechat_services_context';
 
