@@ -10,20 +10,13 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
-import type {
-  PublicRuleResultService,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server/types';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { i18n } from '@kbn/i18n';
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
-import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { ESQLSearchParams } from '@kbn/es-types';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
@@ -35,9 +28,9 @@ export interface FetchEsqlQueryOpts {
   spacePrefix: string;
   services: {
     logger: Logger;
+    scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
     ruleResultService?: PublicRuleResultService;
-    getAsyncSearchClient: RuleExecutorServices['getAsyncSearchClient'];
   };
   dateStart: string;
   dateEnd: string;
@@ -52,19 +45,20 @@ export async function fetchEsqlQuery({
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, share, ruleResultService, getAsyncSearchClient } = services;
+  const { logger, scopedClusterClient, share, ruleResultService } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
-  const asyncSearchClient = getAsyncSearchClient<ESQLSearchParams>(ESQL_ASYNC_SEARCH_STRATEGY);
+  const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
   let response: EsqlTable;
   try {
-    const asyncResponse = await asyncSearchClient.search({
-      request: { params: { query: query.query, filter: query.filter } },
+    response = await esClient.transport.request<EsqlTable>({
+      method: 'POST',
+      path: '/_query',
+      body: query,
     });
-    response = asyncResponse.rawResponse;
   } catch (e) {
     if (e.message?.includes('verification_exception')) {
       throw createTaskRunError(e, TaskErrorSource.USER);
@@ -84,14 +78,6 @@ export async function fetchEsqlQuery({
     const warning = `The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: ${Array.from(
       duplicateAlertIds
     ).join('; ')}`;
-    ruleResultService.addLastRunWarning(warning);
-    ruleResultService.setLastRunOutcomeMessage(warning);
-  }
-
-  const isPartial = response.is_partial ?? false;
-
-  if (ruleResultService && isPartial) {
-    const warning = getPartialResultsWarning(response);
     ruleResultService.addLastRunWarning(warning);
     ruleResultService.setLastRunOutcomeMessage(warning);
   }
@@ -171,25 +157,4 @@ export function generateLink(
   const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
   return redirectUrl;
-}
-
-function getPartialResultsWarning(response: EsqlTable) {
-  const clusters = response?._clusters?.details ?? {};
-  const shardFailures = Object.keys(clusters).reduce<EsqlEsqlShardFailure[]>((acc, cluster) => {
-    const failures = clusters[cluster]?.failures ?? [];
-
-    if (failures.length > 0) {
-      acc.push(...failures);
-    }
-
-    return acc;
-  }, []);
-
-  return i18n.translate('xpack.stackAlerts.esQuery.partialResultsWarning', {
-    defaultMessage:
-      shardFailures.length > 0
-        ? 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: {failures}'
-        : 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.',
-    values: { failures: JSON.stringify(shardFailures) },
-  });
 }

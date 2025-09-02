@@ -69,7 +69,6 @@ describe('fetchEsQuery', () => {
     scopedClusterClient: scopedClusterClientMock,
     logger,
     ruleResultService: mockRuleResultService,
-    getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
   };
   it('should add time filter if timestamp if defined and excludeHitsFromPreviousRun is true', async () => {
     const params = defaultParams;

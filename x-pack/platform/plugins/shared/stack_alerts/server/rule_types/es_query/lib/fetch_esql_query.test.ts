@@ -84,6 +84,7 @@ describe('fetchEsqlQuery', () => {
           params: defaultParams,
           services: {
             logger,
+            scopedClusterClient,
             // @ts-expect-error
             share: {
               url: {
@@ -95,7 +96,6 @@ describe('fetchEsqlQuery', () => {
               },
             } as SharePluginStart,
             ruleResultService: mockRuleResultService,
-            getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
           },
           spacePrefix: '',
           dateStart: new Date().toISOString(),
@@ -147,6 +147,7 @@ describe('fetchEsqlQuery', () => {
         params: { ...defaultParams, groupBy: 'row' },
         services: {
           logger,
+          scopedClusterClient,
           // @ts-expect-error
           share: {
             url: {
@@ -158,7 +159,6 @@ describe('fetchEsqlQuery', () => {
             },
           } as SharePluginStart,
           ruleResultService: mockRuleResultService,
-          getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
         },
         spacePrefix: '',
         dateStart: new Date().toISOString(),
@@ -202,7 +202,7 @@ describe('fetchEsqlQuery', () => {
         params: { ...defaultParams, groupBy: 'row' },
         services: {
           logger,
-          getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
+          scopedClusterClient,
           // @ts-expect-error
           share: {
             url: {
@@ -254,7 +254,7 @@ describe('fetchEsqlQuery', () => {
         params: defaultParams,
         services: {
           logger,
-          getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
+          scopedClusterClient,
           // @ts-expect-error
           share: {
             url: {
@@ -444,7 +444,7 @@ describe('fetchEsqlQuery', () => {
       params: defaultParams,
       services: {
         logger,
-        getAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn() }),
+        scopedClusterClient,
         // @ts-expect-error
         share: {
           url: {

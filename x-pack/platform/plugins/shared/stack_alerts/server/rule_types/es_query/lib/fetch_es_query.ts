@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -13,16 +13,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import type {
-  PublicRuleResultService,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server/types';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { IAsyncSearchRequestParams } from '@kbn/data-plugin/server/search';
 import { getComparatorScript } from '../../../../common';
 import type { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
@@ -36,9 +31,9 @@ export interface FetchEsQueryOpts {
   spacePrefix: string;
   services: {
     share: SharePluginStart;
+    scopedClusterClient: IScopedClusterClient;
     logger: Logger;
     ruleResultService?: PublicRuleResultService;
-    getAsyncSearchClient: RuleExecutorServices['getAsyncSearchClient'];
   };
   alertLimit?: number;
   dateStart: string;
@@ -59,12 +54,9 @@ export async function fetchEsQuery({
   dateStart,
   dateEnd,
 }: FetchEsQueryOpts) {
-  const { logger, ruleResultService, share, getAsyncSearchClient } = services;
+  const { scopedClusterClient, logger, ruleResultService, share } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
-  const asyncSearchClient = getAsyncSearchClient<IAsyncSearchRequestParams>(
-    ENHANCED_ES_SEARCH_STRATEGY
-  );
-
+  const esClient = scopedClusterClient.asCurrentUser;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
   const {
@@ -142,17 +134,7 @@ export async function fetchEsQuery({
     () => `es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(sortedQuery)}`
   );
 
-  const asyncResponse = await asyncSearchClient.search({
-    request: {
-      params: {
-        ...sortedQuery,
-        keep_alive: '10m',
-        wait_for_completion_timeout: '10m',
-      },
-    },
-  });
-
-  const searchResult = asyncResponse.rawResponse;
+  const { body: searchResult } = await esClient.search(sortedQuery, { meta: true });
 
   logger.debug(
     () =>
