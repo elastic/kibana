@@ -11,7 +11,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { createMetricsExperienceRepositoryClient } from './api';
+import type { MetricsExperienceClient } from './api';
+import { createMetricsExperienceClient } from './api';
 import type { MetricsExperiencePluginClass, MetricsExperienceService } from './types';
 
 const MetricsExperienceApplication = dynamic(() =>
@@ -19,7 +20,11 @@ const MetricsExperienceApplication = dynamic(() =>
 );
 
 export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
+  private repositoryClient!: MetricsExperienceClient;
   public setup(core: CoreSetup) {
+    this.repositoryClient = createMetricsExperienceClient(core);
+
+    const repositoryClient = this.repositoryClient;
     // Register app
     core.application.register({
       id: 'metricsExperience',
@@ -29,7 +34,7 @@ export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
         const [coreStart] = await core.getStartServices();
 
         const services: MetricsExperienceService = {
-          callApi: createMetricsExperienceRepositoryClient(core),
+          client: repositoryClient,
         };
 
         ReactDOM.render(
@@ -50,7 +55,9 @@ export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
   }
 
   public start(_core: CoreStart) {
-    return {};
+    return {
+      metricsExperienceClient: this.repositoryClient,
+    };
   }
 
   public stop() {}
