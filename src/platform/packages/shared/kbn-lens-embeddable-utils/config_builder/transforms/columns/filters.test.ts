@@ -24,7 +24,8 @@ describe('Filters Transforms', () => {
 
       const result = fromFiltersLensApiToLensState(input);
       expect(result.operationType).toBe('filters');
-      expect(result.label).toBe('Filters');
+      expect(result.label).toBe('');
+      expect(result.customLabel).toBe(false);
       expect(result.params.filters).toHaveLength(2);
       expect(result.params.filters[0].input).toEqual({ language: 'kuery', query: 'status:active' });
       expect(result.params.filters[0].label).toBe('Active');
@@ -64,6 +65,7 @@ describe('Filters Transforms', () => {
         label: 'Filters',
         dataType: 'string',
         isBucketed: true,
+        customLabel: true,
         params: {
           filters: [
             { input: { language: 'kuery', query: 'status:active' }, label: 'Active' },

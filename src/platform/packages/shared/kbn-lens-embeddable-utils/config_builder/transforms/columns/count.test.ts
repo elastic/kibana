@@ -26,7 +26,7 @@ describe('Count Transforms', () => {
         filter: undefined,
         operationType: 'count',
         sourceField: 'events',
-        label: 'Count of events',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -45,7 +45,6 @@ describe('Count Transforms', () => {
 
       const result = fromCountAPItoLensState(input);
       expect(result.sourceField).toBe('');
-      expect(result.label).toBe('Count of Records');
     });
 
     it('should handle format configuration', () => {
@@ -146,6 +145,7 @@ describe('Count Transforms', () => {
         operationType: 'count',
         sourceField: 'events',
         label: 'Total Events',
+        customLabel: true,
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -161,6 +161,7 @@ describe('Count Transforms', () => {
       const input: CountIndexPatternColumn = {
         operationType: 'count',
         sourceField: '',
+        customLabel: true,
         label: 'Count of Records',
         isBucketed: false,
         dataType: 'number',

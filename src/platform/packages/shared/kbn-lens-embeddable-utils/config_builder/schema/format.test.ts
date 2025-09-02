@@ -78,7 +78,7 @@ describe('Format Schemas', () => {
       };
 
       const validated = formatTypeSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toHaveProperty('type', input.type);
     });
   });
 

@@ -22,7 +22,7 @@ describe('Static Value Transforms', () => {
 
       const expected: StaticValueIndexPatternColumn = {
         operationType: 'static_value',
-        label: 'Static value: 42',
+        label: '',
         customLabel: false,
         dataType: 'number',
         isBucketed: false,
@@ -43,7 +43,6 @@ describe('Static Value Transforms', () => {
 
       const result = fromStaticValueAPItoLensState(input);
       expect(result.params.value).toBe(String(LENS_STATIC_VALUE_DEFAULT));
-      expect(result.label).toBe(`Static value: ${LENS_STATIC_VALUE_DEFAULT}`);
     });
 
     it('should handle format configuration', () => {

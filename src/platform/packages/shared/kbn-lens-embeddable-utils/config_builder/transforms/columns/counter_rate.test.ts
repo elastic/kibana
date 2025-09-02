@@ -31,7 +31,7 @@ describe('Counter Rate Transforms', () => {
         customLabel: false,
         filter: undefined,
         operationType: 'counter_rate',
-        label: 'Counter rate of bytes',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {},
@@ -112,6 +112,7 @@ describe('Counter Rate Transforms', () => {
       const result = fromCounterRateLensStateToAPI(input, columnRef);
       expect(result.format).toEqual({
         type: 'bytes',
+        decimals: 2,
       });
     });
 

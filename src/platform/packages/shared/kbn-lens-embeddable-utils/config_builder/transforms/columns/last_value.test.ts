@@ -25,7 +25,7 @@ describe('Last Value Transforms', () => {
       const expected: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'status',
-        label: 'Last value of status',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {

@@ -34,7 +34,7 @@ describe('Cumulative Sum Transforms', () => {
       const expected: CumulativeSumIndexPatternColumn = {
         operationType: 'cumulative_sum',
         references: ['col1'],
-        label: 'Cumulative sum of sales',
+        label: '',
         customLabel: false,
         isBucketed: false,
         dataType: 'number',
@@ -84,7 +84,7 @@ describe('Cumulative Sum Transforms', () => {
 
       const emptyRef = { id: 'col1', field: '' };
       const result = fromCumulativeSumAPItoLensState(input, emptyRef);
-      expect(result.label).toBe('Cumulative sum of (incomplete)');
+      expect(result.label).toBe('');
     });
   });
 

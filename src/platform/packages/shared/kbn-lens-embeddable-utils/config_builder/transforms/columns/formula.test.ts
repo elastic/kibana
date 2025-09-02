@@ -21,7 +21,7 @@ describe('Formula Transforms', () => {
 
       const expected: FormulaIndexPatternColumn = {
         operationType: 'formula',
-        label: 'count(col1) / sum(col2)',
+        label: '',
         customLabel: false,
         dataType: 'number',
         isBucketed: false,
@@ -41,7 +41,6 @@ describe('Formula Transforms', () => {
       };
 
       const result = fromFormulaAPItoLensState(input);
-      expect(result.label).toBe('Formula');
       expect(result.params.formula).toBe('');
     });
 

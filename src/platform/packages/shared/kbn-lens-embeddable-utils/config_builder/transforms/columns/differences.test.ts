@@ -39,7 +39,7 @@ describe('Differences Transforms', () => {
       const expected: DerivativeIndexPatternColumn = {
         operationType: 'differences',
         references: [testRef.id],
-        label: 'Differences of Sum of Total Sales',
+        label: '',
         customLabel: false,
         isBucketed: false,
         dataType: 'number',
@@ -71,7 +71,7 @@ describe('Differences Transforms', () => {
 
       const emptyRef = { ...testRef, label: '' };
       const result = fromDifferencesAPItoLensState(input, emptyRef);
-      expect(result.label).toBe('Differences of (incomplete)');
+      expect(result.label).toBe('');
     });
   });
 

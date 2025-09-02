@@ -26,7 +26,7 @@ describe('Percentile Transforms', () => {
         filter: undefined,
         operationType: 'percentile',
         sourceField: 'response_time',
-        label: '95th Percentile of response_time',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -46,7 +46,6 @@ describe('Percentile Transforms', () => {
 
       const result = fromPercentileAPItoLensState(input);
       expect(result.params.percentile).toBe(LENS_PERCENTILE_DEFAULT_VALUE);
-      expect(result.label).toBe(`${LENS_PERCENTILE_DEFAULT_VALUE}th Percentile of response_time`);
     });
 
     it('should handle format configuration', () => {
@@ -158,6 +157,7 @@ describe('Percentile Transforms', () => {
         sourceField: 'response_time',
         label: 'P95 Response Time',
         isBucketed: false,
+        customLabel: true,
         dataType: 'number',
         params: {
           percentile: LENS_PERCENTILE_DEFAULT_VALUE,

@@ -26,7 +26,7 @@ describe('Unique Count Transforms', () => {
         filter: undefined,
         operationType: 'unique_count',
         sourceField: 'user_id',
-        label: 'Unique Count of user_id',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -160,6 +160,7 @@ describe('Unique Count Transforms', () => {
         operationType: 'unique_count',
         sourceField: 'user_id',
         label: 'Active Users',
+        customLabel: true,
         isBucketed: false,
         dataType: 'number',
         params: {

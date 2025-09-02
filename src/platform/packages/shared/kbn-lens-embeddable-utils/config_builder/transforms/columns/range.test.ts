@@ -37,7 +37,7 @@ describe('Range Transforms', () => {
         dataType: 'string',
         sourceField: 'price',
         customLabel: false,
-        label: 'price',
+        label: '',
         isBucketed: true,
         params: {
           type: 'range',
@@ -68,7 +68,7 @@ describe('Range Transforms', () => {
         dataType: 'number',
         sourceField: 'price',
         customLabel: false,
-        label: 'price',
+        label: '',
         isBucketed: true,
         params: {
           type: 'histogram',

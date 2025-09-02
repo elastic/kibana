@@ -41,7 +41,7 @@ describe('Moving Average Transforms', () => {
       const expected: MovingAverageIndexPatternColumn = {
         operationType: 'moving_average',
         references: ['col1'],
-        label: 'Moving average of Sum of Total Sales',
+        label: '',
         customLabel: false,
         isBucketed: false,
         dataType: 'number',

@@ -36,7 +36,8 @@ describe('Top Values Transforms', () => {
       expect(result.operationType).toBe('terms');
       expect(result.sourceField).toBe('status');
       expect(result.params.size).toBe(5);
-      expect(result.label).toBe('Top 5 values for status');
+      expect(result.label).toBe('');
+      expect(result.customLabel).toBe(false);
     });
 
     it('should handle secondary fields', () => {

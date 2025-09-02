@@ -208,6 +208,9 @@ describe('Metric Schema', () => {
         breakdown_by: {
           operation: 'date_histogram' as const,
           field: 'timestamp',
+          suggested_interval: 'auto',
+          include_empty_rows: true,
+          use_original_time_rangeoverride_time_range: true,
           columns: 4,
           collapse_by: 'avg' as const,
         },

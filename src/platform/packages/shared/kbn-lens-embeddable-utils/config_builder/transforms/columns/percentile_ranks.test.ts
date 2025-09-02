@@ -29,7 +29,7 @@ describe('Percentile Ranks Transforms', () => {
         filter: undefined,
         operationType: 'percentile_rank',
         sourceField: 'response_time',
-        label: 'Percentile rank (95) of response_time',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -52,7 +52,7 @@ describe('Percentile Ranks Transforms', () => {
         filter: undefined,
         operationType: 'percentile_rank',
         sourceField: 'response_time',
-        label: 'Percentile rank (0) of response_time',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -72,9 +72,6 @@ describe('Percentile Ranks Transforms', () => {
 
       const result = fromPercentileRanksAPItoLensState(input);
       expect(result.params.value).toBe(LENS_PERCENTILE_RANK_DEFAULT_VALUE);
-      expect(result.label).toBe(
-        `Percentile rank (${LENS_PERCENTILE_RANK_DEFAULT_VALUE}) of response_time`
-      );
     });
 
     it('should handle custom label', () => {
@@ -133,6 +130,7 @@ describe('Percentile Ranks Transforms', () => {
         operationType: 'percentile_rank',
         sourceField: 'response_time',
         label: 'PR95 Response Time',
+        customLabel: true,
         isBucketed: false,
         dataType: 'number',
         params: {

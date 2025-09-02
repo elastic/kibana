@@ -27,15 +27,15 @@ describe('Date Histogram Transforms', () => {
         operation: 'date_histogram',
         field: '@timestamp',
         suggested_interval: '1d',
-        include_empty_rows: false,
-        use_original_time_rangeoverride_time_range: false,
+        include_empty_rows: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+        use_original_time_rangeoverride_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
       };
 
       const expected: DateHistogramIndexPatternColumn = {
         operationType: 'date_histogram',
         sourceField: '@timestamp',
         customLabel: false,
-        label: '@timestamp per 1d',
+        label: '',
         isBucketed: true,
         dataType: 'date',
         params: {
@@ -109,7 +109,7 @@ describe('Date Histogram Transforms', () => {
       const input: DateHistogramIndexPatternColumn = {
         operationType: 'date_histogram',
         sourceField: '@timestamp',
-        customLabel: false,
+        customLabel: true,
         label: '@timestamp per 1d',
         isBucketed: true,
         dataType: 'date',
