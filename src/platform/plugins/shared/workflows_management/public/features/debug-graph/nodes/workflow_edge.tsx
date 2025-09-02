@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import type { EdgeProps } from '@xyflow/react';
-import { getBezierPath } from '@xyflow/react';
+import { getSimpleBezierPath } from '@xyflow/react';
 
 export function WorkflowGraphEdge({
   id,
@@ -21,7 +21,7 @@ export function WorkflowGraphEdge({
   style = {},
   markerEnd,
 }: EdgeProps) {
-  const [edgePath] = getBezierPath({
+  const [edgePath] = getSimpleBezierPath({
     sourceX,
     sourceY,
     sourcePosition,

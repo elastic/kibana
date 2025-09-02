@@ -119,7 +119,17 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                     justifyContent: 'space-between',
                   }}
                 >
-                  {node.data.label}
+                  <span
+                    title={node.data.label}
+                    css={{
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '160px',
+                    }}
+                  >
+                    {node.data.label}
+                  </span>
                   {node.data.stepExecution?.status === ExecutionStatus.COMPLETED && (
                     <EuiIcon type="checkInCircleFilled" color="#16C5C0" />
                   )}
