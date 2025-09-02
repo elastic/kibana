@@ -16,10 +16,6 @@ import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getSampleAType } from '../fixtures/zdt_base.fixtures';
-import type {
-  SavedObjectModelTransformationDoc,
-  SavedObjectModelUnsafeTransformFn,
-} from '@kbn/core-saved-objects-server';
 
 export const logFilePath = Path.join(__dirname, 'optimistic_concurrency.test.log');
 
