@@ -7,8 +7,7 @@
 
 import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
-import type { ImportFactoryOptions } from '@kbn/file-upload-plugin/public/importer';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse, ImportFactoryOptions } from '@kbn/file-upload-common';
 import type { TestGrokPatternResponse } from '../../../../../common/types/test_grok_pattern';
 
 export const LINE_LIMIT = 5;
@@ -32,7 +31,7 @@ export class GrokHighlighter extends MessageImporter {
     mappings: FindFileStructureResponse['mappings'],
     ecsCompatibility: string | undefined
   ): Promise<HighlightedLine[]> {
-    const docs = this._createDocs(text, false, LINE_LIMIT);
+    const docs = this._reader._createDocs(text, false, LINE_LIMIT);
     const lines = docs.docs.map((doc) => doc.message);
     const matches = await this.testGrokPattern(lines, grokPattern, ecsCompatibility);
 
