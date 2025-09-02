@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { getMetricFields } from './get_metric_fields';
 import { createRoute } from '../create_route';
-import { isMetricsExperienceEnabled } from '../../lib/utils';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getFieldsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/fields',
@@ -28,11 +28,7 @@ export const getFieldsRoute = createRoute({
   }),
   handler: async ({ context, params, logger, response }) => {
     const services = await context.resolve(['core']);
-    const isEnabled = await isMetricsExperienceEnabled(services);
-
-    if (!isEnabled) {
-      return response.notFound();
-    }
+    await throwNotFoundIfMetricsExperienceDisabled(services);
 
     const esClient = services.core.elasticsearch.client.asCurrentUser;
     const page = params.query.page;

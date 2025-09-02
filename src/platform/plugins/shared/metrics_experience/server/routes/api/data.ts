@@ -17,7 +17,7 @@ import { z } from '@kbn/zod';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createRoute } from '../create_route';
 import { extractDimensionsFromESQL } from '../../lib/dimensions/extract_dimensions_from_esql';
-import { isMetricsExperienceEnabled } from '../../lib/utils';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const metricDataApi = createRoute({
   endpoint: 'POST /internal/metrics_experience/data',
@@ -35,13 +35,9 @@ export const metricDataApi = createRoute({
       ),
     }),
   }),
-  handler: async ({ context, params, response }) => {
+  handler: async ({ context, params }) => {
     const services = await context.resolve(['core']);
-    const isEnabled = await isMetricsExperienceEnabled(services);
-
-    if (!isEnabled) {
-      return response.notFound();
-    }
+    await throwNotFoundIfMetricsExperienceDisabled(services);
 
     const esClient = services.core.elasticsearch.client.asCurrentUser;
     const { esql, from, to, filters } = params.body;

@@ -8,10 +8,18 @@
  */
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { notFound } from '@hapi/boom';
 import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../../../common/constants';
 
-export const isMetricsExperienceEnabled = async (
+export const throwNotFoundIfMetricsExperienceDisabled = async (
   services: AwaitedProperties<Pick<RequestHandlerContext, 'core'>>
-): Promise<boolean> => {
-  return services.core.featureFlags.getBooleanValue(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, false);
+) => {
+  const isEnabled = await services.core.featureFlags.getBooleanValue(
+    METRICS_EXPERIENCE_FEATURE_FLAG_KEY,
+    false
+  );
+
+  if (!isEnabled) {
+    throw notFound();
+  }
 };
