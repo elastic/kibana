@@ -15,8 +15,6 @@ import { FLEET_SERVER_PACKAGE } from '../../constants';
 import { Loading } from '..';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
-import { useAgentPoliciesWithNonFipsIntegrations } from '../../applications/fleet/hooks/use_agent_policies_with_fips';
-
 import type { InstructionProps } from './types';
 import { ManagedSteps, StandaloneSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
@@ -31,14 +29,12 @@ export const Instructions = (props: InstructionProps) => {
     mode,
     setMode,
     isIntegrationFlow,
-    selectedPolicy,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isFleetServerStandalone } = useFleetServerStandalone();
   const { isLoading: isLoadingEnrollmentSettings, data: enrollmentSettings } =
     useGetEnrollmentSettings();
 
-  const nonFipsIntegrations = useAgentPoliciesWithNonFipsIntegrations(selectedPolicy);
   const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
   const showAgentEnrollment =
@@ -93,7 +89,7 @@ export const Instructions = (props: InstructionProps) => {
           {isFleetServerPolicySelected ? (
             <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
-            <ManagedSteps {...props} nonFipsIntegrations={nonFipsIntegrations} />
+            <ManagedSteps {...props} />
           )}
         </>
       );
