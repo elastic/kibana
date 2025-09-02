@@ -8,7 +8,6 @@
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import type { IToasts } from '@kbn/core/public';
 import type { AssignArgs } from 'xstate5';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang/types/processors';
 import type { StreamEnrichmentContextType } from './types';
@@ -27,7 +26,6 @@ import type {
 } from '../../../../../../common/url_schema';
 import { dataSourceConverter, processorConverter } from '../../utils';
 import { isProcessorUnderEdit } from '../processor_state_machine';
-import { ReorderingDetection } from './persistent_field_mappings_utils';
 
 export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
   type: 'random-samples',
@@ -185,29 +183,3 @@ export const spawnDataSource = <
   });
 };
 
- export const createFieldReorderingNotifier =
-  ({ toasts }: { toasts: IToasts }) =>
-  (_args: unknown, params: { reorderings: ReorderingDetection[] }) => {
-    try {
-      const reorderedFields = params.reorderings.map((r) => r.fieldName).join(', ');
-      toasts.addWarning({
-        title: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.fieldPositionsChanged.title',
-          {
-            defaultMessage: 'Field positions changed',
-          }
-        ),
-        text: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.fieldPositionsChanged.text',
-          {
-            defaultMessage:
-              'The positions of fields [{reorderedFields}] have changed due to pattern updates, but your field mappings have been preserved.',
-            values: { reorderedFields },
-          }
-        ),
-        toastLifeTimeMs: 4000,
-      });
-    } catch {
-      // Avoid stopping the machine due to toast errors
-    }
-  };

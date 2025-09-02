@@ -292,7 +292,6 @@ export const simulationMachine = setup({
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
             { type: 'deriveDetectedSchemaFields' },
-            // Notify parent to trigger field restoration
             sendParent({ type: 'simulation.completed' }),
           ],
         },

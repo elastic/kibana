@@ -34,6 +34,7 @@ import {
   matchFieldsWithPersistentMappings,
   applyFieldRestoration,
   updateFieldPositions,
+  createFieldReorderingNotifier,
 } from './persistent_field_mappings_utils';
 import { getDefaultGrokProcessor } from '../../utils';
 import {
@@ -41,13 +42,13 @@ import {
   createUpsertStreamFailureNofitier,
   createUpsertStreamSuccessNofitier,
 } from './upsert_stream_actor';
+
 import {
   simulationMachine,
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
 import { processorMachine } from '../processor_state_machine';
 import {
-  createFieldReorderingNotifier,
   defaultEnrichmentUrlState,
   getConfiguredProcessors,
   getDataSourcesSamples,
