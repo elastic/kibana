@@ -23,6 +23,11 @@ function getRootContextSchema(definition: WorkflowYaml) {
     workflow: WorkflowDataContextSchema,
     now: z.date(),
     event: EventSchema,
+    inputs: z.object({
+      ...Object.fromEntries(
+        Object.entries(definition.inputs ?? {}).map(([key, value]) => [key, inferZodType(value)])
+      ),
+    }),
     steps: z.object({}),
     consts: z.object({
       ...Object.fromEntries(

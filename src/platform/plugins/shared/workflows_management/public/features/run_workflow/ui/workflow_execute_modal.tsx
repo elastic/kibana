@@ -79,14 +79,13 @@ export function WorkflowExecuteModal({
               <EuiButton
                 color={selectedTrigger === trigger ? 'primary' : 'text'}
                 onClick={() => handleChangeTrigger(trigger)}
-                // iconType={option.icon}
                 iconSide="right"
                 contentProps={{
                   style: {
                     justifyContent: 'flex-start',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    padding: euiTheme.size.m,
+                    padding: selectedTrigger === trigger ? '10px' : '9px',
                     textAlign: 'left',
                   },
                 }}
