@@ -2797,25 +2797,6 @@
       "enabled": true
     },
     {
-      "groupName": "expiry-js",
-      "matchDepNames": [
-        "expiry-js"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "globby",
       "matchDepNames": [
         "globby"
