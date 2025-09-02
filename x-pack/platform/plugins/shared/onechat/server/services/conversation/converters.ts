@@ -6,14 +6,20 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ConversationWithoutRounds, ConversationRound } from '@kbn/onechat-common';
-import { type UserIdAndName, type Conversation } from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type {
+  ConversationRound,
+  ConversationWithoutRounds,
+  Conversation,
+  UserIdAndName,
+  ToolResult,
+} from '@kbn/onechat-common';
+import { ConversationRoundStepType } from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
 } from '../../../common/conversations';
 import type { ConversationProperties } from './storage';
+import type { PersistentConversationRound } from './types';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
@@ -37,9 +43,7 @@ const convertBaseFromEs = (
   };
 };
 
-function serializeStepResults(
-  rounds: Array<ConversationRound<ToolResult[]>>
-): Array<ConversationRound<string>> {
+function serializeStepResults(rounds: ConversationRound[]): PersistentConversationRound[] {
   return rounds.map((round) => ({
     ...round,
     steps: round.steps.map((step) => ({
@@ -49,14 +53,23 @@ function serializeStepResults(
   }));
 }
 
-function deserializeStepResults(
-  rounds: Array<ConversationRound<string>>
-): Array<ConversationRound<ToolResult[]>> {
+function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map((round) => ({
     ...round,
     steps: round.steps.map((step) => ({
       ...step,
-      results: 'results' in step ? JSON.parse(step.results) : [],
+      results:
+        'results' in step
+          ? JSON.parse(step.results).map((result: ToolResult) => {
+              if (step.type === ConversationRoundStepType.toolCall) {
+                return {
+                  ...step,
+                  progression: step.progression ?? [],
+                };
+              }
+              return step;
+            })
+          : [],
     })),
   }));
 }

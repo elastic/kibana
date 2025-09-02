@@ -32,7 +32,7 @@ The 'pattern' optional parameter is an index pattern which can be used to filter
 This parameter should only be used when you already know of a specific pattern to filter on,
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient }) => {
+    handler: async ({ pattern }, { esClient, events }) => {
       const {
         indices,
         data_streams: dataStreams,
@@ -46,6 +46,8 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
         excludeIndicesRepresentedAsDatastream: true,
         esClient: esClient.asCurrentUser,
       });
+
+      events.reportProgress('just some testing');
 
       return {
         results: [
