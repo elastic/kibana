@@ -37,7 +37,6 @@ import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
-
 import {
   createDataViewDataSource,
   DataSourceType,
