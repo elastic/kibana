@@ -8,21 +8,15 @@
  */
 
 import React, { useMemo } from 'react';
-import dagre from '@dagrejs/dagre';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
-import { Background, Controls, Position, ReactFlow } from '@xyflow/react';
+import { Background, Controls, ReactFlow } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { WorkflowGraphEdge, WorkflowGraphNode } from './nodes';
-import {
-  mainScopeNodes,
-  secondaryScopeNodes,
-  atomicNodes,
-  openScopeNodes,
-  closeScopeNodes,
-} from './nodes/types';
+import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
+import { mainScopeNodes, secondaryScopeNodes, atomicNodes } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
 
@@ -41,101 +35,6 @@ const edgeTypes = {
   default: WorkflowGraphEdge,
   workflowEdge: WorkflowGraphEdge,
 };
-
-function applyLayout(graph: dagre.graphlib.Graph) {
-  const topologySort = dagre.graphlib.alg.topsort(graph);
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setGraph({});
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-  // Set graph direction and spacing
-  dagreGraph.setGraph({
-    rankdir: 'BT', // Bottom-to-Top direction (reversed)
-    nodesep: 40,
-    ranksep: 40,
-    edgesep: 40,
-    // align: 'UL', // Align nodes to Upper-Left within their ranks
-    marginx: 20,
-    marginy: 20,
-  });
-
-  const stack = [] as string[];
-  const baseWidth = 300;
-  let maxDepth = 0;
-
-  topologySort
-    .map((nodeId) => graph.node(nodeId))
-    .forEach((node: any) => {
-      if (closeScopeNodes.includes(node.type)) {
-        stack.pop();
-      }
-
-      dagreGraph.setNode(node.id, {
-        node,
-        type: (node as any).type,
-        currentDepth: stack.length,
-      });
-      if (stack.length > maxDepth) {
-        maxDepth = stack.length;
-      }
-      if (openScopeNodes.includes(node.type)) {
-        stack.push(node.type);
-      }
-    });
-  dagreGraph
-    .nodes()
-    .map((id) => ({ id, node: dagreGraph.node(id) as any }))
-    .forEach((x) =>
-      dagreGraph.setNode(x.id, {
-        ...x.node,
-        width:
-          x.node.currentDepth === maxDepth
-            ? baseWidth
-            : baseWidth + (maxDepth - x.node.currentDepth) * 70,
-        height: 50,
-      })
-    );
-
-  graph.edges().forEach((edge) => {
-    // Reverse source and destination for BT layout
-    dagreGraph.setEdge(edge.w, edge.v, {
-      type: 'workflowEdge',
-    });
-  });
-
-  dagre.layout(dagreGraph);
-
-  const nodes = graph.nodes().map((id) => {
-    const dagreNode = dagreGraph.node(id);
-    const graphNode = graph.node(id) as any;
-    return {
-      id,
-      data: {
-        ...dagreGraph.node(id),
-        stepType: graphNode?.type,
-        step: graphNode?.configuration,
-        label: graphNode?.label || id,
-      },
-      // See this: https://github.com/dagrejs/dagre/issues/287
-      targetPosition: Position.Bottom, // Reversed due to BT layout
-      sourcePosition: Position.Top, // Reversed due to BT layout
-      style: {
-        width: dagreNode.width as number,
-        height: dagreNode.height as number,
-      },
-      type: graphNode.type,
-      position: { x: dagreNode.x - dagreNode.width / 2, y: dagreNode.y - dagreNode.height / 2 },
-    } as Node;
-  });
-
-  const edges = graph.edges().map((e) => ({
-    id: `${e.v} -> ${e.w}`,
-    source: e.v,
-    target: e.w,
-    label: graph.edge(e)?.label,
-  }));
-  return { nodes, edges };
-}
 
 // Wrapper component to handle ReactFlow initialization timing
 const ReactFlowWrapper: React.FC<{
@@ -219,7 +118,7 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) 
     let result = null;
     let error = null;
     try {
-      result = applyLayout(workflowExecutionGraph.result);
+      result = convertWorkflowGraphToReactFlow(workflowExecutionGraph.result);
     } catch (e) {
       error = e.message;
     }
