@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
@@ -44,12 +45,21 @@ export default ({ getService }: FtrProviderContext) => {
       },
     });
 
-  const waitForPrivMonUsersToBeSynced = async (length = 1) =>
-    retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
+  const waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
+    let lastSeenLength = -1;
+
+    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
       const res = await api.listPrivMonUsers({ query: {} });
-      log.info(`PrivMon users sync check: found ${res.body.length} users`);
-      return res.body.length >= length; // wait until we have at least one user
+      const currentLength = res.body.length;
+
+      if (currentLength !== lastSeenLength) {
+        log.info(`PrivMon users sync check: found ${currentLength} users`);
+        lastSeenLength = currentLength;
+      }
+
+      return currentLength >= expectedLength;
     });
+  };
 
   async function getPrivMonSoStatus(space: string = 'default') {
     return kibanaServer.savedObjects.find({
@@ -329,6 +339,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('schedule now', () => {
+      beforeEach(async () => {
+        await enablePrivmonSetting(kibanaServer);
+        await api.initMonitoringEngine();
+      });
+      afterEach(async () => {
+        await disablePrivmonSetting(kibanaServer);
+        await api.deleteMonitoringEngine({ query: { data: true } });
+      });
+      it('should return a 409 if the task is already running', async () => {
+        await privMonUtils.setPrivmonTaskStatus(TaskStatus.Running);
+        await privMonUtils.scheduleMonitoringEngineNow({ expectStatusCode: 409 });
+      });
+    });
+
     describe('plain index sync', () => {
       const indexName = 'tatooine-privileged-users';
       const entitySource = {
@@ -349,6 +374,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createUserIndex(indexName);
         await enablePrivmonSetting(kibanaServer);
+        await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
@@ -357,12 +383,12 @@ export default ({ getService }: FtrProviderContext) => {
         } catch (err) {
           log.warning(`Failed to clean up in afterEach: ${err.message}`);
         }
+        await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
       });
 
       it('should sync plain index', async () => {
-        // Bulk insert documents
-        const uniqueUsers = [
+        const uniqueUsernames = [
           'Luke Skywalker',
           'Leia Organa',
           'Han Solo',
@@ -372,17 +398,18 @@ export default ({ getService }: FtrProviderContext) => {
           'R2-D2',
           'C-3PO',
           'Darth Vader',
-        ].flatMap((name) => [{ index: {} }, { user: { name, role: 'admin' } }]);
-        const repeatedUsers = Array.from({ length: 150 }).flatMap(() => [
-          { index: {} },
-          { user: { name: 'C-3PO', role: 'admin' } },
-        ]);
+        ];
 
-        const bulkBody = [...uniqueUsers, ...repeatedUsers];
-        await es.bulk({ index: indexName, body: bulkBody, refresh: true });
+        const nameToOp = (name: string) => [{ index: {} }, { user: { name, role: 'admin' } }];
 
-        // Call init to trigger the sync
-        await privMonUtils.initPrivMonEngine();
+        const uniqueUserOps = uniqueUsernames.flatMap(nameToOp);
+        const repeatedUserOps = Array.from({ length: 150 }).flatMap(() => nameToOp('C-3PO'));
+
+        await es.bulk({
+          index: indexName,
+          body: [...uniqueUserOps, ...repeatedUserOps],
+          refresh: true,
+        });
 
         // register entity source
         const response = await api.createEntitySource({ body: entitySource });
@@ -392,7 +419,9 @@ export default ({ getService }: FtrProviderContext) => {
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
         expect(names).toContain('StarWars');
-        await waitForPrivMonUsersToBeSynced(9);
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+        await privMonUtils.waitForSyncTaskRun();
+        await waitForPrivMonUsersToBeSynced(uniqueUsernames.length);
         // Check if the users are indexed
         const res = await api.listPrivMonUsers({ query: {} });
         const userNames = res.body.map((u: any) => u.user.name);

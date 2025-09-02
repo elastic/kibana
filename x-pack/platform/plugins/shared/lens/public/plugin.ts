@@ -131,7 +131,6 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import type { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import type { LensDocument } from './persistence';
 import type { LensSavedObjectAttributes } from '../common/content_management';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
@@ -142,6 +141,7 @@ import {
   ACTION_EDIT_LENS_EMBEDDABLE,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
+import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 export type { SaveProps } from './app_plugin';
 
