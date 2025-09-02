@@ -12,6 +12,7 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -123,6 +124,18 @@ export interface DeleteQueriesAction {
   };
 }
 
+export interface UpdateIngestSettingsAction {
+  type: 'update_ingest_settings';
+  request: {
+    name: string;
+    settings: {
+      'index.number_of_replicas': number | null;
+      'index.number_of_shards': number | null;
+      'index.refresh_interval': string | -1 | null;
+    };
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -139,7 +152,8 @@ export type ElasticsearchAction =
   | UpdateDefaultIngestPipelineAction
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
-  | DeleteQueriesAction;
+  | DeleteQueriesAction
+  | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -158,4 +172,5 @@ export interface ActionsByType {
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   delete_queries: DeleteQueriesAction[];
+  update_ingest_settings: UpdateIngestSettingsAction[];
 }

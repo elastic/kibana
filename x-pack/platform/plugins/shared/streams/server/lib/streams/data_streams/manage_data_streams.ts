@@ -114,7 +114,6 @@ export async function updateDataStreamsLifecycle({
       await putDataStreamsSettings({
         esClient,
         names,
-        logger,
         settings: {
           'index.lifecycle.name': lifecycle.ilm.policy,
           'index.lifecycle.prefer_ilm': true,
@@ -136,7 +135,6 @@ export async function updateDataStreamsLifecycle({
         await putDataStreamsSettings({
           esClient,
           names,
-          logger,
           settings: {
             'index.lifecycle.name': null,
             'index.lifecycle.prefer_ilm': false,
@@ -182,7 +180,6 @@ export async function updateDataStreamsLifecycle({
             await putDataStreamsSettings({
               esClient,
               names: [name],
-              logger,
               settings: {
                 'index.lifecycle.name': null,
                 'index.lifecycle.prefer_ilm': null,
@@ -198,29 +195,26 @@ export async function updateDataStreamsLifecycle({
   }
 }
 
-async function putDataStreamsSettings({
+export async function putDataStreamsSettings({
   esClient,
   names,
-  logger,
   settings,
 }: {
   esClient: ElasticsearchClient;
   names: string[];
-  logger: Logger;
   settings: {
     'index.lifecycle.name'?: string | null;
     'index.lifecycle.prefer_ilm'?: boolean | null;
+    'index.number_of_replicas'?: number | null;
+    'index.number_of_shards'?: number | null;
+    'index.refresh_interval'?: string | -1 | null;
   };
 }) {
-  await retryTransientEsErrors(
-    () =>
-      // TODO: use client method once available
-      esClient.transport.request({
-        method: 'PUT',
-        path: `/_data_stream/${names.join(',')}/_settings`,
-        body: settings,
-      }),
-    { logger }
+  await retryTransientEsErrors(() =>
+    esClient.indices.putDataStreamSettings({
+      name: names,
+      settings,
+    })
   );
 }
 

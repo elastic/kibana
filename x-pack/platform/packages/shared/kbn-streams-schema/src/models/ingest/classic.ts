@@ -15,6 +15,7 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
+import { IngestStreamSettings, ingestStreamSettingsSchema } from './settings';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -44,6 +45,7 @@ export namespace ClassicStream {
     elasticsearch_assets?: ElasticsearchAssets;
     data_stream_exists: boolean;
     effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
+    effective_settings: IngestStreamSettings;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -71,6 +73,7 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
         elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
         data_stream_exists: z.boolean(),
         effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
+        effective_settings: ingestStreamSettingsSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),

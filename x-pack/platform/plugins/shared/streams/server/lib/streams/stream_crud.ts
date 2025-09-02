@@ -14,6 +14,7 @@ import type {
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
+import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -44,6 +45,30 @@ export function getDataStreamLifecycle(
       message: `Unknown data stream lifecycle state [${dataStream.next_generation_managed_by}]`,
     },
   };
+}
+
+export function getDataStreamSettings(dataStream: IndicesDataStream | null) {
+  const settings: IngestStreamSettings = {};
+
+  if (dataStream?.settings.index?.number_of_replicas) {
+    settings['index.number_of_replicas'] = {
+      value: Number(dataStream.settings.index.number_of_replicas),
+    };
+  }
+
+  if (dataStream?.settings.index?.number_of_shards) {
+    settings['index.number_of_shards'] = {
+      value: Number(dataStream.settings.index.number_of_shards),
+    };
+  }
+
+  if (dataStream?.settings.index?.refresh_interval) {
+    settings['index.refresh_interval'] = {
+      value: dataStream.settings.index.refresh_interval,
+    };
+  }
+
+  return settings;
 }
 
 interface ReadUnmanagedAssetsParams extends BaseParams {

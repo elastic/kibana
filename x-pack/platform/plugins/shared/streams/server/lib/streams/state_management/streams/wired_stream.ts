@@ -11,6 +11,7 @@ import {
   MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
+  getInheritedSettings,
   getSegments,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
@@ -56,6 +57,7 @@ interface WiredStreamChanges extends StreamChanges {
   routing: boolean;
   processing: boolean;
   lifecycle: boolean;
+  settings: boolean;
 }
 
 export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definition> {
@@ -64,6 +66,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     routing: false,
     processing: false,
     lifecycle: false,
+    settings: false,
   };
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
@@ -132,6 +135,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
+    this._changes.settings =
+      !startingStateStreamDefinition ||
+      !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings);
+
     const parentId = getParentId(this._definition.name);
     const cascadingChanges: StreamChange[] = [];
     if (parentId && !desiredState.has(parentId)) {
@@ -143,6 +150,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           ingest: {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
             wired: {
               fields: {},
               routing: [
@@ -173,6 +181,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: { steps: [] },
+                settings: {},
                 wired: {
                   fields: {},
                   routing: [],
@@ -503,6 +512,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
     const { existsAsManagedDataStream } = await this.getMatchingDataStream();
+    const settings = getInheritedSettings([...ancestors, this._definition]);
 
     return [
       {
@@ -552,6 +562,17 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: {
+            'index.number_of_replicas': settings['index.number_of_replicas'] ?? null,
+            'index.number_of_shards': settings['index.number_of_shards'] ?? null,
+            'index.refresh_interval': settings['index.refresh_interval'] ?? null,
+          },
+        },
+      },
+      {
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
@@ -564,6 +585,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
   public hasChangedLifecycle(): boolean {
     return this._changes.lifecycle;
+  }
+
+  public hasChangedSettings(): boolean {
+    return this._changes.settings;
   }
 
   public getLifecycle(): IngestStreamLifecycle {
@@ -639,6 +664,27 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         }
         break;
       }
+    }
+
+    const ancestors = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!
+    ) as WiredStream[];
+    if (ancestors.some((ancestor) => ancestor.hasChangedSettings())) {
+      const settings = getInheritedSettings(
+        ancestors.map((ancestor) => ancestor.definition) as Streams.WiredStream.Definition[]
+      );
+
+      actions.push({
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: {
+            'index.number_of_replicas': settings['index.number_of_replicas']?.value ?? null,
+            'index.number_of_shards': settings['index.number_of_shards']?.value ?? null,
+            'index.refresh_interval': settings['index.refresh_interval']?.value ?? null,
+          },
+        },
+      });
     }
 
     const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);

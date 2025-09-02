@@ -101,6 +101,12 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // add settings
+  if (isObject(migratedDefinition.ingest) && !('settings' in migratedDefinition.ingest)) {
+    set(migratedDefinition, 'ingest.settings', {});
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }

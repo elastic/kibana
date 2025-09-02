@@ -30,12 +30,14 @@ import { StreamActiveRecord } from '../stream_active_record/stream_active_record
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
   lifecycle: boolean;
+  settings: boolean;
 }
 
 export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
   protected _changes: ClassicStreamChanges = {
     processing: false,
     lifecycle: false,
+    settings: false,
   };
 
   constructor(definition: Streams.ClassicStream.Definition, dependencies: StateDependencies) {
@@ -80,6 +82,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+
+    this._changes.settings =
+      !startingStateStreamDefinition ||
+      !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings);
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
@@ -163,6 +169,22 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+    if (this._changes.settings) {
+      actions.push({
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: {
+            'index.number_of_replicas':
+              this._definition.ingest.settings['index.number_of_replicas']?.value ?? null,
+            'index.number_of_shards':
+              this._definition.ingest.settings['index.number_of_shards']?.value ?? null,
+            'index.refresh_interval':
+              this._definition.ingest.settings['index.refresh_interval']?.value ?? null,
+          },
         },
       });
     }

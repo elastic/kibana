@@ -18,6 +18,7 @@ import {
   rolloverDataStream,
   upsertDataStream,
   updateDefaultIngestPipeline,
+  putDataStreamsSettings,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -47,6 +48,7 @@ import type {
   UpsertIngestPipelineAction,
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
+  UpdateIngestSettingsAction,
 } from './types';
 
 /**
@@ -79,6 +81,7 @@ export class ExecutionPlan {
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
       delete_queries: [],
+      update_ingest_settings: [],
     };
   }
 
@@ -165,6 +168,7 @@ export class ExecutionPlan {
         upsert_dot_streams_document,
         delete_dot_streams_document,
         delete_queries,
+        update_ingest_settings,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -185,6 +189,7 @@ export class ExecutionPlan {
         this.upsertIndexTemplates(upsert_index_template),
       ]);
       await this.upsertDatastreams(upsert_datastream);
+      await this.updateIngestSettings(update_ingest_settings);
       await Promise.all([
         this.rollover(rollover),
         this.updateLifecycle(update_lifecycle),
@@ -369,6 +374,18 @@ export class ExecutionPlan {
       operations: actions.map(dotDocumentActionToBulkOperation),
       refresh: true,
     });
+  }
+
+  private async updateIngestSettings(actions: UpdateIngestSettingsAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        putDataStreamsSettings({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          names: [action.request.name],
+          settings: action.request.settings,
+        })
+      )
+    );
   }
 }
 

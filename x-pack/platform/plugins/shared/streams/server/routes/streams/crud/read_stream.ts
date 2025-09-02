@@ -9,6 +9,7 @@ import {
   Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
+  getInheritedSettings,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { partition } from 'lodash';
@@ -16,6 +17,7 @@ import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
+  getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
@@ -81,6 +83,7 @@ export async function readStream({
           : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
+      effective_settings: getDataStreamSettings(dataStream),
       dashboards,
       queries,
     } satisfies Streams.ClassicStream.GetResponse;
@@ -97,6 +100,7 @@ export async function readStream({
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
+    effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
   };
 
