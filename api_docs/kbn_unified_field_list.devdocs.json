@@ -4567,13 +4567,7 @@
                 "text": "FrequentCompatibilityChangeAction"
               },
               "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "UiActionsService",
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_visualize_button/field_visualize_button.tsx",
