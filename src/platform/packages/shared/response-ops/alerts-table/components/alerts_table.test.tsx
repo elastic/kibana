@@ -11,8 +11,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
-import { get } from 'lodash';
-import { render, waitFor, screen, act } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
@@ -26,17 +25,12 @@ import { applicationServiceMock, notificationServiceMock } from '@kbn/core/publi
 import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type {
-  AlertsDataGridProps,
-  AlertsTableProps,
-  AdditionalContext,
-  RenderContext,
-} from '../types';
+import type { AdditionalContext, AlertsTableProps, RenderContext } from '../types';
 import { AlertsField } from '../types';
 import { AlertsTable } from './alerts_table';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { getCasesMock, createCasesServiceMock } from '../mocks/cases.mock';
+import { createCasesServiceMock, getCasesMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMock } from '../mocks/maintenance_windows.mock';
 import { bulkGetCases } from '../apis/bulk_get_cases';
 import { bulkGetMaintenanceWindows } from '../apis/bulk_get_maintenance_windows';
@@ -277,30 +271,6 @@ describe('AlertsTable', () => {
     query: {},
     columns,
     pageSize: 10,
-    renderActionsCell: ({ openAlertInFlyout }) => {
-      return (
-        <button
-          data-test-subj="expandColumnCellOpenFlyoutButton-0"
-          onClick={() => {
-            openAlertInFlyout('alert-id-1');
-          }}
-        />
-      );
-    },
-    renderExpandedAlertView: (props) => {
-      const alertIndexInPage = props.expandedAlertIndex - props.pageIndex * props.pageSize;
-      const alert = props.alerts[alertIndexInPage];
-
-      return (
-        <ul>
-          {columns.map((column) => (
-            <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
-              {get(alert as any, column.id, [])[0]}
-            </li>
-          ))}
-        </ul>
-      );
-    },
     services: {
       http: httpServiceMock.createStartContract(),
       application: {
@@ -329,12 +299,12 @@ describe('AlertsTable', () => {
     },
   };
 
-  let onChangePageIndex: AlertsDataGridProps['onChangePageIndex'];
+  let onPageIndexChange: RenderContext<AdditionalContext>['onPageIndexChange'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
 
   mockAlertsDataGrid.mockImplementation((props) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
-    onChangePageIndex = props.onChangePageIndex;
+    onPageIndexChange = props.renderContext.onPageIndexChange;
     refresh = props.renderContext.refresh;
     return <ActualAlertsDataGrid {...props} />;
   });
@@ -661,101 +631,7 @@ describe('AlertsTable', () => {
     });
   });
 
-  describe('flyout', () => {
-    it('should show a flyout when selecting an alert', async () => {
-      const wrapper = render(<TestComponent {...tableProps} />);
-      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
-
-      const result = await wrapper.findAllByTestId('alertFlyout');
-      expect(result.length).toBe(1);
-
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-
-      // Should paginate too
-      await userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
-
-      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-    });
-
-    it('should refetch data if flyout pagination exceeds the current page', async () => {
-      render(
-        <TestComponent
-          {...{
-            ...tableProps,
-            pageSize: 1,
-          }}
-        />
-      );
-
-      await userEvent.click(await screen.findByTestId('expandColumnCellOpenFlyoutButton-0'));
-      const result = await screen.findAllByTestId('alertFlyout');
-      expect(result.length).toBe(1);
-
-      mockSearchAlerts.mockClear();
-
-      await userEvent.click(await screen.findByTestId('pagination-button-next'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 1,
-          pageSize: 1,
-        })
-      );
-
-      mockSearchAlerts.mockClear();
-      await userEvent.click(await screen.findByTestId('pagination-button-previous'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 0,
-          pageSize: 1,
-        })
-      );
-    });
-
-    it('should be able to go back from last page to n - 1', async () => {
-      render(
-        <TestComponent
-          {...{
-            ...tableProps,
-            pageSize: 2,
-          }}
-        />
-      );
-
-      await userEvent.click(
-        (
-          await screen.findAllByTestId('expandColumnCellOpenFlyoutButton-0')
-        )[0]
-      );
-      const result = await screen.findAllByTestId('alertFlyout');
-      expect(result.length).toBe(1);
-
-      mockSearchAlerts.mockClear();
-
-      await userEvent.click(await screen.findByTestId('pagination-button-last'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 1,
-          pageSize: 2,
-        })
-      );
-
-      mockSearchAlerts.mockClear();
-      await userEvent.click(await screen.findByTestId('pagination-button-previous'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 0,
-          pageSize: 2,
-        })
-      );
-    });
-  });
-
-  describe('field browser', () => {
+  describe('Field browser', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockBulkGetCases.mockResolvedValue({ cases: [], errors: [] });
@@ -893,7 +769,7 @@ describe('AlertsTable', () => {
   };
   testInspectButton();
 
-  describe('empty state', () => {
+  describe('Empty state', () => {
     beforeEach(() => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
@@ -951,7 +827,7 @@ describe('AlertsTable', () => {
       });
       const { rerender } = render(<TestComponent {...tableProps} />);
       act(() => {
-        onChangePageIndex(1);
+        onPageIndexChange(1);
       });
       rerender(
         <TestComponent
@@ -973,12 +849,34 @@ describe('AlertsTable', () => {
       });
       render(<TestComponent {...tableProps} />);
       act(() => {
-        onChangePageIndex(1);
+        onPageIndexChange(1);
       });
       act(() => {
         refresh();
       });
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(expect.objectContaining({ pageIndex: 0 }));
+    });
+
+    it('should fetch a new page if the expanded alert index is in the next page', async () => {
+      render(<TestComponent {...tableProps} pageSize={1} expandedAlertIndex={1} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pageIndex: 1,
+          pageSize: 1,
+        })
+      );
+    });
+
+    it('should go back to a previous page if the expanded alert index is in the previous page', async () => {
+      render(<TestComponent {...tableProps} pageSize={1} pageIndex={1} expandedAlertIndex={0} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pageIndex: 0,
+          pageSize: 1,
+        })
+      );
     });
   });
 });

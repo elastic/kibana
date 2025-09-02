@@ -15,21 +15,55 @@ import {
   type SetStateAction,
   useEffect,
 } from 'react';
+import { isFunction } from 'lodash';
 
 type ChangeHandler<T> = (state: T) => void;
 type SetStateFn<T> = Dispatch<SetStateAction<T>>;
 
-interface UseControllableStateParams<T> {
-  prop?: T | undefined;
-  defaultProp: T;
+export function useControllableState<T>(params: {
+  prop?: T;
   onChange?: ChangeHandler<T>;
+  defaultValue?: T;
+}): [T, SetStateFn<T>];
+export function useControllableState<T>({
+  prop,
+  onChange,
+  defaultValue,
+}: {
+  prop?: T;
+  onChange?: ChangeHandler<T | undefined>;
+  defaultValue?: undefined;
+}): [T | undefined, SetStateFn<T | undefined>] {
+  const [internalState, setInternalState, onChangeRef] = useInternalState({
+    initialValue: (prop ?? defaultValue) as T | undefined,
+    onChange,
+  });
+  const isControlled = prop !== undefined && !!onChange;
+  const value = isControlled ? prop : internalState;
+
+  const setValue = useCallback<SetStateFn<T | undefined>>(
+    (nextValue) => {
+      if (onChangeRef.current) {
+        const newValue = isFunction(nextValue) ? nextValue(prop) : nextValue;
+        onChangeRef.current(newValue);
+      } else {
+        setInternalState(nextValue);
+      }
+    },
+    [prop, onChangeRef, setInternalState]
+  );
+
+  return [value, setValue] as const;
 }
 
-const useUncontrolledState = <T>({
-  defaultProp,
+function useInternalState<T>({
+  initialValue,
   onChange,
-}: Omit<UseControllableStateParams<T>, 'prop'>) => {
-  const [value, setValue] = useState(defaultProp);
+}: {
+  initialValue?: T;
+  onChange?: ChangeHandler<T | undefined>;
+}) {
+  const [value, setValue] = useState(initialValue);
   const onChangeRef = useRef(onChange);
   const preValue = useRef(value);
 
@@ -45,35 +79,4 @@ const useUncontrolledState = <T>({
   }, [onChange]);
 
   return [value, setValue, onChangeRef] as const;
-};
-
-const isFunction = (value: unknown): value is (...args: any[]) => any =>
-  typeof value === 'function';
-
-export const useControllableState = <T>({
-  prop,
-  defaultProp,
-  onChange,
-}: UseControllableStateParams<T>) => {
-  const [uncontrolledProp, setUncontrolledProp, onChangeRef] = useUncontrolledState({
-    defaultProp,
-    onChange,
-  });
-  const isControlled = prop !== undefined;
-  const value = isControlled ? prop : uncontrolledProp;
-
-  // const setValue = isControlled ? controlledSetter : setUncontrolledProp;
-  const setValue = useCallback<SetStateFn<T>>(
-    (nextValue) => {
-      if (isControlled) {
-        const newValue = isFunction(nextValue) ? nextValue(prop) : nextValue;
-        onChangeRef.current?.(newValue);
-      } else {
-        setUncontrolledProp(nextValue);
-      }
-    },
-    [isControlled, prop, onChangeRef, setUncontrolledProp]
-  );
-
-  return [value, setValue] as const;
-};
+}
