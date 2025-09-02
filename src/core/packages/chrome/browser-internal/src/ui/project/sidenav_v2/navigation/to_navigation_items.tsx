@@ -278,7 +278,7 @@ export const toNavigationItems = (
     warnUnsupportedNavNodeOptions(navNode);
 
     // for primary menu items there should always be a href
-    // if it's a panel opener, we use the first link inside the section as the href
+    // if it's a panel opener, we use the last opened panel or the first link inside the section as the href
     // if there are no sections, we use the href directly
     const itemHref = secondarySections?.length
       ? getPanelOpenerHref(navNode, secondarySections, panelStateManager)
