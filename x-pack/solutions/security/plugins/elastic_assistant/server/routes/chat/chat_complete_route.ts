@@ -35,6 +35,7 @@ import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_
 import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
 import type { ConfigSchema } from '../../config_schema';
+import { OnLlmResponse } from '../../lib/langchain/executors/types';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -207,10 +208,10 @@ export const chatCompleteRoute = (
             disabled: contentReferencesDisabled ?? false,
           });
 
-          const onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
+          const onLlmResponse: OnLlmResponse = async (
+            { content,
+              traceData = {},
+              isError = false }
           ): Promise<void> => {
             if (conversationId && conversationsDataClient) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(

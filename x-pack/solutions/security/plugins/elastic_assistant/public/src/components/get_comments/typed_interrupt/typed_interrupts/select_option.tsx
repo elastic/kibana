@@ -31,9 +31,9 @@ export const SelectOption = ({
   >(initialResumeValue);
 
   const handleOnSelect = (value: SelectOptionInterruptValue['options'][number]['value']) => {
-    const resumeValue: SelectOptionInterruptResumeValue = { type: 'SELECT_OPTION', value };
-    setResumeValue(resumeValue);
-    resumeGraph(interrupt.threadId, resumeValue);
+    const newResumeValue: SelectOptionInterruptResumeValue = { type: 'SELECT_OPTION', value };
+    setResumeValue(newResumeValue);
+    resumeGraph(interrupt.threadId, newResumeValue);
   };
 
   const disabled = resumeValue !== undefined || interrupt.expired === true || !isLastInConversation;

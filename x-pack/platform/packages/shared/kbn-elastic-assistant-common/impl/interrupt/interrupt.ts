@@ -13,14 +13,14 @@ import { InterruptResumeValue } from '../schemas';
  * Ensures the correct types are used for interrupt values and resume values so that
  * the interrupts are rendered correctly on the frontend.
  */
-export const typedInterrupt = <T extends InterruptType>(
+export const typedInterrupt = async <T extends InterruptType>(
   interruptValue: { type: T } & InterruptValue
-): { type: T } & InterruptResumeValue => {
+): Promise<{ type: T; } & InterruptResumeValue> => {
   if (typeof window !== 'undefined') {
     throw new Error('typedInterrupt is only available on the server side');
   }
 
-  const { interrupt } = eval('require')('@langchain/langgraph'); // Ensures this is only imported server side.
+    const { interrupt } = await import('@langchain/langgraph'); // Ensures this is only imported server side.
 
   const result = interrupt(interruptValue);
 

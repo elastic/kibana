@@ -12,6 +12,7 @@ import type {
   InputTextInterruptResumeValue,
 } from '@kbn/elastic-assistant-common';
 import { EuiBadge, EuiButton, EuiFieldText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   interruptValue: InputTextInterruptValue;
@@ -32,9 +33,9 @@ export const InputText = ({
   );
 
   const onSubmit = () => {
-    const resumeValue: InputTextInterruptResumeValue = { type: 'INPUT_TEXT', value: input };
-    setResumeValue(resumeValue);
-    resumeGraph(interrupt.threadId, resumeValue);
+    const newResumeValue: InputTextInterruptResumeValue = { type: 'INPUT_TEXT', value: input };
+    setResumeValue(newResumeValue);
+    resumeGraph(interrupt.threadId, newResumeValue);
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +76,7 @@ export const InputText = ({
         justifyContent="flexStart"
       >
         <EuiButton color="success" size="s" onClick={onSubmit} disabled={disabled}>
-          Submit
+            <FormattedMessage id="xpack.elasticAssistant.typed.interrupt.input.text.submit.label" defaultMessage="Submit" />
         </EuiButton>
 
         {outcome && <EuiBadge>{outcome}</EuiBadge>}
