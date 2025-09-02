@@ -1,7 +1,7 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -60,8 +60,7 @@
     "@kbn/data-service-server",
     "@kbn/css-utils",
     "@kbn/inspector-common",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

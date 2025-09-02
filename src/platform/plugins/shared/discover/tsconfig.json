@@ -114,6 +114,8 @@
     "@kbn/core-application-browser",
     "@kbn/inspector-common",
     "@kbn/inspector-browser",
+    "@kbn/metrics-experience-plugin",
+    "@kbn/unified-metrics-grid"
   ],
   "exclude": ["target/**/*"]
 }
