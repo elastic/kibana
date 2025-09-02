@@ -44,8 +44,10 @@ export enum EventType {
 }
 export enum FieldType {
   REPORT_ID = 'report_id',
+  SCHEDULED_TASK_ID = 'scheduled_task_id',
   EXPORT_TYPE = 'export_type',
   OBJECT_TYPE = 'object_type',
+  SCHEDULE_TYPE = 'schedule_type',
   IS_DEPRECATED = 'is_deprecated',
   IS_PUBLIC_API = 'is_public_api',
   DURATION_MS = 'duration_ms',
@@ -57,6 +59,11 @@ export enum FieldType {
   SCREENSHOT_LAYOUT = 'screenshot_layout',
   CSV_ROWS = 'csv_rows',
   CSV_COLUMNS = 'csv_columns',
+  ATTEMPT = 'attempt',
+}
+export enum ScheduleType {
+  SINGLE = 'single',
+  SCHEDULED = 'scheduled',
 }
 
 /*

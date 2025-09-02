@@ -6,11 +6,15 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { ScheduleType } from '@kbn/reporting-server';
 import { EventType, FieldType } from '@kbn/reporting-server';
 
 interface CompletionOpts {
+  attempt: number;
   byteSize: number;
+  scheduledTaskId?: string;
   timeSinceCreation: number;
+  scheduleType: ScheduleType;
 }
 
 interface CompletionOptsScreenshot extends CompletionOpts {
@@ -27,6 +31,8 @@ interface FailureOpts {
   timeSinceCreation: number;
   errorCode: string;
   errorMessage: string;
+  scheduledTaskId?: string;
+  scheduleType: ScheduleType;
 }
 
 export class EventTracker {
@@ -55,9 +61,11 @@ export class EventTracker {
   public createReport({
     isDeprecated,
     isPublicApi,
+    scheduleType,
   }: {
     isDeprecated: boolean;
     isPublicApi: boolean;
+    scheduleType: ScheduleType;
   }) {
     this.track(EventType.REPORT_CREATION, {
       [FieldType.REPORT_ID]: this.reportId,
@@ -65,6 +73,7 @@ export class EventTracker {
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.IS_DEPRECATED]: isDeprecated,
       [FieldType.IS_PUBLIC_API]: isPublicApi,
+      [FieldType.SCHEDULE_TYPE]: scheduleType,
     });
   }
 
@@ -73,13 +82,19 @@ export class EventTracker {
    * creation equals the time spent waiting in the
    * queue.
    */
-  public claimJob(opts: { timeSinceCreation: number }) {
-    const { timeSinceCreation } = opts;
+  public claimJob(opts: {
+    timeSinceCreation: number;
+    scheduledTaskId?: string;
+    scheduleType: ScheduleType;
+  }) {
+    const { scheduleType, scheduledTaskId, timeSinceCreation } = opts;
     this.track(EventType.REPORT_CLAIM, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
       [FieldType.OBJECT_TYPE]: this.objectType,
       [FieldType.DURATION_MS]: timeSinceCreation,
+      [FieldType.SCHEDULE_TYPE]: scheduleType,
+      ...(scheduledTaskId ? { [FieldType.SCHEDULED_TASK_ID]: scheduledTaskId } : {}),
     });
   }
 
@@ -89,7 +104,16 @@ export class EventTracker {
    * retries + executing the final report.
    */
   public completeJobScreenshot(opts: CompletionOptsScreenshot) {
-    const { byteSize, timeSinceCreation, numPages, screenshotLayout, screenshotPixels } = opts;
+    const {
+      attempt,
+      byteSize,
+      timeSinceCreation,
+      numPages,
+      scheduledTaskId,
+      scheduleType,
+      screenshotLayout,
+      screenshotPixels,
+    } = opts;
     this.track(EventType.REPORT_COMPLETION_SCREENSHOT, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
@@ -99,11 +123,14 @@ export class EventTracker {
       [FieldType.NUM_PAGES]: numPages,
       [FieldType.SCREENSHOT_LAYOUT]: screenshotLayout,
       [FieldType.SCREENSHOT_PIXELS]: screenshotPixels,
+      [FieldType.SCHEDULE_TYPE]: scheduleType,
+      [FieldType.ATTEMPT]: attempt,
+      ...(scheduledTaskId ? { [FieldType.SCHEDULED_TASK_ID]: scheduledTaskId } : {}),
     });
   }
 
   public completeJobCsv(opts: CompletionOptsCsv) {
-    const { byteSize, timeSinceCreation, csvRows } = opts;
+    const { attempt, byteSize, timeSinceCreation, csvRows, scheduledTaskId, scheduleType } = opts;
     this.track(EventType.REPORT_COMPLETION_CSV, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
@@ -111,6 +138,9 @@ export class EventTracker {
       [FieldType.DURATION_MS]: timeSinceCreation,
       [FieldType.BYTE_SIZE]: byteSize,
       [FieldType.CSV_ROWS]: csvRows,
+      [FieldType.SCHEDULE_TYPE]: scheduleType,
+      [FieldType.ATTEMPT]: attempt,
+      ...(scheduledTaskId ? { [FieldType.SCHEDULED_TASK_ID]: scheduledTaskId } : {}),
     });
   }
 
@@ -121,7 +151,7 @@ export class EventTracker {
    * execution
    */
   public failJob(opts: FailureOpts) {
-    const { timeSinceCreation, errorMessage, errorCode } = opts;
+    const { timeSinceCreation, errorMessage, errorCode, scheduledTaskId, scheduleType } = opts;
     this.track(EventType.REPORT_ERROR, {
       [FieldType.REPORT_ID]: this.reportId,
       [FieldType.EXPORT_TYPE]: this.exportType,
@@ -129,6 +159,8 @@ export class EventTracker {
       [FieldType.DURATION_MS]: timeSinceCreation,
       [FieldType.ERROR_MESSAGE]: errorMessage,
       [FieldType.ERROR_CODE]: errorCode,
+      [FieldType.SCHEDULE_TYPE]: scheduleType,
+      ...(scheduledTaskId ? { [FieldType.SCHEDULED_TASK_ID]: scheduledTaskId } : {}),
     });
   }
 

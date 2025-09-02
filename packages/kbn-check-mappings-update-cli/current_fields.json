@@ -950,7 +950,12 @@
     "unInstallCount"
   ],
   "scheduled_report": [
-    "createdBy"
+    "createdBy",
+    "enabled",
+    "jobType",
+    "notification",
+    "notification.email",
+    "notification.email.to"
   ],
   "search": [
     "description",
