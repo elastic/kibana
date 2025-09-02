@@ -52,7 +52,12 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
 
   const icon = showIcon ? (
     type === SUPPORTED_FIELD_TYPES.TEXT ? (
-      <EuiIconTip content={tooltipContent} type="partial" size={'m'} className={'columnHeader__icon'} />
+      <EuiIconTip
+        content={tooltipContent}
+        type="partial"
+        size={'m'}
+        className={'columnHeader__icon'}
+      />
     ) : (
       <EuiIcon type="database" size={'m'} className={'columnHeader__icon'} />
     )

@@ -153,7 +153,13 @@ export const SpaceCopyResultDetails = (props: Props) => {
               `}
             >
               <EuiFlexItem grow={false}>
-                <EuiIconTip position="top" content={getSavedObjectLabel(type)} aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
+                <EuiIconTip
+                  position="top"
+                  content={getSavedObjectLabel(type)}
+                  aria-label={getSavedObjectLabel(type)}
+                  type={icon}
+                  size="s"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={5}

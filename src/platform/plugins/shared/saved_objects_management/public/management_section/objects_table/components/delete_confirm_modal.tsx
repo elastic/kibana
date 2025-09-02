@@ -165,7 +165,11 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
               ),
               width: '50px',
               render: (type, { icon }) => (
-                <EuiIconTip position="top" content={getSavedObjectLabel(type, allowedTypes)} type={icon} />
+                <EuiIconTip
+                  position="top"
+                  content={getSavedObjectLabel(type, allowedTypes)}
+                  type={icon}
+                />
               ),
             },
             {

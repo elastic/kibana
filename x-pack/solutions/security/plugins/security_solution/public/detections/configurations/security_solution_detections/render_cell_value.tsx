@@ -178,7 +178,11 @@ export const CellValue = memo(function RenderCellValue({
   return columnId === SIGNAL_RULE_NAME_FIELD_NAME && actualSuppressionCount ? (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiIconTip content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)} position="top" type="layers" />
+        <EuiIconTip
+          content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}
+          position="top"
+          type="layers"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{CellRenderer}</EuiFlexItem>
     </EuiFlexGroup>

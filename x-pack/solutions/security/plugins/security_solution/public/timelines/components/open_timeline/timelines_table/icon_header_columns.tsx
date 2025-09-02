@@ -28,7 +28,12 @@ export const getIconHeaderColumns = ({
       align: 'center' as HorizontalAlignment,
       field: 'eventIdToNoteIds',
       name: (
-        <EuiIconTip content={i18n.NOTES} data-test-subj="notes-count-header-icon" size="m" type="editorComment" />
+        <EuiIconTip
+          content={i18n.NOTES}
+          data-test-subj="notes-count-header-icon"
+          size="m"
+          type="editorComment"
+        />
       ),
       render: (
         _: Record<string, string[]> | null | undefined,
@@ -41,7 +46,12 @@ export const getIconHeaderColumns = ({
       align: 'center' as HorizontalAlignment,
       field: 'pinnedEventIds',
       name: (
-        <EuiIconTip content={i18n.PINNED_EVENTS} data-test-subj="pinned-event-header-icon" size="m" type="pin" />
+        <EuiIconTip
+          content={i18n.PINNED_EVENTS}
+          data-test-subj="pinned-event-header-icon"
+          size="m"
+          type="pin"
+        />
       ),
       render: (
         _: Record<string, boolean> | null | undefined,
@@ -56,7 +66,12 @@ export const getIconHeaderColumns = ({
       align: 'center' as HorizontalAlignment,
       field: 'favorite',
       name: (
-        <EuiIconTip content={i18n.FAVORITES} data-test-subj="favorites-header-icon" size="m" type="starEmpty" />
+        <EuiIconTip
+          content={i18n.FAVORITES}
+          data-test-subj="favorites-header-icon"
+          size="m"
+          type="starEmpty"
+        />
       ),
       render: (favorite: FavoriteTimelineResult[] | null | undefined) => {
         const isFavorite = favorite != null && favorite.length > 0;

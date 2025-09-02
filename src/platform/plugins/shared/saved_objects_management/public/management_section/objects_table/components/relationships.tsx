@@ -101,7 +101,13 @@ export class RelationshipsClass extends Component<
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id={modalTitleId}>
-              <EuiIconTip position="top" content={typeLabel} type={savedObject.meta.icon || 'apps'} size="m" aria-label={typeLabel} />
+              <EuiIconTip
+                position="top"
+                content={typeLabel}
+                type={savedObject.meta.icon || 'apps'}
+                size="m"
+                aria-label={typeLabel}
+              />
               &nbsp;&nbsp;
               {savedObject.meta.title || getDefaultTitle(savedObject)}
             </h2>
@@ -283,7 +289,14 @@ export class RelationshipsClass extends Component<
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiIconTip position="top" content={typeLabel} type={object.meta.icon || 'apps'} size="s" aria-label={typeLabel} data-test-subj="relationshipsObjectType" />
+            <EuiIconTip
+              position="top"
+              content={typeLabel}
+              type={object.meta.icon || 'apps'}
+              size="s"
+              aria-label={typeLabel}
+              data-test-subj="relationshipsObjectType"
+            />
           );
         },
       },

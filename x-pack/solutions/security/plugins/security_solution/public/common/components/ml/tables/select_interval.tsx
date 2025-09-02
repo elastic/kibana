@@ -43,9 +43,7 @@ export const SelectInterval: React.FC<{
     <EuiSelect
       data-test-subj="selectInterval"
       prepend={i18n.INTERVAL}
-      append={
-        <EuiIconTip content={i18n.INTERVAL_TOOLTIP} type="question" color="subdued" />
-      }
+      append={<EuiIconTip content={i18n.INTERVAL_TOOLTIP} type="question" color="subdued" />}
       options={OPTIONS}
       value={interval}
       onChange={onChangeCb}

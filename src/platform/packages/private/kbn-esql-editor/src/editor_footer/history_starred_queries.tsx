@@ -27,7 +27,6 @@ import {
   EuiText,
   EuiIconTip,
   EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';

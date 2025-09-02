@@ -8,7 +8,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon, EuiIconTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { capitalize } from 'lodash';

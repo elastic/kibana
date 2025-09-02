@@ -11,7 +11,6 @@ import {
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
   EuiLink,
   EuiSkeletonRectangle,
@@ -452,7 +451,12 @@ export const getDatasetQualityTableColumns = ({
                 {!isActiveDataset(timestamp) ? (
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-                    <EuiIconTip position="top" content={inactiveDatasetActivityColumnTooltip} type="info" size="s" />
+                    <EuiIconTip
+                      position="top"
+                      content={inactiveDatasetActivityColumnTooltip}
+                      type="info"
+                      size="s"
+                    />
                   </EuiFlexGroup>
                 ) : (
                   fieldFormats

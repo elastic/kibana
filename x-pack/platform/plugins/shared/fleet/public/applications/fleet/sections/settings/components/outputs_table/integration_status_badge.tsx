@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiText,

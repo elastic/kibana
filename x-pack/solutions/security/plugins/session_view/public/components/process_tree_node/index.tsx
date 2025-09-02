@@ -7,7 +7,14 @@
 
 import type { MouseEvent, ReactElement, RefObject } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonIcon, EuiIcon, EuiIconTip, EuiToolTip, formatDate } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiIconTip,
+  EuiToolTip,
+  formatDate,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';

@@ -6,7 +6,15 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiAvatar, EuiBadge, EuiIcon, EuiIconTip, EuiText, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiIcon,
+  EuiIconTip,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';

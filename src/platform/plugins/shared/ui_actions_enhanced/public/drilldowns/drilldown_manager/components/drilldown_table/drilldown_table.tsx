@@ -8,13 +8,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiInMemoryTable,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiIconTip,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiButtonEmpty, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { TextWithIcon } from '../text_with_icon';
 import { TriggerLineItem } from '../trigger_line_item';

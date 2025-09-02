@@ -287,7 +287,11 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
                 />
               ) : (
                 <Suspense fallback={null}>
-                  <EuiIconTip content={actionType?.name} size="l" type={actionTypeModel.iconClass} />
+                  <EuiIconTip
+                    content={actionType?.name}
+                    size="l"
+                    type={actionTypeModel.iconClass}
+                  />
                 </Suspense>
               )}
             </EuiFlexItem>

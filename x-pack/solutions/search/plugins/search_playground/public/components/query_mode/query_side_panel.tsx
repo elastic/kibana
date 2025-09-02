@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiPanel,
-  EuiText,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiPanel, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generateSearchQuery } from '@kbn/search-queries';

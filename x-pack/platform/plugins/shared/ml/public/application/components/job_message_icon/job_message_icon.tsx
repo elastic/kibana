@@ -35,9 +35,7 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   }
 
   if (showTooltip) {
-    return (
-      <EuiIconTip content={message.text} position="bottom" type={icon} color={color} />
-    );
+    return <EuiIconTip content={message.text} position="bottom" type={icon} color={color} />;
   } else {
     return <EuiIcon type={icon} color={color} />;
   }

@@ -7,13 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiLink,
-  EuiNotificationBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiNotificationBadge } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../../../types';
 import { useGetAutoUpgradeAgentsStatusQuery } from '../../../../../hooks';

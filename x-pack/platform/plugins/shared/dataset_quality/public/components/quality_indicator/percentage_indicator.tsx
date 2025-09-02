@@ -42,7 +42,12 @@ const DatasetWithFewQualityStatsDocs = ({
   return (
     <EuiText size="s">
       ~0%{' '}
-      <EuiIconTip content={fewDocsTooltipContent(docsCount)} type="warning" color="warning" size="s" />
+      <EuiIconTip
+        content={fewDocsTooltipContent(docsCount)}
+        type="warning"
+        color="warning"
+        size="s"
+      />
     </EuiText>
   );
 };

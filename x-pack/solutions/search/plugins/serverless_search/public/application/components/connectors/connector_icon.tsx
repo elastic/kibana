@@ -13,5 +13,11 @@ export const ConnectorIcon: React.FC<{ name: string; serviceType: string; iconPa
   serviceType,
   iconPath,
 }) => (
-  <EuiIconTip content={name} type={iconPath || 'defaultIcon'} size="l" title={name} id={serviceType} />
+  <EuiIconTip
+    content={name}
+    type={iconPath || 'defaultIcon'}
+    size="l"
+    title={name}
+    id={serviceType}
+  />
 );

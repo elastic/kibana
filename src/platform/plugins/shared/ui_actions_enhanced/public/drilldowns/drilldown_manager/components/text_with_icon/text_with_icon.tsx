@@ -10,7 +10,14 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { EuiTextColorProps } from '@elastic/eui';
-import { EuiTextColor, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, EuiIconTip } from '@elastic/eui';
+import {
+  EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+  EuiIconTip,
+} from '@elastic/eui';
 
 export interface TextWithIconProps {
   color?: EuiTextColorProps['color'];

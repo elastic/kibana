@@ -120,7 +120,12 @@ export function NotificationAction({
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" gutterSize="s" component="span" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={connectorTypeName} anchorClassName="eui-textTruncate" type={iconType} size="m" />
+          <EuiIconTip
+            content={connectorTypeName}
+            anchorClassName="eui-textTruncate"
+            type={iconType}
+            size="m"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">{connectorName}</EuiText>

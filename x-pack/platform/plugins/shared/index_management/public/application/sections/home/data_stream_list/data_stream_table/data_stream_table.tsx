@@ -13,7 +13,6 @@ import {
   EuiInMemoryTable,
   EuiButton,
   EuiLink,
-  EuiIcon,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,

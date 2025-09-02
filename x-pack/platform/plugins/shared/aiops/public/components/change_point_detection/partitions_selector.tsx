@@ -6,13 +6,7 @@
  */
 
 import React, { type FC, useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';

@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiIcon,
   EuiText,
   EuiButtonIcon,
   EuiIconTip,
@@ -95,7 +94,12 @@ export const ProcessTreeAlert = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={alertIconTooltipContent} position="top" type={alertIconType} color="danger" />
+          <EuiIconTip
+            content={alertIconTooltipContent}
+            position="top"
+            type={alertIconType}
+            color="danger"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div css={styles.processAlertDisplayContainer}>
