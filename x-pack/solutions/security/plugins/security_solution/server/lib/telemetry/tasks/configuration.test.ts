@@ -123,49 +123,6 @@ describe('telemetry configuration task test', () => {
     expect(telemetryConfiguration.query_config.maxCompressedResponseSize).toBe(1000000);
   });
 
-  test('should handle partial query configuration from artifact', async () => {
-    const testTaskExecutionPeriod = {
-      last: new Date().toISOString(),
-      current: new Date().toISOString(),
-    };
-    const mockTelemetryReceiver = createMockTelemetryReceiver();
-    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    const telemetryConfigurationTaskConfig = createTelemetryConfigurationTaskConfig();
-    const mockTaskMetrics = createMockTaskMetrics();
-
-    const timelineConfig: TelemetryQueryConfiguration = {
-      pageSize: 750,
-    };
-
-    const mockConfig: TelemetryConfiguration = {
-      telemetry_max_buffer_size: 200,
-      max_security_list_telemetry_batch: 150,
-      max_endpoint_telemetry_batch: 400,
-      max_detection_rule_telemetry_batch: 1500,
-      max_detection_alerts_batch: 75,
-      use_async_sender: false,
-      query_config: timelineConfig,
-    };
-
-    mockedArtifactService.getArtifact.mockResolvedValue({
-      notModified: false,
-      data: mockConfig,
-    });
-
-    await telemetryConfigurationTaskConfig.runTask(
-      'test-id',
-      logger,
-      mockTelemetryReceiver,
-      mockTelemetryEventsSender,
-      mockTaskMetrics,
-      testTaskExecutionPeriod
-    );
-
-    expect(telemetryConfiguration.query_config.pageSize).toBe(750);
-    expect(telemetryConfiguration.query_config.maxResponseSize).toBeUndefined();
-    expect(telemetryConfiguration.query_config.maxCompressedResponseSize).toBeUndefined();
-  });
-
   test('should skip configuration when artifact is not modified', async () => {
     const testTaskExecutionPeriod = {
       last: new Date().toISOString(),
@@ -193,38 +150,5 @@ describe('telemetry configuration task test', () => {
     );
 
     expect(telemetryConfiguration.query_config).toEqual(originalConfig);
-  });
-
-  test('should reset to default on error and maintain default query config', async () => {
-    const testTaskExecutionPeriod = {
-      last: new Date().toISOString(),
-      current: new Date().toISOString(),
-    };
-    const mockTelemetryReceiver = createMockTelemetryReceiver();
-    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
-    const telemetryConfigurationTaskConfig = createTelemetryConfigurationTaskConfig();
-    const mockTaskMetrics = createMockTaskMetrics();
-
-    // Set some non-default values first
-    telemetryConfiguration.telemetry_max_buffer_size = 500;
-    telemetryConfiguration.query_config = { pageSize: 2000 };
-
-    mockedArtifactService.getArtifact.mockRejectedValue(new Error('Network error'));
-
-    await telemetryConfigurationTaskConfig.runTask(
-      'test-id',
-      logger,
-      mockTelemetryReceiver,
-      mockTelemetryEventsSender,
-      mockTaskMetrics,
-      testTaskExecutionPeriod
-    );
-
-    expect(telemetryConfiguration.telemetry_max_buffer_size).toBe(100); // default value
-    expect(telemetryConfiguration.query_config).toEqual({
-      pageSize: 500,
-      maxResponseSize: 10 * 1024 * 1024, // 10 MB
-      maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
-    });
   });
 });

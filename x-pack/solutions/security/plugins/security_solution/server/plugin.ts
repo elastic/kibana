@@ -748,11 +748,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     let queryConfig: TelemetryQueryConfiguration | undefined;
 
     if (this.config.telemetry?.queryConfig !== undefined) {
-      const config = this.config.telemetry.queryConfig;
       queryConfig = {
-        pageSize: config.pageSize ?? 500,
-        maxResponseSize: config.maxResponseSize ?? 10 * 1024 * 1024, // 10 MB
-        maxCompressedResponseSize: config.maxCompressedResponseSize ?? 8 * 1024 * 1024, // 8 MB
+        pageSize: this.config.telemetry.queryConfig.pageSize ?? 500,
+        maxResponseSize: this.config.telemetry.queryConfig.maxResponseSize ?? 10 * 1024 * 1024, // 10 MB
+        maxCompressedResponseSize:
+          this.config.telemetry.queryConfig.maxCompressedResponseSize ?? 8 * 1024 * 1024, // 8 MB
       };
     }
 
