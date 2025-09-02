@@ -51,7 +51,10 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
             setChoice(activeSpan, { content, toolCalls });
           }
 
-          const validatedToolCalls = validateToolCalls<TToolOptions>({ ...toolOptions, toolCalls });
+          const validatedToolCalls = validateToolCalls<TToolOptions>({
+            ...toolOptions,
+            toolCalls,
+          });
 
           return {
             type: ChatCompletionEventType.ChatCompletionMessage,

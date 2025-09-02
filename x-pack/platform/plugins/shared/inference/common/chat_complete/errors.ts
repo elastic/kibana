@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceTaskError, type UnvalidatedToolCall } from '@kbn/inference-common';
+import { InferenceTaskError, ToolCall, type UnvalidatedToolCall } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';
 import type {
   ChatCompletionTokenLimitReachedError,
@@ -28,12 +28,17 @@ export function createTokenLimitReachedError(
   );
 }
 
-export function createToolNotFoundError(name: string): ChatCompletionToolNotFoundError {
+export function createToolNotFoundError(
+  name: string,
+  { content, toolCalls }: { content?: string; toolCalls: ToolCall[] }
+): ChatCompletionToolNotFoundError {
   return new InferenceTaskError(
     ChatCompletionErrorCode.ToolNotFoundError,
     `Tool "${name}" called but was not available`,
     {
       name,
+      toolCalls,
+      content,
     }
   );
 }
@@ -45,6 +50,7 @@ export function createToolValidationError(
     arguments?: string;
     errorsText?: string;
     toolCalls: UnvalidatedToolCall[];
+    content?: string;
   }
 ): ChatCompletionToolValidationError {
   return new InferenceTaskError(ChatCompletionErrorCode.ToolValidationError, message, meta);
