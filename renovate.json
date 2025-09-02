@@ -794,7 +794,7 @@
         "unified"
       ],
       "reviewers": [
-        "team:response-ops",
+        "team:kibana-cases",
         "team:security-solution"
       ],
       "matchBaseBranches": [
