@@ -29,23 +29,24 @@ import {
   loadingCursorPlugin,
   visualizationPlugin,
 } from './markdown_plugins';
+import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
 
 interface Props {
   content: string;
-  stepsFromPrevRounds: ConversationRoundStep[];
-  stepsFromCurrentRound: ConversationRoundStep[];
+  steps: ConversationRoundStep[];
 }
 
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content, stepsFromPrevRounds, stepsFromCurrentRound }: Props) {
+export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
   const { startDependencies } = useOnechatServices();
+  const stepsFromPrevRounds = useStepsFromPrevRounds();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();

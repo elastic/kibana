@@ -63,6 +63,15 @@ export const useConversationRounds = () => {
   return conversationRounds;
 };
 
+export const useStepsFromPrevRounds = () => {
+  const conversationRounds = useConversationRounds();
+
+  return useMemo(() => {
+    return conversationRounds.flatMap(({ steps }) => steps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationRounds.length]); // only depend on length to avoid re-renders during streaming
+};
+
 export const useHasActiveConversation = () => {
   const conversationId = useConversationId();
   const conversationRounds = useConversationRounds();

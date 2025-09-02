@@ -15,19 +15,17 @@ import { RoundThinking } from './round_thinking/round_thinking';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
-  stepsFromCurrentRound: ConversationRoundStep[];
-  stepsFromPrevRounds: ConversationRoundStep[];
+  steps: ConversationRoundStep[];
   isLoading: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
-  stepsFromCurrentRound,
-  stepsFromPrevRounds,
+  steps,
   isLoading,
 }) => {
   const timer = useTimer({ isLoading });
-  const showThinking = timer.showTimer || stepsFromCurrentRound.length > 0;
+  const showThinking = timer.showTimer || steps.length > 0;
   return (
     <EuiFlexGroup
       direction="column"
@@ -38,16 +36,12 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
     >
       {showThinking && (
         <EuiFlexItem grow={false}>
-          <RoundThinking steps={stepsFromCurrentRound} isLoading={isLoading} timer={timer} />
+          <RoundThinking steps={steps} isLoading={isLoading} timer={timer} />
         </EuiFlexItem>
       )}
 
       <EuiFlexItem>
-        <ChatMessageText
-          content={message}
-          stepsFromCurrentRound={stepsFromCurrentRound}
-          stepsFromPrevRounds={stepsFromPrevRounds}
-        />
+        <ChatMessageText content={message} steps={steps} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
