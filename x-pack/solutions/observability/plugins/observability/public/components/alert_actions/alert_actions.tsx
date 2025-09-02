@@ -22,7 +22,6 @@ import {
   SLO_ALERTS_TABLE_ID,
 } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -32,17 +31,22 @@ import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 import { useKibana } from '../../utils/kibana_react';
 
-export function AlertActions({
-  observabilityRuleTypeRegistry,
-  alert,
-  caseData,
-  tableId,
-  refresh,
-  openAlertInFlyout,
-  parentAlert,
-  services,
-  ...rest
-}: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>) {
+export function AlertActions(
+  props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
+) {
+  const {
+    observabilityRuleTypeRegistry,
+    alert,
+    caseData,
+    tableId,
+    refresh,
+    parentAlert,
+    rowIndex,
+    pageIndex,
+    pageSize,
+    onExpandedAlertIndexChange,
+    services,
+  } = props;
   const {
     http: {
       basePath: { prepend },
@@ -167,7 +171,7 @@ export function AlertActions({
     useMemo(
       () => (
         <DefaultAlertActions<ObservabilityAlertsTableContext>
-          observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+          {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
           isAlertDetailsEnabled={true}
@@ -179,26 +183,9 @@ export function AlertActions({
               ? paths.observability.alertDetails(alertId)
               : null
           }
-          tableId={tableId}
-          refresh={refresh}
-          alert={alert}
-          openAlertInFlyout={openAlertInFlyout}
-          services={services}
-          caseData={caseData}
-          {...rest}
         />
       ),
-      [
-        alert,
-        caseData,
-        closeActionsPopover,
-        observabilityRuleTypeRegistry,
-        openAlertInFlyout,
-        refresh,
-        services,
-        rest,
-        tableId,
-      ]
+      [closeActionsPopover, props]
     ),
   ];
 
@@ -212,8 +199,7 @@ export function AlertActions({
         });
 
   const onExpandEvent = () => {
-    const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
-    openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID]);
+    onExpandedAlertIndexChange(pageIndex * pageSize + rowIndex);
   };
 
   const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;

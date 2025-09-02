@@ -111,7 +111,7 @@ describe('AlertsDataGrid', () => {
       bulkActionsReducer,
       props.initialBulkActionsState || createMockBulkActionsState()
     );
-    const renderContext = useMemo(
+    const renderContext: RenderContext<AdditionalContext> = useMemo(
       () => ({
         ...mockRenderContext,
         bulkActionsStore,

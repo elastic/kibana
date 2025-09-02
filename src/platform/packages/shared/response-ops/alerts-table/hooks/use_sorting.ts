@@ -23,14 +23,6 @@ const formatGridColumns = (cols: SortCombinations[]): EuiDataGridSorting['column
   return colsSorting;
 };
 
-export type UseSorting = (
-  onSortChange: (sort: EuiDataGridSorting['columns']) => void,
-  initialSort: SortCombinations[]
-) => {
-  sortingColumns: EuiDataGridSorting['columns'];
-  onSort: (newSort: EuiDataGridSorting['columns']) => void;
-};
-
 export function useSorting(
   onSortChange: (sort: EuiDataGridSorting['columns']) => void,
   visibleColumns: string[],
