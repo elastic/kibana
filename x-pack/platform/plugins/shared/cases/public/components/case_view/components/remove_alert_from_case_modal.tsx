@@ -21,10 +21,14 @@ const RemoveAlertFromCaseModal = React.memo<RemoveAlertModalProps>(
   ({ caseId, alertId, onClose, onSuccess }) => {
     const { mutateAsync: removeAlertFromComment } = useRemoveAlertFromCase(caseId);
 
-    // to do update message
     const removalSuccessToast = i18n.translate(
       'xpack.cases.caseView.alerts.actions.removeFromCaseSuccess',
-      { defaultMessage: 'Alerts removed from case' }
+      {
+        defaultMessage: '{alertCount, plural, one {Alert} other {# alerts}} removed from case',
+        values: {
+          alertCount: alertId.length,
+        },
+      }
     );
     const handleRemoveAlert = useCallback(() => {
       removeAlertFromComment({
@@ -33,7 +37,7 @@ const RemoveAlertFromCaseModal = React.memo<RemoveAlertModalProps>(
       }).then(() => onSuccess());
 
       onClose();
-    }, [alertId, onClose, onSuccess, removeAlertFromComment]);
+    }, [alertId, onClose, onSuccess, removeAlertFromComment, removalSuccessToast]);
 
     return (
       <DeleteAttachmentConfirmationModal
@@ -46,7 +50,10 @@ const RemoveAlertFromCaseModal = React.memo<RemoveAlertModalProps>(
           }
         )}
         title={i18n.translate('xpack.cases.caseView.alerts.actions.removeFromCaseTitle', {
-          defaultMessage: 'Remove alert from case',
+          defaultMessage: 'Remove {alertCount, plural, one {alert} other {# alerts}} from case',
+          values: {
+            alertCount: alertId.length,
+          },
         })}
       />
     );

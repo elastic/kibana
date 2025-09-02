@@ -330,7 +330,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * Strictly for leveraging the caseId for removing alerts from cases
    */
-  caseData: Object & { id: string };
+  caseData?: Object & { id: string };
 }
 
 /**

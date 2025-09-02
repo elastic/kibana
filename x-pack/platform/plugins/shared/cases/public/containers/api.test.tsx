@@ -1052,7 +1052,7 @@ describe('Cases API', () => {
           signal: abortCtrl.signal,
         }
       );
-      expect(resp).toEqual(undefined);
+      expect(resp).toEqual([{ status: 'fulfilled', value: undefined }]);
     });
   });
 

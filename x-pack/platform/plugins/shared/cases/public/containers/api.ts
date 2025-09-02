@@ -485,76 +485,41 @@ export const removeAlertFromComment = async ({
   alertIds: string[];
   caseAttachments: AlertAttachmentUI[];
   signal?: AbortSignal;
-}): Promise<Attachment | void> => {
-  if (alertIdsToRemove.length === 1) {
-    let alertIdxs: number[] = [];
+}): Promise<PromiseSettledResult<Attachment | void>[]> => {
+  const attachmentMap = new Map<string, AlertAttachmentUI & { alertIdxs: number[] }>();
+
+  alertIdsToRemove.forEach((alertIdToRemove) => {
+    let alertIdxsToRemove: number[] = [];
     const alertAttachment = caseAttachments.find((attachment) => {
-      const idx = attachment.alertId.indexOf(alertIdsToRemove.toString());
+      const idx = attachment.alertId.indexOf(alertIdToRemove.toString());
       if (idx > -1) {
-        alertIdxs = [idx];
+        alertIdxsToRemove = [idx];
         return attachment;
       }
+      return undefined;
     });
 
     if (!alertAttachment) {
       throw new Error(`Alert with id ${alertIdsToRemove} not found in case ${caseId}`);
     }
 
-    const { alertId, index, id, version, rule, owner } = alertAttachment;
-
-    if (Array.isArray(alertId) && alertId.length > 1 && Array.isArray(index)) {
-      const newAlertId = alertId.filter((_, i) => !alertIdxs?.includes(i));
-      const newIndex = index.filter((_, i) => !alertIdxs?.includes(i));
-
-      return patchComment({
-        caseId,
-        commentId: id,
-        version,
-        patch: { type: AttachmentType.alert, alertId: newAlertId, index: newIndex, rule, owner },
-        signal,
-      });
+    const existingAttachment = attachmentMap.get(alertAttachment.id);
+    if (existingAttachment) {
+      existingAttachment.alertIdxs.push(...alertIdxsToRemove);
+      attachmentMap.set(alertAttachment.id, existingAttachment);
     } else {
-      return deleteComment({
-        caseId,
-        commentId: alertAttachment.id,
-        signal,
+      attachmentMap.set(alertAttachment.id, {
+        ...alertAttachment,
+        alertIdxs: alertIdxsToRemove,
       });
     }
-  } else {
-    const attachmentMap = new Map<string, AlertAttachmentUI & { alertIdxs: number[] }>();
+  });
 
-    alertIdsToRemove.forEach((alertIdToRemove) => {
-      let alertIdxs: number[] = [];
-      const alertAttachment = caseAttachments.find((attachment) => {
-        const idx = attachment.alertId.indexOf(alertIdToRemove.toString());
-        if (idx > -1) {
-          alertIdxs = [idx];
-          return attachment;
-        }
-      });
-
-      if (!alertAttachment) {
-        throw new Error(`Alert with id ${alertIdsToRemove} not found in case ${caseId}`);
-      }
-
-      if (attachmentMap.has(alertAttachment.id)) {
-        const existing = attachmentMap.get(alertAttachment.id);
-        if (existing != null && alertIdxs != null) {
-          existing.alertIdxs.push(...alertIdxs);
-          attachmentMap.set(alertAttachment.id, existing);
-        }
-      } else {
-        attachmentMap.set(alertAttachment.id, {
-          ...alertAttachment,
-          alertIdxs: alertIdxs ?? [],
-        });
-      }
-    });
-
-    attachmentMap.forEach((alertAttachment) => {
+  return Promise.allSettled(
+    Array.from(attachmentMap.values()).map(async (alertAttachment) => {
       const { alertId, index, id, version, rule, owner } = alertAttachment;
 
-      if (Array.isArray(alertId) && alertId.length > 1 && Array.isArray(index)) {
+      if (Array.isArray(alertId) && Array.isArray(index)) {
         const newAlertId = alertId.filter((_, i) => !alertAttachment.alertIdxs?.includes(i));
         const newIndex = index.filter((_, i) => !alertAttachment?.alertIdxs?.includes(i));
 
@@ -572,16 +537,15 @@ export const removeAlertFromComment = async ({
             },
             signal,
           });
-        } else {
-          return deleteComment({
-            caseId,
-            commentId: alertAttachment.id,
-            signal,
-          });
         }
       }
-    });
-  }
+      return deleteComment({
+        caseId,
+        commentId: id,
+        signal,
+      });
+    })
+  );
 };
 
 export const deleteComment = async ({

@@ -614,6 +614,7 @@ const AlertsTableContent = typedForwardRef(
         setFlyoutAlertIndex,
         sort,
         onSortChange,
+        caseData,
       ]
     );
 
