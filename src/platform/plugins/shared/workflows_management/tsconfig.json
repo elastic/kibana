@@ -43,7 +43,9 @@
     "@kbn/field-utils",
     "@kbn/storybook",
     "@kbn/react-kibana-context-theme",
-    "@kbn/core-chrome-layout"
+    "@kbn/core-chrome-layout",
+    "@kbn/core-security-browser",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }
