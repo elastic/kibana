@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';

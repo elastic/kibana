@@ -19,6 +19,7 @@ module.exports = {
   setupFilesAfterEnv: [
     ...preset.setupFilesAfterEnv,
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/after_env.integration.js',
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_source_maps.js',
   ],
   reporters: [
     'default',

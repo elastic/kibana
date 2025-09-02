@@ -31,6 +31,7 @@ describe('reassignAgent', () => {
   afterEach(() => {
     appContextService.stop();
   });
+
   describe('reassignAgent (singular)', () => {
     it('can reassign from regular agent policy to regular', async () => {
       const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;

@@ -18,6 +18,10 @@ module.exports = {
   ...presetClone,
   snapshotSerializers: [],
   setupFiles: ['<rootDir>/src/setup_node_env/polyfill.ts'],
+  setupFilesAfterEnv: [
+    ...presetClone.setupFilesAfterEnv,
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_source_maps.js',
+  ],
   haste: {
     ...preset.haste,
     throwOnModuleCollision: true,

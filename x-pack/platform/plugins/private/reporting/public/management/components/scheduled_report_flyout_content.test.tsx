@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { type ReportingAPIClient, useKibana } from '@kbn/reporting-public';

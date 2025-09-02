@@ -40,7 +40,7 @@ describe('dependency-usage CLI', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should handle verbose option', () => {

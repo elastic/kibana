@@ -44,19 +44,6 @@ module.exports = (
         ? [require.resolve('babel-plugin-transform-require-default')]
         : []),
     ],
-    env: {
-      production: {
-        plugins: [
-          [
-            require.resolve('babel-plugin-transform-react-remove-prop-types'),
-            {
-              mode: 'remove',
-              removeImport: true,
-            },
-          ],
-        ],
-      },
-    },
     overrides: [
       {
         include: USES_STYLED_COMPONENTS,

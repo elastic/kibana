@@ -57,6 +57,8 @@ describe('JsonEditorField', () => {
 
   beforeEach(() => jest.resetAllMocks());
 
+  afterAll(() => jest.resetAllMocks());
+
   it('renders as expected', async () => {
     render(<JsonEditorField {...props} />);
 

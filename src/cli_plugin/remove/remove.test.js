@@ -8,7 +8,7 @@
  */
 
 import { join } from 'path';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync, mkdtempSync } from 'fs';
 
 import sinon from 'sinon';
 import globby from 'globby';
@@ -19,26 +19,32 @@ import { remove } from './remove';
 
 describe('kibana cli', function () {
   describe('plugin remover', function () {
-    const pluginDir = join(__dirname, '.test.data.remove');
+    const basePluginDir = join(__dirname, '.test.data.remove');
+    let pluginDir;
     let processExitStub;
     let logger;
 
-    const settings = { pluginDir };
+    let settings;
 
     beforeEach(function () {
+      // Create a fresh, unique directory for each test run
+      del.sync(basePluginDir);
+      mkdirSync(basePluginDir, { recursive: true });
+      pluginDir = mkdtempSync(join(basePluginDir, 'run-'));
+
+      settings = { pluginDir };
+
       processExitStub = sinon.stub(process, 'exit');
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      del.sync(pluginDir);
-      mkdirSync(pluginDir, { recursive: true });
     });
 
     afterEach(function () {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
-      del.sync(pluginDir);
+      del.sync(basePluginDir);
     });
 
     it('throw an error if the plugin is not installed.', function () {
@@ -51,7 +57,10 @@ describe('kibana cli', function () {
     });
 
     it('throw an error if the specified plugin is not a folder.', function () {
-      writeFileSync(join(pluginDir, 'foo'), 'This is a file, and not a folder.');
+      // Simulate a non-directory file at the plugin path
+      settings.pluginPath = join(pluginDir, 'foo');
+      settings.plugin = 'foo';
+      writeFileSync(settings.pluginPath, 'This is a file, and not a folder.');
 
       remove(settings, logger);
       expect(logger.error.firstCall.args[0]).toMatch(/not a plugin/);
@@ -78,8 +87,10 @@ describe('kibana cli', function () {
     });
 
     it('delete the specified folder.', function () {
+      // Create two sibling entries: we will remove only "foo"
       settings.pluginPath = join(pluginDir, 'foo');
-      mkdirSync(join(pluginDir, 'foo'), { recursive: true });
+      settings.plugin = 'foo';
+      mkdirSync(settings.pluginPath, { recursive: true });
       mkdirSync(join(pluginDir, 'bar'), { recursive: true });
 
       remove(settings, logger);

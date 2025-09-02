@@ -49,7 +49,9 @@ describe('encryption key generation interactive', () => {
       .mockResolvedValueOnce(true);
     jest.spyOn(prompt, 'question').mockResolvedValue('/foo/bar');
     jest.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
-    fs.writeFileSync = jest.fn();
+    jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {
+      //
+    });
     await generate(encryptionConfig, { interactive: true });
     expect(fs.writeFileSync.mock.calls).toMatchSnapshot();
   });

@@ -15,7 +15,7 @@ if [[ "$1" == 'jest.config.js' ]]; then
   # we used to run jest tests in parallel but started to see a lot of flakiness in libraries like react-dom/test-utils:
   # https://github.com/elastic/kibana/issues/141477
   # parallelism="-w2"
-  parallelism="--runInBand"
+  parallelism="--maxWorkers=100%"
   TEST_TYPE="unit"
 else
   # run integration tests in-band
@@ -54,57 +54,63 @@ echo "
   output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 
-while read -r config; do
-  echo "--- $ node scripts/jest --config $config"
+echo "--- Grouping and running configs via scripts/jest_all.js"
 
-  # --trace-warnings to debug
-  # Node.js process-warning detected:
-  # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
+# Build a comma-separated list for --config
+configs_csv=$(echo "$configs" | paste -sd, -)
 
-  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
-    cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
-  fi
+# Build selection args differently for unit (patterns) vs integration (config files)
+selection_args=()
+if [[ "$TEST_TYPE" == "unit" ]]; then
+  # For unit tests, groups provide glob patterns; pass them via --config CSV like integration
+  selection_args=("--config=$configs_csv")
+else
+  # For integration tests, groups provide explicit jest config paths; pass via --config CSV
+  selection_args=("--config=$configs_csv")
+fi
 
-  cmd=$cmd"\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
+if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+  cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
+fi
 
-  echo "actual full command is:"
-  echo "$cmd"
-  echo ""
+if [[ "$TEST_TYPE" == "unit" ]]; then
+  # Disable file-level retries for CI unit runs; jest_all will respect --noRetryFiles
+  cmd=$cmd"\" node ./scripts/jest_all ${selection_args[*]} $parallelism --coverage=false --passWithNoTests --no-retryFiles"
+else
+  cmd=$cmd"\" node ./scripts/jest ${selection_args[*]} $parallelism --coverage=false --passWithNoTests"
+fi
 
-  start=$(date +%s)
+echo "actual full command is:"
+echo "$cmd"
+echo ""
 
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  eval "$cmd"
-  lastCode=$?
-  set -e;
+start=$(date +%s)
+set +e;
+eval "$cmd"
+lastCode=$?
+set -e;
 
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
+timeSec=$(($(date +%s)-start))
+if [[ $timeSec -gt 60 ]]; then
+  min=$((timeSec/60))
+  sec=$((timeSec-(min*60)))
+  duration="${min}m ${sec}s"
+else
+  duration="${timeSec}s"
+fi
 
-  results+=("- $config
+results+=("- grouped-configs
     duration: ${duration}
     result: ${lastCode}")
 
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "Jest exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
-  fi
-done <<< "$configs"
+if [ $lastCode -ne 0 ]; then
+  exitCode=10
+  echo "Jest exited with code $lastCode"
+  echo "^^^ +++"
+  # On failure, mark all configs as failed so retry mechanism can pick them up
+  failedConfigs="$configs"
+fi
 
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
