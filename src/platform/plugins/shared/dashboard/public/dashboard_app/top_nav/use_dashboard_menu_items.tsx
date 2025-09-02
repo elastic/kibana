@@ -69,6 +69,14 @@ export const useDashboardMenuItems = ({
   );
 
   /**
+   * Open the "Add to case" flyout.
+   */
+  const openAddToCaseFlyout = useCallback(() => {
+    // Open the "Add to case" flyout
+    alert('Open add to case Flyout');
+  }, []);
+
+  /**
    * Save the dashboard without any UI or popups.
    */
   const quickSaveDashboard = useCallback(() => {
@@ -216,6 +224,14 @@ export const useDashboardMenuItems = ({
         htmlId: 'dashboardSettingsButton',
         run: () => openSettingsFlyout(dashboardApi),
       },
+
+      addToCase: {
+        ...topNavStrings.addToCase,
+        id: 'add-to-case',
+        testId: 'dashboardAddToCaseMenuItem',
+        disableButton: disableTopNav,
+        run: () => openAddToCaseFlyout(),
+      } as TopNavMenuData,
     };
   }, [
     disableTopNav,
@@ -225,6 +241,7 @@ export const useDashboardMenuItems = ({
     dashboardInteractiveSave,
     viewMode,
     showShare,
+    openAddToCaseFlyout,
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
@@ -288,6 +305,7 @@ export const useDashboardMenuItems = ({
       ...mayberesetChangesMenuItem,
       ...shareMenuItem,
       ...editMenuItem,
+      menuItems.addToCase,
     ];
   }, [
     isLabsEnabled,
@@ -301,6 +319,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.isManaged,
     showResetChange,
     resetChangesMenuItem,
+    menuItems.addToCase,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -327,6 +346,8 @@ export const useDashboardMenuItems = ({
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
 
+    editModeItems.push(menuItems.addToCase);
+
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
 
     // insert share menu item before the last item in edit mode
@@ -342,6 +363,7 @@ export const useDashboardMenuItems = ({
     menuItems.interactiveSave,
     menuItems.switchToViewMode,
     menuItems.quickSave,
+    menuItems.addToCase,
     hasExportIntegration,
     lastSavedId,
     showResetChange,
