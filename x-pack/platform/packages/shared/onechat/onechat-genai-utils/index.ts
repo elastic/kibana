@@ -7,7 +7,7 @@
 
 export {
   esqlResponseToJson,
-  flattenMappings,
+  flattenMapping,
   cleanupMapping,
   type MappingField,
 } from './tools/utils';
@@ -22,6 +22,12 @@ export {
   listIndices,
   type ListIndexDetailInfo,
   type ListIndexBasicInfo,
+  listSearchSources,
+  type AliasSearchSource,
+  type IndexSearchSource,
+  type DataStreamSearchSource,
+  type EsSearchSource,
+  type ListSourcesResponse,
 } from './tools/steps';
 export {
   indexExplorer,

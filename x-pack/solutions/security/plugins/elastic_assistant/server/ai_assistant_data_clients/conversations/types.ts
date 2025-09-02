@@ -22,11 +22,6 @@ export interface EsConversationSchema {
   '@timestamp': string;
   created_at: string;
   title: string;
-  summary?: {
-    '@timestamp': string;
-    semantic_content?: string;
-    summarized_message_ids?: string[];
-  };
   category: ConversationCategory;
   messages?: Array<{
     '@timestamp': string;
