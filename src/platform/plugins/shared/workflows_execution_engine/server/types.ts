@@ -14,13 +14,17 @@ import type {
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
+interface ExecuteWorkflowResponse {
+  workflowExecutionId: string;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,
     context: Record<string, any>
-  ): Promise<void>;
+  ): Promise<ExecuteWorkflowResponse>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

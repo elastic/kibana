@@ -6,6 +6,7 @@
  */
 
 import type { ExceptionsListPreImportServerExtension } from '@kbn/lists-plugin/server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
@@ -14,7 +15,11 @@ export const getExceptionsPreImportHandler =
     return async ({ data }) => {
       const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
         if ('list_id' in item) {
-          return (ALL_ENDPOINT_ARTIFACT_LIST_IDS as string[]).includes(item.list_id);
+          const NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS = ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+            (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          ) as string[];
+
+          return NON_IMPORTABLE_ENDPOINT_ARTIFACT_IDS.includes(item.list_id);
         }
 
         return false;

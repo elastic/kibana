@@ -15,6 +15,7 @@ import { clearConversations } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertest = getService('supertest');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
