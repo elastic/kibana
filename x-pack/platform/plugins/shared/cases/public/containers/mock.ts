@@ -18,7 +18,6 @@ import type {
   CaseConnector,
   Attachment,
   ObservableType,
-  AlertAttachment,
 } from '../../common/types/domain';
 import {
   CaseSeverity,
@@ -420,7 +419,7 @@ export const basicCommentPatch: AttachmentUI = {
 export const alertCommentPatch = {
   id: '56bf08d1-540d-33dr-b712-9ebface784r2',
   version: 'test',
-  type: AttachmentType.alert,
+  type: 'alert' as AttachmentType.alert,
   alertId: [
     '00cea26c-4396-49ad-8e80-e32146bf2ee6',
     '8591828c-3e33-4588-a3b8-5dfcad22786e',
@@ -438,7 +437,7 @@ export const alertCommentPatch = {
     name: 'Ticket Price Burn Rate rule',
   },
   owner: 'observability',
-} as AlertAttachment;
+};
 
 export const basicCaseCommentPatch = {
   ...basicCase,

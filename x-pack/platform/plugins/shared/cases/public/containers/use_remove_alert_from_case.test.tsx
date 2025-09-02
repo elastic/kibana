@@ -68,11 +68,17 @@ describe('useRemoveAlertFromCase', () => {
     const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
 
     await act(async () => {
-      result.current.mutate({ alertId: 'not-found', successToasterTitle: 'Removed!' });
+      result.current.mutate({ alertIds: ['not-found'], successToasterTitle: 'Removed!' });
     });
 
+    expect(api.removeAlertFromComment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        caseId: 'case-1',
+        alertIds: ['not-found'],
+        caseAttachments: [],
+      })
+    );
     expect(mockShowErrorToast).toHaveBeenCalled();
-    expect(api.removeAlertFromComment).not.toHaveBeenCalled();
   });
 
   it('calls removeAlertFromComment with correct params and shows success toast', async () => {
@@ -80,13 +86,13 @@ describe('useRemoveAlertFromCase', () => {
     const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
 
     await act(async () => {
-      result.current.mutate({ alertId: 'alert-123', successToasterTitle: 'Removed!' });
+      result.current.mutate({ alertIds: ['alert-123'], successToasterTitle: 'Removed!' });
     });
 
     expect(api.removeAlertFromComment).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: 'case-1',
-        alertId: 'alert-123',
+        alertIds: ['not-found'],
         alertAttachment: expect.objectContaining({
           alertId: ['alert-123'],
         }),
@@ -103,7 +109,7 @@ describe('useRemoveAlertFromCase', () => {
     const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
 
     await act(async () => {
-      result.current.mutate({ alertId: 'alert-123', successToasterTitle: 'Removed!' });
+      result.current.mutate({ alertIds: ['alert-123'], successToasterTitle: 'Removed!' });
     });
 
     await waitFor(() => expect(mockShowErrorToast).toHaveBeenCalled());

@@ -70,7 +70,7 @@ type UseBulkRemoveFromCaseActionsProps = Pick<
   'casesConfig' | 'refresh' | 'casesService' | 'http' | 'notifications'
 > &
   Pick<UseBulkActions, 'clearSelection'> & {
-    caseId: string;
+    caseId?: string;
   };
 
 type UseBulkUntrackActionsProps = Pick<
@@ -319,7 +319,8 @@ export const useBulkRemoveFromCaseActions = ({
     return isCasesContextAvailable &&
       removeAlertModal &&
       userCasesPermissions?.create &&
-      userCasesPermissions?.read
+      userCasesPermissions?.read &&
+      caseId
       ? [
           {
             label: REMOVE_FROM_CASE,
@@ -339,7 +340,7 @@ export const useBulkRemoveFromCaseActions = ({
         ]
       : [];
   }, [
-    casesService?.helpers,
+    caseId,
     removeAlertModal,
     isCasesContextAvailable,
     userCasesPermissions?.create,
@@ -395,20 +396,15 @@ export function useBulkActions({
     http,
     notifications,
   });
-
-  const removeBulkActions = caseId
-    ? useBulkRemoveFromCaseActions({
-        casesService,
-        casesConfig,
-        refresh,
-        clearSelection,
-        http,
-        notifications,
-        caseId,
-      })
-    : [];
-
-  console.log(caseId);
+  const removeBulkActions = useBulkRemoveFromCaseActions({
+    casesService,
+    casesConfig,
+    refresh,
+    clearSelection,
+    http,
+    notifications,
+    caseId,
+  });
 
   const initialItems = useMemo(() => {
     return [

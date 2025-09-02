@@ -77,7 +77,7 @@ import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
-import type { CaseUserActionTypeWithAll } from './types';
+import type { AlertAttachmentUI, CaseUserActionTypeWithAll } from './types';
 import type { CaseUserActionStatsResponse } from '../../common/types/api';
 import {
   CaseSeverity,
@@ -1017,8 +1017,8 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(updatedComment);
       await removeAlertFromComment({
         caseId: basicCaseId,
-        alertId: alertCommentPatch.alertId[0],
-        alertAttachment: alertCommentPatch,
+        alertIds: [alertCommentPatch.alertId[0]],
+        caseAttachments: [alertCommentPatch as AlertAttachmentUI],
         signal: abortCtrl.signal,
       });
 
@@ -1040,8 +1040,8 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(null);
       const resp = await removeAlertFromComment({
         caseId: basicCaseId,
-        alertId: alertCommentPatch.alertId[3],
-        alertAttachment: updatedComment,
+        alertIds: [alertCommentPatch.alertId[3]],
+        caseAttachments: [updatedComment as AlertAttachmentUI],
         signal: abortCtrl.signal,
       });
 
