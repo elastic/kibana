@@ -67,6 +67,22 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       };
     }
 
+    /**
+     * Deletes an artifact list along with all of its items (if any).
+     * @param listId
+     * @param supertest
+     */
+    async deleteList(
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      supertest: TestAgent = this.supertest
+    ): Promise<void> {
+      await supertest
+        .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .then(this.getHttpResponseFailureHandler([404]));
+    }
+
     async ensureListExists(
       listDefinition: CreateExceptionListSchema,
       { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
