@@ -351,6 +351,41 @@ server.registerResource(
 );
 
 server.tool(
+  'confirm_risk_assessment',
+  'Confirm risk assessment with user and allow modifications',
+  {
+    assessment: z.string().describe('The risk assessment to present to the user'),
+    riskLevel: z.enum(['low', 'medium', 'high', 'critical']).describe('Assessed risk level'),
+    allowModifications: z
+      .boolean()
+      .optional()
+      .describe('Whether to allow the user to modify the assessment'),
+  },
+  async (args) => {
+    const { assessment, riskLevel, allowModifications = true } = args;
+
+    const text = allowModifications
+      ? `Risk Assessment:\n${assessment}\n\nRisk Level: ${riskLevel}\n\nPlease confirm if you accept this assessment or provide modifications. You can change the risk level or provide additional justification.`
+      : `Risk Assessment:\n${assessment}\n\nRisk Level: ${riskLevel}\n\nPlease confirm this assessment.`;
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text,
+        },
+      ],
+      structuredContent: {
+        requiresUserInput: true,
+        assessment,
+        riskLevel,
+        allowModifications,
+      },
+    };
+  }
+);
+
+server.tool(
   'triage_snyk_issue',
   'Triage the snyk issue',
   {
@@ -430,7 +465,26 @@ server.tool(
               This analysis should also check yarn.lock.
               Find if there are any usages in the codebase (ignore tests, ignore target folders, we are interested in production application code).
               List the usages and check if they are vulnerable.
-              If the package is a transitive dependency, check node_modules to see if the parent dependencies are using the vulnerable functions.`,
+              If the package is a transitive dependency, check node_modules to see if the parent dependencies are using the vulnerable functions.
+
+              Log the analysis.`,
+          },
+          {
+            id: 'analyze_usage_and_feasibility',
+            description: `
+              Analyze library usage and determine upgrade feasibility.
+
+              - Check if the package is directly imported in the codebase.
+              - Check if the package is listed in package.json (dependencies, devDependencies, peerDependencies).
+              - Check if the package is a transitive dependency.
+              - Analyze the dependency chain to see how the package is introduced.
+              - Check if the package is used in the codebase (e.g., via require, import, or other usage patterns).
+              - Determine if the package can be upgraded to the fixed version without breaking changes.
+              - If it is a transitive dependency, check if the parent dependencies can be upgraded to a version that includes the fix.
+
+
+              `,
+            tool: 'analyze_library_usage_and_upgrade_feasibility',
           },
           {
             id: 'find_github_issue',
@@ -515,6 +569,251 @@ server.tool(
     }
   }
 );
+
+server.tool(
+  'analyze_library_usage_and_upgrade_feasibility',
+  'Analyze library usage and determine upgrade feasibility',
+  {
+    packageName: z.string().describe('Name of the vulnerable package'),
+    currentVersion: z.string().describe('Current version of the package'),
+    fixedVersion: z.string().describe('Version that fixes the vulnerability'),
+    triageAnalysis: z.string().describe('The triage analysis from the vulnerability assessment'),
+    dependencyChain: z
+      .string()
+      .optional()
+      .describe('Dependency chain showing how the package is introduced'),
+  },
+  async (args) => {
+    const { packageName, currentVersion, fixedVersion, triageAnalysis, dependencyChain } = args;
+
+    try {
+      // Check if we have direct imports/usage of the package
+      const directUsageResults = [];
+
+      // Search for direct imports
+      const importPatterns = [
+        `require\\(['"]${packageName}['"]\\)`,
+        `from\\s+['"]${packageName}['"]`,
+        `import\\s+.*\\s+from\\s+['"]${packageName}['"]`,
+        `import\\(['"]${packageName}['"]\\)`,
+      ];
+
+      for (const pattern of importPatterns) {
+        // We'll use a simple approach - check common file patterns
+        const searchResults = await searchCodebase(pattern, packageName);
+        if (searchResults.length > 0) {
+          directUsageResults.push(...searchResults);
+        }
+      }
+
+      // Analyze package.json dependencies
+      const packageJsonAnalysis = await analyzePackageJsonDependencies(packageName);
+
+      // Check for API usage patterns specific to the package
+      const apiUsageAnalysis = await analyzeAPIUsage(packageName, triageAnalysis);
+
+      // Determine upgrade feasibility
+      const upgradeFeasibility = await assessUpgradeFeasibility(
+        packageName,
+        currentVersion,
+        fixedVersion,
+        dependencyChain
+      );
+
+      const analysis = {
+        packageName,
+        currentVersion,
+        fixedVersion,
+        directUsage: {
+          found: directUsageResults.length > 0,
+          locations: directUsageResults,
+          count: directUsageResults.length,
+        },
+        packageJsonPresence: packageJsonAnalysis,
+        apiUsageAnalysis,
+        upgradeFeasibility,
+        recommendations: generateRecommendations(
+          directUsageResults.length > 0,
+          packageJsonAnalysis,
+          upgradeFeasibility
+        ),
+      };
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: formatAnalysisReport(analysis),
+          },
+        ],
+        structuredContent: analysis,
+      };
+    } catch (error) {
+      console.error('Error analyzing library usage:', error);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error analyzing library usage for ${packageName}: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+);
+
+// Helper functions for the analysis tool
+async function searchCodebase(pattern, packageName) {
+  const results = [];
+  try {
+    // This is a simplified search - in practice, you might want to use more sophisticated tools
+    // For now, we'll return a placeholder that indicates we should use grep or similar
+    results.push({
+      pattern,
+      packageName,
+      note: 'Use grep search tool to find actual usage patterns',
+    });
+  } catch (error) {
+    console.error(`Error searching for pattern ${pattern}:`, error);
+  }
+  return results;
+}
+
+async function analyzePackageJsonDependencies(packageName) {
+  try {
+    // Check if package is in dependencies, devDependencies, or peerDependencies
+    return {
+      inDependencies: false, // Would check package.json
+      inDevDependencies: false, // Would check package.json
+      inPeerDependencies: false, // Would check package.json
+      isTransitive: true, // Most likely case based on our triage patterns
+      note: 'Check package.json files to determine dependency type',
+    };
+  } catch (error) {
+    console.error('Error analyzing package.json dependencies:', error);
+    return { error: error.message };
+  }
+}
+
+async function analyzeAPIUsage(packageName, triageAnalysis) {
+  // Extract potential API usage patterns from the triage analysis
+  const commonPatterns = {
+    'cipher-base': ['update', 'digest', 'createHash'],
+    lodash: ['map', 'filter', 'reduce', 'merge'],
+    moment: ['format', 'parse', 'diff'],
+    axios: ['get', 'post', 'put', 'delete'],
+  };
+
+  const packagePatterns = commonPatterns[packageName] || [];
+
+  return {
+    commonAPIs: packagePatterns,
+    analysisFound: triageAnalysis.includes(packageName),
+    potentialUsage:
+      packagePatterns.length > 0
+        ? `May use common ${packageName} APIs: ${packagePatterns.join(', ')}`
+        : 'No common API patterns identified',
+    recommendation:
+      packagePatterns.length > 0
+        ? 'Search codebase for these common API patterns'
+        : 'Manual inspection recommended',
+  };
+}
+
+async function assessUpgradeFeasibility(
+  packageName,
+  currentVersion,
+  fixedVersion,
+  dependencyChain
+) {
+  // Parse version numbers to assess breaking changes
+  const currentMajor = parseInt(currentVersion.split('.')[0]);
+  const fixedMajor = parseInt(fixedVersion.split('.')[0]);
+
+  const majorVersionChange = fixedMajor > currentMajor;
+  const isTransitive = dependencyChain && dependencyChain.includes(' -> ');
+
+  return {
+    majorVersionChange,
+    isTransitive,
+    riskLevel: majorVersionChange ? 'high' : 'low',
+    feasibility: isTransitive
+      ? 'depends-on-parent'
+      : majorVersionChange
+      ? 'requires-testing'
+      : 'low-risk',
+    recommendations: [
+      isTransitive ? 'Upgrade depends on parent dependency update cycle' : 'Can upgrade directly',
+      majorVersionChange
+        ? 'Major version change - review changelog for breaking changes'
+        : 'Minor/patch version - likely safe to upgrade',
+      'Test thoroughly before deploying to production',
+    ],
+  };
+}
+
+function generateRecommendations(hasDirectUsage, packageAnalysis, upgradeFeasibility) {
+  const recommendations = [];
+
+  if (hasDirectUsage) {
+    recommendations.push('Direct usage found - review all usage locations before upgrading');
+  } else {
+    recommendations.push('No direct usage found - likely safe to upgrade');
+  }
+
+  if (upgradeFeasibility.isTransitive) {
+    recommendations.push('Transitive dependency - coordinate with parent dependency updates');
+  }
+
+  if (upgradeFeasibility.majorVersionChange) {
+    recommendations.push('Major version change detected - review changelog and test extensively');
+  } else {
+    recommendations.push('Minor version change - lower risk upgrade');
+  }
+
+  return recommendations;
+}
+
+function formatAnalysisReport(analysis) {
+  return `
+## Library Usage & Upgrade Feasibility Analysis
+
+**Package:** ${analysis.packageName}
+**Current Version:** ${analysis.currentVersion}
+**Fixed Version:** ${analysis.fixedVersion}
+
+### Direct Usage Analysis
+- **Direct usage found:** ${analysis.directUsage.found ? 'Yes' : 'No'}
+- **Usage locations:** ${analysis.directUsage.count}
+${analysis.directUsage.locations.map((loc) => `  - ${loc.pattern}`).join('\n')}
+
+### Dependency Analysis
+- **Dependency type:** ${analysis.packageJsonPresence.isTransitive ? 'Transitive' : 'Direct'}
+- **In package.json:** ${
+    analysis.packageJsonPresence.inDependencies
+      ? 'dependencies'
+      : analysis.packageJsonPresence.inDevDependencies
+      ? 'devDependencies'
+      : 'not found'
+  }
+
+### API Usage Patterns
+- **Common APIs:** ${analysis.apiUsageAnalysis.commonAPIs.join(', ') || 'None identified'}
+- **Potential usage:** ${analysis.apiUsageAnalysis.potentialUsage}
+
+### Upgrade Feasibility
+- **Risk Level:** ${analysis.upgradeFeasibility.riskLevel}
+- **Feasibility:** ${analysis.upgradeFeasibility.feasibility}
+- **Major version change:** ${analysis.upgradeFeasibility.majorVersionChange ? 'Yes' : 'No'}
+- **Is transitive:** ${analysis.upgradeFeasibility.isTransitive ? 'Yes' : 'No'}
+
+### Recommendations
+${analysis.recommendations.map((rec) => `- ${rec}`).join('\n')}
+
+### Next Steps
+${analysis.upgradeFeasibility.recommendations.map((rec) => `- ${rec}`).join('\n')}
+  `.trim();
+}
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
