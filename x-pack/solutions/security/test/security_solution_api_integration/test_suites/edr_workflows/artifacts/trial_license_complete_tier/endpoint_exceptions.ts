@@ -12,7 +12,10 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
+import {
+  ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  GLOBAL_ARTIFACT_TAG,
+} from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import { createSupertestErrorLogger } from '../../utils';
@@ -134,6 +137,10 @@ ${JSON.stringify(createItem())}
 
         // After import - all items should be returned on a GET `find` request.
         expect(body.data.length).to.eql(3);
+
+        for (const endpointException of body.data) {
+          expect(endpointException.tags).to.include.string(GLOBAL_ARTIFACT_TAG);
+        }
       });
     });
   });
