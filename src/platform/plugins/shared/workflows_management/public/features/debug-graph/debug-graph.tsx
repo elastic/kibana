@@ -1,13 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /* eslint-disable no-console */
 import React, { useMemo } from 'react';
 import dagre from '@dagrejs/dagre';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, Position, ReactFlow } from '@xyflow/react';
-import {
-  WORKFLOW_ZOD_SCHEMA_LOOSE,
-  parseWorkflowYamlToJSON,
-} from '@kbn/workflows-management-plugin/public';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { WorkflowGraphEdge, WorkflowGraphNode } from './nodes';
 import {
   mainScopeNodes,
