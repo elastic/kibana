@@ -15,7 +15,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
-    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core",
+    "@kbn/security-solution-plugin",
   ]
 }
