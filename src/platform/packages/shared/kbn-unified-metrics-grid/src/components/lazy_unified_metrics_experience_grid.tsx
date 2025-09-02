@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export const LazyUnifiedHistogramMetricsExperienceGrid = dynamic(() => import('.'), {
+export const LazyUnifiedMetricsExperienceGrid = dynamic(() => import('.'), {
   fallback: (
     <EuiDelayRender delay={300}>
       <EuiSkeletonText />

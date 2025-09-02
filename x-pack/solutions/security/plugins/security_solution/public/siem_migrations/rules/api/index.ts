@@ -50,18 +50,13 @@ import type {
   StopRuleMigrationResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
+import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
 
-export interface GetRuleMigrationStatsParams {
-  /** `id` of the migration to get stats for */
-  migrationId: string;
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
 /** Retrieves the stats for the specific migration. */
 export const getRuleMigrationStats = async ({
   migrationId,
   signal,
-}: GetRuleMigrationStatsParams): Promise<RuleMigrationStats> => {
+}: GetMigrationStatsParams): Promise<RuleMigrationStats> => {
   // Typed with `RuleMigrationStats` instead of `GetRuleMigrationStatsResponse` to use native enums instead of the zod enum
   return KibanaServices.get().http.get<RuleMigrationStats>(
     replaceParams(SIEM_RULE_MIGRATION_STATS_PATH, { migration_id: migrationId }),
@@ -69,14 +64,10 @@ export const getRuleMigrationStats = async ({
   );
 };
 
-export interface GetRuleMigrationsStatsAllParams {
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
 /** Retrieves the stats for all the existing migrations, aggregated by `migration_id`. */
 export const getRuleMigrationsStatsAll = async ({
   signal,
-}: GetRuleMigrationsStatsAllParams = {}): Promise<RuleMigrationStats[]> => {
+}: GetMigrationsStatsAllParams = {}): Promise<RuleMigrationStats[]> => {
   // Typed with `RuleMigrationStats` instead of `GetAllStatsRuleMigrationResponse` to use native enums instead of the zod enum
   return KibanaServices.get().http.get<RuleMigrationStats[]>(SIEM_RULE_MIGRATIONS_ALL_STATS_PATH, {
     version: '1',
