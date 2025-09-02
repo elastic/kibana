@@ -67,4 +67,5 @@ export type {
   ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
+  UnionExecutionGraphNode,
 } from './execution';

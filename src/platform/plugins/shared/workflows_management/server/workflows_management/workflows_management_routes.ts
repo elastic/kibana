@@ -616,7 +616,7 @@ export function defineRoutes(
           workflowExecutionId: schema.string(),
         }),
         query: schema.object({
-          stepId: schema.maybe(schema.string()),
+          stepExecutionId: schema.maybe(schema.string()),
           limit: schema.maybe(schema.number({ min: 1, max: 1000 })),
           offset: schema.maybe(schema.number({ min: 0 })),
           sortField: schema.maybe(schema.string()),
@@ -627,7 +627,7 @@ export function defineRoutes(
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const { limit, offset, sortField, sortOrder, stepId } = request.query;
+        const { limit, offset, sortField, sortOrder, stepExecutionId } = request.query;
         const spaceId = spaces.getSpaceId(request);
 
         const logs = await api.getWorkflowExecutionLogs(
@@ -637,7 +637,7 @@ export function defineRoutes(
             offset,
             sortField,
             sortOrder,
-            stepId,
+            stepExecutionId,
           },
           spaceId
         );
@@ -657,7 +657,7 @@ export function defineRoutes(
   );
   router.get(
     {
-      path: '/api/workflowExecutions/{executionId}/steps/{stepId}',
+      path: '/api/workflowExecutions/{executionId}/steps/{id}',
       security: {
         authz: {
           requiredPrivileges: ['all'],
@@ -666,15 +666,15 @@ export function defineRoutes(
       validate: {
         params: schema.object({
           executionId: schema.string(),
-          stepId: schema.string(),
+          id: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        const { executionId, stepId } = request.params;
+        const { executionId, id } = request.params;
         const stepExecution = await api.getStepExecution(
-          { executionId, stepId },
+          { executionId, id },
           spaces.getSpaceId(request)
         );
         if (!stepExecution) {

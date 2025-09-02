@@ -42,7 +42,7 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
-  stepId?: string;
+  stepExecutionId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -70,7 +70,7 @@ export interface WorkflowExecutionLogsDto {
 
 export interface GetStepExecutionParams {
   executionId: string;
-  stepId: string;
+  id: string;
 }
 
 export interface GetExecutionLogsParams {
@@ -87,7 +87,7 @@ export interface GetStepLogsParams {
   offset?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  stepId: string;
+  stepExecutionId: string;
 }
 
 export interface SearchWorkflowExecutionsParams {
@@ -226,11 +226,11 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
     let result: LogSearchResult;
-    if (params.stepId) {
+    if (params.stepExecutionId) {
       result = await this.workflowsService.getStepLogs(
         {
           executionId: params.executionId,
-          stepId: params.stepId,
+          stepExecutionId: params.stepExecutionId,
           limit: params.limit,
           offset: params.offset,
           sortField: params.sortField,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed, EuiTreeViewProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   type EuiEmptyPromptProps,
@@ -19,13 +19,80 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiButtonEmpty,
+  useEuiTheme,
+  EuiTreeView,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { WorkflowStepExecutionListItem } from './workflow_step_execution_list_item';
+import {
+  convertToWorkflowGraph,
+  getNestedStepsFromGraph,
+  type StepListTreeItem,
+} from '@kbn/workflows/graph';
+import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
+import { getStepIconType } from '../../../shared/ui/get_step_icon_type';
+import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
+
+function transformWorkflowDefinitionToStepListTree(
+  workflowDefinition: WorkflowYaml
+): StepListTreeItem[] {
+  const workflowExecutionGraph = convertToWorkflowGraph(workflowDefinition);
+  return getNestedStepsFromGraph(workflowExecutionGraph);
+}
+
+function convertTreeToEuiTreeViewItems(
+  treeItems: StepListTreeItem[],
+  stepExecutionMap: Map<string, EsWorkflowStepExecution[]>,
+  euiTheme: EuiThemeComputed,
+  selectedId: string | null,
+  onClickHandler: (stepExecutionId: string) => void
+): EuiTreeViewProps['items'] {
+  const onClickFn = onClickHandler;
+  return treeItems
+    .map((item) => {
+      const stepExecutions = stepExecutionMap.get(item.stepId);
+      if (!stepExecutions) {
+        return [];
+      }
+      return stepExecutions.map((stepExecution) => ({
+        id: stepExecution.id,
+        sortIndex: stepExecution.executionIndex,
+        icon: (
+          <EuiIcon
+            type={getStepIconType(item.stepType)}
+            color={getExecutionStatusColors(euiTheme, stepExecution.status).color}
+          />
+        ),
+        label: (
+          <StepExecutionTreeItemLabel
+            stepExecution={stepExecution}
+            stepType={item.stepType}
+            selected={selectedId === stepExecution.id}
+          />
+        ),
+        children:
+          item.children.length > 0
+            ? convertTreeToEuiTreeViewItems(
+                item.children,
+                stepExecutionMap,
+                euiTheme,
+                selectedId,
+                onClickFn
+              )
+            : undefined,
+        callback: () => {
+          onClickFn(stepExecution.id);
+          // string is expected by EuiTreeView for some reason
+          return stepExecution.id;
+        },
+      }));
+    })
+    .flat()
+    .sort((a, b) => a.sortIndex - b.sortIndex);
+}
 
 export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
@@ -47,6 +114,9 @@ export const WorkflowStepExecutionList = ({
   onClose,
 }: WorkflowStepExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
+  const treeViewRef = useRef<typeof EuiTreeView | null>(null);
+
   let content: React.ReactNode = null;
 
   if (isLoading) {
@@ -99,16 +169,27 @@ export const WorkflowStepExecutionList = ({
       />
     );
   } else {
+    const stepExecutionMap = new Map<string, EsWorkflowStepExecution[]>();
+    for (const stepExecution of execution.stepExecutions) {
+      if (stepExecutionMap.has(stepExecution.stepId)) {
+        stepExecutionMap.get(stepExecution.stepId)?.push(stepExecution);
+      } else {
+        stepExecutionMap.set(stepExecution.stepId, [stepExecution]);
+      }
+    }
+    const stepListTree = transformWorkflowDefinitionToStepListTree(execution.workflowDefinition);
+    const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
+      stepListTree,
+      stepExecutionMap,
+      euiTheme,
+      selectedId,
+      onStepExecutionClick
+    );
     content = (
-      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
-        {execution.stepExecutions.map((stepExecution) => (
-          <WorkflowStepExecutionListItem
-            key={stepExecution.id}
-            stepExecution={stepExecution}
-            selected={stepExecution.id === selectedId}
-            onClick={() => onStepExecutionClick(stepExecution.id)}
-          />
-        ))}
+      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="spaceBetween">
+        <div css={styles.treeViewContainer}>
+          <EuiTreeView items={items} showExpansionArrows expandByDefault display="compressed" />
+        </div>
         <EuiButton onClick={onClose} css={styles.doneButton}>
           <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
         </EuiButton>
@@ -152,9 +233,17 @@ const componentStyles = {
     }),
   header: css({
     minHeight: `32px`,
+    display: 'flex',
+    alignItems: 'center',
   }),
   doneButton: css({
     justifySelf: 'flex-end',
     marginTop: 'auto',
+  }),
+  treeViewContainer: css({
+    '& .euiTreeView__nodeLabel': {
+      flexGrow: 1,
+      textAlign: 'left',
+    },
   }),
 };

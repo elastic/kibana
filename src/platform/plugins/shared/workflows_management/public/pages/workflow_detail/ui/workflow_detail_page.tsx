@@ -317,8 +317,7 @@ const componentStyles = {
     }),
   sidebar: ({ euiTheme }: UseEuiTheme) =>
     css({
-      flexBasis: '275px',
-      maxWidth: '275px',
+      maxWidth: '300px',
       flex: 1,
       borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),

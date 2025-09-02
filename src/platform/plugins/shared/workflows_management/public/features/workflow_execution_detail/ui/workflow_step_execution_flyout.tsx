@@ -28,33 +28,36 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui';
-import { useStepExecution } from '../model/use_step_execution';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
 interface WorkflowStepExecutionFlyoutProps {
   workflowExecutionId: string;
-  stepId: string;
+  stepExecutionId: string;
+  stepExecution: EsWorkflowStepExecution | null;
+  isLoading: boolean;
   closeFlyout: () => void;
   goNext?: () => void;
   goPrevious?: () => void;
+  setSelectedStepId: (stepId: string | null) => void;
 }
 
 export const WorkflowStepExecutionFlyout = ({
   workflowExecutionId,
-  stepId,
+  stepExecutionId,
+  stepExecution,
   closeFlyout,
   goNext,
   goPrevious,
+  setSelectedStepId,
+  isLoading = false,
 }: WorkflowStepExecutionFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
-
-  const { data: stepExecution, isLoading } = useStepExecution(workflowExecutionId, stepId);
-
-  const { setSelectedStep } = useWorkflowUrlState();
+  const getFormattedDateTime = useGetFormattedDateTime();
 
   const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
 
@@ -79,11 +82,11 @@ export const WorkflowStepExecutionFlyout = ({
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
   useEffect(() => {
-    setSelectedStep(stepId);
+    setSelectedStepId(stepExecution?.stepId || null);
     // reset the tab to the default one on step change
     setSelectedTabId(tabs[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepId, tabs[0].id]);
+  }, [stepExecution?.stepId, tabs[0].id]);
 
   const renderInput = () => {
     return (
@@ -115,7 +118,12 @@ export const WorkflowStepExecutionFlyout = ({
   };
 
   const renderTimeline = () => {
-    return <StepExecutionTimelineStateful executionId={workflowExecutionId} stepId={stepId} />;
+    return (
+      <StepExecutionTimelineStateful
+        executionId={workflowExecutionId}
+        stepExecutionId={stepExecutionId}
+      />
+    );
   };
 
   return (
@@ -164,12 +172,15 @@ export const WorkflowStepExecutionFlyout = ({
         <div css={styles.titleContainer}>
           {isLoading && <EuiSkeletonText lines={1} />}
           {stepExecution && (
-            <EuiTitle size="m">
-              <h2 id={complicatedFlyoutTitleId} css={styles.title}>
-                {getExecutionStatusIcon(euiTheme, stepExecution.status)}
-                {stepExecution.stepId}
-              </h2>
-            </EuiTitle>
+            <div>
+              <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
+              <EuiTitle size="m">
+                <h2 id={complicatedFlyoutTitleId} css={styles.title}>
+                  {getExecutionStatusIcon(euiTheme, stepExecution.status)}
+                  {stepExecution.stepId}
+                </h2>
+              </EuiTitle>
+            </div>
           )}
           <EuiSpacer size="m" />
           <EuiText size="xs">

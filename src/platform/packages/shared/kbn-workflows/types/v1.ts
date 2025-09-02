@@ -107,6 +107,7 @@ export interface WorkflowExecutionDto {
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
+  workflowDefinition: WorkflowYaml;
   stepExecutions: EsWorkflowStepExecution[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'

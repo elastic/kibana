@@ -258,7 +258,7 @@ export class WorkflowsService {
       workflowExecutionId: params.executionId,
       additionalQuery: {
         match: {
-          stepId: params.stepId,
+          id: params.id,
         },
       },
       spaceId,
@@ -454,8 +454,8 @@ export class WorkflowsService {
         };
       }
     }
-    if (updateData.definition!.inputs === undefined) {
-      updateData.definition!.inputs = [];
+    if (updateData.definition && updateData.definition?.inputs === undefined) {
+      updateData.definition.inputs = [];
     }
     const response = await savedObjectsClient.update<WorkflowSavedObjectAttributes>(
       WORKFLOW_SAVED_OBJECT_TYPE,
@@ -685,7 +685,7 @@ export class WorkflowsService {
           },
           {
             match: {
-              'workflow.step_id.keyword': params.stepId,
+              'id.keyword': params.stepExecutionId,
             },
           },
           {
