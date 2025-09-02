@@ -88,6 +88,7 @@ yarn kbn reset              # Full reset (deletes node_modules and build artifac
 yarn es snapshot            # Start Elasticsearch (separate terminal)
 yarn start                  # Start Kibana dev server (localhost:5601)
 yarn start --run-examples   # Include developer examples
+yarn start --no-base-path   # Disable basePath
 ```
 
 ### Serverless Variants
