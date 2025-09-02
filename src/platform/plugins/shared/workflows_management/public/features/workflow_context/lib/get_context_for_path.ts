@@ -25,10 +25,39 @@ function getRootContextSchema(definition: WorkflowYaml) {
     event: EventSchema,
     inputs: z.object({
       ...Object.fromEntries(
-        Object.entries(definition.inputs ?? {}).map(([key, value]) => [
-          value.name ?? key,
-          inferZodType(value.default),
-        ])
+        Object.entries(definition.inputs ?? {}).map(([_index, input]) => {
+          let valueSchema: z.ZodType;
+          switch (input.type) {
+            case 'string':
+              valueSchema = z.string();
+              break;
+            case 'number':
+              valueSchema = z.number();
+              break;
+            case 'boolean':
+              valueSchema = z.boolean();
+              break;
+            case 'choice':
+              const opts = input.options ?? [];
+              valueSchema = z.any();
+              if (opts.length > 0) {
+                const literals = opts.map((o) => z.literal(o)) as [
+                  z.ZodLiteral<any>,
+                  z.ZodLiteral<any>,
+                  ...z.ZodLiteral<any>[]
+                ];
+                valueSchema = z.union(literals);
+              }
+              break;
+            default:
+              valueSchema = z.any();
+              break;
+          }
+          if (input.default) {
+            valueSchema = valueSchema.default(input.default);
+          }
+          return [input.name, valueSchema];
+        })
       ),
     }),
     steps: z.object({}),
