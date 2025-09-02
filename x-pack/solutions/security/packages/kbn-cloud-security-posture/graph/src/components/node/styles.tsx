@@ -126,6 +126,16 @@ export const LabelShape = styled(EuiText, {
   `};
 `;
 
+export const LabelShapeDoubleStroke = styled.div<{ borderColor: string }>`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.9) translateY(calc(-100% + 3px));
+  z-index: -1;
+  border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
+  border-radius: ${LABEL_BORDER_RADIUS}px;
+`;
+
 export const LabelShapeOnHover = styled.div`
   position: absolute;
   top: 50%;
