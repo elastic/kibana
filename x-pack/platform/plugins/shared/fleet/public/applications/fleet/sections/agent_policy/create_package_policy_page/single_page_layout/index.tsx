@@ -178,7 +178,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [integrationToEnable, packageInfo?.policy_templates]);
 
   const fipsCompatibleIntegration = useMemo(() => {
-    return checkIntegrationFipsLooseCompatibility(packageInfo, pkgName);
+    return checkIntegrationFipsLooseCompatibility(pkgName, packageInfo);
   }, [packageInfo, pkgName]);
 
   const showSecretsDisabledCallout =

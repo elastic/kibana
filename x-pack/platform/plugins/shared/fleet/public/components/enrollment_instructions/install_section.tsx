@@ -17,7 +17,7 @@ import { PlatformSelector } from '../platform_selector';
 import { RootPrivilegesCallout } from './root_privileges_callout';
 import { UnprivilegedInfo } from './unprivileged_info';
 
-import { FipsIntegrationsCallout } from './fips_integrations_callout';
+import { NonFipsIntegrationsCallout } from './non_fips_integrations_callout';
 
 interface Props {
   installCommand: CommandsByPlatform;
@@ -47,7 +47,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
-      <FipsIntegrationsCallout nonFipsIntegrations={nonFipsIntegrations} />
+      <NonFipsIntegrationsCallout nonFipsIntegrations={nonFipsIntegrations} />
       <RootPrivilegesCallout rootIntegrations={rootIntegrations} />
       <UnprivilegedInfo />
       <PlatformSelector

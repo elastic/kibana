@@ -458,7 +458,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (enrichedPackagePolicy?.package) {
         enrichedPackagePolicy.package = {
           ...enrichedPackagePolicy.package,
-          fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo?.name),
+          fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
         };
       }
     }
@@ -668,7 +668,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (packagePolicy?.package) {
             packagePolicy.package = {
               ...packagePolicy.package,
-              fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo?.name),
+              fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
             };
           }
         }
@@ -1245,7 +1245,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (restOfPackagePolicy?.package) {
         restOfPackagePolicy.package = {
           ...restOfPackagePolicy.package,
-          fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo?.name),
+          fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
         };
       }
     }
@@ -1633,7 +1633,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             if (restOfPackagePolicy?.package) {
               restOfPackagePolicy.package = {
                 ...restOfPackagePolicy.package,
-                fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo, pkgInfo.name),
+                fips_compatible: checkIntegrationFipsLooseCompatibility(pkgInfo?.name, pkgInfo),
               };
             }
 

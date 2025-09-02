@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { RegistryPolicyTemplate } from '../types';
+
 import {
   getRootIntegrations,
   getRootPrivilegedDataStreams,
   hasInstallServersInputs,
   isRootPrivilegesRequired,
+  checkIntegrationFipsLooseCompatibility,
+  getNonFipsIntegrations,
 } from './package_helpers';
 
 describe('isRootPrivilegesRequired', () => {
@@ -156,5 +160,97 @@ describe('hasInstallServersInputs', () => {
       } as any,
     ]);
     expect(res).toBe(false);
+  });
+});
+
+describe('checkIntegrationFipsLooseCompatibility', () => {
+  const packageInfo = {
+    policy_templates: [
+      {
+        name: 'test-package-1',
+        title: 'Template 1',
+        description: '',
+        fips_compatible: true,
+      },
+      {
+        name: 'test-package-2',
+        title: 'Template 2',
+        description: '',
+      },
+      {
+        name: 'test-package-3',
+        title: 'Template 3',
+        description: '',
+        fips_compatible: false,
+      },
+    ] as RegistryPolicyTemplate[],
+  };
+  it('should return true if an integration has no packageInfo', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-1');
+    expect(res).toBe(true);
+  });
+
+  it('should return true if an integration has no name specified', () => {
+    const res = checkIntegrationFipsLooseCompatibility('');
+    expect(res).toBe(true);
+  });
+
+  it('should return true if an integration has no policy_templates', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-1', { policy_templates: [] });
+    expect(res).toBe(true);
+  });
+
+  it('should return true if an integration has policy_templates marked as fips_compatible', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-1', packageInfo);
+    expect(res).toBe(true);
+  });
+
+  it('should return true if an integration has policy_templates with no fips_compatible flag', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-2', packageInfo);
+    expect(res).toBe(true);
+  });
+
+  it('should return true if an integration has policy_templates  marked as fips_compatible=false', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-3', packageInfo);
+    expect(res).toBe(false);
+  });
+});
+
+describe('getNonFipsIntegrations', () => {
+  it('should return packages that require root', () => {
+    const res = getNonFipsIntegrations([
+      {
+        package: {
+          fips_compatible: false,
+          name: 'oracle',
+          title: 'Oracle',
+        },
+      } as any,
+      {
+        package: {
+          fips_compatible: false,
+          name: 'mongodb',
+          title: 'MongoDb',
+        },
+      } as any,
+      {
+        package: {
+          name: 'test',
+          title: 'Test',
+        },
+      } as any,
+      {
+        package: {
+          fips_compatible: true,
+          name: 'auditd_manager',
+          title: 'Auditd Manager',
+        },
+      } as any,
+      {} as any,
+    ]);
+    expect(res).toEqual([
+      { name: 'oracle', title: 'Oracle' },
+      { name: 'mongodb', title: 'MongoDb' },
+    ]);
   });
 });

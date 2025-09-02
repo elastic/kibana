@@ -10,8 +10,8 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const FipsIntegrationsCallout: React.FC<{
-  nonFipsIntegrations: Array<{ name: string; title: string }>;
+export const NonFipsIntegrationsCallout: React.FC<{
+  nonFipsIntegrations?: Array<{ name: string; title: string }>;
 }> = ({ nonFipsIntegrations = [] }) => {
   return nonFipsIntegrations.length > 0 ? (
     <>
@@ -19,13 +19,17 @@ export const FipsIntegrationsCallout: React.FC<{
         size="m"
         color="warning"
         iconType="warning"
-        title={i18n.translate('xpack.fleet.agentEnrollmentCallout.rootPrivilegesTitle', {
-          defaultMessage: 'FIPS mode compatibility',
-        })}
+        title={i18n.translate(
+          'xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsCalloutTitle',
+          {
+            defaultMessage: 'FIPS mode compatibility',
+          }
+        )}
+        data-test-subj="nonFipsIntegrationsCallout"
       >
         <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-          defaultMessage="This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly.For more information, see the {guideLink}"
+          id="xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsCalloutDescription"
+          defaultMessage="This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly."
         />
         <ul>
           {nonFipsIntegrations.map((item) => (
