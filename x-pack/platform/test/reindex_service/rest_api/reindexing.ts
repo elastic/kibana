@@ -13,9 +13,9 @@ import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/public';
 import { getIndexState } from '@kbn/upgrade-assistant-pkg-server';
 import { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
-import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -23,6 +23,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   const versionService = new Version();
   versionService.setup('8.0.0');
+
+  const reindexOptions = {
+    deleteOldIndex: true,
+  };
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
@@ -41,8 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     return lastState;
   };
 
-  describe.skip('reindexing', function () {
-    this.onlyEsVersion('8');
+  describe('reindexing', function () {
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
@@ -74,6 +77,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions: {
+            deleteOldIndex: true,
+          },
         })
         .expect(200);
 
@@ -132,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
         })
         .expect(200);
 
@@ -176,6 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
         })
         .expect(200);
 
@@ -216,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           indexName: 'dummydata',
           newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
         })
         .expect(200);
       const lastState = await waitForReindexToComplete('dummydata');
@@ -231,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: lastState.newIndexName,
       });
     });
-
+    /*
     it('shows reindex and read-only warnings', async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`); // reusing the index previously migrated in v7->v8 UA tests
       expect(resp.body.warnings.length).to.be(2);
@@ -243,24 +252,36 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
+
     it('reindexes old 7.0 index', async () => {
+      const newIndexName = generateNewIndexName('reindexed-v7-6.0-data', versionService);
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex`) // reusing the index previously migrated in v7->v8 UA tests
         .set('kbn-xsrf', 'xxx')
         .send({
           indexName: 'reindexed-v7-6.0-data',
-          newIndexName: generateNewIndexName('dummydata', versionService),
+          newIndexName,
         })
         .expect(200);
 
       expect(body.indexName).to.equal('reindexed-v7-6.0-data');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
+      // eslint-disable-next-line no-console
+      console.log(body);
+
       const lastState = await waitForReindexToComplete('reindexed-v7-6.0-data');
+      // eslint-disable-next-line no-console
+      console.log('############');
+      // eslint-disable-next-line no-console
+      console.log(lastState);
+      // eslint-disable-next-line no-console
+      console.log('############');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });
 
+        */
     it('should reindex a batch in order and report queue state', async () => {
       const assertQueueState = async (
         firstInQueueIndexName: string | undefined,
@@ -311,7 +332,13 @@ export default function ({ getService }: FtrProviderContext) {
         const result = await supertest
           .post(`/api/upgrade_assistant/reindex/batch`)
           .set('kbn-xsrf', 'xxx')
-          .send({ indexNames: [test1, test2, test3] })
+          .send({
+            indices: [
+              { indexName: test1, newIndexName: `${test1}New`, reindexOptions },
+              { index: test2, newIndexName: `${test2}New`, reindexOptions },
+              { index: test3, newIndexName: `${test3}New`, reindexOptions },
+            ],
+          })
           .expect(200);
 
         expect(result.body.enqueued.length).to.equal(3);

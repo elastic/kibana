@@ -136,7 +136,7 @@ export class ReindexServiceWrapper {
     const throwIfNoPrivileges = async (indexName: string, newIndexName: string): Promise<void> => {
       if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
         throw error.accessForbidden(
-          i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
+          i18n.translate('xpack.reindexService.reindexPrivilegesErrorBatch', {
             defaultMessage:
               'You do not have adequate privileges to reindex "{indexName}" to "{newIndexName}".',
             values: { indexName, newIndexName },
@@ -186,22 +186,25 @@ export class ReindexServiceWrapper {
           errors: [],
         };
 
-        await asyncForEach(reindexJobs, async ({ indexName, newIndexName, settings }) => {
-          try {
-            const result = await reindexOrResume({
-              indexName,
-              newIndexName,
-              settings,
-              reindexOptions: { enqueue: true },
-            });
-            results.enqueued.push(result);
-          } catch (e) {
-            results.errors.push({
-              indexName,
-              message: e.message,
-            });
+        await asyncForEach(
+          reindexJobs,
+          async ({ indexName, newIndexName, settings, reindexOptions }) => {
+            try {
+              const result = await reindexOrResume({
+                indexName,
+                newIndexName,
+                settings,
+                reindexOptions: { ...reindexOptions, enqueue: true },
+              });
+              results.enqueued.push(result);
+            } catch (e) {
+              results.errors.push({
+                indexName,
+                message: e.message,
+              });
+            }
           }
-        });
+        );
         return results;
       },
       hasRequiredPrivileges: reindexService.hasRequiredPrivileges.bind(reindexService),
@@ -216,9 +219,14 @@ export class ReindexServiceWrapper {
 
         const existingOp = await reindexService.findReindexOperation(indexName);
 
-        if (existingOp) {
+        if (
+          existingOp &&
+          ![ReindexStatus.cancelled, ReindexStatus.completed, ReindexStatus.failed].includes(
+            existingOp.attributes.status
+          )
+        ) {
           throw error.reindexAlreadyInProgress(
-            i18n.translate('xpack.upgradeAssistant.reindex.reindexAlreadyInProgressError', {
+            i18n.translate('xpack.reindexService.reindexAlreadyInProgressError', {
               defaultMessage: 'A reindex operation already in-progress for {indexName}',
               values: { indexName },
             })

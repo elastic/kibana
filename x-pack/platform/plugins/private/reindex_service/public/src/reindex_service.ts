@@ -33,7 +33,7 @@ export class ReindexService {
     });
   }
 
-  public async startReindex(reindexArgs: Omit<ReindexArgs, 'reindexOptions'>) {
+  public async startReindex(reindexArgs: ReindexArgs) {
     return sendRequest<ReindexOperation>(this.client, {
       method: 'post',
       path: `${UA_BASE_PATH}/reindex`,

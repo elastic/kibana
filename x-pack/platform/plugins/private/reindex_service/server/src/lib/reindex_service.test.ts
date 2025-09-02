@@ -164,7 +164,7 @@ describe('reindexService', () => {
       expect(actions.createReindexOp).toHaveBeenCalledWith({
         indexName: 'myIndex',
         newIndexName: 'reindexed-myIndex',
-        reindexOptions: undefined,
+        reindexOptions: {},
         settings: undefined,
       });
     });
@@ -839,7 +839,7 @@ describe('reindexService', () => {
         attributes: {
           ...defaultAttributes,
           lastCompletedStep: ReindexStep.indexSettingsRestored,
-          reindexOptions: { openAndClose: false },
+          reindexOptions: { openAndClose: false, deleteOldIndex: true },
         },
       } as ReindexSavedObject;
 
