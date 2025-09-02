@@ -621,12 +621,13 @@
         }
       },
       "incremental_id": {
-        "type": "unsigned_long",
         "fields": {
           "raw": {
+            "ignore_above": 256,
             "type": "keyword"
           }
-        }
+        },
+        "type": "unsigned_long"
       },
       "observables": {
         "properties": {
