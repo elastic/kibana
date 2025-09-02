@@ -15,7 +15,6 @@ import { FormattedDate } from '@kbn/i18n-react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
 import { ShareBadge } from '../../share_conversation/share_badge';
-import { useAssistantContext } from '../../../assistant_context';
 import {
   PRIVATE,
   RESTRICTED,
