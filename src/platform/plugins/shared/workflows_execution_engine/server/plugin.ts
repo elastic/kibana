@@ -16,11 +16,12 @@ import type {
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
-import { graphlib } from '@dagrejs/dagre';
-import { Client } from '@elastic/elasticsearch';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { v4 as generateUuid } from 'uuid';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
@@ -32,14 +33,19 @@ import type {
 
 import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { ConnectorExecutor } from './connector_executor';
+import { UrlValidator } from './lib/url_validator';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
-import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
-import type { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
+import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
+import { workflowExecutionLoop } from './workflow_execution_loop';
+import type {
+  ResumeWorkflowExecutionParams,
+  StartWorkflowExecutionParams,
+} from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 
 export class WorkflowsExecutionEnginePlugin
@@ -47,26 +53,58 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private esClient: Client = new Client({
-    node: 'http://localhost:9200', // or your ES URL
-    auth: {
-      username: 'elastic',
-      password: 'changeme',
-    },
-  });
-  private readonly workflowExecutionRepository: WorkflowExecutionRepository;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(this.esClient);
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
     this.logger.debug('workflows-execution-engine: Setup');
-    const esClient = this.esClient;
+
     const logger = this.logger;
     const config = this.config;
+
+    plugins.taskManager.registerTaskDefinitions({
+      'workflow:run': {
+        title: 'Run Workflow',
+        description: 'Executes a workflow immediately',
+        timeout: '5m',
+        maxAttempts: 1,
+        createTaskRunner: ({ taskInstance }) => {
+          return {
+            async run() {
+              const { workflowRunId, spaceId } =
+                taskInstance.params as StartWorkflowExecutionParams;
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              const { actions, taskManager } =
+                pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+
+              // Get ES client from core services (guaranteed to be available at task execution time)
+              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+
+              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
+                workflowRunId,
+                spaceId,
+                actions,
+                taskManager,
+                esClient,
+                logger,
+                config,
+                workflowExecutionRepository
+              );
+              await workflowRuntime.start();
+
+              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
+            },
+            async cancel() {
+              // Cancel function for the task
+            },
+          };
+        },
+      },
+    });
     plugins.taskManager.registerTaskDefinitions({
       'workflow:resume': {
         title: 'Resume Workflow',
@@ -74,16 +112,23 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
-          const workflowExecutionRepository = this.workflowExecutionRepository;
           return {
             async run() {
-              const { workflowRunId } = taskInstance.params as ResumeWorkflowExecutionParams;
-              const [, pluginsStart] = await core.getStartServices();
+              const { workflowRunId, spaceId } =
+                taskInstance.params as ResumeWorkflowExecutionParams;
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              const { actions, taskManager } =
+                pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+
+              // Get ES client from core services (guaranteed to be available at task execution time)
+              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
                 workflowRunId,
-                (pluginsStart as any).actions,
-                (pluginsStart as any).taskManager,
+                spaceId,
+                actions,
+                taskManager,
                 esClient,
                 logger,
                 config,
@@ -109,16 +154,21 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>
     ) => {
-      const workflowRunId = context.workflowRunId;
       const workflowCreatedAt = new Date();
+
+      // Get ES client and create repository for this execution
+      const esClient = core.elasticsearch.client.asInternalUser as Client;
+      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
-        id: workflowRunId,
+        id: generateUuid(),
+        spaceId: context.spaceId,
         workflowId: workflow.id,
+        isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
+        yaml: workflow.yaml,
         context,
-        executionGraph: workflow.executionGraph,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available
@@ -126,22 +176,27 @@ export class WorkflowsExecutionEnginePlugin
         lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
-      await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      const taskInstance = {
+        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+        taskType: 'workflow:run',
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } as StartWorkflowExecutionParams,
+        state: {
+          lastRunAt: null,
+          lastRunStatus: null,
+          lastRunError: null,
+        },
+        scope: ['workflows'],
+        enabled: true,
+      };
 
-      const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
-        workflowRunId,
-        plugins.actions,
-        plugins.taskManager,
-        this.esClient,
-        this.logger,
-        this.config,
-        this.workflowExecutionRepository
-      );
-
-      // Log workflow execution start
-      await workflowRuntime.start();
-
-      await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
+      await plugins.taskManager.schedule(taskInstance);
+      return {
+        workflowExecutionId: workflowExecution.id!,
+      };
     };
 
     return {
@@ -154,6 +209,7 @@ export class WorkflowsExecutionEnginePlugin
 
 async function createContainer(
   workflowRunId: string,
+  spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
   taskManagerPlugin: TaskManagerStartContract,
   esClient: Client,
@@ -162,14 +218,15 @@ async function createContainer(
   workflowExecutionRepository: WorkflowExecutionRepository
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId
+    workflowRunId,
+    spaceId
   );
 
   if (!workflowExecution) {
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
 
-  const workflowExecutionGraph = graphlib.json.read(workflowExecution.executionGraph);
+  const workflowExecutionGraph = convertToWorkflowGraph(workflowExecution.workflowDefinition);
   const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
   const stepExecutionRepository = new StepExecutionRepository(esClient);
   const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
@@ -203,25 +260,23 @@ async function createContainer(
   });
 
   const contextManager = new WorkflowContextManager({
-    spaceId: workflowExecution.spaceId,
-    workflowRunId: workflowExecution.id,
-    workflow: workflowExecution.workflowDefinition,
-    event: workflowExecution.context.event,
-    logger,
-    workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
-    esClient,
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
   });
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
 
+  const urlValidator = new UrlValidator({
+    allowedHosts: config.http.allowedHosts,
+  });
+
   const nodesFactory = new StepFactory(
     contextManager,
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    workflowTaskManager
+    workflowTaskManager,
+    urlValidator
   );
 
   return {
@@ -234,40 +289,4 @@ async function createContainer(
     workflowTaskManager,
     nodesFactory,
   };
-}
-
-async function workflowExecutionLoop(
-  workflowRuntime: WorkflowExecutionRuntimeManager,
-  workflowLogger: WorkflowEventLogger,
-  nodesFactory: StepFactory
-) {
-  while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    const currentNode = workflowRuntime.getCurrentStep();
-    const step = nodesFactory.create(currentNode as any);
-
-    try {
-      await step.run();
-    } catch (error) {
-      // If an unhandled error occurs in a step, the workflow execution is terminated
-      workflowLogger.logError(
-        `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
-      );
-      await workflowRuntime.setStepResult(currentNode.id, {
-        output: null,
-        error: String(error),
-      });
-      await workflowRuntime.finishStep(currentNode.id);
-      break;
-    } finally {
-      try {
-        await workflowRuntime.saveState(); // Ensure state is updated after each step
-      } catch (error) {
-        workflowLogger.logError(
-          `Error saving state after step ${currentNode.id} (${currentNode.name}): ${error.message}`
-        );
-      }
-
-      await workflowLogger.flushEvents();
-    }
-  }
 }

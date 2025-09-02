@@ -48,7 +48,6 @@ const tabs = [
 ];
 
 export interface SpanFlyoutProps {
-  tracesIndexPattern: string;
   hit: DataTableRecord | null;
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];

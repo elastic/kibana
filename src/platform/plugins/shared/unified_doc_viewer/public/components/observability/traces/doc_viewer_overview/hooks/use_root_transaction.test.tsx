@@ -32,6 +32,12 @@ jest.mock('rxjs', () => {
   };
 });
 
+jest.mock('../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: () => ({
+    indexes: { apm: { traces: 'test-index' } },
+  }),
+}));
+
 const mockSearch = jest.fn();
 const mockAddDanger = jest.fn();
 (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
@@ -58,9 +64,7 @@ beforeEach(() => {
 
 describe('useRootTransaction hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <RootTransactionProvider traceId="test-trace" indexPattern="test-index">
-      {children}
-    </RootTransactionProvider>
+    <RootTransactionProvider traceId="test-trace">{children}</RootTransactionProvider>
   );
 
   it('should start with loading true and transaction as null', async () => {

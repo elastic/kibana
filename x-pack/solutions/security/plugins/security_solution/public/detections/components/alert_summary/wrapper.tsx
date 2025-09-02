@@ -17,14 +17,11 @@ import { i18n } from '@kbn/i18n';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { DataViewSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import { RELATED_INTEGRATION } from '../../constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { KPIsSection } from './kpis/kpis_section';
 import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 
@@ -37,7 +34,7 @@ export const DATA_VIEW_ERROR_TEST_ID = 'alert-summary-data-view-error';
 export const SKELETON_TEST_ID = 'alert-summary-skeleton';
 export const CONTENT_TEST_ID = 'alert-summary-content';
 
-const RUNTIME_FIELD_MAP: Record<string, RuntimeFieldSpec> = {
+export const RUNTIME_FIELD_MAP: Record<string, RuntimeFieldSpec> = {
   [RELATED_INTEGRATION]: {
     type: 'keyword',
     script: {
@@ -61,28 +58,16 @@ export interface WrapperProps {
  */
 export const Wrapper = memo(({ packages }: WrapperProps) => {
   const spaceId = useSpaceId();
-  const oldSignalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  const signalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
   const dataViewSpec: DataViewSpec = useMemo(
     () => ({
-      title: oldSignalIndexName,
+      title: signalIndexName,
       runtimeFieldMap: RUNTIME_FIELD_MAP,
     }),
-    [oldSignalIndexName]
+    [signalIndexName]
   );
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec,
-    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
-  });
-
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-  const signalIndexName = newDataViewPickerEnabled
-    ? experimentalDataView?.getIndexPattern() ?? ''
-    : oldSignalIndexName;
-  const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView, loading } = useCreateDataView({ dataViewSpec });
 
   return (
     <EuiSkeletonLoading

@@ -22,12 +22,14 @@ import {
   TRANSACTION_NAME_FIELD,
   TRANSACTION_TYPE_FIELD,
 } from '@kbn/discover-utils';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
+import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { SpanLinks } from '../components/span_links';
 import { Trace } from '../components/trace';
 import { RootSpanProvider } from './hooks/use_root_span';
 import { fields, allFields } from './resources/fields';
@@ -41,15 +43,10 @@ import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
+import { TraceContextLogEvents } from '../components/trace_context_log_events';
 
 export type OverviewProps = DocViewRenderProps & {
-  indexes: {
-    apm: {
-      traces: string;
-      errors: string;
-    };
-    logs: string;
-  };
+  indexes: TraceIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -96,6 +93,8 @@ export function Overview({
   const duration = isOtelSpan ? flattenedDoc[OTEL_DURATION]! * 0.001 : apmDurationField;
 
   const traceId = flattenedDoc[TRACE_ID_FIELD];
+  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
+  const spanId = flattenedDoc[SPAN_ID_FIELD];
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
@@ -103,12 +102,8 @@ export function Overview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
-        <RootSpanProvider
-          traceId={traceId}
-          transactionId={flattenedDoc[TRANSACTION_ID_FIELD]}
-          indexPattern={indexes.apm.traces}
-        >
+      <RootTransactionProvider traceId={traceId}>
+        <RootSpanProvider traceId={traceId} transactionId={transactionId}>
           <FieldActionsProvider
             columns={columns}
             filter={filter}
@@ -174,9 +169,22 @@ export function Overview({
                   docId={id}
                   displayType={displayType}
                   dataView={dataView}
-                  tracesIndexPattern={indexes.apm.traces}
                   showWaterfall={showWaterfall}
                   showActions={showActions}
+                />
+              </EuiFlexItem>
+              {spanId && (
+                <EuiFlexItem>
+                  <EuiSpacer size="m" />
+                  <SpanLinks traceId={traceId} docId={spanId} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiSpacer size="m" />
+                <TraceContextLogEvents
+                  traceId={flattenedDoc[TRACE_ID_FIELD]}
+                  spanId={flattenedDoc[SPAN_ID_FIELD]}
+                  transactionId={transactionId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

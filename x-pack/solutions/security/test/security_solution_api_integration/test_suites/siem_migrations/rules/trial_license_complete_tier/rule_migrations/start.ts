@@ -77,9 +77,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       const response = await migrationRulesRoutes.stats({ migrationId });
 
-      expect(response.body).keys('status', 'rules', 'id', 'created_at', 'last_updated_at');
+      expect(response.body).keys('status', 'items', 'id', 'created_at', 'last_updated_at');
 
-      expect(response.body.rules).to.eql({
+      expect(response.body.items).to.eql({
         completed: 0,
         failed: 0,
         pending: 1,

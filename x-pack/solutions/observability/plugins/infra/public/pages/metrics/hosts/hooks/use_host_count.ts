@@ -57,8 +57,10 @@ export const useHostCount = () => {
         total: data.count ?? 0,
         with_query: !!searchCriteria.query.query,
         with_filters: searchCriteria.filters.length > 0 || searchCriteria.panelFilters.length > 0,
-        schema_selected: searchCriteria?.preferredSchema || 'ecs',
-        schemas_available: schemas,
+        schema_selected: schemas.length
+          ? searchCriteria?.preferredSchema || 'ecs'
+          : 'no schema available',
+        schemas_available: schemas.length ? schemas : ['no schema available'],
         schema_error: timeRangeMetadataStatus === FETCH_STATUS.FAILURE,
       });
     }
