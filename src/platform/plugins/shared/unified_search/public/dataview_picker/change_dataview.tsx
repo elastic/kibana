@@ -130,6 +130,7 @@ export function ChangeDataView({
         title={trigger.label}
         disabled={isDisabled}
         textProps={{ className: 'eui-textTruncate' }}
+        size="s"
         {...rest}
       >
         <>
@@ -141,6 +142,7 @@ export function ChangeDataView({
               css={css`
                 margin-right: ${euiTheme.size.s};
               `}
+              size="s"
             />
           )}
           {trigger.label}
@@ -285,7 +287,7 @@ export function ChangeDataView({
             <EuiFlexItem
               grow={false}
               css={css`
-                padding: 11px;
+                padding: 7px;
                 border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
                 background-color: ${euiTheme.colors.lightestShade};
                 border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
