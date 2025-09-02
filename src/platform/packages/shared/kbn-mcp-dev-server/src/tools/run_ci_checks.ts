@@ -108,11 +108,11 @@ async function runSingleCheck(checkKey: string): Promise<CheckResult> {
   const startTime = Date.now();
 
   try {
-         await execa.command(check.command, {
-       cwd: REPO_ROOT,
-       stdio: 'pipe',
-       timeout: 900000, // 15 minutes timeout
-     });
+    await execa.command(check.command, {
+      cwd: REPO_ROOT,
+      stdio: 'pipe',
+      timeout: 900000, // 15 minutes timeout
+    });
 
     const duration = Date.now() - startTime;
     return {
