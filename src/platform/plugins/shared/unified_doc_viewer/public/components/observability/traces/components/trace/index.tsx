@@ -122,11 +122,17 @@ export const Trace = ({
         </div>
 
         {showWaterfall && (
-          <EmbeddableRenderer
-            type="APM_TRACE_WATERFALL_EMBEDDABLE"
-            getParentApi={getParentApi}
-            hidePanelChrome
-          />
+          <div
+            css={css`
+              padding-inline: ${euiTheme.size.base};
+            `}
+          >
+            <EmbeddableRenderer
+              type="APM_TRACE_WATERFALL_EMBEDDABLE"
+              getParentApi={getParentApi}
+              hidePanelChrome
+            />
+          </div>
         )}
       </ContentFrameworkSection>
 

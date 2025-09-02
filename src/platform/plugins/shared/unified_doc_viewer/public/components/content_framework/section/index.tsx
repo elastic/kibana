@@ -111,7 +111,7 @@ export function ContentFrameworkSection({
     >
       <>
         <EuiSpacer size="s" />
-        <EuiPanel hasBorder={true} hasShadow={false}>
+        <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
           {children}
         </EuiPanel>
       </>
