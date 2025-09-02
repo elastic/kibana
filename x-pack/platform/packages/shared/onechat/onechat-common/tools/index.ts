@@ -13,6 +13,7 @@ export {
   builtInToolIdPrefix,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
+  editableToolTypes,
 } from './constants';
 export {
   type ByIdsToolSelection,
@@ -33,6 +34,12 @@ export {
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
 } from './esql';
+export {
+  isIndexSearchTool,
+  type IndexSearchToolDefinition,
+  type IndexSearchToolDefinitionWithSchema,
+  type IndexSearchToolConfig,
+} from './index_search';
 export {
   ToolResultType,
   type ToolResult,
