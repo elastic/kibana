@@ -266,3 +266,5 @@ const esqlMetricState = schema.object({
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState]);
 
 export type MetricState = TypeOf<typeof metricStateSchema>;
+export type MetricStateNoESQL = TypeOf<typeof metricStateSchemaNoESQL>;
+export type MetricStateESQL = TypeOf<typeof esqlMetricState>;

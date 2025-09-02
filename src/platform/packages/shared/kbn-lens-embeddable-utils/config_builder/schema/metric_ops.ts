@@ -64,6 +64,7 @@ export const esqlColumnSchema = schema.object({
   /**
    * Value
    */
+  operation: schema.literal('value'),
   column: schema.string({
     meta: {
       description: 'Column to use',
