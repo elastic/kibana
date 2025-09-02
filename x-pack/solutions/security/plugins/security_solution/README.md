@@ -32,20 +32,6 @@ will stand up a docker container using the image defined [here](../../../../test
 
 Make sure you're in the Kibana root directory.
 
-#### Endpoint API Integration Tests
-
-In one terminal, run:
-
-```bash
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/solutions/security/test/security_solution_endpoint_api_int/config.ts
-```
-
-In another terminal, run:
-
-```bash
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/solutions/security/test/security_solution_endpoint_api_int/config.ts
-```
-
 #### Endpoint Functional Tests
 
 In one terminal, run:
