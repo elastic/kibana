@@ -19,19 +19,20 @@ paths:
             examples:
               SentinelOne:
                 summary: "Run a script against a SentinelOne agent"
+                description: "SentinelOne runscript"
                 value:
-                  endpoint_ids: [ "endpoint-id-1" ]
+                  endpoint_ids: [ "ed518850-681a-4d60-bb98-e22640cae2a8" ]
                   agent_type: "sentinel_one"
                   parameters:
                     script: "1111-2222-3333-4444-5555-6666-7777-8888"
                     inputParams: "--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt"
       responses:
         '200':
-          description: OK
+          description: Action request was successfully created
           content:
             application/json:
               schema:
-                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/ResponseActionCreateSuccessResponse'
 components:
   schemas:
     RunScriptRouteRequestBody:
