@@ -748,6 +748,7 @@ describe('queryEventsBySavedObject', () => {
   test('should call cluster with correct options', async () => {
     clusterClient.search.mockResponse({
       hits: {
+        max_score: 1,
         hits: [
           {
             _index: 'index-name-00001',
@@ -755,6 +756,7 @@ describe('queryEventsBySavedObject', () => {
             _source: { foo: 'bar' },
             _seq_no: 1,
             _primary_term: 1,
+            _score: 1,
           },
         ],
         total: { relation: 'eq', value: 1 },
@@ -838,6 +840,7 @@ describe('aggregateEventsBySavedObject', () => {
         },
       },
       hits: {
+        max_score: null,
         hits: [],
         total: { relation: 'eq', value: 0 },
       },
@@ -941,6 +944,7 @@ describe('aggregateEventsWithAuthFilter', () => {
         },
       },
       hits: {
+        max_score: null,
         hits: [],
         total: { relation: 'eq', value: 0 },
       },
@@ -1030,6 +1034,7 @@ describe('aggregateEventsWithAuthFilter', () => {
         },
       },
       hits: {
+        max_score: null,
         hits: [],
         total: { relation: 'eq', value: 0 },
       },

@@ -45,6 +45,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -60,6 +61,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -75,6 +77,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -84,6 +87,7 @@ describe('utils', () => {
         {
           _id: 'id-789',
           _index: 'index-456',
+          _score: 1,
           _source: {
             test: '456',
           },
@@ -100,6 +104,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123', // This should only show up once and not be duplicated twice
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -107,6 +112,7 @@ describe('utils', () => {
         {
           _index: 'index-890',
           _id: 'id-890',
+          _score: 1,
           _source: {
             test: '890',
           },
@@ -116,6 +122,7 @@ describe('utils', () => {
         {
           _id: 'id-123', // This should only show up once and not be duplicated twice
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -123,6 +130,7 @@ describe('utils', () => {
         {
           _id: 'id-789',
           _index: 'index-456',
+          _score: 1,
           _source: {
             test: '456',
           },
@@ -158,6 +166,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123', // This should only show up once and not be duplicated twice
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -165,6 +174,7 @@ describe('utils', () => {
         {
           _index: 'index-890',
           _id: 'id-890',
+          _score: 1,
           _source: {
             test: '890',
           },
@@ -174,6 +184,7 @@ describe('utils', () => {
         {
           _id: 'id-123', // This should only show up once and not be duplicated twice
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -181,6 +192,7 @@ describe('utils', () => {
         {
           _id: 'id-789',
           _index: 'index-456',
+          _score: 1,
           _source: {
             test: '456',
           },
@@ -210,6 +222,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123-a', // This is only different by index
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -217,6 +230,7 @@ describe('utils', () => {
         {
           _index: 'index-890',
           _id: 'id-890',
+          _score: 1,
           _source: {
             test: '890',
           },
@@ -226,6 +240,7 @@ describe('utils', () => {
         {
           _id: 'id-123', // This is only different by index
           _index: 'index-123-b',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -233,6 +248,7 @@ describe('utils', () => {
         {
           _id: 'id-789',
           _index: 'index-456',
+          _score: 1,
           _source: {
             test: '456',
           },
@@ -249,6 +265,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -258,6 +275,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '456',
           },
@@ -282,6 +300,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },
@@ -309,6 +328,7 @@ describe('utils', () => {
         {
           _id: 'id-123',
           _index: 'index-123',
+          _score: 1,
           _source: {
             test: '123',
           },

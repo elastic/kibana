@@ -782,6 +782,7 @@ describe('UnifiedDataTable', () => {
             id: 'test',
             raw: {
               _index: 'test_i',
+              _score: 1,
               _id: 'test',
             },
             flattened: { test: jest.fn() },
@@ -816,6 +817,7 @@ describe('UnifiedDataTable', () => {
             id: 'test',
             raw: {
               _index: 'test_i',
+              _score: 1,
               _id: 'test',
             },
             flattened: { test: jest.fn() },
@@ -845,6 +847,7 @@ describe('UnifiedDataTable', () => {
             id: 'test',
             raw: {
               _index: 'test_i',
+              _score: 1,
               _id: 'test',
             },
             flattened: { test: jest.fn() },
@@ -868,6 +871,7 @@ describe('UnifiedDataTable', () => {
         id: 'test',
         raw: {
           _index: 'test_i',
+          _score: 1,
           _id: 'test',
         },
         flattened: { test: jest.fn() },
@@ -983,6 +987,7 @@ describe('UnifiedDataTable', () => {
             id: 'test',
             raw: {
               _index: 'test_i',
+              _score: 1,
               _id: 'test',
             },
             flattened: { test: jest.fn() },

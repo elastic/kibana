@@ -23,8 +23,8 @@ const mockResponseNoHits = {
     total: {
       value: 0,
       relation: 'gte' as const,
-      max_score: 0,
     },
+    max_score: 0,
     hits: [],
   },
 };
@@ -43,6 +43,7 @@ const mockResponseSomeHits = {
       value: 3,
       relation: 'gte' as const,
     },
+    max_score: 1,
     hits: [],
   },
 };

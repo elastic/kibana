@@ -26,6 +26,7 @@ const createEsResponse = (good: number = 90, total: number = 100) => ({
     failed: 0,
   },
   hits: {
+    max_score: null,
     hits: [],
   },
   aggregations: {

@@ -13,8 +13,8 @@ import { buildDataTableRecord } from './build_data_record';
 describe('calcFieldCounts', () => {
   test('returns valid field count data', async () => {
     const rows = [
-      { _id: '1', _index: 'test', _source: { message: 'test1', bytes: 20 } },
-      { _id: '2', _index: 'test', _source: { name: 'test2', extension: 'jpg' } },
+      { _id: '1', _index: 'test', _score: 1 ,_source: { message: 'test1', bytes: 20 } },
+      { _id: '2', _index: 'test', _score: 1 ,_source: { name: 'test2', extension: 'jpg' } },
     ].map((row) => buildDataTableRecord(row));
     const result = calcFieldCounts(rows);
     expect(result).toMatchInlineSnapshot(`
@@ -28,8 +28,8 @@ describe('calcFieldCounts', () => {
   });
   test('updates field count data', async () => {
     const rows = [
-      { _id: '1', _index: 'test', _source: { message: 'test1', bytes: 20 } },
-      { _id: '2', _index: 'test', _source: { name: 'test2', extension: 'jpg' } },
+      { _id: '1', _index: 'test', _score: 1, _source: { message: 'test1', bytes: 20 } },
+      { _id: '2', _index: 'test', _score: 1, _source: { name: 'test2', extension: 'jpg' } },
     ].map((row) => buildDataTableRecord(row));
     const result = calcFieldCounts(rows);
     expect(result).toMatchInlineSnapshot(`

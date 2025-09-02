@@ -52,6 +52,7 @@ describe('fetchAgentMetrics', () => {
           value: 0,
           relation: 'eq',
         },
+        max_score: null,
         hits: [],
       },
       aggregations: {

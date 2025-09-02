@@ -47,9 +47,11 @@ const createMsDefenderClientConstructorOptionsMock = () => {
   msLogIndexEsHit.inner_hits = {
     most_recent: {
       hits: {
+        max_score: 1,
         hits: [
           {
             _index: '',
+            _score: 1,
             _source: {
               agent: {
                 id: '1-2-3',

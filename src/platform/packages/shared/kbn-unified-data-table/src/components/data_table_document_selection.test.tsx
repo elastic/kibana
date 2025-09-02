@@ -35,6 +35,7 @@ describe('document selection', () => {
       const doc = {
         _id: 'test-id',
         _index: 'test-indices',
+        _score: 1,
         _routing: 'why-not',
       };
       expect(getDocId(doc)).toMatchInlineSnapshot(`"test-indices::test-id::why-not"`);
@@ -44,6 +45,7 @@ describe('document selection', () => {
       const doc = {
         _id: 'test-id',
         _index: 'test-indices',
+        _score: 1,
       };
       expect(getDocId(doc)).toMatchInlineSnapshot(`"test-indices::test-id::"`);
     });

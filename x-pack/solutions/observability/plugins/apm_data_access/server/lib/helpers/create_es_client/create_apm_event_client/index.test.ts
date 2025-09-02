@@ -117,7 +117,7 @@ describe('APMEventClient', () => {
     const esResponse: estypes.SearchResponse = {
       hits: {
         total: { value: 1, relation: 'eq' },
-        hits: [{ _source: {}, _index: '' }],
+        hits: [{ _source: {}, _index: '', _score: 1 }],
         max_score: 1,
       },
       took: 1,

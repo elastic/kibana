@@ -27,6 +27,7 @@ const commonEsResponse = {
     failed: 0,
   },
   hits: {
+    max_score: null,
     hits: [],
   },
 };

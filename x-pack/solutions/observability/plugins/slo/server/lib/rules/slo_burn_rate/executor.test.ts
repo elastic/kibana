@@ -85,6 +85,7 @@ const commonEsResponse = {
     failed: 0,
   },
   hits: {
+    max_score: null,
     hits: [],
   },
 };
@@ -926,10 +927,12 @@ function generateEsSummaryResponse() {
   return {
     ...commonEsResponse,
     hits: {
+      max_score: 1,
       hits: [
         {
           _index: '.slo-observability.summary-v3.2',
           _id: 'X19fX19fJWJbqiqq1WN9x1e_kHkXpwAA',
+          _score: 1,
           _source: {
             sliValue: 0.9,
             status: 'HEALTHY',

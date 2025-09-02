@@ -490,6 +490,7 @@ describe('formatExecutionLogResult', () => {
       formatExecutionLogResult({
         aggregations: undefined,
         hits: {
+          max_score: null,
           total: { value: 0, relation: 'eq' },
           hits: [],
         } as estypes.SearchHitsMetadata<unknown>,
@@ -504,6 +505,7 @@ describe('formatExecutionLogResult', () => {
       formatExecutionLogResult({
         aggregations: { executionLogAgg: undefined as unknown as ExecutionUuidAggResult },
         hits: {
+          max_score: null,
           total: { value: 5, relation: 'eq' },
           hits: [],
         } as estypes.SearchHitsMetadata<unknown>,
@@ -568,6 +570,7 @@ describe('formatExecutionLogResult', () => {
         },
       },
       hits: {
+        max_score: null,
         total: { value: 5, relation: 'eq' },
         hits: [],
       } as estypes.SearchHitsMetadata<unknown>,
@@ -693,6 +696,7 @@ describe('formatExecutionLogResult', () => {
         },
       },
       hits: {
+        max_score: null,
         total: { value: 10, relation: 'eq' },
         hits: [],
       } as estypes.SearchHitsMetadata<unknown>,
@@ -940,6 +944,7 @@ describe('formatExecutionKPIAggBuckets', () => {
       formatExecutionKPIResult({
         aggregations: undefined,
         hits: {
+          max_score: null,
           total: { value: 0, relation: 'eq' },
           hits: [],
         } as estypes.SearchHitsMetadata<unknown>,
@@ -978,6 +983,7 @@ describe('formatExecutionKPIAggBuckets', () => {
       },
       hits: {
         total: { value: 21, relation: 'eq' },
+        max_score: null,
         hits: [],
       } as estypes.SearchHitsMetadata<unknown>,
     };

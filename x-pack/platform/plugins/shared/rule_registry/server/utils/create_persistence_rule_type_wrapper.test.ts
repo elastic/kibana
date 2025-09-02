@@ -176,7 +176,7 @@ describe('isExistingDateGtEqThanAlert', () => {
   it('should return false if existing alert source is undefined', () => {
     expect(
       isExistingDateGtEqThanAlert(
-        { _source: undefined, _id: 'a1', _index: 'test-index' },
+        { _source: undefined, _id: 'a1', _score: 1, _index: 'test-index' },
         {
           _id: 'alert-a',
           _source: {

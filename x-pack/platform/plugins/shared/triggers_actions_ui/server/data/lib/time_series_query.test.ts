@@ -812,7 +812,7 @@ describe('getResultFromEs', () => {
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
           _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
-          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
         },
       })
     ).toEqual({
@@ -830,7 +830,7 @@ describe('getResultFromEs', () => {
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
           _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
-          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
         },
       })
     ).toEqual({
@@ -1268,7 +1268,7 @@ describe('getResultFromEs', () => {
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
           _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
-          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
         },
       })
     ).toEqual({
@@ -1286,7 +1286,7 @@ describe('getResultFromEs', () => {
           timed_out: false,
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
           _clusters: { total: 1, successful: 1, skipped: 0 } as estypes.ClusterStatistics,
-          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
         },
       })
     ).toEqual({

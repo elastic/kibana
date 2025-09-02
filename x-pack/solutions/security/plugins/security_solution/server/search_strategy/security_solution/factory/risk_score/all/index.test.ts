@@ -33,11 +33,12 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
       failed: 0,
     },
     hits: {
-      max_score: null,
+      max_score: 1,
       hits: [
         {
           _id: '4',
           _index: 'index',
+          _score: 1,
           _source: {
             '@timestamp': '1234567899',
             host: {

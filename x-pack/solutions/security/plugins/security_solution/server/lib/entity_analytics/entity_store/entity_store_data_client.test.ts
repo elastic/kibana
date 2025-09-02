@@ -165,6 +165,7 @@ describe('EntityStoreDataClient', () => {
     },
     hits: {
       total: 0,
+      max_score: null,
       hits: [],
     },
   };
@@ -258,9 +259,11 @@ describe('EntityStoreDataClient', () => {
         ...emptySearchResponse,
         hits: {
           total: 1,
+          max_score: 1,
           hits: [
             {
               _index: '.entities.v1.latest.security_host_default',
+              _score: 1,
               _source: fakeEntityRecord,
             },
           ],
@@ -279,9 +282,11 @@ describe('EntityStoreDataClient', () => {
         ...emptySearchResponse,
         hits: {
           total: 1,
+          max_score: 1,
           hits: [
             {
               _index: '.entities.v1.latest.security_host_default',
+              _score: 1,
               _source: { asset: { criticality: 'deleted' }, ...fakeEntityRecord },
             },
           ],

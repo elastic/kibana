@@ -1006,6 +1006,7 @@ describe('utils', () => {
           {
             _id: '1',
             _index: 'index-1',
+            _score: 1,
             fields: {
               'host.name': ['host-1'],
             },
@@ -1022,6 +1023,7 @@ describe('utils', () => {
       const createEvent = (id: string, fields: Record<string, unknown>) => ({
         _id: id,
         _index: `index`,
+        _score: 1,
         fields,
       });
       const valueMap = getFieldAndValueToDocIdsMap({

@@ -37,18 +37,22 @@ const getMockSearchResponse = (
 ) => ({
   ...baseResponse,
   hits: {
+    max_score: 1,
     hits: [
       {
         _id: '1',
         _index: 'index',
+        _score: 1,
         fields: { 'device.id': [agentName] },
         inner_hits: {
           most_recent: {
             hits: {
+              max_score: 1,
               hits: [
                 {
                   _id: '1',
                   _index: 'index',
+                  _score: 1,
                   _source: {
                     crowdstrike: {
                       host: {

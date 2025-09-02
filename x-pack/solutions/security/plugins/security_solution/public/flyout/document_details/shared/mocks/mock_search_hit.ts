@@ -13,6 +13,7 @@ import type { SearchHit } from '../../../../../common/search_strategy';
 export const mockSearchHit: SearchHit = {
   _index: 'index',
   _id: 'id',
+  _score: 1,
   fields: {
     'kibana.alert.rule.parameters': [
       {

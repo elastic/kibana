@@ -353,6 +353,7 @@ const aggregateResults = {
   },
   hits: {
     total: { value: 875, relation: 'eq' },
+    max_score: null,
     hits: [],
   } as estypes.SearchHitsMetadata<unknown>,
 };

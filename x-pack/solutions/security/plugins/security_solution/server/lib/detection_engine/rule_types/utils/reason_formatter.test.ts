@@ -10,6 +10,7 @@ import { buildReasonMessageForThresholdAlert, buildReasonMessageUtil } from './r
 const mergedDoc = {
   _index: 'index-1',
   _id: 'id-1',
+  _score: 1,
   fields: {
     'destination.ip': ['9.99.99.9'],
     'destination.port': ['6789'],
@@ -28,6 +29,7 @@ const mergedDoc = {
 const genThresholdMergedDoc = (groupedKeys: Record<string, string>) => ({
   _index: 'index-1',
   _id: 'some-id',
+  _score: 1,
   _source: {
     '@timestamp': '2022-08-16T11:01:09.848Z',
     threshold_result: [Object],

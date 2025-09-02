@@ -25,6 +25,7 @@ const hit = buildDataTableRecord(
   {
     _ignored: [],
     _index: 'test',
+    _score: 1,
     _id: '1',
     _source: {
       'extension.keyword': 'zip',

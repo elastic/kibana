@@ -769,9 +769,11 @@ describe('TaskStore', () => {
         [{}],
         [
           {
+            max_score: 1,
             hits: [
               {
                 _index: '.kibana_task_manager_8.16.0_001',
+                _score: 1,
                 _source: {
                   task: { ...mockTask, apiKey: 'encryptedKey' },
                 },

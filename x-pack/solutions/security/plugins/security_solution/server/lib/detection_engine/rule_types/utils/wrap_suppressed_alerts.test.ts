@@ -141,6 +141,7 @@ describe('wrapSuppressedAlerts', () => {
           },
           _id: '1',
           _index: 'test*',
+          _score: 1,
         },
       ],
       sharedParams,
@@ -194,6 +195,7 @@ describe('wrapSuppressedAlerts', () => {
           },
           _id: '1',
           _index: 'test*',
+          _score: 1,
         },
         {
           fields: {
@@ -203,6 +205,7 @@ describe('wrapSuppressedAlerts', () => {
           },
           _id: '1',
           _index: 'test*',
+          _score: 1,
         },
       ],
       sharedParams,
@@ -225,6 +228,7 @@ describe('wrapSuppressedAlerts', () => {
           },
           _id: '1',
           _index: 'test*',
+          _score: 1,
         },
       ],
       sharedParams,

@@ -52,14 +52,17 @@ describe('files service', () => {
           failed: 0,
         },
         hits: {
+          max_score: 1,
           hits: [
             {
               _index: ENDPOINT_FILE_METADATA_BACKING_INDEX,
               _id: 'someid1',
+              _score: 1,
             },
             {
               _index: ENDPOINT_FILE_METADATA_BACKING_INDEX,
               _id: 'someid2',
+              _score: 1,
             },
           ],
         },
@@ -100,10 +103,12 @@ describe('files service', () => {
           failed: 0,
         },
         hits: {
+          max_score: 1,
           hits: [
             {
               _index: ENDPOINT_FILE_BACKING_INDEX,
               _id: 'keep1',
+              _score: 1,
               _source: {
                 bid: 'keep1',
               },
@@ -111,6 +116,7 @@ describe('files service', () => {
             {
               _index: ENDPOINT_FILE_BACKING_INDEX,
               _id: 'keep2',
+              _score: 1,
               _source: {
                 bid: 'keep2',
               },
@@ -120,10 +126,10 @@ describe('files service', () => {
       });
 
       const files = [
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep1' },
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep2' },
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete1' },
-        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete2' },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep1', _score: 1, },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep2', _score: 1, },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete1', _score: 1, },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete2', _score: 1, },
       ];
       const { fileIdsByIndex: deletedFileIdsByIndex, allFileIds: allDeletedFileIds } =
         await fileIdsWithoutChunksByIndex(esClientMock, abortController, files);

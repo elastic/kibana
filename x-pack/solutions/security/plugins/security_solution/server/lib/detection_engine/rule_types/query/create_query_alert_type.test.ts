@@ -93,6 +93,7 @@ describe('Custom Query Alerts', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 0,
@@ -132,6 +133,7 @@ describe('Custom Query Alerts', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
       hits: {
         hits: [sampleDocNoSortId()],
+        max_score: 100,
         total: {
           relation: 'eq',
           value: 1,
@@ -195,6 +197,7 @@ describe('Custom Query Alerts', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
       hits: {
         hits: [sampleDocNoSortId()],
+        max_score: 100,
         total: {
           relation: 'eq',
           value: 1,

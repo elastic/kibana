@@ -1347,6 +1347,7 @@ describe('transformResponse', () => {
       ...lastRunResponse,
       hits: {
         total: { value: 1, relation: 'eq' },
+        max_score: lastRunResponse.hits.max_score,
         hits: [lastRunResponse.hits.hits[0]],
       },
     };

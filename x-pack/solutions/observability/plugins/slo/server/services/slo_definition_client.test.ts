@@ -61,7 +61,8 @@ describe('SLODefinitionClient', () => {
           failed: 0,
         },
         hits: {
-          hits: [{ _source: summaryDoc, _index: '', _id: '' }],
+          max_score: 1,
+          hits: [{ _source: summaryDoc, _index: '', _id: '', _score: 1 }],
         },
       });
 

@@ -89,7 +89,13 @@ describe('transform_elastic_to_list_item', () => {
     });
 
     test('converts timestamp from number format to ISO string', () => {
-      const hits = [{ _index: 'test', _source: { ...getSearchEsListItemMock(), '@timestamp': 0 } }];
+      const hits = [
+        {
+          _index: 'test',
+          _score: 1,
+          _source: { ...getSearchEsListItemMock(), '@timestamp': 0 },
+        },
+      ];
 
       const result = transformElasticHitsToListItem({
         hits,
@@ -103,6 +109,7 @@ describe('transform_elastic_to_list_item', () => {
       const hits = [
         {
           _index: 'test',
+          _score: 1,
           _source: { ...getSearchEsListItemMock(), '@timestamp': -63549289600000 },
         },
       ];

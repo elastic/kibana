@@ -16,6 +16,7 @@ const createHit = (
   return {
     _index: '.foo',
     _source: attrs,
+    _score: 1,
     ...(highlights ? { highlight: { content_body: highlights } } : {}),
   };
 };

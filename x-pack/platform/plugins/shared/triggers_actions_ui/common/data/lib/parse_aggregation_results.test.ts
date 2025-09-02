@@ -95,6 +95,7 @@ const sampleAggregations = {
 const sampleEsqlSourceFieldsHit = {
   _id: 'esql_query_document',
   _index: '',
+  _score: 1,
   _source: {
     '@timestamp': '2023-11-27T10:00:00.000Z',
     'host.hostname': 'host-1',
@@ -1205,6 +1206,7 @@ describe('parseAggregationResults', () => {
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
           hits: {
             total: 4,
+            max_score: 1,
             hits: [
               sampleEsqlSourceFieldsHit,
               sampleEsqlSourceFieldsHit,

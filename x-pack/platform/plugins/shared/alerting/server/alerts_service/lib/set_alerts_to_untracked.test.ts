@@ -34,6 +34,7 @@ describe('setAlertsToUntracked()', () => {
         failed: 0,
       },
       hits: {
+        max_score: null,
         hits: [],
       },
     });
@@ -208,6 +209,7 @@ describe('setAlertsToUntracked()', () => {
           failed: 0,
         },
         hits: {
+          max_score: null,
           hits: [],
         },
         aggregations: {
@@ -267,6 +269,7 @@ describe('setAlertsToUntracked()', () => {
           failed: 0,
         },
         hits: {
+          max_score: null,
           hits: [],
         },
         aggregations: {
@@ -314,6 +317,7 @@ describe('setAlertsToUntracked()', () => {
         failed: 0,
       },
       hits: {
+        max_score: null,
         hits: [],
       },
       aggregations: {
@@ -375,6 +379,7 @@ describe('setAlertsToUntracked()', () => {
         failed: 0,
       },
       hits: {
+        max_score: null,
         hits: [],
       },
       aggregations: {
@@ -401,10 +406,12 @@ describe('setAlertsToUntracked()', () => {
         failed: 0,
       },
       hits: {
+        max_score: 1,
         hits: [
           {
             _index: 'test-alert-index',
             _id: 'test-alert-id-1',
+            _score: 1,
             _source: {
               [ALERT_RULE_UUID]: 'test-alert-rule-id-1',
               [ALERT_UUID]: 'test-alert-id-1',
@@ -413,6 +420,7 @@ describe('setAlertsToUntracked()', () => {
           {
             _index: 'test-alert-index',
             _id: 'test-alert-id-2',
+            _score: 1,
             _source: {
               [ALERT_RULE_UUID]: 'test-alert-rule-id-2',
               [ALERT_UUID]: 'test-alert-id-2',
@@ -541,6 +549,7 @@ describe('setAlertsToUntracked()', () => {
         failed: 0,
       },
       hits: {
+        max_score: null,
         hits: [],
       },
       aggregations: {

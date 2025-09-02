@@ -116,6 +116,7 @@ describe('check deleted files task', () => {
             value: 0,
             relation: 'eq',
           },
+          max_score: null,
           hits: [],
         },
       });
@@ -147,15 +148,18 @@ describe('check deleted files task', () => {
               value: 1,
               relation: 'eq',
             },
+            max_score: 1,
             hits: [
               {
                 _id: 'metadata-testid1',
                 _index: MOCK_FILE_METADATA_INDEX,
+                _score: 1,
                 _source: { file: { status: 'READY' } },
               },
               {
                 _id: 'metadata-testid2',
                 _index: MOCK_FILE_METADATA_INDEX,
+                _score: 1,
                 _source: { file: { status: 'READY' } },
               },
             ],
@@ -176,10 +180,12 @@ describe('check deleted files task', () => {
               value: 0,
               relation: 'eq',
             },
+            max_score: 1,
             hits: [
               {
                 _id: 'data-testid1',
                 _index: MOCK_FILE_DATA_INDEX,
+                _score: 1,
                 _source: {
                   bid: 'metadata-testid1',
                 },

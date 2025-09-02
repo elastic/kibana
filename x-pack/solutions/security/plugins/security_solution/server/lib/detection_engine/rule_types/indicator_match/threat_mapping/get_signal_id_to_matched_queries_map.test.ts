@@ -68,6 +68,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       signals: [
         {
           _index: 'test-index',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
@@ -93,6 +94,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       signals: [
         {
           _index: 'test-index',
+          _score: 1,
           _source: { 'user.name': ['test-user'] },
           fields: { 'user.name': ['test-user'] },
         },
@@ -118,6 +120,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       signals: [
         {
           _index: 'test-index',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
@@ -167,6 +170,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       signals: [
         {
           _index: 'test-index',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
@@ -236,6 +240,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       signals: [
         {
           _index: 'test-index',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
@@ -273,6 +278,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       signals: [
         {
           _index: 'test-index',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
@@ -316,12 +322,14 @@ describe('getSignalIdToMatchedQueriesMap', () => {
         {
           _index: 'test-index',
           _id: 'signalId1',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
         {
           _index: 'test-index',
           _id: 'signalId2',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
@@ -374,12 +382,14 @@ describe('getSignalIdToMatchedQueriesMap', () => {
         {
           _index: 'test-index',
           _id: 'signalId1',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.1'] },
           fields: { 'source.ip': ['127.0.0.1'] },
         },
         {
           _index: 'test-index',
           _id: 'signalId2',
+          _score: 1,
           _source: { 'source.ip': ['127.0.0.2'] },
           fields: { 'source.ip': ['127.0.0.2'] },
         },

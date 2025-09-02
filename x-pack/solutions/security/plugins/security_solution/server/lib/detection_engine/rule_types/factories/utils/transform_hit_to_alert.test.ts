@@ -88,6 +88,7 @@ describe('transformHitToAlert', () => {
     const doc = {
       _index: 'testindex',
       _id: 'myId',
+      _score: 1,
       _source: {
         event: {
           kind: 'test-value',
@@ -121,6 +122,7 @@ describe('transformHitToAlert', () => {
     const doc = {
       _index: 'testindex',
       _id: 'myId',
+      _score: 1,
       _source: {
         'event.kind': 'test-value',
       },
@@ -152,6 +154,7 @@ describe('transformHitToAlert', () => {
     const doc = {
       _index: 'testindex',
       _id: 'myId',
+      _score: 1,
       _source: {
         testField: 'testValue',
       },
@@ -183,6 +186,7 @@ describe('transformHitToAlert', () => {
     const doc = {
       _index: 'testindex',
       _id: 'myId',
+      _score: 1,
       _source: {
         'event.action': ['process', { objectSubfield: 'test' }],
       },

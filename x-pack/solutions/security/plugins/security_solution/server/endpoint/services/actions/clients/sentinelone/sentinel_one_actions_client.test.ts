@@ -2605,9 +2605,11 @@ describe('SentinelOneActionsClient class', () => {
       agentSearchHit.inner_hits = {
         most_recent: {
           hits: {
+            max_score: 1,
             hits: [
               {
                 _index: '',
+                _score: 1,
                 _source: {
                   agent: {
                     id: 'elastic-agent-id-1',

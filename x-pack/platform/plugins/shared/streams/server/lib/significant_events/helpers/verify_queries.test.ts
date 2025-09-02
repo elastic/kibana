@@ -40,7 +40,7 @@ describe('verifyQueries', () => {
       took: 10,
       timed_out: false,
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-      hits: { total: { value: 42, relation: 'eq' }, hits: [] },
+      hits: { total: { value: 42, relation: 'eq' }, max_score: null, hits: [] },
     });
     const esClient = createTracedEsClient({ client: esClientMock, logger: loggerMock });
 

@@ -20,6 +20,7 @@ describe('partitionMissingFieldsEvents', () => {
             },
             _id: '1',
             _index: 'index-0',
+            _score: 1,
           },
           {
             fields: {
@@ -28,6 +29,7 @@ describe('partitionMissingFieldsEvents', () => {
             },
             _id: '1',
             _index: 'index-0',
+            _score: 1,
           },
         ],
         ['agent.host', 'agent.type', 'agent.version'],
@@ -70,6 +72,7 @@ describe('partitionMissingFieldsEvents', () => {
               },
               _id: '1',
               _index: 'index-0',
+              _score: 1,
             },
           },
           {
@@ -80,6 +83,7 @@ describe('partitionMissingFieldsEvents', () => {
               },
               _id: '1',
               _index: 'index-0',
+              _score: 1,
             },
           },
         ],
@@ -97,6 +101,7 @@ describe('partitionMissingFieldsEvents', () => {
             },
             _id: '1',
             _index: 'index-0',
+            _score: 1,
           },
         },
       ],
@@ -109,6 +114,7 @@ describe('partitionMissingFieldsEvents', () => {
             },
             _id: '1',
             _index: 'index-0',
+            _score: 1,
           },
         },
       ],

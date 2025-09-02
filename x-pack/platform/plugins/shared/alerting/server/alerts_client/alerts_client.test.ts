@@ -393,6 +393,7 @@ describe('Alerts Client', () => {
           _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
           hits: {
             total: { relation: 'eq', value: 0 },
+            max_score: null,
             hits: [],
           },
         });
@@ -405,6 +406,7 @@ describe('Alerts Client', () => {
               _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
               hits: {
                 total: { relation: 'eq', value: 0 },
+                max_score: null,
                 hits: [],
               },
             },
@@ -586,12 +588,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
                 {
@@ -599,6 +603,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert2,
                 },
                 {
@@ -606,6 +611,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 43,
                   _primary_term: 667,
+                  _score: 1,
                   _source: fetchedAlert3,
                 },
               ],
@@ -638,12 +644,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
                 {
@@ -651,6 +659,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert2,
                 },
               ],
@@ -802,12 +811,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
               ],
@@ -877,12 +888,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: expandFlattenedAlert(fetchedAlert1),
                 },
               ],
@@ -1009,10 +1022,12 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
               ],
@@ -1081,12 +1096,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
                 {
@@ -1094,6 +1111,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert2,
                 },
               ],
@@ -1182,12 +1200,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: expandFlattenedAlert(fetchedAlert1),
                 },
                 {
@@ -1195,6 +1215,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: expandFlattenedAlert(fetchedAlert2),
                 },
               ],
@@ -1342,12 +1363,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
                 {
@@ -1355,6 +1378,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert2,
                 },
               ],
@@ -1461,12 +1485,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
                 {
@@ -1474,6 +1500,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert2,
                 },
               ],
@@ -1676,12 +1703,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: 'partial-.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
                 {
@@ -1689,6 +1718,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert2,
                 },
               ],
@@ -1764,6 +1794,7 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 2 },
+              max_score: null,
               hits: [],
             },
           });
@@ -2244,9 +2275,11 @@ describe('Alerts Client', () => {
                 _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
                 hits: {
                   total: { relation: 'eq', value: 0 },
+                  max_score: 1,
                   hits: [
                     {
                       _index: '.internal.alerts-test.alerts-default-000001',
+                      _score: 1,
                       fields: {
                         [ALERT_UUID]: ['alert_id_1'],
                         [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
@@ -2254,6 +2287,7 @@ describe('Alerts Client', () => {
                     },
                     {
                       _index: '.internal.alerts-test.alerts-default-000001',
+                      _score: 1,
                       fields: {
                         [ALERT_UUID]: ['alert_id_2'],
                         [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
@@ -2268,9 +2302,11 @@ describe('Alerts Client', () => {
                 _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
                 hits: {
                   total: { relation: 'eq', value: 0 },
+                  max_score: 1,
                   hits: [
                     {
                       _index: '.internal.alerts-test.alerts-default-000001',
+                      _score: 1,
                       fields: {
                         [ALERT_UUID]: ['alert_id_1'],
                         [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw2'],
@@ -2377,9 +2413,11 @@ describe('Alerts Client', () => {
                 _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
                 hits: {
                   total: { relation: 'eq', value: 0 },
+                  max_score: 1,
                   hits: [
                     {
                       _index: '.internal.alerts-test.alerts-default-000001',
+                      _score: 1,
                       fields: {
                         [ALERT_UUID]: ['alert_id_1'],
                         [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
@@ -2387,6 +2425,7 @@ describe('Alerts Client', () => {
                     },
                     {
                       _index: '.internal.alerts-test.alerts-default-000001',
+                      _score: 1,
                       fields: {
                         [ALERT_UUID]: ['alert_id_2'],
                         [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
@@ -3024,10 +3063,12 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
+                  _score: 1,
                   _source: alertSource,
                 },
               ],
@@ -3071,10 +3112,12 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
+                  _score: 1,
                   _source: alertSource,
                 },
               ],
@@ -3177,6 +3220,7 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 0 },
+              max_score: null,
               hits: [],
             },
           });
@@ -3265,10 +3309,12 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
+                  _score: 1,
                   _source: {
                     ...fetchedAlert1,
                     count: 1,
@@ -3368,12 +3414,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: {
                     ...fetchedAlert1,
                     count: 1,
@@ -3492,12 +3540,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 1 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
               ],
@@ -3532,6 +3582,7 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 0 },
+              max_score: null,
               hits: [],
             },
           });
@@ -3569,12 +3620,14 @@ describe('Alerts Client', () => {
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
               total: { relation: 'eq', value: 0 },
+              max_score: 1,
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert1,
                 },
                 {
@@ -3582,6 +3635,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
+                  _score: 1,
                   _source: fetchedAlert2,
                 },
               ],

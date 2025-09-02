@@ -37,6 +37,7 @@ const defaultProps: OsqueryActionResultsProps = {
     {
       _id: 'test',
       _index: 'test',
+      _score: 1,
       fields: {
         action_id: ['testActionId'],
         'queries.action_id': ['queriesActionId'],

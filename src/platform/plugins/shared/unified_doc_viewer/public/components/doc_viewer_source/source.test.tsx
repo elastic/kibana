@@ -103,6 +103,7 @@ describe('Source Viewer component', () => {
     const record = {
       _index: 'logstash-2014.09.09',
       _id: 'id123',
+      _score: 1,
       message: 'Lorem ipsum dolor sit amet',
       extension: 'html',
     };

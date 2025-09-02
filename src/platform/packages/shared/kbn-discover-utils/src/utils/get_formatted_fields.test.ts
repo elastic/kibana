@@ -33,7 +33,7 @@ describe('getFormattedFields', () => {
       field3: null,
       field4: undefined,
     },
-    raw: {},
+    raw: { _score: 1 },
   };
 
   beforeEach(() => {

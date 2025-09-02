@@ -15,6 +15,7 @@ export function createClientMock() {
   const agentInHostedDoc = {
     _id: 'agent-in-hosted-policy',
     _index: 'index',
+    _score: 1,
     _source: {
       active: true,
       policy_id: 'hosted-agent-policy',
@@ -27,6 +28,7 @@ export function createClientMock() {
   const agentInHostedDoc2 = {
     _id: 'agent-in-hosted-policy2',
     _index: 'index',
+    _score: 1,
     _source: {
       active: true,
       policy_id: 'hosted-agent-policy',
@@ -39,6 +41,7 @@ export function createClientMock() {
   const agentInRegularDoc = {
     _id: 'agent-in-regular-policy',
     _index: 'index',
+    _score: 1,
     _source: {
       active: true,
       policy_id: 'regular-agent-policy',
@@ -51,6 +54,7 @@ export function createClientMock() {
   const agentInRegularDoc2 = {
     _id: 'agent-in-regular-policy2',
     _index: 'index',
+    _score: 1,
     _source: {
       active: true,
       policy_id: 'regular-agent-policy',
@@ -63,6 +67,7 @@ export function createClientMock() {
   const agentInRegularDocNewer = {
     _id: 'agent-in-regular-policy-newer',
     _index: 'index',
+    _score: 1,
     _source: {
       active: true,
       policy_id: 'regular-agent-policy',
@@ -75,6 +80,7 @@ export function createClientMock() {
   const agentInRegularDocNewer2 = {
     _id: 'agent-in-regular-policy-newer2',
     _index: 'index',
+    _score: 1,
     _source: {
       active: true,
       policy_id: 'regular-agent-policy',
@@ -207,6 +213,7 @@ export function createClientMock() {
           value: 5,
           relation: 'eq',
         },
+        max_score: 1,
       },
     })
   );

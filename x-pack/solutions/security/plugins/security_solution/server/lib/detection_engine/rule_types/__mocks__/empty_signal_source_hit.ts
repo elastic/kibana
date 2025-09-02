@@ -13,5 +13,6 @@ import type { SignalSourceHit } from '../types';
  */
 export const emptyEsResult = (): SignalSourceHit => ({
   _index: 'index',
+  _score: 1,
   _id: '123',
 });

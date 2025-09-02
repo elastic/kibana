@@ -17,7 +17,7 @@ const emptySearchResponse = {
   took: 1,
   timed_out: false,
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  hits: { hits: [] },
+  hits: { max_score: null, hits: [] },
 };
 
 describe('AssetCriticalityMigrationClient', () => {
@@ -74,7 +74,7 @@ describe('AssetCriticalityMigrationClient', () => {
     it('should return true if there are documents without asset.criticality field', async () => {
       assetCriticalityDataClient.search.mockResolvedValue({
         ...emptySearchResponse,
-        hits: { hits: [{ _index: 'test-index' }] },
+        hits: { max_score: 1, hits: [{ _index: 'test-index', _score: 1 }] },
       });
 
       const result = await migrationClient.isEcsDataMigrationRequired();

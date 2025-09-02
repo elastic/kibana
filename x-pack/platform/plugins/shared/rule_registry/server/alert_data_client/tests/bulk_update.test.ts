@@ -266,6 +266,7 @@ describe('bulkUpdate()', () => {
               {
                 _id: fakeAlertId,
                 _index: '.alerts-observability.apm.alerts',
+                _score: 999,
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   [ALERT_RULE_CONSUMER]: 'apm',
@@ -318,6 +319,7 @@ describe('bulkUpdate()', () => {
               {
                 _id: fakeAlertId,
                 _index: '.alerts-observability.apm.alerts',
+                _score: 999,
                 _source: {
                   [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                   [ALERT_RULE_CONSUMER]: 'apm',
@@ -375,6 +377,7 @@ describe('bulkUpdate()', () => {
               {
                 _id: successfulAuthzHit,
                 _index: '.alerts-observability.apm.alerts',
+                _score: 100,
                 _source: {
                   [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                   [ALERT_RULE_CONSUMER]: 'apm',
@@ -385,6 +388,7 @@ describe('bulkUpdate()', () => {
               {
                 _id: unsuccessfulAuthzHit,
                 _index: '.alerts-observability.apm.alerts',
+                _score: 999,
                 _source: {
                   [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                   [ALERT_RULE_CONSUMER]: 'apm',

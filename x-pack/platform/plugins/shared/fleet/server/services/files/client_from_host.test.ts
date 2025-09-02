@@ -84,8 +84,8 @@ describe('FleetFromHostFilesClient', () => {
           value: 1,
           relation: 'eq',
         },
-        max_score: 0,
-        hits: [{ _index: '', _id: '' }],
+        max_score: 1,
+        hits: [{ _index: '', _id: '', _score: 1 }],
       },
     };
 

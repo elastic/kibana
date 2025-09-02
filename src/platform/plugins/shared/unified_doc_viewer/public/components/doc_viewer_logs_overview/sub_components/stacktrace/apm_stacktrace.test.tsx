@@ -28,7 +28,7 @@ describe('APM Stacktrace component', () => {
     const comp = mountWithIntl(
       <ApmStacktrace
         hit={{
-          raw: { _id: '1', _index: 'index1' },
+          raw: { _id: '1', _score: 1, _index: 'index1' },
           flattened: {},
           id: '',
         }}
@@ -46,7 +46,7 @@ describe('APM Stacktrace component', () => {
     const comp = mountWithIntl(
       <ApmStacktrace
         hit={{
-          raw: { _id: '1', _index: 'index1' },
+          raw: { _id: '1', _score: 1, _index: 'index1' },
           flattened: {},
           id: '',
         }}
@@ -100,7 +100,7 @@ describe('APM Stacktrace component', () => {
       <EuiThemeProvider>
         <ApmStacktrace
           hit={{
-            raw: { _id: '1', _index: 'index1' },
+            raw: { _id: '1', _score: 1, _index: 'index1' },
             flattened: {},
             id: '',
           }}
@@ -167,7 +167,7 @@ describe('APM Stacktrace component', () => {
       <EuiThemeProvider>
         <ApmStacktrace
           hit={{
-            raw: { _id: '1', _index: 'index1' },
+            raw: { _id: '1', _score: 1, _index: 'index1' },
             flattened: {},
             id: '',
           }}
@@ -200,7 +200,7 @@ describe('APM Stacktrace component', () => {
       <EuiThemeProvider>
         <ApmStacktrace
           hit={{
-            raw: { _id: '1', _index: 'index1' },
+            raw: { _id: '1', _score: 1, _index: 'index1' },
             flattened: {},
             id: '',
           }}

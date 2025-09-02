@@ -79,9 +79,11 @@ const createConstructorOptionsMock = (): CrowdstrikeActionsClientOptionsMock => 
   crowdstrikeIndexDoc.inner_hits = {
     most_recent: {
       hits: {
+        max_score: 1,
         hits: [
           {
             _index: '',
+            _score: 1,
             _source: {
               agent: { id: 'fleet-agent-id-123' },
               device: { id: '1-2-3' },
@@ -102,9 +104,11 @@ const createConstructorOptionsMock = (): CrowdstrikeActionsClientOptionsMock => 
 
 interface CrowdstrikeEventSearchResponseMock {
   hits: {
+    max_score: number | null;
     hits: Array<{
       _id: string;
       _index: string;
+      _score: number | null;
       _source: Record<string, unknown>;
     }>;
   };
@@ -115,10 +119,12 @@ interface CrowdstrikeEventSearchResponseMock {
 
 const createEventSearchResponseMock = (): CrowdstrikeEventSearchResponseMock => ({
   hits: {
+    max_score: 1,
     hits: [
       {
         _id: '1-2-3',
         _index: 'logs-crowdstrike.fdr-default',
+        _score: 1,
         _source: {
           host: {
             name: 'Crowdstrike-1460',

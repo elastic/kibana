@@ -23,6 +23,7 @@ const services = {
 const hit = {
   _id: '1',
   _index: 'index',
+  _score: 1,
   fields: {
     message: 'foo',
   },

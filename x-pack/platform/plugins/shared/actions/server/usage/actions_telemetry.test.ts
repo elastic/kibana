@@ -40,6 +40,7 @@ describe('actions telemetry', () => {
           },
         },
         hits: {
+          max_score: 0,
           hits: [
             {
               _id: 'action:541efb3d-f82a-4d2c-a5c3-636d1ce49b53',
@@ -503,6 +504,7 @@ describe('actions telemetry', () => {
           },
         },
         hits: {
+          max_score: 0,
           hits: [
             {
               _id: 'action:541efb3d-f82a-4d2c-a5c3-636d1ce49b53',
@@ -629,6 +631,7 @@ describe('actions telemetry', () => {
           },
         },
         hits: {
+          max_score: null,
           hits: [],
         },
       }

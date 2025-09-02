@@ -114,7 +114,7 @@ describe('CSV Export Search Cursor', () => {
     });
 
     it('can update internal cursor ID', () => {
-      cursor.updateIdFromResults({ pit_id: 'very-typical-pit-id', hits: { hits: [] } });
+      cursor.updateIdFromResults({ pit_id: 'very-typical-pit-id', hits: { max_score: null, hits: [] } });
       expect(cursor.getCursorId()).toBe('very-typical-pit-id');
     });
 
@@ -123,6 +123,7 @@ describe('CSV Export Search Cursor', () => {
         {
           _index: 'test-index',
           _id: 'test-doc-id',
+          _score: 1,
           sort: ['Wed Jan 17 15:35:47 MST 2024', 42],
         },
       ]);

@@ -15,6 +15,7 @@ import { cloneDeep } from 'lodash';
 const mockEvent: estypes.SearchHit<SignalSource> = {
   _id: 'test_id',
   _version: 2,
+  _score: 1,
   _index: 'test_index',
   _source: {
     'agent.name': 'test-0',

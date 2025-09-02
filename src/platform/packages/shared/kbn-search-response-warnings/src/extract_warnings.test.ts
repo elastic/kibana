@@ -70,7 +70,7 @@ describe('extract search response warnings', () => {
         took: 999,
         timed_out: true,
         _shards: {} as estypes.ShardStatistics,
-        hits: { hits: [] },
+        hits: { max_score: null, hits: [] },
       };
       expect(
         extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')

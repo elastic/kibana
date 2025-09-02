@@ -42,10 +42,12 @@ describe('usersRelatedHosts search strategy', () => {
 
       mockedDeps.esClient.asCurrentUser.search.mockResponse({
         hits: {
+          max_score: 1,
           hits: [
             {
               _id: 'id',
               _index: 'index',
+              _score: 1,
               _source: {
                 risk,
                 host: {

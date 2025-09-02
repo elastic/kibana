@@ -3407,6 +3407,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
       },
     },
     hits: {
+      max_score: null,
       total: { value: 5, relation: 'eq' },
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,
@@ -3460,6 +3461,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       },
     },
     hits: {
+      max_score: null,
       total: { value: 5, relation: 'eq' },
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,

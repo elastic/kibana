@@ -38,6 +38,7 @@ interface Opts {
 const getMockAlert = ({ id, ruleId, searchAfter }: Opts) => ({
   _id: id,
   _index: '.internal.alerts-test.alerts-default-000001',
+  _score: 1,
   _seq_no: 41,
   _primary_term: 665,
   ...(searchAfter ? { sort: searchAfter } : {}),
@@ -113,6 +114,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
+        max_score: 1,
         hits: [getMockAlert({ id: 'abc' }), getMockAlert({ id: 'def' })],
       },
     });
@@ -126,6 +128,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
+        max_score: 1,
         hits: [getMockAlert({ id: 'xyz' }), getMockAlert({ id: 'rst' })],
       },
     });
@@ -139,6 +142,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
+        max_score: 1,
         hits: [getMockAlert({ id: 'mno', ruleId: '1' }), getMockAlert({ id: 'pqr', ruleId: '3' })],
       },
     });
@@ -334,6 +338,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
+        max_score: 1,
         hits: [
           getMockAlert({ id: 'abc', searchAfter: ['111'] }),
           getMockAlert({ id: 'def', searchAfter: ['222'] }),
@@ -346,6 +351,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
+        max_score: 1,
         hits: [
           getMockAlert({ id: 'ghi', searchAfter: ['333'] }),
           getMockAlert({ id: 'jkl', searchAfter: ['444'] }),
@@ -358,7 +364,10 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
-        hits: [getMockAlert({ id: 'mno', searchAfter: ['555'] })],
+        max_score: 1,
+        hits: [
+          getMockAlert({ id: 'mno', searchAfter: ['555'] }),
+        ],
       },
     });
     esClient.search.mockResolvedValueOnce({
@@ -367,6 +376,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 0 },
+        max_score: null,
         hits: [],
       },
     });
@@ -543,6 +553,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
+        max_score: 1,
         hits: [getMockAlert({ id: 'abc' }), getMockAlert({ id: 'def' })],
       },
     });
@@ -556,6 +567,7 @@ describe('runTask', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 2 },
+        max_score: 1,
         hits: [getMockAlert({ id: 'xyz' }), getMockAlert({ id: 'rst' })],
       },
     });
@@ -827,6 +839,7 @@ describe('runTask', () => {
         _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
         hits: {
           total: { relation: 'eq', value: 2 },
+          max_score: 1,
           hits: [getMockAlert({ id: 'ghi' }), getMockAlert({ id: 'jkl' })],
         },
       });
@@ -927,6 +940,7 @@ describe('runTask', () => {
         _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
         hits: {
           total: { relation: 'eq', value: 2 },
+          max_score: 1,
           hits: [getMockAlert({ id: 'abc' }), getMockAlert({ id: 'def', ruleId: '3' })],
         },
       });

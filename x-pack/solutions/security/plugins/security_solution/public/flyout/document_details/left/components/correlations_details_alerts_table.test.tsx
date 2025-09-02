@@ -49,6 +49,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
         {
           _id: '1',
           _index: 'index',
+          _score: 1,
           fields: {
             '@timestamp': ['2022-01-01'],
             'kibana.alert.rule.name': ['Rule1'],
@@ -60,6 +61,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
         {
           _id: '1',
           _index: 'index',
+          _score: 1,
           fields: {
             '@timestamp': ['2022-01-02'],
             'kibana.alert.rule.name': ['Rule2'],

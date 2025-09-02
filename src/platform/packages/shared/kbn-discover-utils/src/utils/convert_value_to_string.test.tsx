@@ -58,7 +58,7 @@ describe('convertValueToString', () => {
         flattenedValue: 'test',
         dataTableRecord: {
           id: '1',
-          raw: {},
+          raw: { _score: 1 },
           flattened: { testKey: 'testValue' },
         },
         fieldFormats: fieldFormatsMock,
@@ -83,7 +83,7 @@ describe('convertValueToString', () => {
           flattenedValue: ['value1', 'value2'],
           dataTableRecord: {
             id: '1',
-            raw: {},
+            raw: { _score: 1 },
             flattened: { testKey: 'testValue' },
           },
           fieldFormats: fieldFormatsMock,
@@ -107,7 +107,7 @@ describe('convertValueToString', () => {
           flattenedValue: 'value',
           dataTableRecord: {
             id: '1',
-            raw: {},
+            raw: { _score: 1 },
             flattened: { testKey: 'testValue' },
           },
           fieldFormats: fieldFormatsMock,

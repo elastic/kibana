@@ -40,6 +40,7 @@ describe('TableActions', () => {
           _ignored: [],
           _index: 'test',
           _id: '1',
+          _score: 1,
           _source: {
             [fieldName]: fieldValue,
           },

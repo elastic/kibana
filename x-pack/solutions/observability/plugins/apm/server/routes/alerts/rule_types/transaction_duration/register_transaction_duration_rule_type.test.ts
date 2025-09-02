@@ -17,6 +17,7 @@ describe('registerTransactionDurationRuleType', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -105,6 +106,7 @@ describe('registerTransactionDurationRuleType', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -194,6 +196,7 @@ describe('registerTransactionDurationRuleType', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -283,6 +286,7 @@ describe('registerTransactionDurationRuleType', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -371,6 +375,7 @@ describe('registerTransactionDurationRuleType', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -460,6 +465,7 @@ describe('registerTransactionDurationRuleType', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -554,6 +560,7 @@ describe('registerTransactionDurationRuleType', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 0,

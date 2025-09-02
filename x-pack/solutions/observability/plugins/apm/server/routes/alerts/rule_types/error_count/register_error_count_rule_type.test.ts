@@ -249,6 +249,7 @@ describe('Error count alert', () => {
 
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
+        max_score: null,
         hits: [],
         total: {
           relation: 'eq',
@@ -423,6 +424,7 @@ describe('Error count alert', () => {
 
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
+        max_score: null,
         hits: [],
         total: {
           relation: 'eq',
@@ -595,6 +597,7 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -753,6 +756,7 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -914,6 +918,7 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -1101,6 +1106,7 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -1183,6 +1189,7 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 1,

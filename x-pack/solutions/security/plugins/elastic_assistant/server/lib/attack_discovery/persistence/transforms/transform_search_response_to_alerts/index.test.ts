@@ -176,11 +176,13 @@ describe('transformSearchResponseToAlerts', () => {
       {
         _id: '1',
         _index: 'foo',
+        _score: 1,
         _source: undefined,
       },
       {
         _id: '2',
         _index: 'foo',
+        _score: 1,
         _source: undefined,
       },
     ];

@@ -46,6 +46,7 @@ describe('hostsRelatedUsers search strategy', () => {
             {
               _id: 'id',
               _index: 'index',
+              _score: 1,
               _source: {
                 risk,
                 user: {

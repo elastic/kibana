@@ -74,10 +74,12 @@ describe('getLastRun', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 1 },
+        max_score: 1,
         hits: [
           {
             _id: '123',
             _index: '.kibana-event-log',
+            _score: 1,
             _source: {
               '@timestamp': '2025-03-25T15:20:44.704Z',
               event: {
@@ -135,6 +137,7 @@ describe('getLastRun', () => {
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       hits: {
         total: { relation: 'eq', value: 0 },
+        max_score: null,
         hits: [],
       },
     });

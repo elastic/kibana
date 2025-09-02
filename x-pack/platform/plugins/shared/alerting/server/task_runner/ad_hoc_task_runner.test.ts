@@ -400,6 +400,7 @@ describe('Ad Hoc Task Runner', () => {
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
       hits: {
+        max_score: null,
         total: { relation: 'eq', value: 0 },
         hits: [],
       },

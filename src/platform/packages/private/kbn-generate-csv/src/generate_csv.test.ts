@@ -1016,6 +1016,7 @@ describe('CsvGenerator', () => {
               _id: 'my-cool-id',
               _index: 'my-cool-index',
               _version: 4,
+              _score: 1,
               fields: {
                 sku: [`This is a cool SKU.`, `This is also a cool SKU.`],
               },
@@ -1054,6 +1055,7 @@ describe('CsvGenerator', () => {
               _id: 'my-cool-id',
               _index: 'my-cool-index',
               _version: 4,
+              _score: 1,
               fields: {
                 date: ['2020-12-31T00:14:28.000Z'],
                 message: [`it's nice to see you`],
@@ -1104,6 +1106,7 @@ describe('CsvGenerator', () => {
               _id: 'my-cool-id',
               _index: 'my-cool-index',
               _version: 4,
+              _score: 1,
               fields: {
                 date: ['2020-12-31T00:14:28.000Z'],
                 message_z: [`test field Z`],
@@ -1161,6 +1164,7 @@ describe('CsvGenerator', () => {
               _id: 'my-cool-id',
               _index: 'my-cool-index',
               _version: 4,
+              _score: 1,
               fields: {
                 product: 'coconut',
                 category: [`cool`, `rad`],
@@ -1200,6 +1204,7 @@ describe('CsvGenerator', () => {
               _id: 'my-cool-id',
               _index: 'my-cool-index',
               _version: 4,
+              _score: 1,
               fields: {
                 product: 'coconut',
                 category: [`cool`, `rad`],
@@ -1239,6 +1244,7 @@ describe('CsvGenerator', () => {
               _id: 'my-cool-id',
               _index: 'my-cool-index',
               _version: 4,
+              _score: 1,
               fields: {
                 product: 'coconut',
                 category: [`cool`, `rad`],
@@ -1570,6 +1576,7 @@ describe('CsvGenerator', () => {
               range(0, 5).map(() => ({
                 _index: 'lasdf',
                 _id: 'lasdf123',
+                _score: 1,
                 fields: {
                   date: ['2020-12-31T00:14:28.000Z'],
                   ip: ['110.135.176.89'],

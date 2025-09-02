@@ -21,6 +21,7 @@ describe('Transaction error rate alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 0,
@@ -55,6 +56,7 @@ describe('Transaction error rate alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 0,
@@ -176,6 +178,7 @@ describe('Transaction error rate alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -299,6 +302,7 @@ describe('Transaction error rate alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -421,6 +425,7 @@ describe('Transaction error rate alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 2,
@@ -543,6 +548,7 @@ describe('Transaction error rate alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 1,
@@ -652,6 +658,7 @@ describe('Transaction error rate alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {
         hits: [],
+        max_score: null,
         total: {
           relation: 'eq',
           value: 1,

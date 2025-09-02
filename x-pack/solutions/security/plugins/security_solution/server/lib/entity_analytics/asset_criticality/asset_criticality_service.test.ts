@@ -20,6 +20,7 @@ const buildMockCriticalityHit = (
 ): SearchHit<AssetCriticalityRecord> => ({
   _id: 'host.name:not-found',
   _index: '.asset-criticality-default',
+  _score: 1,
   _source: {
     '@timestamp': '2021-09-16T15:00:00.000Z',
     id_field: 'host.name',

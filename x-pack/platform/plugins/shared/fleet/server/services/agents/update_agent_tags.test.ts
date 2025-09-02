@@ -256,6 +256,7 @@ describe('update_agent_tags', () => {
     esClient.search.mockResolvedValue({
       hits: {
         total: 3,
+        max_score: 1,
         hits: [
           {
             _id: 'agent1',

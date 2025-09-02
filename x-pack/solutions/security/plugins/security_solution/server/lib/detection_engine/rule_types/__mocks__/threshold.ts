@@ -42,6 +42,7 @@ import { getThresholdTermsHash } from '../threshold/utils';
 export const sampleThresholdAlert = {
   _id: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
   _index: 'some-index',
+  _score: 1,
   _source: {
     '@timestamp': '2020-04-20T21:26:30.000Z',
     [SPACE_IDS]: ['default'],

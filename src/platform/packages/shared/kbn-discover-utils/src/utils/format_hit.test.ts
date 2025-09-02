@@ -20,6 +20,7 @@ describe('formatHit', () => {
     hit = {
       _id: '1',
       _index: 'logs',
+      _score: 1,
       fields: {
         message: ['foobar'],
         extension: ['png'],
@@ -111,6 +112,7 @@ describe('formatHit', () => {
       {
         _id: '2',
         _index: 'logs',
+        _score: 1,
         fields: {
           object: ['object'],
           'object.value': [42, 13],

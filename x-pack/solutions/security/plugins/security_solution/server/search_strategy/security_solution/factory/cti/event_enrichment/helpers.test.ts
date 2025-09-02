@@ -71,12 +71,12 @@ describe('getTotalCount', () => {
 
 describe('buildIndicatorEnrichments', () => {
   it('returns nothing if hits have no matched queries', () => {
-    const hits = [{ _id: '_id', _index: '_index', matched_queries: [] }];
+    const hits = [{ _id: '_id', _index: '_index', _score: 1, matched_queries: [] }];
     expect(buildIndicatorEnrichments(hits)).toEqual([]);
   });
 
   it("returns nothing if hits' matched queries are not valid", () => {
-    const hits = [{ _id: '_id', _index: '_index', matched_queries: ['invalid.field'] }];
+    const hits = [{ _id: '_id', _index: '_index', _score: 1, matched_queries: ['invalid.field'] }];
     expect(buildIndicatorEnrichments(hits)).toEqual([]);
   });
 
@@ -85,6 +85,7 @@ describe('buildIndicatorEnrichments', () => {
       {
         _id: '_id',
         _index: '_index',
+        _score: 1,
         matched_queries: ['file.hash.md5'],
         fields: {
           'threat.indicator.file.hash.md5': ['indicator_value'],
@@ -108,6 +109,7 @@ describe('buildIndicatorEnrichments', () => {
       {
         _id: '_id',
         _index: '_index',
+        _score: 1,
         matched_queries: ['file.hash.md5', 'source.ip'],
         fields: {
           'threat.indicator.file.hash.md5': ['indicator_value'],
@@ -141,6 +143,7 @@ describe('buildIndicatorEnrichments', () => {
       {
         _id: '_id',
         _index: '_index',
+        _score: 1,
         matched_queries: ['file.hash.md5'],
         fields: {
           'threat.indicator.file.hash.md5': ['indicator_value'],
@@ -149,6 +152,7 @@ describe('buildIndicatorEnrichments', () => {
       {
         _id: '_id2',
         _index: '_index2',
+        _score: 1,
         matched_queries: ['source.ip'],
         fields: {
           'threat.indicator.ip': ['127.0.0.1'],

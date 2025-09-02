@@ -52,7 +52,7 @@ describe('handleWarnings', () => {
         took: 999,
         timed_out: true,
         _shards: {} as estypes.ShardStatistics,
-        hits: { hits: [] },
+        hits: { max_score: null, hits: [] },
       } as estypes.SearchResponse,
       services: {
         inspector: {} as unknown as InspectorStart,
@@ -75,7 +75,7 @@ describe('handleWarnings', () => {
         took: 999,
         timed_out: true,
         _shards: {} as estypes.ShardStatistics,
-        hits: { hits: [] },
+        hits: { max_score: null, hits: [] },
       } as estypes.SearchResponse,
       services: {
         inspector: {} as unknown as InspectorStart,
@@ -99,7 +99,7 @@ describe('handleWarnings', () => {
         took: 999,
         timed_out: true,
         _shards: {} as estypes.ShardStatistics,
-        hits: { hits: [] },
+        hits: { max_score: null, hits: [] },
       } as estypes.SearchResponse,
       services: {
         inspector: {} as unknown as InspectorStart,

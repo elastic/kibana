@@ -12,7 +12,7 @@ import { getFieldValue } from './get_field_value';
 
 const dataTableRecord: DataTableRecord = {
   id: '1',
-  raw: {},
+  raw: { _score: 1 },
   flattened: {
     'field1.value': 'value1',
     'field2.value': ['value2'],

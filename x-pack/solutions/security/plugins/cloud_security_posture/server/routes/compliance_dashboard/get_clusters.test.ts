@@ -14,10 +14,12 @@ const mockClusterBuckets: ClusterBucket[] = [
     doc_count: 10,
     latestFindingTopHit: {
       hits: {
+        max_score: 1,
         hits: [
           {
             _id: '123',
             _index: '123',
+            _score: 1,
             _source: {
               orchestrator: {
                 cluster: {

@@ -35,11 +35,12 @@ export const getConversationSearchEsMock = () => {
         value: 1,
         relation: 'eq',
       },
-      max_score: 0,
+      max_score: 1,
       hits: [
         {
           _index: 'foo',
           _id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          _score: 1,
           _source: {
             category: 'assistant',
             '@timestamp': '2019-12-13T16:40:33.400Z',
