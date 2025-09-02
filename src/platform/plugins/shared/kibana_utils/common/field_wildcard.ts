@@ -8,12 +8,11 @@
  */
 
 import { escapeRegExp, memoize } from 'lodash';
-import { RE2JS } from 're2js';
 
 // @internal
 export const makeRegEx = memoize(function makeRegEx(glob: string) {
   const globRegex = glob.split('*').map(escapeRegExp).join('.*');
-  return RE2JS.compile(`^${globRegex}$`);
+  return new RegExp(`^${globRegex}$`);
 });
 
 // Note that this will return an essentially noop function if globs is undefined.
@@ -23,7 +22,13 @@ export function fieldWildcardMatcher(globs: string[] = [], metaFields: unknown[]
     if (metaFields.indexOf(val) !== -1) {
       return false;
     }
-    return globs.some((p) => makeRegEx(p).matches(`${val}`));
+    try {
+      return globs.some((p) => makeRegEx(p).test(`${val}`));
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e.toString());
+      return [];
+    }
   };
 }
 

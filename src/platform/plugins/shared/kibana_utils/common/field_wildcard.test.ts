@@ -14,23 +14,23 @@ describe('fieldWildcard', () => {
 
   describe('makeRegEx', function () {
     it('matches * in any position', function () {
-      expect(makeRegEx('*a*b*c*').matches('aaaaaabbbbbbbcccccc')).toBe(true);
-      expect(makeRegEx('*1234').matches('a1234')).toBe(true);
-      expect(makeRegEx('1234*').matches('1234a')).toBe(true);
-      expect(makeRegEx('12a34').matches('12a34')).toBe(true);
+      expect('aaaaaabbbbbbbcccccc').toMatch(makeRegEx('*a*b*c*'));
+      expect('a1234').toMatch(makeRegEx('*1234'));
+      expect('1234a').toMatch(makeRegEx('1234*'));
+      expect('12a34').toMatch(makeRegEx('12a34'));
     });
 
     it('properly escapes regexp control characters', function () {
-      expect(makeRegEx('account[*]').matches('account[user_id]')).toBe(true);
+      expect('account[user_id]').toMatch(makeRegEx('account[*]'));
     });
 
     it('properly limits matches without wildcards', function () {
-      expect(makeRegEx('*name').matches('username')).toBe(true);
-      expect(makeRegEx('user*').matches('username')).toBe(true);
-      expect(makeRegEx('username').matches('username')).toBe(true);
-      expect(makeRegEx('user').matches('username')).toBe(false);
-      expect(makeRegEx('name').matches('username')).toBe(false);
-      expect(makeRegEx('erna').matches('username')).toBe(false);
+      expect('username').toMatch(makeRegEx('*name'));
+      expect('username').toMatch(makeRegEx('user*'));
+      expect('username').toMatch(makeRegEx('username'));
+      expect('username').not.toMatch(makeRegEx('user'));
+      expect('username').not.toMatch(makeRegEx('name'));
+      expect('username').not.toMatch(makeRegEx('erna'));
     });
   });
 
