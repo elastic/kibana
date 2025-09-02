@@ -24,7 +24,7 @@ export type ToolEventHandlerFn = (event: OnechatToolEvent) => void;
 /**
  * Progress event reporter, sending a tool progress event based on the provided progress info
  */
-export type ToolProgressEmitterFn = (progressText: string) => void;
+export type ToolProgressEmitterFn = (progressMessage: string) => void;
 
 /**
  * Tool event emitter, exposed to tool handlers
