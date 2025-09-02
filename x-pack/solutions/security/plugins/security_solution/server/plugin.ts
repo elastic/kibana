@@ -96,8 +96,6 @@ import {
 
 import { RequestContextFactory } from './request_context_factory';
 
-import { telemetryConfiguration } from '../configuration';
-
 import type {
   ISecuritySolutionPlugin,
   PluginInitializerContext,
@@ -143,7 +141,7 @@ import {
 } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
-import { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
