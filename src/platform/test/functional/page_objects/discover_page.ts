@@ -43,7 +43,7 @@ export class DiscoverPageObject extends FtrService {
   public async saveSearch(
     searchName: string,
     saveAsNew?: boolean,
-    { tags = [], storeTimeRange = false }: { tags?: string[]; storeTimeRange?: boolean } = {}
+    { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
