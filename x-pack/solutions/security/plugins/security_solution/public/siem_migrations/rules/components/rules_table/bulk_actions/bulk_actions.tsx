@@ -13,7 +13,7 @@ import { UpdateMissingIndex } from './update_missing_index';
 import { type RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
   SiemMigrationStatus,
 } from '../../../../../../common/siem_migrations/constants';
@@ -54,7 +54,7 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
     );
     const installTranslatedRulesSelected = useMemo(
       () =>
-        selectedRules.filter((rule) => rule.translation_result === RuleTranslationResult.FULL)
+        selectedRules.filter((rule) => rule.translation_result === MigrationTranslationResult.FULL)
           .length,
       [selectedRules]
     );
