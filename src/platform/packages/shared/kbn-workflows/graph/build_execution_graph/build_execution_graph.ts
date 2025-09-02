@@ -305,7 +305,6 @@ function handleWorkflowLevelOnFailure(
     return null;
   }
 
-  const stepId = getNodeId(step, context);
   const stackEntry: GraphNode = {
     id: `workflowLevelOnFailure_${getNodeId(step, { ...context, parentKey: '' })}`,
     type: 'workflow-level-on-failure',
@@ -415,7 +414,7 @@ function createFallbackPath(
   graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
   const fallbackPathGraph = createStepsSequence(fallbackSteps, {
     ...context,
-    parentKey: workflowLevelOnFailure ? workflowLevelOnFailure.type : '',
+    parentKey: workflowLevelOnFailure ? [workflowLevelOnFailure.type, id].join('_') : '',
   });
   insertGraphBetweenNodes(
     graph,
