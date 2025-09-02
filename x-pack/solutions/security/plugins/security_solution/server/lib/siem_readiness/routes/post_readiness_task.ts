@@ -7,16 +7,16 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { API_VERSIONS } from '../../../../common/constants';
-import { POST_SIEM_READINESS_TASK_API_PATH } from "../../../../common/api/siem_readiness/constants"
 import { schema } from '@kbn/config-schema';
-import { SiemReadinessRoutesDeps } from "../types"
+import { API_VERSIONS } from '../../../../common/constants';
+import { POST_SIEM_READINESS_TASK_API_PATH } from '../../../../common/api/siem_readiness/constants';
+import type { SiemReadinessRoutesDeps } from '../types';
 
 const SIEM_READINESS_INDEX = 'security_solution-siem_readiness';
 
 export const postReadinessTaskRoute = (
   router: SiemReadinessRoutesDeps['router'],
-  logger: SiemReadinessRoutesDeps['logger'],
+  logger: SiemReadinessRoutesDeps['logger']
 ) => {
   router.versioned
     .post({
@@ -59,12 +59,16 @@ export const postReadinessTaskRoute = (
             body: indexDocument,
           });
 
-          logger.info(`Indexed SIEM readiness task (${request.body.task_id}) to ${SIEM_READINESS_INDEX}`);
+          logger.info(
+            `Indexed SIEM readiness task (${request.body.task_id}) to ${SIEM_READINESS_INDEX}`
+          );
 
           return response.ok({ body: request.body });
         } catch (e) {
           const error = transformError(e);
-          logger.error(`Error logging SIEM readiness task (${request.body.task_id}): ${error.message}`);
+          logger.error(
+            `Error logging SIEM readiness task (${request.body.task_id}): ${error.message}`
+          );
 
           return siemResponse.error({
             statusCode: error.statusCode,

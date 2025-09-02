@@ -20,7 +20,7 @@ export const useLogReadinessTask = (
   options?: UseMutationOptions<void, unknown, SiemReadinessTask>
 ) => {
   const { http } = useKibana<CoreStart>().services;
-  
+
   const { mutate: logReadinessTask } = useMutation<void, unknown, SiemReadinessTask>(
     (task: SiemReadinessTask) =>
       http.post<void>(POST_SIEM_READINESS_TASK_API_PATH, {
@@ -30,6 +30,6 @@ export const useLogReadinessTask = (
   );
 
   return {
-    logReadinessTask
-  }
+    logReadinessTask,
+  };
 };
