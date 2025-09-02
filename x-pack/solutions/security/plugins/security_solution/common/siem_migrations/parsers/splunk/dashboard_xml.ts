@@ -15,7 +15,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import xml2js from 'xml2js';
-import type { ParsedPanel, PanelPosition, VizType } from './types';
+import type { ParsedPanel, PanelPosition, VizType } from '../types';
 
 interface XmlElement {
   $?: { [key: string]: string }; // XML attributes

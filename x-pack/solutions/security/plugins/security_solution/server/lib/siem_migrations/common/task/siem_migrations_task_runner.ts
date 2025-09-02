@@ -99,7 +99,7 @@ export class SiemMigrationTaskRunner<
   }
 
   /** Optional initialization logic */
-  async initialize() {}
+  public async initialize() {}
 
   public async run(invocationConfig: RunnableConfig<C>): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');

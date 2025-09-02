@@ -36,7 +36,6 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   )
     // Nodes
     .addNode('inlineQuery', inlineQueryNode)
-    // TODO: .addNode('createDescription', createDescriptionNode) -> ask the LLM to create a description of the panel
     .addNode('selectIndexPattern', selectIndexPatternNode)
     .addNode('translateQuery', translateQueryNode)
     .addNode('validation', validationNode)
@@ -50,9 +49,7 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
       'selectIndexPattern',
       'translationResult',
     ])
-    // .addEdge('inlineQuery', 'createDescription') // createDescription would go after inlineQuery
     .addEdge('inlineQuery', 'selectIndexPattern')
-    // .addEdge('createDescription', 'selectIndexPattern') // And before selectIndexPattern, the description is sent to the selectIndexPattern graph
     .addEdge('selectIndexPattern', 'translateQuery')
     .addEdge('translateQuery', 'validation')
     .addEdge('fixQueryErrors', 'validation')

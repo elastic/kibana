@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RunnableConfig } from '@langchain/core/runnables';
 import type {
   DashboardMigration,
   DashboardMigrationDashboard,
@@ -29,14 +28,4 @@ export class DashboardMigrationsTaskClient extends SiemMigrationsTaskClient<
 > {
   protected readonly TaskRunnerClass = DashboardMigrationTaskRunner;
   protected readonly EvaluatorClass = DashboardMigrationTaskEvaluator;
-
-  // Dashboards specific last_execution config
-  protected getLastExecutionConfig(
-    invocationConfig: RunnableConfig<MigrateDashboardConfigSchema>
-  ): Record<string, unknown> {
-    return {
-      skipPrebuiltDashboardsMatching:
-        invocationConfig.configurable?.skipPrebuiltDashboardsMatching ?? false,
-    };
-  }
 }

@@ -91,7 +91,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     this.task = (input, config) => agent.invoke(input, config);
   }
 
-  protected async initialize() {
+  public async initialize() {
     await this.retriever.initialize();
   }
 

@@ -6,7 +6,7 @@
  */
 
 import { getQueryColumnsFromESQLQuery } from '@kbn/esql-utils';
-import type { ParsedPanel } from '../../../../../../lib/parsers/types';
+import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
 
 interface ColumnInfo {
   columnId: string;

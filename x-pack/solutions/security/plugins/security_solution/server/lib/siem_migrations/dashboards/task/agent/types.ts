@@ -7,13 +7,13 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { ParsedPanel } from '../../../../../../common/siem_migrations/parsers/types';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type { DashboardMigrationsRetriever } from '../retrievers';
 import type { EsqlKnowledgeBase } from '../../../common/task/util/esql_knowledge_base';
 import type { ChatModel } from '../../../common/task/util/actions_client_chat';
 import type { migrateDashboardConfigSchema, migrateDashboardState } from './state';
 import type { DashboardMigrationTelemetryClient } from '../dashboard_migrations_telemetry_client';
-import type { ParsedPanel } from '../../lib/parsers/types';
 import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
 
 export type MigrateDashboardState = typeof migrateDashboardState.State;

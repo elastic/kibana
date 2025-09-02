@@ -52,9 +52,6 @@ export class DashboardMigrationTelemetryClient
               duration: Date.now() - dashboardStartTime,
               model: this.modelName,
               prebuiltMatch: false,
-              // prebuiltMatch: migrationResult.elastic_dashboard?.prebuilt_dashboard_id
-              //   ? true
-              //   : false,
               eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSuccess],
             });
           },

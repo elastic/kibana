@@ -7,15 +7,27 @@
 
 import type { EvaluationResult } from 'langsmith/evaluation';
 import type { Run, Example } from 'langsmith/schemas';
-import { DashboardMigrationTaskRunner } from './dashboard_migrations_task_runner';
-import { SiemMigrationTaskEvaluable } from '../../common/task/siem_migrations_task_evaluator';
+import type {
+  DashboardMigration,
+  DashboardMigrationDashboard,
+} from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import { SiemMigrationsBaseEvaluator } from '../../common/task/siem_migrations_task_evaluator';
+import type { MigrateDashboardConfigSchema } from './agent/types';
+import type {
+  DashboardMigrationTaskInput,
+  DashboardMigrationTaskOutput,
+} from './dashboard_migrations_task_runner';
 
 type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
 export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
 
-export class DashboardMigrationTaskEvaluator extends SiemMigrationTaskEvaluable(
-  DashboardMigrationTaskRunner
-) {
+export class DashboardMigrationTaskEvaluator extends SiemMigrationsBaseEvaluator<
+  DashboardMigration,
+  DashboardMigrationDashboard,
+  DashboardMigrationTaskInput,
+  MigrateDashboardConfigSchema,
+  DashboardMigrationTaskOutput
+> {
   protected readonly evaluators: Record<string, CustomEvaluator> = {
     // TODO: Implement custom evaluators for dashboard migrations
   };

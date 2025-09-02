@@ -6,11 +6,11 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
+import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { DashboardMigrationDashboard } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type { ValidationErrors } from './types';
-import type { ParsedPanel } from '../../../../lib/parsers/types';
 
 export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),

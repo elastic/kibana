@@ -6,13 +6,13 @@
  */
 
 import { Send } from '@langchain/langgraph';
+import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { DashboardResourceIdentifier } from '../../../../../../../../common/siem_migrations/dashboards/resources';
-import type { Vendor } from '../../../../../../../../common/siem_migrations/model/migration.gen';
+import type { OriginalDashboardVendor } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type { MigrateDashboardState, TranslatePanelNodeParams } from '../../types';
 import { getTranslatePanelGraph } from '../../sub_graphs/translate_panel';
 import type { TranslatePanelGraphParams } from '../../sub_graphs/translate_panel/types';
-import type { ParsedPanel } from '../../../../lib/parsers/types';
 
 export type TranslatePanelNode = ((
   params: TranslatePanelNodeParams
@@ -87,7 +87,7 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
  * and returns only the resources that have been identified for each specific panel query.
  */
 function filterIdentifiedResources(
-  vendor: Vendor,
+  vendor: OriginalDashboardVendor,
   resources: MigrationResources,
   panel: ParsedPanel
 ): MigrationResources {
