@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { isNotFoundError } from '@kbn/es-errors';
-import { Streams } from '@kbn/streams-schema';
 import { cloneDeep } from 'lodash';
+import { Streams } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
-import type { StateDependencies, StreamChange } from '../types';
 import type {
   StreamChangeStatus,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
+import type { StateDependencies, StreamChange } from '../types';
 
 export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definition> {
   constructor(definition: Streams.GroupStream.Definition, dependencies: StateDependencies) {
@@ -43,15 +43,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       throw new StatusError('Cannot change stream types', 400);
     }
 
-    // Deduplicate members
-    this._definition = {
-      name: definition.name,
-      description: definition.description,
-      group: {
-        ...definition.group,
-        members: Array.from(new Set(definition.group.members)),
-      },
-    };
+    this._definition = definition;
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
@@ -64,15 +56,9 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     if (target === this._definition.name) {
       return { cascadingChanges: [], changeStatus: 'deleted' };
     }
-    // remove deleted streams from the group
-    if (this.changeStatus !== 'deleted' && this._definition.group.members.includes(target)) {
-      this._definition = {
-        ...this._definition,
-        group: {
-          ...this._definition.group,
-          members: this._definition.group.members.filter((member) => member !== target),
-        },
-      };
+
+    if (!this.isDeleted() && this._definition.group.members.includes(target)) {
+      // We need to run validation to check that all related streams still exist
       return { cascadingChanges: [], changeStatus: 'upserted' };
     }
 
@@ -83,31 +69,24 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
-    if (this.isDeleted()) {
-      return { isValid: true, errors: [] };
-    }
-
     if (this._definition.name.startsWith('logs.')) {
-      throw new StatusError('A group stream name can not start with [logs.]', 400);
+      throw new StatusError('A Group stream name can not start with [logs.]', 400);
     }
 
     const existsInStartingState = startingState.has(this._definition.name);
-
     if (!existsInStartingState) {
       // Check for conflicts
       try {
-        const dataStreamResponse =
+        const dataStreamResult =
           await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
             name: this._definition.name,
           });
 
-        if (dataStreamResponse.data_streams.length === 0) {
+        if (dataStreamResult.data_streams.length === 0) {
           return {
             isValid: false,
             errors: [
-              new Error(
-                `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`
-              ),
+              new Error(`Cannot create Group stream ${this.definition.name} due to existing index`),
             ],
           };
         }
@@ -116,7 +95,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
           isValid: false,
           errors: [
             new Error(
-              `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream`
+              `Cannot create Group stream ${this.definition.name} due to existing data stream`
             ),
           ],
         };
@@ -128,21 +107,43 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     }
 
     // validate members
+    const selfReference = this._definition.group.members.includes(this.name);
+    if (selfReference) {
+      return {
+        isValid: false,
+        errors: [new Error(`Group stream ${this.name} cannot have itself as a member`)],
+      };
+    }
+
     for (const member of this._definition.group.members) {
-      const memberStream = desiredState.get(member);
-      if (!memberStream || memberStream.isDeleted()) {
+      const relatedStream = desiredState.get(member);
+      if (!relatedStream || relatedStream.isDeleted()) {
         return {
           isValid: false,
-          errors: [new Error(`Member stream ${member} not found`)],
-        };
-      }
-      if (!Streams.ingest.all.Definition.is(memberStream.definition)) {
-        return {
-          isValid: false,
-          errors: [new Error(`Member stream ${member} is neither a wired nor an classic stream`)],
+          errors: [
+            new Error(`Group stream ${this.name} has ${member} as a member which was not found`),
+          ],
         };
       }
     }
+
+    const duplicates = this._definition.group.members.filter(
+      (name, index) => this._definition.group.members.indexOf(name) !== index
+    );
+
+    if (duplicates.length !== 0) {
+      return {
+        isValid: false,
+        errors: [
+          new Error(
+            `Group stream ${
+              this.name
+            } cannot have the same member mentioned more than once: ${duplicates.join(',')}`
+          ),
+        ],
+      };
+    }
+
     return { isValid: true, errors: [] };
   }
 
@@ -150,6 +151,28 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    const dependentGroupStreams = desiredState
+      .all()
+      .filter(
+        (stream): stream is GroupStream =>
+          stream.name !== this.name &&
+          Streams.GroupStream.Definition.is(stream.definition) &&
+          !stream.isDeleted()
+      )
+      .filter((stream) => stream.definition.group.members.includes(this.name));
+
+    if (dependentGroupStreams.length !== 0) {
+      return {
+        isValid: false,
+        errors: dependentGroupStreams.map(
+          (stream) =>
+            new Error(
+              `Cannot delete Group stream ${this.name} because Group stream ${stream.name} depends on it`
+            )
+        ),
+      };
+    }
+
     return { isValid: true, errors: [] };
   }
 
@@ -163,7 +186,12 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
   }
 
   protected async doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
-    return this.doDetermineCreateActions();
+    return [
+      {
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      },
+    ];
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {

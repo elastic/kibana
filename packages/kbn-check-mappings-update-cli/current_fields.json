@@ -1294,6 +1294,7 @@
     "lastUpdatedBy",
     "name",
     "tags",
+    "valid",
     "yaml"
   ],
   "workplace_search_telemetry": []
