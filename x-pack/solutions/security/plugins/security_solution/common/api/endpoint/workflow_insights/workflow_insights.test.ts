@@ -58,26 +58,6 @@ describe('Workflow Insights', () => {
         expect(() => validateQuery(validQuery)).not.toThrow();
       });
 
-      it('should validate successfully with policy_response_failure as single array item', () => {
-        const validQuery = {
-          query: {
-            types: ['policy_response_failure'],
-          },
-        };
-
-        expect(() => validateQuery(validQuery)).not.toThrow();
-      });
-
-      it('should validate successfully with array containing only policy_response_failure', () => {
-        const validQuery = {
-          query: {
-            types: ['policy_response_failure'],
-          },
-        };
-
-        expect(() => validateQuery(validQuery)).not.toThrow();
-      });
-
       it('should validate successfully with noisy_process_tree and policy_response_failure', () => {
         const validQuery = {
           query: {

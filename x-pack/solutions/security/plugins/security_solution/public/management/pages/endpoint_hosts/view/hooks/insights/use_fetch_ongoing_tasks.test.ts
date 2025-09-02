@@ -155,6 +155,9 @@ describe('useFetchLatestScan', () => {
         })
       );
 
+      // Wait for async operations to complete
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       // Should not call onSuccess when still running
       expect(mockOnSuccess).not.toHaveBeenCalled();
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
