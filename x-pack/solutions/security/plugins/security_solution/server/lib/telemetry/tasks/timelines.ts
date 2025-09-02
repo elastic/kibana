@@ -12,6 +12,7 @@ import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
 import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
+import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryTimelineTaskConfig() {
   const taskName = 'Security Solution Timeline telemetry';
@@ -46,7 +47,12 @@ export function createTelemetryTimelineTaskConfig() {
         if (!alertsIndex) {
           throw Error('alerts index is not ready yet, skipping telemetry task');
         }
-        const alerts = await receiver.fetchTimelineAlerts(alertsIndex, rangeFrom, rangeTo);
+        const alerts = await receiver.fetchTimelineAlerts(
+          alertsIndex,
+          rangeFrom,
+          rangeTo,
+          telemetryConfiguration.query_config
+        );
 
         log.debug('found alerts to process', { length: alerts.length } as LogMeta);
 

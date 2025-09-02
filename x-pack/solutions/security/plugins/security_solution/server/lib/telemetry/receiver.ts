@@ -90,6 +90,7 @@ import type {
   EndpointPolicyResponseAggregation,
   EndpointMetadataAggregation,
   EndpointMetadataDocument,
+  TelemetryQueryConfiguration,
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
@@ -121,7 +122,8 @@ export interface ITelemetryReceiver {
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
-    packageService?: PackageService
+    packageService?: PackageService,
+    queryConfig?: TelemetryQueryConfiguration
   ): Promise<void>;
 
   getClusterInfo(): Nullable<ESClusterInfo>;
@@ -247,7 +249,8 @@ export interface ITelemetryReceiver {
   fetchTimelineAlerts(
     index: string,
     rangeFrom: string,
-    rangeTo: string
+    rangeTo: string,
+    queryConfig: TelemetryQueryConfiguration
   ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
@@ -297,6 +300,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private packageService?: PackageService;
   private experimentalFeatures: ExperimentalFeatures | undefined;
   private readonly maxRecords = 10_000 as const;
+  private queryConfig?: TelemetryQueryConfiguration;
 
   // default to 2% of host's total memory or 80MiB, whichever is smaller
   private maxPageSizeBytes: number = Math.min(os.totalmem() * 0.02, 80 * 1024 * 1024);
@@ -313,7 +317,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
-    packageService?: PackageService
+    packageService?: PackageService,
+    queryConfig?: TelemetryQueryConfiguration
   ) {
     this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
@@ -329,6 +334,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
+    this.queryConfig = queryConfig;
 
     setClusterInfo(this.clusterInfo);
   }
@@ -1042,9 +1048,20 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
+  async fetchTimelineAlerts(
+    index: string,
+    rangeFrom: string,
+    rangeTo: string,
+    queryConfig: TelemetryQueryConfiguration
+  ) {
     // default is from looking at Kibana saved objects and online documentation
     const keepAlive = '5m';
+
+    const queryOptions = {
+      maxResponseSize: this.queryConfig?.maxResponseSize ?? queryConfig.maxResponseSize,
+      maxCompressedResponseSize:
+        this.queryConfig?.maxCompressedResponseSize ?? queryConfig.maxCompressedResponseSize,
+    };
 
     // create and assign an initial point in time
     let pitId: OpenPointInTimeResponse['id'] = (
@@ -1109,12 +1126,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         ] as unknown as string[],
         pit: { id: pitId },
         search_after: searchAfter,
-        size: 1000,
+        size: this.queryConfig?.pageSize ?? queryConfig.pageSize, // plugin config have precedence over CDN parameter
       };
 
       let response = null;
       try {
-        response = await this.esClient().search<EnhancedAlertEvent>(query);
+        response = await this.esClient().search<EnhancedAlertEvent>(query, queryOptions);
         const numOfHits = response?.hits.hits.length;
 
         if (numOfHits > 0) {

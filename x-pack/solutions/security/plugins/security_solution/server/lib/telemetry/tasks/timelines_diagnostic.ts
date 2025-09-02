@@ -13,6 +13,7 @@ import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
 import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
+import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryDiagnosticTimelineTaskConfig() {
   const taskName = 'Security Solution Diagnostic Timeline telemetry';
@@ -46,7 +47,8 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
         const alerts = await receiver.fetchTimelineAlerts(
           DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
           rangeFrom,
-          rangeTo
+          rangeTo,
+          telemetryConfiguration.query_config
         );
 
         log.debug('found alerts to process', { length: alerts.length } as LogMeta);
