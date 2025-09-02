@@ -20,15 +20,15 @@ export const getMissingCapabilitiesToast = (
   color: 'danger',
   iconType: 'alert',
   title: i18n.translate(
-    'xpack.securitySolution.siemMigrations.rulesService.missingCapabilities.title',
+    'xpack.securitySolution.siemMigrations.baseService.missingCapabilities.title',
     { defaultMessage: 'Insufficient privileges.' }
   ),
   text: toMountPoint(
     <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="missingPrivilegesGroup">
       <EuiFlexItem>
         {i18n.translate(
-          'xpack.securitySolution.siemMigrations.rulesService.missingCapabilities.description',
-          { defaultMessage: 'The privileges required to start a rule migration are:' }
+          'xpack.securitySolution.siemMigrations.baseService.missingCapabilities.description',
+          { defaultMessage: 'The privileges required to start a migration are:' }
         )}
       </EuiFlexItem>
       <EuiFlexItem>
@@ -42,7 +42,7 @@ export const getMissingCapabilitiesToast = (
       </EuiFlexItem>
       <EuiFlexItem>
         {i18n.translate(
-          'xpack.securitySolution.siemMigrations.rulesService.missingCapabilities.contactAdministrator',
+          'xpack.securitySolution.siemMigrations.baseService.missingCapabilities.contactAdministrator',
           { defaultMessage: 'Contact your administrator for assistance.' }
         )}
       </EuiFlexItem>

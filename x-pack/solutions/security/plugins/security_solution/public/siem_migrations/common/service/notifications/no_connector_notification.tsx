@@ -22,7 +22,7 @@ import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/cons
 export const getNoConnectorToast = (core: CoreStart): ToastInput => ({
   color: 'danger',
   iconType: 'alert',
-  title: i18n.translate('xpack.securitySolution.siemMigrations.rulesService.noConnector.title', {
+  title: i18n.translate('xpack.securitySolution.siemMigrations.baseService.noConnector.title', {
     defaultMessage: 'No connector configured.',
   }),
   text: toMountPoint(
@@ -50,14 +50,14 @@ const NoConnectorToastContent: React.FC = () => {
     <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
       <EuiFlexItem>
         <FormattedMessage
-          id="xpack.securitySolution.siemMigrations.rulesService.noConnector.text"
-          defaultMessage="No AI connector configured. Select an AI connector to start rule translations."
+          id="xpack.securitySolution.siemMigrations.baseService.noConnector.text"
+          defaultMessage="No AI connector configured. Select an AI connector to start translations."
         />
       </EuiFlexItem>
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiLink onClick={onClick} href={url}>
-          {i18n.translate('xpack.securitySolution.siemMigrations.rulesService.noConnector.link', {
+          {i18n.translate('xpack.securitySolution.siemMigrations.baseService.noConnector.link', {
             defaultMessage: 'Go to connector selection',
           })}
         </EuiLink>
