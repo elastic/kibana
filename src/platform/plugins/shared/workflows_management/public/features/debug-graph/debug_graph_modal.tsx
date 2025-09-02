@@ -17,7 +17,7 @@ import {
   EuiButton,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { DebugGraph } from './debug-graph';
+import { DebugGraph } from './execution_graph';
 
 export interface DebugGraphModalProps {
   /**
