@@ -121,6 +121,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-card-no-data-types",
     "@kbn/licensing-types",
+    "@kbn/apm-types",
   ],
   "exclude": ["target/**/*"]
 }

@@ -21,6 +21,7 @@ import type {
   Logger,
   AuditLogger,
   SavedObjectsClientContract,
+  UserProfileServiceStart,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -174,6 +175,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  userProfile: UserProfileServiceStart;
 }
 /**
  * @internal
@@ -199,7 +201,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   indexTemplate: {
@@ -208,7 +209,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   aliases: {
@@ -217,7 +217,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   indexPatterns: {
@@ -226,7 +225,6 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
   };
   pipelines: {
