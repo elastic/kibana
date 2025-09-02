@@ -427,29 +427,22 @@ describe('getAvailableVersions', () => {
     expect(mockedFetch).not.toBeCalled();
   });
 
-  it('should filter out versions higher than kibana version', async () => {
+  it('should filter out versions higher than kibana version but allow patch versions', async () => {
     mockKibanaVersion = '8.10.2';
-    mockedReadFile.mockResolvedValue(`["8.11.0", "8.10.4", "8.10.2", "8.10.1", "8.9.0", "7.17.0"]`);
+    // Include patch versions both higher and lower than kibana version
+    mockedReadFile.mockResolvedValue(`["8.10.4", "8.10.2", "8.10.1", "8.9.0", "7.17.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
       text: jest.fn().mockResolvedValue(
         JSON.stringify([
           [
             {
-              title: 'Elastic Agent 8.12.0',
-              version_number: '8.12.0',
-            },
-            {
-              title: 'Elastic Agent 8.11.0',
+              title: 'Elastic Agent 8.11.0', // Should be filtered (minor version higher)
               version_number: '8.11.0',
             },
             {
-              title: 'Elastic Agent 8.10.3',
+              title: 'Elastic Agent 8.10.3', // Should be included (patch version higher)
               version_number: '8.10.3',
-            },
-            {
-              title: 'Elastic Agent 8.10.2',
-              version_number: '8.10.2',
             },
           ],
         ])
@@ -458,8 +451,7 @@ describe('getAvailableVersions', () => {
 
     const res = await getAvailableVersions({ ignoreCache: true });
 
-    // Should filter out versions higher than kibana version (8.10.2)
-    // 8.11.0, 8.10.4, 8.12.0, and 8.10.3 should be filtered out
-    expect(res).toEqual(['8.10.2', '8.10.1', '8.9.0', '7.17.0']);
+    // Should include patch versions but filter out minor/major versions higher than kibana
+    expect(res).toEqual(['8.10.4', '8.10.3', '8.10.2', '8.10.1', '8.9.0', '7.17.0']);
   });
 });
