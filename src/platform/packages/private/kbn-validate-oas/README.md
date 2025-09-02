@@ -12,8 +12,6 @@ node ./scripts/validate_oas_docs.js --help
 
 ## Enhanced Validation API
 
-This package now provides enhanced validation capabilities through a programmatic API:
-
 ```typescript
 import { runEnhancedValidation } from '@kbn/validate-oas';
 
@@ -25,14 +23,14 @@ const result = await runEnhancedValidation({
 
 ## Features
 
-### 🔧 **Core Classes**
+### 🔧 **Classes**
 
 - **FileSelector**: Handles file selection and path filtering
 - **OutputFormatter**: Supports CLI, JSON, and GitHub comment output formats
 - **GitDiffAnalyzer**: Provides incremental validation based on git changes
 - **runEnhancedValidation()**: Main enhanced validation function
 
-### 🎯 **Key Capabilities**
+### 🎯 **Capabilities**
 
 - ✅ **Multiple Output Formats**: CLI (original), JSON, GitHub comment markdown
 - ✅ **Incremental Validation**: Only validate changed OAS files based on git diff
@@ -82,19 +80,6 @@ Found 25 validation error(s) across 1 file(s).
 ...
 ```
 
-## Development & Testing
-
-### Prerequisites
-
-**CRITICAL:** Before running any tests, you MUST rebuild the package dependencies after making changes to the code:
-
-```bash
-# From the Kibana root directory
-yarn kbn bootstrap
-```
-
-This command rebuilds TypeScript definitions and package dependencies, ensuring tests run against the latest code changes.
-
 ## Running Tests
 
 ### Unit Tests
@@ -108,7 +93,7 @@ yarn test:jest --config src/platform/packages/private/kbn-validate-oas/jest.conf
 
 ### Integration Tests
 
-**CRITICAL:** Integration tests MUST be run with the dedicated integration configuration:
+Run integration tests:
 
 ```bash
 # From the Kibana root directory
@@ -116,8 +101,6 @@ yarn test:jest_integration --config src/platform/packages/private/kbn-validate-o
 ```
 
 #### Integration Test Coverage
-
-The integration tests cover:
 
 - **CLI Command Execution**: Real command-line invocation with process spawn and timeout handling
 - **Exit Code Validation**: Proper exit codes for success/failure scenarios  
@@ -159,7 +142,6 @@ yarn test:jest_integration --config src/platform/packages/private/kbn-validate-o
 
 ### Test Requirements and Success Criteria
 
-- **Pass Rate**: 95%+ test success rate required
 - **Timeout Handling**: All tests must complete within 30 seconds
 - **Resource Cleanup**: No hanging processes or resource leaks
 - **Error Coverage**: Comprehensive error scenario testing
