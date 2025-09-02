@@ -81,23 +81,21 @@ export const SummaryTitle = ({
 
   if (name) {
     nameContent = (
-      <>
-        <FieldContent title={name} value={name} field={nameField} showActions={showActions}>
-          <Title isTitle>
-            <HighlightField textSize="m" value={name} formattedValue={formattedName} as="strong">
-              {transactionName && serviceName
-                ? ({ content }) => (
-                    <TransactionNameLink
-                      serviceName={serviceName}
-                      transactionName={transactionName}
-                      renderContent={() => content}
-                    />
-                  )
-                : undefined}
-            </HighlightField>
-          </Title>
-        </FieldContent>
-      </>
+      <FieldContent title={name} value={name} field={nameField} showActions={showActions}>
+        <Title isTitle>
+          <HighlightField textSize="m" value={name} formattedValue={formattedName} as="strong">
+            {transactionName && serviceName
+              ? ({ content }) => (
+                  <TransactionNameLink
+                    serviceName={serviceName}
+                    transactionName={transactionName}
+                    renderContent={() => content}
+                  />
+                )
+              : undefined}
+          </HighlightField>
+        </Title>
+      </FieldContent>
     );
   } else if (serviceName) {
     nameContent = (

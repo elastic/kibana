@@ -11,12 +11,14 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type { UnifiedDocViewerStorybookArgs } from '../../../../../.storybook/preview';
 import minimalAPMFixture from '../../../../__fixtures__/span_apm_minimal.json';
 import minimalOtelFixture from '../../../../__fixtures__/span_otel_minimal.json';
+import httpServerApmFixture from '../../../../__fixtures__/transaction_http_server_apm.json';
+import httpServerOtelFixture from '../../../../__fixtures__/transaction_http_server_otel.json';
 import redisClientOtelFixture from '../../../../__fixtures__/span_otel_redis_client.json';
 import { Overview, type OverviewProps } from './overview';
 
 type Args = UnifiedDocViewerStorybookArgs<OverviewProps>;
 const meta = {
-  title: 'Span overview',
+  title: 'Trace Overview',
   component: Overview,
 } satisfies Meta<typeof Overview>;
 
@@ -54,4 +56,27 @@ export const RedisClientOtel: Story = {
     hit: redisClientOtelFixture,
   },
   tags: ['otel', 'db', 'redis', 'client', 'span'],
+};
+
+/**
+ * APM HTTP transaction
+ */
+export const ApmHttpServer: Story = {
+  name: 'APM HTTP server transaction',
+  args: {
+    hit: httpServerApmFixture,
+  },
+  tags: ['transaction', 'span', 'http', 'server', 'apm'],
+};
+
+/**
+ * OpenTelemetry HTTP server span.
+ * Processed by the elasticapmprocessor to add APM transaction and span attributes.
+ */
+export const OtelHttpServer: Story = {
+  name: 'OpenTelemetry HTTP server transaction',
+  args: {
+    hit: httpServerOtelFixture,
+  },
+  tags: ['otel', 'transaction', 'span', 'http', 'server', 'apm'],
 };

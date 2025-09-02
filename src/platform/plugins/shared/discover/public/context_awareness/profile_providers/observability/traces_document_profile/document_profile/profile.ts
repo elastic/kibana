@@ -40,28 +40,28 @@ export const createObservabilityTracesDocumentProfileProvider = ({
       return { isMatch: false };
     }
 
-    const isSpanRecord = getIsSpanRecord({
+    const isTraceRecord = resolveTraceRecord({
       record,
     });
 
-    if (!isSpanRecord) {
+    if (!isTraceRecord) {
       return { isMatch: false };
     }
 
     return {
       isMatch: true,
       context: {
-        type: DocumentType.Span,
+        type: DocumentType.Trace,
       },
     };
   },
 });
 
-const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
-  return isSpanDocument(record);
+const resolveTraceRecord = ({ record }: { record: DataTableRecord }) => {
+  return isTraceDocument(record);
 };
 
-const isSpanDocument = (record: DataTableRecord) => {
+const isTraceDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
 

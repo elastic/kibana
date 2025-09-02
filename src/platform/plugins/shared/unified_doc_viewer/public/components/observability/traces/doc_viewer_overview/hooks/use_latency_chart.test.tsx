@@ -65,66 +65,135 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('useSpanLatencyChart', () => {
-  const params = {
-    spanName: 'test-span',
-    serviceName: 'test-service',
-  };
+describe('useLatencyChart', () => {
+  describe('Spans', () => {
+    const params = {
+      spanName: 'test-span',
+      serviceName: 'test-service',
+    };
 
-  describe('when parameters are NOT missing', () => {
-    it('should fetch and set data successfully', async () => {
-      mockHttpPost.mockResolvedValue({
-        overallHistogram: [{ x: 1, y: 2 }],
-        percentileThresholdValue: 456,
+    describe('when parameters are NOT missing', () => {
+      it('should fetch and set data successfully', async () => {
+        mockHttpPost.mockResolvedValue({
+          overallHistogram: [{ x: 1, y: 2 }],
+          percentileThresholdValue: 456,
+        });
+
+        const { result } = renderHook(() => useLatencyChart(params));
+
+        await waitFor(() => !result.current.loading);
+
+        expect(result.current.loading).toBe(false);
+        expect(result.current.hasError).toBe(false);
+        expect(result.current.data).toBeDefined();
+        expect(result.current.data?.distributionChartData).toHaveLength(1);
+        expect(result.current.data?.percentileThresholdValue).toBe(456);
       });
+    });
 
-      const { result } = renderHook(() => useLatencyChart(params));
+    describe('when parameters are missing', () => {
+      it('should return null data and stop loading', async () => {
+        const { result } = renderHook(() =>
+          useLatencyChart({
+            spanName: '',
+            serviceName: '',
+          })
+        );
 
-      await waitFor(() => !result.current.loading);
+        await waitFor(() => !result.current.loading);
 
-      expect(result.current.loading).toBe(false);
-      expect(result.current.hasError).toBe(false);
-      expect(result.current.data).toBeDefined();
-      expect(result.current.data?.distributionChartData).toHaveLength(1);
-      expect(result.current.data?.percentileThresholdValue).toBe(456);
+        expect(result.current.loading).toBe(false);
+        expect(result.current.hasError).toBe(false);
+        expect(result.current.data).toBeUndefined();
+        expect(mockHttpPost).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when there is an error', () => {
+      it('should handle error and show toast', async () => {
+        mockHttpPost.mockRejectedValue(new Error('Fetch error'));
+
+        const { result } = renderHook(() => useLatencyChart(params));
+
+        await waitFor(() => !result.current.loading);
+
+        expect(result.current.loading).toBe(false);
+        expect(result.current.hasError).toBe(true);
+        expect(result.current.data).toBeUndefined();
+        expect(mockAddDanger).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'An error occurred while fetching the latency histogram',
+            text: 'Fetch error',
+          })
+        );
+      });
     });
   });
 
-  describe('when parameters are missing', () => {
-    it('should return null data and stop loading', async () => {
-      const { result } = renderHook(() =>
-        useLatencyChart({
-          spanName: '',
-          serviceName: '',
-        })
-      );
+  describe('Transactions', () => {
+    const params = {
+      transactionName: 'test-name',
+      transactionType: 'test-type',
+      serviceName: 'test-service',
+    };
 
-      await waitFor(() => !result.current.loading);
+    describe('when parameters are NOT missing', () => {
+      it('should fetch and set data successfully', async () => {
+        mockHttpPost.mockResolvedValue({
+          overallHistogram: [{ x: 1, y: 2 }],
+          percentileThresholdValue: 123,
+        });
 
-      expect(result.current.loading).toBe(false);
-      expect(result.current.hasError).toBe(false);
-      expect(result.current.data).toBeNull();
-      expect(mockHttpPost).not.toHaveBeenCalled();
+        const { result } = renderHook(() => useLatencyChart(params));
+
+        await waitFor(() => !result.current.loading);
+        await waitFor(() => !!result.current.data);
+
+        expect(result.current.loading).toBe(false);
+        expect(result.current.hasError).toBe(false);
+        expect(result.current.data).toBeDefined();
+        expect(result.current.data?.distributionChartData).toHaveLength(1);
+        expect(result.current.data?.percentileThresholdValue).toBe(123);
+      });
     });
-  });
 
-  describe('when there is an error', () => {
-    it('should handle error and show toast', async () => {
-      mockHttpPost.mockRejectedValue(new Error('Fetch error'));
+    describe('when parameters are missing', () => {
+      it('should return null data and stop loading ', async () => {
+        const { result } = renderHook(() =>
+          useLatencyChart({
+            transactionName: '',
+            transactionType: '',
+            serviceName: '',
+          })
+        );
 
-      const { result } = renderHook(() => useLatencyChart(params));
+        await waitFor(() => !result.current.loading);
 
-      await waitFor(() => !result.current.loading);
+        expect(result.current.loading).toBe(false);
+        expect(result.current.hasError).toBe(false);
+        expect(result.current.data).toBeUndefined();
+        expect(mockHttpPost).not.toHaveBeenCalled();
+      });
+    });
 
-      expect(result.current.loading).toBe(false);
-      expect(result.current.hasError).toBe(true);
-      expect(result.current.data).toBeUndefined();
-      expect(mockAddDanger).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'An error occurred while fetching the latency histogram',
-          text: 'Fetch error',
-        })
-      );
+    describe('when an error occurs', () => {
+      it('should handle error and show toast', async () => {
+        mockHttpPost.mockRejectedValue(new Error('Fetch error'));
+
+        const { result } = renderHook(() => useLatencyChart(params));
+
+        await waitFor(() => !result.current.loading);
+
+        expect(result.current.loading).toBe(false);
+        expect(result.current.hasError).toBe(true);
+        expect(result.current.data).toBeUndefined();
+        expect(mockAddDanger).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'An error occurred while fetching the latency histogram',
+            text: 'Fetch error',
+          })
+        );
+      });
     });
   });
 });

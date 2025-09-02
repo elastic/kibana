@@ -33,75 +33,178 @@ jest.mock('../../components/highlight_field', () => ({
   },
 }));
 
-describe('SpanSummaryTitle', () => {
-  afterAll(() => {
-    jest.clearAllMocks();
+jest.mock('../../components/transaction_name_link', () => ({
+  TransactionNameLink: ({ renderContent }: { renderContent: () => React.ReactNode }) => (
+    <div>{renderContent()}</div>
+  ),
+}));
+
+describe('SummaryTitle', () => {
+  describe('Spans', () => {
+    afterAll(() => {
+      jest.clearAllMocks();
+    });
+    it('renders spanName with formattedName and id with formattedId', () => {
+      const { getByText, container } = render(
+        <SummaryTitle
+          spanName="Test Span"
+          formattedName="<mark>Test Span</mark>"
+          id="123"
+          formattedId="<mark>123</mark>"
+        />
+      );
+
+      expect(container.querySelector('strong')).toHaveTextContent('Test Span');
+      expect(container.querySelector('strong')?.innerHTML).toBe('<mark>Test Span</mark>');
+
+      expect(getByText('123')).toBeInTheDocument();
+      expect(container.querySelector('span')?.innerHTML).toBe('<mark>123</mark>');
+    });
+
+    it('renders only id with formattedId when spanName is not provided', () => {
+      const { getByText, container } = render(
+        <SummaryTitle id="123" formattedId="<mark>123</mark>" />
+      );
+
+      expect(getByText('123')).toBeInTheDocument();
+      expect(container.querySelector('h2')?.innerHTML).toBe('<span><mark>123</mark></span>');
+    });
+
+    it('renders FieldHoverActionPopover for spanName and id', () => {
+      const { getByText } = render(
+        <SummaryTitle
+          spanName="Test Span"
+          formattedName="<mark>Test Span</mark>"
+          id="123"
+          formattedId="<mark>123</mark>"
+        />
+      );
+
+      expect(getByText('Test Span')).toBeInTheDocument();
+      expect(getByText('123')).toBeInTheDocument();
+    });
+
+    it('renders FieldHoverActionPopover if showActions is undefined', () => {
+      const { container } = render(<SummaryTitle id="123" formattedId="<mark>123</mark>" />);
+
+      expect(
+        container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+      ).not.toBeNull();
+    });
+
+    it('renders FieldHoverActionPopover if showActions is true', () => {
+      const { container } = render(
+        <SummaryTitle id="123" formattedId="<mark>123</mark>" showActions={true} />
+      );
+
+      expect(
+        container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+      ).not.toBeNull();
+    });
+
+    it('does not render FieldHoverActionPopover if showActions is false', () => {
+      const { container } = render(
+        <SummaryTitle id="123" formattedId="<mark>123</mark>" showActions={false} />
+      );
+
+      expect(
+        container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+      ).toBeNull();
+    });
   });
-  it('renders spanName with formattedSpanName and id with formattedId', () => {
-    const { getByText, container } = render(
-      <SummaryTitle
-        spanName="Test Span"
-        formattedName="<mark>Test Span</mark>"
-        id="123"
-        formattedId="<mark>123</mark>"
-      />
-    );
 
-    expect(container.querySelector('strong')).toHaveTextContent('Test Span');
-    expect(container.querySelector('strong')?.innerHTML).toBe('<mark>Test Span</mark>');
+  describe('Transactions', () => {
+    afterAll(() => {
+      jest.clearAllMocks();
+    });
 
-    expect(getByText('123')).toBeInTheDocument();
-    expect(container.querySelector('span')?.innerHTML).toBe('<mark>123</mark>');
-  });
+    it('renders transactionName with formattedName and id with formattedId', () => {
+      const { getByText, container } = render(
+        <SummaryTitle
+          serviceName="Test Service"
+          transactionName="Test Transaction"
+          formattedName="<mark>Test Transaction</mark>"
+          id="123"
+          formattedId="<mark>123</mark>"
+        />
+      );
 
-  it('renders only id with formattedId when spanName is not provided', () => {
-    const { getByText, container } = render(
-      <SummaryTitle id="123" formattedId="<mark>123</mark>" />
-    );
+      expect(container.querySelector('strong')).toHaveTextContent('Test Transaction');
+      expect(container.querySelector('strong')?.innerHTML).toBe('<mark>Test Transaction</mark>');
 
-    expect(getByText('123')).toBeInTheDocument();
-    expect(container.querySelector('h2')?.innerHTML).toBe('<span><mark>123</mark></span>');
-  });
+      expect(getByText('123')).toBeInTheDocument();
+      expect(container.querySelector('span')?.innerHTML).toBe('<mark>123</mark>');
+    });
 
-  it('renders FieldHoverActionPopover for spanName and id', () => {
-    const { getByText } = render(
-      <SummaryTitle
-        spanName="Test Span"
-        formattedName="<mark>Test Span</mark>"
-        id="123"
-        formattedId="<mark>123</mark>"
-      />
-    );
+    it('renders only serviceName when transactionName is not provided', () => {
+      const { getByText } = render(
+        <SummaryTitle serviceName="Test Service" id="123" formattedId="<mark>123</mark>" />
+      );
 
-    expect(getByText('Test Span')).toBeInTheDocument();
-    expect(getByText('123')).toBeInTheDocument();
-  });
+      expect(getByText('Test Service')).toBeInTheDocument();
 
-  it('renders FieldHoverActionPopover if showActions is undefined', () => {
-    const { container } = render(<SummaryTitle id="123" formattedId="<mark>123</mark>" />);
+      expect(getByText('123')).toBeInTheDocument();
+    });
 
-    expect(
-      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
-    ).not.toBeNull();
-  });
+    it('renders FieldHoverActionPopover for transactionName and id', () => {
+      const { getByText } = render(
+        <SummaryTitle
+          serviceName="Test Service"
+          transactionName="Test Transaction"
+          formattedName="<mark>Test Transaction</mark>"
+          id="123"
+          formattedId="<mark>123</mark>"
+        />
+      );
 
-  it('renders FieldHoverActionPopover if showActions is true', () => {
-    const { container } = render(
-      <SummaryTitle id="123" formattedId="<mark>123</mark>" showActions={true} />
-    );
+      expect(getByText('Test Transaction')).toBeInTheDocument();
+      expect(getByText('123')).toBeInTheDocument();
+    });
 
-    expect(
-      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
-    ).not.toBeNull();
-  });
+    it('renders TransactionNameLink with transactionName and formattedName', () => {
+      const { getByText, container } = render(
+        <SummaryTitle
+          serviceName="Test Service"
+          transactionName="Test Transaction"
+          formattedName="<mark>Test Transaction</mark>"
+        />
+      );
 
-  it('does not render FieldHoverActionPopover if showActions is false', () => {
-    const { container } = render(
-      <SummaryTitle id="123" formattedId="<mark>123</mark>" showActions={false} />
-    );
+      expect(getByText('Test Transaction')).toBeInTheDocument();
+      expect(container.querySelector('strong')?.innerHTML).toBe('<mark>Test Transaction</mark>');
+    });
 
-    expect(
-      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
-    ).toBeNull();
+    it('renders id with formattedId when provided', () => {
+      const { getByText, container } = render(
+        <SummaryTitle serviceName="Test Service" id="123" formattedId="<mark>123</mark>" />
+      );
+
+      expect(getByText('123')).toBeInTheDocument();
+      expect(container.querySelector('span')?.innerHTML).toBe('<mark>123</mark>');
+    });
+
+    it('renders FieldHoverActionPopover if showActions is undefined', () => {
+      const { container } = render(<SummaryTitle serviceName="Test Service" />);
+
+      expect(
+        container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+      ).not.toBeNull();
+    });
+
+    it('renders FieldHoverActionPopover if showActions is true', () => {
+      const { container } = render(<SummaryTitle serviceName="Test Service" showActions={true} />);
+
+      expect(
+        container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+      ).not.toBeNull();
+    });
+
+    it('does not render FieldHoverActionPopover if showActions is false', () => {
+      const { container } = render(<SummaryTitle serviceName="Test Service" showActions={false} />);
+
+      expect(
+        container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+      ).toBeNull();
+    });
   });
 });
