@@ -99,7 +99,11 @@ export async function getMetricFields({
 
     // Priority: existing description -> ECS description
     const description = field.description || ecsDescription;
-    const source = field.description ? 'custom' : ecsDescription ? 'ecs' : 'custom';
+    const source: MetricField['source'] = field.description
+      ? 'custom'
+      : ecsDescription
+      ? 'ecs'
+      : 'custom';
 
     return {
       ...field,
