@@ -8,6 +8,7 @@
  */
 
 export type {
+  GraphNode,
   AtomicGraphNode,
   HttpGraphNode,
   HttpGraphNodeSchema,
