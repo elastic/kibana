@@ -50,7 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await settings.applyButtonIsDisabled()).to.eql(true);
     });
 
-    it.skip('changing index pattern setting is reflected elsewhere in UI', async () => {
+    it('changing index pattern setting is reflected elsewhere in UI', async () => {
       const settings = uptimeService.settings;
 
       const originalCount = await uptimePage.getSnapshotCount();

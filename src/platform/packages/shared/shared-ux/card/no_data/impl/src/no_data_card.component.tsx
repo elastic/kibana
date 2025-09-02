@@ -67,7 +67,9 @@ export const NoDataCard = ({
     <EuiPageTemplate.EmptyPrompt
       data-test-subj={dataTestSubj}
       css={css`
-        max-width: ${NO_DATA_CARD_MAX_WIDTH}px;
+        && {
+          max-width: ${NO_DATA_CARD_MAX_WIDTH}px;
+        }
       `}
       title={
         <EuiTitle size="m">
