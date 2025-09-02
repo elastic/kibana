@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
+import type { ContentFrameworkSectionProps } from '../../../../content_framework/section';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { useLatencyChart } from '../../hooks/use_latency_chart';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 export interface SimilarSpansProps {
   duration: number;
@@ -32,6 +35,17 @@ export function SimilarSpans({
   transactionType,
   isOtelSpan,
 }: SimilarSpansProps) {
+  const {
+    share: {
+      url: { locators },
+    },
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = getUnifiedDocViewerServices();
+  const discoverLocator = useMemo(() => locators.get(DISCOVER_APP_LOCATOR), [locators]);
   const latencyChart = useLatencyChart({
     spanName,
     serviceName,
@@ -40,7 +54,55 @@ export function SimilarSpans({
     isOtelSpan,
   });
 
-  const esqlQuery = '';
+  const isTransaction = !!transactionType;
+
+  let esqlQuery = null;
+
+  if (isTransaction) {
+    // TODO build queries
+    esqlQuery = '';
+  } else {
+    esqlQuery = '';
+  }
+
+  const discoverUrl = useMemo(() => {
+    if (!discoverLocator) {
+      return undefined;
+    }
+
+    const url = discoverLocator.getRedirectUrl({
+      timeRange: timefilter.getAbsoluteTime(),
+      filters: [],
+      query: {
+        esql: esqlQuery,
+      },
+    });
+
+    return url;
+  }, [discoverLocator, esqlQuery, timefilter]);
+
+  const sectionActions: ContentFrameworkSectionProps['actions'] =
+    esqlQuery && discoverUrl
+      ? [
+          {
+            dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
+            label: i18n.translate(
+              'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.button',
+              {
+                defaultMessage: 'Open in Discover',
+              }
+            ),
+            href: discoverUrl,
+            icon: 'discoverApp',
+            ariaLabel: i18n.translate(
+              'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.label',
+              {
+                defaultMessage: 'Open in Discover link',
+              }
+            ),
+          },
+        ]
+      : [];
 
   return (
     <ContentFrameworkSection
@@ -49,13 +111,13 @@ export function SimilarSpans({
       title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
         defaultMessage: 'Similar spans',
       })}
+      actions={sectionActions}
     >
       <ContentFrameworkChart
         data-test-subj="docViewerSimilarSpansLatencyChart"
         title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans.latency.title', {
           defaultMessage: 'Latency',
         })}
-        esqlQuery={!latencyChart.hasError && esqlQuery ? esqlQuery : undefined}
       >
         <DurationDistributionChart
           data={latencyChart.data?.distributionChartData ?? []}
