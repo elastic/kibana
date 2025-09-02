@@ -80,7 +80,6 @@ tags:
       description: Cases documentation
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
-  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -103,6 +102,14 @@ tags:
   - name: Fleet outputs
   - name: Fleet package policies
   - name: Fleet proxies
+  - name: Fleet remote synced integrations
+    description: |
+      Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
+      * Use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint on the management cluster to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
+      * Use the `/api/fleet/remote_synced_integrations/status` endpoint on the remote cluster to query the synchronization status of the installed integrations.
+    externalDocs:
+      description: Automatic integrations synchronization documentation
+      url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
   - name: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
@@ -18802,6 +18809,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -19494,6 +19503,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -19714,6 +19725,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -20426,6 +20439,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -21115,6 +21130,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -21806,6 +21823,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -22028,6 +22047,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -22810,6 +22831,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -23613,6 +23636,10 @@ paths:
                                         type: string
                                       verification_mode:
                                         type: string
+                                  target_directory:
+                                    type: string
+                                  timeout:
+                                    type: string
                                 required:
                                   - sourceURI
                               features:
@@ -23647,12 +23674,20 @@ paths:
                                         type: number
                                   level:
                                     type: string
+                                  metrics:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      period:
+                                        type: string
                                   to_files:
                                     type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  _runtime_experimental:
+                                    type: string
                                   apm: {}
                                   enabled:
                                     type: boolean
@@ -26405,6 +26440,7 @@ paths:
                             - POLICY_CHANGE
                             - INPUT_ACTION
                             - MIGRATE
+                            - PRIVILEGE_LEVEL_CHANGE
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -42391,9 +42427,10 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Get CCR Remote synced integrations status by outputId
+      summary: Get remote synced integrations status by outputId
       tags:
-        - CCR Remote synced integrations
+        - Fleet remote synced integrations
+      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -42528,9 +42565,10 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Get CCR Remote synced integrations status
+      summary: Get remote synced integrations status
       tags:
-        - CCR Remote synced integrations
+        - Fleet remote synced integrations
+      x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -88072,7 +88110,7 @@ components:
           properties:
             check:
               description: The check request settings.
-              type: objects
+              type: object
               properties:
                 request:
                   description: An optional request to send to the remote host.
@@ -89421,10 +89459,6 @@ components:
       required:
         - message
         - subject
-        - anyOf:
-            - to
-            - cc
-            - bcc
       properties:
         bcc:
           type: array
