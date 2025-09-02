@@ -47,6 +47,8 @@ export const bulkUpsertBatch =
           {
             script: {
               source: /* java */ `
+                ctx._source['@timestamp'] = params.timestamp;
+                ctx._source.event.ingested = params.timestamp;
                 if (ctx._source.labels == null) {
                   ctx._source.labels = new HashMap();
                 }
@@ -77,6 +79,7 @@ export const bulkUpsertBatch =
               params: {
                 source: 'csv',
                 ea_label: u.label,
+                timestamp,
               },
             },
           },

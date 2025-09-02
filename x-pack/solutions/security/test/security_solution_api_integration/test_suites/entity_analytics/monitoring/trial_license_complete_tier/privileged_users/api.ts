@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.status).eql(500);
         expect(res.body.message).to.match(/Maximum user limit of \d+ reached/);
       });
-      it.only('should update a user', async () => {
+      it('should update a user', async () => {
         log.info(`updating a user`);
         const { body: userBefore } = await api.createPrivMonUser({
           body: { user: { name: 'test_user3' } },
@@ -185,9 +185,11 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         const listed = listRes.body as ListPrivMonUsersResponse;
-        listed.forEach(({ user, labels }) => {
-          expect(user?.is_privileged).to.be(true);
-          expect(labels?.sources).to.contain('csv');
+        listed.forEach((user) => {
+          privmonUtils.assertIsPrivileged(user, true);
+          expect(user['@timestamp']).to.be.a('string');
+          expect(user.event.ingested).to.be.a('string');
+          expect(user.labels?.sources).to.contain('csv');
         });
       });
 
@@ -196,6 +198,14 @@ export default ({ getService }: FtrProviderContext) => {
         await api.createPrivMonUser({
           body: { user: { name: 'api_user_1' } },
         });
+
+        const {
+          body: [apiUserBefore],
+        } = await api.listPrivMonUsers({
+          query: { kql: `user.name: api_user_1` },
+        });
+
+        log.info(`User before upload: ${JSON.stringify(apiUserBefore)}`);
 
         log.info(`Uploading multiple users via CSV`);
         const csv = ['api_user_1', 'csv_user_1', 'csv_user_2'].join('\n');
@@ -215,11 +225,13 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         const listed = listRes.body as ListPrivMonUsersResponse;
-        const apiuser = listed.find((u) => u.user?.name === 'api_user_1');
-        expect(apiuser).to.not.be(undefined);
-        expect(apiuser?.user?.is_privileged).to.be(true);
-        expect(apiuser?.labels?.sources).to.contain('api');
-        expect(apiuser?.labels?.sources).to.contain('csv');
+        const apiUserAfter = listed.find((u) => u.user?.name === 'api_user_1');
+        log.info(`User after upload: ${JSON.stringify(apiUserAfter)}`);
+        expect(apiUserAfter).to.not.be(undefined);
+        expect(apiUserAfter?.user?.is_privileged).to.be(true);
+        expect(apiUserAfter?.labels?.sources).to.contain('api');
+        expect(apiUserAfter?.labels?.sources).to.contain('csv');
+        privmonUtils.expectTimestampsHaveBeenUpdated(apiUserBefore, apiUserAfter);
       });
 
       it('should soft delete users when uploading a second csv which omits some users', async () => {
