@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 
-import { useRovingIndex } from '../../utils/use_roving_index';
+import { useRovingIndex } from '../../hooks/use_roving_index';
 
 export interface SideNavPanelProps {
   children: ReactNode;
