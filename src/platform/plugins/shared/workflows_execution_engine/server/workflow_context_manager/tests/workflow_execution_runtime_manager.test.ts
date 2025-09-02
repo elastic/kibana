@@ -9,9 +9,9 @@
 
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 
+import { graphlib } from '@dagrejs/dagre';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { graphlib } from '@dagrejs/dagre';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 

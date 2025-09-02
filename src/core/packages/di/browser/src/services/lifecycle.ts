@@ -12,28 +12,31 @@ import type {
   CoreStart as CoreStartContext,
 } from '@kbn/core-lifecycle-browser';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { toServiceIdentifier } from '@kbn/core-di-internal';
+import {
+  type ServiceIdentifierFactory,
+  InternalCoreSetup,
+  InternalCoreStart,
+  InternalPluginInitializer,
+} from '@kbn/core-di-internal';
 
 /**
  * The service identifier of {@link PluginInitializerContext}.
  * @param key The service key in the context.
  * @public
  */
-export const PluginInitializer = toServiceIdentifier<PluginInitializerContext>(
-  'plugin',
-  'initializer'
-);
+export const PluginInitializer =
+  InternalPluginInitializer as ServiceIdentifierFactory<PluginInitializerContext>;
 
 /**
  * The service identifier of {@link CoreSetupContext}.
  * @param key The service key in the context.
  * @public
  */
-export const CoreSetup = toServiceIdentifier<CoreSetupContext>('core', 'setup');
+export const CoreSetup = InternalCoreSetup as ServiceIdentifierFactory<CoreSetupContext>;
 
 /**
  * The service identifier of {@link CoreStartContext}.
  * @param key The service key in the context.
  * @public
  */
-export const CoreStart = toServiceIdentifier<CoreStartContext>('core', 'start');
+export const CoreStart = InternalCoreStart as ServiceIdentifierFactory<CoreStartContext>;
