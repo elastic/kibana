@@ -23,6 +23,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.0.6 [kibana-9.0.6-release-notes]
 
+:::{important}
+The 9.0.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Features and enhancements [kibana-9.0.6-features-enhancements]
 
 **Dashboards and Visualizations**:
