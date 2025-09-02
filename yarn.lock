@@ -9799,7 +9799,7 @@
     progress "^2.0.3"
     proxy-agent "^6.5.0"
     semver "^7.7.2"
-    tar-fs "^3.0.8"
+    tar-fs "^3.1.0"
     yargs "^17.7.2"
 
 "@readme/json-schema-ref-parser@^1.2.0":
@@ -17327,11 +17327,6 @@ devtools-protocol@0.0.1475386:
   version "0.0.1475386"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1475386.tgz#5378401a2c5698ab68c3482c9b7816ff62ec652b"
   integrity sha512-RQ809ykTfJ+dgj9bftdeL2vRVxASAuGU+I9LEx9Ij5TXU5HrgAQVmzi72VA+mkzscE12uzlRv5/tWWv9R9J1SA==
-
-devtools-protocol@0.0.927104:
-  version "0.0.927104"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.927104.tgz#3bba0fca644bcdce1bcebb10ae392ab13428a7a0"
-  integrity sha512-5jfffjSuTOv0Lz53wTNNTcCUV8rv7d82AhYcapj28bC2B5tDxEZzVb7k51cNxZP2KHw24QE+sW7ZuSeD9NfMpA==
 
 dezalgo@^1.0.0, dezalgo@^1.0.4:
   version "1.0.4"
@@ -26699,7 +26694,7 @@ puppeteer-core@24.17.0, puppeteer-core@^24.10.0:
     debug "^4.4.1"
     devtools-protocol "0.0.1475386"
     typed-query-selector "^2.12.0"
-    ws "^8.18.2"
+    ws "^8.18.3"
 
 puppeteer@24.17.0:
   version "24.17.0"
@@ -30122,10 +30117,21 @@ tar-fs@^2.0.0:
     pump "^3.0.0"
     tar-stream "^2.1.4"
 
-tar-fs@^3.0.4, tar-fs@^3.0.6, tar-fs@^3.0.8:
+tar-fs@^3.0.4, tar-fs@^3.0.6:
   version "3.0.9"
   resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-3.0.9.tgz#d570793c6370d7078926c41fa422891566a0b617"
   integrity sha512-XF4w9Xp+ZQgifKakjZYmFdkLoSWd34VGKcsTCwlNWM7QG3ZbaxnTsaBwnjFZqHRf/rROxaR8rXnbtwdvaDI+lA==
+  dependencies:
+    pump "^3.0.0"
+    tar-stream "^3.1.5"
+  optionalDependencies:
+    bare-fs "^4.0.1"
+    bare-path "^3.0.0"
+
+tar-fs@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-3.1.0.tgz#4675e2254d81410e609d91581a762608de999d25"
+  integrity sha512-5Mty5y/sOF1YWj1J6GiBodjlDc05CUR8PKXrsnFAiSG0xA+GHeWLovaZPYUDXkH/1iKRf2+M5+OrRgzC7O9b7w==
   dependencies:
     pump "^3.0.0"
     tar-stream "^3.1.5"
@@ -32569,6 +32575,11 @@ ws@^8.18.0, ws@^8.18.2, ws@^8.2.3, ws@^8.9.0:
   version "8.18.2"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.2.tgz#42738b2be57ced85f46154320aabb51ab003705a"
   integrity sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==
+
+ws@^8.18.3:
+  version "8.18.3"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.3.tgz#b56b88abffde62791c639170400c93dcb0c95472"
+  integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==
 
 xdg-basedir@^4.0.0:
   version "4.0.0"
