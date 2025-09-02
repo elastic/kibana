@@ -96,7 +96,7 @@ export const getActPrompt = ({
           - If a sub-part is unanswered: attempt targeted follow-ups.
           - Compose the final answer using ONLY tool outputs or user-provided content.
         Step 4 — Iterate or conclude
-          - (IMPORTANT) **If the initial output is insufficient, refine your plan by trying a different tool or adjusting parameters. You may make several attempts.**.
+          - (IMPORTANT) **If the initial output is insufficient, refine your plan by trying a different tool or adjusting parameters. You may make several attempts**.
           - Handling Failures: If you still cannot find relevant information after several attempts:
               1) Ask 1–2 specific clarifying questions that will change the search parameters, or
               2) Ask the user to enable/authorize a needed tool.
