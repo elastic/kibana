@@ -100,7 +100,6 @@ export function SpanOverview({
               <EuiSpacer size="m" />
               <About
                 hit={hit}
-                displayType="span" // TODO I think it should be the section itself who decides the "displayType" as it has access to the whole hit
                 dataView={dataView}
                 filter={filter}
                 onAddColumn={onAddColumn}

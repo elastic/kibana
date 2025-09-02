@@ -23,14 +23,9 @@ import type { TraceIndexes } from '@kbn/discover-utils/src';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
-import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
-import { transactionFields, allTransactionFields } from './resources/fields';
-import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
-import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 import { RootTransactionProvider } from './hooks/use_root_transaction';
-import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { Trace } from '../components/trace';
@@ -41,6 +36,7 @@ import {
 } from '../../../doc_viewer_source/get_height';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { SpanLinks } from '../components/span_links';
+import { About } from '../components/about';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -56,9 +52,7 @@ export function TransactionOverview({
   onRemoveColumn,
   indexes,
   showWaterfall = true,
-  showActions = true,
   dataView,
-  columnsMeta,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: TransactionOverviewProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -70,16 +64,9 @@ export function TransactionOverview({
     }),
     [dataView, fieldFormats, hit]
   );
-  const { dataViewFields } = useDataViewFields({
-    fields: allTransactionFields,
-    dataView,
-    columnsMeta,
-  });
+
   const transactionDuration = flattenedDoc[TRANSACTION_DURATION_FIELD];
-  const fieldConfigurations = useMemo(
-    () => getTransactionFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
-    [formattedDoc, flattenedDoc]
-  );
+
   const traceId = flattenedDoc[TRACE_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
@@ -111,25 +98,13 @@ export function TransactionOverview({
           >
             <EuiFlexItem>
               <EuiSpacer size="m" />
-              <TransactionSummaryTitle
-                serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
-                transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
-                formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-                id={transactionId}
-                formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
-                showActions={showActions}
+              <About
+                hit={hit}
+                dataView={dataView}
+                filter={filter}
+                onAddColumn={onAddColumn}
+                onRemoveColumn={onRemoveColumn}
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {transactionFields.map((fieldId) => (
-                <TransactionSummaryField
-                  key={fieldId}
-                  fieldId={fieldId}
-                  fieldMapping={dataViewFields[fieldId]}
-                  fieldConfiguration={fieldConfigurations[fieldId]}
-                  showActions={showActions}
-                />
-              ))}
             </EuiFlexItem>
             {transactionDuration !== undefined && (
               <EuiFlexItem>
