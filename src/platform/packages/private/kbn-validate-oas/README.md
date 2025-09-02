@@ -194,8 +194,3 @@ const result = await runEnhancedValidation({
   output: { format: 'json' }
 });
 ```
-
-## Documentation
-
-- **[enhanced_validation.md](./enhanced_validation.md)**: Complete API reference and usage examples
-- **[enhancement_summary.md](./enhancement_summary.md)**: Implementation details and architecture overview
