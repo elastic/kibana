@@ -329,36 +329,64 @@ describe('on_failure graph', () => {
       },
       steps: [],
     } as Partial<WorkflowYaml>;
+    describe('fallback handling', () => {
+      beforeEach(() => {
+        workflow.steps = [
+          {
+            name: 'outer_foreach',
+            type: 'foreach',
+            foreach: '["outer1", "outer2"]',
+            steps: [
+              {
+                name: 'testRetryConnectorStep',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {
+                  message: 'Hello from retry step',
+                },
+              } as ConnectorStep,
+            ],
+          } as ForEachStep,
+        ];
+        workflow.settings!['on-failure']!.fallback = [
+          {
+            name: 'foreachFallbackAction',
+            type: 'console',
+            with: {
+              message: 'fallback log',
+            },
+          } as ConnectorStep,
+        ];
+      });
 
-    it('should should correctly work with foreach when fallback is defined', () => {
-      workflow.steps = [
-        {
-          name: 'outer_foreach',
-          type: 'foreach',
-          foreach: '["outer1", "outer2"]',
-          steps: [
-            {
-              name: 'testRetryConnectorStep',
-              type: 'slack',
-              connectorId: 'slack',
-              with: {
-                message: 'Hello from retry step',
-              },
-            } as ConnectorStep,
-          ],
-        } as ForEachStep,
-      ];
-      workflow.settings!['on-failure']!.fallback = [
-        {
-          name: 'foreachFallbackAction',
-          type: 'console',
-          with: {
-            message: 'fallback log',
-          },
-        } as ConnectorStep,
-      ];
-      const executionGraph = convertToWorkflowGraph(workflow as any);
-      const topsort = graphlib.alg.topsort(executionGraph);
+      it('should should correctly work with foreach when fallback is defined', () => {
+        const executionGraph = convertToWorkflowGraph(workflow as any);
+        const topsort = graphlib.alg.topsort(executionGraph);
+        expect(topsort).toEqual([
+          'outer_foreach',
+          'enterContinue_testRetryConnectorStep',
+          'enterTryBlock_testRetryConnectorStep',
+          'enterNormalPath_testRetryConnectorStep',
+          'enterRetry_testRetryConnectorStep',
+          'testRetryConnectorStep',
+          'exitRetry_testRetryConnectorStep',
+          'exitNormalPath_testRetryConnectorStep',
+          'enterFallbackPath_testRetryConnectorStep',
+          expect.stringContaining('foreachFallbackAction'),
+          'exitFallbackPath_testRetryConnectorStep',
+          'exitTryBlock_testRetryConnectorStep',
+          'exitContinue_testRetryConnectorStep',
+          'exitForeach(outer_foreach)',
+        ]);
+      });
+
+      it('should prepend workflow-level-on-failure for fallbackAction', () => {
+        const executionGraph = convertToWorkflowGraph(workflow as any);
+        const topsort = graphlib.alg.topsort(executionGraph);
+        expect(topsort).toEqual(
+          expect.arrayContaining(['workflow-level-on-failure_foreachFallbackAction'])
+        );
+      });
     });
 
     it('should not set workflow level on-failure for steps inside fallback', () => {
