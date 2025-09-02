@@ -19,19 +19,14 @@ export const getChatModel$ = ({
   inference,
   span,
 }: {
-  connectorId?: string;
+  connectorId: string;
   request: KibanaRequest;
   inference: InferenceServerStart;
   span?: Span;
 }): Observable<InferenceChatModel> => {
   return defer(async () => {
-    let selectedConnectorId = connectorId;
-    if (!selectedConnectorId) {
-      const defaultConnector = await inference.getDefaultConnector(request);
-      selectedConnectorId = defaultConnector.connectorId;
-    }
-    span?.setAttribute('elastic.connector.id', selectedConnectorId);
-    return selectedConnectorId;
+    span?.setAttribute('elastic.connector.id', connectorId);
+    return connectorId;
   }).pipe(
     switchMap((selectedConnectorId) => {
       return inference.getChatModel({
