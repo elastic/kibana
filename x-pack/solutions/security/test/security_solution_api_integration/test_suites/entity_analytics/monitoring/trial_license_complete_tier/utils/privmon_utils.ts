@@ -33,6 +33,7 @@ export const PrivMonUtils = (
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const retry = getService('retry');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
@@ -134,19 +135,6 @@ export const PrivMonUtils = (
     });
   };
 
-  const retry = async <T>(fn: () => Promise<T>, retries: number = 5, delay: number = 1000) => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        return await fn();
-      } catch (error) {
-        if (i === retries - 1) {
-          throw error;
-        }
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-  };
-
   const waitForSyncTaskRun = async (): Promise<void> => {
     const initialTime = new Date();
 
@@ -194,6 +182,32 @@ export const PrivMonUtils = (
       },
     });
 
+  const _waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
+    let lastSeenLength = -1;
+
+    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
+      const res = await api.listPrivMonUsers({ query: {} });
+      const currentLength = res.body.length;
+
+      if (currentLength !== lastSeenLength) {
+        log.info(`PrivMon users sync check: found ${currentLength} users`);
+        lastSeenLength = currentLength;
+      }
+
+      return currentLength >= expectedLength;
+    });
+  };
+
+  const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
+    log.info(`Scheduling engine and waiting for user count: ${expectedCount}`);
+    await scheduleMonitoringEngineNow({ ignoreConflict: true });
+    await waitForSyncTaskRun();
+    await _waitForPrivMonUsersToBeSynced(expectedCount);
+    const res = await api.listPrivMonUsers({ query: {} });
+
+    return res.body;
+  };
+
   return {
     assertIsPrivileged,
     bulkUploadUsersCsv,
@@ -202,9 +216,9 @@ export const PrivMonUtils = (
     findUser,
     initPrivMonEngine,
     initPrivMonEngineWithoutAuth,
-    retry,
     scheduleMonitoringEngineNow,
     setPrivmonTaskStatus,
     waitForSyncTaskRun,
+    scheduleEngineAndWaitForUserCount,
   };
 };

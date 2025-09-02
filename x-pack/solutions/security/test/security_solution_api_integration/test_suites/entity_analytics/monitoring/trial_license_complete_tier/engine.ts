@@ -18,35 +18,9 @@ export default ({ getService }: FtrProviderContext) => {
   const privmonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const es = getService('es');
-  const retry = getService('retry');
   const spaces = getService('spaces');
   const customSpace = 'privmontestspace';
   const supertest = getService('supertest');
-
-  const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
-    await privmonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-    await privmonUtils.waitForSyncTaskRun();
-    await waitForPrivMonUsersToBeSynced(expectedCount);
-    const res = await api.listPrivMonUsers({ query: {} });
-
-    return res.body;
-  };
-
-  const waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
-    let lastSeenLength = -1;
-
-    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
-      const res = await api.listPrivMonUsers({ query: {} });
-      const currentLength = res.body.length;
-
-      if (currentLength !== lastSeenLength) {
-        log.info(`PrivMon users sync check: found ${currentLength} users`);
-        lastSeenLength = currentLength;
-      }
-
-      return currentLength >= expectedLength;
-    });
-  };
 
   async function getPrivMonSoStatus(space: string = 'default') {
     return kibanaServer.savedObjects.find({
@@ -387,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexSyncUtils.addUsersToIndex([...uniqueUsernames, ...repeatedUsers]);
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const users = await scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
+        const users = await privmonUtils.scheduleEngineAndWaitForUserCount(uniqueUsernames.length);
 
         // Check if the users are indexed
         const userNames = users.map((u: any) => u.user.name);
@@ -401,7 +375,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const usersBefore = await scheduleEngineAndWaitForUserCount(2);
+        const usersBefore = await privmonUtils.scheduleEngineAndWaitForUserCount(2);
 
         const user1Before = privmonUtils.findUser(usersBefore, 'user1');
         log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
@@ -409,7 +383,7 @@ export default ({ getService }: FtrProviderContext) => {
         // add a new user so we know when the task completes
         await indexSyncUtils.addUsersToIndex(['user3']);
 
-        const usersAfter = await scheduleEngineAndWaitForUserCount(3);
+        const usersAfter = await privmonUtils.scheduleEngineAndWaitForUserCount(3);
         const user1After = privmonUtils.findUser(usersAfter, 'user1');
         log.info(`User 1 after: ${JSON.stringify(user1After)}`);
         privmonUtils.expectTimestampsHaveBeenUpdated(user1Before, user1After);
@@ -429,7 +403,7 @@ export default ({ getService }: FtrProviderContext) => {
         await indexSyncUtils.addUsersToIndex([user1.name]);
         await indexSyncUtils.createEntitySourceForIndex();
 
-        const usersAfterSync = await scheduleEngineAndWaitForUserCount(1);
+        const usersAfterSync = await privmonUtils.scheduleEngineAndWaitForUserCount(1);
         const user1After = privmonUtils.findUser(usersAfterSync, user1.name);
         log.info(`User 1 after: ${JSON.stringify(user1After)}`);
 
