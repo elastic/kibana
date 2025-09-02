@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export type TwoWayDiffOutcome<T> = {
-  [Field in keyof T]: TwoWayDiffField;
+export type RuleDiffOutcome<T> = {
+  [Field in keyof T]: RuleDiffField;
 };
 
-export interface TwoWayDiffField {
+export interface RuleDiffField {
   is_equal: boolean;
 }
 
