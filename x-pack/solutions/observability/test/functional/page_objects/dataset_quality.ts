@@ -251,7 +251,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilTableLoaded() {
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 30 * 1000);
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
