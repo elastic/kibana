@@ -36,6 +36,7 @@ jest.mock('../saved_objects', () => {
       update: jest.fn(),
       find: mockFind,
       findAll: jest.fn(),
+      bulkUpsert: jest.fn(),
     })),
     PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
       init: mockEngineDescriptorInit,
@@ -81,10 +82,6 @@ describe('createInitialisationSourcesService', () => {
     await initSourcesService.upsertSources(monitoringDescriptorClient);
     expect(monitoringDescriptorClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(monitoringDescriptorClient.update).not.toHaveBeenCalled();
-    expect(dataClient.log).toHaveBeenCalledWith(
-      'debug',
-      expect.stringContaining('Created all 3 default sources')
-    );
   });
 
   it('should update sources when they already exist', async () => {
@@ -94,20 +91,14 @@ describe('createInitialisationSourcesService', () => {
       { id: '3', name: '.entity_analytics.monitoring.sources.ad-default' },
     ];
     (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue(existingSources);
-
     await initSourcesService.upsertSources(monitoringDescriptorClient);
-
-    expect(monitoringDescriptorClient.update).toHaveBeenCalledTimes(3);
-    expect(monitoringDescriptorClient.create).not.toHaveBeenCalled();
-    expect(dataClient.log).toHaveBeenCalledWith('debug', expect.stringContaining('Updated source'));
-    expect(dataClient.log).toHaveBeenCalledWith('debug', expect.stringContaining('Updated source'));
+    expect(monitoringDescriptorClient.bulkUpsert).toHaveBeenCalledTimes(1);
   });
 
   it('should create missing sources and update existing ones', async () => {
     const existingSources = [{ id: '3', name: '.entity_analytics.monitoring.sources.ad-default' }];
     (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue(existingSources);
     await initSourcesService.upsertSources(monitoringDescriptorClient);
-    expect(monitoringDescriptorClient.update).toHaveBeenCalledTimes(1);
-    expect(monitoringDescriptorClient.create).toHaveBeenCalledTimes(2);
+    expect(monitoringDescriptorClient.bulkUpsert).toHaveBeenCalledTimes(1);
   });
 });
