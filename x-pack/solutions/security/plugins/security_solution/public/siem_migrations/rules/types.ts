@@ -7,6 +7,7 @@
 
 import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/model/rule_migration.gen';
+import type { FilterOptionsBase, MigrationSettingsBase } from '../common/types';
 
 export interface RuleMigrationStats extends RuleMigrationTaskStats {
   status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
@@ -23,14 +24,13 @@ export enum StatusFilter {
   PARTIALLY_TRANSLATED = 'partially_translated',
   UNTRANSLATABLE = 'untranslatable',
   FAILED = 'failed',
+  INDEX_PATTERN_MISSING = 'index_pattern_missing',
 }
 
-export interface FilterOptions {
-  status?: StatusFilter;
+export interface FilterOptions extends FilterOptionsBase {
   author?: AuthorFilter;
 }
 
-export interface RuleMigrationSettings {
-  connectorId: string;
+export interface RuleMigrationSettings extends MigrationSettingsBase {
   skipPrebuiltRulesMatching: boolean;
 }
