@@ -19,7 +19,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
@@ -86,6 +85,11 @@ import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security
 import type { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetDashboardMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
+  GetDashboardMigrationResourcesRequestQueryInput,
+  GetDashboardMigrationResourcesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type { GetDashboardMigrationResourcesMissingRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { GetDashboardMigrationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
 import type { GetEndpointMetadataListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/metadata/get_metadata.gen';
@@ -161,11 +165,16 @@ import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-sol
 import type { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type {
+  StartDashboardsMigrationRequestParamsInput,
+  StartDashboardsMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
 import type {
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { StopDashboardsMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import type { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
@@ -196,9 +205,15 @@ import type {
   UpdateWorkflowInsightRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
 import type {
+  UpsertDashboardMigrationResourcesRequestParamsInput,
+  UpsertDashboardMigrationResourcesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
@@ -712,8 +727,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object);
     },
     /**
-     * Download a file from an endpoint.
-     */
+      * Download a file from an endpoint. 
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
@@ -727,8 +746,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get information for the specified file using the file ID.
-     */
+      * Get information for the specified file using the file ID.
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+      */
     endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
@@ -1008,6 +1031,49 @@ finalize it.
         .get(
           getRouteUrlForSpace(
             replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieves resources for an existing SIEM dashboards migration
+     */
+    getDashboardMigrationResources(
+      props: GetDashboardMigrationResourcesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .get(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/resources',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Identifies missing resources from all the dashboards of an existing SIEM dashboard migration
+     */
+    getDashboardMigrationResourcesMissing(
+      props: GetDashboardMigrationResourcesMissingProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .get(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/resources/missing',
+              props.params
+            ),
             kibanaSpace
           )
         )
@@ -1806,6 +1872,15 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    scheduleMonitoringEngine(kibanaSpace: string = 'default') {
+      return supertest
+        .post(
+          getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/schedule_now', kibanaSpace)
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
      */
@@ -1876,6 +1951,28 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Starts a SIEM dashboards migration using the migration id provided
+     */
+    startDashboardsMigration(
+      props: StartDashboardsMigrationProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/start',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
@@ -1903,6 +2000,21 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    /**
+     * Stops a running SIEM dashboards migration using the migration id provided
+     */
+    stopDashboardsMigration(props: StopDashboardsMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(
+          getRouteUrlForSpace(
+            replaceParams('/internal/siem_migrations/dashboards/{migration_id}/stop', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     stopEntityEngine(props: StopEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
@@ -2078,6 +2190,28 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+     * Creates or updates resources for an existing SIEM dashboards migration
+     */
+    upsertDashboardMigrationResources(
+      props: UpsertDashboardMigrationResourcesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(
+          getRouteUrlForSpace(
+            replaceParams(
+              '/internal/siem_migrations/dashboards/{migration_id}/resources',
+              props.params
+            ),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Creates or updates resources for an existing SIEM rules migration
      */
     upsertRuleMigrationResources(
@@ -2246,6 +2380,13 @@ export interface GetAssetCriticalityRecordProps {
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
 }
+export interface GetDashboardMigrationResourcesProps {
+  query: GetDashboardMigrationResourcesRequestQueryInput;
+  params: GetDashboardMigrationResourcesRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesMissingProps {
+  params: GetDashboardMigrationResourcesMissingRequestParamsInput;
+}
 export interface GetDashboardMigrationStatsProps {
   params: GetDashboardMigrationStatsRequestParamsInput;
 }
@@ -2399,12 +2540,19 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface StartDashboardsMigrationProps {
+  params: StartDashboardsMigrationRequestParamsInput;
+  body: StartDashboardsMigrationRequestBodyInput;
+}
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;
   body: StartRuleMigrationRequestBodyInput;
+}
+export interface StopDashboardsMigrationProps {
+  params: StopDashboardsMigrationRequestParamsInput;
 }
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
@@ -2444,6 +2592,10 @@ export interface UpdateRuleMigrationRulesProps {
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;
   body: UpdateWorkflowInsightRequestBodyInput;
+}
+export interface UpsertDashboardMigrationResourcesProps {
+  params: UpsertDashboardMigrationResourcesRequestParamsInput;
+  body: UpsertDashboardMigrationResourcesRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

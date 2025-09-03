@@ -58541,9 +58541,16 @@
                                           "type": "string"
                                         },
                                         "type": "array"
+                                      },
+                                      "tags": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
                                       }
                                     },
                                     "required": [
+                                      "tags",
                                       "members"
                                     ],
                                     "type": "object"
@@ -59006,9 +59013,16 @@
                           "type": "string"
                         },
                         "type": "array"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
                       }
                     },
                     "required": [
+                      "tags",
                       "members"
                     ],
                     "type": "object"

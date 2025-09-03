@@ -913,9 +913,7 @@
         "label": "createApmErrorsContextService",
         "description": [],
         "signature": [
-          "({ apmSourcesAccess, }: ",
-          "ApmErrorsContextServiceDeps",
-          ") => Promise<",
+          "({ apmSourcesAccess, }: ApmErrorsContextServiceDeps) => Promise<",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -3437,7 +3435,7 @@
             "label": "getErrorsIndexPattern",
             "description": [],
             "signature": [
-              "() => string"
+              "() => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
             "deprecated": false,
@@ -5299,6 +5297,34 @@
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanDocumentOverview.links.trace_id",
+            "type": "string",
+            "tags": [],
+            "label": "'links.trace_id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanDocumentOverview.links.span_id",
+            "type": "string",
+            "tags": [],
+            "label": "'links.span_id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5387,6 +5413,34 @@
             "tags": [],
             "label": "'span.destination.service.resource'",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.links.span.id",
+            "type": "string",
+            "tags": [],
+            "label": "'span.links.span.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.links.trace.id",
+            "type": "string",
+            "tags": [],
+            "label": "'span.links.trace.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5491,7 +5545,7 @@
             "label": "getAllTracesIndexPattern",
             "description": [],
             "signature": [
-              "() => string"
+              "() => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
             "deprecated": false,
@@ -6887,6 +6941,36 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_LINKS_SPAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_LINKS_SPAN_ID",
+        "description": [],
+        "signature": [
+          "\"links.span_id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_LINKS_TRACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_LINKS_TRACE_ID",
+        "description": [],
+        "signature": [
+          "\"links.trace_id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE",
         "type": "string",
         "tags": [],
@@ -7367,6 +7451,36 @@
         "description": [],
         "signature": [
           "\"span.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_LINKS_SPAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_LINKS_SPAN_ID",
+        "description": [],
+        "signature": [
+          "\"span.links.span.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_LINKS_TRACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_LINKS_TRACE_ID",
+        "description": [],
+        "signature": [
+          "\"span.links.trace.id\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,

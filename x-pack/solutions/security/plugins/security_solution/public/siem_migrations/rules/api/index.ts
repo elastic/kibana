@@ -8,7 +8,7 @@
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { UpdateRuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../common/siem_migrations/rules/types';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 
