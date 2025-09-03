@@ -31,6 +31,8 @@ export type {
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  ExecutionStatusUnion,
+  ExecutionTypeUnion,
 } from './v1';
 
 // exported full to use enum as values
@@ -39,6 +41,8 @@ export {
   CreateWorkflowCommandSchema,
   ExecutionStatus,
   ExecutionType,
+  ExecutionStatusValues,
+  ExecutionTypeValues,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';

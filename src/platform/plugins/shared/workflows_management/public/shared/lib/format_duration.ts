@@ -12,13 +12,13 @@
  * @param duration - The duration in milliseconds.
  * @returns The formatted duration. e.g. "1m 30s", "1h 30m", "1d 3h", "1w 3d", etc.
  */
-export function formatDuration(duration: number): string {
+export function formatDuration(durationMs: number): string {
   let weeks = 0;
   let days = 0;
   let hours = 0;
   let minutes = 0;
   let seconds = 0;
-  let milliseconds = duration;
+  let milliseconds = durationMs;
 
   if (milliseconds >= 604800000) {
     weeks = Math.floor(milliseconds / 604800000);
@@ -46,7 +46,7 @@ export function formatDuration(duration: number): string {
   }
 
   if (milliseconds > 0) {
-    milliseconds = Math.floor(milliseconds);
+    milliseconds = milliseconds;
   }
 
   let result = '';

@@ -75,6 +75,7 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
       group: 'executionType' as const,
     },
     {
+      key: ExecutionType.TEST,
       label: i18n.translate('workflows.workflowExecutionList.filterIconButton.testLabel', {
         defaultMessage: 'test',
       }),
@@ -82,6 +83,7 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
       group: 'executionType' as const,
     },
     {
+      key: ExecutionType.PRODUCTION,
       label: i18n.translate('workflows.workflowExecutionList.filterIconButton.productionLabel', {
         defaultMessage: 'production',
       }),
@@ -98,12 +100,10 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
     setItems(newOptions);
     onFiltersChange({
       statuses: newOptions
-        .filter((item) => item.checked === 'on' && item.group === 'status' && !item.isGroupLabel)
+        .filter((item) => item.checked === 'on' && item.key && item.group === 'status')
         .map((item) => item.key as ExecutionStatus),
       executionTypes: newOptions
-        .filter(
-          (item) => item.checked === 'on' && item.group === 'executionType' && !item.isGroupLabel
-        )
+        .filter((item) => item.checked === 'on' && item.key && item.group === 'executionType')
         .map((item) => item.key as ExecutionType),
     });
   };
@@ -192,7 +192,7 @@ export function ExecutionListFilters({ filters, onFiltersChange }: ExecutionList
 }
 
 const componentStyles = {
-  popover: ({ euiTheme }: UseEuiTheme) => css`
+  popover: css`
     & .euiFilterButton__wrapper {
       min-inline-size: 64px;
 
@@ -205,17 +205,16 @@ const componentStyles = {
   popoverTitle: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${EQUAL_HEIGHT_OFFSET}px ${euiTheme.size.s};
   `,
-  filterGroup: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: 'transparent',
-      '&::after': {
-        border: 'none',
-      },
-      '&::before': {
-        border: 'none',
-      },
-    }),
-  filterButtonStyle: ({ euiTheme }: UseEuiTheme) => css`
+  filterGroup: css({
+    backgroundColor: 'transparent',
+    '&::after': {
+      border: 'none',
+    },
+    '&::before': {
+      border: 'none',
+    },
+  }),
+  filterButtonStyle: css`
     padding: 0;
 
     &,

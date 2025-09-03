@@ -39,6 +39,7 @@ import {
   getNestedStepsFromGraph,
   type StepListTreeItem,
 } from '@kbn/workflows/graph';
+import { i18n } from '@kbn/i18n';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getStepIconType } from '../../../shared/ui/get_step_icon_type';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
@@ -158,14 +159,15 @@ function convertTreeToEuiTreeViewItems(
                 onClickFn
               )
             : undefined,
-        callback: () => {
-          if (item.children && item.children.length > 0) {
-            return;
-          }
-          onClickFn(stepExecution.id);
-          // string is expected by EuiTreeView for some reason
-          return stepExecution.id;
-        },
+        callback:
+          // for nodes with children, we don't want other onClick behavior besides expanding/collapsing
+          item.children && item.children.length > 0
+            ? undefined
+            : () => {
+                onClickFn(stepExecution.id);
+                // string is expected by EuiTreeView for some reason
+                return stepExecution.id;
+              },
       }));
     })
     .flat()
@@ -263,7 +265,17 @@ export const WorkflowStepExecutionList = ({
     content = (
       <>
         <div css={styles.treeViewContainer}>
-          <EuiTreeView items={items} showExpansionArrows expandByDefault />
+          <EuiTreeView
+            showExpansionArrows
+            expandByDefault
+            items={items}
+            aria-label={i18n.translate(
+              'workflows.workflowStepExecutionList.workflowStepExecutionTreeAriaLabel',
+              {
+                defaultMessage: 'Workflow step execution tree',
+              }
+            )}
+          />
         </div>
         <EuiButton onClick={onClose} css={styles.doneButton}>
           <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />

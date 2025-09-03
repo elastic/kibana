@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { type Type, schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { ExecutionStatus, ExecutionType, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   CreateWorkflowCommandSchema,
+  ExecutionStatusValues,
+  ExecutionTypeValues,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from '@kbn/workflows';
@@ -22,7 +24,6 @@ import type {
 } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../common/lib/errors';
-import { parseStatuses } from './lib/parse_statuses';
 
 export function defineRoutes(
   router: IRouter,
@@ -529,14 +530,42 @@ export function defineRoutes(
         query: schema.object({
           workflowId: schema.string(),
           statuses: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-              defaultValue: [],
-            })
+            schema.oneOf(
+              [
+                schema.oneOf(
+                  ExecutionStatusValues.map((type) => schema.literal(type)) as [
+                    Type<ExecutionStatus>
+                  ]
+                ),
+                schema.arrayOf(
+                  schema.oneOf(
+                    ExecutionStatusValues.map((type) => schema.literal(type)) as [
+                      Type<ExecutionStatus>
+                    ]
+                  )
+                ),
+              ],
+              {
+                defaultValue: [],
+              }
+            )
           ),
           executionTypes: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-              defaultValue: [],
-            })
+            schema.oneOf(
+              [
+                schema.oneOf(
+                  ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
+                ),
+                schema.arrayOf(
+                  schema.oneOf(
+                    ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
+                  )
+                ),
+              ],
+              {
+                defaultValue: [],
+              }
+            )
           ),
         }),
       },
@@ -546,7 +575,10 @@ export function defineRoutes(
         const spaceId = spaces.getSpaceId(request);
         const params: SearchWorkflowExecutionsParams = {
           workflowId: request.query.workflowId,
-          statuses: request.query.statuses ? parseStatuses(request.query.statuses) : undefined,
+          statuses:
+            request.query.statuses && typeof request.query.statuses === 'string'
+              ? [request.query.statuses]
+              : request.query.statuses,
           // Execution type filter is not supported yet
           // executionTypes: parseExecutionTypes(request.query.executionTypes),
         };

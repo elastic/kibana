@@ -24,11 +24,15 @@ export enum ExecutionStatus {
   CANCELLED = 'cancelled',
   SKIPPED = 'skipped',
 }
+export type ExecutionStatusUnion = `${ExecutionStatus}`;
+export const ExecutionStatusValues = Object.values(ExecutionStatus);
 
 export enum ExecutionType {
   TEST = 'test',
   PRODUCTION = 'production',
 }
+export type ExecutionTypeUnion = `${ExecutionType}`;
+export const ExecutionTypeValues = Object.values(ExecutionType);
 
 export interface EsWorkflowExecution {
   spaceId: string;
