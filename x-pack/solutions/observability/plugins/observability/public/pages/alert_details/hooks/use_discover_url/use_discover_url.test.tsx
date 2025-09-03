@@ -7,13 +7,13 @@
 
 import { renderHook } from '@testing-library/react';
 import moment from 'moment';
-import { useDiscoverUrl } from './use_discover_url';
-import { useKibana } from '../../../utils/kibana_react';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { useDiscoverUrl } from '.';
+import { useKibana } from '../../../../utils/kibana_react';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID, ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
-import type { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../../typings/alerts';
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../../../../utils/kibana_react', () => ({
   useKibana: jest.fn(),
 }));
 
@@ -86,6 +86,43 @@ describe('useDiscoverUrl', () => {
       ],
     });
     expect(result.current.discoverUrl).toBe('discover-url');
+  });
+
+  it('returns the discover URL from alert for ES query rule', () => {
+    const expectedDiscoverUrl = '/app/discover#/view/some-saved-search';
+    const alertWithUrl = {
+      ...MOCK_ALERT,
+      fields: {
+        'kibana.alert.url': expectedDiscoverUrl,
+      },
+    } as unknown as TopAlert;
+
+    const rule = {
+      ruleTypeId: ES_QUERY_ID,
+      params: {},
+    } as unknown as Rule;
+
+    const { result } = renderHook(() => useDiscoverUrl({ alert: alertWithUrl, rule }));
+
+    expect(result.current.discoverUrl).toBe(expectedDiscoverUrl);
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+  });
+
+  it('returns null for ES query rule when alert has no URL', () => {
+    const alertWithoutUrl = {
+      ...MOCK_ALERT,
+      fields: {},
+    } as unknown as TopAlert;
+
+    const rule = {
+      ruleTypeId: ES_QUERY_ID,
+      params: {},
+    } as unknown as Rule;
+
+    const { result } = renderHook(() => useDiscoverUrl({ alert: alertWithoutUrl, rule }));
+
+    expect(result.current.discoverUrl).toBeNull();
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
   });
 
   it('ignores unsupported rule types', () => {
