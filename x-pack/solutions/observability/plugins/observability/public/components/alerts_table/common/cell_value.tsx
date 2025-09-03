@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EuiLink, EuiText, EuiFlexGroup } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -40,7 +41,7 @@ import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import { GetObservabilityAlertsTableProp } from '../types';
+import type { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
 import { ElapsedTimestampTooltip } from '../../../../common';
 

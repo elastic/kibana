@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
-import { EvaluationDataset } from '@kbn/evals/src/types';
-import { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
+import type { EvaluationDataset } from '@kbn/evals/src/types';
+import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
 
 interface EsqlExample extends Example {
   input: {

@@ -12,12 +12,12 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { UI_SETTINGS } from '@kbn/data-service/src/constants';
+import type { ExistingFieldsReader } from './use_existing_fields';
 import {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
   resetExistingFieldsCache,
   type ExistingFieldsFetcherParams,
-  ExistingFieldsReader,
 } from './use_existing_fields';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';

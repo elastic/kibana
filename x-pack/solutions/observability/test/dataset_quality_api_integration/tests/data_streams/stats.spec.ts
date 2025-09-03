@@ -8,8 +8,8 @@
 import { log, syntheticsMonitor, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import { DatasetQualityApiClientKey } from '../../common/config';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { DatasetQualityApiClientKey } from '../../common/config';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { cleanLogIndexTemplate, addIntegrationToLogIndexTemplate } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -59,8 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     ]);
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/230901
-  registry.when.skip('Api Key privileges check', { config: 'basic' }, () => {
+  registry.when('Api Key privileges check', { config: 'basic' }, () => {
     describe('index privileges', function () {
       // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
       // These versions are not expected to work together.
@@ -137,7 +136,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await logsSynthtrace.clean();
-        await cleanLogIndexTemplate({ esClient: es });
       });
     });
 

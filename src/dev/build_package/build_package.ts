@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import execa from 'execa';
 import globby from 'globby';
 import { run } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const PATH_TO_WEBPACK_CLI = 'node_modules/.bin/webpack-cli';
 
@@ -95,7 +95,6 @@ async function buildPackage(
     path.resolve(packageRoot, 'webpack.config.js'),
     '--output-path',
     outPath,
-    '--stats=errors-only',
   ];
 
   const isDist =
@@ -105,7 +104,9 @@ async function buildPackage(
   const env = isDist ? envOptions.dist : envOptions.default;
 
   if (watch) {
-    webpackArgs.push('--watch');
+    webpackArgs.push('--watch', '--stats=minimal');
+  } else {
+    webpackArgs.push('--stats=errors-only');
   }
 
   await copySources({

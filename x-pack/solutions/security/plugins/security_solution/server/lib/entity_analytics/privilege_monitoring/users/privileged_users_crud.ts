@@ -7,12 +7,12 @@
 
 import { merge } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { UpdatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
 import type {
+  UpdatePrivMonUserRequestBody,
+  MonitoredUserDoc,
   CreatePrivMonUserRequestBody,
   CreatePrivMonUserResponse,
-} from '../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
+} from '../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { PrivMonUserSource } from '../types';
 
@@ -24,8 +24,22 @@ export const createPrivilegedUsersCrudService = ({
 
   const create = async (
     user: CreatePrivMonUserRequestBody,
-    source: PrivMonUserSource
+    source: PrivMonUserSource,
+    maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
+    const currentUserCount = await esClient.count({
+      index,
+      query: {
+        term: {
+          'user.is_privileged': true,
+        },
+      },
+    });
+
+    if (currentUserCount.count >= maxUsersAllowed) {
+      throw new Error(`Cannot create user: Maximum user limit of ${maxUsersAllowed} reached`);
+    }
+
     const doc = merge(user, {
       user: {
         is_privileged: true,
@@ -34,6 +48,7 @@ export const createPrivilegedUsersCrudService = ({
         sources: [source],
       },
     });
+
     const res = await esClient.index({
       index,
       refresh: 'wait_for',

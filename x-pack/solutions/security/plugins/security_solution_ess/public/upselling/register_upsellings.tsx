@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   ALERT_SUPPRESSION_RULE_DETAILS,

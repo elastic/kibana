@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateAgentPolicyResponse, GetOneAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type {
+  CreateAgentPolicyResponse,
+  GetOneAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
 } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidV4 } from 'uuid';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { enableSecrets, skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {

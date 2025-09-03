@@ -19,7 +19,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import { NavigationProvider } from '../src/services';
 import { Navigation } from '../src/ui/navigation';
-import { NavigationServices } from '../src/types';
+import type { NavigationServices } from '../src/types';
 import { EventTracker } from '../src/analytics';
 
 const activeNodes: ChromeProjectNavigationNode[][] = [];

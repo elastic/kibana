@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiIcon, EuiThemeComputed } from '@elastic/eui';
-import { TickFormatter } from '@elastic/charts';
-import { FormattedChangePoint } from '../change_point';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import type { TickFormatter } from '@elastic/charts';
+import type { FormattedChangePoint } from './change_point';
 import { ChangePointSummary } from '../change_point_summary';
 
 export function getAnnotationFromFormattedChangePoint({

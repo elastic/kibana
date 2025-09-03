@@ -13,7 +13,7 @@ import { generateNewIndexName } from '@kbn/reindex-service-plugin/server';
 import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

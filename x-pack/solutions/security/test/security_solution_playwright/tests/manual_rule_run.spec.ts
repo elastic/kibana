@@ -7,10 +7,10 @@
 
 import { expect, test } from '@playwright/test';
 import { PageFactory } from '../page_objects/page_factory';
-import { RuleDetailsPage } from '../page_objects/rule_details_page_po';
+import type { RuleDetailsPage } from '../page_objects/rule_details_page_po';
 import { createRule, deleteAllRules } from '../api_utils/rules';
 import { deleteAllSecurityDocuments } from '../api_utils/documents';
-import { RuleManagementPage } from '../page_objects/rule_management_po';
+import type { RuleManagementPage } from '../page_objects/rule_management_po';
 import { createEsArchiver } from '../fixtures/es_archiver';
 
 let ruleDetailsPage: RuleDetailsPage;

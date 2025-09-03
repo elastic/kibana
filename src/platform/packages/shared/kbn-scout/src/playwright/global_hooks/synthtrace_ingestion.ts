@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FullConfig } from 'playwright/test';
+import type { FullConfig } from 'playwright/test';
 import { Readable } from 'node:stream';
 import type {
   ApmFields,
@@ -17,10 +17,10 @@ import type {
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
+import type { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
 import { createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
 import { ScoutLogger } from '../../common/services/logger';
-import { ScoutTestOptions } from '../types';
+import type { ScoutTestOptions } from '../types';
 import { getSynthtraceClient } from '../../common/services/synthtrace';
 
 export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;

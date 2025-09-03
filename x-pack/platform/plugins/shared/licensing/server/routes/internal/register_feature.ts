@@ -6,9 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LicenseType, LICENSE_TYPE } from '../../../common/types';
-import { FeatureUsageServiceSetup } from '../../services';
-import { LicensingRouter } from '../../types';
+import type { LicenseType } from '@kbn/licensing-types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
+import type { FeatureUsageServiceSetup } from '../../services';
+import type { LicensingRouter } from '../../types';
 
 export function registerRegisterFeatureRoute(
   router: LicensingRouter,

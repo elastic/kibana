@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import {
-  CONTENT_ID as LENS_CONTENT,
-  LensSavedObjectAttributes,
-} from '@kbn/lens-plugin/common/content_management';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/common/content_management';
+import { CONTENT_ID as LENS_CONTENT } from '@kbn/lens-plugin/common/content_management';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 const SUGGESTED_DASHBOARDS_VALID_RULE_TYPE_IDS = [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID] as const;

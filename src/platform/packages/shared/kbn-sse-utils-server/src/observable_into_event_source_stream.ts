@@ -8,14 +8,13 @@
  */
 
 import { repeat } from 'lodash';
-import { Logger } from '@kbn/logging';
-import {
-  isSSEError,
-  ServerSentErrorEvent,
-  ServerSentEventErrorCode,
-} from '@kbn/sse-utils/src/errors';
-import { ServerSentEvent, ServerSentEventType } from '@kbn/sse-utils/src/events';
-import { catchError, map, Observable, of, Subject, throttleTime } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { ServerSentErrorEvent } from '@kbn/sse-utils/src/errors';
+import { isSSEError, ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
+import { ServerSentEventType } from '@kbn/sse-utils/src/events';
+import type { Observable } from 'rxjs';
+import { catchError, map, of, Subject, throttleTime } from 'rxjs';
 import { PassThrough } from 'stream';
 import type { Zlib } from 'zlib';
 

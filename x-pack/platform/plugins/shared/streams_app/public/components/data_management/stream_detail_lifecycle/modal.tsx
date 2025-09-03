@@ -6,14 +6,14 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  ILM_LOCATOR_ID,
+import type {
   IlmLocatorParams,
   Phases,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamLifecycle,
   getAncestors,
   isIlmLifecycle,
   findInheritedLifecycle,
@@ -21,6 +21,7 @@ import {
   isDslLifecycle,
   Streams,
 } from '@kbn/streams-schema';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -41,7 +42,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiSwitch,
   EuiText,

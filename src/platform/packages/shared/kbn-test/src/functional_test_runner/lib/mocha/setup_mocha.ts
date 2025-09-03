@@ -10,17 +10,17 @@
 import { relative } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 // @ts-expect-error we don't use @types/mocha so it doesn't conflict with @types/jest
 import Mocha from 'mocha';
 
-import { Suite } from '../../fake_mocha_types';
+import type { Suite } from '../../fake_mocha_types';
 import { loadTests } from './load_tests';
 import { filterSuites } from './filter_suites';
-import { Lifecycle } from '../lifecycle';
-import { Config } from '../config';
-import { ProviderCollection } from '../providers';
-import { EsVersion } from '../es_version';
+import type { Lifecycle } from '../lifecycle';
+import type { Config } from '../config';
+import type { ProviderCollection } from '../providers';
+import type { EsVersion } from '../es_version';
 
 import { MochaReporterProvider } from './reporter';
 import { validateCiGroupTags } from './validate_ci_group_tags';

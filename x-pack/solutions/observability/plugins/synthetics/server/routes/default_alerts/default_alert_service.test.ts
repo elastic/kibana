@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '@kbn/alerting-types';
+import type { SanitizedRule } from '@kbn/alerting-types';
 import { omit } from 'lodash';
 import {
   SYNTHETICS_STATUS_RULE,

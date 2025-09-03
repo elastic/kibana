@@ -8,9 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLAstItem, ESQLLiteral } from '../../types';
-import { FunctionParameterType } from '../types';
-import { ISuggestionItem } from '../../commands_registry/types';
+import type { ESQLAstItem } from '../../types';
+import type { ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import { timeUnitsToSuggest } from '../constants';
@@ -137,49 +136,6 @@ export function getCompatibleLiterals(
     ); // i.e. year, month, ...
   }
   return suggestions;
-}
-
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
-
-export function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
-  if (item.literalType === argType) {
-    return true;
-  }
-
-  if (bothStringTypes(argType, item.literalType)) {
-    // all functions accept keyword literals for text parameters
-    return true;
-  }
-
-  if (item.literalType === 'null') {
-    // all parameters accept null, but this is not yet reflected
-    // in our function definitions so we let it through here
-    return true;
-  }
-
-  // some parameters accept string literals because of ES auto-casting
-  if (
-    item.literalType === 'keyword' &&
-    (argType === 'date' ||
-      argType === 'date_period' ||
-      argType === 'version' ||
-      argType === 'ip' ||
-      argType === 'boolean')
-  ) {
-    return true;
-  }
-
-  return false;
 }
 
 function isValidDateString(dateString: unknown): boolean {

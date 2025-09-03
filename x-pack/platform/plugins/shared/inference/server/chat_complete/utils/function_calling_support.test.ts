@@ -6,7 +6,8 @@
  */
 
 import { OpenAiProviderType } from '../adapters/openai/types';
-import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { isNativeFunctionCallingSupported } from './function_calling_support';
 
 const createConnector = (

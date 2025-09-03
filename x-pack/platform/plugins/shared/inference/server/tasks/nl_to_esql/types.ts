@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
   Message,

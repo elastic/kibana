@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { type AlertStatus } from '@kbn/rule-data-utils';
-import { DataSchemaFormat } from './hosts_locator';
+import type { DataSchemaFormat } from './hosts_locator';
 
 export enum SupportedEntityTypes {
   container = 'container',
@@ -42,7 +42,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
     logsSearch?: string;
     profilingSearch?: string;
     alertStatus?: AlertStatus | 'all';
-    schema?: DataSchemaFormat | null;
+    preferredSchema?: DataSchemaFormat;
   };
 }
 

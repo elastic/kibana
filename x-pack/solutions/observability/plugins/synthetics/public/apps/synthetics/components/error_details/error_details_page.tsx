@@ -22,9 +22,11 @@ import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumb
 import { StepImage } from '../step_details_page/step_screenshot/step_image';
 import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
 import { useDateFormat } from '../../../../hooks/use_date_format';
+import { useSelectedMonitor } from '../monitor_details/hooks/use_selected_monitor';
 
 export function ErrorDetailsPage() {
   const { failedTests, loading } = useErrorFailedTests();
+  const { monitor } = useSelectedMonitor();
 
   const checkGroupId = failedTests?.[0]?.monitor.check_group ?? '';
 
@@ -40,6 +42,10 @@ export function ErrorDetailsPage() {
   const stepDetails = useStepDetails({ checkGroup: lastTestRun?.monitor.check_group });
 
   const isBrowser = data?.details?.journey.monitor.type === 'browser';
+
+  if (!monitor) {
+    return null;
+  }
 
   return (
     <div>
@@ -65,6 +71,7 @@ export function ErrorDetailsPage() {
             stepsData={data}
             stepsLoading={stepsLoading}
             isErrorDetails={true}
+            monitor={monitor}
           />
           {isBrowser && (
             <>

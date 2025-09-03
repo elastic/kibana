@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import type { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../services/types';
+import type { FtrProviderContext } from '../../services/types';
 
 type ServiceStatusSerialized = Omit<ServiceStatus, 'level'> & { level: string };
 

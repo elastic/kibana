@@ -9,7 +9,7 @@
 import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import type { ICommandContext } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,

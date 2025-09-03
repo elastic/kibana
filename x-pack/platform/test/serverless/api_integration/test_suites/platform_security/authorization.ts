@@ -6,10 +6,10 @@
  */
 
 import expect from 'expect';
-import { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-plugin/common';
 import type { Role } from '@kbn/security-plugin-types-common';
-import { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function collectSubFeaturesPrivileges(feature: KibanaFeatureConfig) {
   return new Map(

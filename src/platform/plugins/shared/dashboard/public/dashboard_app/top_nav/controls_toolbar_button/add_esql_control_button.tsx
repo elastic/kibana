@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { getAddESQLControlButtonTitle } from '../../_dashboard_app_strings';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';

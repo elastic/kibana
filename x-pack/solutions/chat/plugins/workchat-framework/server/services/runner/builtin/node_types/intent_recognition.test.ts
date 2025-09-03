@@ -21,16 +21,18 @@ import {
 } from '@kbn/wc-framework-types-server/src/nodes/node_type_configs';
 import { getIntentRecognitionNodeTypeDefinition } from './intent_recognition';
 import * as utils from '../../utils';
+import type {
+  MockedNodeFactoryBaseServices,
+  MockedState,
+  NodeEventReporterMock,
+  MockedModel,
+} from '../../test_utils';
 import {
   createMockFactoryServices,
   createMockedState,
   createMockedNodeEventReporter,
   createExecutionState,
-  MockedNodeFactoryBaseServices,
-  MockedState,
-  NodeEventReporterMock,
   createMockedModel,
-  MockedModel,
 } from '../../test_utils';
 
 jest.mock('../../utils', () => ({

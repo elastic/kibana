@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SeriesColorAccessorFn } from '@elastic/charts';
+import type { SeriesColorAccessorFn } from '@elastic/charts';
 import { getColorFactory, type ColorMapping, type ColorMappingInputData } from '@kbn/coloring';
-import { KbnPalettes } from '@kbn/palettes';
-import { InvertedRawValueMap } from '../data_layers';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { InvertedRawValueMap } from '../data_layers';
 
 /**
  * Return a color accessor function for XY charts depending on the split accessors received.

@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  UseEuiTheme,
   euiCanAnimate,
   htmlIdGenerator,
 } from '@elastic/eui';

@@ -9,10 +9,8 @@
 
 import React from 'react';
 import { SettingsApplication } from './application';
-import {
-  SettingsApplicationKibanaDependencies,
-  SettingsApplicationKibanaProvider,
-} from './services';
+import type { SettingsApplicationKibanaDependencies } from './services';
+import { SettingsApplicationKibanaProvider } from './services';
 
 export { SettingsApplication } from './application';
 export {

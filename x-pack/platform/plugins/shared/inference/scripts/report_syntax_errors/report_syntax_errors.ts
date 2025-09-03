@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ESQLMessage, EditorError } from '@kbn/esql-ast';
+import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';
 import Path from 'path';
-import yargs, { Argv } from 'yargs';
+import type { Argv } from 'yargs';
+import yargs from 'yargs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { run } from '@kbn/dev-cli-runner';
 import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';

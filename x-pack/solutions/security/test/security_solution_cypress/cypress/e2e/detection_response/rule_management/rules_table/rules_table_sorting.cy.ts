@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import {
   FIRST_RULE,
   RULE_NAME,
@@ -24,6 +25,7 @@ import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import {
+  getCustomQueryRuleParams,
   getExistingRule,
   getNewOverrideRule,
   getNewRule,
@@ -38,10 +40,14 @@ import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_p
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 describe('Rules table: sorting', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: '1', enabled: false }));
+    createRule(getCustomQueryRuleParams({ rule_id: '1', enabled: false }));
     createRule(getExistingRule({ rule_id: '2', enabled: false }));
     createRule(getNewOverrideRule({ rule_id: '3', enabled: false }));
     createRule(getNewThresholdRule({ rule_id: '4', enabled: false }));

@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { updateIndex } from '.';
-import { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
 import { type Version } from '@kbn/upgrade-assistant-pkg-server';
 import { getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server/src/index_settings';
 

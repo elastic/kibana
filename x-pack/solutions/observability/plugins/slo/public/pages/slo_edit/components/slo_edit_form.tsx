@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
-import { RecursivePartial } from '@kbn/utility-types';
+import type { RecursivePartial } from '@kbn/utility-types';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
@@ -19,7 +19,7 @@ import {
 import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormFooter } from './slo_edit_form_footer';
 import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';

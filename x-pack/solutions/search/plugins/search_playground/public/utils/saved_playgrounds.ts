@@ -12,15 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_CONTEXT_DOCUMENTS } from '../../common';
 import { DEFAULT_LLM_PROMPT } from '../../common/prompt';
 
-import {
+import type {
   LLMModel,
   PlaygroundForm,
   PlaygroundResponse,
   PlaygroundSavedObject,
   SavedPlaygroundForm,
   SavedPlaygroundFormFetchError,
-  SavedPlaygroundFormFields,
 } from '../types';
+import { SavedPlaygroundFormFields } from '../types';
 
 function parseSummarizationModel(
   model: PlaygroundSavedObject['summarizationModel'],
@@ -176,12 +176,12 @@ export function validatePlaygroundName(name: string): string | null {
   const trimmedName = name.trim();
   if (!name || !trimmedName) {
     return i18n.translate('xpack.searchPlayground.savedPlayground.errors.name.required', {
-      defaultMessage: 'Playground name is required',
+      defaultMessage: 'RAG Playground name is required',
     });
   }
   if (name.length > 100) {
     return i18n.translate('xpack.searchPlayground.savedPlayground.errors.name.tooLong', {
-      defaultMessage: 'Playground name must be less than 100 characters',
+      defaultMessage: 'RAG Playground name must be less than 100 characters',
     });
   }
   return null;

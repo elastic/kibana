@@ -8,7 +8,7 @@
  */
 
 import type { Metric } from '../../../../common/types';
-import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisParams } from '../../../types';
 
 export const createNumberHandler = (
   handleChange: (partialModel: Partial<TimeseriesVisParams>) => void

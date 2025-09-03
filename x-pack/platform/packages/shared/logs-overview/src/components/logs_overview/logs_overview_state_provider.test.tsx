@@ -7,12 +7,12 @@
 
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { createActor, fromPromise, waitFor } from 'xstate5';
-import { LogsOverviewFeatureFlags } from '../../types';
-import {
+import type { LogsOverviewFeatureFlags } from '../../types';
+import type {
   LogsSourceConfiguration,
   ResolvedIndexNameLogsSourceConfiguration,
 } from '../../utils/logs_source';
-import { MlCapabilities } from '../../utils/ml_capabilities';
+import type { MlCapabilities } from '../../utils/ml_capabilities';
 import { logsOverviewStateMachine } from './logs_overview_state_provider';
 
 describe('logsOverviewStateMachine', () => {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIconProps, EuiButtonIconPropsForButton } from '@elastic/eui';
+import type { EuiButtonIconProps, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 
 const insufficientPrivilegesText = i18n.translate('xpack.streams.insufficientPrivilegesMessage', {

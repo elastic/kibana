@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   CanLockHoverActions,
   HasParentApi,
   HasUniqueId,
@@ -18,8 +18,8 @@ import {
   PublishesTitle,
   CanOverrideHoverActions,
 } from '@kbn/presentation-publishing';
-import { UiActionsService } from '@kbn/ui-actions-plugin/public';
-import { MaybePromise } from '@kbn/utility-types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /** ------------------------------------------------------------------------------------------
  * Panel Types
@@ -50,7 +50,7 @@ export interface PresentationPanelInternalProps<
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
-  getActions?: UiActionsService['getTriggerCompatibleActions'];
+  getActions?: UiActionsStart['getTriggerCompatibleActions'];
 
   /**
    * Ordinal number of the embeddable in the container, used as a

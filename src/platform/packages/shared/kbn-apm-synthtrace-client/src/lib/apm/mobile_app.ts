@@ -8,7 +8,7 @@
  */
 
 import { Entity } from '../entity';
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 import { MobileDevice } from './mobile_device';
 import { generateLongId } from '../utils/generate_id';
 

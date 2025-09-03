@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { isEmpty, omit } from 'lodash';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
@@ -21,12 +21,12 @@ import type {
 } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
+import type { SuggestedDashboardsValidPanelType } from './helpers';
 import {
-  SuggestedDashboardsValidPanelType,
   isSuggestedDashboardsValidPanelType,
   isSuggestedDashboardsValidRuleTypeId,
 } from './helpers';
-import { ReferencedPanelManager } from './referenced_panel_manager';
+import type { ReferencedPanelManager } from './referenced_panel_manager';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 

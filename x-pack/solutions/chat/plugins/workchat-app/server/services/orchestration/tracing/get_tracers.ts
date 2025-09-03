@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { WorkChatTracingConfig } from '../../../config';
 import { getLangsmithTracer } from './langsmith';
 

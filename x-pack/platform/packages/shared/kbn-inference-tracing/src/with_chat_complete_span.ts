@@ -5,35 +5,36 @@
  * 2.0.
  */
 
-import {
+import type {
   AssistantMessage,
   ChatCompleteCompositeResponse,
   Message,
-  MessageRole,
   Model,
   ToolCall,
   ToolChoice,
   ToolDefinition,
   ToolMessage,
   UserMessage,
+} from '@kbn/inference-common';
+import {
+  MessageRole,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
-import { Span } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
-import {
+import type {
   AssistantMessageEvent,
   ChoiceEvent,
-  ElasticGenAIAttributes,
   GenAISemConvAttributes,
-  GenAISemanticConventions,
   MessageEvent,
   SystemMessageEvent,
   ToolMessageEvent,
   UserMessageEvent,
 } from './types';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
 import { flattenAttributes } from './util/flatten_attributes';
 
 function addEvent(span: Span, event: MessageEvent) {

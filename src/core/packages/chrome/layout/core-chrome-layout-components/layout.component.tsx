@@ -16,7 +16,7 @@ import { LayoutHeader } from './header';
 import { LayoutSidebar, LayoutSidebarPanel } from './sidebar';
 
 import { useLayoutStyles } from './layout.styles';
-import { ChromeLayoutSlots, Slot } from './layout.types';
+import type { ChromeLayoutSlots, Slot } from './layout.types';
 import { useLayoutState } from './layout_state_context';
 
 export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {

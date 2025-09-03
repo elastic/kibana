@@ -8,7 +8,8 @@
  */
 
 import del from 'del';
-import { Task, exec } from '../lib';
+import type { Task } from '../lib';
+import { exec } from '../lib';
 
 export const BuildCanvasShareableRuntime: Task = {
   description: 'Build Canvas shareable runtime',

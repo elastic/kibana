@@ -8,16 +8,17 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
-import _ from 'lodash';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
-import { MUSTACHE_REGEX_GLOBAL } from './regex';
+import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
+import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { MarkerSeverity, getSeverityString } from './utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
+import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 interface UseYamlValidationProps {
   workflowYamlSchema: z.ZodSchema;
@@ -31,6 +32,7 @@ const SEVERITY_MAP = {
 };
 
 export interface UseYamlValidationResult {
+  error: Error | null;
   validationErrors: YamlValidationError[] | null;
   validateVariables: (
     editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor
@@ -47,6 +49,7 @@ export function useYamlValidation({
   workflowYamlSchema,
   onValidationErrors,
 }: UseYamlValidationProps): UseYamlValidationResult {
+  const [error, setError] = useState<Error | null>(null);
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
@@ -72,16 +75,13 @@ export function useYamlValidation({
 
         // Parse the YAML to JSON to get the workflow definition
         const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
-        if (!result.success) {
-          throw new Error('Failed to parse YAML');
-        }
         const yamlDocument = parseDocument(text);
-        const workflowGraph = getWorkflowGraph(result.data);
+        const workflowGraph = result.success ? getWorkflowGraph(result.data) : null;
 
         // Collect markers to add to the model
         const markers: monaco.editor.IMarkerData[] = [];
 
-        const matches = [...text.matchAll(MUSTACHE_REGEX_GLOBAL)];
+        const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
         // TODO: check if the variable is inside quouted string or yaml | or > string section
         for (const match of matches) {
           const matchStart = match.index ?? 0;
@@ -95,14 +95,24 @@ export function useYamlValidation({
           const severity: YamlValidationErrorSeverity = 'warning';
 
           const path = getCurrentPath(yamlDocument, matchStart);
-          const context = getContextForPath(result.data, workflowGraph, path);
+          const context = result.success
+            ? getContextSchemaForPath(result.data, workflowGraph!, path)
+            : null;
 
-          if (match.groups?.key) {
-            if (!_.get(context, match.groups.key)) {
-              errorMessage = `Variable ${match.groups?.key} is not defined`;
-            }
-          } else {
+          if (!match.groups?.key) {
             errorMessage = `Variable is not defined`;
+          } else {
+            const parsedPath = parseVariablePath(match.groups.key);
+            if (parsedPath?.errors) {
+              errorMessage = parsedPath.errors.join(', ');
+            }
+            if (parsedPath?.propertyPath) {
+              if (!context) {
+                errorMessage = `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`;
+              } else if (!isValidSchemaPath(context, parsedPath.propertyPath)) {
+                errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
+              }
+            }
           }
 
           // Add marker for validation issues
@@ -114,7 +124,7 @@ export function useYamlValidation({
               startColumn: startPos.column,
               endLineNumber: endPos.lineNumber,
               endColumn: endPos.column,
-              source: 'mustache-validation',
+              source: 'variable-validation',
             });
 
             decorations.push({
@@ -151,10 +161,10 @@ export function useYamlValidation({
         decorationsCollection.current = editor.createDecorationsCollection(decorations);
 
         // Set markers on the model for the problems panel
-        monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        monaco.editor.setModelMarkers(model, 'variable-validation', markers);
+        setError(null);
+      } catch (e) {
+        setError(e as Error);
       }
     },
     [workflowYamlSchema]
@@ -193,6 +203,7 @@ export function useYamlValidation({
   );
 
   return {
+    error,
     validationErrors,
     validateVariables,
     handleMarkersChanged,

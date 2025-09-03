@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterExpanded } from './filter_expanded';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 import { FieldLabels, LABEL_FIELDS_FILTER } from '../../configurations/constants/constants';
 import { SelectedFilters } from './selected_filters';
 import { LabelsFieldFilter } from '../components/labels_filter';

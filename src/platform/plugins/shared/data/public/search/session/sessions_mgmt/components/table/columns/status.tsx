@@ -9,8 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { UISession } from '../../../types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { UISession } from '../../../types';
 import { StatusIndicator } from '../../status';
 
 export const statusColumn = (timezone: string): EuiBasicTableColumn<UISession> => ({

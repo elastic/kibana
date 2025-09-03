@@ -9,7 +9,8 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { Props, UpdateConnector } from './update_connector';
+import type { Props } from './update_connector';
+import { UpdateConnector } from './update_connector';
 import { act } from 'react-dom/test-utils';
 import { render, waitFor } from '@testing-library/react';
 

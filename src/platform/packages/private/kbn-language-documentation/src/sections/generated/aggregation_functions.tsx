@@ -352,7 +352,7 @@ export const functions = {
       license: {
         licenses: [
           {
-            name: 'PLATINUM',
+            name: 'platinum',
             isSignatureSpecific: true,
             paramsWithLicense: ['cartesian_shape', 'geo_shape'],
           },

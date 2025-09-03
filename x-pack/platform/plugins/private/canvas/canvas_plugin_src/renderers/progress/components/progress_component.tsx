@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties, RefCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  getShapeContentElement,
-  getDefaultShapeData,
+import type {
   ShapeRef,
   SvgConfig,
   SvgTextAttributes,
 } from '../../../../public/components/shape_drawer';
-import { NodeDimensions, ProgressRendererConfig } from '../types';
+import {
+  getShapeContentElement,
+  getDefaultShapeData,
+} from '../../../../public/components/shape_drawer';
+import type { NodeDimensions, ProgressRendererConfig } from '../types';
 import { ProgressDrawerComponent } from './progress_drawer';
 import { getTextAttributes, getViewBox } from './utils';
 

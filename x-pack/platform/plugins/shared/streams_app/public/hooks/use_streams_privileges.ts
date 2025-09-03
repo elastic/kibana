@@ -7,10 +7,11 @@
 
 import {
   OBSERVABILITY_ENABLE_STREAMS_UI,
+  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
-import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
@@ -20,6 +21,9 @@ export interface StreamsFeatures {
   };
   significantEvents?: {
     available: boolean;
+    enabled: boolean;
+  };
+  groupStreams?: {
     enabled: boolean;
   };
 }
@@ -50,6 +54,8 @@ export function useStreamsPrivileges(): StreamsPrivileges {
 
   const uiEnabled = uiSettings.get<boolean>(OBSERVABILITY_ENABLE_STREAMS_UI);
 
+  const groupStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS, false);
+
   const significantEventsEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
     false // Default to false if the setting is not defined or not available
@@ -74,6 +80,9 @@ export function useStreamsPrivileges(): StreamsPrivileges {
           significantEventsEnabled &&
           license.hasAtLeast('enterprise') &&
           significantEventsAvailableForTier,
+      },
+      groupStreams: {
+        enabled: groupStreamsEnabled,
       },
     },
   };

@@ -44,7 +44,10 @@ export const DescriptionListColumns = () => {
         )}
         description={i18n.translate(
           'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.abTest.description',
-          { defaultMessage: 'Playground allow you to A/B test different LLMs from model providers' }
+          {
+            defaultMessage:
+              'RAG Playground allows you to A/B test different LLMs from model providers',
+          }
         )}
       />
       <DescriptionListColumn
@@ -67,7 +70,7 @@ export const DescriptionListColumns = () => {
         )}
         description={i18n.translate(
           'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.lowCode.description',
-          { defaultMessage: "Elastic's playground experience is a low-code interface" }
+          { defaultMessage: "Elastic's RAG Playground experience is a low-code interface" }
         )}
       />
     </EuiFlexGrid>

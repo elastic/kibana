@@ -8,10 +8,10 @@
  */
 
 import { EnterIfNodeImpl } from '../enter_if_node_impl';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
-import { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
-import { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 
 describe('EnterIfNodeImpl', () => {
   let step: EnterIfNode;
@@ -20,12 +20,14 @@ describe('EnterIfNodeImpl', () => {
   let startStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
   let getNodeSuccessors: jest.Mock<any, any, any>;
+  let enterScope: jest.Mock<any, any, any>;
   let workflowContextLoggerMock: IWorkflowEventLogger;
   let workflowContextManagerMock: WorkflowContextManager;
 
   beforeEach(() => {
     startStep = jest.fn();
     goToStep = jest.fn();
+    enterScope = jest.fn();
     getNodeSuccessors = jest.fn();
     workflowContextLoggerMock = {
       logDebug: jest.fn(),
@@ -45,6 +47,7 @@ describe('EnterIfNodeImpl', () => {
       startStep,
       goToStep,
       getNodeSuccessors,
+      enterScope,
     } as any;
     impl = new EnterIfNodeImpl(
       step,
@@ -69,6 +72,11 @@ describe('EnterIfNodeImpl', () => {
   it('should start the step', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalledWith(step.id);
+  });
+
+  it('should enter scope', async () => {
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
   });
 
   describe('then branch', () => {

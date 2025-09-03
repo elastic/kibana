@@ -9,10 +9,11 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { from } from 'rxjs';
-import { CoreSetup, type Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerSearchRoute } from './search';
-import { DataPluginStart } from '../../plugin';
+import type { DataPluginStart } from '../../plugin';
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
 import { KbnSearchError } from '../report_search_error';

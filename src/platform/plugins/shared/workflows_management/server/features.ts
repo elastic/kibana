@@ -10,7 +10,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { WorkflowsManagementPluginServerDependenciesSetup } from './types';
+import type { WorkflowsManagementPluginServerDependenciesSetup } from './types';
 
 /**
  * The order of appearance in the feature privilege page

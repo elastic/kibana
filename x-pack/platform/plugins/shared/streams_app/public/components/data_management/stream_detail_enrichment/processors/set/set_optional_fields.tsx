@@ -11,7 +11,7 @@ import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ToggleField } from '../toggle_field';
-import { ExtractBooleanFields, ProcessorFormState } from '../../types';
+import type { ExtractBooleanFields, ProcessorFormState } from '../../types';
 
 export const OverrideField = () => {
   return (

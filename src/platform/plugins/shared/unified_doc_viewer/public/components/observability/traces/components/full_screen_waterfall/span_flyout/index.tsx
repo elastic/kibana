@@ -15,11 +15,11 @@ import {
   EuiFlyoutBody,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { flattenObject } from '@kbn/object-utils';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useSpan } from '../hooks/use_span';
 import { SpanFlyoutBody } from './span_flyout_body';
 import { isSpanHit } from '../helpers/is_span';
@@ -27,19 +27,13 @@ import { isSpanHit } from '../helpers/is_span';
 const flyoutId = 'spanDetailFlyout';
 
 export interface SpanFlyoutProps {
-  tracesIndexPattern: string;
   spanId: string;
   dataView: DocViewRenderProps['dataView'];
   onCloseFlyout: () => void;
 }
 
-export const SpanFlyout = ({
-  tracesIndexPattern,
-  spanId,
-  dataView,
-  onCloseFlyout,
-}: SpanFlyoutProps) => {
-  const { span, docId, loading } = useSpan({ indexPattern: tracesIndexPattern, spanId });
+export const SpanFlyout = ({ spanId, dataView, onCloseFlyout }: SpanFlyoutProps) => {
+  const { span, docId, loading } = useSpan({ spanId });
   const { euiTheme } = useEuiTheme();
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
     if (!span || !docId) return null;
@@ -92,7 +86,6 @@ export const SpanFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SpanFlyoutBody
-          tracesIndexPattern={tracesIndexPattern}
           hit={documentAsHit}
           dataView={dataView}
           loading={loading}

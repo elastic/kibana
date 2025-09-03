@@ -7,13 +7,14 @@
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { getPosturePolicy } from '../utils';
+import type { CspRadioOption } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
+import { updatePolicyWithInputs } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
@@ -21,7 +22,8 @@ import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
-import { AwsSetupFormat, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import type { AwsSetupFormat, UpdatePolicy } from '../types';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -40,7 +42,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 
 interface AwsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
@@ -129,6 +131,7 @@ export const AwsCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AwsFormProps) => {
+  const { awsPolicyType } = useCloudSetup();
   const {
     awsCredentialsType,
     setupFormat,
@@ -174,6 +177,7 @@ export const AwsCredentialsForm = ({
         onChange={(idSelected: AwsSetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
+        name="setupFormat"
       />
       <EuiSpacer size="l" />
       {setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && (
@@ -193,7 +197,7 @@ export const AwsCredentialsForm = ({
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+                updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
                   'aws.credentials.type': { value: optionId },
                 }),
               });
@@ -209,10 +213,11 @@ export const AwsCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+                updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
+                  [key]: { value },
+                }),
               });
             }}
-            hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         </>
       )}

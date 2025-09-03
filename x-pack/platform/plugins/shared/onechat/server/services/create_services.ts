@@ -46,7 +46,6 @@ export class ServiceManager {
     logger,
     security,
     elasticsearch,
-    actions,
     inference,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
@@ -78,7 +77,6 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
-      actions,
       inference,
       toolsService: tools,
       agentsService: agents,
@@ -93,7 +91,6 @@ export class ServiceManager {
 
     const chat = createChatService({
       logger: logger.get('chat'),
-      actions,
       inference,
       conversationService: conversations,
       agentService: agents,

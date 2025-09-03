@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -31,14 +31,11 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('home');
-      await browser.setLocalStorageItem('discoverExperimental:tabs', 'true');
       await common.navigateToApp('discover');
       await discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {
-      await browser.setLocalStorageItem('discoverExperimental:tabs', 'false');
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

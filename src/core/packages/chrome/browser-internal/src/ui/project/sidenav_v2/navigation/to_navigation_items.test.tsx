@@ -9,7 +9,10 @@
 
 import { waitFor } from '@testing-library/dom';
 import { toNavigationItems } from './to_navigation_items';
-import { ChromeProjectNavigationNode, NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+import type {
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinitionUI,
+} from '@kbn/core-chrome-browser';
 
 // use require to bypass unnecessary TypeScript checks for JSON imports
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -26,13 +29,14 @@ describe('toNavigationItems', () => {
     navItems: { footerItems, primaryItems },
   } = toNavigationItems(navigationTree, [], []);
 
-  it('should return logo from navigation tree', () => {
+  it('should return missing logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "data-test-subj": undefined,
         "href": "/missing-href-😭",
-        "iconType": "logoSecurity",
-        "id": "security_solution_nav",
-        "label": "Security",
+        "iconType": "broom",
+        "id": "kibana",
+        "label": "Kibana",
       }
     `);
   });
@@ -53,31 +57,31 @@ describe('toNavigationItems', () => {
     expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "
       === Navigation Warnings ===
-      • Navigation item \\"security_solution_nav\\" is missing a \\"href\\". Using fallback value: \\"/missing-href-😭\\".
-      • Navigation item \\"discover\\" is missing a \\"icon\\". Using fallback value: \\"discoverApp\\".
-      • Navigation item \\"dashboards\\" is missing a \\"icon\\". Using fallback value: \\"dashboardApp\\".
+      • No \\"home\\" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: \\"home\\" is expected.
+      • Navigation item is missing. Using fallback value: \\"/missing-href-😭\\".
+      • No icon found for node \\"undefined\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • Navigation item is missing. Using fallback value: \\"kibana\\".
+      • Navigation item is missing. Using fallback value: \\"Kibana\\".
       • Navigation node \\"node-2\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:rules, alerts, attack_discovery, cloud_security_posture-findings, cases.
-      • Navigation item \\"securityGroup:rules\\" is missing a \\"icon\\". Using fallback value: \\"securitySignal\\".
-      • Navigation item \\"alerts\\" is missing a \\"icon\\". Using fallback value: \\"bell\\".
-      • Navigation item \\"attack_discovery\\" is missing a \\"icon\\". Using fallback value: \\"lensApp\\".
-      • Navigation item \\"cloud_security_posture-findings\\" is missing a \\"icon\\". Using fallback value: \\"logoSecurity\\".
-      • Navigation item \\"cases\\" is missing a \\"icon\\". Using fallback value: \\"casesApp\\".
+      • No icon found for node \\"securityGroup:rules\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"alerts\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"attack_discovery\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"cloud_security_posture-findings\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"cases\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Navigation node \\"node-3\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:entityAnalytics, securityGroup:explore, securityGroup:investigations, threat_intelligence.
       • Panel opener node \\"securityGroup:entityAnalytics\\" has no children. Ignoring it.
       • Panel opener node \\"securityGroup:explore\\" should contain panel sections, not direct links. Flattening links \\"hosts, network, users\\" into secondary items and creating a placeholder section for these links.
-      • Navigation item \\"securityGroup:explore\\" is missing a \\"icon\\". Using fallback value: \\"search\\".
+      • No icon found for node \\"securityGroup:explore\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Panel opener node \\"securityGroup:investigations\\" should contain panel sections, not direct links. Flattening links \\"timelines, notes, osquery\\" into secondary items and creating a placeholder section for these links.
-      • Navigation item \\"securityGroup:investigations\\" is missing a \\"icon\\". Using fallback value: \\"casesApp\\".
-      • Navigation item \\"threat_intelligence\\" is missing a \\"icon\\". Using fallback value: \\"bug\\".
+      • No icon found for node \\"securityGroup:investigations\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"threat_intelligence\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Navigation node \\"node-4\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:assets.
       • Secondary menu item node \\"fleet\\" has a href \\"/tzo/s/sec/app/fleet\\", but it should not. We're using it as a section title that doesn't have a link.
       • Navigation item \\"node-0\\" is missing a \\"title\\". Using fallback value: \\"Missing Title 😭\\".
       • Navigation item \\"node-0\\" is missing a \\"href\\". Using fallback value: \\"Missing Href 😭\\".
-      • Navigation item \\"securityGroup:assets\\" is missing a \\"icon\\". Using fallback value: \\"indexManagementApp\\".
-      • Navigation item \\"securityGroup:machineLearning\\" is missing a \\"icon\\". Using fallback value: \\"machineLearningApp\\".
-      • Navigation item \\"stack_management\\" is missing a \\"icon\\". Using fallback value: \\"gear\\".
-      • Navigation item \\"monitoring\\" is missing a \\"icon\\". Using fallback value: \\"monitoringApp\\".
-      • Navigation item \\"integrations\\" is missing a \\"icon\\". Using fallback value: \\"plugs\\".
+      • No icon found for node \\"securityGroup:assets\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"securityGroup:machineLearning\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
+      • No icon found for node \\"stack_management\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\"."
     `);
   });
@@ -87,13 +91,6 @@ describe('isActive', () => {
   it('should return null if no active paths', () => {
     const { activeItemId } = toNavigationItems(navigationTree, [], []);
     expect(activeItemId).toBeUndefined();
-  });
-
-  it('should return logo node as active item', () => {
-    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
-
-    const { activeItemId } = toNavigationItems(navigationTree, [], [[logoNode]]);
-    expect(activeItemId).toBe(logoNode.id);
   });
 
   it('should return primary menu node as active item', () => {
@@ -188,5 +185,43 @@ describe('isActive', () => {
     );
 
     expect(activeItemId).toBe(managementSecondaryItem.id);
+  });
+});
+
+describe('logo node', () => {
+  const treeWithLogo = structuredClone(navigationTree);
+  const homeNode: ChromeProjectNavigationNode = {
+    id: 'securityHome',
+    icon: 'launch',
+    href: '/tzo/s/sec/app/security/get_started',
+    path: 'security_solution_nav.get_started',
+    title: 'Security',
+    deepLink: {} as any,
+    isExternalLink: false,
+    sideNavStatus: 'visible',
+    renderAs: 'home',
+  };
+
+  (treeWithLogo.body[0] as ChromeProjectNavigationNode).children = [
+    homeNode,
+    ...(treeWithLogo.body[0] as ChromeProjectNavigationNode).children!,
+  ];
+
+  test('should return logo node with correct properties', () => {
+    const { logoItem } = toNavigationItems(treeWithLogo, [], []);
+    expect(logoItem).toMatchInlineSnapshot(`
+      Object {
+        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome",
+        "href": "/tzo/s/sec/app/security/get_started",
+        "iconType": "launch",
+        "id": "securityHome",
+        "label": "Security",
+      }
+    `);
+  });
+
+  test('Logo node can be active', () => {
+    const { activeItemId } = toNavigationItems(treeWithLogo, [], [[homeNode]]);
+    expect(activeItemId).toBe(homeNode.id);
   });
 });

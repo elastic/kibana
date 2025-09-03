@@ -17,8 +17,29 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
+        },
+      },
+      {
+        name: 'classic-stream-with-fields',
+        description: '',
+        ingest: {
+          lifecycle: {
+            inherit: {},
+          },
+          processing: {
+            steps: [],
+          },
+          classic: {
+            field_overrides: {
+              xxx: {
+                type: 'keyword',
+              },
+            },
+          },
         },
       },
     ])('is valid', (val) => {
@@ -34,7 +55,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       },
@@ -52,7 +75,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
           wired: {},
         },
@@ -72,7 +97,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },
@@ -103,7 +128,9 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -137,7 +164,9 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -158,7 +187,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },

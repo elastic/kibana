@@ -9,8 +9,8 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import { DashboardAttributes, DashboardQuery } from '../../types';
+import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+import type { DashboardAttributes, DashboardQuery } from '../../types';
 import { migrateLegacyQuery, cleanFiltersForSerialize } from '../../../../../common';
 import { logger } from '../../../../kibana_services';
 

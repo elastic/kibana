@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const es = getService('es');
 
   describe('ES|QL Tools API', () => {
     const createdToolIds: string[] = [];
@@ -125,6 +126,71 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('POST /api/chat/tools/_execute', () => {
+      const testIndex = 'test-onechat-index';
+
+      before(async () => {
+        await es.indices.create({
+          index: testIndex,
+          mappings: {
+            properties: {
+              name: { type: 'text' },
+              age: { type: 'integer' },
+              '@timestamp': { type: 'date' },
+            },
+          },
+        });
+        await es.bulk({
+          body: [
+            { index: { _index: testIndex } },
+            { name: 'Test Case 1', age: 25, '@timestamp': '2023-01-01T00:00:00Z' },
+            { index: { _index: testIndex } },
+            { name: 'Test Case 2', age: 30, '@timestamp': '2023-01-02T00:00:00Z' },
+            { index: { _index: testIndex } },
+            { name: 'Test Case 3', age: 35, '@timestamp': '2023-01-03T00:00:00Z' },
+          ],
+        });
+        await es.indices.refresh({ index: testIndex });
+
+        const testTool = {
+          type: 'esql',
+          description: 'A test tool',
+          tags: ['test'],
+          configuration: {
+            query: `FROM ${testIndex} | LIMIT 3`,
+            params: {},
+          },
+          id: 'execute-test-tool',
+        };
+
+        await supertest
+          .post('/api/chat/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(testTool)
+          .expect(200);
+
+        createdToolIds.push(testTool.id);
+      });
+
+      it('should execute a new ES|QL tool successfully', async () => {
+        const executeRequest = {
+          tool_id: 'execute-test-tool',
+          tool_params: {},
+        };
+        const response = await supertest
+          .post('/api/chat/tools/_execute')
+          .set('kbn-xsrf', 'kibana')
+          .send(executeRequest)
+          .expect(200);
+
+        expect(response.body).to.have.property('results');
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: testIndex });
+      });
+    });
+
     describe('GET /api/chat/tools/get-test-tool', () => {
       let testToolId: string;
 
@@ -176,8 +242,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('GET /api/chat/tools', () => {
-      const testToolIds: string[] = [];
-
       before(async () => {
         for (let i = 0; i < 3; i++) {
           const testTool = {
@@ -191,7 +255,6 @@ export default function ({ getService }: FtrProviderContext) {
             .send(testTool)
             .expect(200);
 
-          testToolIds.push(testTool.id);
           createdToolIds.push(testTool.id);
         }
       });

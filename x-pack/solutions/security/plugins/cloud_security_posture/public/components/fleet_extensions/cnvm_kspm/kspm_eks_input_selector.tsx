@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
+import { RadioGroup } from '@kbn/cloud-security-posture';
 import type { PostureInput } from '../../../../common/types_old';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from '../utils';
-import { RadioGroup } from '../csp_boxed_radio_group';
 
 interface KspmEksInputSelector {
   disabled: boolean;
@@ -17,12 +17,14 @@ interface KspmEksInputSelector {
 
 export const KspmEksInputSelector = ({ input, disabled, setInput }: KspmEksInputSelector) => {
   const baseOptions = getPolicyTemplateInputOptions(input.policy_template);
-  const options = baseOptions.map((option) => ({
-    ...option,
-    disabled: option.disabled || disabled,
-    label: option.label,
-    icon: option.icon,
-  }));
+  const options = baseOptions
+    ? baseOptions.map((option) => ({
+        ...option,
+        disabled: option.disabled || disabled,
+        label: option.label,
+        icon: option.icon,
+      }))
+    : [];
 
   return (
     <RadioGroup
@@ -31,6 +33,7 @@ export const KspmEksInputSelector = ({ input, disabled, setInput }: KspmEksInput
       options={options}
       onChange={(inputType) => setInput(inputType as PostureInput)}
       size="m"
+      name="kspmEksInput"
     />
   );
 };

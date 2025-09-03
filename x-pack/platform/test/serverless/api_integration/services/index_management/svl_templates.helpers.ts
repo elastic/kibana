@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   TemplateDeserialized,
   TemplateSerialized,
   IndexMode,
 } from '@kbn/index-management-plugin/common';
 import { INDEX_PATTERNS } from './constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const templateMock = {
   settings: {},

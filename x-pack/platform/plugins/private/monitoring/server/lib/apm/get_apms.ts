@@ -11,8 +11,8 @@ import { checkParam } from '../error_missing_required';
 import { createApmQuery } from './create_apm_query';
 import { calculateRate } from '../calculate_rate';
 import { getDiffCalculation } from './_apm_stats';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };

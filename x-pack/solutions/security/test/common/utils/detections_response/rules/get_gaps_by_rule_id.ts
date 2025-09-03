@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type SuperTest from 'supertest';
-import { FindGapsResponse } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
+import type { FindGapsResponse } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import { routeWithNamespace } from '../route_with_namespace';
 
 export const getGapsByRuleId = async (

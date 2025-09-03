@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexTemplate, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { castArray, groupBy, omit, uniq } from 'lodash';
@@ -111,21 +111,28 @@ async function createStreamsManagedPipeline({
     },
   });
 
+  // Remove properties from the GET response that cannot be in the PUT request
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { created_date_millis, modified_date_millis, ...safeTemplate } =
+    indexTemplate.index_template as IndicesIndexTemplate & {
+      created_date_millis: number;
+      modified_date_millis: number;
+    };
+
   actionsByType.upsert_index_template.push({
     type: 'upsert_index_template',
     request: {
       name: indexTemplate.name,
-      ...indexTemplate.index_template,
-      ignore_missing_component_templates: indexTemplate.index_template
-        .ignore_missing_component_templates
-        ? castArray(indexTemplate.index_template.ignore_missing_component_templates)
+      ...safeTemplate,
+      ignore_missing_component_templates: safeTemplate.ignore_missing_component_templates
+        ? castArray(safeTemplate.ignore_missing_component_templates)
         : [],
       template: {
-        ...(indexTemplate.index_template.template ?? {}),
+        ...(safeTemplate.template ?? {}),
         settings: {
-          ...(indexTemplate.index_template.template?.settings ?? {}),
+          ...(safeTemplate.template?.settings ?? {}),
           index: {
-            ...(indexTemplate.index_template.template?.settings?.index ?? {}),
+            ...(safeTemplate.template?.settings?.index ?? {}),
             default_pipeline: pipelineName,
           },
         },

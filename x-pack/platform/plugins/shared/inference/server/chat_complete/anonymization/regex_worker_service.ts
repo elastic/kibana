@@ -7,13 +7,13 @@
 
 import Piscina from 'piscina';
 import type { Logger } from '@kbn/logging';
-import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
+import type { AnonymizationRegexWorkerTaskPayload } from './types';
 import type { AnonymizationWorkerConfig } from '../../config';
-import { AnonymizationState } from './types';
-import { executeRegexRuleTask } from './execute_regex_rule_task';
+import type { DetectedMatch } from './types';
+import { executeRegexRulesTask } from './execute_regex_rule_task';
 
-function runTaskSync(payload: AnonymizationRegexWorkerTaskPayload): AnonymizationState {
-  return executeRegexRuleTask(payload);
+function runTaskSync(payload: AnonymizationRegexWorkerTaskPayload): DetectedMatch[] {
+  return executeRegexRulesTask(payload);
 }
 
 export class RegexWorkerService {
@@ -45,7 +45,7 @@ export class RegexWorkerService {
    * Execute a task in a worker.  Falls back to synchronous execution when the
    * worker is disabled
    */
-  async run(payload: AnonymizationRegexWorkerTaskPayload): Promise<AnonymizationState> {
+  async run(payload: AnonymizationRegexWorkerTaskPayload): Promise<DetectedMatch[]> {
     if (!this.enabled) {
       return runTaskSync(payload);
     }

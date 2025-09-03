@@ -18,8 +18,9 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../../../tasks/alerts_detection_rules';
 import {
-  getAvailablePrebuiltRulesCount,
+  getInstalledPrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
+  installMockPrebuiltRulesPackage,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -39,6 +40,10 @@ describe(
   'Rules table: selection',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       /* Create and install two mock rules */
@@ -65,7 +70,7 @@ describe(
 
       cy.get(SELECT_ALL_RULES_BTN).click();
 
-      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
       });
 
@@ -75,7 +80,7 @@ describe(
       // Current selection should be 0 rules
       cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
       // Bulk selection button should be back to displaying all rules
-      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         cy.get(SELECT_ALL_RULES_BTN).should('contain.text', availablePrebuiltRulesCount);
       });
     });
@@ -85,7 +90,7 @@ describe(
 
       cy.get(SELECT_ALL_RULES_BTN).click();
 
-      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
       });
 
@@ -95,7 +100,7 @@ describe(
       // Current selection should be 0 rules
       cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
       // Bulk selection button should be back to displaying all rules
-      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         cy.get(SELECT_ALL_RULES_BTN).should('contain.text', availablePrebuiltRulesCount);
       });
     });

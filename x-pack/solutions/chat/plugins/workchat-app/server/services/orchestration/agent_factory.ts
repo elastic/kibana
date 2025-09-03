@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkChatTracingConfig } from '../../config';
-import { IntegrationsServiceImpl } from '../integrations/integrations_service';
+import type { IntegrationsServiceImpl } from '../integrations/integrations_service';
 import type { AgentService } from '../agents';
 import type { AgentRunner } from './types';
 import { createAgentRunner } from './agent_runner';
-import { McpGatewaySession, McpGatewaySessionImpl } from './mcp_gateway';
+import type { McpGatewaySession } from './mcp_gateway';
+import { McpGatewaySessionImpl } from './mcp_gateway';
 import { getBaseToolProvider } from './base_tools';
 
 interface AgentFactoryArgs {

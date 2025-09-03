@@ -9,9 +9,11 @@
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
-import { AggTypesDependencies, getAggTypes } from '../agg_types';
-import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
+import type { AggTypesRegistryStart } from '../agg_types_registry';
+import { AggTypesRegistry } from '../agg_types_registry';
+import type { AggTypesDependencies } from '../agg_types';
+import { getAggTypes } from '../agg_types';
+import type { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
 
 // Mocked uiSettings shared among aggs unit tests
 const mockGetConfig = jest.fn().mockImplementation((key: string) => {

@@ -6,8 +6,8 @@
  */
 
 import { isNotFoundError } from '@kbn/es-errors';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamLifecycle,
   MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
@@ -142,13 +142,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [
                 {
                   destination: this._definition.name,
-                  if: { never: {} },
+                  where: { never: {} },
+                  status: 'disabled',
                 },
               ],
             },
@@ -171,7 +172,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: { steps: [] },
                 wired: {
                   fields: {},
                   routing: [],
@@ -206,7 +207,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                     ...currentParentRouting,
                     {
                       destination: this._definition.name,
-                      if: { never: {} },
+                      where: { never: {} },
+                      status: 'disabled',
                     },
                   ],
                 },

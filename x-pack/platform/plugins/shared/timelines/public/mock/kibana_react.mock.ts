@@ -9,7 +9,7 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 const mockGetCreateCaseFlyout = jest.fn();
 const mockGetAllCasesSelectorModal = jest.fn();

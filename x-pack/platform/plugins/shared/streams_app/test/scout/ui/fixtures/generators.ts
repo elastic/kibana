@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SynthtraceFixture } from '@kbn/scout';
+import type { SynthtraceFixture } from '@kbn/scout';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
 export const DATE_RANGE = {

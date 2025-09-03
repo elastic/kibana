@@ -23,8 +23,7 @@ test.describe(
       // Create a test stream with routing rules first
       await apiServices.streams.forkStream('logs', 'logs.nginx', {
         field: 'service.name',
-        value: 'nginx',
-        operator: 'eq',
+        eq: 'nginx',
       });
 
       await pageObjects.streams.gotoDataRetentionTab('logs.nginx');

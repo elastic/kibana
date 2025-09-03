@@ -6,10 +6,15 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutFooter,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
 import { FlyoutContainer } from '../../shared_components/flyout_container';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -31,6 +36,7 @@ export function LoadAnnotationLibraryFlyout({
     renderEventAnnotationGroupSavedObjectFinder: EventAnnotationGroupSavedObjectFinder,
     loadAnnotationGroup,
   } = eventAnnotationService || {};
+  const { euiTheme } = useEuiTheme();
 
   return (
     <FlyoutContainer
@@ -71,7 +77,7 @@ export function LoadAnnotationLibraryFlyout({
     >
       <div
         css={css`
-          padding: ${euiThemeVars.euiSize};
+          padding: ${euiTheme.size.base}
           height: 100%;
         `}
       >

@@ -21,6 +21,23 @@
     "functions": [
       {
         "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.cleanCanvasMock",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanCanvasMock",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/canvas_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
         "id": "def-common.cleanResizeObserverMock",
         "type": "Function",
         "tags": [],
@@ -115,6 +132,23 @@
         "returnComment": [
           "An object containing the RTL render result and, if requested, the parsed chart debug state.\n\nUsage:\nawait renderChart(props, MyChartComponent); // returns { component }\nawait renderChart(props, MyChartComponent, true); // returns { component, debugState }"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.setupCanvasMock",
+        "type": "Function",
+        "tags": [],
+        "label": "setupCanvasMock",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/canvas_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

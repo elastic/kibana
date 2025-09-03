@@ -8,7 +8,7 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LogCategory } from '../../types';
+import type { LogCategory } from '../../types';
 import { createLogCategoriesGridExpandButton } from './log_categories_grid_expand_button';
 
 const DEFAULT_CONTROL_COLUMN_WIDTH = 40;

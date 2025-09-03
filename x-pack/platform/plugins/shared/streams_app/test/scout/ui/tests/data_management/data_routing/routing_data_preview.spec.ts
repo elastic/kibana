@@ -107,8 +107,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       JSON.stringify(
         {
           field: 'severity_text',
-          operator: 'eq',
-          value: 'info',
+          eq: 'info',
         },
         null,
         2
@@ -133,13 +132,11 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
           and: [
             {
               field: 'severity_text',
-              operator: 'eq',
-              value: 'warn',
+              eq: 'warn',
             },
             {
               field: 'body.text',
-              operator: 'contains',
-              value: 'log',
+              contains: 'log',
             },
           ],
         },

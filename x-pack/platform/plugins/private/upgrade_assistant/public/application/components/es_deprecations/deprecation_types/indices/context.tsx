@@ -7,10 +7,12 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { ApiService } from '../../../../lib/api';
-import { useReindex, ReindexState } from './use_reindex';
-import { UpdateIndexState, useUpdateIndex } from './use_update_index';
-import { EnrichedDeprecationInfo, IndexAction } from '../../../../../../common/types';
+import type { ApiService } from '../../../../lib/api';
+import type { ReindexState } from './use_reindex';
+import { useReindex } from './use_reindex';
+import type { UpdateIndexState } from './use_update_index';
+import { useUpdateIndex } from './use_update_index';
+import type { EnrichedDeprecationInfo, IndexAction } from '../../../../../../common/types';
 
 export interface IndexStateContext {
   deprecation: EnrichedDeprecationInfo;

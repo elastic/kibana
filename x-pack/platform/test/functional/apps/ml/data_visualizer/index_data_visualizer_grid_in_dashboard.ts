@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { TestData, MetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { TestData, MetricFieldVisConfig } from './types';
 import { farequoteLuceneFiltersSearchTestData } from './index_test_data';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';

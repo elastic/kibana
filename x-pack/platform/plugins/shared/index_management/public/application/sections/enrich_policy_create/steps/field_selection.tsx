@@ -8,21 +8,21 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiIconTip,
   EuiSpacer,
-  EuiComboBoxOptionOption,
   EuiCallOut,
 } from '@elastic/eui';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
+import type { FormSchema } from '../../../../shared_imports';
 import {
   useForm,
   Form,
   fieldValidators,
-  FormSchema,
   UseField,
   FIELD_TYPES,
   ComboBoxField,
@@ -30,7 +30,8 @@ import {
 
 import type { IndexWithFields, FieldItem } from '../../../../../common';
 import { getFieldsFromIndices } from '../../../services/api';
-import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
+import type { DraftPolicy } from '../create_policy_context';
+import { useCreatePolicyContext } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;

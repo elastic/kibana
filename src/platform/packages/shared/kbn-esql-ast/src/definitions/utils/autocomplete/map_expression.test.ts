@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISuggestionItem } from '../../../commands_registry/types';
+import type { ISuggestionItem } from '../../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../../..';
 import { getCommandMapExpressionSuggestions } from './map_expression';
 

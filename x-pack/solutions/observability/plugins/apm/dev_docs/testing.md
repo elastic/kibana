@@ -190,17 +190,17 @@ diff --git a/x-pack/solutions/observability/plugins/apm/scripts/test/README.md b
 #### Start server and run tests (single process)
 
 ```
-node scripts/functional_tests.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+node scripts/functional_tests.js --config x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
 ```
 
 #### Start server and run tests (separate processes)
 
 ```sh
 # Start server
-node scripts/functional_tests_server.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+node scripts/functional_tests_server.js --config x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
 
 # Run tests
-node scripts/functional_test_runner --config=x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+node scripts/functional_test_runner --config=x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
 ```
 
 ## Storybook

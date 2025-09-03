@@ -11,7 +11,7 @@
         "label": "useAssetDetailsRedirect",
         "description": [],
         "signature": [
-          "() => { getAssetDetailUrl: ({ entityType, entityId, search, }: { entityType: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; entityId: string; search: QueryParams; }) => ",
+          "() => { getAssetDetailUrl: ({ entityType, entityId, search, preferredSchema, }: { entityType: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; entityId: string; search: QueryParams; preferredSchema?: \"ecs\" | \"semconv\" | undefined; }) => ",
           "RouterLinkProps",
           "; }"
         ],
@@ -1995,10 +1995,25 @@
     "misc": [
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.CONTAINER_ID_FIELD",
+        "id": "def-common.CLOUD_PROVIDER",
         "type": "string",
         "tags": [],
-        "label": "CONTAINER_ID_FIELD",
+        "label": "CLOUD_PROVIDER",
+        "description": [],
+        "signature": [
+          "\"cloud.provider\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.CONTAINER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTAINER_ID",
         "description": [],
         "signature": [
           "\"container.id\""
@@ -2070,13 +2085,28 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.HOST_NAME_FIELD",
+        "id": "def-common.HOST_NAME",
         "type": "string",
         "tags": [],
-        "label": "HOST_NAME_FIELD",
+        "label": "HOST_NAME",
         "description": [],
         "signature": [
           "\"host.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.HOST_OS_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_OS_NAME",
+        "description": [],
+        "signature": [
+          "\"host.os.name\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
         "deprecated": false,
@@ -3072,10 +3102,10 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.KUBERNETES_POD_UID_FIELD",
+        "id": "def-common.KUBERNETES_POD_UID",
         "type": "string",
         "tags": [],
-        "label": "KUBERNETES_POD_UID_FIELD",
+        "label": "KUBERNETES_POD_UID",
         "description": [],
         "signature": [
           "\"kubernetes.pod.uid\""
@@ -3279,6 +3309,36 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.OS_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OS_NAME",
+        "description": [],
+        "signature": [
+          "\"os.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.SERVICE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_NAME",
+        "description": [],
+        "signature": [
+          "\"service.name\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.SnapshotMetricType",
         "type": "Type",
         "tags": [],
@@ -3309,10 +3369,10 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.TIMESTAMP_FIELD",
+        "id": "def-common.TIMESTAMP",
         "type": "string",
         "tags": [],
-        "label": "TIMESTAMP_FIELD",
+        "label": "TIMESTAMP",
         "description": [],
         "signature": [
           "\"@timestamp\""

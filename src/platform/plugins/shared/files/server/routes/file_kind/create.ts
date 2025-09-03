@@ -8,12 +8,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilesClient } from '../../../common/files_client';
+import type { FilesClient } from '../../../common/files_client';
 import type { FileJSON, FileKind } from '../../../common/types';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import type { CreateRouteDefinition } from '../api_routes';
+import { FILES_API_ROUTES } from '../api_routes';
 import type { FileKindRouter } from './types';
 import * as commonSchemas from '../common_schemas';
-import { CreateHandler } from './types';
+import type { CreateHandler } from './types';
 
 export const method = 'post' as const;
 

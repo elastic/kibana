@@ -11,7 +11,7 @@ import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/r
 import { getCommonRequestHeader } from '../../services/ml/common_api';
 import { USER } from '../../services/transform/security_common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { generateTransformConfig } from './common';
 
