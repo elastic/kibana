@@ -35,10 +35,10 @@ export const i18nMessages = {
     defaultMessage: 'Remove parameter',
   }),
   addParamButtonLabel: i18n.translate('xpack.onechat.tools.newTool.addParamButtonLabel', {
-    defaultMessage: 'Add parameter',
+    defaultMessage: 'Add a parameter',
   }),
   inferParamsButtonLabel: i18n.translate('xpack.onechat.tools.newTool.inferParamsButtonLabel', {
-    defaultMessage: 'Infer parameters from query',
+    defaultMessage: 'Infer parameters',
   }),
   noParamsMessage: i18n.translate('xpack.onechat.tools.newTool.noParamsMessage', {
     defaultMessage: 'Add parameters or infer them from your ES|QL query.',

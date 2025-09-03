@@ -69,11 +69,7 @@ const setupSyntaxHighlighting = ({
   };
 };
 
-const setupCompletionProvider = ({
-  params,
-}: {
-  params: EsqlParam[];
-}): monaco.IDisposable => {
+const setupCompletionProvider = ({ params }: { params: EsqlParam[] }): monaco.IDisposable => {
   return monaco.languages.registerCompletionItemProvider(ESQL_LANG_ID, {
     triggerCharacters: ['?'],
     provideCompletionItems: (

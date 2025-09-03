@@ -13,8 +13,14 @@ export interface EsqlParam {
   description: string;
 }
 
-type EsqlParamFormData = EsqlParam & {
+export enum EsqlParamSource {
+  Inferred = 'inferred',
+  Custom = 'custom',
+}
+
+export type EsqlParamFormData = EsqlParam & {
   warning?: string;
+  source: EsqlParamSource;
 };
 
 export interface ToolFormData {

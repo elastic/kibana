@@ -50,7 +50,11 @@ export const Configuration = () => {
           )}
         />
       </EuiFormRow>
-      <EuiFormRow label={i18nMessages.configuration.form.esql.queryLabel} isInvalid={!!errors.esql}>
+      <EuiFormRow
+        label={i18nMessages.configuration.form.esql.queryLabel}
+        isInvalid={!!errors.esql}
+        error={errors.esql?.message}
+      >
         <EsqlEditorField />
       </EuiFormRow>
       <EuiFormRow

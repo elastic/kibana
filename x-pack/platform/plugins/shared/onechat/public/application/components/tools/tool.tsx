@@ -127,7 +127,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       isLoading={isSubmitting}
     >
       {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveAndTestButtonLabel', {
-        defaultMessage: 'Save and Test',
+        defaultMessage: 'Save & test',
       })}
     </EuiButton>
   );
