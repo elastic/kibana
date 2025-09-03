@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await indexEditor.setColumnName('renamed-column-1', 0);
 
       // Save the index
-      await indexEditor.saveChanges();
+      await indexEditor.saveChangesAndClose();
 
       // Query should be updated appending the new index name
       const updatedESQLQuery = await esql.getEsqlEditorQuery();
@@ -307,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Go back to save
       await testSubjects.click('confirmModalCancelButton');
       await testSubjects.waitForDeleted('indexEditorUnsavedChangesModal');
-      await indexEditor.saveChanges();
+      await indexEditor.saveChangesAndClose();
 
       // Verify the editions took place correctly
       await retry.tryForTime(10000, async () => {
@@ -334,6 +334,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             customer_first_name: 'Pedro',
             customer_full_name: 'Pedro Fernandez',
             age: 30,
+          },
+        ]);
+      });
+    });
+
+    it('allows to save an edition without closing the flyout', async () => {
+      // Type lookup join query with index name inside it
+      await monacoEditor.setCodeEditorValue('');
+      await monacoEditor.typeCodeEditorValue(
+        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_FILE}`,
+        'ESQLEditor'
+      );
+
+      // Click Create lookup index suggestion
+      await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_FILE}"`);
+      await testSubjects.isDisplayed('lookupIndexFlyout');
+
+      // Manually set content
+      await indexEditor.setColumnName(`my_column`, 0);
+      await indexEditor.setCellValue(0, 1, `value`);
+
+      // Save changes
+      await indexEditor.saveChanges();
+
+      // Verify the editions took place correctly
+      await retry.tryForTime(10000, async () => {
+        await indexEditor.verifyIndexContent(INDEX_NAME_FILE, [
+          {
+            my_column: 'value',
           },
         ]);
       });

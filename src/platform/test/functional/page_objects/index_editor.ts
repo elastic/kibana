@@ -69,9 +69,14 @@ export class IndexEditorObject extends FtrService {
     await this.testSubjects.click('indexEditorDeleteDocs');
   }
 
-  public async saveChanges(): Promise<void> {
+  public async saveChangesAndClose(): Promise<void> {
     await this.testSubjects.click('indexEditorSaveAndCloseButton');
     await this.testSubjects.waitForDeleted('lookupIndexFlyout');
+  }
+
+  public async saveChanges(): Promise<void> {
+    await this.testSubjects.click('indexEditorSaveChangesButton');
+    await this.testSubjects.waitForDeleted('indexEditorSaveChangesButton');
   }
 
   public async closeIndexEditor(): Promise<void> {
