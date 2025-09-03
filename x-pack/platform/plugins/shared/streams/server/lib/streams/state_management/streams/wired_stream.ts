@@ -566,9 +566,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         request: {
           name: this._definition.name,
           settings: {
-            'index.number_of_replicas': settings['index.number_of_replicas'] ?? null,
-            'index.number_of_shards': settings['index.number_of_shards'] ?? null,
-            'index.refresh_interval': settings['index.refresh_interval'] ?? null,
+            'index.number_of_replicas': settings['index.number_of_replicas']?.value ?? null,
+            'index.number_of_shards': settings['index.number_of_shards']?.value ?? null,
+            'index.refresh_interval': settings['index.refresh_interval']?.value ?? null,
           },
         },
       },

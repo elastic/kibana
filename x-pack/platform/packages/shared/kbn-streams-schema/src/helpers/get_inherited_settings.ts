@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import {
+  IngestStreamSettings,
+  WiredIngestStreamEffectiveSettings,
+} from '../models/ingest/settings';
 import type { Streams } from '../models/streams';
 
-export const getInheritedSettings = (ancestors: Streams.WiredStream.Definition[]) => {
+export const getInheritedSettings = (
+  ancestors: Streams.WiredStream.Definition[]
+): WiredIngestStreamEffectiveSettings => {
   return ancestors.reduce((acc, def) => {
     Object.entries(def.ingest.settings).forEach(([key, value]) => {
       acc[key] = { ...value, from: def.name };
     });
 
     return acc;
-  }, {});
+  }, {} as Record<string, WiredIngestStreamEffectiveSettings[keyof IngestStreamSettings]>);
 };
