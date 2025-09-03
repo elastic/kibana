@@ -32928,6 +32928,8 @@ paths:
                               enum:
                                 - elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33090,6 +33092,8 @@ paths:
                               enum:
                                 - remote_elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33220,6 +33224,8 @@ paths:
                               enum:
                                 - logstash
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33505,6 +33511,8 @@ paths:
                                 - not: {}
                             version:
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33710,6 +33718,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -33872,6 +33882,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -34002,6 +34014,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -34287,6 +34301,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -34441,6 +34457,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -34603,6 +34621,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -34733,6 +34753,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35018,6 +35040,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35298,6 +35322,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35460,6 +35486,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35590,6 +35618,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35875,6 +35905,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -36073,6 +36105,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -36229,6 +36263,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -36353,6 +36389,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -36634,6 +36672,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - compression_level
@@ -36785,6 +36825,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -36947,6 +36989,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -37077,6 +37121,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -37362,6 +37408,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -56731,7 +56779,61 @@ paths:
                                             classic:
                                               additionalProperties: false
                                               type: object
-                                              properties: {}
+                                              properties:
+                                                field_overrides:
+                                                  additionalProperties:
+                                                    allOf:
+                                                      - additionalProperties:
+                                                          anyOf:
+                                                            - anyOf:
+                                                                - type: string
+                                                                - type: number
+                                                                - type: boolean
+                                                                - enum:
+                                                                    - 'null'
+                                                                  nullable: true
+                                                                - not: {}
+                                                            - items:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                  - enum:
+                                                                      - 'null'
+                                                                    nullable: true
+                                                                  - not: {}
+                                                              type: array
+                                                            - {}
+                                                        type: object
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              format:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - keyword
+                                                                  - match_only_text
+                                                                  - long
+                                                                  - double
+                                                                  - date
+                                                                  - boolean
+                                                                  - ip
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              type:
+                                                                enum:
+                                                                  - system
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                  type: object
                                           required:
                                             - classic
                                       required:
@@ -61685,7 +61787,61 @@ paths:
                             classic:
                               additionalProperties: false
                               type: object
-                              properties: {}
+                              properties:
+                                field_overrides:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
                           required:
                             - classic
               required:
