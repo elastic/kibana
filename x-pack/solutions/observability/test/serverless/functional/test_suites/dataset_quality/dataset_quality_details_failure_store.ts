@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(failedDocsCard).to.not.contain('No failure store');
       });
 
-      it.only('should edit failure store', async () => {
+      it('should edit failure store', async () => {
         const {
           datasetQualityDetailsSummaryCardFailedDocuments,
           editFailureStoreIcon,
