@@ -36,12 +36,12 @@ export interface CloudProviderConfig {
 }
 
 export type AwsInputs =
-  | 'access_key_id'
-  | 'secret_access_key'
-  | 'session_token'
-  | 'role_arn'
-  | 'shared_credential_file'
-  | 'credential_profile_name'
+  | 'aws.access_key_id'
+  | 'aws.secret_access_key'
+  | 'aws.session_token'
+  | 'aws.role_arn'
+  | 'aws.shared_credential_file'
+  | 'aws.credential_profile_name'
   | 'aws.credentials.external_id';
 
 export type AwsInputFieldMapping = {

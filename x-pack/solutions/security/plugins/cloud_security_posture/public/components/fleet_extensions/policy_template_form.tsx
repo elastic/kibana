@@ -113,6 +113,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           type: CLOUDBEAT_AWS,
           enableOrganization: enableAwsOrganization,
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
+          inputFieldMapping: {
+            'aws.access_key_id': 'access_key_id',
+            'aws.secret_access_key': 'secret_access_key',
+            'aws.session_token': 'session_token',
+            'aws.role_arn': 'role_arn',
+            'aws.shared_credential_file': 'shared_credential_file',
+            'aws.credential_profile_name': 'credential_profile_name',
+          },
         },
         gcp: {
           type: CLOUDBEAT_GCP,
