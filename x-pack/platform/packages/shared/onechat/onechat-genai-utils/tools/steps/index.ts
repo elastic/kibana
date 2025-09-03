@@ -18,3 +18,12 @@ export {
 } from './perform_match_search';
 export { executeEsql, type EsqlResponse } from './execute_esql';
 export { listIndices, type ListIndexBasicInfo, type ListIndexDetailInfo } from './list_indices';
+export {
+  listSearchSources,
+  type AliasSearchSource,
+  type IndexSearchSource,
+  type DataStreamSearchSource,
+  type EsSearchSource,
+  type ListSourcesResponse,
+} from './list_search_sources';
+export { resolveResource, type ResolveResourceResponse } from './resolve_resource';
