@@ -204,8 +204,8 @@ export const AgentTypesEnum = AgentTypes.enum;
 export type BaseActionSchema = z.infer<typeof BaseActionSchema>;
 export const BaseActionSchema = z.object({
   endpoint_ids: EndpointIds,
-  alert_ids: AlertIds.optional(),
-  case_ids: CaseIds.optional(),
+  alert_ids: AlertIds.merge(z.object({})),
+  case_ids: CaseIds.merge(z.object({})),
   comment: Comment.optional(),
   parameters: Parameters.optional(),
   agent_type: AgentTypes.optional(),
