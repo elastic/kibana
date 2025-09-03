@@ -10,9 +10,11 @@
 import React from 'react';
 import type { IndicesListProps } from './indices_list';
 import { IndicesList, PER_PAGE_STORAGE_KEY } from './indices_list';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { IntlProvider } from 'react-intl';
 
 const indices = [
   { name: 'kibana', tags: [] },
@@ -29,67 +31,75 @@ describe('IndicesList', () => {
     indices,
     isExactMatch: jest.fn(() => false),
   };
+  const Wrapper = (props) => <IntlProvider locale="en">{props.children}</IntlProvider>;
+  const user = userEvent.setup();
 
   afterEach(() => {
     new Storage(localStorage).remove(PER_PAGE_STORAGE_KEY);
   });
 
   it('should render normally', () => {
-    const component = shallow(<IndicesList {...commonProps} query="" />);
+    const { container } = render(<IndicesList {...commonProps} query="" />, { wrapper: Wrapper });
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('should change pages', () => {
-    const component = shallow(<IndicesList {...commonProps} query="" />);
+  it('should change pages', async () => {
+    const lotsOfIndices = Array.from({ length: 15 }).map((_, i) => ({
+      name: `index-${i}`,
+      tags: [],
+    })) as unknown as MatchedItem[];
+    const { container } = render(
+      <IndicesList {...commonProps} indices={lotsOfIndices} query="" />,
+      { wrapper: Wrapper }
+    );
 
-    const instance = component.instance() as IndicesList;
+    await user.click(screen.getByTestId('pagination-button-next'));
 
-    component.setState({ perPage: 1 });
-    instance.onChangePage(1);
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('should change per page', () => {
-    const component = shallow(<IndicesList {...commonProps} query="" />);
+  it('should change per page', async () => {
+    const { container } = render(<IndicesList {...commonProps} query="" />, { wrapper: Wrapper });
 
-    const instance = component.instance() as IndicesList;
-    instance.onChangePerPage(1);
-    component.update();
+    await user.click(screen.getByText('Rows per page: 10'));
+    await user.click(screen.getByText('5'));
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should highlight the query in the matches', () => {
-    const component = shallow(
+    const { container } = render(
       <IndicesList
         {...commonProps}
         query="es,ki"
         isExactMatch={(indexName) => indexName === 'es'}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should highlight fully when an exact match', () => {
-    const component = shallow(
+    const { container } = render(
       <IndicesList
         {...commonProps}
         indices={similarIndices}
         query="logs*"
         isExactMatch={(indexName) => indexName === 'some_logs'}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   describe('updating props', () => {
     it('should render all new indices', () => {
-      const component = shallow(<IndicesList {...commonProps} query="" />);
+      const { container, rerender } = render(<IndicesList {...commonProps} query="" />, {
+        wrapper: Wrapper,
+      });
 
       const moreIndices = [
         ...indices,
@@ -102,9 +112,8 @@ describe('IndicesList', () => {
         ...indices,
       ];
 
-      component.setProps({ indices: moreIndices });
-      component.update();
-      expect(component).toMatchSnapshot();
+      rerender(<IndicesList {...commonProps} indices={moreIndices} query="" />);
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });
