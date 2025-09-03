@@ -16,8 +16,7 @@ import { JOB_STATE } from '@kbn/ml-common-constants/states';
 import { mlApiProvider } from '@kbn/ml-services/ml_api_service';
 import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 import { HttpService } from '@kbn/ml-services/http_service';
-
-import { extractDeploymentId } from '../../../services/ml_server_info';
+import { extractDeploymentId } from '@kbn/ml-common-utils/extract_deployment_id';
 
 interface Props {
   jobIds: string[];
