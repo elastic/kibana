@@ -9,14 +9,14 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { DefaultValue, Type, TypeOptions } from './type';
 
-export type URIOptions = TypeOptions<string> & {
+export type URIOptions<D extends DefaultValue<string>> = TypeOptions<string, D> & {
   scheme?: string | string[];
 };
 
-export class URIType extends Type<string> {
-  constructor(options: URIOptions = {}) {
+export class URIType<D extends DefaultValue<string>> extends Type<string, D> {
+  constructor(options: URIOptions<D> = {}) {
     super(internals.string().uri({ scheme: options.scheme }), options);
   }
 

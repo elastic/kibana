@@ -64,51 +64,53 @@ export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
 
-function any(options?: TypeOptions<any>) {
+function any<D extends DefaultValue<any> = never>(options?: TypeOptions<any, D>): Type<any, D> {
   return new AnyType(options);
 }
 
-function boolean(options?: TypeOptions<boolean>): Type<boolean> {
+function boolean<D extends DefaultValue<boolean> = never>(options?: TypeOptions<boolean, D>): Type<boolean, D> {
   return new BooleanType(options);
 }
 
-function buffer(options?: TypeOptions<Buffer>): Type<Buffer> {
+function buffer<D extends DefaultValue<Buffer> = never>(options?: TypeOptions<Buffer, D>): Type<Buffer, D> {
   return new BufferType(options);
 }
 
-function stream(options?: TypeOptions<Stream>): Type<Stream> {
+function stream<D extends DefaultValue<Stream> = never>(options?: TypeOptions<Stream, D>): Type<Stream, D> {
   return new StreamType(options);
 }
 
-function string(options?: StringOptions): Type<string> {
+function string<D extends DefaultValue<string> = never>(options?: StringOptions<D>): Type<string, D> {
   return new StringType(options);
 }
 
-function uri(options?: URIOptions): Type<string> {
+function uri<D extends DefaultValue<string> = never>(options?: URIOptions<D>): Type<string, D> {
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean | null>(value: T): Type<T> {
+function literal<T extends string | number | boolean | null, D extends DefaultValue<T>>(value: T): Type<T, D> {
   return new LiteralType(value);
 }
 
-function number(options?: NumberOptions): Type<number> {
+function number<D extends DefaultValue<number> = never>(
+  options?: NumberOptions<D>
+): Type<number, D> {
   return new NumberType(options);
 }
 
-function byteSize(options?: ByteSizeOptions): Type<ByteSizeValue> {
+function byteSize<D extends ByteSizeValue = never>(options?: ByteSizeOptions<D>): Type<ByteSizeValue, D> {
   return new ByteSizeType(options);
 }
 
-function duration(options?: DurationOptions): Type<Duration> {
+function duration<D extends DefaultValue<Duration> = never>(options?: DurationOptions<D>): Type<Duration, D> {
   return new DurationType(options);
 }
 
-function never(): Type<never> {
+function never(): Type<never, never> {
   return new NeverType();
 }
 
-function ip(options?: IpOptions): Type<string> {
+function ip<D extends DefaultValue<string> = never>(options?: IpOptions<D>): Type<string, D> {
   return new IpType(options);
 }
 
@@ -123,7 +125,10 @@ function nullable<V>(type: Type<V>): Type<V | null> {
   return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
 }
 
-function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
+function object<
+  P extends ObjectProps<Props>,
+  D extends DefaultValue<ObjectResultTypeInput<P>> = never
+>(props: P, options?: ObjectTypeOptions<P, D>): ObjectType<P, D> {
   return new ObjectType(props, options);
 }
 
@@ -139,11 +144,11 @@ function mapOf<K, V>(
   return new MapOfType(keyType, valueType, options);
 }
 
-function recordOf<K extends string, V>(
+function recordOf<K extends string, V, D extends DefaultValue<Record<K, V>>>(
   keyType: Type<K>,
   valueType: Type<V>,
-  options?: RecordOfOptions<K, V>
-): Type<Record<K, V>> {
+  options?: RecordOfOptions<K, V, D>
+): Type<Record<K, V>, D> {
   return new RecordOfType(keyType, valueType, options);
 }
 
@@ -443,6 +448,11 @@ import {
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
 } from './src/oas_meta_fields';
+import { DefaultValue } from './src/types/type';
+import {
+  ObjectProps,
+  ObjectResultTypeInput,
+} from './src/types/object_type';
 
 export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DISCONTINUED,

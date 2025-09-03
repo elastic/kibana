@@ -10,17 +10,17 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions, DefaultValue } from './type';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
-export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>> & UnknownOptions;
+export type RecordOfOptions<K extends string, V, D extends DefaultValue<Record<K, V>>> = TypeOptions<Record<K, V>, D> & UnknownOptions;
 
-export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
+export class RecordOfType<K extends string, V, D extends DefaultValue<Record<K, V>>> extends Type<Record<K, V>, D> {
   private readonly keyType: Type<K>;
   private readonly valueType: Type<V>;
-  private readonly options: RecordOfOptions<K, V>;
+  private readonly options: RecordOfOptions<K, V, D>;
 
-  constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
+  constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V, D> = {}) {
     let schema = internals
       .record()
       .entries(keyType.getSchema(), valueType.getSchema())
