@@ -14,7 +14,6 @@ import {
   isCloudTrial,
   getNewJobDefaults,
   getNewJobLimits,
-  extractDeploymentId,
 } from './ml_server_info';
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
@@ -58,32 +57,6 @@ describe('ml_server_info', () => {
       const limits = getNewJobLimits();
 
       expect(limits.max_model_memory_limit).toBe('128mb');
-    });
-  });
-
-  describe('cloud extract deployment ID', () => {
-    const cloudIdWithDeploymentName =
-      'cloud_message_test:ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==';
-
-    const cloudIdWithOutDeploymentName =
-      ':ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==';
-
-    const badCloudId = 'cloud_message_test:this_is_not_a_base64_string';
-
-    it('should extract cloud ID when deployment name is present', () => {
-      expect(extractDeploymentId(cloudIdWithDeploymentName)).toBe(
-        '85d666f3350c469e8c3242d76a7f459c'
-      );
-    });
-
-    it('should extract cloud ID when deployment name is not present', () => {
-      expect(extractDeploymentId(cloudIdWithOutDeploymentName)).toBe(
-        '85d666f3350c469e8c3242d76a7f459c'
-      );
-    });
-
-    it('should fail to extract cloud ID', () => {
-      expect(extractDeploymentId(badCloudId)).toBe(null);
     });
   });
 });
