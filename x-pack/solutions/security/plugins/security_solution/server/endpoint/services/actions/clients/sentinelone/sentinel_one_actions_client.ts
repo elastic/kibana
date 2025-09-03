@@ -460,9 +460,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // RUN SCRIPT
     if (payload.command === 'runscript') {
-      const parameters = (
-        payload as ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
-      ).parameters;
+      const runScriptRequestPayload = payload as Mutable<
+        ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
+      >;
+      const parameters = runScriptRequestPayload.parameters;
       const scriptId = (parameters?.scriptId ?? '').trim();
 
       if (!scriptId) {
@@ -478,6 +479,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (scriptDetails.data?.data.length === 0 || scriptDetails.data?.data[0].id !== scriptId) {
         throw new ResponseActionsClientError(`Script ID [${scriptId}] not found`, 404);
+      }
+
+      // Prepend the script name to the `comment` field for reference
+      const scriptNameComment = `(Script name: ${scriptDetails.data?.data[0].scriptName})`;
+
+      if (!(runScriptRequestPayload.comment ?? '').startsWith(scriptNameComment)) {
+        runScriptRequestPayload.comment = `(Script name: ${
+          scriptDetails.data?.data[0].scriptName
+        })${runScriptRequestPayload.comment ? ` ${runScriptRequestPayload.comment}` : ''}`;
       }
     }
 
@@ -1128,29 +1138,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           reqIndexOptions.meta = {
             parentTaskId: s1Response.data?.data?.parentTaskId ?? '',
           };
-
-          // since sending the action to S1 was successful, add the script name to the response action
-          // comment so that it is shown in the UI. BUT: if for some reason this fails, just log it
-          // and keep going since action was already sent and this is just supplemental data.
-          try {
-            const { data: scriptSearchResults } = await this.sendAction<
-              SentinelOneGetRemoteScriptsResponse,
-              Mutable<Partial<SentinelOneGetRemoteScriptsParams>>
-            >(SUB_ACTION.GET_REMOTE_SCRIPTS, { ids: scriptId });
-
-            const scriptName = scriptSearchResults?.data?.at(0)?.scriptName ?? '';
-
-            if (scriptName) {
-              reqIndexOptions.comment = `(Script name: ${scriptName})${
-                reqIndexOptions.comment ? ` ${reqIndexOptions.comment}` : ''
-              }`;
-            }
-          } catch (e) {
-            this.log.error(
-              `Failed to retrieve SentinelOne Script name for script id ${scriptId}: ${e.message}`,
-              { error: e }
-            );
-          }
         } catch (err) {
           error = err;
         }
