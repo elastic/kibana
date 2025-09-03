@@ -19,6 +19,7 @@ export interface ChatParams {
   connectorId?: string;
   conversationId?: string;
   input: string;
+  toolParameters?: any;
 }
 
 export class ChatService {
@@ -34,6 +35,7 @@ export class ChatService {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
+      tool_parameters: params.toolParameters,
     };
     return defer(() => {
       return this.http.post('/api/chat/converse/async', {

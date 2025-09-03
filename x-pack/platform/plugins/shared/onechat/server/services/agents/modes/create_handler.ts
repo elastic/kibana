@@ -13,7 +13,10 @@ import { runAgent } from './run_agent';
  * Create the handler function for the default onechat agent.
  */
 export const createAgentHandler = ({ agent }: { agent: AgentDefinition }): AgentHandlerFn => {
-  return async ({ agentParams: { nextInput, conversation = [] }, runId, abortSignal }, context) => {
+  return async (
+    { agentParams: { nextInput, conversation = [], toolParameters }, runId, abortSignal },
+    context
+  ) => {
     const { round } = await runAgent(
       {
         nextInput,
@@ -23,6 +26,7 @@ export const createAgentHandler = ({ agent }: { agent: AgentDefinition }): Agent
         agentId: agent.id,
         toolSelection: agent.configuration.tools,
         customInstructions: agent.configuration.instructions,
+        toolParameters,
       },
       context
     );

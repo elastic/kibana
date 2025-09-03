@@ -39,6 +39,10 @@ export interface RunAgentParams {
    * optional signal to abort the execution of the agent
    */
   abortSignal?: AbortSignal;
+  /**
+   * Optional tool parameters to be passed to the agent.
+   */
+  toolParameters?: Record<string, any>;
 }
 
 export interface RunAgentResponse {

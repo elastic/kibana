@@ -7,7 +7,8 @@
 
 import { Observable } from 'rxjs';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { AgentCreateRequest } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
+import type { AgentCreateRequest } from '@kbn/onechat-plugin/common/agents';
 import type {
   SecuritySolutionPluginCoreStartDependencies,
   SecuritySolutionPluginStartDependencies,
@@ -36,7 +37,7 @@ export class SiemAgentCreator {
         url: { pathname: '/internal/security_solution/siem-agent' },
         route: { settings: {} },
         events: { aborted$: new Observable() },
-      } as KibanaRequest;
+      } as unknown as KibanaRequest;
 
       const agentClient = await onechatPlugin.agents.getScopedClient({ request: mockRequest });
 
@@ -77,16 +78,16 @@ When analyzing alerts, focus on:
 Always provide clear, actionable recommendations and explain your reasoning.`,
           tools: [
             // Include the open-and-acknowledged-alerts-internal-tool
-            { tool_ids: ['.open-and-acknowledged-alerts-internal-tool'] },
+            { type: ToolType.builtin, tool_ids: ['.open-and-acknowledged-alerts-internal-tool'] },
             // Include all built-in tools for comprehensive security analysis
-            { type: 'builtin', tool_ids: ['*'] },
+            // { type: ToolType.builtin, tool_ids: ['*'] },
           ],
         },
       };
 
       const createdAgent = await agentClient.create(siemAgentRequest);
       logger.info('Successfully created SIEM agent', {
-        agentId: createdAgent.id,
+        agent: createdAgent.id,
         agentName: createdAgent.name,
       });
     } catch (error) {

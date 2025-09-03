@@ -19,7 +19,6 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 // import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
-import { APP_UI_ID } from '../../../../common';
 
 export type OpenAndAcknowledgedAlertsInternalToolParams = Require<
   AssistantToolParams,
@@ -43,15 +42,14 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
 > => {
   return {
     id: '.open-and-acknowledged-alerts-internal-tool',
-    name: 'OpenAndAcknowledgedAlertsInternalTool',
     description: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION,
     schema: openAndAcknowledgedAlertsToolSchema,
-    handler: async ({ alertsIndexPattern, size }, { esClient, request, context }) => {
+    handler: async ({ alertsIndexPattern, size }, { esClient, request }) => {
+      console.log('alertsIndexPattern', alertsIndexPattern);
       // Validate size is within range
       if (sizeIsOutOfRange(size)) {
         throw new Error(`Size ${size} is out of range`);
       }
-      console.log('alertsIndexPattern', alertsIndexPattern);
 
       const query = getOpenAndAcknowledgedAlertsQuery({
         alertsIndexPattern,
@@ -82,13 +80,12 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
       return {
         results: [
           {
-            type: ToolResultType.text,
+            type: ToolResultType.other,
             data: JSON.stringify(content),
           },
         ],
       };
     },
     tags: ['alerts', 'open-and-acknowledged-alerts', 'security'],
-    sourceRegister: APP_UI_ID,
   };
 };

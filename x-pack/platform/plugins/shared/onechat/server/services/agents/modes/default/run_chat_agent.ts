@@ -41,6 +41,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
+    toolParameters,
   },
   { logger, request, modelProvider, toolProvider, events }
 ) => {
@@ -62,6 +63,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
+    toolParameters,
   });
 
   const agentGraph = createAgentGraph({

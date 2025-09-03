@@ -15,6 +15,7 @@ export interface ChatRequestBodyPayload {
   connector_id?: string;
   conversation_id?: string;
   input: string;
+  tool_parameters?: Record<string, any>;
 }
 
 export interface ChatResponse {

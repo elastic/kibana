@@ -27,9 +27,13 @@ import { mutationKeys } from '../mutation_keys';
 import type { ConversationSettings } from '../../services/types';
 interface UseSendMessageMutationProps {
   connectorId?: string;
+  toolParameters?: Record<string, any>;
 }
 
-const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
+const useSendMessageMutation = ({
+  connectorId,
+  toolParameters,
+}: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { reportConverseError } = useReportConverseError();
   const conversationActions = useConversationActions();
@@ -52,6 +56,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
         conversationId,
         agentId,
         connectorId,
+        toolParameters,
       });
 
       events$.subscribe({
@@ -194,9 +199,10 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
   );
 
   const connectorId = conversationSettings?.selectedConnectorId;
+  const toolParameters = conversationSettings?.toolParameters;
 
   const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
-    useSendMessageMutation({ connectorId });
+    useSendMessageMutation({ connectorId, toolParameters });
 
   return (
     <SendMessageContext.Provider

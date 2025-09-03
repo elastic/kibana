@@ -54,6 +54,8 @@ export const OneChatOverlay = React.memo(() => {
     toasts,
     commentActionsMounter,
     onechatServices,
+    alertsIndexPattern,
+    knowledgeBase,
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
@@ -207,6 +209,10 @@ export const OneChatOverlay = React.memo(() => {
         defaultAgentId: 'siem-security-analyst',
         commentActionsMounter,
         setConnectorId,
+        toolParameters: {
+          alertsIndexPattern,
+          size: knowledgeBase.latestAlerts,
+        },
       });
     }
   }, [
@@ -218,6 +224,8 @@ export const OneChatOverlay = React.memo(() => {
     assistantSettings,
     setLastConversation,
     commentActionsMounter,
+    alertsIndexPattern,
+    knowledgeBase.latestAlerts,
   ]);
 
   if (!isModalVisible || !OnechatConversationsView || !onechatServices) return null;

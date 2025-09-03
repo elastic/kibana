@@ -41,6 +41,7 @@ export function registerChatRoutes({
     connector_id: schema.maybe(schema.string()),
     conversation_id: schema.maybe(schema.string()),
     input: schema.string(),
+    tool_parameters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   });
 
   const callConverse = ({
@@ -61,6 +62,7 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      tool_parameters: toolParameters,
     } = payload;
 
     return chatService.converse({
@@ -71,6 +73,7 @@ export function registerChatRoutes({
       nextInput: { message: input },
       request,
       spaceId,
+      toolParameters,
     });
   };
 

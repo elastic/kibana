@@ -33,6 +33,7 @@ export interface ConversationSettings {
   defaultAgentId?: string;
   commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
   setConnectorId?: (connectorId?: string) => void;
+  toolParameters?: Record<string, any>;
 }
 
 export interface OnechatInternalService {
