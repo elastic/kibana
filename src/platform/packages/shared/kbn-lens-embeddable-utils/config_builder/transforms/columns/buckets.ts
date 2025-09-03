@@ -31,8 +31,11 @@ import {
   fromRangeOrHistogramLensStateToAPI,
 } from './range';
 import { fromTermsLensApiToLensState, fromTermsLensStateToAPI } from './top_values';
-import type { AnyBucketLensStateColumn, AnyLensStateColumn, AnyMetricLensStateColumn } from './types';
-import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type {
+  AnyBucketLensStateColumn,
+  AnyLensStateColumn,
+  AnyMetricLensStateColumn,
+} from './types';
 
 export function fromBucketLensApiToLensState(
   options: LensApiBucketOperations,
@@ -68,10 +71,7 @@ export function fromBucketLensStateToAPI(
     return fromRangeOrHistogramLensStateToAPI(column);
   }
   if (isLensStateColumnOfType<TermsIndexPatternColumn>('terms', column)) {
-    return fromTermsLensStateToAPI(
-      column,
-      columns
-    );
+    return fromTermsLensStateToAPI(column, columns);
   }
   throw new Error(`Unsupported bucket operation`);
 }

@@ -26,7 +26,8 @@ describe('Bucket Operation Schemas', () => {
     it('validates a valid date histogram configuration', () => {
       const input = {
         operation: 'date_histogram',
-        field: 'timestamp',suggested_interval: 'auto',
+        field: 'timestamp',
+        suggested_interval: 'auto',
         include_empty_rows: true,
         use_original_time_range: true,
       };
