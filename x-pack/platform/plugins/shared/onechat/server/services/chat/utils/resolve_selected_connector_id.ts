@@ -85,7 +85,14 @@ export const resolveSelectedConnectorId = async ({
   const hasValidDefaultConnector =
     defaultConnectorSetting && defaultConnectorSetting !== NO_DEFAULT_CONNECTOR;
 
-  if (defaultConnectorOnly && hasValidDefaultConnector) return defaultConnectorSetting;
+  if (defaultConnectorOnly && hasValidDefaultConnector) {
+    if (connectorId && connectorId !== defaultConnectorSetting) {
+      throw new Error(
+        `Connector ID [${connectorId}] does not match the configured default connector ID [${defaultConnectorSetting}].`
+      );
+    }
+    return defaultConnectorSetting;
+  }
   if (connectorId) return connectorId;
   if (hasValidDefaultConnector) return defaultConnectorSetting;
 

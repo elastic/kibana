@@ -11,6 +11,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createRegexWorkerServiceMock } from '../test_utils';
 import type { Message } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import {
   MessageRole,
   type PromptAPI,
@@ -127,7 +128,7 @@ describe('createPromptApi', () => {
   it('calls promptToMessageOptions with correct arguments derived from connector', async () => {
     const mockConnector = createInferenceConnectorMock({
       connectorId: 'test-connector-openai',
-      type: 'openai' as any, // Using 'as any' if InferenceConnectorType.OpenAI is not directly available or for simplicity
+      type: InferenceConnectorType.OpenAI,
       name: 'My OpenAI Connector',
       config: { model_id: 'gpt-4o-test' },
     });

@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { defer, switchMap } from 'rxjs';
+import { defer } from 'rxjs';
 import type { Span } from '@opentelemetry/api';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -26,16 +26,12 @@ export const getChatModel$ = ({
 }): Observable<InferenceChatModel> => {
   return defer(async () => {
     span?.setAttribute('elastic.connector.id', connectorId);
-    return connectorId;
-  }).pipe(
-    switchMap((selectedConnectorId) => {
-      return inference.getChatModel({
-        request,
-        connectorId: selectedConnectorId,
-        chatModelOptions: {
-          telemetryMetadata: MODEL_TELEMETRY_METADATA,
-        },
-      });
-    })
-  );
+    return inference.getChatModel({
+      request,
+      connectorId,
+      chatModelOptions: {
+        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+      },
+    });
+  });
 };
