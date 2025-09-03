@@ -272,7 +272,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             {/* Additional Settings Section */}
             <EuiFormRow fullWidth>
               <EuiAccordion
-                arrowDisplay="right"
+                arrowDisplay="left"
                 id="migrateAgentFlyoutAdditionalOptions"
                 initialIsOpen={false}
                 buttonContent={
