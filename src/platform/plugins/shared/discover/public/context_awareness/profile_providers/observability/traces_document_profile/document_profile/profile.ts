@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
-import { DocumentType, SolutionType } from '../../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 
@@ -33,32 +31,18 @@ export const createObservabilityTracesDocumentProfileProvider = ({
       logs: logsContextService.getAllLogsIndexPattern(),
     }),
   },
-  resolve: ({ record, rootContext }) => {
+  resolve: ({ rootContext, dataSourceContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
-    if (!isObservabilitySolutionView) {
-      return { isMatch: false };
+    if (isObservabilitySolutionView && dataSourceContext.category === DataSourceCategory.Traces) {
+      return {
+        isMatch: true,
+        context: {
+          type: DocumentType.Trace,
+        },
+      };
     }
 
-    if (!isTraceDocument(record)) {
-      return { isMatch: false };
-    }
-
-    return {
-      isMatch: true,
-      context: {
-        type: DocumentType.Trace,
-      },
-    };
+    return { isMatch: false };
   },
 });
-
-const isTraceDocument = (record: DataTableRecord) => {
-  const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
-  const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-
-  const isApmSpan = processorEvent === 'span' || processorEvent === 'transaction';
-  const isOtelSpan = processorEvent == null;
-
-  return dataStreamType === 'traces' && (isApmSpan || isOtelSpan);
-};

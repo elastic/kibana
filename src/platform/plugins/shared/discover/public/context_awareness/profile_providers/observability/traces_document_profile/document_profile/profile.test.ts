@@ -67,27 +67,14 @@ describe('spanDocumentProfileProvider', () => {
       ).toEqual(RESOLUTION_MATCH);
     });
 
-    it('does not match records with neither characteristic', () => {
+    it('matches records with neither characteristic as long as it comes from the correct data source', () => {
       expect(
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildSpanMockRecord('another-index'),
         })
-      ).toEqual(RESOLUTION_MISMATCH);
-    });
-
-    it('does not match records with the correct data stream type but the incorrect processor event', () => {
-      expect(
-        spanDocumentProfileProvider.resolve({
-          rootContext: getRootContext({ profileId }),
-          dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildSpanMockRecord('index', {
-            'data_stream.type': ['traces'],
-            'processor.event': ['other'],
-          }),
-        })
-      ).toEqual(RESOLUTION_MISMATCH);
+      ).toEqual(RESOLUTION_MATCH);
     });
 
     it('matches records with the correct data stream type and any OTEL `kind` field (unprocessed spans)', () => {
@@ -197,14 +184,14 @@ describe('transactionDocumentProfileProvider', () => {
       ).toEqual(RESOLUTION_MATCH);
     });
 
-    it('does not match records with neither characteristic', () => {
+    it('matches records with neither characteristic as long as it comes from the correct data source', () => {
       expect(
         transactionDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildSpanMockRecord('another-index'),
         })
-      ).toEqual(RESOLUTION_MISMATCH);
+      ).toEqual(RESOLUTION_MATCH);
     });
   });
 
