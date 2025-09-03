@@ -8,9 +8,6 @@
 import moment from 'moment';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { defaultMonitoringUsersIndex } from '../../../../../common/constants';
-import type { CreateMonitoringEntitySource } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
-import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import {
   MonitoringEngineComponentResourceEnum,
   type CreateMonitoringEntitySource,

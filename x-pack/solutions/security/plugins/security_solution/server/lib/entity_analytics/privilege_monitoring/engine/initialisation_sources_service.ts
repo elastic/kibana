@@ -6,7 +6,7 @@
  */
 
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import type { IntegrationType } from '../data_sources';
 import {
@@ -67,7 +67,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
       );
       dataClient.audit(
         PrivilegeMonitoringEngineActions.INIT,
-        EngineComponentResourceEnum.privmon_engine,
+        MonitoringEngineComponentResourceEnum.privmon_engine,
         'Failed to create default index source for privilege monitoring',
         error
       );
