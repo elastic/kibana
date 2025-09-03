@@ -19,7 +19,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ReactElement } from 'react';
 import type { DiscoverServices } from '../../../../build_services';
-import type { showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { fromTabStateToSavedObjectTab, internalStateActions } from '../../state_management/redux';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { getTabStateMock } from '../../state_management/redux/__mocks__/internal_state.mocks';
@@ -27,11 +27,11 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { omit } from 'lodash';
 
-const mockShowSaveModal: jest.MockedFunction<typeof showSaveModal> = jest.fn();
+const mockShowSaveModal = jest.mocked(showSaveModal);
 
 jest.mock('@kbn/saved-objects-plugin/public', () => ({
   ...jest.requireActual('@kbn/saved-objects-plugin/public'),
-  showSaveModal: (...params: Parameters<typeof showSaveModal>) => mockShowSaveModal(...params),
+  showSaveModal: jest.fn(),
 }));
 
 type OnSaveProps = Parameters<DiscoverSessionSaveModalOnSaveCallback>[0];
@@ -128,7 +128,7 @@ describe('onSaveDiscoverSession', () => {
     });
   });
 
-  it("should set isTimeBased to true if any tab's data view is time based", async () => {
+  describe('isTimeBased checks', () => {
     const services = createDiscoverServicesMock();
     const dataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
       tab: getTabStateMock({
@@ -170,31 +170,46 @@ describe('onSaveDiscoverSession', () => {
       timeRestore: true,
       services,
     });
-    let { saveModal } = await setup({
-      additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
-      dataViewsList: [dataViewMock],
-      services,
+
+    it("should set isTimeBased to false if no tab's data view is time based", async () => {
+      const { saveModal } = await setup({
+        additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
+        dataViewsList: [dataViewMock],
+        services,
+      });
+      expect(saveModal?.props.isTimeBased).toBe(false);
     });
-    expect(saveModal?.props.isTimeBased).toBe(false);
-    ({ saveModal } = await setup({
-      savedSearch: savedSearchMockWithTimeField,
-      additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
-      dataViewsList: [dataViewMock],
-      services,
-    }));
-    expect(saveModal?.props.isTimeBased).toBe(true);
-    ({ saveModal } = await setup({
-      additionalPersistedTabs: [dataViewWithTimeFieldTab, adHocDataViewNoTimeFieldTab],
-      dataViewsList: [dataViewMockWithTimeField],
-      services,
-    }));
-    expect(saveModal?.props.isTimeBased).toBe(true);
-    ({ saveModal } = await setup({
-      additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewWithTimeFieldTab],
-      dataViewsList: [dataViewMock],
-      services,
-    }));
-    expect(saveModal?.props.isTimeBased).toBe(true);
+
+    it.each([
+      [
+        'initialized tab',
+        {
+          savedSearch: savedSearchMockWithTimeField,
+          additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewNoTimeFieldTab],
+          dataViewsList: [dataViewMock],
+        },
+      ],
+      [
+        'uninitialized tab with persisted data view',
+        {
+          additionalPersistedTabs: [dataViewWithTimeFieldTab, adHocDataViewNoTimeFieldTab],
+          dataViewsList: [dataViewMockWithTimeField],
+        },
+      ],
+      [
+        'uninitialized tab with ad hoc data view',
+        {
+          additionalPersistedTabs: [dataViewNoTimeFieldTab, adHocDataViewWithTimeFieldTab],
+          dataViewsList: [dataViewMock],
+        },
+      ],
+    ])(
+      "should set isTimeBased to true if any tab's data view is time based - %s",
+      async (_, setupArgs) => {
+        const { saveModal } = await setup({ ...setupArgs, services });
+        expect(saveModal?.props.isTimeBased).toBe(true);
+      }
+    );
   });
 
   it("should set timeRestore to true if any tab's timeRestore is true", async () => {
