@@ -15,6 +15,7 @@ import type {
   CreateToolResponse,
   UpdateToolResponse,
   BulkDeleteToolResponse,
+  ExecuteToolResponse,
 } from '../../../common/http_api/tools';
 
 export class ToolsService {
@@ -52,6 +53,15 @@ export class ToolsService {
   async update(id: string, update: UpdateToolPayload) {
     return await this.http.put<UpdateToolResponse>(`/api/chat/tools/${id}`, {
       body: JSON.stringify(update),
+    });
+  }
+
+  async execute(toolId: string, toolParams: Record<string, unknown>) {
+    return await this.http.post<ExecuteToolResponse>('/api/chat/tools/_execute', {
+      body: JSON.stringify({
+        tool_id: toolId,
+        tool_params: toolParams,
+      }),
     });
   }
 }

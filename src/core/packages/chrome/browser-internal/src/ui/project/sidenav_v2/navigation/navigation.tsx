@@ -10,7 +10,8 @@
 import React, { useMemo } from 'react';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import type { Observable } from 'rxjs';
-import { combineLatest } from 'rxjs';
+import { combineLatest, EMPTY } from 'rxjs';
+import classnames from 'classnames';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
@@ -48,6 +49,7 @@ export interface ChromeNavigationProps {
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
+  const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
 
   if (!state) {
     return null;
@@ -63,6 +65,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         activeItemId={activeItemId}
+        data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />
     </RedirectNavigationAppLinks>
   );
