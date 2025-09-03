@@ -98,6 +98,7 @@ export class WorkflowContextManager {
       },
       consts: workflowExecution.workflowDefinition.consts || {},
       event: workflowExecution.context?.event,
+      inputs: workflowExecution.context?.inputs,
     };
   }
 
