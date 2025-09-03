@@ -32,6 +32,7 @@ export class RpcService<Context extends object | void = void, Names extends stri
     if (!procedure) throw new Error(`Procedure [${name}] is not registered.`);
 
     const { fn, schemas } = procedure;
+
     // 1. Validate input
     if (schemas?.in) {
       const error = validate(input, schemas.in);

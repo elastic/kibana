@@ -31,18 +31,15 @@ class InMemoryStorage implements ContentStorage<any> {
 
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
-      const temp = {
-        data: {
+      return {
+        item: {
           ...(await this.db.get(id)),
           options: forwardInResponse,
         },
       };
-      console.log('InMemoryStorage storage get called with-----', JSON.stringify(temp, null, 2));
-      return temp;
     }
-
     return {
-      data: this.db.get(id),
+      item: this.db.get(id),
     };
   }
 
@@ -110,7 +107,6 @@ class InMemoryStorage implements ContentStorage<any> {
     data: Partial<Omit<FooContent, 'id'>>,
     { forwardInResponse, errorToThrow }: { forwardInResponse?: object; errorToThrow?: string } = {}
   ) {
-    console.log('InMemoryStorage storage update called with-----', JSON.stringify(data, null, 2));
     // This allows us to test that proper error events are thrown when the storage layer op fails
     if (errorToThrow) {
       throw new Error(errorToThrow);

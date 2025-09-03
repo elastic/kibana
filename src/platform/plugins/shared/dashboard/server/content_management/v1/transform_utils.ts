@@ -18,7 +18,7 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-export type SavedObjectToItemReturn<T> =
+type SavedObjectToItemReturn<T> =
   | {
       item: T;
       error: null;
@@ -69,6 +69,7 @@ export function savedObjectToItem(
       getTagNamesFromReferences
     );
     const references = transformReferencesOut(savedObject.references ?? []);
+
     return {
       item: {
         id,

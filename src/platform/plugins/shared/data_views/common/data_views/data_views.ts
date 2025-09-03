@@ -870,6 +870,7 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
+
     return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
   };
 
@@ -1083,6 +1084,7 @@ export class DataViewsService {
     indexPatternPromise.catch(() => {
       this.dataViewCache.delete(id);
     });
+
     return indexPatternPromise;
   };
 

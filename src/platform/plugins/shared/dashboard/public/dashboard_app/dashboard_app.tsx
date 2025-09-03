@@ -158,8 +158,7 @@ export function DashboardApp({
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from URL. Error: ', e);
       }
-      console.log('initialUrlState---', initialUrlState);
-      console.log('stateFromLocator---', stateFromLocator);
+
       // Override all state with URL + Locator input
       return {
         // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.

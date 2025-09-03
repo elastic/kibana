@@ -82,6 +82,7 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.get(ctx, contentId, options);
+
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
@@ -270,6 +271,7 @@ export class ContentCrud<T = unknown> {
 
     try {
       const result = await this.storage.search(ctx, query, options);
+
       this.eventBus.emit({
         type: 'searchItemSuccess',
         contentTypeId: this.contentTypeId,

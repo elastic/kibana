@@ -43,7 +43,6 @@ export class ContentMagementWrapper implements PersistenceAPI {
         fields: options.fields,
       },
     });
-
     return results.hits;
   }
 
