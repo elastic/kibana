@@ -77,6 +77,45 @@ import {
  * Specialized function signatures for transforming metric API operations to Lens state columns
  */
 export function fromMetricAPItoLensState(
+  options: LensApiCountMetricOperation
+): [CountIndexPatternColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiUniqueCountMetricOperation
+): [CardinalityIndexPatternColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiMetricOperation
+): [
+  | StandardDeviationIndexPatternColumn
+  | MinIndexPatternColumn
+  | MaxIndexPatternColumn
+  | AvgIndexPatternColumn
+  | MedianIndexPatternColumn
+];
+export function fromMetricAPItoLensState(
+  options: LensApiSumMetricOperation
+): [SumIndexPatternColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiStaticValueOperation
+): [StaticValueIndexPatternColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiFormulaOperation
+): [FormulaIndexPatternColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiLastValueOperation
+): [LastValueIndexPatternColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiMovingAverageOperation
+): [MovingAverageIndexPatternColumn, ReferableMetricLensStateColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiCounterRateOperation
+): [CounterRateIndexPatternColumn, ReferableMetricLensStateColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiCumulativeSumOperation
+): [CumulativeSumIndexPatternColumn, ReferableMetricLensStateColumn];
+export function fromMetricAPItoLensState(
+  options: LensApiDifferencesOperation
+): [DerivativeIndexPatternColumn, ReferableMetricLensStateColumn];
+export function fromMetricAPItoLensState(
   options: LensApiAllMetricOperations
 ): AnyMetricLensStateColumn[] {
   if (isAPIColumnOfType<LensApiCountMetricOperation>('count', options)) {
@@ -171,6 +210,55 @@ export function fromMetricAPItoLensState(
 }
 
 export function getMetricApiColumnFromLensState(
+  column: CountIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiCountMetricOperation;
+export function getMetricApiColumnFromLensState(
+  column: CardinalityIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiUniqueCountMetricOperation;
+export function getMetricApiColumnFromLensState(
+  column:
+    | StandardDeviationIndexPatternColumn
+    | MinIndexPatternColumn
+    | MaxIndexPatternColumn
+    | AvgIndexPatternColumn
+    | MedianIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiMetricOperation;
+export function getMetricApiColumnFromLensState(
+  column: SumIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiSumMetricOperation;
+export function getMetricApiColumnFromLensState(
+  column: StaticValueIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiStaticValueOperation;
+export function getMetricApiColumnFromLensState(
+  column: FormulaIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiFormulaOperation;
+export function getMetricApiColumnFromLensState(
+  column: LastValueIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiLastValueOperation;
+export function getMetricApiColumnFromLensState(
+  column: MovingAverageIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiMovingAverageOperation;
+export function getMetricApiColumnFromLensState(
+  column: CounterRateIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiCounterRateOperation;
+export function getMetricApiColumnFromLensState(
+  column: CumulativeSumIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiCumulativeSumOperation;
+export function getMetricApiColumnFromLensState(
+  column: DerivativeIndexPatternColumn,
+  columns: Record<string, AnyMetricLensStateColumn>
+): LensApiDifferencesOperation;
+export function getMetricApiColumnFromLensState(
   options: AnyMetricLensStateColumn,
   columns: Record<string, AnyMetricLensStateColumn>
 ): LensApiAllMetricOperations {
@@ -220,7 +308,7 @@ export function getMetricApiColumnFromLensState(
     if (!refColumn || !('field' in refColumn)) {
       throw new Error(`Unsupported referenced metric operation: ${options.operationType}`);
     }
-    return fromMovingAverageLensStateToAPI(options, refColumn, refColumn.label ?? '');
+    return fromMovingAverageLensStateToAPI(options, refColumn);
   }
   if (isLensStateColumnOfType<CounterRateIndexPatternColumn>('counter_rate', options)) {
     if (!options.references || columns[options.references[0]] == null) {
@@ -265,7 +353,7 @@ export function getMetricApiColumnFromLensState(
     if (!refColumn || !('sourceField' in refLensStateColumn)) {
       throw new Error(`Unsupported referenced metric operation: ${options.operationType}`);
     }
-    return fromDifferencesLensStateToAPI(options, refColumn, refColumn.label ?? '');
+    return fromDifferencesLensStateToAPI(options, refColumn);
   }
   throw new Error(`Unsupported metric operation`);
 }
