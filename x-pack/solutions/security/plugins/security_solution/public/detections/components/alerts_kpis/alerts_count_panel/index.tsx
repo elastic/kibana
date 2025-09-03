@@ -41,6 +41,7 @@ interface AlertsCountPanelProps {
   title?: React.ReactNode;
   isExpanded: boolean;
   setIsExpanded: (status: boolean) => void;
+  signalIndexName: string | null;
 }
 const CHART_HEIGHT = 218; // px
 
@@ -64,6 +65,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     title = i18n.COUNT_TABLE_TITLE,
     isExpanded,
     setIsExpanded,
+    signalIndexName,
   }) => {
     const { to, from } = useGlobalTime();
     // create a unique, but stable (across re-renders) query id
@@ -114,6 +116,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           </HeaderSection>
           {isExpanded && (
             <VisualizationEmbeddable
+              signalIndexName={signalIndexName}
               data-test-subj="embeddable-alerts-count"
               extraActions={extraActions}
               extraOptions={extraVisualizationOptions}

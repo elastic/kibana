@@ -43,6 +43,7 @@ export interface UseLensAttributesProps {
   stackByField?: string;
   title?: string;
   esql?: string;
+  signalIndexName?: string | null;
 }
 
 export enum VisualizationContextMenuActions {
@@ -122,6 +123,7 @@ export interface LensEmbeddableComponentProps {
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
+  signalIndexName?: string | null;
   width?: string | number;
   withActions?: VisualizationContextMenuActions[];
   /**
@@ -193,6 +195,7 @@ export interface VisualizationEmbeddableProps extends LensEmbeddableComponentPro
   inputId?: InputsModelId.global | InputsModelId.timeline;
   isDonut?: boolean;
   label?: string;
+  signalIndexName?: string | null;
 }
 
 export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {
