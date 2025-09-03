@@ -12,22 +12,16 @@ import moment from 'moment';
 
 import type { ReindexSavedObject } from './types';
 import { ReindexStatus, ReindexStep } from '../../../common';
-import { type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexActions } from './reindex_actions';
 import { LOCK_WINDOW, reindexActionsFactory } from './reindex_actions';
-import { getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '@kbn/upgrade-assistant-pkg-server/src/__fixtures__/version';
 
 const { currentMajor } = getMockVersionInfo();
 
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   getRollupJobByIndexName: jest.fn(),
 }));
-
-const versionMock = {
-  getMajorVersion: jest.fn().mockReturnValue(8),
-  getPrevMajorVersion: jest.fn().mockReturnValue(7),
-} as unknown as Version;
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -53,7 +47,7 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log, versionMock);
+    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log);
   });
 
   describe('createReindexOp', () => {

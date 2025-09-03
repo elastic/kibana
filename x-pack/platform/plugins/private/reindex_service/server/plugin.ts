@@ -55,7 +55,6 @@ export class ReindexServiceServerPlugin
   }: CoreSetup<PluginsStart, ReindexServiceServerPluginStart>) {
     const dependencies: RouteDependencies = {
       router: http.createRouter(),
-      version: this.version,
       getReindexService: async () => {
         const [, , reindexService] = await getStartServices();
         return reindexService;
@@ -100,10 +99,8 @@ export class ReindexServiceServerPlugin
 
     this.reindexService = service.getInternalApis();
 
-    const worker = service.getWorker();
-
     return {
-      cleanupReindexOperations: worker.cleanupReindexOperations.bind(worker),
+      cleanupReindexOperations: service.cleanupReindexOperations.bind(service),
       getScopedClient: service.getScopedClient.bind(service),
     };
   }

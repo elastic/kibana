@@ -28,9 +28,6 @@ const mockReindexService = {
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
 };
-jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: () => (a: any) => a,
-}));
 
 jest.mock('../lib/reindex_service', () => ({
   reindexServiceFactory: () => mockReindexService,
@@ -64,7 +61,6 @@ describe('reindex API', () => {
       licensing: licensingMock.createSetup(),
       lib: { handleEsError },
       getSecurityPlugin: () => Promise.resolve(securityMock.createStart()),
-      version: { getMajorVersion: () => 8 },
       getReindexService: () =>
         Promise.resolve(
           new ReindexServiceWrapper({

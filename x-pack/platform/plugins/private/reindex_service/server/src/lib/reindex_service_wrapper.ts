@@ -119,12 +119,7 @@ export class ReindexServiceWrapper {
     savedObjects,
   }: ReindexServiceScopedClientArgs): ReindexServiceScopedClient {
     const callAsCurrentUser = dataClient.asCurrentUser;
-    const reindexActions = reindexActionsFactory(
-      savedObjects,
-      callAsCurrentUser,
-      this.deps.logger,
-      this.deps.version
-    );
+    const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, this.deps.logger);
     const reindexService = reindexServiceFactory(
       callAsCurrentUser,
       reindexActions,
@@ -267,6 +262,7 @@ export class ReindexServiceWrapper {
           hasRequiredPrivileges,
           meta: {
             indexName,
+            reindexName: reindexOp?.attributes.newIndexName,
             aliases: Object.keys(aliases),
             isFrozen: isTruthy(settings?.frozen),
             isReadonly: isTruthy(settings?.verified_read_only),
@@ -284,8 +280,11 @@ export class ReindexServiceWrapper {
     };
   }
 
-  // for legacy code, used by routes
-  public getWorker(): ReindexWorker {
+  public cleanupReindexOperations(indexNames: string[]): Promise<void> {
+    return this.getWorker().cleanupReindexOperations(indexNames);
+  }
+
+  private getWorker(): ReindexWorker {
     if (!this.reindexWorker) {
       throw new Error('Worker unavailable');
     }

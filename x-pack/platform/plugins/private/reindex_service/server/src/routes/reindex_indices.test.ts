@@ -35,10 +35,6 @@ const mockReindexService = {
   getIndexInfo: jest.fn().mockResolvedValue({ aliases: {}, settings: {} }),
 };
 
-jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: () => (a: any) => a,
-}));
-
 jest.mock('../lib/reindex_service', () => ({
   reindexServiceFactory: () => mockReindexService,
 }));
@@ -76,7 +72,6 @@ describe('reindex API', () => {
       licensing: licensingMockInstance,
       lib: { handleEsError },
       getSecurityPlugin: () => Promise.resolve(securityMockInstance),
-      version,
       getReindexService: async () => {
         return new ReindexServiceWrapper({
           soClient: savedObjectsClientMock.create(),
@@ -233,7 +228,7 @@ describe('reindex API', () => {
           headers: {
             'kbn-auth-x': 'HERE!',
           },
-          body: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' },
         }),
         kibanaResponseFactory
       );
@@ -255,7 +250,7 @@ describe('reindex API', () => {
       })(
         routeHandlerContextMock,
         createRequestMock({
-          body: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' },
         }),
         kibanaResponseFactory
       );
@@ -278,7 +273,7 @@ describe('reindex API', () => {
       })(
         routeHandlerContextMock,
         createRequestMock({
-          body: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' },
         }),
         kibanaResponseFactory
       );
