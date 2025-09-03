@@ -121,13 +121,13 @@ describe('EVAL > columnsAfter', () => {
     expect(result).toEqual([
       {
         name: 'foo',
-        type: 'keyword',
+        type: 'keyword', // originally integer
         location: { min: 0, max: 0 },
         userDefined: true,
       },
       {
         name: 'bar',
-        type: 'integer',
+        type: 'integer', // originally keyword
         location: { min: 0, max: 0 },
         userDefined: true,
       },

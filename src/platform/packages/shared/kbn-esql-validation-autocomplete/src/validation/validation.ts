@@ -142,6 +142,8 @@ async function validateAst(
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
   for (let i = 0; i < rootCommands.length; i++) {
+    // FIXME we need to expand FORK and EVAL like we do in getQueryForFields
+    // _before_ slicing off the later commands
     const partialQuery = queryString.slice(0, rootCommands[i].location.max + 1);
 
     const previousCommands = rootCommands.slice(0, i + 1);
