@@ -46,7 +46,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
   onClose,
   managed,
 }) => {
-  const [timeRestore, setTimeRestore] = useState((isTimeBased && savedTimeRestore) || false);
+  const [timeRestore, setTimeRestore] = useState(Boolean(isTimeBased && savedTimeRestore));
   const [currentTags, setCurrentTags] = useState(tags);
 
   const onModalSave = (params: OnSaveProps) => {
