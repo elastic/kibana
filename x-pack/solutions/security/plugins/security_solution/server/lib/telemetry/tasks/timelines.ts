@@ -53,35 +53,37 @@ export function createTelemetryTimelineTaskConfig() {
         if (!alertsIndex) {
           throw Error('alerts index is not ready yet, skipping telemetry task');
         }
-        const alerts = await receiver.fetchTimelineAlerts(
+        const alerts = receiver.fetchTimelineAlerts(
           alertsIndex,
           rangeFrom,
           rangeTo,
           telemetryConfiguration.query_config
         );
 
-        log.debug('found alerts to process', { length: alerts.length, alertsIndex } as LogMeta);
+        for await (const page of alerts) {
+          log.debug('found alerts to process', { length: page.length, alertsIndex } as LogMeta);
 
-        for (const alert of alerts) {
-          const result = await fetcher.fetchTimeline(alert);
+          for (const alert of page) {
+            const result = await fetcher.fetchTimeline(alert);
 
-          sender.getTelemetryUsageCluster()?.incrementCounter({
-            counterName: 'telemetry_timeline',
-            counterType: 'timeline_node_count',
-            incrementBy: result.nodes,
-          });
+            sender.getTelemetryUsageCluster()?.incrementCounter({
+              counterName: 'telemetry_timeline',
+              counterType: 'timeline_node_count',
+              incrementBy: result.nodes,
+            });
 
-          sender.getTelemetryUsageCluster()?.incrementCounter({
-            counterName: 'telemetry_timeline',
-            counterType: 'timeline_event_count',
-            incrementBy: result.events,
-          });
+            sender.getTelemetryUsageCluster()?.incrementCounter({
+              counterName: 'telemetry_timeline',
+              counterType: 'timeline_event_count',
+              incrementBy: result.events,
+            });
 
-          if (result.timeline) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
-            counter += 1;
-          } else {
-            log.debug('no events in timeline');
+            if (result.timeline) {
+              await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
+              counter += 1;
+            } else {
+              log.debug('no events in timeline');
+            }
           }
         }
 
