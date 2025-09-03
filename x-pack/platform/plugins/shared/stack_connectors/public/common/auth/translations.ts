@@ -126,7 +126,7 @@ export const VALUE_LABEL = i18n.translate(
   }
 );
 
-export const CONFIG_LABEL = i18n.translate(
+export const CONFIG_OPTION = i18n.translate(
   'xpack.stackConnectors.components.auth.configHeaderLabel',
   {
     defaultMessage: 'Config',
@@ -140,7 +140,7 @@ export const HEADER_TYPE_LABEL = i18n.translate(
   }
 );
 
-export const SECRET_LABEL = i18n.translate(
+export const SECRET_OPTION = i18n.translate(
   'xpack.stackConnectors.components.auth.secretHeaderLabel',
   {
     defaultMessage: 'Secret',

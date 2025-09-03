@@ -77,6 +77,14 @@ export const getWebhookSecretHeadersKeyRoute = (
           connectorId
         );
 
+      /*
+        - in the encrypted connector the older secret headers are replaced by the new one
+        - if we have a secret header: 'secretKey' : 'secretValue' and we want o add another one 
+          'secretKeyUpdate' : 'secretValueUpdate' -> in the secrets.secretHeaders we will have:
+            - 'secretKeyUpdate' : 'secretValueUpdate'
+        */
+
+      console.log('decryptedConnector: ', decryptedConnector.attributes);
       const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || [];
 
       const secretHeadersArray = Object.keys(secretHeaders).map((key) => ({

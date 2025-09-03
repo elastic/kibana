@@ -168,6 +168,8 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
 
   const headers = webhookFormData?.__internal__?.headers ?? [];
 
+  console.log('serializer, ', { headers });
+
   const configHeaders = headers
     .filter((header) => header.type === 'config' && header.key)
     .reduce((acc, { key, value }) => {
@@ -181,6 +183,9 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
       acc[key] = value;
       return acc;
     }, {} as Record<string, string>);
+
+  console.log('serializer', { secretHeaders });
+  console.log('serializer', { configHeaders });
 
   return {
     ...formData,
@@ -208,6 +213,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   setResetForm,
 }) => {
   const secretHeaders = useSecretHeaders(connector.id);
+  console.log('after fetching secretHeaders: ', secretHeaders);
   const { form } = useForm({
     defaultValue: connector,
     serializer: formSerializer,
@@ -253,7 +259,13 @@ const ConnectorFormComponent: React.FC<Props> = ({
       type: 'config' as const,
     }));
 
+    const secretHeadersWithId = secretHeaders.map((h, i) => ({ ...h, id: `secret-${i}` }));
+
+    console.log({ secretHeadersWithId });
+    console.log({ configHeaders });
     const mergedHeaders = [...configHeaders, ...secretHeaders].filter(Boolean);
+
+    console.log({ mergedHeaders });
 
     form.updateFieldValues(
       {
