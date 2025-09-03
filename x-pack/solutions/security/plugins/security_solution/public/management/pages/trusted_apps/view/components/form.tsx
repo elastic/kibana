@@ -167,7 +167,11 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
 
   const os = ((values.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
 
-  if (!values.entries.length || (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some((e) => e.value === '' || !e.value.length)) {
+  if (isAdvancedModeEnabled(values) && (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some((e) => e.value === '' || !e.value.length)) {
+    isValid = false;
+  }
+
+  if (!values.entries.length) {
     isValid = false;
     addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.field);
   } else if (!isAdvancedModeEnabled(values)) {
@@ -598,8 +602,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               ...prev,
               hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
             }));
+            return; // moved from line 615, but causes an infinite loop
           }
-          return;
+          console.log('3');
+          // bug here --> need to do processChanged for validation to kick in when user removes the last entry
         }
 
         // Batch all condition state updates
