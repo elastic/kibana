@@ -12,9 +12,7 @@ export class OnboardingApp {
 
   async goto() {
     await this.page.gotoApp('observabilityOnboarding');
-    await this.page
-      .getByText('What do you want to monitor?')
-      .waitFor({ state: 'visible', timeout: 30000 });
+    await this.useCaseGridByTestId.waitFor({ state: 'visible', timeout: 10000 });
   }
 
   public get hostUseCaseTile() {
@@ -171,16 +169,6 @@ export class OnboardingApp {
   }
 
   async waitForIntegrationCards() {
-    const cards = this.page.locator('[data-test-subj^="integration-card:"]').first();
-    try {
-      await cards.waitFor({ state: 'visible', timeout: 10000 });
-    } catch {
-      await this.page
-        .getByText(
-          /Monitor your (Host|Kubernetes cluster|Application) using:|Select your Cloud provider:/
-        )
-        .first()
-        .waitFor({ state: 'visible', timeout: 10000 });
-    }
+    await this.page.waitForSelector('[data-test-subj^="integration-card:"]', { state: 'visible', timeout: 5000 });
   }
 }
