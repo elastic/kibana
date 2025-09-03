@@ -343,12 +343,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Type lookup join query with index name inside it
       await monacoEditor.setCodeEditorValue('');
       await monacoEditor.typeCodeEditorValue(
-        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_FILE}`,
+        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_MANUAL}`,
         'ESQLEditor'
       );
 
       // Click Create lookup index suggestion
-      await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_FILE}"`);
+      await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_MANUAL}"`);
       await testSubjects.isDisplayed('lookupIndexFlyout');
 
       // Manually set content
@@ -360,7 +360,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Verify the editions took place correctly
       await retry.tryForTime(10000, async () => {
-        await indexEditor.verifyIndexContent(INDEX_NAME_FILE, [
+        await indexEditor.verifyIndexContent(INDEX_NAME_MANUAL, [
           {
             my_column: 'value',
           },
