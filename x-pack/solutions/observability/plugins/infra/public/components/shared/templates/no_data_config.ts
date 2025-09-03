@@ -46,7 +46,7 @@ const createCardConfig = (
             'Start collecting data for your hosts to understand metric trends, explore logs and deep insight into their performance',
         }),
         href: onboardingLocator?.getRedirectUrl({ category: onboardingFlow }),
-        button: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
+        buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
           defaultMessage: 'Add data',
         }),
         docsLink: 'https://www.elastic.co/observability/infrastructure-monitoring',
@@ -57,7 +57,7 @@ const createCardConfig = (
         title: noMetricIndicesPromptTitle,
         description: noMetricIndicesPromptDescription,
         href: onboardingLocator?.getRedirectUrl({}),
-        button: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
+        buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
           defaultMessage: 'Add data',
         }),
         docsLink: 'https://www.elastic.co/observability/infrastructure-monitoring',

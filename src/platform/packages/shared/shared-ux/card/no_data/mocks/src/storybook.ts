@@ -16,7 +16,7 @@ type PropArguments = Pick<
   NoDataCardProps,
   | 'title'
   | 'description'
-  | 'button'
+  | 'buttonText'
   | 'href'
   | 'docsLink'
   | 'canAccessFleet'
@@ -55,7 +55,7 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       defaultValue: '',
     },
-    button: {
+    buttonText: {
       control: {
         control: 'text',
       },
@@ -100,7 +100,7 @@ export class StorybookMock extends AbstractStorybookMock<
     return {
       title: this.getArgumentValue('title', params),
       description: this.getArgumentValue('description', params),
-      button: this.getArgumentValue('button', params),
+      buttonText: this.getArgumentValue('buttonText', params),
       canAccessFleet: this.getArgumentValue('canAccessFleet', params),
       href: this.getArgumentValue('href', params),
       docsLink: this.getArgumentValue('docsLink', params),

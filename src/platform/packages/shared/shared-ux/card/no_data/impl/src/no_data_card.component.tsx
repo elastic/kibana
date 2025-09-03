@@ -26,7 +26,7 @@ const defaultDescription = i18n.translate('sharedUXPackages.card.noData.descript
     'Browse integration options to find the best way to add your data and start analyzing.',
 });
 
-const defaultButton = i18n.translate('sharedUXPackages.card.noData.buttonLabel', {
+const defaultButtonText = i18n.translate('sharedUXPackages.card.noData.buttonLabel', {
   defaultMessage: 'Browse integrations',
 });
 
@@ -46,7 +46,7 @@ export const NoDataCard = ({
   description,
   canAccessFleet = true,
   href,
-  button,
+  buttonText,
   docsLink: link,
   onClick,
   icon,
@@ -94,7 +94,7 @@ export const NoDataCard = ({
             data-test-subj="noDataDefaultActionButton"
             onClick={onClick || (() => {})}
           >
-            {button || defaultButton}
+            {buttonText || defaultButtonText}
           </EuiButton>
         ) : undefined
       }

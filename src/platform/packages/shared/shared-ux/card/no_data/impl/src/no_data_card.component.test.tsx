@@ -39,7 +39,7 @@ describe('NoDataCardComponent', () => {
 
   describe('props', () => {
     test('renders button with href', () => {
-      render(<NoDataCard href="/some-path" button="Browse integrations" />);
+      render(<NoDataCard href="/some-path" buttonText="Browse integrations" />);
 
       const button = screen.getByRole('link', { name: 'Browse integrations' });
       expect(button).toHaveAttribute('href', '/some-path');

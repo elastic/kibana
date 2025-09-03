@@ -20,7 +20,7 @@ describe('NoDataConfigPage', () => {
     docsLink: 'test-link',
     action: {
       kibana: {
-        button: 'Click me',
+        buttonText: 'Click me',
         onClick: jest.fn(),
         description: 'Page with no data',
       },

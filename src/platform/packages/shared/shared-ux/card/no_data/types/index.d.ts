@@ -72,7 +72,7 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
    * Provide a string for the button's label;
    * The button will be hidden completely if `canAccessFleet=false` or `hideActionButton=true`
    */
-  button?: string;
+  buttonText?: string;
   /** Optional flag to hide actions button (in case custom button is passed as part of custom description) */
   hideActionButton?: boolean;
   /**

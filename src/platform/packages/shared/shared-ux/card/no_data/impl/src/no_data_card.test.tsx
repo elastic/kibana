@@ -26,7 +26,7 @@ describe('NoDataCard', () => {
 
   test('integrates with services correctly', () => {
     const { rerender } = renderWithProvider(
-      <NoDataCard button="Browse" title="Card title" description="Description" />
+      <NoDataCard buttonText="Browse" title="Card title" description="Description" />
     );
 
     // Test service integration: addBasePath
@@ -36,7 +36,7 @@ describe('NoDataCard', () => {
     // Test service integration: canAccessFleet affects component behavior
     rerender(
       <NoDataCardProvider {...getNoDataCardServicesMock({ canAccessFleet: false })}>
-        <NoDataCard button="Browse" title="Card title" description="Description" />
+        <NoDataCard buttonText="Browse" title="Card title" description="Description" />
       </NoDataCardProvider>
     );
 

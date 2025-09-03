@@ -141,7 +141,7 @@ Each action configuration is of type [`NoDataCardProps`](https://github.com/elas
 
 - `title?: string`: Custom title for the card (defaults to "Add Data to get started")
 - `description?: React.ReactNode`: Custom description for the card
-- `button?: string`: Custom label for the action button (defaults to "Browse integrations")
+- `buttonText?: string`: Custom label for the action button (defaults to "Browse integrations")
 - `href?: string`: Custom URL for the button (defaults to integrations browse page)
 - `onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void`: Custom click handler
 - `canAccessFleet?: boolean`: Whether user has Fleet access - affects button visibility and content
@@ -175,7 +175,7 @@ const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
       title: 'Add Observability data', // Custom card title
       description:
         'Use Elastic Agent to collect logs, metrics, and traces from your infrastructure.',
-      button: 'Add data', // Custom button text
+      buttonText: 'Add data', // Custom button text
       onClick: (e) => {
         // Custom click handling
         trackAnalyticsEvent('no_data_add_clicked');
@@ -186,7 +186,7 @@ const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     customAction: {
       title: 'Import existing data',
       description: 'Already have data? Import it directly.',
-      button: 'Import data',
+      buttonText: 'Import data',
       href: '/app/management/data/import',
       icon: 'importAction',
     },

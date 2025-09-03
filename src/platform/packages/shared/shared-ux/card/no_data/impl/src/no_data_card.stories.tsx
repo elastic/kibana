@@ -43,7 +43,7 @@ export const Card = {
 
   argTypes,
   args: {
-    button: 'Browse integrations',
+    buttonText: 'Browse integrations',
     href: '/app/integrations/browse',
   },
 };
@@ -60,7 +60,7 @@ export const NoPermission = {
   argTypes,
   args: {
     canAccessFleet: false,
-    button: 'Browse integrations',
+    buttonText: 'Browse integrations',
     href: '/app/integrations/browse',
   },
 };
