@@ -29,7 +29,6 @@ import {
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 
 import {
   getDetectionEngineUrl,
@@ -84,6 +83,7 @@ import { extractValidationMessages } from '../../../rule_creation/logic/extract_
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -111,15 +111,9 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC = () => {
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-    },
-  ] = useUserData();
+  const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
+    useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addSuccess } = useAppToasts();
@@ -812,7 +806,7 @@ const CreateRulePageComponent: React.FC = () => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!hasUserCRUDPermission(canUserCRUD)) {
+  } else if (!canEditRules) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),

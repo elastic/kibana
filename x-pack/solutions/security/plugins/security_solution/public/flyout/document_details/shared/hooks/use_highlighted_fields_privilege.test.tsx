@@ -13,7 +13,7 @@ import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_lice
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import {
-  LACK_OF_KIBANA_SECURITY_PRIVILEGES,
+  LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES,
   ML_RULES_DISABLED_MESSAGE,
 } from '../../../../detection_engine/common/translations';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -67,7 +67,7 @@ describe('useHighlightedFieldsPrivilege', () => {
     (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: false }]);
     const { result } = renderUseHighlightedFieldsPrivilege(defaultProps);
     expect(result.current.isDisabled).toBe(true);
-    expect(result.current.tooltipContent).toContain(LACK_OF_KIBANA_SECURITY_PRIVILEGES);
+    expect(result.current.tooltipContent).toContain(LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES);
   });
 
   describe('when rule is machine learning rule', () => {

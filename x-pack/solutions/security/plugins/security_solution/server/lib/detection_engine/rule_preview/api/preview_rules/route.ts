@@ -18,6 +18,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
@@ -89,7 +90,7 @@ export const previewRulesRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
       options: {
