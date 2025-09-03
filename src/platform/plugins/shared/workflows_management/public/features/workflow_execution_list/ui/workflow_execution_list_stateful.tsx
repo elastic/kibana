@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import { ExecutionStatus, type ExecutionType } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
@@ -17,13 +17,13 @@ const EXECUTIONS_LIST_REFETCH_INTERVAL = 5000;
 const EXECUTIONS_LIST_REFETCH_INTERVAL_ACTIVE = 1000;
 
 export interface ExecutionListFiltersQueryParams {
-  status: ExecutionStatus[];
-  executionType: ExecutionType[];
+  statuses: ExecutionStatus[];
+  executionTypes: ExecutionType[];
 }
 
 const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
-  status: [...Object.values(ExecutionStatus)],
-  executionType: [ExecutionType.PRODUCTION],
+  statuses: [],
+  executionTypes: [],
 };
 
 interface WorkflowExecutionListProps {
@@ -38,7 +38,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     isLoading: isLoadingWorkflowExecutions,
     error,
   } = useWorkflowExecutions(
-    { workflowId, status: filters.status, executionType: filters.executionType },
+    { workflowId, statuses: filters.statuses, executionTypes: filters.executionTypes },
     {
       refetchInterval,
     }

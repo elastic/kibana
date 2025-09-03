@@ -92,8 +92,8 @@ export interface GetStepLogsParams {
 
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
-  status?: ExecutionStatus[];
-  executionType?: ExecutionType[];
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
 }
 
 export class WorkflowsManagementApi {

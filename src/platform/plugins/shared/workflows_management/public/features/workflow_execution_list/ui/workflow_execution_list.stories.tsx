@@ -7,14 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { Meta, StoryObj } from '@storybook/react';
 import { parseDuration } from '@kbn/workflows-execution-engine/server/utils/parse-duration/parse-duration';
+import { useState } from 'react';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
+import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
+
+const WorkflowExecutionListWithState = (props: WorkflowExecutionListProps) => {
+  const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>({
+    statuses: [],
+    executionTypes: [],
+  });
+  return <WorkflowExecutionList {...props} filters={filters} onFiltersChange={setFilters} />;
+};
 
 const meta: Meta<typeof WorkflowExecutionList> = {
-  component: WorkflowExecutionList,
+  component: WorkflowExecutionListWithState,
   title: 'Workflows Management/Workflow Execution List',
   decorators: [kibanaReactDecorator],
 };
@@ -24,8 +35,8 @@ export default meta;
 type Story = StoryObj<typeof WorkflowExecutionList>;
 
 const mockFilters: WorkflowExecutionListProps['filters'] = {
-  status: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_INPUT],
-  executionType: [ExecutionType.PRODUCTION],
+  statuses: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_INPUT],
+  executionTypes: [ExecutionType.PRODUCTION],
 };
 
 export const Default: Story = {
@@ -104,8 +115,6 @@ export const Default: Story = {
     },
     onExecutionClick: () => {},
     selectedId: '2',
-    filters: mockFilters,
-    onFiltersChange: () => {},
   },
 };
 

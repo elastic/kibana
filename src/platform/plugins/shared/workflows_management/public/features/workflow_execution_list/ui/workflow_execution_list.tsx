@@ -70,9 +70,7 @@ export const WorkflowExecutionList = ({
         }
       />
     );
-  }
-
-  if (error) {
+  } else if (error) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -89,8 +87,7 @@ export const WorkflowExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  }
-  if (!executions || !executions.results.length) {
+  } else if (!executions || !executions.results.length) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}

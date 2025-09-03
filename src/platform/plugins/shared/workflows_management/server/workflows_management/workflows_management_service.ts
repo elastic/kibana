@@ -549,17 +549,17 @@ export class WorkflowsService {
         },
       },
     ];
-    if (params.status) {
+    if (params.statuses) {
       mustQueries.push({
         terms: {
-          status: params.status,
+          status: params.statuses,
         },
       });
     }
-    if (params.executionType) {
+    if (params.executionTypes) {
       mustQueries.push({
         terms: {
-          executionType: params.executionType,
+          executionType: params.executionTypes,
         },
       });
     }

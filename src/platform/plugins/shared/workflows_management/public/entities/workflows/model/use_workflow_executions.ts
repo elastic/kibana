@@ -13,8 +13,8 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
 interface UseWorkflowExecutionsParams {
   workflowId: string | null;
-  status?: ExecutionStatus[];
-  executionType?: ExecutionType[];
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
 }
 
 export function useWorkflowExecutions(
@@ -29,15 +29,15 @@ export function useWorkflowExecutions(
       'workflows',
       params.workflowId,
       'executions',
-      params.status?.join(','),
-      params.executionType?.join(','),
+      params.statuses,
+      params.executionTypes,
     ],
     queryFn: () =>
       http!.get(`/api/workflowExecutions`, {
         query: {
           workflowId: params.workflowId,
-          status: params.status?.join(','),
-          executionType: params.executionType?.join(','),
+          statuses: params.statuses,
+          executionTypes: params.executionTypes,
         },
       }),
     enabled: params.workflowId !== null,

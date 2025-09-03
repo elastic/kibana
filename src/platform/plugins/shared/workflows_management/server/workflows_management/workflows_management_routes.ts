@@ -11,7 +11,6 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
-  ExecutionStatus,
   CreateWorkflowCommandSchema,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
@@ -23,6 +22,7 @@ import type {
 } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../common/lib/errors';
+import { parseStatuses } from './lib/parse_statuses';
 
 export function defineRoutes(
   router: IRouter,
@@ -528,21 +528,27 @@ export function defineRoutes(
         // todo use shared params schema based on SearchWorkflowExecutionsParams type
         query: schema.object({
           workflowId: schema.string(),
-          status: schema.maybe(schema.string()),
-          executionType: schema.maybe(schema.string()),
+          statuses: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+              defaultValue: [],
+            })
+          ),
+          executionTypes: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+              defaultValue: [],
+            })
+          ),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
-        const statuses = request.query.status?.split(',');
-        const types = request.query.executionType?.split(',');
         const params: SearchWorkflowExecutionsParams = {
           workflowId: request.query.workflowId,
-          status: Object.values(ExecutionStatus).filter((status) => statuses?.includes(status)),
-          // Execution type is not supported yet
-          // executionType: Object.values(ExecutionType).filter((type) => types?.includes(type)),
+          statuses: request.query.statuses ? parseStatuses(request.query.statuses) : undefined,
+          // Execution type filter is not supported yet
+          // executionTypes: parseExecutionTypes(request.query.executionTypes),
         };
         return response.ok({
           body: await api.getWorkflowExecutions(params, spaceId),
