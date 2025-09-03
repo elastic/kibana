@@ -18,7 +18,7 @@ export const fromCountAPItoLensState = (
   options: LensApiCountMetricOperation
 ): CountIndexPatternColumn => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { empty_as_null, format, field } = options ?? {};
+  const { empty_as_null, format, field } = options;
 
   return {
     operationType: 'count',

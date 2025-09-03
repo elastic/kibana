@@ -41,7 +41,7 @@ export function fromFiltersLensStateToAPI(
     label,
     filters: column.params.filters.map((filter) => ({
       filter: fromFilterLensStateToAPI(filter.input) ?? DEFAULT_FILTER,
-      label: filter.label ?? '',
+      ...(filter.label !== 'Filter' ? { label: filter.label } : {}),
     })),
   };
 }

@@ -19,7 +19,7 @@ export const fromCumulativeSumAPItoLensState = (
   options: LensApiCumulativeSumOperation,
   ref: { id: string; field: string }
 ): CumulativeSumIndexPatternColumn => {
-  const { format } = options ?? {};
+  const { format } = options;
 
   return {
     operationType: 'cumulative_sum',

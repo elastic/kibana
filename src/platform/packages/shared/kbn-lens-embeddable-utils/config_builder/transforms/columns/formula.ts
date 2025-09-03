@@ -15,7 +15,7 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 export const fromFormulaAPItoLensState = (
   options: LensApiFormulaOperation
 ): FormulaIndexPatternColumn => {
-  const { formula, format } = options ?? {};
+  const { formula, format } = options;
 
   const { filter, timeShift, ...sharedProps } = getLensStateMetricSharedProps(options);
 
@@ -24,7 +24,7 @@ export const fromFormulaAPItoLensState = (
     ...sharedProps,
     references: [],
     params: {
-      formula: formula ?? '',
+      formula: formula,
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
   };

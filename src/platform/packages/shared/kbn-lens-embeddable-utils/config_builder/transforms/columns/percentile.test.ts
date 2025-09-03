@@ -65,6 +65,8 @@ describe('Percentile Transforms', () => {
         id: 'number',
         params: {
           decimals: 2,
+          compact: false,
+
         },
       });
     });
@@ -146,7 +148,6 @@ describe('Percentile Transforms', () => {
       const result = fromPercentileLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
-        compact: false,
         decimals: 2,
       });
     });

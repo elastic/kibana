@@ -15,7 +15,7 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 export const fromStaticValueAPItoLensState = (
   options: LensApiStaticValueOperation
 ): StaticValueIndexPatternColumn => {
-  const { value, format } = options ?? {};
+  const { value, format } = options;
 
   const { label, customLabel, dataType, isBucketed } = getLensStateMetricSharedProps(options);
   return {

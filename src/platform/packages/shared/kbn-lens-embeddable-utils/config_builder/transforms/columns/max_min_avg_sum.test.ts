@@ -65,6 +65,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         id: 'number',
         params: {
           decimals: 2,
+          compact: false,
         },
       });
     });
@@ -128,7 +129,6 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
       expect(result.format).toEqual({
         type: 'number',
         decimals: 2,
-        compact: false,
       });
     });
   });
@@ -168,7 +168,7 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
         const result = fromSumMetricAPIToLensState(input);
         expect(result.params?.format).toEqual({
           id: 'percent',
-          params: { decimals: 5 },
+          params: { decimals: 5, compact: false },
         });
         expect(result.label).toBe('Total Revenue');
       });

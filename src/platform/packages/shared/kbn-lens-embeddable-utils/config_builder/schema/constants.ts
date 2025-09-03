@@ -18,6 +18,7 @@ export const LENS_TERMS_SIZE_DEFAULT = 5;
 export const LENS_TERMS_MISSING_BUCKET_DEFAULT = false;
 
 export const LENS_FORMAT_NUMBER_DECIMALS_DEFAULT = 2;
+export const LENS_FORMAT_COMPACT_DEFAULT = false;
 
 export const LENS_SAMPLING_MIN_VALUE = 0;
 export const LENS_SAMPLING_MAX_VALUE = 1;

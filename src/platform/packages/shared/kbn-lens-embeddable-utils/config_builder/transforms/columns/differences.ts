@@ -32,7 +32,6 @@ export function fromDifferencesAPItoLensState(
 export function fromDifferencesLensStateToAPI(
   column: DerivativeIndexPatternColumn,
   ref: LensApiFieldMetricOperations,
-  refDefaultLabel: string
 ): LensApiDifferencesOperation {
   return {
     operation: 'differences',

@@ -57,6 +57,7 @@ describe('Last Value Transforms', () => {
         id: 'number',
         params: {
           decimals: 2,
+          compact: false,
         },
       });
     });
@@ -133,7 +134,6 @@ describe('Last Value Transforms', () => {
       expect(result.format).toEqual({
         type: 'number',
         decimals: 2,
-        compact: false,
       });
     });
 

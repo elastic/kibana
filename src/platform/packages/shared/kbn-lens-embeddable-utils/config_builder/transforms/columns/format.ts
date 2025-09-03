@@ -10,12 +10,6 @@
 import type { ValueFormatConfig } from '@kbn/lens-plugin/common';
 import type { LensApiMetricOperation } from '../../schema/metric_ops';
 
-// @TODO: move it into the shared values/type package
-const DEFAULT_FORMAT_PARAMS = {
-  decimals: 2,
-  compact: false,
-};
-
 export function fromFormatAPIToLensState(
   format: LensApiMetricOperation['format']
 ): ValueFormatConfig | undefined {
@@ -28,7 +22,7 @@ export function fromFormatAPIToLensState(
       params: {
         decimals: format.decimals,
         ...(format.suffix ? { suffix: format.suffix } : {}),
-        ...(format.compact ? { compact: format.compact } : {}),
+        ...(format.compact != null ? { compact: format.compact } : {}),
       },
     };
   }
@@ -74,17 +68,17 @@ export function fromFormatLensStateToAPI(
   if (format.id === 'number' || format.id === 'percent') {
     return {
       type: format.id,
-      decimals: format.params?.decimals ?? DEFAULT_FORMAT_PARAMS.decimals,
-      compact: format.params?.compact ?? DEFAULT_FORMAT_PARAMS.compact,
+      ...(format.params?.decimals != null ? { decimals: format.params?.decimals } : {}),
+      ...(format.params?.compact != null? { compact: format.params?.compact } : {}),
       ...(format.params?.suffix ? { suffix: format.params.suffix } : {}),
-    };
+    } as LensApiMetricOperation['format'];
   }
   if (format.id === 'bits' || format.id === 'bytes') {
     return {
       type: format.id,
-      decimals: format.params?.decimals ?? DEFAULT_FORMAT_PARAMS.decimals,
+      ...(format.params?.decimals != null ? { decimals: format.params?.decimals } : {}),
       ...(format.params?.suffix ? { suffix: format.params.suffix } : {}),
-    };
+    } as LensApiMetricOperation['format'];
   }
   if (format.id === 'duration' && format.params?.fromUnit && format.params?.toUnit) {
     return {

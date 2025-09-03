@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT } from './constants';
+import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
 
 const numericFormatSchema = schema.object({
   type: schema.oneOf([schema.literal('number'), schema.literal('percent')]),
@@ -35,7 +35,7 @@ const numericFormatSchema = schema.object({
    * Whether to use compact notation
    */
   compact: schema.boolean({
-    defaultValue: false,
+    defaultValue: LENS_FORMAT_COMPACT_DEFAULT,
     meta: {
       description: 'Whether to use compact notation',
     },

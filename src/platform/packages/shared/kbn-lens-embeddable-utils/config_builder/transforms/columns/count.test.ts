@@ -64,6 +64,7 @@ describe('Count Transforms', () => {
         id: 'number',
         params: {
           decimals: 0,
+          compact: false,
         },
       });
     });
@@ -136,7 +137,6 @@ describe('Count Transforms', () => {
       expect(result.format).toEqual({
         type: 'number',
         decimals: 0,
-        compact: false,
       });
     });
 

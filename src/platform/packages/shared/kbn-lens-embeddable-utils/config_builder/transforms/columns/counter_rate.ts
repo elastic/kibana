@@ -19,7 +19,7 @@ export const fromCounterRateAPItoLensState = (
   options: LensApiCounterRateOperation,
   ref?: { id: string; field: string }
 ): CounterRateIndexPatternColumn => {
-  const { format } = options ?? {};
+  const { format } = options;
   const { reducedTimeRange, ...sharedProps } = getLensStateMetricSharedProps(options);
   return {
     operationType: 'counter_rate',

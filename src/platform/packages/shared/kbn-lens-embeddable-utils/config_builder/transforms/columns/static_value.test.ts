@@ -61,6 +61,7 @@ describe('Static Value Transforms', () => {
         id: 'number',
         params: {
           decimals: 2,
+          compact: false,
         },
       });
     });
@@ -122,7 +123,6 @@ describe('Static Value Transforms', () => {
       const result = fromStaticValueLensStateToAPI(input);
       expect(result.format).toEqual({
         type: 'number',
-        compact: false,
         decimals: 2,
       });
     });

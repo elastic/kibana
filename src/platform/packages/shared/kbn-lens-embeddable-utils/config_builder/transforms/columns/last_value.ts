@@ -16,7 +16,7 @@ export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation
 ): LastValueIndexPatternColumn => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { field, format, sort_by, show_array_values } = options ?? {};
+  const { field, format, sort_by, show_array_values } = options;
 
   return {
     operationType: 'last_value',

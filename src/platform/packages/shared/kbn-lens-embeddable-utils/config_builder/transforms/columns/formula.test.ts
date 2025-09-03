@@ -60,6 +60,7 @@ describe('Formula Transforms', () => {
         id: 'number',
         params: {
           decimals: 2,
+          compact: false,
         },
       });
     });
@@ -137,7 +138,6 @@ describe('Formula Transforms', () => {
       expect(result.format).toEqual({
         type: 'number',
         decimals: 2,
-        compact: false,
       });
     });
   });
