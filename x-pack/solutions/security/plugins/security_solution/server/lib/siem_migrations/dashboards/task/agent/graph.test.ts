@@ -6,7 +6,7 @@
  */
 
 import fs from 'fs';
-import type { ActionsClientChatOpenAI } from '@kbn/langchain/server/language_models';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { NodeResponse } from '../__mocks__/mocks';
 import { SiemMigrationFakeLLM, MockSiemMigrationTelemetryClient } from '../__mocks__/mocks';
@@ -41,7 +41,7 @@ const esClientMock =
 
 const setupAgent = (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
-  const model = fakeLLM as unknown as ActionsClientChatOpenAI;
+  const model = fakeLLM as unknown as InferenceChatModel;
   const graph = getDashboardMigrationAgent({
     model,
     esScopedClient: esClientMock,

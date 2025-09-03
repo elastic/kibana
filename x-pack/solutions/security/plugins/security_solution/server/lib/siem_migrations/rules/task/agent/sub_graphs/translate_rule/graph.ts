@@ -82,10 +82,7 @@ const translatableRouter = (state: TranslateRuleState) => {
 };
 
 const validationRouter = (state: TranslateRuleState) => {
-  if (
-    state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    !isEmpty(state.validation_errors?.esql_errors)
-  ) {
+  if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
   if (!state.includes_ecs_mapping) {
