@@ -19,10 +19,11 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { WorkflowStepExecutionListItem } from './workflow_step_execution_list_item';
+import { CancelExecutionButton } from './cancel_execution_button';
 
 export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
@@ -116,9 +117,24 @@ export const WorkflowStepExecutionList = ({
             onClick={() => onStepExecutionClick(stepExecution.id)}
           />
         ))}
-        <EuiButton onClick={onClose} css={styles.doneButton}>
-          <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
-        </EuiButton>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          justifyContent="flexEnd"
+          css={styles.buttonsContainer}
+        >
+          {[
+            ExecutionStatus.RUNNING,
+            ExecutionStatus.WAITING,
+            ExecutionStatus.WAITING_FOR_INPUT,
+            ExecutionStatus.PENDING,
+          ].includes(execution?.status as ExecutionStatus) && (
+            <CancelExecutionButton executionId={execution.id} />
+          )}
+          <EuiButton onClick={onClose}>
+            <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
+          </EuiButton>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </>
   );
@@ -129,8 +145,7 @@ const componentStyles = {
     css({
       padding: euiTheme.size.s,
     }),
-  doneButton: css({
-    justifySelf: 'flex-end',
+  buttonsContainer: css({
     marginTop: 'auto',
   }),
 };

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface CancelExecutionButtonProps {
@@ -27,15 +27,16 @@ export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({ ex
 
   return (
     <EuiButton
-      color="danger"
+      color="warning"
       iconType="cross"
       disabled={isCancellationRequested}
       onClick={handleClick}
       data-test-subj="cancelExecutionButton"
     >
-      {i18n.translate('workflowsManagement.executionDetail.cancelButton', {
-        defaultMessage: 'Cancel execution',
-      })}
+      <FormattedMessage
+        id="workflowsManagement.executionDetail.cancelButton"
+        defaultMessage="Cancel execution"
+      />
     </EuiButton>
   );
 };
