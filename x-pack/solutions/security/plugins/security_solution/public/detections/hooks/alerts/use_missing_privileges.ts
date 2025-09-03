@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
-import type { Privilege } from '../../../containers/detection_engine/alerts/types';
-import { useUserData } from '../../user_info';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import type { Privilege } from '../../containers/detection_engine/alerts/types';
+import { useUserData } from '../../components/user_info';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const REQUIRED_INDEX_PRIVILEGES = ['read', 'write', 'view_index_metadata', 'manage'] as const;
 
@@ -35,10 +35,19 @@ export type MissingFeaturePrivileges = [feature: string, privileges: string[]];
 export type MissingIndexPrivileges = [indexName: string, privileges: string[]];
 
 export interface MissingPrivileges {
+  /**
+   * List of features that the user does not have the privileges for.
+   */
   featurePrivileges: MissingFeaturePrivileges[];
+  /**
+   * List of indices that the user does not have the privileges for.
+   */
   indexPrivileges: MissingIndexPrivileges[];
 }
 
+/**
+ * Hook that returns index and feature privileges that are missing for the user.
+ */
 export const useMissingPrivileges = (): MissingPrivileges => {
   const { detectionEnginePrivileges, listPrivileges } = useUserPrivileges();
   const [{ canUserCRUD }] = useUserData();
@@ -62,7 +71,7 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       };
     }
 
-    if (canUserCRUD === false) {
+    if (!canUserCRUD) {
       featurePrivileges.push([SECURITY_FEATURE_ID, ['all']]);
     }
 
