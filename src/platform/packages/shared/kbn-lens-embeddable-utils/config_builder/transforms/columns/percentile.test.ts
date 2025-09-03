@@ -66,7 +66,6 @@ describe('Percentile Transforms', () => {
         params: {
           decimals: 2,
           compact: false,
-
         },
       });
     });

@@ -24,7 +24,7 @@ export const fromFormulaAPItoLensState = (
     ...sharedProps,
     references: [],
     params: {
-      formula: formula,
+      formula,
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
   };

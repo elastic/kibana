@@ -69,7 +69,7 @@ export function fromFormatLensStateToAPI(
     return {
       type: format.id,
       ...(format.params?.decimals != null ? { decimals: format.params?.decimals } : {}),
-      ...(format.params?.compact != null? { compact: format.params?.compact } : {}),
+      ...(format.params?.compact != null ? { compact: format.params?.compact } : {}),
       ...(format.params?.suffix ? { suffix: format.params.suffix } : {}),
     } as LensApiMetricOperation['format'];
   }

@@ -153,7 +153,7 @@ describe('Range Transforms', () => {
         field: 'price',
         granularity: 10,
         include_empty_rows: true,
-        format: { type: 'number', decimals: 0, compact: false, },
+        format: { type: 'number', decimals: 0, compact: false },
       };
 
       expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);

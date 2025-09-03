@@ -26,7 +26,7 @@ describe('Format Transforms', () => {
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'number',
-          params: { decimals: 2, compact: false, },
+          params: { decimals: 2, compact: false },
         });
       });
 
@@ -38,7 +38,7 @@ describe('Format Transforms', () => {
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'percent',
-          params: { decimals: 1, compact: false, },
+          params: { decimals: 1, compact: false },
         });
       });
 
@@ -51,7 +51,7 @@ describe('Format Transforms', () => {
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'number',
-          params: { decimals: 2, suffix: ' units', compact: false, },
+          params: { decimals: 2, suffix: ' units', compact: false },
         });
       });
 
@@ -63,7 +63,7 @@ describe('Format Transforms', () => {
         };
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'number',
-          params: { decimals: 2, compact: true, },
+          params: { decimals: 2, compact: true },
         });
       });
     });

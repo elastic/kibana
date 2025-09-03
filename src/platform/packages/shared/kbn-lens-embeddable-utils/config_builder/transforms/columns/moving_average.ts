@@ -32,7 +32,7 @@ export function fromMovingAverageAPItoLensState(
 
 export function fromMovingAverageLensStateToAPI(
   column: MovingAverageIndexPatternColumn,
-  ref: LensApiFieldMetricOperations,
+  ref: LensApiFieldMetricOperations
 ): LensApiMovingAverageOperation {
   return {
     operation: 'moving_average',
