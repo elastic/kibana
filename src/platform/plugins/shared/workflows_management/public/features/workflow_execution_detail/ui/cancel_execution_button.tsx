@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 interface CancelExecutionButtonProps {
   executionId: string;
@@ -18,18 +19,34 @@ interface CancelExecutionButtonProps {
 
 export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({ executionId }) => {
   const { services } = useKibana();
-  const [isCancellationRequested, setIsCancellationRequested] = React.useState(false);
 
   const handleClick = async () => {
-    await services.http?.post(`/api/workflowExecutions/${executionId}/cancel`);
-    setIsCancellationRequested(true);
+    try {
+      await services.http?.post(`/api/workflowExecutions/${executionId}/cancel`);
+      services.notifications?.toasts.addSuccess({
+        title: i18n.translate(
+          'workflowsManagement.executionDetail.cancelButton.successNotificationTitle',
+          {
+            defaultMessage: 'Execution cancelled',
+          }
+        ),
+      });
+    } catch (error) {
+      services.notifications?.toasts.addError?.(error, {
+        title: i18n.translate(
+          'workflowsManagement.executionDetail.cancelButton.errorNotificationTitle',
+          {
+            defaultMessage: 'Error cancelling execution',
+          }
+        ),
+      });
+    }
   };
 
   return (
     <EuiButton
       color="warning"
       iconType="cross"
-      disabled={isCancellationRequested}
       onClick={handleClick}
       data-test-subj="cancelExecutionButton"
     >
