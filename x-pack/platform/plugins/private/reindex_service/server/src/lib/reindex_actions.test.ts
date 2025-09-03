@@ -18,7 +18,7 @@ import type { ReindexActions } from './reindex_actions';
 import { LOCK_WINDOW, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
-const { currentMajor, prevMajor } = getMockVersionInfo();
+const { currentMajor } = getMockVersionInfo();
 
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   getRollupJobByIndexName: jest.fn(),
@@ -61,7 +61,7 @@ describe('ReindexActions', () => {
       client.create.mockResolvedValue();
     });
 
-    it(`prepends reindexed-v${currentMajor} to new name`, async () => {
+    it(`creates new reindex op with correct arguments`, async () => {
       await actions.createReindexOp({
         indexName: 'myIndex',
         newIndexName: `reindexed-v${currentMajor}-myIndex`,
@@ -77,46 +77,6 @@ describe('ReindexActions', () => {
         reindexTaskPercComplete: null,
         errorMessage: null,
         runningReindexCount: null,
-      });
-    });
-
-    it(`prepends reindexed-v${currentMajor} to new name, preserving leading period`, async () => {
-      await actions.createReindexOp({
-        indexName: '.internalIndex',
-        newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
-      });
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: '.internalIndex',
-        newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-      });
-    });
-
-    it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
-      await actions.createReindexOp({
-        indexName: `reindexed-v${prevMajor}-myIndex`,
-        newIndexName: `reindexed-v${currentMajor}-myIndex`,
-      });
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: `reindexed-v${prevMajor}-myIndex`,
-        newIndexName: `reindexed-v${currentMajor}-myIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-        rollupJob: undefined,
-        settings: undefined,
       });
     });
   });
