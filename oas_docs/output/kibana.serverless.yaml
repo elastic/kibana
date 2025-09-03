@@ -11072,9 +11072,15 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                  allOf:
+                    - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                    - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                      type: object
                 case_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                  allOf:
+                    - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                    - description: The IDs of cases where the action taken will be logged.
+                      type: object
                 comment:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
                 endpoint_ids:
@@ -11276,9 +11282,15 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
                 alert_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                  allOf:
+                    - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                    - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                      type: object
                 case_ids:
-                  $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                  allOf:
+                    - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                    - description: The IDs of cases where the action taken will be logged.
+                      type: object
                 comment:
                   $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
                 endpoint_ids:
@@ -69342,9 +69354,15 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -69495,9 +69513,15 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -69558,9 +69582,15 @@ components:
         agent_type:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
         alert_ids:
-          $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+          allOf:
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+            - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              type: object
         case_ids:
-          $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+          allOf:
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+            - description: The IDs of cases where the action taken will be logged.
+              type: object
         comment:
           $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
         endpoint_ids:
@@ -69657,9 +69687,15 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -70080,9 +70116,15 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -70110,9 +70152,15 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -70223,9 +70271,15 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
@@ -70338,9 +70392,15 @@ components:
             agent_type:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+                - description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
             endpoint_ids:
