@@ -38,6 +38,21 @@ export function initPlugin(router: IRouter, path: string) {
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
+      // only validate headers if they are defined:
+      const headers = req.headers;
+
+      if (headers.secret || headers.config) {
+        const match = Object.entries(expectedHeaders).every(
+          ([key, expectedValue]) => headers[key] === expectedValue
+        );
+
+        if (!match) {
+          return jsonResponse(res, 400, {
+            error: 'Headers do not match',
+          });
+        }
+      }
+
       return jsonResponse(res, 200, {
         id: '123',
         key: 'CK-1',
@@ -157,45 +172,6 @@ export function initPlugin(router: IRouter, path: string) {
             name: 'Sub-task',
           },
         ],
-      });
-    }
-  );
-
-  router.post(
-    {
-      path: `${path}/rest/api/2/issue/headers`,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      options: {
-        authRequired: false,
-        xsrfRequired: false,
-      },
-      validate: {},
-    },
-    async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      const headers = req.headers;
-
-      const match = Object.entries(expectedHeaders).every(
-        ([key, expectedValue]) => headers[key] === expectedValue
-      );
-
-      if (!match) {
-        return jsonResponse(res, 400, {
-          error: 'Headers do not match',
-        });
-      }
-      return jsonResponse(res, 200, {
-        id: '123',
-        key: 'CK-1',
-        headers,
       });
     }
   );

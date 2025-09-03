@@ -478,7 +478,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         });
 
         it('should send both config and secret headers in a cases wehook action', async () => {
-          const customSimulatorUrl = `${casesWebhookSimulatorURL}/rest/api/2/issue/headers`;
+          const customSimulatorUrl = `${casesWebhookSimulatorURL}/rest/api/2/issue`;
           const { body: createdAction } = await supertest
             .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')

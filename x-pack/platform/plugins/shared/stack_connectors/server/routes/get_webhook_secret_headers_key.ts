@@ -41,7 +41,7 @@ export const getWebhookSecretHeadersKeyRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/{id}/_secret_headers`,
+      path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/{id}/secret_headers`,
       security: {
         authz: {
           enabled: false,
