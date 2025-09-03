@@ -9,13 +9,13 @@ import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CallOutMessage } from '../../../common/components/callouts';
-import { CallOutPersistentSwitcher } from '../../../common/components/callouts';
-import { useUserData } from '../user_info';
+import type { CallOutMessage } from '../../../../common/components/callouts';
+import { CallOutPersistentSwitcher } from '../../../../common/components/callouts';
+import { useUserData } from '../../../../detections/components/user_info';
 import {
   DetectionsRequirementsLink,
   SecuritySolutionRequirementsLink,
-} from '../../../common/components/links_to_docs';
+} from '../../../../common/components/links_to_docs';
 
 export const NEED_ADMIN_CALLOUT_TEST_ID = 'need-admin-for-update-rules';
 

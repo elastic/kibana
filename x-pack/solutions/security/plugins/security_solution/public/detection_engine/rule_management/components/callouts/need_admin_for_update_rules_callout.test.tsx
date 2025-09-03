@@ -11,10 +11,10 @@ import {
   NEED_ADMIN_CALLOUT_TEST_ID,
   NeedAdminForUpdateRulesCallOut,
 } from './need_admin_for_update_rules_callout';
-import { useUserData } from '../user_info';
-import { TestProviders } from '../../../common/mock';
+import { useUserData } from '../../../../detections/components/user_info';
+import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../user_info');
+jest.mock('../../../../detections/components/user_info');
 
 describe('NeedAdminForUpdateRulesCallOut', () => {
   beforeEach(() => {
