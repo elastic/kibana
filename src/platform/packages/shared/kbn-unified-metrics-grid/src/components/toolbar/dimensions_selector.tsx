@@ -8,7 +8,6 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { type SelectableEntry } from '@kbn/unified-histogram';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
@@ -20,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ToolbarSelector } from '@kbn/shared-ux-toolbar-selector';
+import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 
 interface DimensionsFilterProps {
   fields: Array<{
