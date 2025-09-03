@@ -49,6 +49,8 @@ export function createEditLookupIndexContentAction(
         existingIndexName,
         { index: { mode: 'lookup' } },
         // On index searchable
+        undefined,
+        // On all docs searchable
         (index) => {
           indexUpdateService.onFileUploadFinished(index);
         }

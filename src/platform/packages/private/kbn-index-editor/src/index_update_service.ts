@@ -955,14 +955,11 @@ export class IndexUpdateService {
 
   public async onFileUploadFinished(indexName: string) {
     if (this.isIndexCreated()) {
-      // This timeout can be cleaned when https://github.com/elastic/kibana/issues/232225 is resolved
-      setTimeout(async () => {
-        const dataView = await firstValueFrom(this.dataView$);
-        await this.data.dataViews.refreshFields(dataView, false, true);
-        this.refresh();
-        this.addAction('recalculate-column-placeholders');
-        this._isSaving$.next(false);
-      }, 2000);
+      const dataView = await firstValueFrom(this.dataView$);
+      await this.data.dataViews.refreshFields(dataView, false, true);
+      this.refresh();
+      this.addAction('recalculate-column-placeholders');
+      this._isSaving$.next(false);
     } else {
       this.setIndexName(indexName);
       this.setIndexCreated(true);
