@@ -46,8 +46,8 @@ examples/v8_profiler_examples @elastic/response-ops
 examples/workflows @elastic/workflows-eng
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
-packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
+packages/kbn-check-saved-objects-cli @elastic/kibana-core
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
@@ -688,6 +688,7 @@ src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
+src/platform/plugins/private/inspect_component @elastic/appex-sharedux
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
