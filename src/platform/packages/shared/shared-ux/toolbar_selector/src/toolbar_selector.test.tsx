@@ -119,21 +119,21 @@ describe('ToolbarSelector', () => {
     expect(getByTestId('toolbarSelectorSearchSelectorSearch')).toBeInTheDocument();
   });
 
-  it('renders with optional props: popoverTitleLabel, popoverTitleSection, hasArrow', () => {
-    const { getByText, getByTestId, getAllByLabelText } = render(
+  it('renders with optional props: popoverTitle, clearAllSection, hasArrow', () => {
+    const { getByTestId, getAllByLabelText, getByText } = render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorOptionalProps"
         buttonLabel="Optional"
         options={options}
-        searchable={false}
+        searchable={true}
         singleSelection={true}
         popoverTitle="My Popover Title"
-        popoverTitleSection={<span>Custom Section</span>}
+        clearAllSection={<span>Custom Section</span>}
         hasArrow={false}
       />
     );
     fireEvent.click(getByTestId('toolbarSelectorOptionalPropsButton'));
     expect(getByText('Custom Section')).toBeInTheDocument();
-    expect(getAllByLabelText('My Popover Title')).toHaveLength(2);
+    expect(getAllByLabelText('My Popover Title')).toHaveLength(3);
   });
 });

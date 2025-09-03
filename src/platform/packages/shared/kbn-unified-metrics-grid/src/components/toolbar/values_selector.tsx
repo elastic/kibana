@@ -127,7 +127,7 @@ export const ValuesSelector = ({
     );
   }, [isLoading, selectedValues.length]);
 
-  const popoverTitleSection = useMemo(() => {
+  const clearAllSection = useMemo(() => {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -197,7 +197,7 @@ export const ValuesSelector = ({
       hasArrow={!isLoading}
       onChange={handleChange}
       disabled={disabled}
-      popoverTitleSection={popoverTitleSection}
+      clearAllSection={clearAllSection}
     />
   );
 };
