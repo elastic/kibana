@@ -21,6 +21,9 @@ import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
+import { DefaultAIConnector } from '@kbn/ai-assistant-default-llm-setting'
+import { useGenAIConnectors } from '@kbn/ai-assistant/src/hooks';
 
 export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const {
@@ -30,6 +33,7 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     application: { capabilities, getUrlForApp },
   } = useKibana().services;
   const { config } = useAppContext();
+  const connectors = useGenAIConnectors();
 
   const settingsKeys = [
     aiAssistantSimulatedFunctionCalling,
@@ -37,8 +41,13 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
   ];
 
+  const customComponentSettingsKeys = [
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  ]
+
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(settingsKeys);
+    useEditableSettings([...settingsKeys, ...customComponentSettingsKeys]);
 
   const canEditAdvancedSettings = capabilities.advancedSettings?.save;
 
@@ -87,6 +96,8 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
           </FieldRowProvider>
         );
       })}
+      <DefaultAIConnector toast={notifications.toasts} uiSetting={{ fields, handleFieldChange, unsavedChanges }} connectors={connectors} />
+
       {config.logSourcesEnabled && (
         <LogSourcesSettingSynchronisationInfo
           isLoading={false}

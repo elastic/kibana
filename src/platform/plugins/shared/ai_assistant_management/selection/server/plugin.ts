@@ -27,6 +27,11 @@ import type {
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { NO_DEFAULT_CONNECTOR } from '../common/constants';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -90,6 +95,36 @@ export class AIAssistantManagementSelectionPlugin
         },
         requiresPageReload: true,
         solution: 'oblt',
+      },
+    });
+
+    core.uiSettings.register({
+      /**
+       * TODO:
+       * Once assistants changes have been made that watch this uiSetting,
+       * change the bellow configuration to the following:
+       * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
+       */
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.string(),
+        value: NO_DEFAULT_CONNECTOR,
+      },
+    });
+
+    core.uiSettings.register({
+      /**
+       * TODO:
+       * Once assistants changes have been made that watch this uiSetting,
+       * change the bellow configuration to the following:
+       * {"readonlyMode": "ui", "schema": schema.boolean(), "value": false}
+       */
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
+        readonlyMode: 'ui',
+        readonly: false,
+        schema: schema.boolean(),
+        value: false,
       },
     });
 

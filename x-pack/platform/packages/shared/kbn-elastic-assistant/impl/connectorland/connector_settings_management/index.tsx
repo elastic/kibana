@@ -7,20 +7,29 @@
 
 import {
   EuiButton,
+  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiPanel,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { useAssistantContext } from '../../assistant_context';
-
+import { DefaultAIConnector } from '@kbn/ai-assistant-default-llm-setting'
 import * as i18n from './translations';
+import { SettingsContextProvider, useSettingsContext } from './context/settings_context';
+import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
+import { isEmpty } from 'lodash';
+import { AIConnector } from '../connector_selector';
 
-const ConnectorsSettingsManagementComponent: React.FC = () => {
+type Props = {
+  settings: SettingsStart
+  connectors: AIConnector[] | undefined
+}
+
+const ConnectorsSettingsManagementComponent: React.FC<Props> = ({ settings, connectors }) => {
   const { navigateToApp } = useAssistantContext();
 
   const onClick = useCallback(
@@ -32,27 +41,75 @@ const ConnectorsSettingsManagementComponent: React.FC = () => {
   );
 
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-      <EuiTitle size="xs">
-        <h2>{i18n.CONNECTOR_SETTINGS_MANAGEMENT_TITLE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem
-          css={css`
-            align-self: center;
-          `}
-        >
-          <EuiText size="m">{i18n.CONNECTOR_SETTINGS_MANAGEMENT_DESCRIPTION}</EuiText>
-        </EuiFlexItem>
+    <SettingsContextProvider settings={settings}>
+      <EuiPanel hasShadow={false} hasBorder paddingSize="l">
 
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={onClick}>{i18n.CONNECTOR_MANAGEMENT_BUTTON_TITLE}</EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+        <EuiDescribedFormGroup
+          data-test-subj="connectorsSection"
+          fullWidth
+          title={
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3 data-test-subj="connectorsTitle">
+                    {i18n.CONNECTOR_SETTINGS_MANAGEMENT_TITLE}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          description={i18n.CONNECTOR_SETTINGS_MANAGEMENT_DESCRIPTION}
+        >
+
+          <EuiFormRow fullWidth>
+            <EuiFlexGroup gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={onClick}>{i18n.CONNECTOR_MANAGEMENT_BUTTON_TITLE}</EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+
+        </EuiDescribedFormGroup>
+
+        <DefaultAIConnectorHoc connectors={connectors} />
+        <BottomBarActionsHoc />
+      </EuiPanel>
+    </SettingsContextProvider>
   );
 };
+
+export const DefaultAIConnectorHoc: React.FC<Pick<Props, 'connectors'>> = ({ connectors }) => {
+  const { toasts } = useAssistantContext();
+  const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
+
+  return <DefaultAIConnector toast={toasts!} uiSetting={{ fields, handleFieldChange, unsavedChanges }} connectors={{
+    loading: false,
+    connectors: connectors
+  }} />
+}
+
+export const BottomBarActionsHoc = () => {
+  const { unsavedChanges, cleanUnsavedChanges, isSaving, saveAll } = useSettingsContext();
+  const { toasts } = useAssistantContext();
+  if (isEmpty(unsavedChanges)) {
+    return null
+  }
+
+  async function handleSave() {
+    try {
+      await saveAll();
+    } catch (e) {
+      const error = e as Error;
+      toasts && toasts.addDanger({
+        title: i18n.BOTTOM_BAR_ACTIONS_SAVE_ERROR,
+        text: error.message,
+      });
+      throw error;
+    }
+  }
+
+  return <BottomBarActions isLoading={isSaving} onDiscardChanges={cleanUnsavedChanges} onSave={handleSave} unsavedChangesCount={Object.keys(unsavedChanges).length} appTestSubj="settingsSaveBar" saveLabel={i18n.BOTTOM_BAR_ACTIONS_SAVE_LABEL} />;
+}
 
 export const ConnectorsSettingsManagement = React.memo(ConnectorsSettingsManagementComponent);
 ConnectorsSettingsManagementComponent.displayName = 'ConnectorsSettingsManagementComponent';

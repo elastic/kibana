@@ -28,6 +28,7 @@ export const ManagementSettings = React.memo(() => {
     data: { dataViews },
     chrome: { docTitle, setBreadcrumbs },
     serverless,
+    settings
   } = useKibana().services;
   const spaceId = useSpaceId();
 
@@ -99,6 +100,7 @@ export const ManagementSettings = React.memo(() => {
   return spaceId ? (
     <AssistantSpaceIdProvider spaceId={spaceId}>
       <AssistantSettingsManagement
+        settings={settings}
         dataViews={dataViews}
         onTabChange={handleTabChange}
         currentTab={currentTab}

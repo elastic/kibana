@@ -28,3 +28,11 @@ export const CONNECTOR_MANAGEMENT_BUTTON_TITLE = i18n.translate(
     defaultMessage: 'Manage Connectors',
   }
 );
+
+export const BOTTOM_BAR_ACTIONS_SAVE_LABEL = i18n.translate('xpack.gen_ai_settings.settings.saveButton', {
+  defaultMessage: 'Save changes',
+})
+
+export const BOTTOM_BAR_ACTIONS_SAVE_ERROR = i18n.translate('xpack.observabilityAiAssistantManagement.save.error', {
+  defaultMessage: 'An error occurred while saving the settings',
+})
