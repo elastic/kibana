@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type {
   ConversationResponse,
@@ -26,6 +27,7 @@ export interface UpdateConversationSchema {
   title?: string;
   messages?: Array<{
     '@timestamp': string;
+    id: string;
     content: string;
     reader?: Reader;
     role: MessageRole;
@@ -44,11 +46,6 @@ export interface UpdateConversationSchema {
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
-  };
-  summary?: {
-    '@timestamp': string;
-    semantic_content?: string;
-    summarized_message_ids?: UUID[];
   };
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
@@ -101,13 +98,14 @@ export const transformToUpdateScheme = (
     messages,
     replacements,
     id,
-    summary,
+    users,
   }: ConversationUpdateProps
 ): UpdateConversationSchema => {
   return {
     id,
     updated_at: updatedAt,
     ...(title ? { title } : {}),
+    ...(users ? { users } : {}),
     ...(apiConfig
       ? {
           api_config: {
@@ -136,6 +134,7 @@ export const transformToUpdateScheme = (
       ? {
           messages: messages.map((message) => ({
             '@timestamp': message.timestamp,
+            id: message.id ?? uuidv4(),
             content: message.content,
             is_error: message.isError,
             reader: message.reader,
@@ -158,15 +157,6 @@ export const transformToUpdateScheme = (
                 }
               : {}),
           })),
-        }
-      : {}),
-    ...(summary
-      ? {
-          summary: {
-            '@timestamp': updatedAt,
-            semantic_content: summary.semanticContent,
-            summarized_message_ids: summary.summarizedMessageIds,
-          },
         }
       : {}),
   };

@@ -19,7 +19,7 @@ export const useMetricFieldsQuery = (params?: {
   from?: string;
   to?: string;
 }) => {
-  const { callApi } = useMetricsExperience();
+  const { client } = useMetricsExperience();
 
   const { hasNextPage, data, status, fetchNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery({
@@ -32,19 +32,17 @@ export const useMetricFieldsQuery = (params?: {
         try {
           const [, fields, index, from, to] = queryKey;
 
-          const response = await callApi('GET /internal/metrics_experience/fields', {
-            params: {
-              query: {
-                fields,
-                index,
-                from,
-                to,
-                page: pageParam,
-                size: 200,
-              },
+          const response = await client.getFields(
+            {
+              fields,
+              index,
+              from,
+              to,
+              page: pageParam,
+              size: 200,
             },
-            signal,
-          });
+            signal
+          );
 
           if (!response) {
             throw new Error(`Failed to fetch fields for ${index}`);

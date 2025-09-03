@@ -578,7 +578,7 @@
         "label": "createResultSchema",
         "description": [],
         "signature": [
-          "(soSchema: ",
+          "<T extends ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -586,7 +586,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<any>) => ",
+          "<any>>(soSchema: T) => ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -594,15 +594,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<{ item: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<any>; }>"
+          "<{ item: T; }>"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
@@ -611,64 +603,14 @@
           {
             "parentPluginId": "@kbn/content-management-utils",
             "id": "def-server.createResultSchema.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "soSchema",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<any>"
+              "T"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-management-utils",
-        "id": "def-server.getMSearch",
-        "type": "Function",
-        "tags": [],
-        "label": "getMSearch",
-        "description": [],
-        "signature": [
-          "<ReturnItem, SOAttributes extends object>({ savedObjectType, cmServicesDefinition, allowedSavedObjectAttributes, }: GetMSearchParams) => { savedObjectType: string; toItemResult: (ctx: ",
-          {
-            "pluginId": "contentManagement",
-            "scope": "server",
-            "docId": "kibContentManagementPluginApi",
-            "section": "def-server.StorageContext",
-            "text": "StorageContext"
-          },
-          ", savedObject: ",
-          "SavedObjectsFindResult",
-          "<unknown>) => ReturnItem; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-server.getMSearch.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  savedObjectType,\n  cmServicesDefinition,\n  allowedSavedObjectAttributes,\n}",
-            "description": [],
-            "signature": [
-              "GetMSearchParams"
-            ],
-            "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -685,7 +627,7 @@
         "label": "objectTypeToGetResultSchema",
         "description": [],
         "signature": [
-          "(soSchema: ",
+          "<T extends ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -693,7 +635,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<any>) => ",
+          "<any>>(soSchema: T) => ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -701,15 +643,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<{ item: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<any>; meta: ",
+          "<{ item: T; meta: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -750,19 +684,12 @@
           {
             "parentPluginId": "@kbn/content-management-utils",
             "id": "def-server.objectTypeToGetResultSchema.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "soSchema",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<any>"
+              "T"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -781,7 +708,7 @@
         "label": "savedObjectSchema",
         "description": [],
         "signature": [
-          "(attributesSchema: ",
+          "<T extends ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -789,7 +716,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<any>) => ",
+          "<any>>(attributesSchema: T) => ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -837,6 +764,22 @@
             "section": "def-common.Type",
             "text": "Type"
           },
+          "<string | undefined>; createdBy: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; updatedBy: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
           "<string | undefined>; error: ",
           {
             "pluginId": "@kbn/config-schema",
@@ -845,15 +788,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<any>; references: ",
+          "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: T; references: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -861,7 +796,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]>; namespaces: ",
+          "<Readonly<{} & { id: string; type: string; name: string; }>[]>; namespaces: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -877,7 +812,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; }>"
+          "<string | undefined>; managed: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
@@ -886,19 +829,12 @@
           {
             "parentPluginId": "@kbn/content-management-utils",
             "id": "def-server.savedObjectSchema.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "attributesSchema",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<any>"
+              "T"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -969,6 +905,110 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-server.searchResultSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "searchResultSchema",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any>, M extends ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any> = never>(soSchema: T, meta?: M | undefined) => ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ meta?: M | undefined; hits: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ [x: string]: any; } & {}>[]>; pagination: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ total: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; cursor: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; }>; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-server.searchResultSchema.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "soSchema",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-server.searchResultSchema.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "M | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1826,105 +1866,6 @@
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-management-utils",
-        "id": "def-server.GetMSearchType",
-        "type": "Interface",
-        "tags": [],
-        "label": "GetMSearchType",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.GetMSearchType",
-            "text": "GetMSearchType"
-          },
-          "<ReturnItem>"
-        ],
-        "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-server.GetMSearchType.savedObjectType",
-            "type": "string",
-            "tags": [],
-            "label": "savedObjectType",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-utils",
-            "id": "def-server.GetMSearchType.toItemResult",
-            "type": "Function",
-            "tags": [],
-            "label": "toItemResult",
-            "description": [],
-            "signature": [
-              "(ctx: ",
-              {
-                "pluginId": "contentManagement",
-                "scope": "server",
-                "docId": "kibContentManagementPluginApi",
-                "section": "def-server.StorageContext",
-                "text": "StorageContext"
-              },
-              ", savedObject: ",
-              "SavedObjectsFindResult",
-              "<unknown>) => ReturnItem"
-            ],
-            "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/content-management-utils",
-                "id": "def-server.GetMSearchType.toItemResult.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "ctx",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "contentManagement",
-                    "scope": "server",
-                    "docId": "kibContentManagementPluginApi",
-                    "section": "def-server.StorageContext",
-                    "text": "StorageContext"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/content-management-utils",
-                "id": "def-server.GetMSearchType.toItemResult.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "savedObject",
-                "description": [],
-                "signature": [
-                  "SavedObjectsFindResult",
-                  "<unknown>"
-                ],
-                "path": "src/platform/packages/shared/kbn-content-management-utils/src/msearch.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3273,7 +3214,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
+              "<Readonly<{} & { id: string; type: string; name: string; }>[] | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3389,7 +3330,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string | undefined>; type: ",
+          "<string>; type: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -3427,7 +3368,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]>"
+          "<Readonly<{} & { id: string; type: string; name: string; }>[]>"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
@@ -3650,7 +3591,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }> | Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
+              "<Readonly<{} & { id: string; type: string; name: string; }> | Readonly<{} & { id: string; type: string; name: string; }>[] | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3692,7 +3633,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }> | Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
+              "<Readonly<{} & { id: string; type: string; name: string; }> | Readonly<{} & { id: string; type: string; name: string; }>[] | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3853,7 +3794,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
+              "<Readonly<{} & { id: string; type: string; name: string; }>[] | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3909,7 +3850,7 @@
             "label": "upsert",
             "description": [],
             "signature": [
-              "(attributesSchema: ",
+              "<T extends ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -3917,7 +3858,7 @@
                 "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
-              "<any>) => ",
+              "<any>>(attributesSchema: T) => ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -3925,7 +3866,407 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ [x: string]: any; } & {}>; references: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]; }> | undefined>"
+              "<Readonly<{ [K in keyof OptionalProperties<{ id: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; type: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; version: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; error: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: T; references: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { id: string; type: string; name: string; }>[]>; namespaces: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string[] | undefined>; originId: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; managed: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean | undefined>; }>]?: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.TypeOf",
+                "text": "TypeOf"
+              },
+              "<{ id: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; type: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; version: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; error: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: T; references: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { id: string; type: string; name: string; }>[]>; namespaces: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string[] | undefined>; originId: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; managed: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean | undefined>; }[K]> | undefined; } & { [K in keyof RequiredProperties<{ id: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; type: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; version: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; error: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: T; references: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { id: string; type: string; name: string; }>[]>; namespaces: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string[] | undefined>; originId: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; managed: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean | undefined>; }>]: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.TypeOf",
+                "text": "TypeOf"
+              },
+              "<{ id: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; type: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string>; version: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedAt: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; createdBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; updatedBy: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; error: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: T; references: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { id: string; type: string; name: string; }>[]>; namespaces: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string[] | undefined>; originId: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<string | undefined>; managed: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean | undefined>; }[K]>; }> | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3934,19 +4275,12 @@
               {
                 "parentPluginId": "@kbn/content-management-utils",
                 "id": "def-server.updateOptionsSchema.upsert.$1",
-                "type": "Object",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "attributesSchema",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.ObjectType",
-                    "text": "ObjectType"
-                  },
-                  "<any>"
+                  "T"
                 ],
                 "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
                 "deprecated": false,

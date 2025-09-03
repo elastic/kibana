@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @packageDocumentation
+ * @module @kbn/esql-composer
+ *
+ * This package contains the primary ESQL composer for building queries
+ * in a functional, chainable way. Each exported function represents a command
+ * in an ESQL query pipeline.
+ */
+
 export { from } from './src/commands/from';
 export { drop } from './src/commands/drop';
 export { evaluate } from './src/commands/eval';
