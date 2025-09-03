@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
+import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
 import type { RouteDependencies } from '../../types';
@@ -37,11 +37,7 @@ export const reindexSchema = schema.object({
   ),
 });
 
-export function registerReindexIndicesRoutes({
-  router,
-  version,
-  getReindexService,
-}: RouteDependencies) {
+export function registerReindexIndicesRoutes({ router, getReindexService }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
 
   // Start reindex for an index
@@ -58,7 +54,7 @@ export function registerReindexIndicesRoutes({
         body: reindexSchema,
       },
     },
-    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+    async ({ core }, request, response) => {
       const {
         savedObjects: { getClient },
         elasticsearch: { client: esClient },
@@ -89,7 +85,7 @@ export function registerReindexIndicesRoutes({
         }
         return mapAnyErrorToKibanaHttpResponse(error);
       }
-    })
+    }
   );
 
   // Get status
@@ -108,7 +104,7 @@ export function registerReindexIndicesRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+    async ({ core }, request, response) => {
       const {
         savedObjects,
         elasticsearch: { client: esClient },
@@ -133,7 +129,7 @@ export function registerReindexIndicesRoutes({
         }
         return mapAnyErrorToKibanaHttpResponse(error);
       }
-    })
+    }
   );
 
   // Cancel reindex
@@ -152,7 +148,7 @@ export function registerReindexIndicesRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
+    async ({ core }, request, response) => {
       const {
         savedObjects,
         elasticsearch: { client: esClient },
@@ -176,6 +172,6 @@ export function registerReindexIndicesRoutes({
 
         return mapAnyErrorToKibanaHttpResponse(error);
       }
-    })
+    }
   );
 }

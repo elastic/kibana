@@ -6,7 +6,6 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexOperation } from '../common';
 
 import type {
@@ -16,7 +15,6 @@ import type {
 
 export interface RouteDependencies {
   router: IRouter;
-  version: Version;
   getReindexService: () => Promise<ReindexServiceServerPluginStart>;
 }
 

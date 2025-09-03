@@ -119,12 +119,7 @@ export class ReindexServiceWrapper {
     savedObjects,
   }: ReindexServiceScopedClientArgs): ReindexServiceScopedClient {
     const callAsCurrentUser = dataClient.asCurrentUser;
-    const reindexActions = reindexActionsFactory(
-      savedObjects,
-      callAsCurrentUser,
-      this.deps.logger,
-      this.deps.version
-    );
+    const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, this.deps.logger);
     const reindexService = reindexServiceFactory(
       callAsCurrentUser,
       reindexActions,

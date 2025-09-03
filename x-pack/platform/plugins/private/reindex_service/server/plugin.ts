@@ -55,7 +55,6 @@ export class ReindexServiceServerPlugin
   }: CoreSetup<PluginsStart, ReindexServiceServerPluginStart>) {
     const dependencies: RouteDependencies = {
       router: http.createRouter(),
-      version: this.version,
       getReindexService: async () => {
         const [, , reindexService] = await getStartServices();
         return reindexService;

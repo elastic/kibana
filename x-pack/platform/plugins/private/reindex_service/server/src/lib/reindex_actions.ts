@@ -15,7 +15,6 @@ import type {
 } from '@kbn/core/server';
 import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import type { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
-import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexArgs, ReindexOptions, ReindexOperation } from '../../../common';
 import type { ReindexSavedObject } from './types';
 import { ReindexStatus, ReindexStep } from '../../../common';
@@ -91,8 +90,7 @@ export interface ReindexActions {
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  log: Logger,
-  versionService: Version
+  log: Logger
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
