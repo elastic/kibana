@@ -14,6 +14,10 @@ export const toolTypeDisplays: Record<ToolType, { label: string; icon: string }>
     label: labels.tools.esqlLabel,
     icon: 'code',
   },
+  [ToolTypeEnum.index_search]: {
+    label: labels.tools.searchLabel,
+    icon: 'code',
+  },
   [ToolTypeEnum.builtin]: {
     label: labels.tools.builtinLabel,
     icon: 'logoElastic',

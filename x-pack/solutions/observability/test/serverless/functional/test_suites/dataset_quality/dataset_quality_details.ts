@@ -313,6 +313,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const discoverButton =
           await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
 
+        // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
+        // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
+        await testSubjects.moveMouseTo(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
+
         await discoverButton.click();
 
         // Confirm dataset selector text in discover
@@ -327,6 +333,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
+
+        // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
+        // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
+        await testSubjects.moveMouseTo(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
 
         await testSubjects.click(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover

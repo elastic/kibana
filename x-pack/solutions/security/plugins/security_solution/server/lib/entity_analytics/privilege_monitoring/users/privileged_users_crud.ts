@@ -7,12 +7,12 @@
 
 import { merge } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { UpdatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
 import type {
+  UpdatePrivMonUserRequestBody,
+  MonitoredUserDoc,
   CreatePrivMonUserRequestBody,
   CreatePrivMonUserResponse,
-} from '../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
+} from '../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { PrivMonUserSource } from '../types';
 
