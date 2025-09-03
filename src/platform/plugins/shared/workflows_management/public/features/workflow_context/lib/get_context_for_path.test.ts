@@ -83,7 +83,7 @@ describe('getContextSchemaForPath', () => {
     const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
     expect(Object.keys(context.shape).sort()).toEqual(
-      ['execution', 'workflow', 'now', 'event', 'steps', 'consts'].sort()
+      ['execution', 'workflow', 'now', 'event', 'inputs', 'steps', 'consts'].sort()
     );
     expectZodSchemaEqual(
       context,
@@ -92,6 +92,7 @@ describe('getContextSchemaForPath', () => {
         workflow: WorkflowDataContextSchema,
         now: z.date(),
         event: EventSchema,
+        inputs: z.object({}),
         steps: z.object({}),
         consts: z.object({
           test: z.string(),
@@ -115,6 +116,7 @@ describe('getContextSchemaForPath', () => {
         workflow: WorkflowDataContextSchema,
         now: z.date(),
         event: EventSchema,
+        inputs: z.object({}),
         steps: z.object({
           'first-step': z.object({
             output: z.string(),
