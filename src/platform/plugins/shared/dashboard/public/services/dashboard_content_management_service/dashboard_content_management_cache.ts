@@ -8,16 +8,16 @@
  */
 
 import { LRUCache } from 'lru-cache';
-import type { LegacyDashboardGetOut } from '../../../server/content_management';
+import type { DashboardGetOut } from '../../../server/content_management';
 
 const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
 const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
 export class DashboardContentManagementCache {
-  private cache: LRUCache<string, LegacyDashboardGetOut>;
+  private cache: LRUCache<string, DashboardGetOut>;
 
   constructor() {
-    this.cache = new LRUCache<string, LegacyDashboardGetOut>({
+    this.cache = new LRUCache<string, DashboardGetOut>({
       max: DASHBOARD_CACHE_SIZE,
       ttl: DASHBOARD_CACHE_TTL,
     });
@@ -29,7 +29,7 @@ export class DashboardContentManagementCache {
   }
 
   /** Add the fetched dashboard to the cache */
-  public addDashboard({ item: dashboard, meta }: LegacyDashboardGetOut) {
+  public addDashboard({ item: dashboard, meta }: DashboardGetOut) {
     this.cache.set(dashboard.id, {
       meta,
       item: dashboard,

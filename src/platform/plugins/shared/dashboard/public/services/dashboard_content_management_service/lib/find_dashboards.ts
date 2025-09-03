@@ -14,10 +14,10 @@ import type {
   LegacyDashboardAttributes,
   DashboardGetIn,
   DashboardSearchIn,
-  DashboardSearchOut,
+  DashboardAPISearchOut,
   DashboardSearchOptions,
   DashboardSearchAPIResult,
-  LegacyDashboardGetOut,
+  DashboardGetOut,
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
@@ -33,7 +33,7 @@ export interface SearchDashboardsArgs {
 
 export interface SearchDashboardsResponse {
   total: number;
-  hits: DashboardSearchOut['hits'];
+  hits: DashboardAPISearchOut['hits'];
 }
 
 export async function searchDashboards({
@@ -88,10 +88,7 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
 
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
-    const response = await contentManagementService.client.get<
-      DashboardGetIn,
-      LegacyDashboardGetOut
-    >({
+    const response = await contentManagementService.client.get<DashboardGetIn, DashboardGetOut>({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
     });
@@ -125,7 +122,7 @@ export async function findDashboardsByIds(ids: string[]): Promise<FindDashboards
 export async function findDashboardIdByTitle(title: string): Promise<{ id: string } | undefined> {
   const result = await contentManagementService.client.search<
     DashboardSearchIn,
-    DashboardSearchOut
+    DashboardAPISearchOut
   >({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {

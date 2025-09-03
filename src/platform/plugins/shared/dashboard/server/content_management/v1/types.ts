@@ -30,15 +30,15 @@ import type {
   dashboardUpdateOptionsSchema,
   optionsSchema,
   dashboardGetResultMetaSchema,
-  dashboardAttributesSchemaResponse,
-  dashboardResponseMetaSchema,
-  mayBeDashboardItemSchema,
+  dashboardDataAttributesSchema,
+  dashboardMetaSchema,
+  mayBeDashboardAPIItemSchema,
   dashboardCreateRequestAttributesSchema,
-  dashboardItemAPIResponseSchema,
+  dashboardItemSchema,
   dashboardSearchResultsSchema,
-  legacyDashboardGetResultSchema,
-  dashboardAttributesSchema,
-  dashboardItemAPIRequestSchema,
+  dashboardGetResultSchema,
+  dashboardAPIItemRequestSchema,
+  dashboardAttributesSchemaRequest,
 } from './cm_services';
 import type { CONTENT_ID } from '../../../common/content_management';
 
@@ -61,18 +61,21 @@ export type DashboardAttributes = Omit<
 > & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
-export type LegacyDashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
+export type LegacyDashboardAttributes = Omit<
+  TypeOf<typeof dashboardAttributesSchemaRequest>,
+  'panels'
+> & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
 export type FindDashboardsByIdResponseAttributes = Omit<
-  TypeOf<typeof dashboardAttributesSchemaResponse>,
+  TypeOf<typeof dashboardDataAttributesSchema>,
   'panels'
 > & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
 
-export type DashboardItem = TypeOf<typeof dashboardItemAPIResponseSchema>;
-export type MaybeDashboardItem = TypeOf<typeof mayBeDashboardItemSchema>;
+export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
+export type MaybeDashboardItem = TypeOf<typeof mayBeDashboardAPIItemSchema>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
   attributes: Partial<DashboardAttributes>;
   references: SavedObjectReference[] | undefined;
@@ -81,33 +84,29 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
-export type DashboardGetOut = GetResult<
-  TypeOf<typeof dashboardAttributesSchemaResponse>,
+export type DashboardAPIGetOut = GetResult<
+  TypeOf<typeof dashboardDataAttributesSchema>,
   TypeOf<typeof dashboardGetResultMetaSchema>
 >;
+export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;
 
 export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardAttributes>;
 export type DashboardCreateOut = CreateResult<
-  TypeOf<typeof dashboardItemAPIRequestSchema>,
-  TypeOf<typeof dashboardResponseMetaSchema>
->;
-export type LegacyDashboardCreateOut = CreateResult<
-  TypeOf<typeof dashboardItemAPIResponseSchema>,
-  TypeOf<typeof dashboardResponseMetaSchema>
+  TypeOf<typeof dashboardAPIItemRequestSchema>,
+  TypeOf<typeof dashboardMetaSchema>
 >;
 export type DashboardCreateOptions = TypeOf<typeof dashboardCreateOptionsSchema>;
 
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
 export type DashboardUpdateOut = CreateResult<
-  TypeOf<typeof dashboardItemAPIRequestSchema>,
-  TypeOf<typeof dashboardResponseMetaSchema>
+  TypeOf<typeof dashboardItemSchema>,
+  TypeOf<typeof dashboardMetaSchema>
 >;
 export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>;
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
-export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
-export type LegacyDashboardSearchOut = SearchResult<TypeOf<typeof dashboardItemAPIResponseSchema>>;
-export type LegacyDashboardGetOut = TypeOf<typeof legacyDashboardGetResultSchema>;
+export type DashboardAPISearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
+export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardItemSchema>>;
 
-export type DashboardSearchAPIResult = SearchResult<TypeOf<typeof dashboardItemAPIResponseSchema>>;
+export type DashboardSearchAPIResult = SearchResult<TypeOf<typeof dashboardItemSchema>>;

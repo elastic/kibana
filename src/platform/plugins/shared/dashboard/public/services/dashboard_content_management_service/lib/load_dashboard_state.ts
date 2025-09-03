@@ -10,7 +10,7 @@
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import { getDashboardContentManagementCache } from '..';
-import type { DashboardGetIn, LegacyDashboardGetOut } from '../../../../server/content_management';
+import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
@@ -40,8 +40,8 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent: LegacyDashboardGetOut['item'];
-  let resolveMeta: LegacyDashboardGetOut['meta'];
+  let rawDashboardContent: DashboardGetOut['item'];
+  let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
 
@@ -51,7 +51,7 @@ export const loadDashboardState = async ({
   } else {
     /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
     const result = await contentManagementService.client
-      .get<DashboardGetIn, LegacyDashboardGetOut>({
+      .get<DashboardGetIn, DashboardGetOut>({
         contentTypeId: DASHBOARD_CONTENT_ID,
         id,
       })

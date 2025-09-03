@@ -23,27 +23,3 @@ export type ItemResult<T = unknown, M = void> = M extends void
       item: T;
       meta: M;
     };
-
-export type DataResult<T = unknown, M = void> = M extends void
-  ? {
-      data: T;
-      meta?: never;
-    }
-  : {
-      data: T;
-      meta: M;
-    };
-
-export type DashboardItemResult<T = unknown, M = void> = M extends void
-  ? {
-      id: string;
-      type: string;
-      data: T;
-      meta?: never;
-    }
-  : {
-      id: string;
-      type: string;
-      data: T;
-      meta: M;
-    };

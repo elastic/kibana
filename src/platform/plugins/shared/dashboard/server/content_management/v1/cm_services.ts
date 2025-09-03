@@ -198,7 +198,7 @@ export const sectionSchema = schema.object({
   }),
 });
 
-const dashboardCreationResponsePanels = {
+const dashboardPanels = {
   // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
   panels: schema.arrayOf(
     schema.oneOf([
@@ -268,7 +268,7 @@ export const searchResultsAttributes = {
 // These are the attributes that are returned in search results
 export const searchResultsAttributesSchema = schema.object(searchResultsAttributes);
 
-export const dashboardRequestAttributes = {
+export const dashboardAdditionalAttributes = {
   // Search
   kibanaSavedObjectMeta: schema.object(
     {
@@ -308,14 +308,14 @@ export const referenceSchema = schema.object(
 
 export const dashboardCreateRequestAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardRequestAttributes,
+  ...dashboardAdditionalAttributes,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const dashboardUpdateRequestAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardRequestAttributes,
+  ...dashboardAdditionalAttributes,
   type: schema.maybe(schema.string()),
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -323,29 +323,26 @@ export const dashboardUpdateRequestAttributesSchema = schema.object({
 
 export const dashboardResponseAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardRequestAttributes,
+  ...dashboardAdditionalAttributes,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const dashboardAttributesSchemaRequest = dashboardCreateRequestAttributesSchema.extends(
-  dashboardCreationResponsePanels
-);
+export const dashboardAttributesSchemaRequest =
+  dashboardCreateRequestAttributesSchema.extends(dashboardPanels);
 
 export const dashboardAttributesSchema = schema.object({
   ...searchResultsAttributes,
-  ...dashboardRequestAttributes,
+  ...dashboardAdditionalAttributes,
   version: schema.string(),
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends(
-  dashboardCreationResponsePanels
-);
+export const dashboardDataAttributesSchema = dashboardAttributesSchema.extends(dashboardPanels);
 
-export const dashboardResponseMetaSchema = schema.object({
+export const dashboardMetaSchema = schema.object({
   updatedAt: schema.maybe(schema.string()),
   createdAt: schema.maybe(schema.string()),
   updatedBy: schema.maybe(schema.string()),
@@ -388,19 +385,19 @@ export const dashboardUpdateOptionsSchema = schema.object({
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
-export const dashboardItemSchema = schema.object({
-  data: dashboardAttributesSchemaResponse,
-  meta: dashboardResponseMetaSchema,
+export const dashboardAPIItemSchema = schema.object({
+  data: dashboardDataAttributesSchema,
+  meta: dashboardMetaSchema,
   type: schema.string(),
   id: schema.string(),
 });
 
-export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
+export const dashboardSearchResultsSchema = dashboardAPIItemSchema.extends({
   attributes: searchResultsAttributesSchema,
 });
 
-export const mayBeDashboardItemSchema = schema.oneOf([
-  dashboardItemSchema,
+export const mayBeDashboardAPIItemSchema = schema.oneOf([
+  dashboardAPIItemSchema,
   schema.object(
     {
       error: apiError,
@@ -420,16 +417,16 @@ const dashboardGetResultMetaSchemaSettings = {
     schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
   ),
 };
-export const dashboardGetResultMetaSchema = dashboardResponseMetaSchema.extends(
+export const dashboardGetResultMetaSchema = dashboardMetaSchema.extends(
   dashboardGetResultMetaSchemaSettings
 );
 
-export const dashboardGetResultSchema = schema.object(
+export const dashboardAPIGetResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
-    data: dashboardAttributesSchemaResponse,
-    meta: dashboardResponseMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
+    data: dashboardDataAttributesSchema,
+    meta: dashboardMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
   },
   { unknowns: 'forbid' }
 );
@@ -438,15 +435,15 @@ export const dashboardCreateResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
-    data: dashboardAttributesSchemaResponse,
-    meta: dashboardResponseMetaSchema,
+    data: dashboardDataAttributesSchema,
+    meta: dashboardMetaSchema,
   },
   { unknowns: 'forbid' }
 );
 
 export const dashboardUpdateResultSchema = dashboardCreateResultSchema;
 
-export const dashboardItemAPIResponseSchema = schema.object(
+export const dashboardItemSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
@@ -465,7 +462,7 @@ export const dashboardItemAPIResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const dashboardItemAPIRequestSchema = schema.object(
+export const dashboardAPIItemRequestSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
@@ -476,7 +473,7 @@ export const dashboardItemAPIRequestSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardAttributesSchemaResponse,
+    attributes: dashboardDataAttributesSchema,
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
@@ -484,9 +481,9 @@ export const dashboardItemAPIRequestSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const legacyDashboardGetResultSchema = schema.object(
+export const dashboardGetResultSchema = schema.object(
   {
-    item: dashboardItemAPIResponseSchema,
+    item: dashboardItemSchema,
     meta: schema.object(
       {
         outcome: schema.oneOf([
@@ -509,13 +506,13 @@ export const legacyDashboardGetResultSchema = schema.object(
 );
 
 export const dashboardListResultAPISchema = schema.object({
-  items: schema.arrayOf(dashboardItemSchema),
+  items: schema.arrayOf(dashboardAPIItemSchema),
   total: schema.number(),
 });
 
 export const dashboardGetResultAPISchema = schema.object(
   {
-    item: dashboardItemAPIResponseSchema,
+    item: dashboardItemSchema,
     meta: schema.object(
       {
         outcome: schema.oneOf([
@@ -539,7 +536,7 @@ export const dashboardGetResultAPISchema = schema.object(
 
 export const dashboardGetRequestAPISchema = schema.object(
   {
-    item: dashboardItemAPIRequestSchema,
+    item: dashboardAPIItemRequestSchema,
     meta: schema.object(
       {
         outcome: schema.oneOf([
@@ -560,11 +557,6 @@ export const dashboardGetRequestAPISchema = schema.object(
   },
   { unknowns: 'forbid' }
 );
-
-export const rpcProcedureResultSchema = schema.object({
-  contentTypeId: schema.string(),
-  result: schema.object({ hits: schema.arrayOf(dashboardItemAPIResponseSchema) }),
-});
 
 const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.extends({
   // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
@@ -617,8 +609,8 @@ export const dashboardStorageCreateResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
-    data: dashboardAttributesSchemaResponse,
-    meta: dashboardResponseMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
+    data: dashboardDataAttributesSchema,
+    meta: dashboardMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
   },
   { unknowns: 'forbid' }
 );
@@ -642,7 +634,7 @@ export const serviceDefinition: ServicesDefinition = {
     },
     out: {
       result: {
-        schema: dashboardItemAPIResponseSchema,
+        schema: dashboardItemSchema,
       },
     },
   },

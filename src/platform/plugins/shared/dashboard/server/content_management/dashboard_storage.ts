@@ -31,7 +31,7 @@ import type {
   DashboardUpdateOptions,
   DashboardSearchOptions,
   DashboardItem,
-  LegacyDashboardGetOut,
+  DashboardGetOut,
 } from './latest';
 import type { DashboardSearchAPIResult } from './v1/types';
 
@@ -175,7 +175,7 @@ export class DashboardStorage {
     return combinedTagNames;
   }
 
-  async get(ctx: StorageContext, id: string): Promise<LegacyDashboardGetOut> {
+  async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -208,8 +208,8 @@ export class DashboardStorage {
 
     // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<
-      LegacyDashboardGetOut,
-      LegacyDashboardGetOut
+      DashboardGetOut,
+      DashboardGetOut
     >(
       // @ts-expect-error - fix type error
       response,
@@ -232,7 +232,7 @@ export class DashboardStorage {
     ctx: StorageContext,
     data: DashboardAttributes,
     options: DashboardCreateOptions
-  ): Promise<LegacyDashboardGetOut> {
+  ): Promise<DashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -313,7 +313,7 @@ export class DashboardStorage {
     id: string,
     data: DashboardAttributes,
     options: DashboardUpdateOptions
-  ): Promise<LegacyDashboardGetOut> {
+  ): Promise<DashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -376,8 +376,8 @@ export class DashboardStorage {
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
-      LegacyDashboardGetOut,
-      LegacyDashboardGetOut
+      DashboardGetOut,
+      DashboardGetOut
     >(
       // @ts-expect-error - fix type error
       { item },

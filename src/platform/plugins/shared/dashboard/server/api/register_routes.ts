@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/logging';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import type { DashboardItem } from '../content_management/v1';
-import { dashboardGetResultSchema } from '../content_management/v1';
+import { dashboardAPIGetResultSchema } from '../content_management/v1';
 import {
   dashboardAttributesSchemaRequest,
   dashboardCreateRequestAttributesSchema,
@@ -299,7 +299,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
-            body: () => dashboardGetResultSchema,
+            body: () => dashboardAPIGetResultSchema,
           },
         },
       },
