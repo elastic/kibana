@@ -22,17 +22,8 @@ import {
 import dateMath from '@elastic/datemath';
 import { EuiFlexItem, EuiText, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { getValueFormatter } from '../../utils';
-
-interface ChartData {
-  x: number;
-  y: number;
-}
-
-interface SeriesData {
-  key: string | Record<string, string>;
-  data: ChartData[];
-}
+import { getValueFormatter } from '../../common/utils';
+import type { ChartData, SeriesData } from '../../hooks/use_metric_data_query';
 
 interface TimeSeriesChartProps {
   data: ChartData[] | SeriesData[];
@@ -49,7 +40,7 @@ interface TimeSeriesChartProps {
   colorIndex?: number;
 }
 
-export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
+export const TimeSeriesChart = ({
   data,
   timeRange,
   colorMode,
@@ -62,7 +53,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   unit,
   showLegend = false,
   colorIndex,
-}) => {
+}: TimeSeriesChartProps) => {
   const { euiTheme } = useEuiTheme();
 
   // Create array of EUI vis colors for cycling
