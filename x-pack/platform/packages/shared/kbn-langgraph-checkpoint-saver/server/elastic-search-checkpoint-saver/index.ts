@@ -163,6 +163,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       query: {
         bool: {
           must: [
+            // todo(@KDKHD): fix this query to remove the duplicate should clauses. Ensure both tests and the elastic assistant work.
             {
               bool: {
                 should: [
@@ -427,10 +428,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         { doc, doc_as_upsert: true },
       ];
     });
-
-    this.logger.debug(
-      `Bulk operations for checkpoint ${checkpointId}`
-    );
 
     const result = await this.client.bulk({
       operations,

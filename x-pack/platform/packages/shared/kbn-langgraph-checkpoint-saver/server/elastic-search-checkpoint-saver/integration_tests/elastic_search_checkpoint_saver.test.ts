@@ -84,7 +84,7 @@ describe('ElasticSearchSaver', () => {
     await esClient.indices.create({
       index: checkpointIndexName,
       mappings: {
-        properties: {
+        properties: { // TODO(@KDKHD) Replace this field map with the one from ElasticSearchSaver.
           '@timestamp': { type: 'date' },
           thread_id: { type: 'keyword' },
           checkpoint_ns: { type: 'keyword' },
@@ -102,7 +102,7 @@ describe('ElasticSearchSaver', () => {
     await esClient.indices.create({
       index: checkpointWritesIndexName,
       mappings: {
-        properties: {
+        properties: { // TODO(@KDKHD) Replace this field map with the one from ElasticSearchSaver.
           '@timestamp': { type: 'date' },
           thread_id: { type: 'keyword' },
           checkpoint_ns: { type: 'keyword' },
