@@ -32,11 +32,6 @@ import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitori
 
 export const DEFAULT_PAGE_SIZE = 10;
 
-export interface VisualizationStackByOption {
-  text: string;
-  value: string;
-}
-
 export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>({
   stackByField,
   generateVisualizationQuery,
@@ -122,7 +117,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
         />
         <EuiSpacer size="s" />
         <ul>
-          {visualizationQuery.left.map((field, index) => (
+          {visualizationQuery.left.invalidFields?.map((field, index) => (
             <li key={index}>{field}</li>
           ))}
         </ul>

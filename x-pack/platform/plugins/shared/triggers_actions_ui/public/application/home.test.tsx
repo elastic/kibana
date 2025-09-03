@@ -12,9 +12,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { createLocation, createMemoryHistory } from 'history';
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import TriggersActionsUIHome, { MatchParams } from './home';
+import type { MatchParams } from './home';
+import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
 
 jest.mock('../common/lib/kibana');

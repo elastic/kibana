@@ -8,7 +8,8 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { ROUTE_VERSIONS, SearchPlaygroundQueryKeys } from '../../common';
-import { APIRoutes, PlaygroundListResponse } from '../types';
+import type { PlaygroundListResponse } from '../types';
+import { APIRoutes } from '../types';
 import { useKibana } from './use_kibana';
 
 export interface UsePlaygroundsListParameters {

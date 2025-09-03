@@ -8,10 +8,26 @@
 import moment from 'moment';
 
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { EndpointIntegrationFleetError } from './errors';
 import { getControlledArtifactCutoffDate } from '../../../common/endpoint/utils/controlled_artifact_rollout';
 
-export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) => {
+export const validateEndpointPackagePolicy = (
+  inputs: NewPackagePolicyInput[],
+  operation: 'update' | 'create' = 'create'
+) => {
   const input = inputs.find((i) => i.type === 'endpoint');
+
+  // An elastic defend policy MUST have an input with expected policy and manifest data
+  if (
+    operation === 'update' &&
+    (!input?.config?.policy?.value || !input?.config?.artifact_manifest?.value)
+  ) {
+    throw new EndpointIntegrationFleetError(
+      `Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.artifact_manifest.value' are required.`
+    );
+  }
+
+  // Validate global manifest versions
   if (input?.config?.policy?.value?.global_manifest_version) {
     const globalManifestVersion = input.config.policy.value.global_manifest_version;
 
@@ -24,7 +40,7 @@ export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) =
       }
 
       const maxAllowedDate = getControlledArtifactCutoffDate();
-      if (parsedDate.isBefore(maxAllowedDate)) {
+      if (parsedDate.startOf('day').isBefore(maxAllowedDate.clone().startOf('day'))) {
         throw createManifestVersionError(
           'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.'
         );

@@ -9,11 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BoundOptions, BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
-import { AnonymizationRule } from '@kbn/inference-common';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { AnonymizationRule } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
-import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
 interface CreateClientOptions {
   request: KibanaRequest;

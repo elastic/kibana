@@ -8,12 +8,18 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { PackageInstallContext } from '../../../../../common/types';
-import type { KibanaAssetReference, KibanaAssetType } from '../../../../types';
+import {
+  KibanaSavedObjectType,
+  type KibanaAssetReference,
+  type KibanaAssetType,
+  type PackageSpecTags,
+} from '../../../../types';
 import { getPathParts } from '../../archive';
+import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
-import type { ArchiveAsset } from './install';
+import type { ArchiveAsset, InstallAssetContext } from './install';
 import {
   KibanaSavedObjectTypeMapping,
   createSavedObjectKibanaAsset,
@@ -27,6 +33,7 @@ interface InstallKibanaAssetsWithStreamingArgs {
   pkgName: string;
   packageInstallContext: PackageInstallContext;
   spaceId: string;
+  assetTags?: PackageSpecTags[];
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -36,6 +43,7 @@ export async function installKibanaAssetsWithStreaming({
   spaceId,
   packageInstallContext,
   savedObjectsClient,
+  assetTags,
   pkgName,
 }: InstallKibanaAssetsWithStreamingArgs): Promise<KibanaAssetReference[]> {
   const { archiveIterator } = packageInstallContext;
@@ -51,6 +59,12 @@ export async function installKibanaAssetsWithStreaming({
   const assetRefs: KibanaAssetReference[] = [];
   let batch: ArchiveAsset[] = [];
 
+  const context: InstallAssetContext = {
+    pkgName,
+    spaceId,
+    assetTags,
+  };
+
   await archiveIterator.traverseEntries(async ({ path, buffer }) => {
     if (!buffer || !isKibanaAssetType(path)) {
       return;
@@ -62,6 +76,13 @@ export async function installKibanaAssetsWithStreaming({
       return;
     }
 
+    if (
+      soType === KibanaSavedObjectType.alert &&
+      !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+    ) {
+      return;
+    }
+
     batch.push(savedObject);
     assetRefs.push(toAssetReference(savedObject));
 
@@ -69,6 +90,7 @@ export async function installKibanaAssetsWithStreaming({
       await bulkCreateSavedObjects({
         savedObjectsClient: savedObjectClientWithSpace,
         kibanaAssets: batch,
+        context,
         refresh: false,
       });
       batch = [];
@@ -80,6 +102,7 @@ export async function installKibanaAssetsWithStreaming({
     await bulkCreateSavedObjects({
       savedObjectsClient: savedObjectClientWithSpace,
       kibanaAssets: batch,
+      context,
       // Use wait_for with the last batch to ensure all assets are readable once the install is complete
       refresh: 'wait_for',
     });
@@ -95,16 +118,20 @@ async function bulkCreateSavedObjects({
   savedObjectsClient,
   kibanaAssets,
   refresh,
+  context,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsClient: SavedObjectsClientContract;
   refresh?: boolean | 'wait_for';
+  context: InstallAssetContext;
 }) {
   if (!kibanaAssets.length) {
     return [];
   }
 
-  const toBeSavedObjects = kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset));
+  const toBeSavedObjects = kibanaAssets.map((asset) =>
+    createSavedObjectKibanaAsset(asset, context)
+  );
 
   const { saved_objects: createdSavedObjects } = await savedObjectsClient.bulkCreate(
     toBeSavedObjects,

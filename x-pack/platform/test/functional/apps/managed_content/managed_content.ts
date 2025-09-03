@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -28,14 +28,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Managed Content', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/managed_content'
       );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/managed_content'
       );

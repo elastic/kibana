@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users';
 import {
   DATASET_QUALITY_TEST_PASSWORD,
   DatasetQualityUsername,
 } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import {
-  fleetPackageRegistryDockerImage,
-  FtrConfigProviderContext,
-  defineDockerServersConfig,
-} from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import path from 'path';
 import supertest from 'supertest';
-import { UrlObject, format } from 'url';
-import { DatasetQualityFtrConfigName } from '../configs';
+import type { UrlObject } from 'url';
+import { format } from 'url';
+import type { DatasetQualityFtrConfigName } from '../configs';
 import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
-import {
+import type {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,

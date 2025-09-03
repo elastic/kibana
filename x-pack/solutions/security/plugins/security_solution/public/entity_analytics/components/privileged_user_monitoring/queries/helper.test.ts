@@ -80,7 +80,7 @@ describe('removeInvalidForkBranchesFromESQL', () => {
     const esql = 'FROM test-index | FORK (WHERE not_a_field IS NULL) (WHERE not_a_field IS NULL)';
     const invalidFields = removeInvalidForkBranchesFromESQL(fields, esql);
 
-    expect(invalidFields).toEqual(left(['not_a_field']));
+    expect(invalidFields).toEqual(left({ invalidFields: ['not_a_field'] }));
   });
 
   it('should remove fork and insert valid branch into root if only one valid branch exists', () => {

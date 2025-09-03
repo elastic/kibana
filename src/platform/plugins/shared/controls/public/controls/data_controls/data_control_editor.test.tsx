@@ -12,15 +12,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-  type DefaultDataControlState,
-} from '../../../common';
+import { type DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
 import type { ControlGroupApi } from '../../control_group/types';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { BurnRateRuleParams } from '../../typings';
+import type { BurnRateRuleParams } from '../../typings';
 import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
 

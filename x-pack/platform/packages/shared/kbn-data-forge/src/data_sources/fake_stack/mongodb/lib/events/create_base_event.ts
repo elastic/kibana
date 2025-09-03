@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { MONGODB } from '../../../common/constants';
 
 export function createBaseEvent(

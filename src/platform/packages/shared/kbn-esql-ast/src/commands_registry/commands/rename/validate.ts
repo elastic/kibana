@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
-import type { ICommandContext } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

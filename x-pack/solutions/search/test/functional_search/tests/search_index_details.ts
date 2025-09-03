@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
@@ -193,17 +193,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
           });
         });
-        describe('With dense vecotrs', () => {
+        describe('With dense vectors', () => {
           it('should have ai quick stats for index with semantic mappings', async () => {
             await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
             await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
           });
         });
         describe('has index actions enabled', () => {
-          before(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
-          });
-
           beforeEach(async () => {
             await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });

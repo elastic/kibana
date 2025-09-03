@@ -8,10 +8,11 @@
  */
 
 import typeDetect from 'type-detect';
-import { Duration, ensureDuration } from '../duration';
+import type { Duration } from '../duration';
+import { ensureDuration } from '../duration';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';
-import { DefaultValue, Type } from './type';
+import { Type, type DefaultValue } from './type';
 
 // we need to special-case defaultValue as we want to handle string inputs too
 export type DurationValueType = Duration | string | number;
@@ -23,7 +24,10 @@ export interface DurationOptions<D extends DefaultValue<DurationValueType>> {
   max?: DurationValueType;
 }
 
-export class DurationType<D extends DefaultValue<DurationValueType>> extends Type<Duration, [D] extends [never] ? never : Duration> {
+export class DurationType<D extends DefaultValue<DurationValueType>> extends Type<
+  Duration,
+  [D] extends [never] ? never : Duration
+> {
   constructor(options: DurationOptions<D> = {}) {
     let defaultValue: DefaultValue<Duration> | undefined;
 

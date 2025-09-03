@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FetchContext, fetch$ } from '@kbn/presentation-publishing';
-import { Query } from '@kbn/es-query';
-import { MapExtent } from '../../common/descriptor_types';
+import type { FetchContext } from '@kbn/presentation-publishing';
+import { fetch$ } from '@kbn/presentation-publishing';
+import type { Query } from '@kbn/es-query';
+import type { MapExtent } from '../../common/descriptor_types';
 import { getSearchService } from '../kibana_services';
-import { MapStore } from '../reducers/store';
-import { MapApi } from './types';
+import type { MapStore } from '../reducers/store';
+import type { MapApi } from './types';
 import { setMapSettings, setQuery } from '../actions';
 
 function getIsRestore(searchSessionId?: string) {

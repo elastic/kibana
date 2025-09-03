@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useAddSuggestedDashboards } from './use_add_suggested_dashboard';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import type { RelatedDashboard } from '@kbn/observability-schema';

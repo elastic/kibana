@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('regression saved search creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
       await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');

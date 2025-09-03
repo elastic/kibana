@@ -8,11 +8,13 @@
 import React from 'react';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ActionGroup, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleEventLogList, RuleEventLogListProps } from './rule_event_log_list';
+import type { RuleEventLogListProps } from './rule_event_log_list';
+import { RuleEventLogList } from './rule_event_log_list';
 import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test_helpers';
-import { RuleType } from '../../../../types';
+import type { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 import { getJsDomPerformanceFix } from '../../test_utils';
 

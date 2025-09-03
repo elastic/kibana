@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 /**
  * Options for tracking overlays.

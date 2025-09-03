@@ -287,10 +287,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -434,10 +433,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1279,10 +1277,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1496,11 +1493,10 @@ paths:
 
         > warn
 
-        > When used with  [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        > When used with [API
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -2769,8 +2765,8 @@ paths:
               properties:
                 objects:
                   description: >-
-                    Array of `rule_id` fields. Exports all rules when
-                    unspecified.
+                    Array of objects with a rule's `rule_id` field. Do not use
+                    rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -3031,10 +3027,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -4146,9 +4141,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4172,9 +4169,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4211,9 +4210,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4317,9 +4318,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4348,9 +4351,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4376,9 +4381,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4421,9 +4428,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4448,9 +4457,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5587,6 +5598,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -7720,7 +7732,6 @@ components:
         gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-              
       type: object
     RuleActionFrequency:
       description: >-
@@ -8918,25 +8929,29 @@ components:
         properties:
           entries:
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '#/components/schemas/NonEmptyString'
-                type:
-                  enum:
-                    - mapping
-                  type: string
-                value:
-                  $ref: '#/components/schemas/NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/ThreatMappingEntry'
             type: array
         required:
           - entries
       minItems: 1
       type: array
+    ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     ThreatMatchRule:
       allOf:
         - type: object

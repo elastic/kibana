@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -68,7 +68,11 @@ export function StreamDetailContextProvider({
             };
           }
 
-          throw new Error('Stream detail only supports IngestStreams.');
+          if (Streams.GroupStream.GetResponse.is(response)) {
+            return response;
+          }
+
+          throw new Error('Stream detail only supports Ingest streams and Group streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]

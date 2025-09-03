@@ -2510,5 +2510,56 @@ describe('EPM template', () => {
         })
       );
     });
+
+    it('should not rollover when package do not define index mode and defaut source mode is logsdb', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'logs.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'logs.prefix1-default': {
+          mappings: {},
+          settings: {
+            index: {
+              mode: 'logsdb',
+              mapping: {
+                source: {
+                  mode: 'STORED',
+                },
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {},
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'logs.prefix1',
+          indexTemplate: {
+            index_patterns: ['logs.prefix1-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
   });
 });

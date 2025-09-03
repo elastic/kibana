@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema as s, ObjectType } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
+import { schema as s } from '@kbn/config-schema';
 import { sortOrderSchema } from './common_schemas';
 
 /**

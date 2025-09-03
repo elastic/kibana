@@ -8,18 +8,22 @@
  */
 
 import { internals } from '../internals';
-import { DefaultValue, Type } from './type';
+import type { DefaultValue } from './type';
+import { Type } from './type';
 
 export class LiteralType<T, D extends DefaultValue<T>> extends Type<T, D> {
+  private expectedValue: T;
+
   constructor(value: T) {
     super(internals.any().valid(value));
+    this.expectedValue = value;
   }
 
-  protected handleError(type: string, { value, valids: [expectedValue] }: Record<string, any>) {
+  protected handleError(type: string) {
     switch (type) {
       case 'any.required':
       case 'any.only':
-        return `expected value to equal [${expectedValue}]`;
+        return `expected value to equal [${this.expectedValue}]`;
     }
   }
 }

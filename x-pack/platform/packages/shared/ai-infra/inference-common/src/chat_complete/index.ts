@@ -42,6 +42,7 @@ export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './too
 export {
   ToolChoiceType,
   type ToolCallbacksOf,
+  type ToolCallback,
   type ToolOptions,
   type ToolDefinition,
   type ToolCall,
@@ -79,5 +80,4 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
-  AnonymizationRegexWorkerTaskPayload,
 } from './anonymization';

@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import {
-  StreamQuery,
-  streamQuerySchema,
-  upsertStreamQueryRequestSchema,
-} from '@kbn/streams-schema';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
@@ -60,7 +57,7 @@ const listQueriesRoute = createServerRoute({
       path: { name: streamName },
     } = params;
 
-    const queryAssets = await assetClient.getAssetLinks(streamName, ['query']);
+    const { [streamName]: queryAssets } = await assetClient.getAssetLinks([streamName], ['query']);
 
     return {
       queries: queryAssets.map((queryAsset) => queryAsset.query),

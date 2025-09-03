@@ -8,10 +8,11 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/analytics';
-import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
+import type { UiCounterMetricType, Report } from '@kbn/analytics';
+import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
+import type { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const APP_NAME = 'myApp';
 

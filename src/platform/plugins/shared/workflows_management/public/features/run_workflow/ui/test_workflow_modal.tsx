@@ -15,13 +15,14 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiFlexGroup,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
+import { WorkflowExecutionDetail } from '../../workflow_execution_detail';
 
 export function TestWorkflowModal({
   workflowYaml,
@@ -33,6 +34,7 @@ export function TestWorkflowModal({
   const { services } = useKibana();
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   // Get current user
   useEffect(() => {
@@ -90,9 +92,9 @@ export function TestWorkflowModal({
   const [workflowEvent, setWorkflowEvent] = useState<string>(getDefaultWorkflowInputs());
 
   return (
-    <EuiModal maxWidth={false} onClose={onClose}>
+    <EuiModal aria-labelledby={modalTitleId} maxWidth={false} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Test Workflow</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>Test Workflow</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup
@@ -127,7 +129,7 @@ export function TestWorkflowModal({
           </EuiFlexItem>
           {workflowExecutionId && (
             <EuiFlexItem>
-              <WorkflowExecution
+              <WorkflowExecutionDetail
                 workflowExecutionId={workflowExecutionId}
                 workflowYaml={workflowYaml}
               />

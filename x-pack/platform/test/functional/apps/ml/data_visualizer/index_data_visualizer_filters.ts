@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
   farequoteDataViewTestData,
 } from './index_test_data';
-import { TestData } from './types';
+import type { TestData } from './types';
 
 const PINNED_FILTER = {
   key: 'type.keyword',
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
   describe('data visualizer with pinned global filters', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();

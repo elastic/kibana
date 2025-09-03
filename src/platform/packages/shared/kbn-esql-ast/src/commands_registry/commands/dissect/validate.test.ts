@@ -29,7 +29,7 @@ describe('DISSECT Validation', () => {
   });
   test('raises error on wrong type field', () => {
     dissectExpectErrors('from a_index | dissect doubleField "%{firstWord}"', [
-      'DISSECT only supports values of type [keyword, text]. Found [doubleField] of type [double]',
+      'DISSECT only supports values of type keyword, text. Found "doubleField" of type double',
     ]);
   });
   test('raises error on wrong append separator', () => {

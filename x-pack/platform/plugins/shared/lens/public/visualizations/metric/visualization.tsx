@@ -7,18 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
-import {
+import type {
   Visualization,
   OperationMetadata,
   VisualizationConfigProps,
@@ -37,7 +38,7 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import { MetricVisualizationState, SecondaryTrend } from './types';
+import type { MetricVisualizationState, SecondaryTrend } from './types';
 import {
   getColorMode,
   getDefaultConfigForMode,

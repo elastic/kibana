@@ -18,7 +18,7 @@ import {
 
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
-import { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
+import type { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
 import { IndexDocuments } from '../index_documents/index_documents';
 import { IndexSearchExample } from './details_search_example';
 

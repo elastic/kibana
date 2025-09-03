@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import { SHOW_SECURITY, HIDE_ASSISTANT, TITLE } from './translations';
 
@@ -38,5 +38,5 @@ export const securitySolutionSetting: Omit<
     [AIAssistantType.Never]: HIDE_ASSISTANT,
   },
   requiresPageReload: true,
-  solution: 'security',
+  solutionViews: ['classic', 'security'],
 };

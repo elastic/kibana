@@ -15,4 +15,7 @@ export function plugin() {
   return new WorkflowsPlugin();
 }
 export type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
-export { WorkflowExecution } from './features/workflow_detail/ui/workflow_execution';
+
+// for use in workflows example plugin. TODO: revisit, maybe move to shared package.
+export type { WorkflowExecutionProps } from './features/workflow_execution_detail/ui/workflow_execution_detail';
+export { WorkflowExecutionLazy as WorkflowExecution } from './features/workflow_execution_detail/ui/workflow_execution.lazy';

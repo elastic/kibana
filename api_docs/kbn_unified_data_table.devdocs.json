@@ -1393,6 +1393,48 @@
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.density",
+            "type": "Enum",
+            "tags": [],
+            "label": "density",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-public.UnifiedDataTableRestorableState.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-unified-data-table/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

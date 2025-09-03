@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ValidationError } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { MetricTypes } from '../../common/rest_types';
 import { AutoOpsError } from '../errors';
 import { AutoOpsAPIService } from './autoops_api';

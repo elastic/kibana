@@ -9,4 +9,4 @@
 
 export * from './src/constants';
 export * from './src/validation';
-export * from './src/types';
+export type * from './src/types';

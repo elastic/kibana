@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
-import { AgentRunEvents } from '../../types';
+import type { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
+import type { AgentRunEvents } from '../../types';
 
 /**
  * Event converter, in charge of transforming langgraph run events

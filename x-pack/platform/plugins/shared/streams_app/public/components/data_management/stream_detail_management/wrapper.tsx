@@ -24,8 +24,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
 import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
-import { ExportContentPackFlyout } from '../content/export_content_pack_flyout';
-import { ImportContentPackFlyout } from '../content/import_content_pack_flyout';
+import { ExportContentPackFlyout } from '../content/export_flyout';
+import { ImportContentPackFlyout } from '../content/import_flyout';
 
 export type ManagementTabs = Record<
   string,
@@ -102,9 +102,13 @@ export function Wrapper({
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <DiscoverBadgeButton definition={definition} />
-                  {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-                  <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <DiscoverBadgeButton definition={definition} />
+                  )}
+                  {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
 

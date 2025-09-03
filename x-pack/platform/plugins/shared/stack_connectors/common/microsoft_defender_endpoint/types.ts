@@ -20,6 +20,7 @@ import type {
   AgentListParamsSchema,
   GetLibraryFilesResponse,
   RunScriptParamsSchema,
+  CancelParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -185,6 +186,7 @@ export type MicrosoftDefenderEndpointIsolateHostParams = TypeOf<typeof IsolateHo
 
 export type MicrosoftDefenderEndpointReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
 export type MicrosoftDefenderEndpointRunScriptParams = TypeOf<typeof RunScriptParamsSchema>;
+export type MicrosoftDefenderEndpointCancelParams = TypeOf<typeof CancelParamsSchema>;
 
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema

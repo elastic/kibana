@@ -7,28 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Config, AggregatedResult, TestContext, ReporterOnStartOptions } from '@jest/reporters';
+import type {
+  Config,
+  AggregatedResult,
+  TestContext,
+  ReporterOnStartOptions,
+} from '@jest/reporters';
 import { BaseReporter } from '@jest/reporters';
-import { TestResult } from '@jest/types';
+import type { TestResult } from '@jest/types';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { CodeOwnersEntry } from '@kbn/code-owners';
 import {
   type CodeOwnerArea,
-  CodeOwnersEntry,
   findAreaForCodeOwner,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import stripAnsi from 'strip-ansi';
-import { ScoutJestReporterOptions } from './options';
+import type { ScoutJestReporterOptions } from './options';
+import type { ScoutFileInfo } from '../../..';
 import {
   datasources,
   generateTestRunId,
   getTestIDForTitle,
   ScoutEventsReport,
-  ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
 } from '../../..';
@@ -61,6 +66,10 @@ export class ScoutJestReporter extends BaseReporter {
     this.report = new ScoutEventsReport(this.scoutLog);
     this.baseTestRunInfo = {
       id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
       config: {
         category: reporterOptions.configCategory,
       },

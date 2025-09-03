@@ -10,10 +10,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { UptimeRefreshContext } from '../../../../contexts';
 import { useGetUrlParams, useMonitorId } from '../../../../hooks';
 import { monitorLocationsSelector, monitorStatusSelector } from '../../../../state/selectors';
-import { AppState } from '../../../../state';
+import type { AppState } from '../../../../state';
 import { getMonitorStatusAction } from '../../../../state/actions';
-import { Ping } from '../../../../../../common/runtime_types/ping';
-import { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
+import type { Ping } from '../../../../../../common/runtime_types/ping';
+import type { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
 
 interface MonitorStatusBarProps {
   monitorId: string;

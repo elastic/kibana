@@ -5,17 +5,13 @@
  * 2.0.
  */
 import type { InventoryItemType, InventoryModel } from '../types';
-import type {
-  AggregationConfigMap,
-  FormulasConfigMap,
-  LensMetricChartConfig,
-} from './metrics/types';
+import type { AggregationConfigMap, FormulasConfigMap, ChartsConfigMap } from './metrics/types';
 
 export function createInventoryModel<
   TType extends InventoryItemType,
   TAggsConfigMap extends AggregationConfigMap,
   TFormulasConfigMap extends FormulasConfigMap | undefined = undefined,
-  TCharts extends LensMetricChartConfig | undefined = undefined
+  TCharts extends ChartsConfigMap | undefined = undefined
 >(
   id: TType,
   config: Omit<InventoryModel<TType, TAggsConfigMap, TFormulasConfigMap, TCharts>, 'id'>

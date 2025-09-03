@@ -6,7 +6,7 @@
  */
 
 import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
-import { RouteContext } from '../../types';
+import type { RouteContext } from '../../types';
 
 // Mock the syncEditedMonitorBulk module
 jest.mock('../../monitor_cruds/bulk_cruds/edit_monitor_bulk', () => ({

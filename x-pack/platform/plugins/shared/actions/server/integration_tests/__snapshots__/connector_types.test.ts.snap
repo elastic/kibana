@@ -10945,7 +10945,32 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
-    "id": Object {
+    "actionId": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "comment": Object {
       "flags": Object {
         "error": [Function],
       },
@@ -10976,6 +11001,46 @@ Object {
 `;
 
 exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 10`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "id": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 11`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11115,7 +11180,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 11`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 12`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -11155,7 +11220,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 12`] = `
+exports[`Connector type config checks detect connector type changes for: .microsoft_defender_endpoint 13`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -13569,6 +13634,196 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "cursor": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "groupIds": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "ids": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "isAvailableForArs": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "type": "boolean",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "limit": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "default": 10,
+              "error": [Function],
+              "presence": "optional",
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 1,
+                },
+                "name": "min",
+              },
+              Object {
+                "args": Object {
+                  "limit": 1000,
+                },
+                "name": "max",
+              },
+            ],
+            "type": "number",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
     "osTypes": Object {
       "flags": Object {
         "default": null,
@@ -13646,6 +13901,180 @@ Object {
       "type": "alternatives",
     },
     "scriptType": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "siteIds": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "skip": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "type": "number",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "skipCount": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "type": "boolean",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "sortBy": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "sortOrder": Object {
       "flags": Object {
         "default": null,
         "error": [Function],

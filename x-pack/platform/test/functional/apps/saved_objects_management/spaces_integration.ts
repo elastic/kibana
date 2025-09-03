@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const getSpacePrefix = (spaceId: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await spacesService.create({ id: spaceId, name: spaceId });
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/spaces_integration',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/spaces_integration',
         { space: spaceId }
       );
     });

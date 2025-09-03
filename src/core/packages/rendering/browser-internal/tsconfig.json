@@ -35,7 +35,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-layout",
-    "@kbn/core-feature-flags-browser-mocks"
+    "@kbn/core-feature-flags-browser-mocks",
+    "@kbn/core-chrome-layout-feature-flags"
   ],
   "exclude": [
     "target/**/*"

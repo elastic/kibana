@@ -15,28 +15,36 @@ import type {
 } from '../../types';
 
 /* base types */
-export enum DataSchemaFormat {
+export enum DataSchemaFormatEnum {
   ECS = 'ecs',
   SEMCONV = 'semconv',
 }
 
-export type SchemaBasedFormulas = Omit<LensBaseLayer, 'value'> & {
+export type DataSchemaFormat = `${DataSchemaFormatEnum}`;
+
+export type SchemaBasedFormula = Omit<LensBaseLayer, 'value'> & {
   value: Record<DataSchemaFormat, LensBaseLayer['value']>;
 };
 export type SchemaBasedAggregations = Record<DataSchemaFormat, MetricsUIAggregation>;
 
-export type FormulasConfig = LensBaseLayer | SchemaBasedFormulas;
+export type ChartsConfig = {
+  [key in ChartType]?: Partial<Record<string, LensConfigWithId>>;
+};
+export type FormulasConfig = LensBaseLayer | SchemaBasedFormula;
 export type AggregationConfig = MetricsUIAggregation | SchemaBasedAggregations;
 export type RawConfig = FormulasConfig | AggregationConfig;
+
+/** config maps */
 export type MetricConfigMap<T extends RawConfig = RawConfig> = Record<string, MetricConfigEntry<T>>;
 export type AggregationConfigMap = MetricConfigMap<AggregationConfig>;
 export type FormulasConfigMap = MetricConfigMap<FormulasConfig>;
+export type ChartsConfigMap = MetricConfigMap<ChartsConfig>;
 
 /** helper types */
 export type SchemaWrappedEntry<T> = T extends AggregationConfig
   ? SchemaBasedAggregations
   : T extends LensBaseLayer
-  ? SchemaBasedFormulas
+  ? SchemaBasedFormula
   : never;
 
 export type MetricConfigEntry<T extends RawConfig = RawConfig> =
@@ -44,7 +52,7 @@ export type MetricConfigEntry<T extends RawConfig = RawConfig> =
   | LensBaseLayer
   | SchemaWrappedEntry<T>;
 
-export type UnwrapMetricConfig<T> = T extends SchemaBasedFormulas
+export type UnwrapMetricConfig<T> = T extends SchemaBasedFormula
   ? LensBaseLayer
   : T extends SchemaBasedAggregations
   ? MetricsUIAggregation
@@ -60,6 +68,7 @@ export type UnwrapRawConfig<T extends MetricConfigMap, K extends keyof T> = Unwr
 
 /** catalog types */
 export interface BaseMetricsCatalog<TConfigMap extends MetricConfigMap> {
+  get schema(): DataSchemaFormat;
   get<K extends keyof ResolvedMetricMap<TConfigMap>>(
     key: K
   ): UnwrapRawConfig<TConfigMap, keyof TConfigMap>;
@@ -69,13 +78,6 @@ export interface BaseMetricsCatalog<TConfigMap extends MetricConfigMap> {
 export type AggregationsCatalog<TConfigMap extends AggregationConfigMap> =
   BaseMetricsCatalog<TConfigMap>;
 export type FormulasCatalog<TConfigMap extends FormulasConfigMap> = BaseMetricsCatalog<TConfigMap>;
-
-export type LensMetricChartConfig = Record<
-  string,
-  {
-    [key in ChartType]?: Partial<Record<string, LensConfigWithId>>;
-  }
->;
 
 /** inventory types */
 export interface BaseInventoryMetricsConfig<TAggregations extends AggregationConfigMap> {
@@ -95,16 +97,16 @@ export interface InventoryTsvbMetrics {
 }
 export interface InventoryMetricsConfigWithLens<
   TFormulas extends FormulasConfigMap,
-  TCharts extends LensMetricChartConfig
+  TCharts extends ChartsConfigMap
 > {
   getFormulas: (args?: { schema?: DataSchemaFormat }) => Promise<FormulasCatalog<TFormulas>>;
-  getCharts: () => Promise<TCharts>;
+  getCharts: (args?: { schema?: DataSchemaFormat }) => Promise<TCharts>;
 }
 
 export type InventoryMetricsConfig<
   TAggregations extends AggregationConfigMap = AggregationConfigMap,
   TFormulas extends FormulasConfigMap | undefined = undefined,
-  TCharts extends LensMetricChartConfig | undefined = undefined
+  TCharts extends ChartsConfigMap | undefined = undefined
 > = BaseInventoryMetricsConfig<TAggregations> &
   (TFormulas extends undefined
     ? TCharts extends undefined

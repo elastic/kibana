@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens metric', () => {
-    const BADGE_SELECTOR = `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`;
+    const BADGE_SELECTOR = `[data-test-subj^="expressionMetricVis-secondaryMetric-badge"]`;
     // get a reference to the badge element
     const getBadge = async () => await find.byCssSelector(BADGE_SELECTOR);
 

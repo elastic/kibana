@@ -12,15 +12,16 @@
  */
 
 import expect from '@kbn/expect';
-import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { kbnTestConfig } from '@kbn/test';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { ActionDocument } from './types';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ActionDocument } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');

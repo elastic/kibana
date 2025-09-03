@@ -9,30 +9,75 @@
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import type { ActivePanelEvent } from '../../grid_panel';
-import type { GridLayoutStateManager } from '../../types';
+import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
+import type { GridLayoutStateManager, RuntimeGridSettings } from '../../types';
 import { updateClientY } from '../keyboard_utils';
 import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
 import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
 import type { PointerPosition, UserInteractionEvent } from '../types';
 
+export const getDefaultResizeOptions = (runtimeSettings: RuntimeGridSettings) => ({
+  minWidth: 1,
+  maxWidth: runtimeSettings.columnCount,
+  minHeight: 1,
+  maxHeight: Infinity,
+});
+
+const getColumnCountInPixels = ({
+  columnCount,
+  runtimeSettings,
+}: {
+  columnCount: number;
+  runtimeSettings: RuntimeGridSettings;
+}) =>
+  columnCount * runtimeSettings.columnPixelWidth + (columnCount - 1) * runtimeSettings.gutterSize;
+
+const getRowCountInPixels = ({
+  rowCount,
+  runtimeSettings,
+}: {
+  rowCount: number;
+  runtimeSettings: RuntimeGridSettings;
+}) => rowCount * runtimeSettings.rowHeight + (rowCount - 1) * runtimeSettings.gutterSize;
+
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   activePanel,
   pointerPixel,
+  runtimeSettings,
+  resizeOptions,
   maxRight,
 }: {
   pointerPixel: PointerPosition;
   activePanel: ActivePanelEvent;
+  runtimeSettings: RuntimeGridSettings;
+  resizeOptions: GridPanelData['resizeOptions'];
   maxRight: number;
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
-
+  const { minWidth, maxWidth, minHeight, maxHeight } = {
+    ...getDefaultResizeOptions(runtimeSettings),
+    ...resizeOptions,
+  };
   return {
     left: panelRect.left,
     top: panelRect.top,
-    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
-    right: Math.min(pointerPixel.clientX - activePanel.sensorOffsets.right, maxRight),
+    bottom: Math.max(
+      Math.min(
+        pointerPixel.clientY - activePanel.sensorOffsets.bottom, // actual height based on mouse position
+        panelRect.top + getRowCountInPixels({ rowCount: maxHeight, runtimeSettings }) // max height of panel
+      ),
+      panelRect.top + getRowCountInPixels({ rowCount: minHeight, runtimeSettings }) // min height of panel
+    ),
+    right: Math.max(
+      Math.min(
+        pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
+        panelRect.left + getColumnCountInPixels({ columnCount: maxWidth, runtimeSettings }), // max width of panel
+        // cannot extend width past the right edge of the grid layout
+        maxRight
+      ),
+      panelRect.left + getColumnCountInPixels({ columnCount: minWidth, runtimeSettings }) // min width of panel
+    ),
   };
 };
 

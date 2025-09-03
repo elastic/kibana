@@ -6,7 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../../../types';
+import { commaCompleteItem, pipeCompleteItem } from '../../../..';
+import type {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLProperNode,
+  ESQLSingleAstItem,
+} from '../../../types';
 import {
   isFunctionExpression,
   isFieldExpression,
@@ -15,39 +22,14 @@ import {
   isOptionNode,
   isLiteral,
   isAssignment,
+  isColumn,
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
-import {
-  findPreviousWord,
-  getLastNonWhitespaceChar,
-} from '../../../definitions/utils/autocomplete/helpers';
-import { ISuggestionItem } from '../../types';
+import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
+import type { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
-import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/ast';
-
-function isAssignmentComplete(node: ESQLFunction | undefined) {
-  const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
-  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
-}
-
-const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-
-function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
-  node: T | undefined
-) {
-  if (!node) {
-    return;
-  }
-  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
-    return {
-      ...node,
-      args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
-    };
-  }
-  return node;
-}
 
 /**
  * Position of the caret in the sort command:
@@ -64,46 +46,37 @@ function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
 export type CaretPosition =
   | 'expression_without_assignment'
   | 'expression_after_assignment'
-  | 'expression_complete'
   | 'grouping_expression_without_assignment'
   | 'grouping_expression_after_assignment'
-  | 'grouping_expression_complete'
   | 'after_where';
 
-export const getPosition = (innerText: string, command: ESQLCommand): CaretPosition => {
+export const getPosition = (command: ESQLCommand, innerText: string): CaretPosition => {
   const lastCommandArg = command.args[command.args.length - 1];
 
   if (isOptionNode(lastCommandArg) && lastCommandArg.name === 'by') {
     // in the BY clause
 
     const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg) && !isAssignmentComplete(lastOptionArg)) {
+    if (isAssignment(lastOptionArg)) {
       return 'grouping_expression_after_assignment';
     }
 
-    // check if the cursor follows a comma or the BY keyword
-    // optionally followed by a fragment of a word
-    // e.g. ", field/"
-    if (/\,\s+\S*$/.test(innerText) || noCaseCompare(findPreviousWord(innerText), 'by')) {
-      return 'grouping_expression_without_assignment';
-    } else {
-      return 'grouping_expression_complete';
-    }
+    return 'grouping_expression_without_assignment';
   }
 
-  if (isAssignment(lastCommandArg) && !isAssignmentComplete(lastCommandArg)) {
+  if (isAssignment(lastCommandArg) && !/,\s*$/.test(innerText)) {
     return 'expression_after_assignment';
   }
 
-  if (getLastNonWhitespaceChar(innerText) === ',' || /stats\s+\S*$/i.test(innerText)) {
-    return 'expression_without_assignment';
-  }
-
-  if (isFunctionExpression(lastCommandArg) && lastCommandArg.name === 'where') {
+  if (
+    isFunctionExpression(lastCommandArg) &&
+    lastCommandArg.name === 'where' &&
+    !/,\s*$/.test(innerText)
+  ) {
     return 'after_where';
   }
 
-  return 'expression_complete';
+  return 'expression_without_assignment';
 };
 
 export const byCompleteItem: ISuggestionItem = {
@@ -193,3 +166,57 @@ export function checkFunctionContent(arg: ESQLFunction) {
     );
   });
 }
+
+export const rightAfterColumn = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined,
+  columnExists: (name: string) => boolean
+): boolean => {
+  if (!expressionRoot) return false;
+
+  let col: ESQLProperNode | undefined;
+
+  Walker.walk(expressionRoot, {
+    visitColumn(node) {
+      if (node.location.max === innerText.length - 1) col = node;
+    },
+  });
+
+  return isColumn(col) && columnExists(col.parts.join('.'));
+};
+
+export const getCommaAndPipe = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined,
+  columnExists: (name: string) => boolean
+): ISuggestionItem[] => {
+  const pipeSuggestion = { ...pipeCompleteItem };
+  const commaSuggestion = {
+    ...commaCompleteItem,
+    text: ', ',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  };
+
+  // does the query end with whitespace?
+  if (/\s$/.test(innerText)) {
+    // if so, comma needs to be sent back a column to replace the trailing space
+    commaSuggestion.rangeToReplace = {
+      start: innerText.length - 1,
+      end: innerText.length,
+    };
+  }
+  // special case: cursor right after a column name
+  else if (isColumn(expressionRoot) && rightAfterColumn(innerText, expressionRoot, columnExists)) {
+    const { fragment, rangeToReplace } = getFragmentData(innerText);
+
+    pipeSuggestion.filterText = fragment;
+    pipeSuggestion.text = fragment + ' ' + pipeSuggestion.text;
+    pipeSuggestion.rangeToReplace = rangeToReplace;
+
+    commaSuggestion.filterText = fragment;
+    commaSuggestion.text = fragment + commaSuggestion.text;
+    commaSuggestion.rangeToReplace = rangeToReplace;
+  }
+
+  return [pipeSuggestion, commaSuggestion];
+};

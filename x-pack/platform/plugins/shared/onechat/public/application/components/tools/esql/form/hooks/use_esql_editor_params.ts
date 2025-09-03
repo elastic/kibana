@@ -7,7 +7,7 @@
 
 import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import { useEffect } from 'react';
-import { OnechatEsqlParam } from '../types/esql_tool_form_types';
+import type { OnechatEsqlParam } from '../types/esql_tool_form_types';
 
 const SOURCE_NAME = 'esql-param-validator';
 const COMMAND_ID = 'esql.addParam';

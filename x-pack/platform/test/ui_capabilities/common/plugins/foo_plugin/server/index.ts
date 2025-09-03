@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export const plugin = async () => new FooPlugin();

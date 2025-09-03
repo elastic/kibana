@@ -8,9 +8,9 @@
 import React, { Component } from 'react';
 import type { GeoShapeRelation, QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { MultiPolygon, Polygon } from 'geojson';
+import type { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { MultiPolygon, Polygon } from 'geojson';
 import rison from '@kbn/rison';
 import { URL_MAX_LENGTH } from '@kbn/core/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';

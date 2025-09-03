@@ -8,22 +8,22 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
-import {
+import type {
   PersistableStateService,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import {
+import type {
   EmbeddableFactoryRegistry,
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
   EmbeddableRegistryDefinition,
 } from './types';
-import { EmbeddableStateWithType } from './persistable_state/types';
+import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
   getExtractFunction,
   getInjectFunction,
@@ -31,7 +31,7 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import { EmbeddableTransforms } from '../common';
+import type { EmbeddableTransforms } from '../common';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;

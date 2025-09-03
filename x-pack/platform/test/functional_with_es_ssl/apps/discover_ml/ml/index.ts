@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -24,7 +24,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       await ml.securityUI.logout();
 
       await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
       await ml.testResources.resetKibanaTimeZone();

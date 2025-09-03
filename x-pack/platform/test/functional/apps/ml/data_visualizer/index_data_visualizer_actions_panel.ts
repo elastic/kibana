@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     // Note query is not currently passed to the wizard
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded(esIndexName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();

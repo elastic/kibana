@@ -7,11 +7,12 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
@@ -47,6 +48,7 @@ export interface StreamsPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
   cloud?: CloudSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {

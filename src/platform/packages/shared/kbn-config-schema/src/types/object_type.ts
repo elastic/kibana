@@ -10,7 +10,8 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions, DefaultValue } from './type';
+import type { TypeOptions, ExtendsDeepOptions, UnknownOptions, DefaultValue } from './type';
+import { Type } from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any, DefaultValue<any>>>;
@@ -37,15 +38,16 @@ type TypeOf<RT extends TypeOrLazyType> = RT extends () => TypeOrLazyType<infer V
   : never;
 
 /**
-  * @internal
-  *
-  * Need to avoid circular ref
-  */
-type TypeOfInput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> = RT extends ObjectTypeOrLazyType<infer V, infer D>
-  ? ObjectResultTypeInput<V>
-  : RT extends TypeOrLazyType<infer V, infer D>
-  ? Type<V, D>['_input']
-  : never
+ * @internal
+ *
+ * Need to avoid circular ref
+ */
+type TypeOfInput<RT extends TypeOrLazyType | ObjectTypeOrLazyType> =
+  RT extends ObjectTypeOrLazyType<infer V, infer D>
+    ? ObjectResultTypeInput<V>
+    : RT extends TypeOrLazyType<infer V, infer D>
+    ? Type<V, D>['_input']
+    : never;
 
 /**
  * A type used to constrain the object props to preserve the exact type for D
@@ -56,11 +58,11 @@ export type ObjectProps<P extends Props> = {
 
 type UndefinedPropertyKeys<Base extends ObjectProps<Props>> = {
   [Key in keyof Base]: Base[Key] extends Type<infer V, infer D>
-  ? V extends undefined
-  ? Key
-  : never
-  : never
-}[keyof Base]
+    ? V extends undefined
+      ? Key
+      : never
+    : never;
+}[keyof Base];
 
 type OptionalProperties<Base extends ObjectProps<Props>> = Pick<
   Base,
@@ -73,10 +75,10 @@ type DefaultProperties<Base extends ObjectProps<Props>> = Pick<
   Base,
   {
     [Key in keyof Base]: Base[Key] extends Type<any, infer D>
-    ? [D] extends [never]
-      ? never
+      ? [D] extends [never]
+        ? never
         : Key
-        : never;
+      : never;
   }[keyof Base]
 >;
 
@@ -90,24 +92,23 @@ type RequiredProperties<Base extends ObjectProps<Props>> = Pick<
 export type ObjectResultType<P extends ObjectProps<Props>> = {
   [K in keyof OptionalProperties<P>]?: TypeOf<P[K]>;
 } & {
-    [K in Exclude<keyof RequiredProperties<P>, keyof DefaultProperties<P>>]: TypeOf<
-      P[K]
-    >;
-  } & {
-    [K in keyof DefaultProperties<P>]?: TypeOf<P[K]>;
-  };
+  [K in Exclude<keyof RequiredProperties<P>, keyof DefaultProperties<P>>]: TypeOf<P[K]>;
+} & {
+  [K in keyof DefaultProperties<P>]?: TypeOf<P[K]>;
+};
 
 export type ObjectResultTypeInput<P extends ObjectProps<Props>> = {
   [K in keyof OptionalProperties<P>]?: TypeOfInput<P[K]>;
 } & {
   // Omit default and undefined (not defined with ?) values from required list
-  [K in Exclude<keyof RequiredProperties<P>, keyof DefaultProperties<P> | UndefinedPropertyKeys<P>>]: TypeOfInput<
-      P[K]
-    >;
-  } & {
-    [K in keyof DefaultProperties<P>]?: TypeOfInput<P[K]>;
-  } & {
-    [K in UndefinedPropertyKeys<P>]?: TypeOfInput<P[K]>;
+  [K in Exclude<
+    keyof RequiredProperties<P>,
+    keyof DefaultProperties<P> | UndefinedPropertyKeys<P>
+  >]: TypeOfInput<P[K]>;
+} & {
+  [K in keyof DefaultProperties<P>]?: TypeOfInput<P[K]>;
+} & {
+  [K in UndefinedPropertyKeys<P>]?: TypeOfInput<P[K]>;
 };
 
 type DefinedProperties<Base extends NullableProps> = Pick<
@@ -310,11 +311,9 @@ export class ObjectType<
 
   /**
    * Return the schema for this object's underlying properties
-   *
-   * @internal should only be used internal for type reflection
    */
   public getPropSchemas(): P {
-    return this.props;
+    return { ...this.props };
   }
 
   validateKey(key: string, value: any) {

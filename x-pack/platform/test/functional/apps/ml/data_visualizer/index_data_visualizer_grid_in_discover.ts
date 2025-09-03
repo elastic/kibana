@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { TestData, MetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { TestData, MetricFieldVisConfig } from './types';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 import {
@@ -75,8 +75,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('field statistics in Discover', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
+      );
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();

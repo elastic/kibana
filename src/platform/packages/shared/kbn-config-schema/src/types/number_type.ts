@@ -9,7 +9,8 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { DefaultValue, Type, TypeOptions } from './type';
+import type { DefaultValue, TypeOptions } from './type';
+import { Type } from './type';
 
 export type NumberOptions<D extends DefaultValue<number>> = TypeOptions<number, D> & {
   min?: number;

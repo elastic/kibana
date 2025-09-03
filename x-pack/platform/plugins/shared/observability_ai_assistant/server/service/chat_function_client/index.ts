@@ -8,7 +8,7 @@
 
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import { compact, keyBy } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { type FunctionResponse } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';

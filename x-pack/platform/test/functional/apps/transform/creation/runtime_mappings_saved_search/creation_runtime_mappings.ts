@@ -8,15 +8,10 @@
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import type { HistogramCharts } from '../../../../services/transform/wizard';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-import {
-  GroupByEntry,
-  isLatestTransformTestData,
-  isPivotTransformTestData,
-  LatestTransformTestData,
-  PivotTransformTestData,
-} from '../../helpers';
+import type { GroupByEntry, LatestTransformTestData, PivotTransformTestData } from '../../helpers';
+import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -35,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('creation with runtime mappings', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.setKibanaTimeZoneToUTC();
 

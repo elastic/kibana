@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   IngestPutPipelineRequest,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
   IBasePath,
   IScopedClusterClient,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
@@ -29,14 +30,15 @@ import {
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
-import { Duration, DurationUnit, SLODefinition, StoredSLODefinition } from '../domain/models';
+import type { SLODefinition, StoredSLODefinition } from '../domain/models';
+import { Duration, DurationUnit } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { TransformManager } from './transform_manager';
+import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 

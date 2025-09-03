@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TelemetryEvent, TelemetryEventTypes } from './types';
+import type { TelemetryEvent } from './types';
+import { TelemetryEventTypes } from './types';
 
 const relatedAlertsLoaded: TelemetryEvent = {
   eventType: TelemetryEventTypes.RELATED_ALERTS_LOADED,
@@ -33,4 +34,21 @@ const alertDetailsPageView: TelemetryEvent = {
   },
 };
 
-export const events: TelemetryEvent[] = [relatedAlertsLoaded, alertDetailsPageView];
+const relatedAlertAddedToCase: TelemetryEvent = {
+  eventType: TelemetryEventTypes.RELATED_ALERT_ADDED_TO_CASE,
+  schema: {
+    new_case_created: {
+      type: 'boolean' as const,
+      _meta: {
+        description: 'Whether a case was created when adding an alert to a case',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const events: TelemetryEvent[] = [
+  relatedAlertsLoaded,
+  alertDetailsPageView,
+  relatedAlertAddedToCase,
+];

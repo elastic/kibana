@@ -12,10 +12,10 @@ export const diskSpaceUsage: SchemaBasedAggregations = {
     diskSpaceUsage: { max: { field: 'system.filesystem.used.pct' } },
   },
   semconv: {
-    disk_space_usage_used_bytes: {
+    disk_space_usage_free_bytes: {
       terms: {
         field: 'state',
-        include: ['used'],
+        include: ['free'],
       },
       aggs: {
         max: {
@@ -25,36 +25,35 @@ export const diskSpaceUsage: SchemaBasedAggregations = {
         },
       },
     },
-    disk_space_usage_available: {
+    disk_usage_space_available: {
       terms: {
         field: 'state',
-        include: ['free', 'used'],
       },
       aggs: {
-        max: {
-          max: {
+        sum: {
+          sum: {
             field: 'system.filesystem.usage',
           },
         },
       },
     },
-    disk_space_usage_used_bytes_total: {
+    disk_space_usage_free_bytes_total: {
       max_bucket: {
-        buckets_path: 'disk_space_usage_used_bytes.max',
+        buckets_path: 'disk_space_usage_free_bytes.max',
       },
     },
-    disk_space_usage_available_total: {
-      max_bucket: {
-        buckets_path: 'disk_space_usage_available.max',
+    disk_usage_space_available_total: {
+      sum_bucket: {
+        buckets_path: 'disk_usage_space_available.sum',
       },
     },
     diskSpaceUsage: {
       bucket_script: {
         buckets_path: {
-          diskSpaceUsageUsedBytesTotal: 'disk_space_usage_used_bytes_total',
-          diskSpaceUsageAvailableTotal: 'disk_space_usage_available_total',
+          diskSpaceUsageFreeBytesTotal: 'disk_space_usage_free_bytes_total',
+          diskSpaceUsageAvailableTotal: 'disk_usage_space_available_total',
         },
-        script: 'params.diskSpaceUsageUsedBytesTotal / params.diskSpaceUsageAvailableTotal',
+        script: '1 - params.diskSpaceUsageFreeBytesTotal / params.diskSpaceUsageAvailableTotal',
         gap_policy: 'skip',
       },
     },

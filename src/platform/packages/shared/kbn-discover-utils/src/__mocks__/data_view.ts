@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 export const shallowMockedFields = [
   {

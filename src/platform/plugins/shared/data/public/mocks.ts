@@ -9,7 +9,7 @@
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '../common/mocks';
-import { DataPlugin } from '.';
+import type { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { createNowProviderMock } from './now_provider/mocks';

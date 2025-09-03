@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { ISavedObjectsManagement } from '../services';
-import { SavedObjectWithMetadata } from '../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { ISavedObjectsManagement } from '../services';
+import type { SavedObjectWithMetadata } from '../types';
 
 export function injectMetaAttributes<T = unknown>(
   savedObject: SavedObject<T> | SavedObjectWithMetadata<T>,

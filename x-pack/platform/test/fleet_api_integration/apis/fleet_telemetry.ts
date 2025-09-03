@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
 
 const AGENT_COUNT_WAIT_ATTEMPTS = 3;
@@ -29,13 +29,13 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       if (pkgVersion) {
         await supertest.delete(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`);
       }

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactNode } from 'react';
-import { EuiPageTemplateProps, EuiPageSidebarProps } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import type { EuiPageTemplateProps, EuiPageSidebarProps } from '@elastic/eui';
 
 import type {
   NoDataPageProps,

@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
       };
 
       before(async () => {
-        await setup('x-pack/test/functional/es_archives/monitoring/logstash_pipelines', {
+        await setup('x-pack/platform/test/fixtures/es_archives/monitoring/logstash_pipelines', {
           from: 'Jan 22, 2018 @ 09:10:00.000',
           to: 'Jan 22, 2018 @ 09:41:00.000',
         });

@@ -31,6 +31,8 @@ import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-int
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-server-internal';
 import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
 import type { PricingServiceSetup } from '@kbn/core-pricing-server';
+import type { InternalCoreDiServiceSetup } from '@kbn/core-di-internal';
+import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -58,4 +60,6 @@ export interface InternalCoreSetup {
   security: InternalSecurityServiceSetup;
   userProfile: InternalUserProfileServiceSetup;
   pricing: PricingServiceSetup;
+  injection: InternalCoreDiServiceSetup;
+  dataStreams: DataStreamsSetup;
 }

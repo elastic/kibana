@@ -73,7 +73,7 @@ describe('Secondary metric', () => {
       it('should render a badge with a static color', () => {
         const color = faker.color.rgb();
 
-        renderSecondaryMetric({ color });
+        renderSecondaryMetric({ staticColor: color });
 
         const el = screen.getByTitle(formattedValue);
 
@@ -86,7 +86,7 @@ describe('Secondary metric', () => {
         const color = faker.color.rgb();
 
         renderSecondaryMetric({
-          color,
+          staticColor: color,
           row: { [id]: undefined },
           getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
         });
@@ -219,8 +219,8 @@ describe('Secondary metric', () => {
             renderSecondaryMetric({
               row: { [id]: value },
               trendConfig: {
-                icon: showIcon,
-                value: showValue,
+                showIcon,
+                showValue,
                 palette,
                 baselineValue: baseline,
                 compareToPrimary: false,
@@ -261,8 +261,8 @@ describe('Secondary metric', () => {
               row: { [id]: value },
               getMetricFormatter: getMetricFormatterMock,
               trendConfig: {
-                icon: showIcon,
-                value: showValue,
+                showIcon,
+                showValue,
                 palette,
                 baselineValue: baseline,
                 compareToPrimary: true,

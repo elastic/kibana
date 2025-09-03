@@ -13,9 +13,11 @@ export type {
   FieldMetadataPlain,
   FieldName,
   IntegrationFieldName,
+  OtelFieldName,
   PartialFieldMetadataPlain,
   TEcsFields,
   TMetadataFields,
+  TOtelFields,
 } from './fields_metadata/types';
 
 export { FieldMetadata } from './fields_metadata/models/field_metadata';

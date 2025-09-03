@@ -7,7 +7,7 @@
 
 import { capitalize, last } from 'lodash';
 import React, { useMemo } from 'react';
-import {
+import type {
   IlmPolicyDeletePhase,
   IlmPolicyPhase,
   IlmPolicyPhases,
@@ -33,7 +33,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';
 import { IlmLink } from './ilm_link';
 import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
+import type { DataStreamStats } from './hooks/use_data_stream_stats';
 
 export function IlmSummary({
   definition,

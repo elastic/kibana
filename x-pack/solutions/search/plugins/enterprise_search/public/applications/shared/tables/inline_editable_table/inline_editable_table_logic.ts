@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { ItemWithAnID } from '../types';
+import type { ItemWithAnID } from '../types';
 
-import { FormErrors, InlineEditableTableColumn } from './types';
+import type { FormErrors, InlineEditableTableColumn } from './types';
 
 interface InlineEditableTableActions<Item extends ItemWithAnID> {
   deleteItem(item: Item): { item: Item };
@@ -89,9 +90,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
           defaultItem
             ? { ...generateEmptyItem(columns), ...defaultItem }
             : generateEmptyItem(columns),
-        // @ts-expect-error upgrade typescript v5.1.6
         editExistingItem: (_, { item }) => item,
-        // @ts-expect-error upgrade typescript v5.1.6
         setEditingItemValue: (_, { item }) => item,
       },
     ],
@@ -100,7 +99,6 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
       {
         doneEditing: () => ({}),
         setEditingItemValue: () => ({}),
-        // @ts-expect-error upgrade typescript v5.1.6
         setFieldErrors: (_, { fieldErrors }) => fieldErrors,
       },
     ],
@@ -109,7 +107,6 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
       {
         doneEditing: () => [],
         setEditingItemValue: () => [],
-        // @ts-expect-error upgrade typescript v5.1.6
         setRowErrors: (_, { rowErrors }) => rowErrors,
       },
     ],

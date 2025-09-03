@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  EntriesArray,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type ExceptionListItemSchema,
+  type CreateExceptionListItemSchema,
+  type UpdateExceptionListItemSchema,
+  type EntriesArray,
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -407,6 +405,41 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): UpdateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToUpdateExceptionItem(this.generateBlocklist()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    return this.generate({
+      name: `Trusted device (${this.randomString(5)})`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      os_types: this.randomChoice([['windows'], ['macos'], ['windows', 'macos']]),
+      entries: [
+        {
+          field: 'user.name',
+          operator: 'included',
+          type: 'match',
+          value: `user_${this.randomString(5)}`,
+        },
+      ],
+      ...overrides,
+    });
+  }
+
+  generateTrustedDeviceForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDeviceForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedDevice()),
       ...overrides,
     };
   }

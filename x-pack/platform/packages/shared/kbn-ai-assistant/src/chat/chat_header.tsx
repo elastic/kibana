@@ -21,7 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
+  Conversation,
+  ConversationAccess,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ElasticLlmTourCallout,
   getElasticManagedLlmConnector,

@@ -106,6 +106,7 @@ export interface DiscoverAppState {
    * Hide chart
    */
   hideChart?: boolean;
+
   /**
    * The current data source
    */

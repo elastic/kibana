@@ -22,6 +22,7 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { PreviewMatches } from './preview_matches';
 import {
+  selectPreviewDocuments,
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
@@ -32,19 +33,19 @@ export function PreviewPanel() {
   let content;
 
   if (routingSnapshot.matches({ ready: 'idle' })) {
-    content = <IdlePanel />;
+    content = <SamplePreviewPanel />;
   } else if (
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' })
   ) {
     content = <EditingPanel />;
   } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
-    content = <RuleCreationPanel />;
+    content = <SamplePreviewPanel />;
   }
 
   return (
     <>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
             <EuiIcon type="inspect" />
@@ -62,24 +63,6 @@ export function PreviewPanel() {
     </>
   );
 }
-
-const IdlePanel = () => (
-  <EuiEmptyPrompt
-    icon={<AssetImage type="yourPreviewWillAppearHere" />}
-    titleSize="s"
-    title={
-      <h2>
-        {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmpty', {
-          defaultMessage: 'Your preview will appear here',
-        })}
-      </h2>
-    }
-    body={i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription', {
-      defaultMessage:
-        'Create a new child stream to see what will be routed to it based on the conditions',
-    })}
-  />
-);
 
 const EditingPanel = () => (
   <EuiEmptyPrompt
@@ -111,24 +94,24 @@ const EditingPanel = () => (
   />
 );
 
-const RuleCreationPanel = () => {
+const SamplePreviewPanel = () => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const {
-    documents,
-    documentsError,
-    approximateMatchingPercentage,
-    approximateMatchingPercentageError,
-  } = samplesSnapshot.context;
-  const hasDocuments = !isEmpty(documents);
   const isLoadingDocumentCounts = samplesSnapshot.matches({
     fetching: { documentCounts: 'loading' },
   });
+  const { documentsError, approximateMatchingPercentage, approximateMatchingPercentageError } =
+    samplesSnapshot.context;
 
-  let content = null;
+  const documents = useStreamSamplesSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+  const hasDocuments = !isEmpty(documents);
+
+  let content: React.ReactNode | null = null;
 
   if (isLoadingDocuments && !hasDocuments) {
     content = (
@@ -180,7 +163,7 @@ const RuleCreationPanel = () => {
     );
   } else if (hasDocuments) {
     content = (
-      <EuiFlexItem grow>
+      <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <PreviewMatches

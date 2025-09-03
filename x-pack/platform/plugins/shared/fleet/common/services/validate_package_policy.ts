@@ -345,7 +345,7 @@ export const validatePackagePolicyConfig = (
   safeLoadYaml: (yaml: string) => any,
   packageType?: string
 ): string[] | null => {
-  const errors = [];
+  const errors: string[] = [];
 
   const value = configEntry?.value;
 
@@ -522,6 +522,36 @@ export const validatePackagePolicyConfig = (
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
           defaultMessage: 'Invalid value for select type',
+        })
+      );
+    }
+  }
+
+  if (varDef.type === 'url' && parsedValue !== undefined && parsedValue !== '') {
+    try {
+      // Validate URL against RFC3986 using the URL constructor
+      new URL(parsedValue);
+
+      // Validate the scheme against url_allowed_schemes.
+      if (varDef.url_allowed_schemes && varDef.url_allowed_schemes.length > 0) {
+        const urlScheme = parsedValue.split(':')[0].toLowerCase();
+        if (!varDef.url_allowed_schemes.includes(urlScheme)) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidUrlSchemeErrorMessage', {
+              defaultMessage:
+                'URL scheme "{urlScheme}" is not allowed. Allowed schemes: {allowedSchemes}',
+              values: {
+                urlScheme,
+                allowedSchemes: varDef.url_allowed_schemes.join(', '),
+              },
+            })
+          );
+        }
+      }
+    } catch (e) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidUrlFormatErrorMessage', {
+          defaultMessage: 'Invalid URL format',
         })
       );
     }

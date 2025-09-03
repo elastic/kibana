@@ -98,7 +98,7 @@ describe('IndexImportManageDataSource', () => {
       wrapper: TestProviders,
     });
     fireEvent.click(screen.getByText(/Select index/i));
-    fireEvent.click(screen.getByText('Add privileged users'));
+    fireEvent.click(screen.getByText('Update privileged users'));
     await waitFor(() => {
       expect(setAddDataSourceResult).toHaveBeenCalledWith({ successful: true, userCount: 0 });
       expect(refetch).toHaveBeenCalled();

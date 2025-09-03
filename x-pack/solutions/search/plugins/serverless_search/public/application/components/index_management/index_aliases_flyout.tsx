@@ -8,9 +8,9 @@
 import React from 'react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,

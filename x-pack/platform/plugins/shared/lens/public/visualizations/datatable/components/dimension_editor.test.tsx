@@ -13,11 +13,17 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor, DataType } from '../../../types';
-import { DatatableVisualizationState } from '../visualization';
+import type {
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  OperationDescriptor,
+  DataType,
+} from '../../../types';
+import type { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { TableDimensionEditor, TableDimensionEditorProps } from './dimension_editor';
-import { ColumnState } from '../../../../common/expressions';
+import type { TableDimensionEditorProps } from './dimension_editor';
+import { TableDimensionEditor } from './dimension_editor';
+import type { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
 import { getKbnPalettes } from '@kbn/palettes';
 import { renderWithProviders } from '../../../test_utils/test_utils';

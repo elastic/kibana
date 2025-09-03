@@ -18,15 +18,15 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   DataStreamMigrationWarning,
   DataStreamWarningTypes,
   DataStreamMetadata,
 } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
+import type { WarningCheckboxProps } from './warnings';
 import {
   IncompatibleDataInDataStreamWarningCheckbox,
-  WarningCheckboxProps,
   AffectExistingSetupsWarningCheckbox,
 } from './warnings';
 

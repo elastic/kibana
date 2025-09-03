@@ -14,23 +14,24 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIngestSampleData } from '../hooks/use_ingest_data';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
 import { useNavigateToDiscover } from '../hooks/use_navigate_to_discover';
+import { AnalyticsEvents } from '../analytics/constants';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
 
-interface SampleDataActionButtonProps {
-  isLoading: boolean;
-  onIngestSampleData: () => void;
-}
-
-export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
-  isLoading,
-  onIngestSampleData,
-}) => {
+export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSampleDataClick }) => {
+  const usageTracker = useUsageTracker();
+  const { ingestSampleData, isLoading } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
   const { isInstalled, indexName, isLoading: isStatusLoading } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
 
+  const onInstallButtonClick = useCallback(() => {
+    usageTracker.click(clickEvent);
+    ingestSampleData();
+  }, [ingestSampleData, usageTracker, clickEvent]);
   const onViewButtonClick = useCallback(() => {
     setShowViewDataOptions(true);
   }, []);
@@ -98,7 +99,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
               <EuiContextMenuItem key="playground" onClick={navigateToPlayground} icon="comment">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToPlayground"
-                  defaultMessage="Playground"
+                  defaultMessage="RAG Playground"
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem key="index" onClick={navigateToIndexDetails} icon="index">
@@ -122,7 +123,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
       size="s"
       data-test-subj="installSampleBtn"
       isLoading={isLoading}
-      onClick={onIngestSampleData}
+      onClick={onInstallButtonClick}
     >
       <FormattedMessage
         id="xpack.searchHomepage.sampleData.btn"

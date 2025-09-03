@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { ExpressionsStart } from './types';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { ExpressionsStart } from './types';
 import { setExpressions } from './services';
 
 export interface StartDeps {

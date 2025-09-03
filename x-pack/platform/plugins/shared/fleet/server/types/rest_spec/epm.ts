@@ -200,6 +200,7 @@ export const PackageInfoSchema = schema
     discovery: schema.maybe(
       schema.object({
         fields: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
+        datasets: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
       })
     ),
   })
@@ -255,6 +256,7 @@ export const GetLimitedPackagesResponseSchema = schema.object({
 export const GetStatsResponseSchema = schema.object({
   response: schema.object({
     agent_policy_count: schema.number(),
+    package_policy_count: schema.number(),
   }),
 });
 

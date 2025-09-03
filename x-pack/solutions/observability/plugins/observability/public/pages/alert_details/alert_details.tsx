@@ -5,47 +5,50 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
   EuiLoadingSpinner,
-  EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
   EuiNotificationBadge,
   EuiIcon,
 } from '@elastic/eui';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
+import moment from 'moment';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
-import { AlertDetailsSource, TAB_IDS, TabId } from './types';
+import type { AlertDetailsSource, TabId } from './types';
+import { TAB_IDS } from './types';
 import { SourceBar } from './components';
 import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../hooks/use_fetch_alert_detail';
+import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { HeaderActions } from './components/header_actions';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { getTimeZone } from '../../utils/get_time_zone';
@@ -53,7 +56,7 @@ import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enable
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
-import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
+import type { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
@@ -85,7 +88,6 @@ const isTabId = (value: string): value is TabId => {
 export function AlertDetails() {
   const { services } = useKibana();
   const {
-    cases,
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
@@ -202,6 +204,15 @@ export function AlertDetails() {
     },
   });
 
+  // This is the time range that will be used to open the dashboards
+  // in the related dashboards tab
+  const dashboardTimeRange = useMemo(() => {
+    return {
+      from: moment(alertDetail?.formatted.start).subtract(30, 'minutes').toISOString(),
+      to: moment(alertDetail?.formatted.start).add(30, 'minutes').toISOString(),
+    };
+  }, [alertDetail]);
+
   if (isLoading) {
     return <CenterJustifiedSpinner />;
   }
@@ -305,6 +316,7 @@ export function AlertDetails() {
         isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
         onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
+        timeRange={dashboardTimeRange}
       />
     ) : (
       <EuiLoadingSpinner />
@@ -399,21 +411,17 @@ export function AlertDetails() {
         ) : (
           <EuiLoadingSpinner />
         ),
-        rightSideItems: cases
-          ? [
-              <ObsCasesContext>
-                <HeaderActions
-                  alert={alertDetail?.formatted ?? null}
-                  alertIndex={alertDetail?.raw._index}
-                  alertStatus={alertStatus}
-                  onUntrackAlert={onUntrackAlert}
-                  onUpdate={onUpdate}
-                  rule={rule}
-                  refetch={refetch}
-                />
-              </ObsCasesContext>,
-            ]
-          : [],
+        rightSideItems: [
+          <HeaderActions
+            alert={alertDetail?.formatted ?? null}
+            alertIndex={alertDetail?.raw._index}
+            alertStatus={alertStatus}
+            onUntrackAlert={onUntrackAlert}
+            onUpdate={onUpdate}
+            rule={rule}
+            refetch={refetch}
+          />,
+        ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
       }}

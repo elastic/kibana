@@ -6,10 +6,11 @@
  */
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { EsqlToolDefinition, EsqlToolFieldTypes, ToolType } from '@kbn/onechat-common';
+import type { EsqlToolDefinition, EsqlToolFieldTypes } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import { omit } from 'lodash';
-import { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
-import { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
+import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
+import type { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
 
 /**
  * Transforms an ES|QL tool into its UI form representation.

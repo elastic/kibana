@@ -7,7 +7,6 @@
 
 export {
   AgentType,
-  AgentMode,
   oneChatDefaultAgentId,
   type AgentDescriptor,
   type AgentDefinition,

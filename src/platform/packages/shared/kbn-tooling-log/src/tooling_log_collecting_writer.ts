@@ -8,8 +8,8 @@
  */
 
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
-import { LogLevel } from './log_levels';
-import { Message } from './message';
+import type { LogLevel } from './log_levels';
+import type { Message } from './message';
 
 export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
   messages: string[] = [];

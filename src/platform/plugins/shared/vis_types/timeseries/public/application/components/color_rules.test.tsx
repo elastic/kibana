@@ -13,12 +13,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { collectionActions } from './lib/collection_actions';
-import {
-  ColorRules,
-  ColorRulesProps,
-  colorRulesOperatorsList,
-  ColorRulesOperator,
-} from './color_rules';
+import type { ColorRulesProps, ColorRulesOperator } from './color_rules';
+import { ColorRules, colorRulesOperatorsList } from './color_rules';
 import { Operator } from '../../../common/operators_utils';
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {

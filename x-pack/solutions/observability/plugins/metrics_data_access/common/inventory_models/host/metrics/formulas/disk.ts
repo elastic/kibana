@@ -5,73 +5,88 @@
  * 2.0.
  */
 
-import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import {
   DISK_READ_IOPS_LABEL,
   DISK_READ_THROUGHPUT_LABEL,
-  DISK_SPACE_AVAILABILITY_LABEL,
   DISK_SPACE_AVAILABLE_LABEL,
   DISK_USAGE_AVERAGE_LABEL,
   DISK_USAGE_LABEL,
   DISK_WRITE_IOPS_LABEL,
   DISK_WRITE_THROUGHPUT_LABEL,
 } from '../../../shared/charts/constants';
+import type { SchemaBasedFormula } from '../../../shared/metrics/types';
 
-export const diskIORead: LensBaseLayer = {
+export const diskIORead: SchemaBasedFormula = {
   label: DISK_READ_IOPS_LABEL,
-  value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  value: {
+    ecs: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+    semconv: "counter_rate(max(system.disk.operations, kql='attributes.direction: read'))",
+  },
   format: 'number',
   decimals: 0,
   normalizeByUnit: 's',
 };
 
-export const diskReadThroughput: LensBaseLayer = {
+export const diskReadThroughput: SchemaBasedFormula = {
   label: DISK_READ_THROUGHPUT_LABEL,
-  value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
+  value: {
+    ecs: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
+    semconv: "counter_rate(max(system.disk.io, kql='attributes.direction: read'))",
+  },
   format: 'bytes',
   decimals: 1,
   normalizeByUnit: 's',
 };
 
-export const diskSpaceAvailable: LensBaseLayer = {
+export const diskSpaceAvailable: SchemaBasedFormula = {
   label: DISK_SPACE_AVAILABLE_LABEL,
-  value: 'average(system.filesystem.free)',
+  value: {
+    ecs: 'average(system.filesystem.free)',
+    semconv: "average(system.filesystem.usage, kql='state: free')",
+  },
   format: 'bytes',
   decimals: 0,
 };
 
-export const diskSpaceAvailability: LensBaseLayer = {
-  label: DISK_SPACE_AVAILABILITY_LABEL,
-  value: '1 - average(system.filesystem.used.pct)',
-  format: 'percent',
-  decimals: 0,
-};
-
-export const diskUsage: LensBaseLayer = {
+export const diskUsage: SchemaBasedFormula = {
   label: DISK_USAGE_LABEL,
-  value: 'max(system.filesystem.used.pct)',
+  value: {
+    ecs: 'max(system.filesystem.used.pct)',
+    semconv:
+      "1 - max(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
+  },
   format: 'percent',
   decimals: 0,
 };
 
-export const diskUsageAverage: LensBaseLayer = {
+export const diskUsageAverage: SchemaBasedFormula = {
   label: DISK_USAGE_AVERAGE_LABEL,
-  value: 'average(system.filesystem.used.pct)',
+  value: {
+    ecs: 'average(system.filesystem.used.pct)',
+    semconv:
+      "1 - sum(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
+  },
   format: 'percent',
   decimals: 0,
 };
 
-export const diskIOWrite: LensBaseLayer = {
+export const diskIOWrite: SchemaBasedFormula = {
   label: DISK_WRITE_IOPS_LABEL,
-  value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  value: {
+    ecs: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+    semconv: "counter_rate(max(system.disk.operations, kql='attributes.direction: write'))",
+  },
   format: 'number',
   decimals: 0,
   normalizeByUnit: 's',
 };
 
-export const diskWriteThroughput: LensBaseLayer = {
+export const diskWriteThroughput: SchemaBasedFormula = {
   label: DISK_WRITE_THROUGHPUT_LABEL,
-  value: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
+  value: {
+    ecs: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
+    semconv: "counter_rate(max(system.disk.io, kql='attributes.direction: write'))",
+  },
   format: 'bytes',
   decimals: 1,
   normalizeByUnit: 's',

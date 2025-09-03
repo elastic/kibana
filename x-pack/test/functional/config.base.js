@@ -187,10 +187,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/observabilityAIAssistant',
       },
       aiAssistantManagementSelection: {
-        pathname: '/app/management/kibana/aiAssistantManagementSelection',
+        pathname: '/app/management/ai/aiAssistantManagementSelection',
       },
       obsAIAssistantManagement: {
-        pathname: '/app/management/kibana/observabilityAiAssistantManagement',
+        pathname: '/app/management/ai/observabilityAiAssistantManagement',
       },
       enterpriseSearch: {
         pathname: '/app/elasticsearch/overview',

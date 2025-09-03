@@ -16,7 +16,8 @@ import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-pac
 import { createFailError } from '@kbn/dev-cli-errors';
 import { readPackageJson } from '@kbn/repo-packages';
 
-import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
+import type { TsConfig } from './ts_configfile';
+import { readTsConfig, parseTsConfig } from './ts_configfile';
 
 export type RefableTsProject = TsProject & { rootImportReq: string; pkg: Package };
 

@@ -10,9 +10,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import {
   SCOUT_REPORTER_ES_URL,

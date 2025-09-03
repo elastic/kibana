@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import { Agent } from '../../../../common/agents';
+import type { Agent } from '../../../../common/agents';
 import { sortAndGroupConversations } from '../../utils/sort_and_group_conversations';
 import { sliceRecentConversations } from '../../utils/slice_recent_conversations';
 import { appPaths } from '../../app_paths';
