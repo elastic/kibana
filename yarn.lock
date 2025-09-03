@@ -6385,6 +6385,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inspect-component-plugin@link:src/platform/plugins/private/inspect_component":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
   version "0.0.0"
   uid ""
