@@ -26,13 +26,7 @@ export function getEsqlQuery({
   return undefined;
 }
 
-function getSimilarSpansESQL({
-  serviceName,
-  spanName,
-}: {
-  serviceName: string;
-  spanName: string;
-}): Record<string, any> {
+function getSimilarSpansESQL({ serviceName, spanName }: { serviceName: string; spanName: string }) {
   return where(`${SERVICE_NAME} == ?serviceName AND ${SPAN_NAME} == ?spanName`, {
     serviceName,
     spanName,
@@ -47,7 +41,7 @@ function getSimilarTransactionsESQL({
   serviceName: string;
   transactionName: string;
   transactionType: string;
-}): Record<string, any> {
+}) {
   return where(
     `${SERVICE_NAME} == ?serviceName AND ${TRANSACTION_NAME} == ?transactionName AND ${TRANSACTION_TYPE} == ?transactionType`,
     { serviceName, transactionName, transactionType }
