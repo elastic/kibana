@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Children, isValidElement, useEffect, useRef, useMemo } from 'react';
+import React, { Children, isValidElement, useEffect, useRef, useMemo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { useDataCascadeActions, type GroupNode, type LeafNode } from '../../store_provider';
-import { useTableHelper, flexRender } from '../../lib/core/table';
+import { useTableHelper, flexRender, type Table, type CellContext } from '../../lib/core/table';
 import {
   useRowVirtualizerHelper,
   getGridHeaderPositioningStyle,
@@ -29,7 +29,6 @@ import type {
   DataCascadeImplProps,
   DataCascadeRowProps,
   DataCascadeRowCellProps,
-  CascadeRowCellPrimitiveProps,
   CascadeRowPrimitiveProps,
 } from './types';
 
@@ -89,35 +88,49 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     actions.setInitialState(data);
   }, [data, actions]);
 
+  const cascadeHeaderElement = useCallback(
+    ({ table }: { table: Table<G> }) => {
+      const { rows: tableRows } = table.getGroupedRowModel();
+
+      return (
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          css={styles.cascadeHeaderWrapper}
+        >
+          <EuiFlexItem id="treegrid-label">
+            <TableTitleSlot rows={tableRows} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectionDropdown onSelectionChange={onCascadeGroupingChange} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+    [TableTitleSlot, onCascadeGroupingChange, styles.cascadeHeaderWrapper]
+  );
+
+  const cascadeRowCell = useCallback(
+    (props: CellContext<G, L>) => {
+      return (
+        <CascadeRowCellPrimitive
+          {...{
+            ...props,
+            ...rowElement.props.children.props,
+            key: props.row.id,
+            size,
+          }}
+        />
+      );
+    },
+    [rowElement.props.children.props, size]
+  );
+
   const { headerColumns, rows } = useTableHelper<G, L>({
     enableRowSelection,
     allowMultipleRowToggle,
-    header: (props) =>
-      React.createElement(function GroupByHeader({ table: _table }) {
-        const { rows: tableRows } = _table.getGroupedRowModel();
-
-        return (
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-            css={styles.cascadeHeaderWrapper}
-          >
-            <EuiFlexItem id="treegrid-label">
-              <TableTitleSlot rows={tableRows} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SelectionDropdown onSelectionChange={onCascadeGroupingChange} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }, props),
-    rowCell: React.memo((props) => {
-      return React.createElement<CascadeRowCellPrimitiveProps<G, L>>(CascadeRowCellPrimitive, {
-        size,
-        ...props,
-        ...rowElement.props.children.props,
-      });
-    }),
+    header: cascadeHeaderElement,
+    rowCell: cascadeRowCell,
   });
 
   const {
