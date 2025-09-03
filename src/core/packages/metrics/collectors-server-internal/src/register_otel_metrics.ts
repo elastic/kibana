@@ -8,6 +8,7 @@
  */
 
 import { type Meter, metrics, ValueType } from '@opentelemetry/api';
+import v8 from 'v8';
 import { EventLoopUtilizationMonitor } from './event_loop_utilization_monitor';
 import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
@@ -27,6 +28,81 @@ export function registerOtelMetrics() {
 
   registerOtelEventLoopDelayMetrics(meter);
   registerOtelEventLoopUtilizationMetrics(meter);
+  registerOtelMemoryMetrics(meter);
+}
+
+function registerOtelMemoryMetrics(meter: Meter) {
+  const memoryMetrics = {
+    // opentelemetry.io/docs/specs/semconv/runtime/v8js-metrics/
+    limit: meter.createObservableGauge('v8js.memory.heap.limit', {
+      description: 'Process Memory: Total heap available.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    used: meter.createObservableGauge('v8js.memory.heap.used', {
+      description: 'Process Memory: Used heap size.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    available: meter.createObservableGauge('v8js.memory.heap.available_size', {
+      description: 'Process Memory: Available heap size.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    physical: meter.createObservableGauge('v8js.memory.heap.physical_size', {
+      description: 'Process Memory: Committed size of a heap space.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    // Following this convention: https://opentelemetry.io/docs/specs/semconv/system/process-metrics/#metric-processmemoryusage
+    rss: meter.createObservableGauge('process.memory.rss', {
+      description:
+        'Process Memory: Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the process, including all C++ and JavaScript objects and code.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    external: meter.createObservableGauge('process.memory.external', {
+      description:
+        'Process Memory: memory usage of C++ objects bound to JavaScript objects managed by V8.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    arrayBuffers: meter.createObservableGauge('process.memory.array_buffers', {
+      description:
+        'Process Memory: Refers to memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s, including all Node.js Buffers. This is also included in the external value.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    heapTotal: meter.createObservableGauge('process.memory.heap.total', {
+      description: 'Process Memory: Total heap size pre-allocated.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+    heapUsed: meter.createObservableGauge('process.memory.heap.used', {
+      description: 'Process Memory: Used heap size.',
+      unit: 'By',
+      valueType: ValueType.INT,
+    }),
+  };
+
+  meter.addBatchObservableCallback((result) => {
+    v8.getHeapSpaceStatistics().forEach((space) => {
+      const attributes = {
+        'v8js.heap.space.name': space.space_name,
+      };
+      result.observe(memoryMetrics.limit, space.space_size, attributes);
+      result.observe(memoryMetrics.used, space.space_used_size, attributes);
+      result.observe(memoryMetrics.available, space.space_available_size, attributes);
+      result.observe(memoryMetrics.physical, space.physical_space_size, attributes);
+    });
+
+    const memoryUsage = process.memoryUsage();
+    result.observe(memoryMetrics.rss, memoryUsage.rss);
+    result.observe(memoryMetrics.external, memoryUsage.external);
+    result.observe(memoryMetrics.arrayBuffers, memoryUsage.arrayBuffers);
+    result.observe(memoryMetrics.heapTotal, memoryUsage.heapTotal);
+    result.observe(memoryMetrics.heapUsed, memoryUsage.heapUsed);
+  }, Object.values(memoryMetrics));
 }
 
 function registerOtelEventLoopDelayMetrics(meter: Meter) {
