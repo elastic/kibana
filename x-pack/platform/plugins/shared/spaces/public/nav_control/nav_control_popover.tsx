@@ -212,7 +212,7 @@ class NavControlPopoverUI extends Component<Props, State> {
       return (
         solutionMap[solution as keyof typeof solutionMap] || {
           name: 'Classic',
-          icon: 'logoElasticStack',
+          icon: null,
         }
       );
     };
@@ -239,8 +239,10 @@ class NavControlPopoverUI extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            {/* CURRENTLY: Solution icon */}
-            <EuiIcon type={solutionData.icon} size="m" title={`Solution: ${solutionText}`} />
+            {/* Only show solution icon when not in Classic view */}
+            {activeSpace.solution && activeSpace.solution !== 'classic' && (
+              <EuiIcon type={solutionData.icon} size="m" title={`Solution: ${solutionText}`} />
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
@@ -273,7 +275,6 @@ class NavControlPopoverUI extends Component<Props, State> {
         style={{
           height: euiTheme.size.xl,
           paddingInlineStart: euiTheme.size.xs,
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           border: euiTheme.border.thin,
         }}
       >

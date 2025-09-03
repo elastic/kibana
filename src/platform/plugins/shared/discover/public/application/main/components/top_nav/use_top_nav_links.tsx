@@ -253,7 +253,6 @@ export const useTopNavLinks = ({
         }),
         testId: 'discoverSaveButton',
         iconType: 'save',
-        emphasize: true,
         run: (anchorElement: HTMLElement) => {
           onSaveSearch({
             savedSearch: state.savedSearchState.getState(),
