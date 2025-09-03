@@ -18,5 +18,6 @@
     "@kbn/data-plugin",
     "@kbn/react-field",
     "@kbn/field-utils",
+    "@kbn/i18n",
   ]
 }
