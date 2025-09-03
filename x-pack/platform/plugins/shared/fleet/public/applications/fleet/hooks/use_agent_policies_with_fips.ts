@@ -34,7 +34,7 @@ export const useAgentPoliciesWithFipsAgents = (policyIds: string[]) => {
   return hasFipsAgents(fipsAgentsRes.data?.items);
 };
 
-export const useAgentPoliciesWithNonFipsIntegrations = (agentPolicy: AgentPolicy | undefined) => {
+export const getAgentPoliciesWithNonFipsIntegrations = (agentPolicy: AgentPolicy | undefined) => {
   if (!agentPolicy || !agentPolicy?.package_policies) return [];
 
   return getNonFipsIntegrations(agentPolicy.package_policies);

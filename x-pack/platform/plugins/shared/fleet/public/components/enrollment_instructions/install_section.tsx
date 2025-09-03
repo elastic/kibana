@@ -29,7 +29,7 @@ interface Props {
   isManaged?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
-  nonFipsIntegrations: Array<{ name: string; title: string }>;
+  nonFipsIntegrations?: Array<{ name: string; title: string }>;
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({

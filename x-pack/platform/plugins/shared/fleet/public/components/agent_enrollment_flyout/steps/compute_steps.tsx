@@ -29,7 +29,7 @@ import {
   InstallAzureArmTemplateManagedAgentStep,
 } from '../../cloud_security_posture';
 
-import { useAgentPoliciesWithNonFipsIntegrations } from '../../../applications/fleet/hooks/use_agent_policies_with_fips';
+import { getAgentPoliciesWithNonFipsIntegrations } from '../../../applications/fleet/hooks/use_agent_policies_with_fips';
 
 import {
   InstallationModeSelectionStep,
@@ -109,6 +109,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         isK8s,
         cloudSecurityIntegration,
         rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+        nonFipsIntegrations: getAgentPoliciesWithNonFipsIntegrations(selectedPolicy),
       })
     );
 
@@ -180,7 +181,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
 
   const showInstallServers = hasInstallServersInputs(agentPolicy?.package_policies ?? []);
-  const nonFipsIntegrations = useAgentPoliciesWithNonFipsIntegrations(selectedPolicy);
 
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
@@ -262,7 +262,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           fleetServerHost,
           enrollToken,
           rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
-          nonFipsIntegrations,
+          nonFipsIntegrations: getAgentPoliciesWithNonFipsIntegrations(selectedPolicy),
         })
       );
     }
@@ -309,7 +309,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     installManagedCommands,
     gcpProjectId,
     isK8s,
-    nonFipsIntegrations,
     onClickViewAgents,
     link,
     enrolledAgentIds,
