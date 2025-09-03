@@ -16,7 +16,7 @@ import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 
-describe('spanDocumentProfileProvider', () => {
+describe('tracesDocumentProfileProvider', () => {
   const getRootContext = ({
     profileId,
     solutionType,
@@ -31,7 +31,7 @@ describe('spanDocumentProfileProvider', () => {
   };
 
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
-    profileId: 'traces-span-document-profile',
+    profileId: 'traces-document-profile',
     category: DataSourceCategory.Traces,
   };
   const RESOLUTION_MATCH = {
@@ -59,7 +59,7 @@ describe('spanDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildSpanMockRecord('index', {
+          record: buildTraceMockRecord('index', {
             'trace.id': ['c0ffee'],
           }),
         })
@@ -71,7 +71,7 @@ describe('spanDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildSpanMockRecord('another-index'),
+          record: buildTraceMockRecord('another-index'),
         })
       ).toEqual(RESOLUTION_MISMATCH);
     });
@@ -81,7 +81,7 @@ describe('spanDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildSpanMockRecord('index', {
+          record: buildTraceMockRecord('index', {
             'trace.id': ['c0ffee'],
             kind: 'Internal',
           }),
@@ -101,7 +101,7 @@ describe('spanDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId, solutionType }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildSpanMockRecord('index', {
+          record: buildTraceMockRecord('index', {
             'trace.id': ['c0ffee'],
           }),
         })
@@ -110,97 +110,7 @@ describe('spanDocumentProfileProvider', () => {
   });
 });
 
-const buildSpanMockRecord = (index: string, fields: Record<string, unknown> = {}) =>
-  buildDataTableRecord({
-    _id: '',
-    _index: index,
-    fields: {
-      _index: index,
-      ...fields,
-    },
-  });
-
-describe('transactionDocumentProfileProvider', () => {
-  const getRootContext = ({
-    profileId,
-    solutionType,
-  }: {
-    profileId: string;
-    solutionType?: SolutionType;
-  }): ContextWithProfileId<RootContext> => {
-    return {
-      profileId,
-      solutionType: solutionType ?? SolutionType.Observability,
-    };
-  };
-
-  const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
-    profileId: 'traces-transaction-document-profile',
-    category: DataSourceCategory.Traces,
-  };
-  const RESOLUTION_MATCH = {
-    isMatch: true,
-    context: {
-      type: DocumentType.Trace,
-    },
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
-  };
-
-  const mockServices: ProfileProviderServices = {
-    ...createContextAwarenessMocks().profileProviderServices,
-  };
-
-  describe('when root profile is observability', () => {
-    const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
-    const transactionDocumentProfileProvider =
-      createObservabilityTracesDocumentProfileProvider(mockServices);
-
-    it('matches records with the correct data source and a trace id', () => {
-      expect(
-        transactionDocumentProfileProvider.resolve({
-          rootContext: getRootContext({ profileId }),
-          dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildSpanMockRecord('index', {
-            'trace.id': ['c0ffee'],
-          }),
-        })
-      ).toEqual(RESOLUTION_MATCH);
-    });
-
-    it('does not match records with no trace id', () => {
-      expect(
-        transactionDocumentProfileProvider.resolve({
-          rootContext: getRootContext({ profileId }),
-          dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildSpanMockRecord('another-index'),
-        })
-      ).toEqual(RESOLUTION_MISMATCH);
-    });
-  });
-
-  describe('when solutionType is NOT observability', () => {
-    const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
-    const solutionType = SolutionType.Default;
-    const transactionDocumentProfileProvider =
-      createObservabilityTracesDocumentProfileProvider(mockServices);
-
-    it('does not match records with the correct data source and a trace id', () => {
-      expect(
-        transactionDocumentProfileProvider.resolve({
-          rootContext: getRootContext({ profileId, solutionType }),
-          dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildTransactionMockRecord('index', {
-            'trace.id': ['c0ffee'],
-          }),
-        })
-      ).toEqual(RESOLUTION_MISMATCH);
-    });
-  });
-});
-
-const buildTransactionMockRecord = (index: string, fields: Record<string, unknown> = {}) =>
+const buildTraceMockRecord = (index: string, fields: Record<string, unknown> = {}) =>
   buildDataTableRecord({
     _id: '',
     _index: index,
