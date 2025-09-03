@@ -70,7 +70,7 @@ export const metricOperationSharedSchema = genericOperationOptionsSchema.extends
   /**
    * Filter
    */
-  filter: schema.maybe(filterSchema),
+  filter: schema.maybe(filterSchema, false),
 });
 
 export const fieldBasedOperationSharedSchema = metricOperationSharedSchema.extends({
@@ -86,10 +86,11 @@ const emptyAsNullSchemaRawObject = {
    */
   empty_as_null: schema.maybe(
     schema.boolean({
+      defaultValue: true,
       meta: {
         description: 'Whether to consider null values as null',
       },
-    })
+    }), true
   ),
 };
 

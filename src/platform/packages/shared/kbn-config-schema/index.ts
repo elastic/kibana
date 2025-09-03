@@ -118,8 +118,8 @@ function ip(options?: IpOptions): Type<string> {
 /**
  * Create an optional type
  */
-function maybe<V>(type: Type<V>): Type<V | undefined> {
-  return new MaybeType(type);
+function maybe<V>(type: Type<V>, applyDefaults = true): Type<V | undefined> {
+  return new MaybeType(type, applyDefaults);
 }
 
 function nullable<V>(type: Type<V>): Type<V | null> {

@@ -59,14 +59,14 @@ export const layerSettingsSchema = schema.object({
    * Default: 1
    * Possible values: number (0 <= value <= 1)
    */
-  sampling: schema.number({
+  sampling: schema.maybe(schema.number({
     min: LENS_SAMPLING_MIN_VALUE,
     max: LENS_SAMPLING_MAX_VALUE,
     defaultValue: LENS_SAMPLING_DEFAULT_VALUE,
     meta: {
       description: 'Sampling factor between 0 (no sampling) and 1 (full sampling). Default is 1.',
     },
-  }),
+  }), true),
   /**
    * Whether to ignore global filters when fetching data for this layer.
    *
@@ -76,13 +76,13 @@ export const layerSettingsSchema = schema.object({
    * Default: false
    * Possible values: boolean (true or false)
    */
-  ignore_global_filters: schema.boolean({
+  ignore_global_filters: schema.maybe(schema.boolean({
     defaultValue: LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     meta: {
       description:
         'If true, ignore global filters when fetching data for this layer. Default is false.',
     },
-  }),
+  }), true),
 });
 
 export const collapseBySchema = schema.oneOf(

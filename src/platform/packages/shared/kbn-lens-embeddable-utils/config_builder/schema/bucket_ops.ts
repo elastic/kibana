@@ -85,15 +85,16 @@ export const bucketTermsOperationSchema = schema.object({
   /**
    * Size of the terms
    */
-  size: schema.number({
+  size: schema.maybe(schema.number({
     defaultValue: LENS_TERMS_SIZE_DEFAULT,
     meta: { description: 'Size of the terms' },
-  }),
+  })),
   /**
    * Whether to increase accuracy
    */
   increase_accuracy: schema.maybe(
     schema.boolean({
+      defaultValue: false,
       meta: {
         description: 'Whether to increase accuracy',
       },
@@ -118,7 +119,7 @@ export const bucketTermsOperationSchema = schema.object({
           },
         })
       ),
-    })
+    }), false
   ),
   /**
    * Excludes
@@ -139,7 +140,7 @@ export const bucketTermsOperationSchema = schema.object({
           },
         })
       ),
-    })
+    }), false
   ),
   /**
    * Other bucket
@@ -147,6 +148,7 @@ export const bucketTermsOperationSchema = schema.object({
   other_bucket: schema.maybe(
     schema.object({
       include_documents_without_field: schema.boolean({
+        defaultValue: false,
         meta: {
           description: 'Whether to include documents without field',
         },

@@ -79,7 +79,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
           schema.oneOf(
             [schema.literal('left'), schema.literal('center'), schema.literal('right')],
             { meta: { description: 'Alignments for labels' }, defaultValue: 'left' }
-          )
+          ), true
         ),
         /**
          * Alignments for value. Possible values:
@@ -91,11 +91,11 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
           schema.oneOf(
             [schema.literal('left'), schema.literal('center'), schema.literal('right')],
             { meta: { description: 'Alignments for value' }, defaultValue: 'left' }
-          )
+          ), true
         ),
       },
-      { defaultValue: { labels: 'left', value: 'left' } }
-    )
+      { }
+    ), true
   ),
   /**
    * Whether to fit the value
@@ -123,7 +123,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
           defaultValue: 'right',
         })
       ),
-    })
+    }), false
   ),
   /**
    * Color configuration
@@ -183,7 +183,7 @@ export const metricStateSchema = schema.allOf([
     /**
      * Primary value configuration, must define operation.
      */
-    metric: schema.oneOf([
+    metric: schema.maybe(schema.oneOf([
       schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
       schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
       schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
@@ -196,7 +196,7 @@ export const metricStateSchema = schema.allOf([
       schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
       schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
       schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-    ]),
+    ], { defaultValue: countMetricOperationSchema.validate({ operation: 'count' }) }), true),
     /**
      * Secondary value configuration, must define operation.
      */
@@ -226,7 +226,7 @@ export const metricStateSchema = schema.allOf([
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
-      ])
+      ]), 
     ),
   }),
 ]);
