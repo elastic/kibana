@@ -20,6 +20,11 @@
     "@kbn/i18n-react",
     "@kbn/chart-icons",
     "@kbn/esql-editor",
-    "@kbn/data-plugin"
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/esql-composer"
   ]
 }
