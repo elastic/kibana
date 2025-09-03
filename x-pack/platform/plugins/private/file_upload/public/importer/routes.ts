@@ -14,7 +14,7 @@ import type {
   InitializeImportResponse,
   ImportDoc,
   ImportResponse,
-} from '../../common/types';
+} from '@kbn/file-upload-common';
 import { getHttp } from '../kibana_services';
 
 interface CallInitializeImportRoute {
