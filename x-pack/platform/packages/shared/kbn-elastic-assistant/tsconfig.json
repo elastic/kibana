@@ -51,5 +51,6 @@
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-ids",
     "@kbn/ai-assistant-default-llm-setting",
+    "@kbn/core-ui-settings-browser",
   ]
 }
