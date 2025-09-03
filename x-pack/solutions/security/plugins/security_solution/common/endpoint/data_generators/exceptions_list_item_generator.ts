@@ -408,4 +408,39 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       ...overrides,
     };
   }
+
+  generateTrustedDevice(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    return this.generate({
+      name: `Trusted device (${this.randomString(5)})`,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      os_types: this.randomChoice([['windows'], ['macos'], ['windows', 'macos']]),
+      entries: [
+        {
+          field: 'user.name',
+          operator: 'included',
+          type: 'match',
+          value: `user_${this.randomString(5)}`,
+        },
+      ],
+      ...overrides,
+    });
+  }
+
+  generateTrustedDeviceForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
+
+  generateTrustedDeviceForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateTrustedDevice()),
+      ...overrides,
+    };
+  }
 }

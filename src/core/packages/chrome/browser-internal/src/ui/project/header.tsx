@@ -43,9 +43,9 @@ import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
-import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
 import { AppMenuBar } from './app_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
+import { HeaderPageAnnouncer } from '../header/header_page_announcer';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -237,13 +237,6 @@ export const ProjectHeader = ({
 
   return (
     <>
-      <ScreenReaderRouteAnnouncements
-        breadcrumbs$={observables.breadcrumbs$}
-        customBranding$={customBranding$}
-        appId$={application.currentAppId$}
-      />
-      <SkipToMainContent />
-
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
@@ -252,6 +245,10 @@ export const ProjectHeader = ({
               {children}
 
               <EuiHeaderSectionItem>
+                <HeaderPageAnnouncer
+                  breadcrumbs$={observables.breadcrumbs$}
+                  customBranding$={customBranding$}
+                />
                 <Logo
                   prependBasePath={prependBasePath}
                   application={application}

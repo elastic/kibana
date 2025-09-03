@@ -336,6 +336,8 @@ export class RequestContextFactory implements IRequestContextFactory {
             logger: options.logger,
             clusterClient: coreContext.elasticsearch.client,
             uiSettingsClient: coreContext.uiSettings.client,
+            usageCollection: options.plugins.usageCollection,
+            coreStartPromise: core.getStartServices(),
           })
       ),
       getMlAuthz: memoize(() => {

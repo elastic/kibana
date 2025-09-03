@@ -1,4 +1,4 @@
-@mixin prfDevToolProgress($color: tintOrShade($euiColorPrimary, 60%, 60%)) {
+@mixin prfDevToolProgress($color: $euiColorBackgroundLightPrimary) {
   border: none;
   display: block;
   background-image:
@@ -6,8 +6,8 @@
       to right,
       $color 0%,
       $color var(--prfDevToolProgressPercentage, auto),
-      $euiColorLightestShade var(--prfDevToolProgressPercentage, auto),
-      $euiColorLightestShade 100%
+      $euiColorBackgroundBaseSubdued var(--prfDevToolProgressPercentage, auto),
+      $euiColorBackgroundBaseSubdued 100%
     );
 
   .prfDevTool__progress--percent-ie {
@@ -22,10 +22,8 @@
   }
 
   &__progress--time {
-    @include prfDevToolProgress(#FFAFAF);
-    background-color: #F5F5F5; // Must be light at all times
+    @include prfDevToolProgress($euiColorBackgroundLightDanger);
     // Width of 3 badges, with the last child not having padding on the left
     width: ($badgeSize * 3) - ($euiSizeXS * .75);
-    // Force text to always be dark on top of white -> pink color
   }
 }

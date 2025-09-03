@@ -17,6 +17,7 @@ import { SearchSessionsMgmtAPI } from '../lib/api';
 import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { Flyout } from './flyout';
+import type { BackgroundSearchOpenedHandler } from '../types';
 
 export function openSearchSessionsFlyout({
   coreStart,
@@ -33,11 +34,14 @@ export function openSearchSessionsFlyout({
   sessionsClient: ISessionsClient;
   share: SharePluginStart;
 }) {
-  return () => {
+  return (
+    attrs: { appId?: string; onBackgroundSearchOpened?: BackgroundSearchOpenedHandler } = {}
+  ) => {
     const api = new SearchSessionsMgmtAPI(sessionsClient, config, {
       notifications: coreStart.notifications,
       application: coreStart.application,
       usageCollector,
+      featureFlags: coreStart.featureFlags,
     });
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 
@@ -47,6 +51,8 @@ export function openSearchSessionsFlyout({
           <KibanaReactContextProvider>
             <Flyout
               onClose={() => flyout.close()}
+              onBackgroundSearchOpened={attrs.onBackgroundSearchOpened}
+              appId={attrs.appId}
               api={api}
               coreStart={coreStart}
               usageCollector={usageCollector}

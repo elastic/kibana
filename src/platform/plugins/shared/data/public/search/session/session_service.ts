@@ -23,6 +23,7 @@ import {
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, EMPTY, from, merge, of, Subscription, timer } from 'rxjs';
 import type {
+  FeatureFlagsStart,
   PluginInitializerContext,
   StartServicesAccessor,
   ToastsStart as ToastService,
@@ -44,7 +45,7 @@ import {
 } from './search_session_state';
 import type { ISessionsClient } from './sessions_client';
 import type { NowProviderInternalContract } from '../../now_provider';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 
 /**
@@ -183,6 +184,7 @@ export class SessionService {
   private subscription = new Subscription();
   private currentApp?: string;
   private hasAccessToSearchSessions: boolean = false;
+  private featureFlags?: FeatureFlagsStart;
 
   private toastService?: ToastService;
 
@@ -255,6 +257,8 @@ export class SessionService {
     );
 
     getStartServices().then(([coreStart]) => {
+      this.featureFlags = coreStart.featureFlags;
+
       // using management?.kibana? we infer if any of the apps allows current user to store sessions
       this.hasAccessToSearchSessions =
         coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
@@ -608,10 +612,19 @@ export class SessionService {
         await this.sessionsClient.rename(sessionId, newName);
         renamed = true;
       } catch (e) {
+        const hasBackgroundSearchEnabled = this.featureFlags?.getBooleanValue(
+          BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+          false
+        );
+
         this.toastService?.addError(e, {
-          title: i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
-            defaultMessage: 'Failed to edit name of the search session',
-          }),
+          title: hasBackgroundSearchEnabled
+            ? i18n.translate('data.searchSessions.sessionService.backgroundSearchEditNameError', {
+                defaultMessage: 'Failed to edit name of the background search',
+              })
+            : i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
+                defaultMessage: 'Failed to edit name of the search session',
+              }),
         });
       }
 
@@ -701,10 +714,22 @@ export class SessionService {
           this.state.transitions.setSearchSessionSavedObject(savedObject);
         }
       } catch (e) {
+        const hasBackgroundSearchEnabled = this.featureFlags?.getBooleanValue(
+          BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+          false
+        );
+
         this.toastService?.addError(e, {
-          title: i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
-            defaultMessage: 'Failed to fetch search session info',
-          }),
+          title: hasBackgroundSearchEnabled
+            ? i18n.translate(
+                'data.searchSessions.sessionService.backgroundSearchObjectFetchError',
+                {
+                  defaultMessage: 'Failed to fetch background search info',
+                }
+              )
+            : i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
+                defaultMessage: 'Failed to fetch search session info',
+              }),
         });
       }
     }

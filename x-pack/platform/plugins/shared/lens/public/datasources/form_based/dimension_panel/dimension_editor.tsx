@@ -1158,9 +1158,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 />
               ) : null,
             },
-            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
-              paramEditorProps
-            ) || []),
+            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.({
+              ...paramEditorProps,
+              euiTheme,
+            }) || []),
           ]}
         />
       )}

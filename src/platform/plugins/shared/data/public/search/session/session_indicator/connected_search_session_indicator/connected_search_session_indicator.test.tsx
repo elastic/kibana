@@ -28,6 +28,7 @@ import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
 const coreStart = coreMock.createStart();
 const application = coreStart.application;
 const basePath = coreStart.http.basePath;
+const featureFlags = coreStart.featureFlags;
 const dataStart = dataPluginMock.createStartContract();
 const sessionService = dataStart.search.session as jest.Mocked<ISessionService>;
 let storage: Storage;
@@ -64,6 +65,7 @@ test("shouldn't show indicator in case no active search session", async () => {
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -93,6 +95,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -124,6 +127,7 @@ test('should show indicator in case there is an active search session', async ()
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
   const { getByTestId } = render(
     <Container>
@@ -149,6 +153,7 @@ test('should be disabled in case uiConfig says so ', async () => {
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
 
   render(
@@ -172,6 +177,7 @@ test('should be disabled in case not enough permissions', async () => {
     storage,
     basePath,
     tourDisabled,
+    featureFlags,
   });
 
   render(
@@ -201,6 +207,7 @@ describe('Completed inactivity', () => {
       usageCollector,
       basePath,
       tourDisabled,
+      featureFlags,
     });
 
     render(
@@ -242,6 +249,7 @@ describe('tour steps', () => {
         usageCollector,
         basePath,
         tourDisabled,
+        featureFlags,
       });
       const rendered = render(
         <Container>
@@ -283,6 +291,7 @@ describe('tour steps', () => {
         usageCollector,
         basePath,
         tourDisabled,
+        featureFlags,
       });
       const rendered = render(
         <Container>
@@ -317,6 +326,7 @@ describe('tour steps', () => {
         usageCollector,
         basePath,
         tourDisabled: true,
+        featureFlags,
       });
       const rendered = render(
         <Container>
@@ -362,6 +372,7 @@ describe('tour steps', () => {
       usageCollector,
       basePath,
       tourDisabled,
+      featureFlags,
     });
     const rendered = render(
       <Container>
@@ -389,6 +400,7 @@ describe('tour steps', () => {
       usageCollector,
       basePath,
       tourDisabled,
+      featureFlags,
     });
     const rendered = render(
       <Container>

@@ -20,6 +20,7 @@ export class ExitForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
+    this.wfExecutionRuntimeManager.exitScope();
     const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.startNodeId);
 
     if (!foreachState) {
@@ -34,7 +35,10 @@ export class ExitForeachNodeImpl implements StepImplementation {
     await this.wfExecutionRuntimeManager.setStepState(this.step.startNodeId, undefined);
     await this.wfExecutionRuntimeManager.finishStep(this.step.startNodeId);
     this.workflowLogger.logDebug(
-      `Exiting foreach step ${this.step.startNodeId} after processing all items.`
+      `Exiting foreach step ${this.step.startNodeId} after processing all items.`,
+      {
+        workflow: { step_id: this.step.startNodeId },
+      }
     );
     this.wfExecutionRuntimeManager.goToNextStep();
   }

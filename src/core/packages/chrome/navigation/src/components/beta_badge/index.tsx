@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiBetaBadge, EuiThemeProvider } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { i18n } from '@kbn/i18n';
 import type { BadgeType } from '../../../types';
 
 interface BetaBadgeProps {
@@ -30,11 +31,20 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
     vertical-align: ${alignment === 'text-bottom' ? 'text-bottom' : 'bottom'};
   `;
 
-  // TODO: translate
   const config =
     type === 'techPreview'
-      ? { iconType: 'flask', label: 'Tech preview' }
-      : { iconType: 'beta', label: 'Beta' };
+      ? {
+          iconType: 'flask',
+          label: i18n.translate('core.ui.chrome.sideNavigation.techPreviewBadgeLabel', {
+            defaultMessage: 'Tech preview',
+          }),
+        }
+      : {
+          iconType: 'beta',
+          label: i18n.translate('core.ui.chrome.sideNavigation.betaBadgeLabel', {
+            defaultMessage: 'Beta',
+          }),
+        };
 
   return (
     <EuiThemeProvider
