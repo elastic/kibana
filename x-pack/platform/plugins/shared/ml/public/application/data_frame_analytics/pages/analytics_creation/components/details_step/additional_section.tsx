@@ -8,10 +8,12 @@
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiLink, EuiSpacer } from '@elastic/eui';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { DeepPartial } from '@kbn/utility-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { CustomUrlsDescription } from '../../../../../components/custom_urls/custom_urls_description';
 import { CustomUrlsWrapper } from '../../../../../components/custom_urls';
 import {
@@ -35,6 +37,10 @@ interface Props {
 export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
   const [additionalExpanded, setAdditionalExpanded] = useState<boolean>(false);
   const { _meta: formMeta } = formState;
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const docsUrl = docLinks.links.ml.customUrls;
 
   const analyticsJob = useMemo(
     () => getJobConfigFromFormState(formState) as DeepPartial<DataFrameAnalyticsConfig>,
@@ -43,6 +49,23 @@ export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
   const setCustomUrls = (urls: MlUrlConfig[]) => {
     setFormState({ _meta: { ...formMeta, custom_urls: urls } });
   };
+
+  const description = (
+    <FormattedMessage
+      id="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.description"
+      defaultMessage="Provide links from analytics job results to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
+      values={{
+        learnMoreLink: (
+          <EuiLink href={docsUrl} target="_blank">
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
+              defaultMessage="Learn more"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
 
   return (
     <>
@@ -56,10 +79,7 @@ export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
       >
         <section data-test-subj="mlDataFrameAnalyticsDetailsStepAdditionalSection">
           <EuiSpacer />
-          <CustomUrlsDescription
-            descriptionMessageId="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.description"
-            descriptionDefaultMessage="Provide links from analytics job results to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
-          >
+          <CustomUrlsDescription description={description}>
             <CustomUrlsWrapper
               job={analyticsJob as DataFrameAnalyticsConfig}
               jobCustomUrls={formMeta?.custom_urls ?? []}
