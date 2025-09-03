@@ -464,6 +464,7 @@ function DiscoverDocumentsComponent({
                   services.filterManager.setAppFilters([]);
                 }}
                 stateContainer={stateContainer}
+                viewModeToggle={viewModeToggle}
               />
             ) : (
               <DiscoverGridMemoized
