@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 
@@ -37,6 +37,7 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }
         ),
         dataType: 'auto',
         truncateText: { lines: 2 },
+        render: (value: string) => <EuiText size="xs">{value}</EuiText>,
       };
     });
   }, [mappings.properties, sampleDocs?.length]);
