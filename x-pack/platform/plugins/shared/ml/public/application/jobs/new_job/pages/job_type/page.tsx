@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { PageTitle } from '../../../../components/page_title';
 import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
 
 import { useDataSource } from '../../../../contexts/ml';
@@ -274,10 +275,14 @@ export const Page: FC = () => {
   return (
     <div data-test-subj="mlPageJobTypeSelection">
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
-          defaultMessage="Create a job from the {pageTitleLabel}"
-          values={{ pageTitleLabel }}
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
+              defaultMessage="Create a job from the {pageTitleLabel}"
+              values={{ pageTitleLabel }}
+            />
+          }
         />
       </MlPageHeader>
 

@@ -8,14 +8,8 @@
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  type Filter,
-} from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   initializeTitleManager,
@@ -36,14 +30,14 @@ import {
 } from 'rxjs';
 import type {
   OptionsListControlState,
-  OptionsListSortingType,
   OptionsListSuccessResponse,
 } from '../../../../common/options_list';
-import { getSelectionAsFieldType, isValidSearch } from '../../../../common/options_list';
+import { isValidSearch } from '../../../../common/options_list';
 import { coreServices } from '../../../services/kibana_services';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
+  type DataControlStateManager,
 } from '../data_control_manager';
 import { OptionsListControl } from './components/options_list_control';
 import {
@@ -62,6 +56,14 @@ import { OptionsListStrings } from './options_list_strings';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import { buildFilter } from './utils/filter_utils';
+import {
+  clearSelections,
+  deselectAll,
+  deselectOption,
+  makeSelection,
+  selectAll,
+} from './utils/selection_utils';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
@@ -71,46 +73,23 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-      const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(
-        state.sort ?? OPTIONS_LIST_DEFAULT_SORT
-      );
-
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const titlesManager = initializeTitleManager(state);
       const selectionsManager = initializeSelectionsManager(state);
 
-      const dataControlManager = await initializeDataControlManager<EditorState>(
-        uuid,
-        OPTIONS_LIST_CONTROL,
-        OptionsListStrings.control.getDisplayName(),
-        state,
-        editorStateManager.getLatestState,
-        editorStateManager.reinitializeState,
-        parentApi,
-        selectionsManager.api.hasInitialSelections,
-        (dataView: DataView) => {
-          // TODO clean up this logic.
-          let newFilter: Filter | undefined;
-          const field = dataView.getFieldByName(state.fieldName);
-          if (dataView && field) {
-            if (state.existsSelected) {
-              newFilter = buildExistsFilter(field, dataView);
-            } else if (state.selectedOptions && state.selectedOptions.length > 0) {
-              newFilter =
-                state.selectedOptions.length === 1
-                  ? buildPhraseFilter(field, state.selectedOptions[0], dataView)
-                  : buildPhrasesFilter(field, state.selectedOptions, dataView);
-            }
-          }
-          if (newFilter) {
-            newFilter.meta.key = field?.name;
-            if (state.exclude) newFilter.meta.negate = true;
-            newFilter.meta.controlledBy = uuid;
-          }
-          return newFilter;
-        }
-      );
+      const dataControlManager: DataControlStateManager =
+        await initializeDataControlManager<EditorState>({
+          controlId: uuid,
+          controlType: OPTIONS_LIST_CONTROL,
+          typeDisplayName: OptionsListStrings.control.getDisplayName(),
+          state,
+          parentApi,
+          willHaveInitialFilter: selectionsManager.internalApi.hasInitialSelections,
+          getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
+          editorStateManager,
+          titlesManager,
+        });
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
@@ -161,8 +140,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           selectionsManager.api.setSelectedOptions(undefined);
           selectionsManager.api.setExistsSelected(false);
           selectionsManager.api.setExclude(false);
+          selectionsManager.api.setSort(OPTIONS_LIST_DEFAULT_SORT);
           temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
-          sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
 
       /** Fetch the suggestions and perform validation */
@@ -181,7 +160,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
-        sort$,
+        sort$: selectionsManager.api.sort$,
       }).subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
@@ -243,23 +222,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
           const dataView = dataViews?.[0];
-          const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-
           let newFilter: Filter | undefined;
-          if (dataView && field) {
-            if (existsSelected) {
-              newFilter = buildExistsFilter(field, dataView);
-            } else if (selectedOptions && selectedOptions.length > 0) {
-              newFilter =
-                selectedOptions.length === 1
-                  ? buildPhraseFilter(field, selectedOptions[0], dataView)
-                  : buildPhrasesFilter(field, selectedOptions, dataView);
-            }
-          }
-          if (newFilter) {
-            newFilter.meta.key = field?.name;
-            if (exclude) newFilter.meta.negate = true;
-            newFilter.meta.controlledBy = uuid;
+          if (dataView) {
+            newFilter = buildFilter(dataView, uuid, {
+              fieldName,
+              selectedOptions,
+              existsSelected,
+              exclude,
+            });
           }
           dataControlManager.internalApi.setOutputFilter(newFilter);
         });
@@ -273,7 +243,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             ...selectionsManager.getLatestState(),
             ...editorStateManager.getLatestState(),
             ...titlesManager.getLatestState(),
-            sort: sort$.getValue(),
 
             // serialize state that cannot be changed to keep it consistent
             placeholder,
@@ -294,8 +263,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
           editorStateManager.anyStateChange$,
-          titlesManager.anyStateChange$,
-          sort$
+          titlesManager.anyStateChange$
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
@@ -303,7 +271,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             ...defaultDataControlComparators,
             ...selectionComparators,
             ...editorComparators,
-            sort: 'deepEquality',
             // This state cannot currently be changed after the control is created
             placeholder: 'skip',
             hideActionBar: 'skip',
@@ -319,10 +286,10 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
+          titlesManager.reinitializeState(lastSaved?.rawState);
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);
-          sort$.next(lastSaved?.rawState.sort ?? OPTIONS_LIST_DEFAULT_SORT);
         },
       });
 
@@ -346,14 +313,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
         serializeState,
-        clearSelections: () => {
-          if (selectionsManager.api.selectedOptions$.getValue()?.length)
-            selectionsManager.api.setSelectedOptions([]);
-          if (selectionsManager.api.existsSelected$.getValue())
-            selectionsManager.api.setExistsSelected(false);
-          if (temporaryStateManager.api.invalidSelections$.getValue().size)
-            temporaryStateManager.api.setInvalidSelections(new Set([]));
-        },
+        clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
@@ -381,102 +341,19 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         ...temporaryStateManager.api,
         ...titlesManager.api,
         loadMoreSubject,
-        deselectOption: (key: string | undefined) => {
-          const field = api.field$.getValue();
-          if (!key || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
-            return;
-          }
-
-          const keyAsType = getSelectionAsFieldType(field, key);
-
-          // delete from selections
-          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
-          const itemIndex = (selectionsManager.api.selectedOptions$.getValue() ?? []).indexOf(
-            keyAsType
-          );
-          if (itemIndex !== -1) {
-            const newSelections = [...selectedOptions];
-            newSelections.splice(itemIndex, 1);
-            selectionsManager.api.setSelectedOptions(newSelections);
-          }
-          // delete from invalid selections
-          const currentInvalid = temporaryStateManager.api.invalidSelections$.getValue();
-          if (currentInvalid.has(keyAsType)) {
-            currentInvalid.delete(keyAsType);
-            temporaryStateManager.api.setInvalidSelections(new Set(currentInvalid));
-          }
-        },
-        makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
-          const field = api.field$.getValue();
-          if (!key || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
-            return;
-          }
-
-          const existsSelected = Boolean(selectionsManager.api.existsSelected$.getValue());
-          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
-          const singleSelect = editorStateManager.api.singleSelect$.getValue();
-
-          // the order of these checks matters, so be careful if rearranging them
-          const keyAsType = getSelectionAsFieldType(field, key);
-          if (key === 'exists-option') {
-            // if selecting exists, then deselect everything else
-            selectionsManager.api.setExistsSelected(!existsSelected);
-            if (!existsSelected) {
-              selectionsManager.api.setSelectedOptions([]);
-              temporaryStateManager.api.setInvalidSelections(new Set([]));
-            }
-          } else if (showOnlySelected || selectedOptions.includes(keyAsType)) {
-            componentApi.deselectOption(key);
-          } else if (singleSelect) {
-            // replace selection
-            selectionsManager.api.setSelectedOptions([keyAsType]);
-            if (existsSelected) selectionsManager.api.setExistsSelected(false);
-          } else {
-            // select option
-            if (existsSelected) selectionsManager.api.setExistsSelected(false);
-            selectionsManager.api.setSelectedOptions(
-              selectedOptions ? [...selectedOptions, keyAsType] : [keyAsType]
-            );
-          }
-        },
-        sort$,
-        setSort: (sort: OptionsListSortingType | undefined) => {
-          sort$.next(sort);
-        },
-        selectAll: (keys: string[]) => {
-          const field = api.field$.getValue();
-          if (keys.length < 1 || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
-            return;
-          }
-
-          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
-          const newSelections = keys.filter((key) => !selectedOptions.includes(key as string));
-          selectionsManager.api.setSelectedOptions([...selectedOptions, ...newSelections]);
-        },
-        deselectAll: (keys: string[]) => {
-          const field = api.field$.getValue();
-          if (keys.length < 1 || !field) {
-            api.setBlockingError(
-              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
-            );
-            return;
-          }
-
-          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
-          const remainingSelections = selectedOptions.filter(
-            (option) => !keys.includes(option as string)
-          );
-          selectionsManager.api.setSelectedOptions(remainingSelections);
-        },
+        deselectOption: (key) =>
+          deselectOption({ api, selectionsManager, temporaryStateManager, key }),
+        makeSelection: (key: string | undefined, showOnlySelected: boolean) =>
+          makeSelection({
+            api,
+            selectionsManager,
+            temporaryStateManager,
+            editorStateManager,
+            key,
+            showOnlySelected,
+          }),
+        selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
+        deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
         allowExpensiveQueries$,
       };
 
