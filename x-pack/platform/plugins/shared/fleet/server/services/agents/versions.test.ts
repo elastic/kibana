@@ -13,7 +13,6 @@ import type { DeepPartial } from 'utility-types';
 import type { FleetConfigType } from '../../../public/plugin';
 
 import { getAvailableVersions, getLatestAvailableAgentVersion } from './versions';
-import { title } from 'process';
 
 let mockKibanaVersion = '300.0.0';
 let mockConfig: DeepPartial<FleetConfigType> = {};
