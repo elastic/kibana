@@ -29,6 +29,8 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/component
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
+const ENTITY_INSIGHT_CALLOUT_DISMISSED_KEY = 'InsightCallOutOnDismiss';
+
 export type CloudPostureEntityIdentifier =
   | Extract<
       EntityIdentifierFields,
@@ -80,11 +82,13 @@ export const EntityInsight = <T,>({
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   });
 
-  const [showCallOut, setShowCallOut] = useState(!localStorage.getItem('InsightCallOutOnDismiss'));
+  const [showCallOut, setShowCallOut] = useState(
+    !localStorage.getItem(ENTITY_INSIGHT_CALLOUT_DISMISSED_KEY)
+  );
 
   const onDismiss = () => {
     setShowCallOut(false);
-    localStorage.setItem('InsightCallOutOnDismiss', 'hidden');
+    localStorage.setItem(ENTITY_INSIGHT_CALLOUT_DISMISSED_KEY, 'hidden');
   };
 
   if (showAlertsPreview) {
