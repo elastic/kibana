@@ -708,11 +708,11 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
-      alertText = await this.testSubjects.getVisibleText('confirmModalTitleText');
+      alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
-      await this.testSubjects.click('confirmModalConfirmButton');
+      await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();

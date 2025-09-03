@@ -14,6 +14,7 @@ import { ConversationInputForm } from './conversation_input/conversation_input_f
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../hooks/use_conversation_id';
+import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -41,6 +42,8 @@ export const Conversation: React.FC<{}> = () => {
   useEffect(() => {
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
+
+  useSyncAgentId();
 
   return (
     <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
