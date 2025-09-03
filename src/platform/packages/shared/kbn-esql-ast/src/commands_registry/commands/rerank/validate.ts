@@ -45,7 +45,7 @@ export const validate = (
   }
 
   if (inferenceId?.incomplete) {
-    messages.push(errors.byId('inferenceIdRequired', command.location, {}));
+    messages.push(errors.byId('inferenceIdRequired', command.location, { command: 'RERANK' }));
   }
 
   const targetName = targetField?.name || 'rerank';

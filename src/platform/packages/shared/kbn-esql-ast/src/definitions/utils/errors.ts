@@ -298,7 +298,8 @@ Expected one of:
     case 'inferenceIdRequired':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.inferenceIdRequired', {
-          defaultMessage: '"inference_id" parameter is required.',
+          defaultMessage: '"inference_id" parameter is required for {command}.',
+          values: { command: out.command.toUpperCase() },
         }),
         type: 'error',
       };

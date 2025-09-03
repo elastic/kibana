@@ -35,7 +35,7 @@ describe('RERANK Validation', () => {
       );
     });
 
-    const msg = '"inference_id" parameter is required.';
+    const msg = '"inference_id" parameter is required for RERANK.';
 
     test('WITH without map (partial: WITH)', () => {
       rerankExpectErrors('FROM index | RERANK "q" ON keywordField WITH', [msg]);
