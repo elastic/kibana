@@ -40,7 +40,7 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 10290
   discoverShared: 2322
-  elasticAssistant: 294308
+  elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 18810
   embeddableAlertsTable: 6596
@@ -81,6 +81,7 @@ pageLoadAssetSize:
   infra: 56302
   ingestPipelines: 17866
   inputControlVis: 9842
+  inspectComponent: 4900
   inspector: 18000
   interactiveSetup: 42153
   intercepts: 19011
@@ -200,4 +201,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 5768
+  workflowsManagement: 6200

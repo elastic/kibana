@@ -141,8 +141,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS).filter(
-      (k) => k !== 'trustedDevices'
-    ); // Todo: Enable once trustedDevices are implemented.
+      (k) =>
+        k !== 'trustedDevices' && // Todo: remove once trustedDevices are implemented.
+        k !== 'endpointExceptions' // todo: remove once endpointExceptions are per policy and space aware
+    );
 
     for (const artifactList of artifactLists) {
       const listInfo =

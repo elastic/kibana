@@ -80,6 +80,7 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
           disableScreenReaderOutput
           onMouseOut={handleMouseOut}
           position="right"
+          repositionOnScroll
         >
           {menuItem}
         </EuiToolTip>

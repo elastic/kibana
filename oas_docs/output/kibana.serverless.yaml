@@ -66,7 +66,6 @@ tags:
       Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
       For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
-  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -6368,7 +6367,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
             type: string
         - description: The order to sort by.
           in: query
@@ -11523,6 +11522,36 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates the scheduling was successful
+                    type: boolean
+          description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
+      summary: Schedule the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/entity_analytics/monitoring/privileges/health:
     get:
       operationId: PrivMonHealth
@@ -15289,6 +15318,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -15983,6 +16014,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -16203,6 +16236,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -16917,6 +16952,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -17608,6 +17645,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -18301,6 +18340,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -18523,6 +18564,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -19300,6 +19343,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -20098,6 +20143,10 @@ paths:
                                         type: string
                                       verification_mode:
                                         type: string
+                                  target_directory:
+                                    type: string
+                                  timeout:
+                                    type: string
                                 required:
                                   - sourceURI
                               features:
@@ -20132,12 +20181,20 @@ paths:
                                         type: number
                                   level:
                                     type: string
+                                  metrics:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      period:
+                                        type: string
                                   to_files:
                                     type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  _runtime_experimental:
+                                    type: string
                                   apm: {}
                                   enabled:
                                     type: boolean
@@ -22772,6 +22829,7 @@ paths:
                             - POLICY_CHANGE
                             - INPUT_ACTION
                             - MIGRATE
+                            - PRIVILEGE_LEVEL_CHANGE
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -29093,6 +29151,8 @@ paths:
                               enum:
                                 - elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29255,6 +29315,8 @@ paths:
                               enum:
                                 - remote_elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29385,6 +29447,8 @@ paths:
                               enum:
                                 - logstash
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29670,6 +29734,8 @@ paths:
                                 - not: {}
                             version:
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29868,6 +29934,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30030,6 +30098,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30160,6 +30230,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30445,6 +30517,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30599,6 +30673,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30761,6 +30837,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30891,6 +30969,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31176,6 +31256,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31442,6 +31524,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31604,6 +31688,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31734,6 +31820,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -32019,6 +32107,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -32210,6 +32300,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32366,6 +32458,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32490,6 +32584,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32771,6 +32867,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - compression_level
@@ -32922,6 +33020,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -33084,6 +33184,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -33214,6 +33316,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -33499,6 +33603,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -38385,271 +38491,6 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/fleet/remote_synced_integrations/{outputId}/remote_status:
-    get:
-      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
-      operationId: get-fleet-remote-synced-integrations-outputid-remote-status
-      parameters:
-        - in: path
-          name: outputId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  custom_assets:
-                    additionalProperties:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        is_deleted:
-                          type: boolean
-                        name:
-                          type: string
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        type:
-                          type: string
-                      required:
-                        - type
-                        - name
-                        - package_name
-                        - package_version
-                        - sync_status
-                    type: object
-                  error:
-                    type: string
-                  integrations:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        id:
-                          type: string
-                        install_status:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            main:
-                              type: string
-                            remote:
-                              type: string
-                          required:
-                            - main
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        updated_at:
-                          type: string
-                        warning:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            message:
-                              type: string
-                            title:
-                              type: string
-                          required:
-                            - title
-                      required:
-                        - sync_status
-                        - install_status
-                    type: array
-                  warning:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                      title:
-                        type: string
-                    required:
-                      - title
-                required:
-                  - integrations
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Get CCR Remote synced integrations status by outputId
-      tags:
-        - CCR Remote synced integrations
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/fleet/remote_synced_integrations/status:
-    get:
-      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
-      operationId: get-fleet-remote-synced-integrations-status
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  custom_assets:
-                    additionalProperties:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        is_deleted:
-                          type: boolean
-                        name:
-                          type: string
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        type:
-                          type: string
-                      required:
-                        - type
-                        - name
-                        - package_name
-                        - package_version
-                        - sync_status
-                    type: object
-                  error:
-                    type: string
-                  integrations:
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        error:
-                          type: string
-                        id:
-                          type: string
-                        install_status:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            main:
-                              type: string
-                            remote:
-                              type: string
-                          required:
-                            - main
-                        package_name:
-                          type: string
-                        package_version:
-                          type: string
-                        sync_status:
-                          enum:
-                            - completed
-                            - synchronizing
-                            - failed
-                            - warning
-                          type: string
-                        updated_at:
-                          type: string
-                        warning:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            message:
-                              type: string
-                            title:
-                              type: string
-                          required:
-                            - title
-                      required:
-                        - sync_status
-                        - install_status
-                    type: array
-                  warning:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                      title:
-                        type: string
-                    required:
-                      - title
-                required:
-                  - integrations
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Get CCR Remote synced integrations status
-      tags:
-        - CCR Remote synced integrations
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -44090,6 +43931,14 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
@@ -46129,8 +45978,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -47631,6 +47485,11 @@ paths:
                                                       destination:
                                                         minLength: 1
                                                         type: string
+                                                      status:
+                                                        enum:
+                                                          - enabled
+                                                          - disabled
+                                                        type: string
                                                       where:
                                                         anyOf:
                                                           - anyOf:
@@ -47830,8 +47689,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -49312,8 +49176,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -50751,7 +50620,61 @@ paths:
                                             classic:
                                               additionalProperties: false
                                               type: object
-                                              properties: {}
+                                              properties:
+                                                field_overrides:
+                                                  additionalProperties:
+                                                    allOf:
+                                                      - additionalProperties:
+                                                          anyOf:
+                                                            - anyOf:
+                                                                - type: string
+                                                                - type: number
+                                                                - type: boolean
+                                                                - enum:
+                                                                    - 'null'
+                                                                  nullable: true
+                                                                - not: {}
+                                                            - items:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                  - enum:
+                                                                      - 'null'
+                                                                    nullable: true
+                                                                  - not: {}
+                                                              type: array
+                                                            - {}
+                                                        type: object
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              format:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - keyword
+                                                                  - match_only_text
+                                                                  - long
+                                                                  - double
+                                                                  - date
+                                                                  - boolean
+                                                                  - ip
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              type:
+                                                                enum:
+                                                                  - system
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                  type: object
                                           required:
                                             - classic
                                       required:
@@ -50814,8 +50737,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -52296,8 +52224,13 @@ paths:
                                 required:
                                   - kql
                           type: array
+                        rules:
+                          items:
+                            type: string
+                          type: array
                       required:
                         - dashboards
+                        - rules
                         - queries
                     - type: object
                       properties:
@@ -52319,7 +52252,12 @@ paths:
                                       items:
                                         type: string
                                       type: array
+                                    tags:
+                                      items:
+                                        type: string
+                                      type: array
                                   required:
+                                    - tags
                                     - members
                               required:
                                 - group
@@ -52359,6 +52297,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
                 stream:
                   additionalProperties: false
                   type: object
@@ -52569,7 +52512,12 @@ paths:
                       items:
                         type: string
                       type: array
+                    tags:
+                      items:
+                        type: string
+                      type: array
                   required:
+                    - tags
                     - members
               required:
                 - group
@@ -54104,6 +54052,11 @@ paths:
                                     properties:
                                       destination:
                                         minLength: 1
+                                        type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
                                         type: string
                                       where:
                                         anyOf:
@@ -55650,7 +55603,61 @@ paths:
                             classic:
                               additionalProperties: false
                               type: object
-                              properties: {}
+                              properties:
+                                field_overrides:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
                           required:
                             - classic
               required:
@@ -56166,6 +56173,119 @@ paths:
                 - kql
       responses: {}
       summary: Upsert a query to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/streams/{name}/rules:
+    get:
+      description: 'Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: get-streams-name-rules
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream rules
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/streams/{name}/rules/{ruleId}:
+    delete:
+      description: 'Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      operationId: delete-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Unlink a rule from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: 'Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      operationId: put-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Link a rule to a stream
       tags:
         - streams
       x-state: Technical Preview
@@ -61877,14 +61997,6 @@ components:
         - insights
       example: assistant
       type: string
-    Security_AI_Assistant_API_ConversationConfidence:
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: high
-      type: string
     Security_AI_Assistant_API_ConversationCreateProps:
       type: object
       properties:
@@ -61929,6 +62041,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -61945,8 +62060,6 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         timestamp:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         title:
@@ -61965,28 +62078,10 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
-    Security_AI_Assistant_API_ConversationSummary:
-      type: object
-      properties:
-        confidence:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationConfidence'
-          description: How confident you are about this being a correct and useful learning.
-          example: high
-        content:
-          description: Summary text of the conversation over time.
-          example: This conversation covered how to configure the Security AI Assistant.
-          type: string
-        public:
-          description: Define if summary is marked as publicly available.
-          example: true
-          type: boolean
-        timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
     Security_AI_Assistant_API_ConversationUpdateProps:
       type: object
       properties:
@@ -62009,12 +62104,14 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        summary:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          type: array
       required:
         - id
     Security_AI_Assistant_API_DeleteResponseFields:
@@ -62592,6 +62689,7 @@ components:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
@@ -62611,6 +62709,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false
@@ -62632,6 +62733,9 @@ components:
         traceData:
           $ref: '#/components/schemas/Security_AI_Assistant_API_TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content
@@ -69380,6 +69484,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -71027,15 +71132,13 @@ components:
           type: number
         category_1_count:
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number
@@ -72032,6 +72135,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -76452,10 +76556,6 @@ components:
       required:
         - message
         - subject
-        - anyOf:
-            - to
-            - cc
-            - bcc
       properties:
         bcc:
           type: array

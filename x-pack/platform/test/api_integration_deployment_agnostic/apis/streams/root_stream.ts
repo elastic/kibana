@@ -83,9 +83,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
 
-  // Failing: See https://github.com/elastic/kibana/issues/231900
-  describe.skip('Root stream', () => {
+  describe('Root stream', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -99,6 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
@@ -129,6 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
@@ -157,6 +160,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {
@@ -170,6 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     field: 'cloud.provider',
                     eq: 'gcp',
                   },
+                  status: 'enabled',
                 },
               ],
             },
@@ -190,7 +195,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await indexDocument(esClient, 'logs.gcpcloud', doc);
       } catch (e) {
         threw = true;
-        expect(e.message).to.contain('stream.name is not set properly');
+        if (isServerless) {
+          expect(e.message).to.contain('stream.name is not set properly');
+        } else {
+          expect(e.message).to.contain('Direct writes to child streams are prohibited');
+        }
       }
       expect(threw).to.be(true);
     });

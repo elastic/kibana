@@ -44,10 +44,10 @@ describe('KEEP Validation', () => {
       'from index | keep `keywordField`, `doubleField`, `integerField`, `dateField`',
       []
     );
-    keepExpectErrors('from index | keep 4.5', ['Unknown column [.]']);
-    keepExpectErrors('from index | keep `4.5`', ['Unknown column [4.5]']);
+    keepExpectErrors('from index | keep 4.5', ['Unknown column "."']);
+    keepExpectErrors('from index | keep `4.5`', ['Unknown column "4.5"']);
     keepExpectErrors('from index | keep missingField, doubleField, dateField', [
-      'Unknown column [missingField]',
+      'Unknown column "missingField"',
     ]);
     keepExpectErrors('from index | keep `any#Char$Field`', []);
     keepExpectErrors('from index | keep k*', []);
@@ -55,9 +55,9 @@ describe('KEEP Validation', () => {
     keepExpectErrors('from index | keep k*Field', []);
     keepExpectErrors('from index | keep key*Field', []);
     keepExpectErrors('from index | keep k*, i*', []);
-    keepExpectErrors('from index | keep m*', ['Unknown column [m*]']);
-    keepExpectErrors('from index | keep *m', ['Unknown column [*m]']);
-    keepExpectErrors('from index | keep d*m', ['Unknown column [d*m]']);
+    keepExpectErrors('from index | keep m*', ['Unknown column "m*"']);
+    keepExpectErrors('from index | keep *m', ['Unknown column "*m"']);
+    keepExpectErrors('from index | keep d*m', ['Unknown column "d*m"']);
 
     keepExpectErrors(
       `FROM index | STATS ROUND(AVG(doubleField * 1.5)), COUNT(*), MIN(doubleField * 10) | KEEP \`MIN(doubleField * 10)\``,

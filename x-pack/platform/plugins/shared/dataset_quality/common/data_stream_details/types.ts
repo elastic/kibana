@@ -27,3 +27,9 @@ export interface IntegrationType {
   areAssetsAvailable: boolean;
   integration?: Integration;
 }
+
+export interface UpdateFailureStoreParams {
+  dataStream: string;
+  failureStoreEnabled: boolean;
+  customRetentionPeriod?: string;
+}
