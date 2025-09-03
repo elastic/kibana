@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiText, EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiLink, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
@@ -19,13 +19,21 @@ interface Props {
 
 const ValueReportSettingsComponent: React.FC<Props> = ({ minutesPerAlert, analystHourlyRate }) => {
   const { navigateTo } = useNavigation();
-
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
   const goToKibanaSettings = useCallback(
     () => navigateTo({ appId: 'management', path: '/kibana/settings?query=defaultValueReport' }),
     [navigateTo]
   );
   return (
-    <EuiText size="xs" className="valueReportSettings">
+    <EuiText
+      size="xs"
+      className="valueReportSettings"
+      css={css`
+        padding: ${size.base};
+      `}
+    >
       <h3>{i18n.COST_CALCULATIONS}</h3>
       <p>
         {i18n.COST_CALCULATION({ minutesPerAlert, analystHourlyRate })}{' '}

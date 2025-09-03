@@ -6,8 +6,16 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { AlertProcessingKeyInsight } from './alert_processing_key_insight';
 import * as i18n from './translations';
 import type { GetLensAttributes } from '../../../common/components/visualization_actions/types';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
@@ -41,30 +49,53 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
       getCostSavingsTrendAreaLensAttributes({ ...args, minutesPerAlert, analystHourlyRate }),
     [analystHourlyRate, minutesPerAlert]
   );
+  const isSmall = useIsWithinMaxBreakpoint('s');
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
   return (
-    <EuiPanel paddingSize="l" hasBorder hasShadow={false} data-test-subj="cost-savings-trend-panel">
+    <div
+      css={css`
+        padding: ${size.base};
+        .embPanel,
+        .echMetric,
+        .echChartBackground,
+        .embPanel__hoverActions > span {
+          background-color: rgb(0, 0, 0, 0) !important;
+        }
+      `}
+      data-test-subj="cost-savings-trend-panel"
+    >
       <EuiTitle size="s">
         <h3>{i18n.COST_SAVINGS_TREND}</h3>
       </EuiTitle>
-      <EuiText size="s">
-        <p>{i18n.COST_SAVINGS_SOC}</p>
-      </EuiText>
       <EuiSpacer size="l" />
-      <VisualizationEmbeddable
-        data-test-subj="embeddable-area-chart"
-        getLensAttributes={getLensAttributes}
-        timerange={timerange}
-        id={`${ID}-area-embeddable`}
-        height={300}
-        inspectTitle={i18n.COST_SAVINGS_TREND}
-        scopeId={SourcererScopeName.detections}
-        withActions={[
-          VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
-          VisualizationContextMenuActions.inspect,
-        ]}
-      />
-    </EuiPanel>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <VisualizationEmbeddable
+            data-test-subj="embeddable-area-chart"
+            getLensAttributes={getLensAttributes}
+            timerange={timerange}
+            id={`${ID}-area-embeddable`}
+            height={300}
+            inspectTitle={i18n.COST_SAVINGS_TREND}
+            scopeId={SourcererScopeName.detections}
+            withActions={[
+              VisualizationContextMenuActions.addToExistingCase,
+              VisualizationContextMenuActions.addToNewCase,
+              VisualizationContextMenuActions.inspect,
+            ]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            max-width: ${isSmall ? 'auto' : '300px'};
+          `}
+        >
+          <AlertProcessingKeyInsight valueMetrics={{}} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };
 

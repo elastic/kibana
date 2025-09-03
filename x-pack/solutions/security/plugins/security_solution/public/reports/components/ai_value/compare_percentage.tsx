@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getPercentInfo } from './utils';
 import * as i18n from './translations';
@@ -53,10 +54,12 @@ export const ComparePercentage = ({
         width: ${positionForLens ? '90%' : 'auto'};
       `}
     >
-      {percentInfo.note}
-      {` `}
-      {i18n.TIME_RANGE(timeRange)}
-      {`.`}
+      <EuiText size="s">
+        {percentInfo.note}
+        {` `}
+        {i18n.TIME_RANGE(timeRange)}
+        {`.`}
+      </EuiText>
     </span>
   );
 };

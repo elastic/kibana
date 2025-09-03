@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,6 +31,7 @@ import { FilteringRate } from './filtering_rate';
 import { ThreatsDetected } from './threats_detected';
 
 interface Props {
+  attackAlertIds: string[];
   from: string;
   to: string;
   hasAttackDiscoveries: boolean;
@@ -40,6 +42,7 @@ interface Props {
 }
 
 export const ExecutiveSummary: React.FC<Props> = ({
+  attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   hasAttackDiscoveries,
@@ -65,7 +68,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
     })}`;
   }, [from, to]);
   const isDarkMode = useKibanaIsDarkMode();
-  const isSmall = useIsWithinMaxBreakpoint('l');
+  const isSmall = useIsWithinMaxBreakpoint('m');
   const costSavings = useMemo(
     () => formatDollars(valueMetrics.costSavings),
     [valueMetrics.costSavings]
@@ -74,19 +77,21 @@ export const ExecutiveSummary: React.FC<Props> = ({
   const timerangeAsDays = useMemo(() => getTimeRangeAsDays({ from, to }), [from, to]);
 
   const logoSvg = useMemo(() => (isDarkMode ? logoDark : logo), [isDarkMode]);
-
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
   return (
     <div
       data-test-subj="executiveSummaryContainer"
       css={css`
-        background: linear-gradient(
-            112deg,
-            rgba(89, 159, 254, 0.08) 3.58%,
-            rgba(240, 78, 152, 0.08) 98.48%
-          ),
-          url(${logoSvg}) no-repeat bottom right;
-        border-radius: 8px;
-        padding: 24px;
+        // background: linear-gradient(
+        //     112deg,
+        //     rgba(89, 159, 254, 0.08) 3.58%,
+        //     rgba(240, 78, 152, 0.08) 98.48%
+        //   ),
+        //   url(${logoSvg}) no-repeat bottom right;
+        border-radius: ${size.s};
+        padding: ${size.base};
         min-height: 200px;
       `}
     >
@@ -138,9 +143,14 @@ export const ExecutiveSummary: React.FC<Props> = ({
             <EuiText size="s">
               {hasAttackDiscoveries && (
                 <p data-test-subj="executiveSummaryMessage">
+                  {i18n.EXECUTIVE_SUMMARY_SUBTITLE}
+                  <strong>
+                    {i18n.EXECUTIVE_SAVINGS_SUMMARY({
+                      costSavings,
+                      hoursSaved: formatThousands(valueMetrics.hoursSaved),
+                    })}
+                  </strong>
                   {i18n.EXECUTIVE_SUMMARY_MAIN_TEXT({
-                    costSavings,
-                    hoursSaved: formatThousands(valueMetrics.hoursSaved),
                     timeRange: timerangeAsDays,
                     minutesPerAlert,
                     analystRate: analystHourlyRate,
@@ -164,6 +174,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           <EuiFlexItem
             css={css`
               min-width: 300px;
+              display: grid;
             `}
             grow={isSmall}
             data-test-subj="executiveSummarySideStats"
@@ -185,7 +196,11 @@ export const ExecutiveSummary: React.FC<Props> = ({
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup direction={isSmall ? 'column' : 'row'} gutterSize="m">
-            <EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                display: grid;
+              `}
+            >
               <TimeSaved
                 minutesPerAlert={minutesPerAlert}
                 hoursSaved={valueMetrics.hoursSaved}
@@ -195,8 +210,13 @@ export const ExecutiveSummary: React.FC<Props> = ({
               />
             </EuiFlexItem>
             {/* Alert filtering rate card */}
-            <EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                display: grid;
+              `}
+            >
               <FilteringRate
+                attackAlertIds={attackAlertIds}
                 totalAlerts={valueMetrics.totalAlerts}
                 filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
                 filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
@@ -206,7 +226,11 @@ export const ExecutiveSummary: React.FC<Props> = ({
             </EuiFlexItem>
 
             {/* Real threats detected card */}
-            <EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                display: grid;
+              `}
+            >
               <ThreatsDetected
                 attackDiscoveryCount={valueMetrics.attackDiscoveryCount}
                 attackDiscoveryCountCompare={valueMetricsCompare.attackDiscoveryCount}

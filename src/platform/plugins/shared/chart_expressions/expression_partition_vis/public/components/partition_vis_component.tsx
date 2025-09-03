@@ -153,7 +153,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, [bucketColumns, props.uiState, visParams.legendDisplay, visType]);
 
   const [showLegend, setShowLegend] = useState<boolean>(() => showLegendDefault());
-
+  console.log('props', props);
   const showToggleLegendElement = props.uiState !== undefined;
   const [chartIsLoaded, setChartIsLoaded] = useState<boolean>(false);
   const [containerDimensions, setContainerDimensions] = useState<

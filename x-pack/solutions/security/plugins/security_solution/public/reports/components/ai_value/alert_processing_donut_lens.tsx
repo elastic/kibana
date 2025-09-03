@@ -5,51 +5,46 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { getExcludeAlertsFilters } from './utils';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
-import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
+const ChartSize = 250;
 interface Props {
   attackAlertIds: string[];
   from: string;
   to: string;
-  totalAlerts: number;
 }
-const ID = 'AlertFilteringMetricQuery';
-const AlertFilteringMetricComponent: React.FC<Props> = ({
-  attackAlertIds,
-  from,
-  to,
-  totalAlerts,
-}) => {
+export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to }) => {
+  const spaceId = useSpaceId();
   const {
-    euiTheme: { colors },
+    euiTheme: { font },
   } = useEuiTheme();
-  const extraVisualizationOptions = useMemo(
-    () => ({
-      filters: getExcludeAlertsFilters(attackAlertIds),
-    }),
-    [attackAlertIds]
-  );
+
   return (
     <div
+      className="donutChart"
       css={css`
-        height: 100%;
-        > * {
-          height: 100% !important;
+        // hide filtering actions in the legend
+        .echLegendItem__action {
+          display: none;
         }
-        .echMetricText__icon .euiIcon {
-          fill: ${colors.vis.euiColorVis4};
-        }
-        .echMetricText {
-          padding: 8px 20px 60px;
+        .donutText {
+          text-align: center;
+          top: 44% !important;
+          max-width: 100% !important;
+          .donutTitleLabel {
+            font-size: ${font.scale.m}em;
+          }
+          b {
+            font-size: ${font.scale.xl}em;
+          }
         }
         .embPanel,
         .echMetric,
@@ -57,18 +52,28 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
         .embPanel__hoverActions > span {
           background-color: rgb(0, 0, 0, 0) !important;
         }
+        .donutChart .euiPanel {
+          background-color: rgb(255, 255, 255, 0);
+        }
       `}
     >
       <VisualizationEmbeddable
-        data-test-subj="alert-filtering-metric"
-        extraOptions={extraVisualizationOptions}
+        applyGlobalQueriesAndFilters={false}
         getLensAttributes={(args) =>
-          getAlertFilteringMetricLensAttributes({ ...args, totalAlerts })
+          getAlertProcessingDonutAttributes({
+            ...args,
+            attackAlertIds,
+            spaceId: spaceId ?? 'default',
+          })
         }
-        timerange={{ from, to }}
-        id={`${ID}-area-embeddable`}
-        inspectTitle={i18n.FILTERING_RATE}
+        height={ChartSize}
+        width={'100%'}
+        id={`open`}
+        isDonut={true}
+        donutTitleLabel={'Total alerts processed'}
+        donutTextWrapperClassName={'donutText'}
         scopeId={SourcererScopeName.detections}
+        timerange={{ from, to }}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,
@@ -78,5 +83,3 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
     </div>
   );
 };
-
-export const AlertFilteringMetric = React.memo(AlertFilteringMetricComponent);

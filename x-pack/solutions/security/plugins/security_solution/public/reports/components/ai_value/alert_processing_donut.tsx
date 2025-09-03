@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { useEuiTheme } from '@elastic/eui';
+import * as i18n from './translations';
 import { type ValueMetrics } from './metrics';
 import { DonutChart } from '../../../common/components/charts/donutchart';
 
@@ -26,12 +27,12 @@ export const AlertProcessingDonut: React.FC<Props> = ({ valueMetrics }) => {
   const data = useMemo(
     () => [
       {
-        label: 'Escalated',
+        label: i18n.ESCALATED,
         key: 'escalated',
         value: valueMetrics.totalAlerts - valueMetrics.filteredAlerts,
       },
       {
-        label: 'AI Filtered',
+        label: i18n.AI_FILTERED,
         key: 'filtered',
         value: valueMetrics.filteredAlerts,
       },
