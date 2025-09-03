@@ -44,12 +44,12 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   describe('@ess @serverless @serverlessQA modifying non-customizable fields', () => {
-    describe('patch rules', () => {
-      beforeEach(async () => {
-        await deleteAllRules(supertest, log);
-        await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
-      });
+    beforeEach(async () => {
+      await deleteAllRules(supertest, log);
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
+    });
 
+    describe('patch rules', () => {
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
         await installPrebuiltRulesFromUploadedPackage();
         await installPrebuiltRules(es, supertest);
@@ -68,11 +68,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('update rules', () => {
-      beforeEach(async () => {
-        await deleteAllRules(supertest, log);
-        await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
-      });
-
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
         await installPrebuiltRulesFromUploadedPackage();
         await installPrebuiltRules(es, supertest);
