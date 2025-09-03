@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, getByTitle, queryByRole } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  getByTitle,
+  queryByRole,
+  within,
+  fireEvent,
+} from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -21,7 +29,7 @@ import {
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { GROUP_ID } from './constants';
+import { GROUP_ID, legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import { getDefaultConfigForMode } from './helpers';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -167,11 +175,34 @@ describe('dimension editor', () => {
         await userEvent.clear(staticColorPicker);
       };
 
+      const iconSelect = screen.getByTestId('lns-icon-select');
+      const setIcon = async (icon: string) => {
+        const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
+        await userEvent.click(iconInput);
+        const optionsList = await screen.findByTestId(
+          'comboBoxOptionsList lns-icon-select-optionsList'
+        );
+        const option = within(optionsList).getByText(icon, { exact: true });
+        if (option) {
+          await userEvent.click(option);
+        } else {
+          throw new Error(`option ${icon} not found`);
+        }
+      };
+      const clearIcon = async () => {
+        const iconInput = within(iconSelect).getByTestId('comboBoxSearchInput');
+        fireEvent.input(iconInput, { target: { value: 'None' } });
+        const noneOption = screen.getByRole('option', { name: 'None' });
+        await userEvent.click(noneOption);
+      };
+
       return {
         colorModeGroup,
         staticColorPicker,
         typeColor,
         clearColor,
+        setIcon,
+        clearIcon,
         ...rtlRender,
       };
     }
@@ -267,6 +298,68 @@ describe('dimension editor', () => {
         );
 
         expect(mockSetState).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('icon select', () => {
+      it('sets icon with deafult iconAlign', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: undefined, iconAlign: undefined },
+          setState,
+        });
+        await setIcon('Compute');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({ icon: 'compute', iconAlign: metricStateDefaults.iconAlign })
+        );
+      });
+
+      it('sets iconAlign with legacy icon', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: undefined },
+          setState,
+        });
+        await setIcon('Compute');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            icon: 'compute',
+            iconAlign: legacyMetricStateDefaults.iconAlign,
+          })
+        );
+      });
+
+      it('sets icon and iconAlign with icon and iconAlign already set', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: 'left' },
+          setState,
+        });
+        await setIcon('Compute');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({ icon: 'compute', iconAlign: 'left' })
+        );
+      });
+
+      it('clears icon and iconAlign when none is selected', async () => {
+        const setState = jest.fn();
+        const { clearIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: 'left' },
+          setState,
+        });
+        await clearIcon();
+        const { icon, iconAlign, ...noIconState } = fullState;
+        expect(setState).toHaveBeenCalledWith(noIconState);
+      });
+
+      it('does not call setState when same icon is selected', async () => {
+        const setState = jest.fn();
+        const { setIcon } = renderPrimaryMetricEditor({
+          state: { ...fullState, icon: 'heart', iconAlign: 'left' },
+          setState,
+        });
+        await setIcon('Heart');
+        expect(setState).not.toHaveBeenCalled();
       });
     });
   });

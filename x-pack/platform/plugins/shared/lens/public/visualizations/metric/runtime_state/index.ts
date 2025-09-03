@@ -7,7 +7,9 @@
 
 import type { MetricVisualizationState } from '../types';
 
-export const convertToRunTimeState = (state: MetricVisualizationState) => {
+export const convertToRunTimeState = (
+  state: MetricVisualizationState
+): MetricVisualizationState => {
   // Remove legacy state properties if they exist
   const { secondaryPrefix, valuesTextAlign, ...restState } = state;
   let newState = { ...restState };
