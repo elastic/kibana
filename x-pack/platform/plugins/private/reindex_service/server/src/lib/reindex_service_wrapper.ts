@@ -285,8 +285,11 @@ export class ReindexServiceWrapper {
     };
   }
 
-  // for legacy code, used by routes
-  public getWorker(): ReindexWorker {
+  public cleanupReindexOperations(indexNames: string[]): Promise<void> {
+    return this.getWorker().cleanupReindexOperations(indexNames);
+  }
+
+  private getWorker(): ReindexWorker {
     if (!this.reindexWorker) {
       throw new Error('Worker unavailable');
     }
