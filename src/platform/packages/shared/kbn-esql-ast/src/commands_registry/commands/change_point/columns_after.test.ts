@@ -11,24 +11,13 @@ import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('CHANGE_POINT > columnsAfter', () => {
-  const context = {
-    columns: new Map<string, ESQLColumnData>([
-      ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-      ['count', { name: 'count', type: 'double', userDefined: false }],
-    ]),
-  };
   it('adds "type" and "pvalue" fields, when AS option not specified', () => {
     const previousCommandFields: ESQLColumnData[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'count', type: 'double', userDefined: false },
     ];
 
-    const result = columnsAfter(
-      synth.cmd`CHANGE_POINT count ON field1`,
-      previousCommandFields,
-      '',
-      context
-    );
+    const result = columnsAfter(synth.cmd`CHANGE_POINT count ON field1`, previousCommandFields, '');
 
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'field1', type: 'keyword', userDefined: false },
@@ -47,8 +36,7 @@ describe('CHANGE_POINT > columnsAfter', () => {
     const result = columnsAfter(
       synth.cmd`CHANGE_POINT count ON field1 AS changePointType, pValue`,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual<ESQLColumnData[]>([

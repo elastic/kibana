@@ -9,13 +9,12 @@
 import uniqBy from 'lodash/uniqBy';
 import { isColumn, isFunctionExpression } from '../../../ast/is';
 import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '../../../types';
-import type { ESQLColumnData, ICommandContext } from '../../types';
+import type { ESQLColumnData } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string,
-  context?: ICommandContext
+  query: string
 ) => {
   const asRenamePairs: ESQLFunction[] = [];
   const assignRenamePairs: ESQLFunction[] = [];

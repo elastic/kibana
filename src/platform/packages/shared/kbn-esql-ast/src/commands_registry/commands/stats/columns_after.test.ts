@@ -17,19 +17,8 @@ describe('STATS', () => {
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'field2', type: 'double', userDefined: false },
     ];
-    const context = {
-      columns: new Map<string, ESQLFieldWithMetadata>([
-        ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-        ['count', { name: 'count', type: 'double', userDefined: false }],
-      ]),
-    };
 
-    const result = columnsAfter(
-      synth.cmd`STATS var0=AVG(field2)`,
-      previousCommandFields,
-      '',
-      context
-    );
+    const result = columnsAfter(synth.cmd`STATS var0=AVG(field2)`, previousCommandFields, '');
 
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'var0', type: 'double', userDefined: true, location: { min: 0, max: 0 } },
@@ -52,9 +41,7 @@ describe('STATS', () => {
       },
     } = Parser.parseQuery(queryString);
 
-    const result = columnsAfter(command, previousCommandFields, queryString, {
-      columns: new Map(),
-    });
+    const result = columnsAfter(command, previousCommandFields, queryString);
 
     expect(result).toEqual([
       { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 19, max: 29 } },
@@ -77,9 +64,7 @@ describe('STATS', () => {
       },
     } = Parser.parseQuery(queryString);
 
-    const result = columnsAfter(command, previousCommandFields, queryString, {
-      columns: new Map(),
-    });
+    const result = columnsAfter(command, previousCommandFields, queryString);
 
     expect(result).toEqual([
       { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 15, max: 25 } },
@@ -94,10 +79,6 @@ describe('STATS', () => {
       { name: '@timestamp', type: 'date', userDefined: false },
     ];
 
-    const context = {
-      columns: new Map(),
-    };
-
     const queryString = `FROM a | STATS AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)`;
 
     // Can't use synth because it steps on the location information
@@ -108,7 +89,7 @@ describe('STATS', () => {
       },
     } = Parser.parseQuery(queryString);
 
-    const result = columnsAfter(command, previousCommandFields, queryString, context);
+    const result = columnsAfter(command, previousCommandFields, queryString);
 
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 15, max: 25 } },

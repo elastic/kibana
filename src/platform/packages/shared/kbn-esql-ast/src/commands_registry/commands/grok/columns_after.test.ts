@@ -40,9 +40,6 @@ describe('GROK', () => {
     });
   });
   describe('columnsAfter', () => {
-    const context = {
-      columns: new Map(),
-    };
     it('adds the GROK columns from the pattern in the list', () => {
       const previousCommandFields: ESQLFieldWithMetadata[] = [
         { name: 'field1', type: 'keyword', userDefined: false },
@@ -52,8 +49,7 @@ describe('GROK', () => {
       const result = columnsAfter(
         synth.cmd`GROK agent "%{WORD:firstWord}"`,
         previousCommandFields,
-        '',
-        context
+        ''
       );
 
       expect(result).toEqual([

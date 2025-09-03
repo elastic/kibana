@@ -11,19 +11,13 @@ import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('DROP', () => {
-  const context = {
-    columns: new Map<string, ESQLColumnData>([
-      ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-      ['count', { name: 'count', type: 'double', userDefined: false }],
-    ]),
-  };
   it('removes the columns defined in the command', () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'field2', type: 'double', userDefined: false },
     ];
 
-    const result = columnsAfter(synth.cmd`DROP field1`, previousColumns, '', context);
+    const result = columnsAfter(synth.cmd`DROP field1`, previousColumns, '');
 
     expect(result).toEqual([{ name: 'field2', type: 'double', userDefined: false }]);
   });

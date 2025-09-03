@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
+import { esqlCommandRegistry } from '../../../..';
 import type { ESQLAstQueryExpression } from '../../../types';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
-import type { ICommandContext } from '../../types';
-import { esqlCommandRegistry } from '../../../..';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string,
-  context?: ICommandContext
+  query: string
 ) => {
   const branches = command.args as ESQLAstQueryExpression[];
 
@@ -32,8 +30,7 @@ export const columnsAfter = (
         columnsFromBranch = commandDef.methods?.columnsAfter?.(
           branchCommand,
           columnsFromBranch,
-          query,
-          context
+          query
         );
       }
     }

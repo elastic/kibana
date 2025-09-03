@@ -104,9 +104,7 @@ export async function getCurrentQueryAvailableColumns(
   const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
 
   if (commandDefinition?.methods.columnsAfter) {
-    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, query, {
-      columns: new Map(),
-    });
+    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, query);
   } else {
     return previousPipeFields;
   }

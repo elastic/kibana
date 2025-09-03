@@ -11,12 +11,6 @@ import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('FORK', () => {
-  const context = {
-    columns: new Map<string, ESQLColumnData>([
-      ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-      ['count', { name: 'count', type: 'double', userDefined: false }],
-    ]),
-  };
   it('adds the _fork in the list of fields', () => {
     const previousCommandFields: ESQLColumnData[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
@@ -26,8 +20,7 @@ describe('FORK', () => {
     const result = columnsAfter(
       synth.cmd`FORK (LIMIT 10 ) (LIMIT 1000 ) `,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual<ESQLColumnData[]>([
@@ -50,8 +43,7 @@ describe('FORK', () => {
     const result = columnsAfter(
       synth.cmd`FORK (EVAL foo = 1 | RENAME foo AS bar) (EVAL lolz = 2 + 3 | EVAL field1 = 2.) `,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual<ESQLColumnData[]>([
@@ -78,8 +70,7 @@ describe('FORK', () => {
     const result = columnsAfter(
       synth.cmd`FORK (EVAL foo = 1) (EVAL bar = 2)`,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     // foo from branch 1 is userDefined, bar from branch 2 is userDefined
@@ -103,8 +94,7 @@ describe('FORK', () => {
     const result = columnsAfter(
       synth.cmd`FORK (EVAL foo = 1) (EVAL foo = 2.5)`,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     // The first userDefined column wins (type: integer)
@@ -127,8 +117,7 @@ describe('FORK', () => {
     const result = columnsAfter(
       synth.cmd`FORK (KEEP foo) (KEEP foo) (KEEP foo)`,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual<ESQLColumnData[]>([
@@ -150,8 +139,7 @@ describe('FORK', () => {
     const result = columnsAfter(
       synth.cmd`FORK (EVAL foo = 1) (LIMIT 1)`,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual<ESQLColumnData[]>([

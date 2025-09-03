@@ -8,16 +8,15 @@
  */
 
 import { uniqBy } from 'lodash';
-import { getExpressionType } from '../../../definitions/utils';
 import { isAssignment, isColumn } from '../../../ast/is';
+import { getExpressionType } from '../../../definitions/utils';
 import type { ESQLAstItem, ESQLCommand } from '../../../types';
-import type { ESQLColumnData, ESQLUserDefinedColumn, ICommandContext } from '../../types';
+import type { ESQLColumnData, ESQLUserDefinedColumn } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string,
-  context?: ICommandContext
+  query: string
 ) => {
   const columnMap = new Map<string, ESQLColumnData>();
   previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient

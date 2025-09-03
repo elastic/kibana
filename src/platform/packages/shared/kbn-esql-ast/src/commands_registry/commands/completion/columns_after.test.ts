@@ -11,12 +11,6 @@ import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('COMPLETION', () => {
-  const context = {
-    columns: new Map<string, ESQLColumnData>([
-      ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-      ['count', { name: 'count', type: 'double', userDefined: false }],
-    ]),
-  };
   it('adds "completion" field, when targetField is not specified', () => {
     const previousCommandColumns: ESQLColumnData[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
@@ -26,8 +20,7 @@ describe('COMPLETION', () => {
     const result = columnsAfter(
       synth.cmd`COMPLETION "prompt" WITH {"inference_id": "my-inference-id"}`,
       previousCommandColumns,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual([
@@ -46,8 +39,7 @@ describe('COMPLETION', () => {
     const result = columnsAfter(
       synth.cmd`COMPLETION customField = "prompt" WITH {"inference_id": "my-inference-id"}`,
       previousCommandColumns,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual([

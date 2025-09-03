@@ -11,23 +11,13 @@ import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('RENAME', () => {
-  const columns = new Map<string, ESQLColumnData>([
-    ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-    ['count', { name: 'count', type: 'double', userDefined: false }],
-  ]);
-  const context = { columns };
   it('renames the given columns with the new names using AS', () => {
     const previousCommandFields: ESQLColumnData[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
       { name: 'field2', type: 'double', userDefined: false },
     ];
 
-    const result = columnsAfter(
-      synth.cmd`RENAME field1 as meow`,
-      previousCommandFields,
-      '',
-      context
-    );
+    const result = columnsAfter(synth.cmd`RENAME field1 as meow`, previousCommandFields, '');
 
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'meow', type: 'keyword', userDefined: true, location: { max: 0, min: 0 } },
@@ -41,12 +31,7 @@ describe('RENAME', () => {
       { name: 'field2', type: 'double', userDefined: false },
     ];
 
-    const result = columnsAfter(
-      synth.cmd`RENAME meow = field1`,
-      previousCommandFields,
-      '',
-      context
-    );
+    const result = columnsAfter(synth.cmd`RENAME meow = field1`, previousCommandFields, '');
 
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'meow', type: 'keyword', userDefined: true, location: { max: 0, min: 0 } },
@@ -63,8 +48,7 @@ describe('RENAME', () => {
     const result = columnsAfter(
       synth.cmd`RENAME meow = field1, field2 as woof`,
       previousCommandFields,
-      '',
-      context
+      ''
     );
 
     expect(result).toEqual<ESQLColumnData[]>([

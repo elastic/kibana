@@ -6,10 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
+import { walk } from '../../../walker';
 import type { ESQLColumnData } from '../../types';
-import type { ICommandContext } from '../../types';
 
 function unquoteTemplate(inputString: string): string {
   if (inputString.startsWith('"') && inputString.endsWith('"') && inputString.length >= 2) {
@@ -51,8 +50,7 @@ export function extractSemanticsFromGrok(pattern: string): string[] {
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string,
-  context?: ICommandContext
+  query: string
 ) => {
   const columns: string[] = [];
 

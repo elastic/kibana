@@ -9,18 +9,12 @@
 import uniqBy from 'lodash/uniqBy';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import { type ESQLAstCompletionCommand, type ESQLCommand } from '../../../types';
-import type {
-  ESQLColumnData,
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ICommandContext,
-} from '../../types';
+import type { ESQLColumnData, ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string,
-  context?: ICommandContext
+  query: string
 ) => {
   const { targetField } = command as ESQLAstCompletionCommand;
 

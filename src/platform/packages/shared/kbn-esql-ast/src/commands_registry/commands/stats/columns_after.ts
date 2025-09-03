@@ -11,7 +11,7 @@ import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
 import type { SupportedDataType } from '../../../definitions/types';
 import { getExpressionType } from '../../../definitions/utils';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../../../types';
-import type { ESQLColumnData, ESQLUserDefinedColumn, ICommandContext } from '../../types';
+import type { ESQLColumnData, ESQLUserDefinedColumn } from '../../types';
 
 const getUserDefinedColumns = (
   command: ESQLCommand | ESQLCommandOption,
@@ -56,8 +56,7 @@ const getUserDefinedColumns = (
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string,
-  context?: ICommandContext
+  query: string
 ) => {
   const columnMap = new Map<string, ESQLColumnData>();
   previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient

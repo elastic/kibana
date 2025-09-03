@@ -9,13 +9,11 @@
 import { walk } from '../../../walker';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData } from '../../types';
-import type { ICommandContext } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string,
-  context?: ICommandContext
+  query: string
 ) => {
   const columnsToDrop: string[] = [];
 

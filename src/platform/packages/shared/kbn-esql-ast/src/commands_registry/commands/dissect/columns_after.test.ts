@@ -68,24 +68,13 @@ describe('DISSECT', () => {
     });
   });
   describe('columnsAfter', () => {
-    const context = {
-      columns: new Map<string, ESQLColumnData>([
-        ['field1', { name: 'field1', type: 'keyword', userDefined: false }],
-        ['count', { name: 'count', type: 'double', userDefined: false }],
-      ]),
-    };
     it('adds the DISSECT pattern columns as fields', () => {
       const previousColumns: ESQLColumnData[] = [
         { name: 'field1', type: 'keyword', userDefined: false },
         { name: 'field2', type: 'double', userDefined: false },
       ];
 
-      const result = columnsAfter(
-        synth.cmd`DISSECT agent "%{firstWord}"`,
-        previousColumns,
-        '',
-        context
-      );
+      const result = columnsAfter(synth.cmd`DISSECT agent "%{firstWord}"`, previousColumns, '');
 
       expect(result).toEqual<ESQLColumnData[]>([
         { name: 'field1', type: 'keyword', userDefined: false },
