@@ -597,7 +597,7 @@ export function defineRoutes(
         authz: {
           requiredPrivileges: [
             {
-              anyRequired: ['read', 'workflow_execution_read'], // TODO: To ask Vladimir is this correct privilege
+              anyRequired: ['read', 'workflow_execution_cancel'],
             },
           ],
         },

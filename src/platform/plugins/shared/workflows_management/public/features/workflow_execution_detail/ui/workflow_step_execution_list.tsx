@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { WorkflowStepExecutionListItem } from './workflow_step_execution_list_item';
@@ -123,14 +123,7 @@ export const WorkflowStepExecutionList = ({
           justifyContent="flexEnd"
           css={styles.buttonsContainer}
         >
-          {[
-            ExecutionStatus.RUNNING,
-            ExecutionStatus.WAITING,
-            ExecutionStatus.WAITING_FOR_INPUT,
-            ExecutionStatus.PENDING,
-          ].includes(execution?.status as ExecutionStatus) && (
-            <CancelExecutionButton executionId={execution.id} />
-          )}
+          <CancelExecutionButton execution={execution} />
           <EuiButton onClick={onClose}>
             <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
           </EuiButton>
