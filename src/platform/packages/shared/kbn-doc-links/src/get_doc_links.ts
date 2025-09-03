@@ -906,6 +906,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       httpMonitoring: `${ELASTIC_DOCS}reference/fleet/agent-policy#change-policy-enable-agent-monitoring`,
       agentLevelLogging: `${ELASTIC_DOCS}reference/fleet/monitor-elastic-agent#change-logging-level`,
       remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
+      fipsIngest: `${ELASTIC_DOCS}deploy-manage/security/fips-ingest`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,

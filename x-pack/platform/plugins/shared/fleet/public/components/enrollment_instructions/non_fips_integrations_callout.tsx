@@ -6,13 +6,17 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { useStartServices } from '../../hooks';
 
 export const NonFipsIntegrationsCallout: React.FC<{
   nonFipsIntegrations?: Array<{ name: string; title: string }>;
 }> = ({ nonFipsIntegrations = [] }) => {
+  const { docLinks } = useStartServices();
+
   return nonFipsIntegrations.length > 0 ? (
     <>
       <EuiCallOut
@@ -29,7 +33,17 @@ export const NonFipsIntegrationsCallout: React.FC<{
       >
         <FormattedMessage
           id="xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsCalloutDescription"
-          defaultMessage="This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly."
+          defaultMessage="This agent policy contains the following integrations that are not FIPS compatible. Enrolling an agent in FIPS mode might cause the agent to not ingest data properly. For more information, see the {guideLink}."
+          values={{
+            guideLink: (
+              <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollmentCallout.nonFipsIntegrationsMessage.guideLink"
+                  defaultMessage="Guide"
+                />
+              </EuiLink>
+            ),
+          }}
         />
         <ul>
           {nonFipsIntegrations.map((item) => (

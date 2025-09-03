@@ -29,7 +29,6 @@ export const useAgentPoliciesWithFipsAgents = (policyIds: string[]) => {
   if (fipsAgentsRes?.error) {
     throw new Error(fipsAgentsRes.error.message);
   }
-
   if (!fipsAgentsRes?.data?.items || fipsAgentsRes.data?.items.length === 0) return false;
 
   return hasFipsAgents(fipsAgentsRes.data?.items);

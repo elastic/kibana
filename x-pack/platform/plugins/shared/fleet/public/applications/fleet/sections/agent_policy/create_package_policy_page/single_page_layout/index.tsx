@@ -608,14 +608,24 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             iconType="warning"
             title={
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
+                id="xpack.fleet.createPackagePolicy.fipsCalloutTitle"
                 defaultMessage="This integration is not FIPS compatible"
               />
             }
           >
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration might cause these agents to not ingest data properly."
+              id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
+              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
+              values={{
+                guideLink: (
+                  <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
+                      defaultMessage="Guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </EuiCallOut>
 
