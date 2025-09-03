@@ -656,19 +656,15 @@ export const getKnowledgeBaseHandler: FleetRequestHandler<
   const { pkgName } = request.params;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
-  try {
-    const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName });
+  const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName });
 
-    if (!knowledgeBase) {
-      return response.notFound({ body: `Knowledge base not found for package: ${pkgName}` });
-    }
-
-    return response.ok({
-      body: knowledgeBase,
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  if (!knowledgeBase) {
+    return response.notFound({ body: `Knowledge base not found for package: ${pkgName}` });
   }
+
+  return response.ok({
+    body: knowledgeBase,
+  });
 };
 
 // Don't expose the whole SO in the API response, only selected fields

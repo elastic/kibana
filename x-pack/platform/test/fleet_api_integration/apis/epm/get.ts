@@ -38,17 +38,14 @@ export default function (providerContext: FtrProviderContext) {
 
   // Helper function to clean up knowledge base content
   const cleanupKnowledgeBase = async (name: string) => {
-    try {
-      await es.deleteByQuery({
-        index: '.integration_knowledge',
-        query: {
-          term: { 'package_name.keyword': name },
-        },
-        refresh: true,
-      });
-    } catch (error) {
-      // Ignore errors if index doesn't exist or documents aren't found
-    }
+    await es.deleteByQuery({
+      index: '.integration_knowledge',
+      query: {
+        term: { 'package_name.keyword': name },
+      },
+      refresh: true,
+      ignore_unavailable: true,
+    });
   };
 
   const testPkgArchiveZip = path.join(
