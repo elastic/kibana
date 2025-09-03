@@ -510,7 +510,6 @@ export class EntityStoreDataClient {
       this.log(`debug`, entityType, `Started entity store data view refresh task`);
 
       // this task will create daily snapshots for the historical view
-      // TODO(kuba): Issue - no access to task manager SETUP
       await startEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
       this.log(`debug`, entityType, `Started entity store snapshot task`);
 

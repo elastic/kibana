@@ -27,7 +27,6 @@ import {
 import { SCOPE, TIMEOUT, TYPE, VERSION, MAX_ATTEMPTS, SCHEDULE } from './constants';
 import { createEntitySnapshotIndex } from '../../elasticsearch_assets/entity_snapshot_index';
 import { getEntitiesIndexName, getEntitiesResetIndexName } from '../../utils';
-import { FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT } from '../../../../telemetry/event_based/events';
 import { entityStoreTaskLogFactory, entityStoreTaskDebugLogFactory } from '../utils';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
@@ -243,8 +242,8 @@ export async function runTask({
     updatedState.lastSnapshotTookSeconds = taskDurationInSeconds;
     log(`task run completed in ${taskDurationInSeconds} seconds`);
 
-    // TODO(kuba): Add custom telemetry to the new task?
-    /* 
+    // TODO(kuba): Do we want to add custom telemetry events like the other tasks have?
+    /*
     telemetry.reportEvent(FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT.eventType, {
       duration: taskDurationInSeconds,
       interval: context.taskInstance.schedule?.interval,

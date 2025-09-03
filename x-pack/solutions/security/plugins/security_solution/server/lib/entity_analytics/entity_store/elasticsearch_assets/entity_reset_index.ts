@@ -15,7 +15,6 @@ interface Options {
   namespace: string;
 }
 
-// TODO(kuba): unused because in Entity Manager?
 export async function createEntityResetIndex({ entityType, esClient, namespace }: Options) {
   return esClient.indices.create({
     index: getEntitiesResetIndexName(entityType, namespace),
