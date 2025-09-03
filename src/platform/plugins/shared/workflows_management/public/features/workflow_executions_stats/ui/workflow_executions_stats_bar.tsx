@@ -67,7 +67,6 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
   const colorMap: Record<ExecutionStatus, Color> = {
     [ExecutionStatus.COMPLETED]: euiTheme.colors.vis.euiColorVis0,
     [ExecutionStatus.FAILED]: euiTheme.colors.vis.euiColorVis6,
-    [ExecutionStatus.CANCELLING]: euiTheme.colors.vis.euiColorVis8,
     [ExecutionStatus.CANCELLED]: euiTheme.colors.vis.euiColorVis8,
     [ExecutionStatus.PENDING]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.WAITING]: euiTheme.colors.vis.euiColorVis1,
