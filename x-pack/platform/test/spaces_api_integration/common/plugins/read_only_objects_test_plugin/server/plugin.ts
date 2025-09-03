@@ -286,6 +286,46 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+    router.post(
+      {
+        path: '/read_only_objects/bulk_delete',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          body: schema.object({
+            objects: schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                type: schema.oneOf([
+                  schema.literal(READ_ONLY_TYPE),
+                  schema.literal(NON_READ_ONLY_TYPE),
+                ]),
+              })
+            ),
+            force: schema.maybe(schema.boolean({ defaultValue: false })),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        try {
+          const result = await soClient.bulkDelete(request.body.objects, {
+            force: request.body.force,
+          });
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          return response.forbidden({
+            body: error.message,
+          });
+        }
+      }
+    );
   }
   public start() {}
 }
