@@ -124,6 +124,13 @@ export interface ElasticAssistantPluginStart {
    * @param callback
    */
   registerCallback: (callbackId: CallbackIds, callback: Function) => void;
+  /**
+   * Get the knowledge base data client for a given request.
+   * @param request The Kibana request to get the client for
+   */
+  getKnowledgeBaseDataClient: (
+    request: KibanaRequest
+  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {

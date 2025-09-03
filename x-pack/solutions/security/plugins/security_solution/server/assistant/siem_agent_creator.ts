@@ -80,6 +80,8 @@ Always provide clear, actionable recommendations and explain your reasoning.`,
             { type: ToolType.builtin, tool_ids: ['.open-and-acknowledged-alerts-internal-tool'] },
             // Include the alert-counts-internal-tool
             { type: ToolType.builtin, tool_ids: ['.alert-counts-internal-tool'] },
+            // Include the knowledge-base-retrieval-internal-tool
+            { type: ToolType.builtin, tool_ids: ['.knowledge-base-retrieval-internal-tool'] },
             // Include the product-documentation-internal-tool
             { type: ToolType.builtin, tool_ids: ['.product-documentation-internal-tool'] },
             // Include all built-in tools for comprehensive security analysis
