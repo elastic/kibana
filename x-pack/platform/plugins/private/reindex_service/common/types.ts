@@ -111,7 +111,7 @@ export interface ReindexOperation {
    * be able to handle older ReindexOperation objects.
    */
   reindexOptions?: ReindexOptions;
-  settings?: string; // serialied JSON of index settings to be applied
+  settings?: string; // serialized JSON of index settings to be applied
 }
 
 export interface ReindexOperationCancelResponse {
