@@ -64905,6 +64905,76 @@
         "x-state": "Technical Preview"
       }
     },
+    "/api/streams/{name}/description/_generate": {
+      "get": {
+        "description": "identify the stream description using LLM<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "get-streams-name-description-generate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "connectorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currentDate",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shortLookback",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "identify the stream description using LLM",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
     "/api/streams/{name}/queries": {
       "get": {
         "description": "Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
@@ -65323,6 +65393,28 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "method",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "zero_shot"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "enum": [
+                    "log_patterns"
+                  ],
+                  "type": "string"
+                }
+              ],
+              "default": "zero_shot"
             }
           }
         ],

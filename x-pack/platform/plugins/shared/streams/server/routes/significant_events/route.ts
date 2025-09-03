@@ -16,17 +16,17 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
+import { generateSignificantEventDefinitions } from '../../lib/significant_events/generate_significant_events';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-} from '../../../../common/constants';
-import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
-import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
-import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
-import type { StreamsServer } from '../../../types';
-import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+} from '../../../common/constants';
+import { previewSignificantEvents } from '../../lib/significant_events/preview_significant_events';
+import { readSignificantEventsFromAlertsIndices } from '../../lib/significant_events/read_significant_events_from_alerts_indices';
+import { SecurityError } from '../../lib/streams/errors/security_error';
+import type { StreamsServer } from '../../types';
+import { createServerRoute } from '../create_server_route';
+import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
 
 async function assertLicenseAndPricingTier(
   server: StreamsServer,
@@ -43,7 +43,7 @@ async function assertLicenseAndPricingTier(
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
+export const dateFromString = z.string().transform((input) => new Date(input));
 
 const previewSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
@@ -163,7 +163,7 @@ const readSignificantEventsRoute = createServerRoute({
   },
 });
 
-const durationSchema = z.string().transform((value) => {
+export const durationSchema = z.string().transform((value) => {
   const match = value.match(/^(\d+)([mhd])$/);
   if (!match) {
     throw new Error('Duration must follow format: {number}{unit} where unit is m, h, or d');

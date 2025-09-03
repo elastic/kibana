@@ -16,8 +16,8 @@ import type {
   Asset,
   AssetLink,
   AssetLinkRequest,
-  AssetUnlinkRequest,
   AssetType,
+  AssetUnlinkRequest,
   AssetWithoutUuid,
   DashboardLink,
   QueryAsset,
@@ -146,6 +146,7 @@ function fromStorage(link: StoredAssetLink): AssetLink {
       },
     } satisfies QueryLink;
   }
+
   return link;
 }
 
