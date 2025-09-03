@@ -17,6 +17,7 @@ import fetch from 'node-fetch';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import fs from 'fs/promises';
+import { existsSync } from 'fs';
 
 // TODO validate config with zod
 // const ConfigSchema = z.object({
@@ -30,7 +31,11 @@ const config = {
   snykApiKey: process.env.SNYK_API_KEY,
   snykOrgId: process.env.SNYK_ORG_ID,
   githubToken: process.env.GITHUB_TOKEN,
+  githubRepo: 'snyk_vuln_analyzer_testing',
+  mode: process.env.MODE ?? 'debug',
 };
+
+const isDebugMode = config.mode === 'debug';
 
 const server = new McpServer(
   {
@@ -49,7 +54,7 @@ const server = new McpServer(
 
 async function findGitHubIssue(cveId) {
   try {
-    const query = `repo:elastic/snyk_vuln_analyzer_testing is:issue "${cveId}" in:title,body label:Kibana`;
+    const query = `repo:elastic/${config.githubRepo} is:issue "${cveId}" in:title,body label:Kibana`;
     const response = await fetch(
       `https://api.github.com/search/issues?q=${encodeURIComponent(query)}`,
       {
@@ -80,8 +85,23 @@ async function findGitHubIssue(cveId) {
 
 async function writeCommentOnGitHubIssue(issueNumber, comment) {
   try {
+    if (isDebugMode) {
+      const triagePath = path.resolve(process.env.DATA_PATH, 'triage/risk_assessment.md');
+
+      if (!existsSync(triagePath)) {
+        await fs.mkdir(triagePath, { recursive: true });
+      }
+
+      await fs.appendFile(
+        path.resolve(triagePath),
+        `Comment for issue https://api.github.com/repos/elastic/${config.githubRepo}/issues/${issueNumber}:\n${comment}\n\n`
+      );
+
+      return;
+    }
+
     const response = await fetch(
-      `https://api.github.com/repos/elastic/snyk_vuln_analyzer_testing/issues/${issueNumber}/comments`,
+      `https://api.github.com/repos/elastic/${config.githubRepo}/issues/${issueNumber}/comments`,
       {
         method: 'POST',
         headers: {
@@ -111,15 +131,29 @@ server.tool(
   'Write the security statement post to the GitHub issue',
   {
     issueNumber: z.number().describe('GitHub issue number to post the security statement.'),
-    securityPost: z
+    cveId: z.string().min(1, 'CVE ID cannot be empty').describe('CVE ID of the vulnerability.'),
+    status: z
+      .enum(['future update', 'not exploitable', 'false positive'])
+      .describe('Status of the vulnerability.'),
+    statement: z
       .string()
-      .min(1, 'Security post cannot be empty')
-      .describe('Security post content in YAML format.'),
+      .min(1, 'Statement cannot be empty')
+      .describe('The security statement content.'),
+    dependency: z
+      .string()
+      .min(1, 'Dependency cannot be empty')
+      .describe('The name of the npm package, i.e. "minimist".'),
   },
   async (args) => {
-    const { issueNumber, securityPost } = args;
+    const { issueNumber, cveId, statement, dependency, status } = args;
 
-    const formattedPost = `### Security statement\n\`\`\`yaml\n${securityPost}\n\`\`\``;
+    const formattedPost = `### Security statement\n\`\`\`yaml\n
+      cve: ${cveId}
+      status: ${status}
+      statement: ${statement}
+      product: kibana
+      dependency: ${dependency}
+    \n\`\`\``;
 
     await writeCommentOnGitHubIssue(issueNumber, formattedPost);
 
@@ -213,15 +247,17 @@ server.tool(
       .enum(['mitigate', 'avoid', 'accept'])
       .describe("Risk response for the vulnerability. Can be 'mitigate', 'avoid' or 'accept'."),
     issueNumber: z.number().describe('GitHub issue number to post the security statement.'),
+    upgradePaths: z.array(z.string()).describe('List of upgrade paths.').optional().default([]),
   },
   async (args) => {
-    const { riskResponse, justification, issueNumber } = args;
+    const { riskResponse, justification, issueNumber, upgradePaths } = args;
 
     const content = `
     - **Triage:** ${justification}
     - **Risk response:** ${riskResponse}
     - **Upgrade paths:**
-      - package@x.y.z -> package@x.y.z`;
+      ${upgradePaths.length ? upgradePaths.map((path) => `  - ${path}`).join('\n') : 'N/A'}
+    `;
 
     await writeCommentOnGitHubIssue(issueNumber, content);
 
@@ -237,8 +273,8 @@ server.tool(
 );
 
 server.tool(
-  'issue_security_statement_template',
-  'Issue security statement template',
+  'generate_security_statement_template',
+  'Generate security statement template',
   {
     isKibanaVulnerable: z.boolean().describe('Is Kibana vulnerable to the issue?'),
     justification: z
@@ -288,30 +324,19 @@ server.tool(
     try {
       const issueNumber = await findGitHubIssue(cveId);
 
-      if (issueNumber) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Found related GitHub issue: #${issueNumber} for CVE ID ${cveId}.`,
-            },
-          ],
-          structuredContent: {
-            issueNumber,
+      return {
+        content: [
+          {
+            type: 'text',
+            text: issueNumber
+              ? `Found related GitHub issue: #${issueNumber} for CVE ID ${cveId}.`
+              : `No related GitHub issue found for CVE ID ${cveId}.`,
           },
-        };
-      } else {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `No related GitHub issue found for CVE ID ${cveId}.`,
-            },
-          ],
-        };
-      }
+        ],
+      };
     } catch (error) {
       console.error('Error finding GitHub issue:', error);
+
       return {
         content: [
           {
@@ -326,14 +351,17 @@ server.tool(
 
 server.registerResource(
   'sample.snyk-triage-response',
-  pathToFileURL(path.resolve('./samples/triage_response.md')).href,
+  pathToFileURL(path.resolve(process.env.DATA_PATH, 'triage_response.md')).href,
   {
     description: 'Few-shot examples of how to make triage comments for Snyk issues',
     mimeType: 'text/markdown',
   },
   async (uri) => {
     try {
-      const fileContent = await fs.readFile(path.resolve('./samples/triage_response.md'), 'utf-8');
+      const fileContent = await fs.readFile(
+        path.resolve(process.env.DATA_PATH, 'triage_response.md'),
+        'utf-8'
+      );
 
       return {
         contents: [
@@ -440,6 +468,28 @@ server.tool(
         .map((depChain) => depChain.map(({ name, version }) => `${name}@${version}`).join(' -> '))
         .join(';');
 
+      const remediationPlan = paths.reduce((acc, depChain) => {
+        const depToUpgrade = depChain.find((dep) => dep.fixVersion);
+
+        const introducedThrough = depChain
+          .map(({ name, version }) => `${name}@${version}`)
+          .join(' -> ');
+
+        if (!depToUpgrade) {
+          acc.push(`Introduced through: ${introducedThrough}. No upgrade path available;`);
+          return acc;
+        }
+
+        const fix =
+          depToUpgrade.version === depToUpgrade?.fixVersion
+            ? `Dependencies are out of date, otherwise you would be using a newer ${depToUpgrade?.fixVersion}. Try relocking lockfile.`
+            : `Upgrade ${depToUpgrade.name} to version ${depToUpgrade?.fixVersion}`;
+
+        acc.push(`Introduced through: ${introducedThrough}. Fix: ${fix};`);
+
+        return acc;
+      }, []);
+
       const { severity, identifiers } = vulnerability;
       const [cveId] = identifiers.CVE;
 
@@ -453,6 +503,10 @@ server.tool(
       const exceptionDays =
         exceptionTTLBySeverity[severity.toLowerCase()] ?? exceptionTTLBySeverity.low;
 
+      const hasUpgradePath = remediationPlan.some(
+        (plan) => !plan.includes('No upgrade path available')
+      );
+
       const plan = {
         steps: [
           {
@@ -460,79 +514,47 @@ server.tool(
             description:
               `@workspace ${vulnerability.packageName} has vulnerabilities. Severity ${severity}, CVE ID ${cveId}` +
               vulnerability.description +
-              `It was introduces through ${introducedThrough}
-              You need to triage this package, extract vulnerable functions and methods from the description (if applicable).
-              This analysis should also check yarn.lock.
+              `It was introduced through ${introducedThrough}
+              You need to triage the ${vulnerability.packageName} package, extract vulnerable functions and methods from the description (if applicable).
               Find if there are any usages in the codebase (ignore tests, ignore target folders, we are interested in production application code).
-              List the usages and check if they are vulnerable.
-              If the package is a transitive dependency, check node_modules to see if the parent dependencies are using the vulnerable functions.
-
-              Log the analysis.`,
+              List the usages and check if they are vulnerable.`,
           },
           {
-            id: 'analyze_usage_and_feasibility',
-            description: `
-              Analyze library usage and determine upgrade feasibility.
-
-              - Check if the package is directly imported in the codebase.
-              - Check if the package is listed in package.json (dependencies, devDependencies, peerDependencies).
-              - Check if the package is a transitive dependency.
-              - Analyze the dependency chain to see how the package is introduced.
-              - Check if the package is used in the codebase (e.g., via require, import, or other usage patterns).
-              - Determine if the package can be upgraded to the fixed version without breaking changes.
-              - If it is a transitive dependency, check if the parent dependencies can be upgraded to a version that includes the fix.
-
-
-              `,
-            tool: 'analyze_library_usage_and_upgrade_feasibility',
+            id: 'perform_upgrades',
+            description: `You need to perform upgrades that do not come with breaking changes. Follow the remediation plan below carefully. ${remediationPlan}.  Keep in mind that kibana cannot upgrade to esm only modules. After changing the package.json, use 'yarn kbn bootstrap' to update the lockfile.`,
+            required: hasUpgradePath,
+          },
+          {
+            id: 'validate_upgrades',
+            description:
+              'Verify that the necessary upgrades were completed by checking the new dependency versions in package.json and yarn.lock',
+            required: hasUpgradePath,
           },
           {
             id: 'find_github_issue',
-            description:
-              'Using the CVE ID, find the related GitHub issue in the snyk_vuln_analyzer_testing repo.',
+            description: `Using the CVE ID, find the related GitHub issue in the ${config.githubRepo} repo.`,
             tool: 'find_github_issue',
           },
           {
             id: 'make_triage_comment',
-            description: `Based on the triage from previous step, make a triage comment with the justification and risk response.`,
+            description: `Based on the triage from previous step, make a triage comment with the justification, risk response and upgrade paths we performed (if any) as array of entries ['package1@x.y.z -> package1@x.y.z', 'package2@x.y.z -> package3@x.y.z']. Confirm the risk assessment with the user and allow modifications.`,
             tool: 'make_triage_comment',
-            structuredContent: {
-              samples: [
-                {
-                  resource: 'sample.snyk-triage-response',
-                  purpose: 'guidance',
-                  mimeType: 'text/markdown',
-                },
-              ],
-            },
+            samples: [
+              {
+                resource: 'sample.snyk-triage-response',
+                purpose: 'guidance',
+                mimeType: 'text/markdown',
+              },
+            ],
           },
           {
-            id: 'determine_kibana_latest_versions',
-            description: `determine the next version of Kibana that will be released after the current version.`,
-          },
-          {
-            id: 'issue_security_statement_template',
+            id: 'generate_security_statement_template',
             description: `Based on the triage and justification from previous steps, create a template for a security statement.`,
-            tool: 'issue_security_statement_template',
-          },
-          {
-            id: 'issue_security_statement',
-            description: `Based on the triage, justification, and template for a security statement from previous steps, create text in the following format:
-
-            \`\`\`yaml
-            cve: The CVE ID for the vulnerability triaged. i.e. "CVE-2021-1223". If you are triaging more than one CVEs in the same GH issue, you need to create multiple comments
-            status: Can be one of "future update", "not exploitable", "false positive".
-            statement: Using the security statement template from previous step, fill in the details and make any changes to better alight with the triage that has been done, include a sentence about the Kibana version that will be released with the fix.
-            product: kibana
-            dependency: The name of the npm package, i.e. "minimist"
-            \`\`\`
-
-            This will be called a security post. Log it out
-            `,
+            tool: 'generate_security_statement_template',
           },
           {
             id: 'write_security_statement_post',
-            description: `Using the GitHub issue number and repo from previous steps, add the security statement post to the GitHub issue as a comment.`,
+            description: `Based on the triage, justification, and template for a security statement from previous step generate security statement. Use kibana version for statement from package.json`,
             tool: 'write_security_statement_post',
           },
           {
@@ -547,7 +569,7 @@ server.tool(
         content: [
           {
             type: 'text',
-            text: `You need to triage the Snyk issue: ${snykIssueNumber}. Follow the instruction steps below carefully. ${JSON.stringify(
+            text: `Triage the Snyk issue: ${snykIssueNumber}. Follow the instruction steps below carefully in the exact order. ${JSON.stringify(
               plan,
               null,
               2
@@ -558,6 +580,7 @@ server.tool(
       };
     } catch (error) {
       console.error('Error during Snyk issue triage:', error);
+
       return {
         content: [
           {
@@ -570,97 +593,100 @@ server.tool(
   }
 );
 
-server.tool(
-  'analyze_library_usage_and_upgrade_feasibility',
-  'Analyze library usage and determine upgrade feasibility',
-  {
-    packageName: z.string().describe('Name of the vulnerable package'),
-    currentVersion: z.string().describe('Current version of the package'),
-    fixedVersion: z.string().describe('Version that fixes the vulnerability'),
-    triageAnalysis: z.string().describe('The triage analysis from the vulnerability assessment'),
-    dependencyChain: z
-      .string()
-      .optional()
-      .describe('Dependency chain showing how the package is introduced'),
-  },
-  async (args) => {
-    const { packageName, currentVersion, fixedVersion, triageAnalysis, dependencyChain } = args;
+// Commented it out for now, so Copilot can look into perform_upgrades and validate_upgrades steps
+// and suggest code changes for those steps in the triage_snyk_issue tool
 
-    try {
-      // Check if we have direct imports/usage of the package
-      const directUsageResults = [];
+// server.tool(
+//   'analyze_library_usage_and_upgrade_feasibility',
+//   'Analyze library usage and determine upgrade feasibility',
+//   {
+//     packageName: z.string().describe('Name of the vulnerable package'),
+//     currentVersion: z.string().describe('Current version of the package'),
+//     fixedVersion: z.string().describe('Version that fixes the vulnerability'),
+//     triageAnalysis: z.string().describe('The triage analysis from the vulnerability assessment'),
+//     dependencyChain: z
+//       .string()
+//       .optional()
+//       .describe('Dependency chain showing how the package is introduced'),
+//   },
+//   async (args) => {
+//     const { packageName, currentVersion, fixedVersion, triageAnalysis, dependencyChain } = args;
 
-      // Search for direct imports
-      const importPatterns = [
-        `require\\(['"]${packageName}['"]\\)`,
-        `from\\s+['"]${packageName}['"]`,
-        `import\\s+.*\\s+from\\s+['"]${packageName}['"]`,
-        `import\\(['"]${packageName}['"]\\)`,
-      ];
+//     try {
+//       // Check if we have direct imports/usage of the package
+//       const directUsageResults = [];
 
-      for (const pattern of importPatterns) {
-        // We'll use a simple approach - check common file patterns
-        const searchResults = await searchCodebase(pattern, packageName);
-        if (searchResults.length > 0) {
-          directUsageResults.push(...searchResults);
-        }
-      }
+//       // Search for direct imports
+//       const importPatterns = [
+//         `require\\(['"]${packageName}['"]\\)`,
+//         `from\\s+['"]${packageName}['"]`,
+//         `import\\s+.*\\s+from\\s+['"]${packageName}['"]`,
+//         `import\\(['"]${packageName}['"]\\)`,
+//       ];
 
-      // Analyze package.json dependencies
-      const packageJsonAnalysis = await analyzePackageJsonDependencies(packageName);
+//       for (const pattern of importPatterns) {
+//         // We'll use a simple approach - check common file patterns
+//         const searchResults = await searchCodebase(pattern, packageName);
+//         if (searchResults.length > 0) {
+//           directUsageResults.push(...searchResults);
+//         }
+//       }
 
-      // Check for API usage patterns specific to the package
-      const apiUsageAnalysis = await analyzeAPIUsage(packageName, triageAnalysis);
+//       // Analyze package.json dependencies
+//       const packageJsonAnalysis = await analyzePackageJsonDependencies(packageName);
 
-      // Determine upgrade feasibility
-      const upgradeFeasibility = await assessUpgradeFeasibility(
-        packageName,
-        currentVersion,
-        fixedVersion,
-        dependencyChain
-      );
+//       // Check for API usage patterns specific to the package
+//       const apiUsageAnalysis = await analyzeAPIUsage(packageName, triageAnalysis);
 
-      const analysis = {
-        packageName,
-        currentVersion,
-        fixedVersion,
-        directUsage: {
-          found: directUsageResults.length > 0,
-          locations: directUsageResults,
-          count: directUsageResults.length,
-        },
-        packageJsonPresence: packageJsonAnalysis,
-        apiUsageAnalysis,
-        upgradeFeasibility,
-        recommendations: generateRecommendations(
-          directUsageResults.length > 0,
-          packageJsonAnalysis,
-          upgradeFeasibility
-        ),
-      };
+//       // Determine upgrade feasibility
+//       const upgradeFeasibility = await assessUpgradeFeasibility(
+//         packageName,
+//         currentVersion,
+//         fixedVersion,
+//         dependencyChain
+//       );
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: formatAnalysisReport(analysis),
-          },
-        ],
-        structuredContent: analysis,
-      };
-    } catch (error) {
-      console.error('Error analyzing library usage:', error);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error analyzing library usage for ${packageName}: ${error.message}`,
-          },
-        ],
-      };
-    }
-  }
-);
+//       const analysis = {
+//         packageName,
+//         currentVersion,
+//         fixedVersion,
+//         directUsage: {
+//           found: directUsageResults.length > 0,
+//           locations: directUsageResults,
+//           count: directUsageResults.length,
+//         },
+//         packageJsonPresence: packageJsonAnalysis,
+//         apiUsageAnalysis,
+//         upgradeFeasibility,
+//         recommendations: generateRecommendations(
+//           directUsageResults.length > 0,
+//           packageJsonAnalysis,
+//           upgradeFeasibility
+//         ),
+//       };
+
+//       return {
+//         content: [
+//           {
+//             type: 'text',
+//             text: formatAnalysisReport(analysis),
+//           },
+//         ],
+//         structuredContent: analysis,
+//       };
+//     } catch (error) {
+//       console.error('Error analyzing library usage:', error);
+//       return {
+//         content: [
+//           {
+//             type: 'text',
+//             text: `Error analyzing library usage for ${packageName}: ${error.message}`,
+//           },
+//         ],
+//       };
+//     }
+//   }
+// );
 
 // Helper functions for the analysis tool
 async function searchCodebase(pattern, packageName) {
