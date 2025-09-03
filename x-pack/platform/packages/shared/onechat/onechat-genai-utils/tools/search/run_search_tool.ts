@@ -53,7 +53,6 @@ export const runSearchTool = async ({
       // handle errors that come from the search tool itself
       if (ToolResultType.error) {
         let allErrorDetails = [];
-        console.log(outState.messages)
         for (const msg of outState.messages) {
           if (msg.getType() == 'tool' && msg.name) {
             allErrorDetails.push({
