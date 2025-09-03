@@ -26,28 +26,36 @@ describe('@kbn/timerange', () => {
         expect(getTimeDifferenceInSeconds(input)).toBe(3600);
       });
 
-      it('should throw error for invalid start date', () => {
+      it('should return NaN for invalid start date', () => {
         const input = {
-          startDate: 0,
+          startDate: NaN,
           endDate: new Date('2023-01-01T01:00:00.000Z').getTime(),
         };
-        expect(() => getTimeDifferenceInSeconds(input)).toThrow('Invalid Dates');
+        expect(getTimeDifferenceInSeconds(input)).toBeNaN();
       });
 
-      it('should throw error for invalid end date', () => {
+      it('should return NaN for invalid end date', () => {
         const input = {
           startDate: new Date('2023-01-01T00:00:00.000Z').getTime(),
-          endDate: 0,
+          endDate: NaN,
         };
-        expect(() => getTimeDifferenceInSeconds(input)).toThrow('Invalid Dates');
+        expect(getTimeDifferenceInSeconds(input)).toBeNaN();
       });
 
-      it('should throw error when start date is after end date', () => {
+      it('should return NaN when start date is after end date', () => {
         const input = {
           startDate: new Date('2023-01-01T01:00:00.000Z').getTime(),
           endDate: new Date('2023-01-01T00:00:00.000Z').getTime(),
         };
-        expect(() => getTimeDifferenceInSeconds(input)).toThrow('Invalid Dates');
+        expect(getTimeDifferenceInSeconds(input)).toBeNaN();
+      });
+
+      it('should handle Unix epoch (0) as valid timestamp', () => {
+        const input = {
+          startDate: 0, // Unix epoch - January 1, 1970
+          endDate: 3600000, // 1 hour later
+        };
+        expect(getTimeDifferenceInSeconds(input)).toBe(3600);
       });
     });
 

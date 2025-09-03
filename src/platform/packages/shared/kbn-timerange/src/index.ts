@@ -65,20 +65,16 @@ export function getDateISORange({ from, to }: { from: string; to: string }) {
 export function getTimeDifferenceInSeconds(
   input: { startDate: number; endDate: number } | TimeRange
 ): number {
-  if ('startDate' in input && 'endDate' in input) {
-    // Original API with timestamp objects
-    if (!input.startDate || !input.endDate || input.startDate > input.endDate) {
-      throw new Error(`Invalid Dates: from: ${input.startDate}, to: ${input.endDate}`);
-    }
+  const isTimestampInput = 'startDate' in input && 'endDate' in input;
 
-    return Math.round((input.endDate - input.startDate) / 1000);
-  } else {
-    // New API with TimeRange object
-    const fromTime = new Date(input.from).getTime();
-    const toTime = new Date(input.to).getTime();
+  const from = isTimestampInput ? input.startDate : new Date(input.from).getTime();
+  const to = isTimestampInput ? input.endDate : new Date(input.to).getTime();
 
-    return Math.round((toTime - fromTime) / 1000);
+  if (from > to) {
+    return NaN;
   }
+
+  return Math.round((to - from) / 1000);
 }
 
 export function getOffsetFromNowInSeconds(epochDate: number) {
