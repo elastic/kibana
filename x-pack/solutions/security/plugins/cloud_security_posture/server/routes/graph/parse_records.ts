@@ -85,13 +85,10 @@ export const parseRecords = (
 
 const getEntityDocuments = (
   entityId: string,
-  actorsDocDataArray: NodeDocumentDataModel[],
-  targetsDocDataArray: NodeDocumentDataModel[]
+  nodesDataArray: NodeDocumentDataModel[]
 ): NodeDocumentDataModel[] => {
-  // Filter documents that match this entity ID from both actors and targets
-  const matchingActorDocs = actorsDocDataArray.filter((doc) => doc.id === entityId);
-  const matchingTargetDocs = targetsDocDataArray.filter((doc) => doc.id === entityId);
-  const matchingDocs = [...matchingActorDocs, ...matchingTargetDocs];
+  // Filter documents that match this entity ID
+  const matchingDocs = nodesDataArray.filter((doc) => doc.id === entityId);
 
   return matchingDocs.map((doc) => ({ ...doc, type: DOCUMENT_TYPE_ENTITY }));
 };
@@ -151,15 +148,28 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       }
     });
 
-    // Create entity nodes
-    [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
+    // Create entity nodes for actors
+    actorIdsArray.forEach((id) => {
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
-          documentsData: getEntityDocuments(id, actorsDocDataArray, targetsDocDataArray),
+          documentsData: getEntityDocuments(id, actorsDocDataArray),
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray, ...targetsDocDataArray]),
+          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray]),
+        };
+      }
+    });
+
+    // Create entity nodes for targets
+    targetIdsArraySafe.forEach((id) => {
+      if (nodesMap[id] === undefined) {
+        nodesMap[id] = {
+          documentsData: getEntityDocuments(id, targetsDocDataArray),
+          id,
+          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
+          color: 'primary',
+          ...determineEntityNodeVisualProps(id, [...targetsDocDataArray]),
         };
       }
     });

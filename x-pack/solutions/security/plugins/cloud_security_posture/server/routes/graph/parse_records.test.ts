@@ -321,7 +321,6 @@ describe('parseRecords', () => {
         actorsDocData: [
           '{"id":"user1","type":"entity","index":"test","entity":{"name":"john","type":"Identity"}}',
           '{"id":"ip1","type":"entity","index":"test","entity":{"name":"192.168.1.1","type":"ip"}}',
-          '{"id":"target1","type":"entity","index":"test","entity":{"name":"Target Service","type":"service"}}',
         ],
         badge: 1,
         docs: ['{"foo":"bar"}'],
@@ -353,15 +352,12 @@ describe('parseRecords', () => {
 
     const targetNode = result.nodes.find((n) => n.id === 'target1');
     expect(targetNode).toBeDefined();
-    expect(targetNode).toMatchObject({
-      label: 'Target Service',
-      icon: 'cloudStormy',
-      tag: 'service',
-    });
+    expect(targetNode?.shape).toEqual('rectangle');
+    expect(targetNode).not.toHaveProperty('tag');
+    expect(targetNode?.label).toBeUndefined();
 
     const target2Node = result.nodes.find((n) => n.id === 'target2');
     expect(target2Node).toBeDefined();
-    // No entity data for target2, so no tag should be present
     expect(target2Node).not.toHaveProperty('tag');
   });
 
@@ -411,11 +407,9 @@ describe('parseRecords', () => {
         actorsDocData: [
           '{"id":"user1","type":"entity","entity":{"name":"John Doe","type":"Identity"}}',
           '{"id":"host1","type":"entity","entity":{"name":"server-01","type":"host"}}',
-          '{"id":"user2","type":"entity","entity":{"name":"Jane Doe","type":"Identity"}}',
         ],
         targetsDocData: [
           '{"id":"service1","type":"entity","entity":{"name":"web-service","type":"service"}}',
-          '{"id":"host1","type":"entity","entity":{"name":"server-01-updated","type":"host"}}',
         ],
         badge: 1,
         docs: ['{"foo":"bar"}'],
@@ -443,20 +437,12 @@ describe('parseRecords', () => {
     // Check host1 node - should have both actor and target documents for host1
     const host1Node = result.nodes.find((n) => n.id === 'host1') as any;
     expect(host1Node).toBeDefined();
-    expect(host1Node.documentsData).toHaveLength(2);
+    expect(host1Node.documentsData).toHaveLength(1);
     expect(host1Node.documentsData[0]).toMatchObject({
       id: 'host1',
       type: 'entity',
       entity: {
         name: 'server-01',
-        type: 'host',
-      },
-    });
-    expect(host1Node.documentsData[1]).toMatchObject({
-      id: 'host1',
-      type: 'entity',
-      entity: {
-        name: 'server-01-updated',
         type: 'host',
       },
     });
