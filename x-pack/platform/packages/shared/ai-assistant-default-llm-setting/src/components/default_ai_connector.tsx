@@ -23,27 +23,27 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import type { FieldDefinition, OnFieldChangeFn, UnsavedFieldChange } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  OnFieldChangeFn,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 import type { ApplicationStart, DocLinksStart, IToasts, UiSettingsType } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { NO_DEFAULT_CONNECTOR } from '../lib/constants'
+import { NO_DEFAULT_CONNECTOR } from '../lib/constants';
 
-
-
-type ConnectorData = {
+interface ConnectorData {
   connectors?: Array<{
-    id: string
-    name: string
-    isPreconfigured: boolean
-    actionTypeId: string
-    config?: Record<string, any>
-  }>
-  loading: boolean
+    id: string;
+    name: string;
+    isPreconfigured: boolean;
+    actionTypeId: string;
+    config?: Record<string, any>;
+  }>;
+  loading: boolean;
 }
 
-const hasElasticManagedLlm = (
-  connectors: ConnectorData['connectors'] | undefined
-) => {
+const hasElasticManagedLlm = (connectors: ConnectorData['connectors'] | undefined) => {
   if (!Array.isArray(connectors) || connectors.length === 0) {
     return false;
   }
@@ -56,17 +56,22 @@ const hasElasticManagedLlm = (
   );
 };
 
-
 interface Props {
-  toast: IToasts
-  application: ApplicationStart
-  docLinks: DocLinksStart
+  toast: IToasts;
+  application: ApplicationStart;
+  docLinks: DocLinksStart;
   uiSetting: {
-    unsavedChanges: Record<string, UnsavedFieldChange<UiSettingsType>>
-    handleFieldChange: OnFieldChangeFn
-    fields: Record<string, FieldDefinition<UiSettingsType, string | number | boolean | (string | number)[] | null | undefined>>
-  }
-  connectors: ConnectorData
+    unsavedChanges: Record<string, UnsavedFieldChange<UiSettingsType>>;
+    handleFieldChange: OnFieldChangeFn;
+    fields: Record<
+      string,
+      FieldDefinition<
+        UiSettingsType,
+        string | number | boolean | (string | number)[] | null | undefined
+      >
+    >;
+  };
+  connectors: ConnectorData;
 }
 
 const NoDefaultOption: EuiComboBoxOptionOption<string> = {
@@ -135,9 +140,15 @@ const getOptionsByValues = (
   return options.flatMap(getOptionsByValuesHelper);
 };
 
-export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connectors, application, docLinks }) => {
+export const DefaultAIConnector: React.FC<Props> = ({
+  toast,
+  uiSetting,
+  connectors,
+  application,
+  docLinks,
+}) => {
   const options = useMemo(() => getOptions(connectors), [connectors]);
-  const { handleFieldChange, fields, unsavedChanges } = uiSetting
+  const { handleFieldChange, fields, unsavedChanges } = uiSetting;
 
   const onChangeDefaultLlm = (selectedOptions: EuiComboBoxOptionOption<string>[]) => {
     const values = selectedOptions.map((option) => option.value);
@@ -211,9 +222,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connecto
                 >
                   <FormattedMessage
                     id="genAiSettings.manage.connectors"
-                    defaultMessage={
-                      'View connectors'
-                    }
+                    defaultMessage={'View connectors'}
                   />
                 </EuiLink>
               ),
@@ -264,14 +273,11 @@ export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connecto
           }}
         />
       </p>
-    )
-
-  }, [hasElasticManagedLlm, application, docLinks])
+    );
+  }, [hasElasticManagedLlm, application, docLinks]);
 
   return (
     <>
-
-
       <EuiDescribedFormGroup
         data-test-subj="connectorsSection"
         fullWidth
@@ -291,7 +297,6 @@ export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connecto
         }
         description={connectorDescription}
       >
-
         <EuiFormRow fullWidth>
           <EuiFlexGroup gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -318,7 +323,9 @@ export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connecto
                     <EuiCheckbox
                       id="defaultAiConnectorCheckbox"
                       data-test-subj="defaultAiConnectorCheckbox"
-                      disabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly}
+                      disabled={
+                        fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly
+                      }
                       label={
                         <FormattedMessage
                           id="genAiSettings.gen_ai_settings.settings.defaultLlmOnly.checkbox.label"

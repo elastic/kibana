@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-
-export { DefaultAIConnector } from './src/components/default_ai_connector'
+export { DefaultAIConnector } from './src/components/default_ai_connector';

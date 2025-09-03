@@ -1,5 +1,11 @@
-import React from 'react';
-import { createContext, useContext } from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { createContext, useContext } from 'react';
 import type {
   FieldDefinition,
   OnFieldChangeFn,
@@ -15,7 +21,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 type SettingsContext = ReturnType<typeof Settings>;
 
@@ -34,8 +40,14 @@ const SETTING_KEYS = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 ];
 
-export const SettingsContextProvider = ({ children, settings }: { children: React.ReactNode, settings: SettingsStart }) => {
-  const value = Settings({ settingsKeys: SETTING_KEYS, settings: settings });
+export const SettingsContextProvider = ({
+  children,
+  settings,
+}: {
+  children: React.ReactNode;
+  settings: SettingsStart;
+}) => {
+  const value = Settings({ settingsKeys: SETTING_KEYS, settings });
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
@@ -72,8 +84,13 @@ function getSettingsFields({
   }, {});
 }
 
-const Settings = ({ settingsKeys, settings }: { settingsKeys: string[], settings: SettingsStart }) => {
-
+const Settings = ({
+  settingsKeys,
+  settings,
+}: {
+  settingsKeys: string[];
+  settings: SettingsStart;
+}) => {
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
   );

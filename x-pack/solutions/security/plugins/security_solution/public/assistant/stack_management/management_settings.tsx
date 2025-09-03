@@ -24,14 +24,14 @@ export const ManagementSettings = React.memo(() => {
     chrome: { docTitle, setBreadcrumbs },
     serverless,
     settings,
-    docLinks
+    docLinks,
   } = useKibana().services;
   const {
-      navigateToApp,
-      capabilities: {
-        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
-      },
-    } = application;
+    navigateToApp,
+    capabilities: {
+      securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+    },
+  } = application;
   const spaceId = useSpaceId();
 
   docTitle.change(SECURITY_AI_SETTINGS);

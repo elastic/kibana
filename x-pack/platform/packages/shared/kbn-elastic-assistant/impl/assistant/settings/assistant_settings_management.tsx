@@ -9,6 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -31,8 +33,6 @@ import {
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
 import { EvaluationSettings } from '.';
 import { ManagementSettingsTabs } from './types';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
-import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 
 interface Props {
   dataViews: DataViewsContract;
@@ -48,7 +48,14 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab: selectedSettingsTab, settings, docLinks, application }) => {
+  ({
+    dataViews,
+    onTabChange,
+    currentTab: selectedSettingsTab,
+    settings,
+    docLinks,
+    application,
+  }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -159,7 +166,14 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           `}
           data-test-subj={`tab-${selectedSettingsTab}`}
         >
-          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement settings={settings} connectors={connectors} docLinks={docLinks} application={application} />}
+          {selectedSettingsTab === CONNECTORS_TAB && (
+            <ConnectorsSettingsManagement
+              settings={settings}
+              connectors={connectors}
+              docLinks={docLinks}
+              application={application}
+            />
+          )}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               connectors={connectors}
