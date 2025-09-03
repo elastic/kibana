@@ -8,17 +8,20 @@ import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useUpdateStreams } from '../../hooks/use_update_streams';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
+import { ManageStreamDescriptionFlyout } from './manage_stream_description_flyout/manage_stream_description_flyout';
 import { SignificantEventsTable } from './significant_events_table';
 import type { TimelineEvent } from './timeline';
 import { Timeline } from './timeline';
@@ -26,9 +29,10 @@ import { formatChangePoint } from './utils/change_point';
 
 interface Props {
   definition: Streams.all.GetResponse;
+  refreshDefinition: () => void;
 }
 
-export function StreamDetailSignificantEventsView({ definition }: Props) {
+export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
   const {
     core: { notifications },
   } = useKibana();
@@ -47,12 +51,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     start,
     end,
   });
-
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
   });
+  const updateStream = useUpdateStreams(definition.stream.name);
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [isManageDescriptionFlyoutOpen, setIsManageDescriptionFlyoutOpen] = useState(false);
 
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
@@ -143,6 +148,43 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   ) : null;
 
+  const manageDescriptionFlyout = isManageDescriptionFlyoutOpen ? (
+    <ManageStreamDescriptionFlyout
+      definition={definition.stream}
+      onSave={async (description: string) => {
+        await updateStream({
+          queries: definition.queries,
+          dashboards: definition.dashboards,
+          stream: { ...omit(definition.stream, ['name']), description },
+        } as Streams.all.UpsertRequest).then(
+          () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.manageDescription.saveSuccessToastTitle',
+                { defaultMessage: `Successfully saved stream description` }
+              ),
+            });
+            setIsManageDescriptionFlyoutOpen(false);
+            refreshDefinition();
+          },
+          (error) => {
+            notifications.showErrorDialog({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.manageDescription.saveErrorToastTitle',
+                { defaultMessage: `Could not save stream description` }
+              ),
+              error,
+            });
+          }
+        );
+        setIsManageDescriptionFlyoutOpen(false);
+      }}
+      onClose={() => {
+        setIsManageDescriptionFlyoutOpen(false);
+      }}
+    />
+  ) : null;
+
   if (significantEventsFetchState.value.length === 0) {
     return (
       <>
@@ -151,8 +193,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setIsEditFlyoutOpen(true);
             setQueryToEdit(undefined);
           }}
+          onIdentifySystemClick={() => {
+            setIsManageDescriptionFlyoutOpen(true);
+          }}
         />
         {editFlyout}
+        {manageDescriptionFlyout}
       </>
     );
   }
@@ -166,18 +212,34 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               <StreamsAppSearchBar showQueryInput={false} showDatePicker />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={() => {
-                  setIsEditFlyoutOpen(true);
-                  setQueryToEdit(undefined);
-                }}
-                iconType="plus"
-              >
-                {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Significant events',
-                })}
-              </EuiButton>
+              <EuiFlexGroup direction="row" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      setIsManageDescriptionFlyoutOpen(true);
+                    }}
+                    iconType="sparkles"
+                  >
+                    {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
+                      defaultMessage: 'Identify system',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="primary"
+                    onClick={() => {
+                      setIsEditFlyoutOpen(true);
+                      setQueryToEdit(undefined);
+                    }}
+                    iconType="plus"
+                  >
+                    {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
+                      defaultMessage: 'Significant events',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -204,6 +266,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       {editFlyout}
+      {manageDescriptionFlyout}
     </>
   );
 }
