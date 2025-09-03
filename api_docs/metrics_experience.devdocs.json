@@ -5,8 +5,75 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "metricsExperience",
+        "id": "def-public.MetricsExperienceClient",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricsExperienceClient",
+        "description": [],
+        "signature": [
+          "{ getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+          "MetricField",
+          "[]; total: number; page: number; }>; postData: (params: { esql: string; filters: { value: string; field: string; }[]; from: string; to: string; }, signal?: AbortSignal | null | undefined) => Promise<{ data: { key: Record<string, string>; data: { x: number; y: number; }[]; }[] | { x: number; y: ",
+          "FieldValue",
+          "; }[]; esql: string; hasDimensions: boolean; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/metrics_experience/public/api/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "metricsExperience",
+      "id": "def-public.MetricsExperiencePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "MetricsExperiencePluginSetup",
+      "description": [],
+      "path": "src/platform/plugins/shared/metrics_experience/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "metricsExperience",
+      "id": "def-public.MetricsExperiencePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "MetricsExperiencePluginStart",
+      "description": [],
+      "path": "src/platform/plugins/shared/metrics_experience/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "metricsExperience",
+          "id": "def-public.MetricsExperiencePluginStart.metricsExperienceClient",
+          "type": "Object",
+          "tags": [],
+          "label": "metricsExperienceClient",
+          "description": [],
+          "signature": [
+            "{ getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+            "MetricField",
+            "[]; total: number; page: number; }>; postData: (params: { esql: string; filters: { value: string; field: string; }[]; from: string; to: string; }, signal?: AbortSignal | null | undefined) => Promise<{ data: { key: Record<string, string>; data: { x: number; y: number; }[]; }[] | { x: number; y: ",
+            "FieldValue",
+            "; }[]; esql: string; hasDimensions: boolean; }>; }"
+          ],
+          "path": "src/platform/plugins/shared/metrics_experience/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],

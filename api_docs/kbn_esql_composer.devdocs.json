@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "drop",
-        "description": [],
+        "description": [
+          "\nAppends a `DROP` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(columns: (string | string[])[]) => ",
           "QueryOperator"
@@ -40,7 +42,9 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": [],
+            "description": [
+              "The columns to drop."
+            ],
             "signature": [
               "(string | string[])[]"
             ],
@@ -50,7 +54,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `DROP` command appended."
+        ],
         "initialIsOpen": false
       },
       {
@@ -59,7 +65,9 @@
         "type": "Function",
         "tags": [],
         "label": "evaluate",
-        "description": [],
+        "description": [
+          "\nAppends an `EVAL` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -74,7 +82,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [],
+            "description": [
+              "The body of the `EVAL` command."
+            ],
             "signature": [
               "TQuery"
             ],
@@ -89,7 +99,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "The parameters to use in the `EVAL` command."
+            ],
             "signature": [
               "TParams | undefined"
             ],
@@ -99,7 +111,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `EVAL` command appended."
+        ],
         "initialIsOpen": false
       },
       {
@@ -108,7 +122,9 @@
         "type": "Function",
         "tags": [],
         "label": "from",
-        "description": [],
+        "description": [
+          "\nThe entry point for the ESQL composer pipeline. Creates a new query\nstarting with a `FROM` clause.\n"
+        ],
         "signature": [
           "(patterns: (string | string[])[]) => ",
           "QueryPipeline"
@@ -123,7 +139,9 @@
             "type": "Array",
             "tags": [],
             "label": "patterns",
-            "description": [],
+            "description": [
+              "The index patterns to query."
+            ],
             "signature": [
               "(string | string[])[]"
             ],
@@ -133,7 +151,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance to which other composer commands can be chained."
+        ],
         "initialIsOpen": false
       },
       {
@@ -142,7 +162,9 @@
         "type": "Function",
         "tags": [],
         "label": "keep",
-        "description": [],
+        "description": [
+          "\nAppends a `KEEP` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(columns: (string | string[])[]) => ",
           "QueryOperator"
@@ -157,7 +179,9 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": [],
+            "description": [
+              "The columns to keep."
+            ],
             "signature": [
               "(string | string[])[]"
             ],
@@ -167,7 +191,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `KEEP` command appended."
+        ],
         "initialIsOpen": false
       },
       {
@@ -176,7 +202,9 @@
         "type": "Function",
         "tags": [],
         "label": "limit",
-        "description": [],
+        "description": [
+          "\nAppends a `LIMIT` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(value: number) => ",
           "QueryOperator"
@@ -191,7 +219,9 @@
             "type": "number",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "The limit to apply."
+            ],
             "signature": [
               "number"
             ],
@@ -201,7 +231,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `LIMIT` command appended."
+        ],
         "initialIsOpen": false
       },
       {
@@ -210,7 +242,9 @@
         "type": "Function",
         "tags": [],
         "label": "sort",
-        "description": [],
+        "description": [
+          "\nAppends a `SORT` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -250,7 +284,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `SORT` command appended."
+        ],
         "initialIsOpen": false
       },
       {
@@ -357,7 +393,9 @@
         "type": "Function",
         "tags": [],
         "label": "stats",
-        "description": [],
+        "description": [
+          "\nAppends a `STATS` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -372,7 +410,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [],
+            "description": [
+              "The body of the `STATS` command."
+            ],
             "signature": [
               "TQuery"
             ],
@@ -387,7 +427,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "The parameters to use in the `STATS` command."
+            ],
             "signature": [
               "TParams | undefined"
             ],
@@ -397,7 +439,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `STATS` command appended."
+        ],
         "initialIsOpen": false
       },
       {
@@ -406,7 +450,9 @@
         "type": "Function",
         "tags": [],
         "label": "where",
-        "description": [],
+        "description": [
+          "\nAppends a `WHERE` command to the ESQL composer pipeline.\n"
+        ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
           "QueryOperator"
@@ -421,7 +467,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
-            "description": [],
+            "description": [
+              "The body of the `WHERE` command."
+            ],
             "signature": [
               "TQuery"
             ],
@@ -436,7 +484,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "The parameters to use in the `WHERE` command."
+            ],
             "signature": [
               "TParams | undefined"
             ],
@@ -446,7 +496,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `WHERE` command appended."
+        ],
         "initialIsOpen": false
       }
     ],

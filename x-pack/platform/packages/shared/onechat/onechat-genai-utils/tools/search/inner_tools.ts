@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel } from '@kbn/onechat-server';
-import type { ResourceResult, TabularDataResult } from '@kbn/onechat-common/tools';
+import type { ResourceResult, ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { relevanceSearch } from '../relevance_search';
@@ -48,7 +48,7 @@ export const createRelevanceSearchTool = ({
         { tool: { input: { term, index, size } } },
         async () => {
           const { results: rawResults } = await relevanceSearch({
-            index,
+            target: index,
             term,
             size,
             model,
@@ -66,17 +66,17 @@ export const createRelevanceSearchTool = ({
       name: relevanceSearchToolName,
       responseFormat: 'content_and_artifact',
       schema: z.object({
-        term: z.string().describe('Term to search for.'),
-        index: z.string().describe('Index to search against.'),
+        term: z.string().describe('Term to search for'),
+        index: z.string().describe('Name of the index, alias or datastream to search against'),
         size: z
           .number()
           .optional()
           .default(10)
           .describe('Number of documents to return. Defaults to 10.'),
       }),
-      description: `Find relevant documents in an index based on a simple fulltext search.
+      description: `Find relevant documents in an index, alias or datastream, based on a simple fulltext search.
 
-      Will search for documents in the specified index, performing a match query against the provided term(s).`,
+      Will search for documents performing a match query against the provided term(s).`,
     }
   );
 };
@@ -93,23 +93,31 @@ export const createNaturalLanguageSearchTool = ({
   return toTool(
     async ({ query, index }) => {
       return withExecuteToolSpan(
-        relevanceSearchToolName,
+        naturalLanguageSearchToolName,
         { tool: { input: { query, index } } },
         async () => {
           const response = await naturalLanguageSearch({
             nlQuery: query,
-            index,
+            target: index,
             model,
             esClient,
           });
 
-          const result: TabularDataResult = {
-            type: ToolResultType.tabularData,
-            data: response,
-          };
+          const results: ToolResult[] = [
+            {
+              type: ToolResultType.query,
+              data: {
+                esql: response.generatedQuery,
+              },
+            },
+            {
+              type: ToolResultType.tabularData,
+              data: response.esqlData,
+            },
+          ];
 
-          const content = JSON.stringify([result]);
-          const artifact = { results: [result] };
+          const content = JSON.stringify(results);
+          const artifact = { results };
           return [content, artifact];
         }
       );
@@ -119,7 +127,7 @@ export const createNaturalLanguageSearchTool = ({
       responseFormat: 'content_and_artifact',
       schema: z.object({
         query: z.string().describe('A natural language query expressing the search request'),
-        index: z.string().describe('Index to search against'),
+        index: z.string().describe('Name of the index, alias or datastream to search against'),
       }),
       description: `Given a natural language query, generate and execute the corresponding search request and returns the results in a tabular format
 
