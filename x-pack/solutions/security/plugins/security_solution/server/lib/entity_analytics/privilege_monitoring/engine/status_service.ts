@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
@@ -64,7 +64,7 @@ export const createEngineStatusService = (
 
       dataClient.audit(
         PrivilegeMonitoringEngineActions.DISABLE,
-        EngineComponentResourceEnum.privmon_engine,
+        MonitoringEngineComponentResourceEnum.privmon_engine,
         'Privilege Monitoring Engine disabled'
       );
       dataClient.log('info', 'Privileged Monitoring Engine disabled successfully');
@@ -78,7 +78,7 @@ export const createEngineStatusService = (
 
       dataClient.audit(
         PrivilegeMonitoringEngineActions.DISABLE,
-        EngineComponentResourceEnum.privmon_engine,
+        MonitoringEngineComponentResourceEnum.privmon_engine,
         'Failed to disable Privileged Monitoring Engine',
         e
       );
@@ -100,7 +100,7 @@ export const createEngineStatusService = (
 
     dataClient.audit(
       PrivilegeMonitoringEngineActions.SCHEDULE_NOW,
-      EngineComponentResourceEnum.privmon_engine,
+      MonitoringEngineComponentResourceEnum.privmon_engine,
       'Privilege Monitoring Engine scheduled for immediate run'
     );
 

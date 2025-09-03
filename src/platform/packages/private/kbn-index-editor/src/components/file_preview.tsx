@@ -27,7 +27,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { KibanaContextExtra } from '../types';
@@ -265,7 +265,7 @@ export type ResultsPreviewProps = Omit<FilePreviewItem, 'fileName'>;
 
 const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<object>>>(() => {
-    return columnNames.map((name) => {
+    return columnNames.map((name: string) => {
       return {
         field: name,
         name,
