@@ -36,13 +36,16 @@ export const createDataSource = ({
   dataView: DataView | DataViewSpec | string | undefined;
   query: Query | AggregateQuery | undefined;
 }) => {
-  return isOfAggregateQueryType(query)
-    ? createEsqlDataSource()
-    : typeof dataView === 'string'
-    ? createDataViewDataSource({ dataViewId: dataView })
-    : dataView?.id
-    ? createDataViewDataSource({ dataViewId: dataView.id })
-    : undefined;
+  if (isOfAggregateQueryType(query)) {
+    return createEsqlDataSource();
+  }
+  if (typeof dataView === 'string') {
+    return createDataViewDataSource({ dataViewId: dataView });
+  }
+  if (dataView?.id) {
+    return createDataViewDataSource({ dataViewId: dataView.id });
+  }
+  return undefined;
 };
 
 export const isDataSourceType = <T extends DataSourceType>(
