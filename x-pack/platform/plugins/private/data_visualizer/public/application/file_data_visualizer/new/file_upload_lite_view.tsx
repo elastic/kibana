@@ -90,7 +90,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
                   ) : (
                     <>
                       <FormattedMessage
-                        id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+                        id="xpack.dataVisualizer.file.uploadView.uploadFileLiteDescription"
                         defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
                       />
 

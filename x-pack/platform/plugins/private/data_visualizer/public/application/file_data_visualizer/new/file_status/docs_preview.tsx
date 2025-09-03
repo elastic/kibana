@@ -11,7 +11,7 @@ import { type DataTableRecord } from '@kbn/discover-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { FieldTypeIcon } from './field_type_icon';
+import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 
 interface ResultsPreviewProps {
   sampleDocs: DataTableRecord[];
@@ -23,7 +23,6 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }
     if (!sampleDocs?.length) {
       return [];
     }
-    // const columnNames = Object.keys(mappings.properties ?? {}).sort((a, b) => a.localeCompare(b));
     const fields = Object.entries(mappings.properties ?? {}).sort(([a], [b]) => a.localeCompare(b));
     return fields.map(([name, { type }]) => {
       return {

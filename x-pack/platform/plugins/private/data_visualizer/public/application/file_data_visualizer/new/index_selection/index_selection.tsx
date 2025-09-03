@@ -75,7 +75,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
       <EuiText size="s">
         <p>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+            id="xpack.dataVisualizer.file.uploadView.indexChoiceDescription"
             defaultMessage="An index stores your data and defines the field mappings for searches."
           />
         </p>
