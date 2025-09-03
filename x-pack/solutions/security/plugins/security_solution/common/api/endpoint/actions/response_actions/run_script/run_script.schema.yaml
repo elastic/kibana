@@ -7,7 +7,7 @@ paths:
     post:
       summary: Run a script
       operationId: RunScriptAction
-      description: Run a script on a host. Currently supported only for some agent types
+      description: Run a script on a host. Currently supported only for some agent types.
       x-codegen-enabled: true
       x-labels: [ ess, serverless ]
       requestBody:
@@ -121,5 +121,5 @@ components:
         inputParams:
           type: string
           minLength: 1
-          description: The input parameter arguments for the script that was selected
+          description: The input parameter arguments for the script that was selected.
 
