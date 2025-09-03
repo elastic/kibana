@@ -1250,7 +1250,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.monitored_filesystems',
       {
         defaultMessage:
-          'Provide a comma-separated list of additional filesystems for fanotify subsystem to monitor. Names should be as they appear in `/proc/filesystems`, for example `jfs,ufs,ramfs`. When `ignore_unknown_filesystems` is `false`, this option is ignored. Warning: it's recommended to avoid network backed filesystems. Default: none.',
+          'Provide a comma-separated list of additional filesystems for fanotify subsystem to monitor. Names should be as they appear in `/proc/filesystems`, for example `jfs,ufs,ramfs`. When `ignore_unknown_filesystems` is `false`, this option is ignored. Warning: it\'s recommended to avoid network backed filesystems. Default: none.',
       }
     ),
   },
