@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage, isIdentifier } from '@kbn/esql-ast';
+import {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLMessage,
+  isIdentifier,
+  isList,
+} from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import {
   isLiteralItem,
   isTimeIntervalItem,

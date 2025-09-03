@@ -50,7 +50,7 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
       )}
 
       {!required && (
-        <EuiToolTip position="top" content={strings.getRemoveAriaLabel()}>
+        <EuiToolTip position="top" content={strings.getRemoveAriaLabel()} disableScreenReaderOutput>
           <EuiButtonIcon
             color="text"
             onClick={onRemove}

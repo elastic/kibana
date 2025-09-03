@@ -120,7 +120,7 @@ xpack.observabilityAIAssistant.scope: "search"
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
 
 # Query Rules UI
-xpack.searchQueryRules.enabled: false
+xpack.searchQueryRules.enabled: true
 
 ## Search Connectors in stack management
 xpack.contentConnectors.ui.enabled: false

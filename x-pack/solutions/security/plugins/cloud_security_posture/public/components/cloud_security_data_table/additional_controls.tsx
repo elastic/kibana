@@ -62,7 +62,6 @@ export const AdditionalControls = ({
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonEmpty
-          className="cspDataTableFields"
           iconType="tableOfContents"
           onClick={openFieldsSelectorModal}
           size="xs"

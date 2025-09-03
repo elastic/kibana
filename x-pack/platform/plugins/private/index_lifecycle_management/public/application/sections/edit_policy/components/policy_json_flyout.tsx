@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiCallOut,
   EuiLoadingSpinner,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { SerializedPolicy } from '../../../../../common/types';
@@ -53,6 +54,8 @@ const prettifyFormJson = (policy: SerializedPolicy): PolicyJson => {
 };
 
 export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid
@@ -136,10 +139,10 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
   }
 
   return (
-    <EuiFlyout maxWidth={480} onClose={close}>
+    <EuiFlyout maxWidth={480} onClose={close} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {policyName ? (
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.policyJsonFlyout.namedTitle"

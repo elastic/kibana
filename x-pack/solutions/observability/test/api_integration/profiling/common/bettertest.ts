@@ -19,9 +19,7 @@ export type BetterTest = <T extends any>(options: {
 }) => Promise<{ status: number; body: T }>;
 
 /*
- * This is a wrapper around supertest that throws an error if the response status is not 200.
- * This is useful for tests that expect a 200 response
- * It also makes it easier to debug tests that fail because of a 500 response.
+ * This is a wrapper around supertest that add the correct headers
  */
 export function getBettertest(st: supertest.Agent): BetterTest {
   return async ({ pathname, method = 'get', query, body }) => {
@@ -29,14 +27,14 @@ export function getBettertest(st: supertest.Agent): BetterTest {
 
     let res: request.Response;
     if (body) {
-      res = await st[method](url).send(body).set('kbn-xsrf', 'true');
+      res = await st[method](url)
+        .send(body)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana');
     } else {
-      res = await st[method](url).set('kbn-xsrf', 'true');
-    }
-
-    // supertest doesn't throw on http errors
-    if (res?.status !== 200 && res?.status !== 202) {
-      throw new BetterTestError(res);
+      res = await st[method](url)
+        .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana');
     }
 
     return res;

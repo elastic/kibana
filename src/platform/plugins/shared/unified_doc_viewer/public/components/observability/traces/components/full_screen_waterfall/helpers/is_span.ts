@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord, OTEL_SPAN_KIND, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import { DataTableRecord, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 
 export const isSpanHit = (hit: DataTableRecord | null): boolean => {
   if (!hit?.flattened) {
     return false;
   }
 
-  const processorEvent = hit.flattened[PROCESSOR_EVENT_FIELD];
-  const spanKind = hit.flattened[OTEL_SPAN_KIND];
+  const processorEvent = getFlattenedFields<{ [PROCESSOR_EVENT_FIELD]: string }>(hit, [
+    PROCESSOR_EVENT_FIELD,
+  ])[PROCESSOR_EVENT_FIELD];
 
-  const isOtelSpan = spanKind != null || processorEvent == null;
+  const isOtelSpan = processorEvent == null;
   const isApmSpan = processorEvent === 'span';
 
   return isApmSpan || isOtelSpan;

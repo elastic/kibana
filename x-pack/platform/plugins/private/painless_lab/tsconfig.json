@@ -7,7 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

@@ -15,7 +15,7 @@ import {
 const RULE_SIGNAL_ID_SUB_AGGREGATION = {
   signalRuleIdSubAggregation: {
     terms: {
-      field: 'signal.rule.id',
+      field: 'signal.rule.rule_id',
     },
   },
 };
@@ -23,7 +23,7 @@ const RULE_SIGNAL_ID_SUB_AGGREGATION = {
 /**
  * Returns aggregations to be used to calculate the statistics to be used in the`extraAction` property of the EuiAccordion component.
  * It handles custom renders for the following fields:
- * - signal.rule.id
+ * - signal.rule.rule_id
  * - kibana.alert.severity
  * - kibana.alert.rule.name
  * And returns a default set of aggregation for all the other fields.
@@ -34,7 +34,7 @@ export const groupStatsAggregations = (field: string): NamedAggregation[] => {
   const aggMetrics: NamedAggregation[] = DEFAULT_GROUP_STATS_AGGREGATION('');
 
   switch (field) {
-    case 'signal.rule.id':
+    case 'signal.rule.rule_id':
       aggMetrics.push(SEVERITY_SUB_AGGREGATION, RULE_COUNT_AGGREGATION);
       break;
     case 'kibana.alert.severity':

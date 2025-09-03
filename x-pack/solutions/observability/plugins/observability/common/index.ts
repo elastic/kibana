@@ -42,6 +42,7 @@ export {
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   apmEnableServiceMapApiV2,
+  enableDiagnosticMode,
 } from './ui_settings_keys';
 
 export {

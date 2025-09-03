@@ -3036,10 +3036,18 @@
       }
     }
   },
+  "privmon-api-key": {
+    "dynamic": false,
+    "properties": {
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
       "index_name": {
+        "type": "keyword"
+      },
+      "inference_id": {
         "type": "keyword"
       },
       "installation_status": {

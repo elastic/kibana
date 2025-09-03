@@ -26,7 +26,13 @@ export const privilegedUserParserTransform = (initialRowIndex = 1) => {
       const result = parseMonitoredPrivilegedUserCsvRow(row);
 
       const formattedResult: Either<BulkProcessingError, BulkPrivMonUser> = isRight(result)
-        ? right({ username: result.right, index })
+        ? right({
+            username: result.right.username,
+            label: result.right.label
+              ? { field: 'label', value: result.right.label, source: 'csv' }
+              : undefined,
+            index,
+          })
         : left({ index, message: result.left, username: null }); // The username could not be found in the row
 
       index++;

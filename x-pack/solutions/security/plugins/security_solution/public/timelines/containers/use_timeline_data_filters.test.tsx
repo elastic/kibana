@@ -56,15 +56,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useTimelineDataFilters', () => {
   describe('on alerts page', () => {
-    it('uses the same selected patterns throughout the app', () => {
-      const { result } = renderHook(() => useTimelineDataFilters(false), { wrapper });
-      const { result: timelineResult } = renderHook(() => useTimelineDataFilters(true), {
-        wrapper,
-      });
-
-      expect(result.current.selectedPatterns).toEqual(timelineResult.current.selectedPatterns);
-    });
-
     it('allows the other parts of the query to remain unique', () => {
       const { result } = renderHook(() => useTimelineDataFilters(false), { wrapper });
       const { result: timelineResult } = renderHook(() => useTimelineDataFilters(true), {

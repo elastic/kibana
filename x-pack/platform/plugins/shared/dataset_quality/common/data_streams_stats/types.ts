@@ -7,6 +7,12 @@
 
 import { APIClientRequestParamsOf, APIReturnType } from '../rest';
 
+export type GetDataStreamsTypesPrivilegesParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/types_privileges`>['params'];
+export type GetDataStreamsTypesPrivilegesQuery = GetDataStreamsTypesPrivilegesParams['query'];
+export type GetDataStreamsTypesPrivilegesResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/types_privileges`>;
+
 export type GetDataStreamsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/stats`>['params'];
 export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];

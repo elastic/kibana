@@ -62,6 +62,8 @@ export interface RuleTaskRunResult {
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
   taskRunError?: DecoratedError;
+  shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 }
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state

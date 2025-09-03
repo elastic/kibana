@@ -19,7 +19,7 @@ export const useKibanaFeatureFlags = (): UseKibanaFeatureFlags => {
   } = useKibana();
 
   const attackDiscoveryAlertsEnabled = useMemo(
-    () => featureFlags.getBooleanValue(ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG, false),
+    () => featureFlags.getBooleanValue(ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG, true),
     [featureFlags]
   );
 

@@ -6,6 +6,7 @@
  */
 
 import { EXCLUDE_ELASTIC_CLOUD_INDICES, INCLUDE_INDEX_PATTERN } from '../../../../common/constants';
+
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_analytics:monitoring:privileges:engine';
 export const VERSION = '1.0.0';
@@ -19,6 +20,8 @@ export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
   // STOPPED: 'stopped',
   STARTED: 'started',
   ERROR: 'error',
+  DISABLED: 'disabled',
+  NOT_INSTALLED: 'not_installed',
 } as const;
 
 // Base constants

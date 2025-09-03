@@ -64,6 +64,7 @@ const getSettingsApplicationStory = ({ hasGlobalSettings }: StoryProps) => (
       });
       return { successfulValidation: true, valid: true };
     }}
+    subscribeToActiveSpace={() => new Subscription()}
   >
     <Component />
   </SettingsApplicationProvider>

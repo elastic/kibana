@@ -25,13 +25,26 @@ import {
   getModelOptionsForInferenceEndpoints,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
-import { KnowledgeBaseState, useKibana } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  KnowledgeBaseState,
+  LEGACY_CUSTOM_INFERENCE_ID,
+  useKibana,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { UseProductDoc } from '../../../hooks/use_product_doc';
 
-export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
+export function ChangeKbModel({
+  knowledgeBase,
+  productDoc,
+  currentlyDeployedInferenceId,
+}: {
+  knowledgeBase: UseKnowledgeBaseResult;
+  productDoc: UseProductDoc;
+  currentlyDeployedInferenceId: string | undefined;
+}) {
   const { overlays } = useKibana().services;
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
-  const [selectedInferenceId, setSelectedInferenceId] = useState<string>('');
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
@@ -40,12 +53,15 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     endpoints: inferenceEndpoints,
   });
 
+  const [selectedInferenceId, setSelectedInferenceId] = useState(
+    currentlyDeployedInferenceId || ''
+  );
+
   const doesModelNeedRedeployment =
     knowledgeBase.status?.value?.kbState === KnowledgeBaseState.MODEL_PENDING_ALLOCATION ||
     knowledgeBase.status?.value?.kbState === KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
 
-  const isSelectedModelCurrentModel =
-    selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id;
+  const isSelectedModelCurrentModel = selectedInferenceId === currentlyDeployedInferenceId;
 
   const isKnowledgeBaseInLoadingState =
     knowledgeBase.isInstalling ||
@@ -55,11 +71,16 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
 
   useEffect(() => {
     if (!hasLoadedCurrentModel && modelOptions?.length && knowledgeBase.status?.value) {
-      const currentModel = knowledgeBase.status.value.currentInferenceId;
-      setSelectedInferenceId(currentModel || modelOptions[0].key);
+      setSelectedInferenceId(currentlyDeployedInferenceId || modelOptions[0].key);
       setHasLoadedCurrentModel(true);
     }
-  }, [hasLoadedCurrentModel, modelOptions, knowledgeBase.status?.value, selectedInferenceId]);
+  }, [
+    hasLoadedCurrentModel,
+    modelOptions,
+    knowledgeBase.status?.value,
+    setSelectedInferenceId,
+    currentlyDeployedInferenceId,
+  ]);
 
   useEffect(() => {
     if (isUpdatingModel && !knowledgeBase.isInstalling && !knowledgeBase.isPolling) {
@@ -145,6 +166,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
             if (isConfirmed) {
               setIsUpdatingModel(true);
               knowledgeBase.install(selectedInferenceId);
+              productDoc.installProductDoc(selectedInferenceId);
             }
           });
       }
@@ -156,6 +178,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     isSelectedModelCurrentModel,
     overlays,
     confirmationMessages,
+    productDoc,
   ]);
 
   const superSelectOptions = modelOptions.map((option: ModelOptionsData) => ({
@@ -164,7 +187,12 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     dropdownDisplay: (
       <div>
         <strong>{option.label}</strong>
-        <EuiText size="xs" color="subdued" css={{ marginTop: 4 }}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={{ marginTop: 4 }}
+          data-test-subj={`observabilityAiAssistantKnowledgeBaseModelDropdownOption-${option.label}`}
+        >
           {option.description}
         </EuiText>
       </div>
@@ -211,6 +239,8 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
             isDisabled={
               !selectedInferenceId ||
               isKnowledgeBaseInLoadingState ||
+              (knowledgeBase.status?.value?.endpoint?.inference_id === LEGACY_CUSTOM_INFERENCE_ID &&
+                selectedInferenceId === ELSER_ON_ML_NODE_INFERENCE_ID) ||
               (knowledgeBase.status?.value?.kbState !== KnowledgeBaseState.NOT_INSTALLED &&
                 selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
                 !doesModelNeedRedeployment)
@@ -227,6 +257,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     isLoadingEndpoints,
     superSelectOptions,
     selectedInferenceId,
+    setSelectedInferenceId,
     isKnowledgeBaseInLoadingState,
     doesModelNeedRedeployment,
     knowledgeBase.status?.value?.kbState,

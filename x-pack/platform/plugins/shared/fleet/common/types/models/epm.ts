@@ -283,6 +283,7 @@ export enum RegistryInputKeys {
   input_group = 'input_group',
   required_vars = 'required_vars',
   vars = 'vars',
+  deployment_modes = 'deployment_modes',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -296,6 +297,7 @@ export interface RegistryInput {
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
+  [RegistryInputKeys.deployment_modes]?: string[];
 }
 
 export enum RegistryStreamKeys {
@@ -763,6 +765,13 @@ export interface IndexTemplate {
   composed_of: string[];
   ignore_missing_component_templates?: string[];
   _meta: object;
+
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
 }
 
 export interface ESAssetMetadata {

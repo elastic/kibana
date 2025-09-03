@@ -31,6 +31,7 @@
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
     "@kbn/projects-solutions-groups",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-http-common"
   ]
 }

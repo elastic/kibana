@@ -8,7 +8,7 @@
 import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_page';
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
-describe.skip(
+describe(
   'Host Isolation Exceptions RBAC',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
 

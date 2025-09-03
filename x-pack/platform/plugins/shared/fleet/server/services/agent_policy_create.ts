@@ -90,6 +90,9 @@ async function createPackagePolicy(
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
+  if (agentPolicy.supports_agentless) {
+    newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
+  }
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     spaceId: options.spaceId,

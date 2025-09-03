@@ -81,7 +81,14 @@ describe('waitForPickupUpdatedMappingsTask', () => {
         start_time_in_millis: 312,
         type: 'any type',
       },
-      error: { type: 'search_phase_execution_exception' },
+      error: {
+        type: 'search_phase_execution_exception',
+        caused_by: {
+          type: 'search_phase_execution_exception',
+          reason:
+            'Search rejected due to missing shards [.kibana]. Consider using `allow_partial_search_results` setting to bypass this error.',
+        },
+      },
     });
 
     const task = waitForPickupUpdatedMappingsTask({ client, taskId: '4273', timeout: '2m' });

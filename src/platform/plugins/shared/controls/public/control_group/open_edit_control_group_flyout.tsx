@@ -18,6 +18,7 @@ import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { ControlGroupEditor } from './components/control_group_editor';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 import { coreServices } from '../services/kibana_services';
+import { confirmDeleteAllControls } from '../common/confirm_delete_control';
 
 export const openEditControlGroupFlyout = (
   controlGroupApi: ControlGroupApi,
@@ -33,31 +34,13 @@ export const openEditControlGroupFlyout = (
   };
 
   const onDeleteAll = (ref: OverlayRef) => {
-    coreServices.overlays
-      .openConfirm(
-        i18n.translate('controls.controlGroup.management.delete.sub', {
-          defaultMessage: 'Controls are not recoverable once removed.',
-        }),
-        {
-          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
-            defaultMessage: 'Delete',
-          }),
-          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
-            defaultMessage: 'Cancel',
-          }),
-          title: i18n.translate('controls.controlGroup.management.delete.deleteAllTitle', {
-            defaultMessage: 'Delete all controls?',
-          }),
-          buttonColor: 'danger',
-        }
-      )
-      .then((confirmed) => {
-        if (confirmed)
-          Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
-            controlGroupApi.removePanel(childId);
-          });
-        closeOverlay(ref);
-      });
+    confirmDeleteAllControls().then((confirmed) => {
+      if (confirmed)
+        Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
+          controlGroupApi.removePanel(childId);
+        });
+      closeOverlay(ref);
+    });
   };
 
   const overlay = coreServices.overlays.openFlyout(

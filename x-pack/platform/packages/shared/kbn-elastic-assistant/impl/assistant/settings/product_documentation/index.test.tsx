@@ -9,6 +9,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ProductDocumentationManagement } from '.';
 import * as i18n from './translations';
 import { useInstallProductDoc } from '../../api/product_docs/use_install_product_doc';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 jest.mock('../../api/product_docs/use_install_product_doc');
 jest.mock('../../api/product_docs/use_get_product_doc_status');
@@ -26,12 +27,22 @@ describe('ProductDocumentationManagement', () => {
   });
 
   it('renders install button when not installed', () => {
-    render(<ProductDocumentationManagement status="uninstalled" />);
+    render(
+      <ProductDocumentationManagement
+        status="uninstalled"
+        inferenceId={defaultInferenceEndpoints.ELSER}
+      />
+    );
     expect(screen.getByText(i18n.INSTALL)).toBeInTheDocument();
   });
 
   it('does not render anything when already installed', () => {
-    const { container } = render(<ProductDocumentationManagement status="installed" />);
+    const { container } = render(
+      <ProductDocumentationManagement
+        status="installed"
+        inferenceId={defaultInferenceEndpoints.ELSER}
+      />
+    );
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -41,7 +52,12 @@ describe('ProductDocumentationManagement', () => {
       isLoading: false,
       isSuccess: false,
     });
-    const { container } = render(<ProductDocumentationManagement status="installing" />);
+    const { container } = render(
+      <ProductDocumentationManagement
+        status="installing"
+        inferenceId={defaultInferenceEndpoints.ELSER}
+      />
+    );
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -51,7 +67,12 @@ describe('ProductDocumentationManagement', () => {
       isLoading: true,
       isSuccess: false,
     });
-    render(<ProductDocumentationManagement status="uninstalled" />);
+    render(
+      <ProductDocumentationManagement
+        status="uninstalled"
+        inferenceId={defaultInferenceEndpoints.ELSER}
+      />
+    );
     expect(screen.getByTestId('installing')).toBeInTheDocument();
     expect(screen.getByText(i18n.INSTALLING)).toBeInTheDocument();
   });
@@ -63,7 +84,12 @@ describe('ProductDocumentationManagement', () => {
       isSuccess: true,
     });
     mockInstallProductDoc.mockResolvedValueOnce({});
-    render(<ProductDocumentationManagement status="uninstalled" />);
+    render(
+      <ProductDocumentationManagement
+        status="uninstalled"
+        inferenceId={defaultInferenceEndpoints.ELSER}
+      />
+    );
     expect(screen.queryByText(i18n.INSTALL)).not.toBeInTheDocument();
   });
 
@@ -74,7 +100,12 @@ describe('ProductDocumentationManagement', () => {
       isSuccess: false,
     });
     mockInstallProductDoc.mockRejectedValueOnce(new Error('Installation failed'));
-    render(<ProductDocumentationManagement status="uninstalled" />);
+    render(
+      <ProductDocumentationManagement
+        status="uninstalled"
+        inferenceId={defaultInferenceEndpoints.ELSER}
+      />
+    );
     fireEvent.click(screen.getByText(i18n.INSTALL));
     await waitFor(() => expect(screen.getByText(i18n.INSTALL)).toBeInTheDocument());
   });

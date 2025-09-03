@@ -17,9 +17,9 @@ import {
   type Message,
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
-  aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { AnonymizationRule } from '@kbn/observability-ai-assistant-plugin/common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
+import { AnonymizationSettings } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
@@ -79,37 +79,33 @@ export interface ChatTimelineProps {
 export function highlightContent(
   content: string,
   detectedEntities: Array<{
-    start_pos: number;
-    end_pos: number;
-    entity: string;
-    class_name: string;
+    start: number;
+    end: number;
+    entity: { class_name: string; value: string; mask: string };
   }>
 ): React.ReactNode {
   // Sort the entities by start position
-  const sortedEntities = [...detectedEntities].sort((a, b) => a.start_pos - b.start_pos);
+  const sortedEntities = [...detectedEntities].sort((a, b) => a.start - b.start);
   const parts: Array<string | React.ReactNode> = [];
   let lastIndex = 0;
   sortedEntities.forEach((entity, index) => {
     // Add the text before the entity
-    if (entity.start_pos > lastIndex) {
-      parts.push(content.substring(lastIndex, entity.start_pos));
+    if (entity.start > lastIndex) {
+      parts.push(content.substring(lastIndex, entity.start));
     }
 
     // Currently only highlighting the content that's not inside code blocks
-    if (
-      isInsideInlineCode(content, entity.start_pos) ||
-      isInsideCodeBlock(content, entity.start_pos)
-    ) {
-      parts.push(`${content.substring(entity.start_pos, entity.end_pos)}`);
+    if (isInsideInlineCode(content, entity.start) || isInsideCodeBlock(content, entity.start)) {
+      parts.push(`${content.substring(entity.start, entity.end)}`);
     } else {
       parts.push(
-        `!{anonymized{"entityClass":"${entity.class_name}","content":"${content.substring(
-          entity.start_pos,
-          entity.end_pos
+        `!{anonymized{"entityClass":"${entity.entity.class_name}","content":"${content.substring(
+          entity.start,
+          entity.end
         )}"}}`
       );
     }
-    lastIndex = entity.end_pos;
+    lastIndex = entity.end;
   });
   // Add any remaining text after the last entity
   if (lastIndex < content.length) {
@@ -154,20 +150,6 @@ export function ChatTimeline({
     services: { uiSettings },
   } = useKibana();
 
-  const { anonymizationEnabled } = useMemo(() => {
-    try {
-      // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
-      let rules = uiSettings?.get<AnonymizationRule[] | string>(aiAssistantAnonymizationRules);
-      if (typeof rules === 'string') {
-        rules = JSON.parse(rules);
-      }
-      return {
-        anonymizationEnabled: Array.isArray(rules) && rules.some((rule) => rule.enabled),
-      };
-    } catch (e) {
-      return { anonymizationEnabled: false };
-    }
-  }, [uiSettings]);
   const { euiTheme } = useEuiTheme();
 
   const stickyCalloutContainerClassName = css`
@@ -179,6 +161,18 @@ export function ChatTimeline({
       display: none;
     }
   `;
+
+  const { anonymizationEnabled } = useMemo(() => {
+    const settings = uiSettings?.get<AnonymizationSettings | undefined>(aiAnonymizationSettings);
+
+    if (!settings) {
+      return { anonymizationEnabled: false };
+    }
+
+    return {
+      anonymizationEnabled: settings.rules.some((rule) => rule.enabled),
+    };
+  }, [uiSettings]);
 
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
@@ -197,11 +191,11 @@ export function ChatTimeline({
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
-      const { content, unredactions } = item.message.message;
+      const { content, deanonymizations } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (anonymizationEnabled && content && unredactions) {
-        item.anonymizedHighlightedContent = highlightContent(content, unredactions);
+      if (anonymizationEnabled && content && deanonymizations) {
+        item.anonymizedHighlightedContent = highlightContent(content, deanonymizations);
       }
 
       if (item.display.collapsed) {

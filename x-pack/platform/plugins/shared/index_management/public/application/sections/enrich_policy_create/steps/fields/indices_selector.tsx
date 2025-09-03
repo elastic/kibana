@@ -146,6 +146,7 @@ export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
       {...rest}
     >
       <EuiComboBox
+        isInvalid={isInvalid}
         async
         placeholder={i18nTexts.sourcePlaceholder}
         isLoading={isIndiciesLoading}

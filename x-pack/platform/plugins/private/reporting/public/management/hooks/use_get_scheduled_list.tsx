@@ -6,23 +6,24 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { HttpSetup } from '@kbn/core/public';
+import { useKibana } from '@kbn/reporting-public';
 import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { queryKeys } from '../query_keys';
 
 export const getKey = queryKeys.getScheduledList;
 
 interface GetScheduledListQueryProps {
-  http: HttpSetup;
-  index?: number;
-  size?: number;
+  page?: number;
+  perPage?: number;
 }
 
 export const useGetScheduledList = (props: GetScheduledListQueryProps) => {
-  const { index = 1, size = 10 } = props;
+  const { http } = useKibana().services;
+
+  const { page = 1, perPage = 50 } = props;
   return useQuery({
-    queryKey: getKey({ index, size }),
-    queryFn: () => getScheduledReportsList(props),
+    queryKey: getKey({ page, perPage }),
+    queryFn: () => getScheduledReportsList({ http, page, perPage }),
     keepPreviousData: true,
   });
 };

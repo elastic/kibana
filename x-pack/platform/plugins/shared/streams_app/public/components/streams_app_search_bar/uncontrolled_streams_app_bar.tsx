@@ -23,6 +23,7 @@ export function UncontrolledStreamsAppSearchBar(props: UncontrolledStreamsAppSea
       submitButtonStyle="iconOnly"
       displayStyle="inPage"
       disableQueryLanguageSwitcher
+      query={undefined}
       {...props}
     />
   );

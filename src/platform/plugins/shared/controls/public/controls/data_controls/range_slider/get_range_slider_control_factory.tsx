@@ -202,10 +202,10 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           const lte = parseFloat(value?.[1] ?? '');
 
           let rangeFilter: Filter | undefined;
-          if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
+          if (value && dataView && dataViewField && (!isNaN(gte) || !isNaN(lte))) {
             const params = {
-              gte,
-              lte,
+              gte: !isNaN(gte) ? gte : -Infinity,
+              lte: !isNaN(lte) ? lte : Infinity,
             } as RangeFilterParams;
 
             rangeFilter = buildRangeFilter(dataViewField, params, dataView);
@@ -236,16 +236,25 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, fieldFormatter, max, min, selectionHasNoResults, step, value] =
-            useBatchedPublishingSubjects(
-              dataLoading$,
-              dataControlManager.api.fieldFormatter,
-              max$,
-              min$,
-              selectionHasNoResults$,
-              step$,
-              selections.value$
-            );
+          const [
+            dataLoading,
+            fieldFormatter,
+            max,
+            min,
+            selectionHasNoResults,
+            step,
+            value,
+            fieldName,
+          ] = useBatchedPublishingSubjects(
+            dataLoading$,
+            dataControlManager.api.fieldFormatter,
+            max$,
+            min$,
+            selectionHasNoResults$,
+            step$,
+            selections.value$,
+            dataControlManager.api.fieldName$
+          );
 
           useEffect(() => {
             return () => {
@@ -260,6 +269,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           return (
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
+              fieldName={fieldName}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

@@ -119,11 +119,13 @@ describe('getCombinedFilter', () => {
   describe('getAdditionalFilter', () => {
     it('returns the additional filter joined with an AND when filter is defined', () => {
       const result = getAdditionalFilter('foo: "bar"');
+
       expect(result).toBe(' AND foo: "bar"');
     });
 
     it('returns an empty string when filter is undefined', () => {
       const result = getAdditionalFilter(undefined);
+
       expect(result).toBe('');
     });
   });
@@ -243,6 +245,58 @@ describe('getCombinedFilter', () => {
           `(${EMPTY_ALERT_ATTACK_DISCOVERY_USERS_KQL} OR ${ALERT_ATTACK_DISCOVERY_USERS_NOT_EXISTS_KQL}) AND foo: "bar"`
         );
       });
+    });
+
+    it('returns id when username is undefined', () => {
+      const authenticatedUser = {
+        username: undefined,
+        profile_uid: 'abc',
+      } as unknown as AuthenticatedUser;
+
+      const result = getUserNameOrId(authenticatedUser);
+
+      expect(result).toBe('id: "abc"');
+    });
+
+    it('returns empty string for getUserFilter when authenticatedUser is missing profile_uid and username', () => {
+      const authenticatedUser = {} as unknown as AuthenticatedUser;
+      const result = getUserFilter({ authenticatedUser, shared: true });
+
+      expect(result).toBe('');
+    });
+
+    it('returns the correct filter when filter is empty string', () => {
+      const authenticatedUser = {
+        username: 'test_user',
+        profile_uid: '123',
+      } as AuthenticatedUser;
+      const filter = '';
+      const result = getCombinedFilter({ authenticatedUser, filter, shared: false });
+
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" }) AND `);
+    });
+
+    it('returns correct filter when filter is whitespace', () => {
+      const authenticatedUser = {
+        username: 'test_user',
+        profile_uid: '123',
+      } as AuthenticatedUser;
+      const filter = ' ';
+      const result = getCombinedFilter({ authenticatedUser, filter, shared: false });
+
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" }) AND  `);
+    });
+
+    it('returns correct filter when shared is null', () => {
+      const authenticatedUser = {
+        username: 'test_user',
+        profile_uid: '123',
+      } as AuthenticatedUser;
+      const filter = undefined;
+      const shared = null as unknown as boolean;
+      const result = getCombinedFilter({ authenticatedUser, filter, shared });
+
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" })`);
     });
   });
 });

@@ -54,6 +54,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       http,
       selectedSettingsTab: contextSettingsTab,
       setSelectedSettingsTab,
+      navigateToApp,
+      assistantAvailability: { isAssistantManagementEnabled },
     } = useAssistantContext();
 
     useEffect(() => {
@@ -119,6 +121,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         isSelected: t.id === selectedSettingsTab,
       }));
     }, [onTabChange, selectedSettingsTab, tabsConfig]);
+
+    if (!isAssistantManagementEnabled) {
+      navigateToApp('management');
+    }
 
     return (
       <>

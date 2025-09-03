@@ -13,18 +13,19 @@ export const DraggableProcessorListItem = ({
   idx,
   disableDrag,
   ...props
-}: EditProcessorPanelProps & { idx: number; disableDrag: boolean }) => (
+}: Omit<EditProcessorPanelProps, 'dragHandleProps'> & { idx: number; disableDrag: boolean }) => (
   <EuiDraggable
     index={idx}
     spacing="m"
     draggableId={props.processorRef.id}
     hasInteractiveChildren
+    customDragHandle
     isDragDisabled={disableDrag}
     css={{
       paddingLeft: 0,
       paddingRight: 0,
     }}
   >
-    {() => <EditProcessorPanel {...props} />}
+    {(provided) => <EditProcessorPanel {...props} dragHandleProps={provided.dragHandleProps} />}
   </EuiDraggable>
 );

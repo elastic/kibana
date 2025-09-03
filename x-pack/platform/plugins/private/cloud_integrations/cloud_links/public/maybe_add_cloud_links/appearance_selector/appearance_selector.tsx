@@ -41,6 +41,7 @@ function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Pr
   const { isVisible } = useAppearance({
     uiSettingsClient: core.uiSettings,
     defaultColorMode: 'space_default',
+    defaultContrastMode: 'standard',
   });
 
   const modalRef = useRef<OverlayRef | null>(null);

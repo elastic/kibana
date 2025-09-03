@@ -37,7 +37,6 @@ const getBaseLayer = (): PersistedIndexPatternLayer => ({
       label: '@timestamp',
       operationType: 'date_histogram',
       params: { interval: 'auto' },
-      scale: 'interval',
     } as DateHistogramIndexPatternColumn,
   },
 });
@@ -103,7 +102,6 @@ describe('createFormulaPublicApi', () => {
             label: '@timestamp',
             operationType: 'date_histogram',
             params: { interval: 'auto' },
-            scale: 'interval',
           },
         },
         indexPatternId: undefined,
@@ -153,7 +151,6 @@ describe('createFormulaPublicApi', () => {
             label: '@timestamp',
             operationType: 'date_histogram',
             params: { interval: 'auto' },
-            scale: 'interval',
           },
         },
         indexPatternId: undefined,

@@ -184,6 +184,16 @@ export const lastValueOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   input: 'field',
+  scale: (column, dataview) => {
+    if (!dataview) {
+      return 'ratio';
+    }
+    const field = dataview.getFieldByName(column.sourceField);
+    if (!field) {
+      return 'ratio';
+    }
+    return getScale(field?.type);
+  },
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 
@@ -198,7 +208,6 @@ export const lastValueOperation: OperationDefinition<
       label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
       params: newParams,
-      scale: getScale(field.type),
       filter:
         oldColumn.filter && comparePreviousColumnFilter(oldColumn.filter, oldColumn.sourceField)
           ? getExistsFilter(field.name)
@@ -251,7 +260,6 @@ export const lastValueOperation: OperationDefinition<
       dataType: field.type as DataType,
       operationType: LAST_VALUE_ID,
       isBucketed: false,
-      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,

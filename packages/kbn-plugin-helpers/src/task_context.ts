@@ -22,4 +22,5 @@ export interface TaskContext {
   sourceDir: string;
   buildDir: string;
   kibanaVersion: string;
+  quiet?: boolean;
 }

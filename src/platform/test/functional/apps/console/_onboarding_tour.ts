@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/224128
-  describe.skip('console onboarding tour', function describeIndexTests() {
+  describe('console onboarding tour', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -98,10 +97,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickSkipTour();
 
       // All steps should now be hidden
+      await waitUntilFinishedLoading();
       await expectAllStepsHidden();
 
-      // Tour should not show after refreshing the browser
+      // Refresh the browser
       await browser.refresh();
+
+      // Tour should not show after refreshing the browser
+      // Making sure tour stays hidden when skipped even after refresh
+      await waitUntilFinishedLoading();
       await expectAllStepsHidden();
     });
 

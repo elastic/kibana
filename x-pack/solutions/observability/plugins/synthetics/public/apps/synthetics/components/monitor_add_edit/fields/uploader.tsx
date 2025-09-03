@@ -60,6 +60,7 @@ export function Uploader({ onUpload }: Props) {
       fullWidth
     >
       <EuiFilePicker
+        isInvalid={Boolean(error)}
         id="syntheticsFleetScriptRecorderUploader"
         data-test-subj="syntheticsFleetScriptRecorderUploader"
         ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}

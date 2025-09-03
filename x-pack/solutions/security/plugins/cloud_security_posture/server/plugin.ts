@@ -307,5 +307,5 @@ const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
 
 const isTransformAssetIncluded = (integrationVersion: string): boolean => {
   const majorVersion = semver.major(integrationVersion);
-  return majorVersion >= 2;
+  return majorVersion >= 3;
 };

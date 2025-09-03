@@ -85,14 +85,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               ]
             : []),
           {
-            id: 'apm',
-            link: 'apm:services',
+            id: 'applications',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
                 children: [
                   {
                     link: 'apm:services',
@@ -137,6 +137,29 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     link: 'synthetics:certificates',
                     title: i18n.translate(
                       'xpack.observability.obltNav.apm.synthetics.tlsCertificates',
+                      {
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                  },
+                ],
+              },
+              {
+                id: 'uptime',
+                title: i18n.translate('xpack.observability.obltNav.apm.uptimeGroupTitle', {
+                  defaultMessage: 'Uptime',
+                }),
+                children: [
+                  {
+                    link: 'uptime',
+                    title: i18n.translate('xpack.observability.obltNav.apm.uptime.monitors', {
+                      defaultMessage: 'Uptime monitors',
+                    }),
+                  },
+                  {
+                    link: 'uptime:Certificates',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.apm.uptime.tlsCertificates',
                       {
                         defaultMessage: 'TLS certificates',
                       }

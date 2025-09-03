@@ -56,9 +56,12 @@ export default {
 type FieldCategoryParams = Pick<ComponentProps, 'category'> & Params;
 
 const CategoryComponent = ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
-  const { onClearQuery, onFieldChange, unsavedChanges } = useCategoryStory({
+  const onClearQuery = () => {};
+
+  const { onFieldChange, unsavedChanges } = useCategoryStory({
     isFiltered,
     isSavingEnabled,
+    onClearQuery,
   });
 
   const { count, fields } = categorizeFields(definitions)[category];

@@ -111,6 +111,15 @@ export function registerDashboardUsageCollector(
           },
         },
       },
+      sections: {
+        total: {
+          type: 'long',
+          _meta: {
+            description:
+              'Collection of telemetry metrics that count the number of collapsible sections on all dashboards',
+          },
+        },
+      },
     },
   });
 

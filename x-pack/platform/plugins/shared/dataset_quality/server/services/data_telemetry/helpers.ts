@@ -242,6 +242,7 @@ export function getIndexBasicStats({
           index: indexChunk,
           metric: ['docs', 'store'],
           filter_path: ['indices.*.primaries.docs', 'indices.*.primaries.store.size_in_bytes'],
+          forbid_closed_indices: false,
         })
       )
     )
@@ -361,6 +362,7 @@ async function getIndicesInfoForPattern({
         index: indexChunk,
         features: ['mappings'],
         filter_path: ['*.mappings', '*._meta'],
+        ignore_unavailable: true,
       })
     )
   );

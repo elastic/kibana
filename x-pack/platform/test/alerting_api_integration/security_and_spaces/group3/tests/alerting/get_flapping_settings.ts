@@ -11,7 +11,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, resetRulesSettings } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function getFlappingSettingsTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 

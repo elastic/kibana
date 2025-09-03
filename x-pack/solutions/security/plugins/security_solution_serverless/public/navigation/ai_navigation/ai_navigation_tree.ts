@@ -18,7 +18,7 @@ import { renderAiSocCallout } from './callout';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.aiNavigation.projectType.title',
-  { defaultMessage: 'AI for SOC' }
+  { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
 export const createAiNavigationTree = (): NavigationTreeDefinition => ({

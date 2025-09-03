@@ -59,6 +59,9 @@ export const getRuleObjectCorrelations = ({
       rule_type: attributes.params.type,
       rule_version: attributes.params.version,
       enabled: attributes.enabled,
+      is_customized:
+        attributes.params.ruleSource?.type === 'external' &&
+        attributes.params.ruleSource?.isCustomized === true,
       // if rule immutable, it's Elastic/prebuilt
       elastic_rule: attributes.params.immutable,
       created_on: attributes.createdAt,
@@ -73,6 +76,8 @@ export const getRuleObjectCorrelations = ({
       has_alert_suppression_missing_fields_strategy_do_not_suppress:
         hasAlertSuppressionMissingFieldsStrategyDoNotSuppress,
       alert_suppression_fields_count: alertSuppressionFieldsCount,
+      has_exceptions:
+        attributes.params.exceptionsList != null && attributes.params.exceptionsList.length > 0,
       has_response_actions: hasResponseActions,
       has_response_actions_endpoint: hasResponseActionsEndpoint,
       has_response_actions_osquery: hasResponseActionsOsquery,

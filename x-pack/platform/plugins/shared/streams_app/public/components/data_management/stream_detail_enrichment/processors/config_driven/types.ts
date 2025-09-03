@@ -6,6 +6,7 @@
  */
 
 import { ProcessorDefinition } from '@kbn/streams-schema';
+import { DocLinksStart } from '@kbn/core/public';
 import { configDrivenProcessors } from '.';
 import { WithUIAttributes } from '../../types';
 
@@ -15,7 +16,7 @@ export interface ConfigDrivenProcessorConfiguration<
 > {
   type: ConfigDrivenProcessorType;
   inputDisplay: string;
-  getDocUrl: (esDocUrl: string) => React.ReactNode;
+  getDocUrl: (docLinks: DocLinksStart) => React.ReactNode;
   defaultFormState: FormStateT;
   convertFormStateToConfig: (formState: FormStateT) => ProcessorDefinitionT;
   convertProcessorToFormState: (processor: WithUIAttributes<ProcessorDefinitionT>) => FormStateT;

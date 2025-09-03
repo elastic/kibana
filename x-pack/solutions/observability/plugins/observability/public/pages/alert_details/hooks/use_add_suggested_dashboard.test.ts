@@ -143,7 +143,7 @@ describe('useAddSuggestedDashboards', () => {
     // Check that notifications.toasts.addSuccess was called
     expect(mockUseKibanaReturnValue.services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: 'Added to linked dashboard',
-      text: `From now on this dashboard will be linked to all alerts related to ${TEST_RULE_NAME}`,
+      text: `From now on, this dashboard will be linked to all alerts triggered by this rule`,
     });
   });
 

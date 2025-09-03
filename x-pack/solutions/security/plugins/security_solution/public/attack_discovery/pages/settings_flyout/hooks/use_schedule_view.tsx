@@ -36,7 +36,7 @@ export const useScheduleView = (): UseScheduleView => {
 
   const isAttackDiscoverySchedulingEnabled = featureFlags.getBooleanValue(
     ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-    false
+    true
   );
 
   // showing / hiding the flyout:
@@ -74,7 +74,7 @@ export const useScheduleView = (): UseScheduleView => {
             data-test-subj="createNewSchedule"
             fill
             onClick={openFlyout}
-            size="s"
+            size="m"
             iconType="plusInCircle"
           >
             {i18n.CREATE_NEW_SCHEDULE}

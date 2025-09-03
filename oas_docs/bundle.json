@@ -5708,15 +5708,22 @@
             }
           },
           {
+            "description": "The fields to return in the `attributes` key of the response.",
             "in": "query",
             "name": "fields",
             "required": false,
             "schema": {
-              "items": {
-                "description": "The fields to return in the `attributes` key of the response.",
-                "type": "string"
-              },
-              "type": "array"
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -7881,6 +7888,9 @@
                               },
                               "agent_logging_to_files": {
                                 "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
+                                "nullable": true
                               }
                             },
                             "type": "object"
@@ -8901,6 +8911,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -9217,6 +9230,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -10263,6 +10279,9 @@
                                 "nullable": true
                               },
                               "agent_logging_to_files": {
+                                "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
                                 "nullable": true
                               }
                             },
@@ -11556,6 +11575,9 @@
                             },
                             "agent_logging_to_files": {
                               "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
+                              "nullable": true
                             }
                           },
                           "type": "object"
@@ -12574,6 +12596,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -12893,6 +12918,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -14033,6 +14061,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -15207,6 +15238,12 @@
                                         }
                                       },
                                       "type": "object"
+                                    },
+                                    "target_directory": {
+                                      "type": "string"
+                                    },
+                                    "timeout": {
+                                      "type": "string"
                                     }
                                   },
                                   "required": [
@@ -15259,6 +15296,15 @@
                                     "level": {
                                       "type": "string"
                                     },
+                                    "metrics": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "period": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "to_files": {
                                       "type": "boolean"
                                     }
@@ -15268,6 +15314,9 @@
                                 "monitoring": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "_runtime_experimental": {
+                                      "type": "string"
+                                    },
                                     "apm": {},
                                     "enabled": {
                                       "type": "boolean"
@@ -41650,10 +41699,11 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status",
+        "summary": "Get remote synced integrations status",
         "tags": [
-          "CCR Remote synced integrations"
-        ]
+          "Fleet remote synced integrations"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
@@ -41845,10 +41895,11 @@
             }
           }
         },
-        "summary": "Get CCR Remote synced integrations status by outputId",
+        "summary": "Get remote synced integrations status by outputId",
         "tags": [
-          "CCR Remote synced integrations"
-        ]
+          "Fleet remote synced integrations"
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/service_tokens": {
@@ -46403,7 +46454,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -48515,7 +48565,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -50342,7 +50391,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -52201,7 +52249,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -54030,7 +54077,6 @@
                                       "additionalProperties": false,
                                       "properties": {
                                         "query": {
-                                          "minLength": 1,
                                           "type": "string"
                                         }
                                       },
@@ -58692,7 +58738,6 @@
                                       "additionalProperties": false,
                                       "properties": {
                                         "query": {
-                                          "minLength": 1,
                                           "type": "string"
                                         }
                                       },
@@ -58861,7 +58906,6 @@
                     "additionalProperties": false,
                     "properties": {
                       "query": {
-                        "minLength": 1,
                         "type": "string"
                       }
                     },
@@ -58910,7 +58954,6 @@
             "name": "from",
             "required": true,
             "schema": {
-              "format": "date-time",
               "type": "string"
             }
           },
@@ -58919,7 +58962,6 @@
             "name": "to",
             "required": true,
             "schema": {
-              "format": "date-time",
               "type": "string"
             }
           },
@@ -58963,6 +59005,98 @@
         ],
         "x-state": "Technical Preview"
       }
+    },
+    "/api/streams/{name}/significant_events/_preview": {
+      "post": {
+        "description": "Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "post-streams-name-significant-events-preview",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bucketSize",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "query": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kql": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "query": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "query"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "kql"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Preview significant events",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
     }
   },
   "security": [
@@ -58978,9 +59112,6 @@
   "tags": [
     {
       "name": "alerting"
-    },
-    {
-      "name": "CCR Remote synced integrations"
     },
     {
       "name": "connectors"
@@ -59020,6 +59151,9 @@
     },
     {
       "name": "Fleet proxies"
+    },
+    {
+      "name": "Fleet remote synced integrations"
     },
     {
       "name": "Fleet Server hosts"

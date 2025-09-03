@@ -8,6 +8,7 @@
 import React from 'react';
 import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
+import camelCase from 'lodash/camelCase';
 
 export interface CspRadioGroupProps {
   disabled?: boolean;
@@ -15,6 +16,7 @@ export interface CspRadioGroupProps {
   onChange(id: string): void;
   idSelected: string;
   size?: 's' | 'm';
+  name?: string;
 }
 
 export interface CspRadioOption {
@@ -33,6 +35,7 @@ export const RadioGroup = ({
   options,
   disabled,
   onChange,
+  name,
 }: CspRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -64,14 +67,7 @@ export const RadioGroup = ({
           >
             <EuiButton
               disabled={option.disabled || disabled}
-              style={{
-                border: `1px solid ${
-                  isChecked ? euiTheme.colors.primary : euiTheme.colors.lightShade
-                }`,
-              }}
-              // Use empty string to fallback to no color
-              // @ts-ignore
-              color={isChecked ? 'primary' : ''}
+              color={isChecked ? 'primary' : 'text'}
               onClick={() => onChange(option.id)}
               iconType={option.icon}
               iconSide="right"
@@ -88,10 +84,6 @@ export const RadioGroup = ({
                   margin-left: auto;
                 }
 
-                &&,
-                &&:hover {
-                  text-decoration: none;
-                }
                 &:disabled {
                   svg,
                   img {
@@ -101,6 +93,7 @@ export const RadioGroup = ({
               `}
             >
               <EuiRadio
+                name={name || camelCase(option.label || 'optionsGroup')}
                 data-test-subj={option.testId}
                 label={option.label}
                 id={option.id}

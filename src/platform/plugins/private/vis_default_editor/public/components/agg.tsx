@@ -224,7 +224,12 @@ function DefaultEditorAgg({
     return actionIcons.length ? (
       <>
         {actionIcons.map((icon) => (
-          <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
+          <EuiToolTip
+            key={icon.id}
+            position="bottom"
+            content={icon.tooltip}
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               disabled={icon.disabled}
               iconType={icon.type}

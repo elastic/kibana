@@ -103,7 +103,6 @@ export const CachedFetchModelsApiLogic = kea<
       null,
       {
         apiReset: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (currentState, newState) =>
           isEqual(currentState, newState) ? currentState : newState,
       },
@@ -112,7 +111,6 @@ export const CachedFetchModelsApiLogic = kea<
       null,
       {
         clearPollTimeout: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         setTimeoutId: (_, { id }) => id,
       },
     ],

@@ -22,6 +22,7 @@ import type {
 } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
+import { isSuggestedDashboardsValidRuleTypeId } from './helpers';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
@@ -71,6 +72,8 @@ export class RelatedDashboardsClient {
 
   private async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
     const alert = this.checkAlert();
+    if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
+
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
     const index = this.getRuleQueryIndex();
@@ -116,10 +119,7 @@ export class RelatedDashboardsClient {
     perPage?: number;
     limit?: number;
   }) {
-    const dashboards = await this.dashboardClient.search(
-      { limit: perPage, cursor: `${page}` },
-      { spaces: ['*'] }
-    );
+    const dashboards = await this.dashboardClient.search({ limit: perPage, cursor: `${page}` });
     const {
       result: { hits },
     } = dashboards;

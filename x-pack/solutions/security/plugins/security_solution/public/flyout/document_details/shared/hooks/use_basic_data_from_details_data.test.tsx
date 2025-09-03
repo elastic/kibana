@@ -23,6 +23,7 @@ describe('useBasicDataFromDetailsData', () => {
     expect(hookResult.result.current.ruleDescription).toEqual('');
     expect(hookResult.result.current.ruleId).toEqual('');
     expect(hookResult.result.current.ruleName).toEqual('');
+    expect(hookResult.result.current.ruleRuleId).toEqual('');
     expect(hookResult.result.current.timestamp).toEqual('');
     expect(hookResult.result.current.userName).toEqual('');
   });
@@ -42,6 +43,7 @@ describe('useBasicDataFromDetailsData', () => {
     expect(hookResult.result.current.ruleDescription).toEqual('rule-description');
     expect(hookResult.result.current.ruleId).toEqual('rule-uuid');
     expect(hookResult.result.current.ruleName).toEqual('rule-name');
+    expect(hookResult.result.current.ruleRuleId).toEqual('');
     expect(hookResult.result.current.timestamp).toEqual('2023-01-01T01:01:01.000Z');
     expect(hookResult.result.current.userName).toEqual('user-name');
   });

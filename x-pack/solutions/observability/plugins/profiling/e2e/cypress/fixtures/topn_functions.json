@@ -1,0 +1,102 @@
+{
+  "TotalCount": 12540,
+  "totalCPU": 12540,
+  "selfCPU": 498,
+  "totalAnnualCO2Kgs": 34.5,
+  "totalAnnualCostUSD": 325.2726,
+  "SamplingRate": 1,
+  "TopN": [
+    {
+      "Id": "574807228",
+      "Rank": 1,
+      "CountExclusive": 67,
+      "CountInclusive": 69,
+      "selfAnnualCO2kgs": 4.6,
+      "selfAnnualCostUSD": 43.7616,
+      "totalAnnualCO2kgs": 4.8,
+      "totalAnnualCostUSD": 45.0679,
+      "subGroups": { "service.name": { "": { "count": 590 } } },
+      "Frame": {
+        "AddressOrLine": 12583051,
+        "ExeFileName": "vmlinux",
+        "FrameType": 4,
+        "FunctionName": "",
+        "Inline": false,
+        "SourceFilename": "",
+        "SourceLine": 0,
+        "FileID": "",
+        "FrameID": "",
+        "FunctionOffset": 0
+      }
+    },
+    {
+      "Id": "602913197",
+      "Rank": 2,
+      "CountExclusive": 36,
+      "CountInclusive": 324,
+      "selfAnnualCO2kgs": 2.5,
+      "selfAnnualCostUSD": 23.5137,
+      "totalAnnualCO2kgs": 22.5,
+      "totalAnnualCostUSD": 211.6232,
+      "subGroups": { "service.name": { "": { "count": 2114 } } },
+      "Frame": {
+        "AddressOrLine": 12941846,
+        "ExeFileName": "libjvm.so",
+        "FrameType": 3,
+        "FunctionName": "",
+        "Inline": false,
+        "SourceFilename": "",
+        "SourceLine": 0,
+        "FileID": "",
+        "FrameID": "",
+        "FunctionOffset": 0
+      }
+    },
+    {
+      "Id": "-610160251",
+      "Rank": 3,
+      "CountExclusive": 36,
+      "CountInclusive": 54,
+      "selfAnnualCO2kgs": 2.5,
+      "selfAnnualCostUSD": 23.5137,
+      "totalAnnualCO2kgs": 3.7,
+      "totalAnnualCostUSD": 35.2705,
+      "subGroups": { "service.name": { "": { "count": 795 } } },
+      "Frame": {
+        "AddressOrLine": 42414592,
+        "ExeFileName": "metricbeat",
+        "FrameType": 3,
+        "FunctionName": "",
+        "Inline": false,
+        "SourceFilename": "",
+        "SourceLine": 0,
+        "FileID": "",
+        "FrameID": "",
+        "FunctionOffset": 0
+      }
+    },
+    {
+      "Id": "574807228",
+      "Rank": 1,
+      "CountExclusive": 67,
+      "CountInclusive": 69,
+      "selfAnnualCO2kgs": 4.6,
+      "selfAnnualCostUSD": 43.7616,
+      "totalAnnualCO2kgs": 4.8,
+      "totalAnnualCostUSD": 45.0679,
+      "subGroups": { "service.name": { "": { "count": 590 } } },
+      "Frame": {
+        "AddressOrLine": 12583051,
+        "ExeFileName": "vmlinux",
+        "FrameType": 4,
+        "FunctionName": "",
+        "Inline": false,
+        "SourceFilename": "",
+        "SourceLine": 0,
+        "FileID": "",
+        "FrameID": "",
+        "FunctionOffset": 0
+      }
+    }
+  ]
+}

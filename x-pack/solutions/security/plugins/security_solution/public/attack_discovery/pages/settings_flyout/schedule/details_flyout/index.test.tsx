@@ -174,4 +174,50 @@ describe('DetailsFlyout', () => {
       expect(screen.getByTestId('save')).toBeInTheDocument();
     });
   });
+
+  describe('confirmation modal', () => {
+    beforeEach(async () => {
+      await renderComponent();
+
+      // Enter edit mode
+      const editButton = screen.getByTestId('edit');
+      fireEvent.click(editButton);
+      // Simulate unsaved changes
+      const input = screen.getByTestId('alertsRange');
+      fireEvent.change(input, { target: { value: 'changed' } });
+      // Click the close button to trigger the confirmation modal
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and close is clicked', () => {
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+
+    it('calls onClose when discard is clicked in confirmation modal', () => {
+      fireEvent.click(screen.getByTestId('discardChanges'));
+
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    it('closes the confirmation modal when cancel is clicked', () => {
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and escape key is pressed', () => {
+      // First, close the modal that was opened in beforeEach
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      // Verify modal is closed
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+
+      // Now press escape key on the flyout
+      const flyout = screen.getByTestId('scheduleDetailsFlyout');
+      fireEvent.keyDown(flyout, { key: 'Escape' });
+
+      // Verify the confirmation modal is shown
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+  });
 });

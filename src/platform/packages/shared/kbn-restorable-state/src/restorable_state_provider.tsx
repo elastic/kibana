@@ -19,6 +19,7 @@ import React, {
   Dispatch,
   useMemo,
   useEffect,
+  type ComponentProps,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -94,20 +95,27 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return <context.Provider value={value}>{children}</context.Provider>;
   });
 
-  const withRestorableState = <TProps extends object>(Component: React.ComponentType<TProps>) =>
-    forwardRef<RestorableStateProviderApi, TProps & RestorableStateProviderProps<TState>>(
-      function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
-        return (
-          <RestorableStateProvider
-            ref={ref}
-            initialState={initialState}
-            onInitialStateChange={onInitialStateChange}
-          >
-            <Component {...(props as TProps)} />
-          </RestorableStateProvider>
-        );
-      }
-    );
+  const withRestorableState = <TComponent extends React.ComponentType<any>>(
+    Component: TComponent
+  ) => {
+    const ComponentMemoized = React.memo(Component);
+    type TProps = ComponentProps<typeof ComponentMemoized>;
+
+    return forwardRef<
+      RestorableStateProviderApi,
+      TProps & Pick<RestorableStateProviderProps<TState>, 'initialState' | 'onInitialStateChange'>
+    >(function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
+      return (
+        <RestorableStateProvider
+          ref={ref}
+          initialState={initialState}
+          onInitialStateChange={onInitialStateChange}
+        >
+          <ComponentMemoized {...(props as TProps)} />
+        </RestorableStateProvider>
+      );
+    });
+  };
 
   const getInitialValue = <TKey extends keyof TState>(
     initialState: Partial<TState> | undefined,

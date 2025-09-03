@@ -195,7 +195,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }),
     });
 
-    return this.fetchActionDetails<TResponse>(actionId);
+    // We bypass space validation when retrieving the action details to ensure that if a failed
+    // action was created, and it did not contain the agent policy information (and space is enabled)
+    // we don't trigger an error.
+    return this.fetchActionDetails<TResponse>(actionId, true);
   }
 
   private async dispatchActionViaFleet({

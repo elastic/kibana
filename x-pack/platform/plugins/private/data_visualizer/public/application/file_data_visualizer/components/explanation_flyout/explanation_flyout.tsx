@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiSubSteps,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
@@ -29,11 +30,13 @@ interface Props {
 }
 export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
   const explanation = results.explanation!;
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'}>
+    <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.dataVisualizer.file.explanationFlyout.title"
               defaultMessage="Analysis explanation"

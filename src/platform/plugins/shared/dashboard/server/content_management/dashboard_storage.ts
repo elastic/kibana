@@ -426,20 +426,18 @@ export class DashboardStorage {
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
-    const hits = await Promise.all(
-      soResponse.saved_objects
-        .map(async (so) => {
-          const { item } = savedObjectToItem(so, false, {
-            allowedAttributes: soQuery.fields,
-            allowedReferences: optionsToLatest?.includeReferences,
-            getTagNamesFromReferences: (references: SavedObjectReference[]) =>
-              this.getTagNamesFromReferences(references, allTags),
-          });
-          return item;
-        })
-        // Ignore any saved objects that failed to convert to items.
-        .filter((item) => item !== null)
-    );
+    const hits = soResponse.saved_objects
+      .map((so) => {
+        const { item } = savedObjectToItem(so, false, {
+          allowedAttributes: soQuery.fields,
+          allowedReferences: optionsToLatest?.includeReferences,
+          getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+            this.getTagNamesFromReferences(references, allTags),
+        });
+        return item;
+      })
+      // Ignore any saved objects that failed to convert to items.
+      .filter((item) => item !== null);
     const response = {
       hits,
       pagination: {

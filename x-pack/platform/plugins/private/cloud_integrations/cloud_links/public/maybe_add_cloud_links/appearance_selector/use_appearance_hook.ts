@@ -11,14 +11,40 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   useUpdateUserProfile,
   type DarkModeValue as ColorMode,
+  type ContrastModeValue as ContrastMode,
 } from '@kbn/user-profile-components';
 
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
   defaultColorMode: ColorMode;
+  defaultContrastMode: ContrastMode;
 }
 
-export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
+interface AppearanceAPI {
+  setColorMode: (colorMode: ColorMode, updateUserProfile: boolean) => void;
+  colorMode: ColorMode;
+  initialColorModeValue: ColorMode;
+  setContrastMode: (contrastMode: ContrastMode, updateUserProfile: boolean) => void;
+  contrastMode: ContrastMode;
+  initialContrastModeValue: ContrastMode;
+  isVisible: boolean;
+  isLoading: boolean;
+  onChange: (
+    opts: { colorMode?: ColorMode; contrastMode?: ContrastMode },
+    updateUserProfile: boolean
+  ) => void;
+}
+
+interface ChangeOpts {
+  colorMode?: ColorMode;
+  contrastMode?: ContrastMode;
+}
+
+export const useAppearance = ({
+  uiSettingsClient,
+  defaultColorMode,
+  defaultContrastMode,
+}: Deps): AppearanceAPI => {
   // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
   // we don't allow the user to change the theme color.
   const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
@@ -36,21 +62,35 @@ export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
       ),
     },
     pageReloadChecker: (prev, next) => {
-      return prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
+      const hasChangedDarkMode = prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
+      const hasChangedContrastMode =
+        prev?.userSettings?.contrastMode !== next.userSettings?.contrastMode;
+      return hasChangedDarkMode || hasChangedContrastMode;
     },
   });
 
-  const { userSettings: { darkMode: colorModeUserProfile = defaultColorMode } = {} } =
-    userProfileData ?? {
-      userSettings: {},
-    };
+  const {
+    userSettings: {
+      darkMode: colorModeUserProfile = defaultColorMode,
+      contrastMode: contrastModeUserProfile = defaultContrastMode,
+    } = {},
+  } = userProfileData ?? {
+    userSettings: {},
+  };
 
   const [colorMode, setColorMode] = useState<ColorMode>(colorModeUserProfile);
   const [initialColorModeValue, setInitialColorModeValue] =
     useState<ColorMode>(colorModeUserProfile);
 
+  const [contrastMode, setContrastMode] = useState<ContrastMode>(contrastModeUserProfile);
+  const [initialContrastModeValue, setInitialContrastModeValue] =
+    useState<ContrastMode>(contrastModeUserProfile);
+
   const onChange = useCallback(
-    ({ colorMode: updatedColorMode }: { colorMode?: ColorMode }, persist: boolean) => {
+    (
+      { colorMode: updatedColorMode, contrastMode: updatedContrastMode }: ChangeOpts,
+      persist: boolean
+    ) => {
       if (isLoading) {
         return;
       }
@@ -59,8 +99,9 @@ export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
       if (updatedColorMode) {
         setColorMode(updatedColorMode);
       }
-
-      // TODO: here we will update the contrast when available
+      if (updatedContrastMode) {
+        setContrastMode(updatedContrastMode);
+      }
 
       if (!persist) {
         return;
@@ -69,6 +110,7 @@ export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
       return update({
         userSettings: {
           darkMode: updatedColorMode,
+          contrastMode: updatedContrastMode,
         },
       });
     },
@@ -77,23 +119,32 @@ export const useAppearance = ({ uiSettingsClient, defaultColorMode }: Deps) => {
 
   useEffect(() => {
     setColorMode(colorModeUserProfile);
-  }, [colorModeUserProfile]);
+    setContrastMode(contrastModeUserProfile);
+  }, [colorModeUserProfile, contrastModeUserProfile]);
 
   useEffect(() => {
     if (userProfileLoaded) {
-      const storedValue = userProfileData?.userSettings?.darkMode;
-      if (storedValue) {
-        setInitialColorModeValue(storedValue);
+      const { darkMode: storedValueDarkMode, contrastMode: storedValueContrastMode } =
+        userProfileData?.userSettings ?? {};
+
+      if (storedValueDarkMode) {
+        setInitialColorModeValue(storedValueDarkMode);
+      }
+      if (storedValueContrastMode) {
+        setInitialContrastModeValue(storedValueContrastMode);
       }
     }
   }, [userProfileData, userProfileLoaded]);
 
   return {
-    isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
     setColorMode,
     colorMode,
-    onChange,
-    isLoading,
     initialColorModeValue,
+    setContrastMode,
+    contrastMode,
+    initialContrastModeValue,
+    isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
+    isLoading,
+    onChange,
   };
 };

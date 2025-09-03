@@ -76,6 +76,11 @@ export const ColorSwatch = ({
       repositionOnScroll={true}
       closePopover={() => dispatch(hideColorPickerVisibility())}
       anchorPosition="upLeft"
+      css={css`
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      `}
       button={
         swatchShape === 'round' ? (
           <button

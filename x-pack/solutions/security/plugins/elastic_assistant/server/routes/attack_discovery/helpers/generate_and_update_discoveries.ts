@@ -111,7 +111,11 @@ export const generateAndUpdateAttackDiscoveries = async ({
         connectorId: apiConfig.connectorId,
         indexPattern,
         logger,
-        ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
+        ownerInfo: {
+          id: authenticatedUser.username ?? authenticatedUser.profile_uid,
+          isSchedule: false,
+        },
+        replacements: latestReplacements,
         spaceId: dataClient.spaceId,
       });
       storedAttackDiscoveries = dedupedDiscoveries;

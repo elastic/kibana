@@ -85,25 +85,21 @@ export const createApiLogic = <Result, Args>(
       },
     }),
     path: ['content_connectors', 'api', ...path],
-    // @ts-expect-error upgrade typescript v5.1.6
     reducers: () => ({
       apiStatus: [
         {
           status: Status.IDLE,
         },
         {
-          // @ts-expect-error upgrade typescript v5.1.6
           apiError: (_, error) => ({
             error,
             status: Status.ERROR,
           }),
           apiReset: () => ({ status: Status.IDLE }),
-          // @ts-expect-error upgrade typescript v5.1.6
           apiSuccess: (_, data) => ({
             data,
             status: Status.SUCCESS,
           }),
-          // @ts-expect-error upgrade typescript v5.1.6
           makeRequest: ({ data }) => {
             return {
               data,

@@ -122,3 +122,19 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
   }
   return JSON.stringify(formatted);
 };
+
+function escapeTemplateLiterals(script: string): string {
+  return script.replace(/\$\{/g, '$$${');
+}
+
+export const inlineSourceFormatter: FormatterFn = (fields, key) => {
+  const value = fields[key] as string;
+  if (!value?.trim()) return value;
+
+  // Escape template literals to prevent unintended interpolation
+  return escapeTemplateLiterals(value).trim();
+};
+
+export const handleMultilineStringFormatter = (value: string) => {
+  return value.replace(/(\n+)/g, '$1\n');
+};

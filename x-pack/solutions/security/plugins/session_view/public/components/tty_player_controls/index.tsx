@@ -118,7 +118,7 @@ export const TTYPlayerControls = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={TTY_START}>
+          <EuiToolTip content={TTY_START} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="sessionView:TTYPlayerControlsStart"
               iconType="arrowStart"
@@ -129,7 +129,7 @@ export const TTYPlayerControls = ({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={TTY_PREVIOUS}>
+          <EuiToolTip content={TTY_PREVIOUS} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="sessionView:TTYPlayerControlsPrevious"
               iconType="arrowLeft"
@@ -140,7 +140,7 @@ export const TTYPlayerControls = ({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={isPlaying ? TTY_PAUSE : TTY_PLAY}>
+          <EuiToolTip content={isPlaying ? TTY_PAUSE : TTY_PLAY} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="sessionView:TTYPlayerControlsPlay"
               iconType={isPlaying ? 'pause' : 'playFilled'}
@@ -151,7 +151,7 @@ export const TTYPlayerControls = ({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={TTY_NEXT}>
+          <EuiToolTip content={TTY_NEXT} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="sessionView:TTYPlayerControlsNext"
               iconType="arrowRight"
@@ -162,7 +162,7 @@ export const TTYPlayerControls = ({
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={TTY_END}>
+          <EuiToolTip content={TTY_END} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="sessionView:TTYPlayerControlsEnd"
               iconType="arrowEnd"

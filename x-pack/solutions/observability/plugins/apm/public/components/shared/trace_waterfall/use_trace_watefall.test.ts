@@ -14,6 +14,8 @@ import {
   getTraceWaterfallDuration,
   getClockSkew,
   getServiceLegends,
+  getRootItemOrFallback,
+  TraceDataState,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -25,7 +27,7 @@ jest.mock('@elastic/eui', () => ({
 
 const root: TraceItem = {
   id: '1',
-  timestamp: '2024-01-01T00:00:00.000Z',
+  timestampUs: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,
   name: 'root',
   traceId: 't1',
   duration: 1000,
@@ -34,7 +36,7 @@ const root: TraceItem = {
 const child1: TraceItem = {
   id: '2',
   parentId: '1',
-  timestamp: '2024-01-01T00:00:00.500Z',
+  timestampUs: new Date('2024-01-01T00:00:00.500Z').getTime() * 1000,
   name: 'child1',
   traceId: 't1',
   duration: 400,
@@ -43,7 +45,7 @@ const child1: TraceItem = {
 const child2: TraceItem = {
   id: '3',
   parentId: '1',
-  timestamp: '2024-01-01T00:00:00.800Z',
+  timestampUs: new Date('2024-01-01T00:00:00.800Z').getTime() * 1000,
   name: 'child2',
   traceId: 't1',
   duration: 100,
@@ -52,7 +54,7 @@ const child2: TraceItem = {
 const grandchild: TraceItem = {
   id: '4',
   parentId: '2',
-  timestamp: '2024-01-01T00:00:01.000Z',
+  timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000,
   name: 'grandchild',
   traceId: 't1',
   duration: 50,
@@ -78,7 +80,12 @@ describe('getFlattenedTraceWaterfall', () => {
   };
 
   it('returns a flattened waterfall with correct depth, offset, skew, and color', () => {
-    const result = getTraceWaterfall(root, parentChildMap, serviceColorsMap);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap,
+      orphans: [],
+      serviceColorsMap,
+    });
 
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
 
@@ -114,7 +121,12 @@ describe('getFlattenedTraceWaterfall', () => {
   });
 
   it('returns only the root if there are no children', () => {
-    const result = getTraceWaterfall(root, {}, serviceColorsMap);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [],
+      serviceColorsMap,
+    });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
     expect(result[0].depth).toBe(0);
@@ -126,8 +138,28 @@ describe('getFlattenedTraceWaterfall', () => {
       '1': [child2, child1], // child2 timestamp is after child1
       '2': [grandchild],
     };
-    const result = getTraceWaterfall(root, unorderedMap, serviceColorsMap);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: unorderedMap,
+      orphans: [],
+      serviceColorsMap,
+    });
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
+  });
+
+  it('reparents orphan spans', () => {
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [grandchild],
+      serviceColorsMap,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe('1');
+    expect(result[0].depth).toBe(0);
+    expect(result[1].id).toBe('4');
+    expect(result[1].depth).toBe(1);
   });
 });
 
@@ -137,9 +169,9 @@ describe('getServiceColors', () => {
   });
   it('assigns a unique color to each serviceName', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcB' },
-      { id: '3', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcC' },
+      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
+      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
+      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcC' },
     ];
 
     const result = getServiceColors(traceItems);
@@ -152,9 +184,9 @@ describe('getServiceColors', () => {
 
   it('handles duplicate service names gracefully', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '3', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcB' },
+      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
+      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
+      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
     ];
 
     const result = getServiceColors(traceItems);
@@ -172,7 +204,7 @@ describe('getServiceColors', () => {
   it('rotates the palette if there are more than 10 unique services', () => {
     const traceItems: TraceItem[] = Array.from({ length: 15 }, (_, i) => ({
       id: `${i}`,
-      timestamp: '',
+      timestampUs: 0,
       name: '',
       traceId: '',
       duration: 1,
@@ -194,10 +226,10 @@ describe('getTraceMap', () => {
   });
   it('maps root and children correctly', () => {
     const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
       {
         id: '2',
-        timestamp: '',
+        timestampUs: 0,
         name: 'child1',
         traceId: 't1',
         duration: 50,
@@ -206,7 +238,7 @@ describe('getTraceMap', () => {
       },
       {
         id: '3',
-        timestamp: '',
+        timestampUs: 0,
         name: 'child2',
         traceId: 't1',
         duration: 30,
@@ -215,7 +247,7 @@ describe('getTraceMap', () => {
       },
       {
         id: '4',
-        timestamp: '',
+        timestampUs: 0,
         name: 'grandchild',
         traceId: 't1',
         duration: 10,
@@ -236,7 +268,7 @@ describe('getTraceMap', () => {
 
   it('returns only root if there are no children', () => {
     const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
     ];
 
     const result = getTraceParentChildrenMap(items);
@@ -247,8 +279,8 @@ describe('getTraceMap', () => {
 
   it('handles multiple roots (should only keep the last as root)', () => {
     const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root1', traceId: 't1', duration: 100, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: 'root2', traceId: 't1', duration: 100, serviceName: 'svcB' },
+      { id: '1', timestampUs: 0, name: 'root1', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      { id: '2', timestampUs: 0, name: 'root2', traceId: 't1', duration: 100, serviceName: 'svcB' },
     ];
 
     const result = getTraceParentChildrenMap(items);
@@ -262,6 +294,46 @@ describe('getTraceMap', () => {
   });
 });
 
+describe('getRootItemOrFallback', () => {
+  it('should return a FULL state and a rootItem for a complete trace', () => {
+    const traceData = [root, child1, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(root);
+    expect(result.traceState).toBe(TraceDataState.Full);
+    expect(result.orphans).toEqual([]);
+  });
+
+  it('should return an EMPTY state for an empty trace', () => {
+    const result = getRootItemOrFallback({}, []);
+
+    expect(result.rootItem).toBeUndefined();
+    expect(result.traceState).toBe(TraceDataState.Empty);
+    expect(result.orphans).toBeUndefined();
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with no root span', () => {
+    const traceData = [child1, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(child1);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([]);
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with orphan child spans', () => {
+    const traceData = [root, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(root);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([grandchild]);
+  });
+});
+
 describe('getTraceWaterfallDuration', () => {
   afterAll(() => {
     jest.clearAllMocks();
@@ -270,7 +342,7 @@ describe('getTraceWaterfallDuration', () => {
     const items: TraceWaterfallItem[] = [
       {
         id: '1',
-        timestamp: '',
+        timestampUs: 0,
         name: '',
         traceId: '',
         duration: 100,
@@ -279,10 +351,11 @@ describe('getTraceWaterfallDuration', () => {
         offset: 0,
         skew: 0,
         color: 'red',
+        isOrphan: false,
       },
       {
         id: '2',
-        timestamp: '',
+        timestampUs: 0,
         name: '',
         traceId: '',
         duration: 50,
@@ -291,10 +364,11 @@ describe('getTraceWaterfallDuration', () => {
         offset: 80,
         skew: 10,
         color: 'blue',
+        isOrphan: false,
       },
       {
         id: '3',
-        timestamp: '',
+        timestampUs: 0,
         name: '',
         traceId: '',
         duration: 30,
@@ -303,6 +377,7 @@ describe('getTraceWaterfallDuration', () => {
         offset: 120,
         skew: 5,
         color: 'green',
+        isOrphan: false,
       },
     ];
     expect(getTraceWaterfallDuration(items)).toBe(155);
@@ -318,7 +393,7 @@ describe('getclockSkew', () => {
     jest.clearAllMocks();
   });
   const parent = {
-    timestamp: '2024-01-01T00:00:00.000Z',
+    timestampUs: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,
     duration: 1000,
     skew: 0,
   } as unknown as TraceWaterfallItem;
@@ -341,7 +416,7 @@ describe('getclockSkew', () => {
     const result = getClockSkew({
       itemTimestamp: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,
       itemDuration: 500,
-      parent: { ...parent, timestamp: '2024-01-01T00:00:01.000Z' },
+      parent: { ...parent, timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000 },
     });
     expect(result).toBe(1000250);
   });
@@ -349,7 +424,7 @@ describe('getclockSkew', () => {
   it('latency is never negative', () => {
     const parentWithSkew = {
       ...parent,
-      timestamp: '2024-01-01T00:00:01.000Z',
+      timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000,
       duration: 400,
       skew: 0,
     } as unknown as TraceWaterfallItem;
@@ -364,7 +439,7 @@ describe('getclockSkew', () => {
   it('uses parent.skew in parentStart calculation', () => {
     const parentWithSkew = {
       ...parent,
-      timestamp: '2024-01-01T00:00:01.000Z',
+      timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000,
       skew: 100,
     } as unknown as TraceWaterfallItem;
 

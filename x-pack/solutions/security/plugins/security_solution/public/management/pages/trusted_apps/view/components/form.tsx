@@ -476,6 +476,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           error={validationResult.result.name?.errors}
         >
           <EuiFieldText
+            isInvalid={visited.name && validationResult.result.name?.isInvalid}
             name="name"
             value={item.name}
             onChange={handleOnNameOrDescriptionChange}

@@ -19,6 +19,7 @@ const { collapseLiteralStrings } = XJson;
 export interface RequestArgs {
   http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
+  host?: string;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -104,6 +105,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           path,
           data,
           asResponse: true,
+          host: args.host,
         });
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
@@ -168,6 +170,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           value = JSON.stringify(errorBody, null, 2);
         } else {
           value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+        }
+
+        // Check for warning headers in error responses
+        const warnings = response?.headers.get('warning');
+        if (warnings) {
+          const warningMessages = extractWarningMessages(warnings);
+          value = warningMessages.join('\n') + '\n' + value;
         }
 
         if (isMultiRequest) {

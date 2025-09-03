@@ -10,7 +10,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
+import { DEFAULTS, useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../../assistant_context';
 import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
@@ -36,7 +36,7 @@ describe('useFetchAnonymizationFields', () => {
       isAssistantEnabled: true,
     },
   });
-  it(`should make http request to fetch anonymization fields`, async () => {
+  it(`should make http request to fetch anonymization fields with default params`, async () => {
     renderHook(() => useFetchAnonymizationFields(), {
       wrapper: createWrapper(),
     });
@@ -47,8 +47,52 @@ describe('useFetchAnonymizationFields', () => {
         {
           method: 'GET',
           query: {
-            page: 1,
-            per_page: 1000,
+            page: DEFAULTS.page + 1,
+            per_page: DEFAULTS.perPage,
+            sort_field: DEFAULTS.sortField,
+            sort_order: DEFAULTS.sortOrder,
+          },
+          version: API_VERSIONS.public.v1,
+          signal: undefined,
+        }
+      );
+
+      expect(http.fetch).toHaveBeenCalled();
+    });
+  });
+
+  it(`should make http request to fetch anonymization fields with custom params`, async () => {
+    const page = 1;
+    const perPage = 20;
+    const sortField = 'custom_field';
+    const sortOrder = 'desc';
+    const filter = 'test_filter';
+
+    renderHook(
+      () =>
+        useFetchAnonymizationFields({
+          page,
+          perPage,
+          sortField,
+          sortOrder,
+          filter,
+        }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => {
+      expect(http.fetch).toHaveBeenCalledWith(
+        '/api/security_ai_assistant/anonymization_fields/_find',
+        {
+          method: 'GET',
+          query: {
+            page: page + 1, // EUI uses 0-based index, while API uses 1-based index
+            per_page: perPage,
+            sort_field: sortField,
+            sort_order: sortOrder,
+            filter: `field: ${filter}*`,
           },
           version: API_VERSIONS.public.v1,
           signal: undefined,

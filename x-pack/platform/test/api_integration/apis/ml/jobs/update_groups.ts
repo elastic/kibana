@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
   // Failing: See https://github.com/elastic/kibana/issues/161324
   describe.skip('update groups', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       for (const job of testSetupJobConfigs) {

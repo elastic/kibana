@@ -8,14 +8,14 @@
  */
 
 import {
-  binaryExpressionGroup,
   isBinaryExpression,
   isColumn,
   isDoubleLiteral,
   isIntegerLiteral,
   isLiteral,
   isProperNode,
-} from '../ast/helpers';
+} from '../ast/is';
+import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
 import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
 import { ESQLAstExpressionNode, Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
@@ -344,11 +344,17 @@ export class BasicPrettyPrinter {
           let leftFormatted = ctx.visitArgument(0);
           let rightFormatted = ctx.visitArgument(1);
 
-          if (groupLeft && groupLeft < group) {
+          const shouldGroupLeftExpressions =
+            groupLeft && (groupLeft === BinaryExpressionGroup.unknown || groupLeft < group);
+
+          if (shouldGroupLeftExpressions) {
             leftFormatted = `(${leftFormatted})`;
           }
 
-          if (groupRight && groupRight < group) {
+          const shouldGroupRightExpressions =
+            groupRight && (groupRight === BinaryExpressionGroup.unknown || groupRight < group);
+
+          if (shouldGroupRightExpressions) {
             rightFormatted = `(${rightFormatted})`;
           }
 

@@ -10,14 +10,19 @@ import { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
-import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { ManagementTabs, Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 
-const classicStreamManagementSubTabs = ['enrich', 'advanced', 'lifecycle'] as const;
+const classicStreamManagementSubTabs = [
+  'enrich',
+  'advanced',
+  'lifecycle',
+  'significantEvents',
+] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
 
@@ -35,6 +40,11 @@ export function ClassicStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  const { enrich, ...otherTabs } = useStreamsDetailManagementTabs({
+    definition,
+    refreshDefinition,
+  });
 
   if (!definition.data_stream_exists) {
     return (
@@ -99,14 +109,7 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
-    tabs.enrich = {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
-        defaultMessage: 'Processing',
-      }),
-    };
+    tabs.enrich = enrich;
   }
 
   if (definition.privileges.manage) {
@@ -132,6 +135,10 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
+  }
+
+  if (otherTabs.significantEvents) {
+    tabs.significantEvents = otherTabs.significantEvents;
   }
 
   if (!isValidManagementSubTab(tab)) {

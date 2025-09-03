@@ -53,6 +53,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
       delay="long"
       ref={toolTipRef}
       anchorClassName="unifiedDataTable__rowControl"
+      disableScreenReaderOutput
     >
       <EuiButtonIcon
         id={rowIndex === 0 ? tourStep : undefined}

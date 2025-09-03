@@ -46,6 +46,7 @@ const taskSchema = schema.object({
         }),
         schema.object({
           rrule: schema.object({
+            dtstart: schema.maybe(schema.string()),
             freq: schema.number(),
             interval: schema.number(),
             tzid: schema.string({ defaultValue: 'UTC' }),

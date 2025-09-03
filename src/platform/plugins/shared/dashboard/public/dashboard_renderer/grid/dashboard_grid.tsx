@@ -275,6 +275,11 @@ const dashboardGridStyles = {
           position: 'absolute',
           width: '100%',
         },
+
+        [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+          // on smaller screens, the maximized panel should take the full height of the screen minus the sticky top nav
+          minHeight: 'calc(100vh - var(--kbn-application--sticky-headers-offset, 0px))',
+        },
       },
       // LAYOUT MODES
       // Adjust borders/etc... for non-spaced out and expanded panels
@@ -290,7 +295,7 @@ const dashboardGridStyles = {
       // drag handle visibility when dashboard is in edit mode or a panel is expanded
       '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':
         {
-          '.embPanel--dragHandle': {
+          '.embPanel--dragHandle, ~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',
           },
         },

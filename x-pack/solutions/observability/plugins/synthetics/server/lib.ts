@@ -76,7 +76,7 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
     const startTime = process.hrtime();
     const startTimeNow = Date.now();
 
@@ -156,7 +156,11 @@ export class SyntheticsEsClient {
         this.inspectableEsQueries.push(
           getInspectResponse({
             esError,
-            esRequestParams: { index: SYNTHETICS_INDEX_PATTERN, ...request },
+            esRequestParams: {
+              index: SYNTHETICS_INDEX_PATTERN,
+              ignore_unavailable: true,
+              ...request,
+            },
             esRequestStatus: RequestStatus.OK,
             esResponse: res?.body.responses[index],
             kibanaRequest: this.request!,
@@ -179,7 +183,7 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
     const startTime = process.hrtime();
 
     try {

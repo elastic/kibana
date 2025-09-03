@@ -36,9 +36,9 @@ export const NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
 );
 
 export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.goToMigrationsPageButton',
+  'xpack.securitySolution.siemMigrations.rules.table.goToAutomaticMigrationsPageButton',
   {
-    defaultMessage: 'Go back to SIEM Migrations',
+    defaultMessage: 'Go back to Automatic Migrations',
   }
 );
 

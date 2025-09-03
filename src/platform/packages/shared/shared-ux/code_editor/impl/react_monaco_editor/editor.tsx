@@ -212,6 +212,27 @@ export function MonacoEditor({
         ...finalOptions,
         ...(theme ? { theme } : {}),
       });
+
+      monaco.editor.onDidChangeMarkers(() => {
+        let currentEditorModel: monaco.editor.ITextModel | null;
+
+        if (!editor.current || (currentEditorModel = editor.current?.getModel()) === null) {
+          return;
+        }
+
+        const markers = monaco.editor.getModelMarkers({
+          resource: currentEditorModel.uri,
+        });
+
+        const hasErrors = markers.some((m) => m.severity === monaco.MarkerSeverity.Error);
+
+        const $editor = editor.current.getDomNode();
+
+        if ($editor) {
+          const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
+          textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
+        }
+      });
       // After initializing monaco editor
       handleEditorDidMount();
     }

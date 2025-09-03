@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit, omitBy } from 'lodash';
 import { format as formatUrl } from 'url';
@@ -21,29 +20,6 @@ import {
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-
-export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statusCode = 200) => {
-  const result = await supertestAPI
-    .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-    .set('kbn-xsrf', 'true')
-    .send(monitor);
-
-  expect(result.status).eql(statusCode, JSON.stringify(result.body));
-
-  if (statusCode === 200) {
-    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
-    expect(id).not.empty();
-    expect(configId).not.empty();
-    expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-    return {
-      rawBody: result.body,
-      body: {
-        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
-      },
-    };
-  }
-  return result.body;
-};
 
 export const keyToOmitList = [
   'created_at',

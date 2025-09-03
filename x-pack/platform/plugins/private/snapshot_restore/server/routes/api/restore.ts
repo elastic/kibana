@@ -38,6 +38,7 @@ export function registerRestoreRoutes({
         const snapshotRestores: SnapshotRestore[] = [];
         const recoveryByIndexName = await clusterClient.asCurrentUser.indices.recovery({
           human: true,
+          expand_wildcards: 'all',
         });
 
         // Filter to snapshot-recovered shards only

@@ -91,7 +91,7 @@ export function Wrapper({
           isSelected: tab === tabKey,
         }))}
       />
-      <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
+      <StreamsAppPageTemplate.Body>{tabs[tab]?.content}</StreamsAppPageTemplate.Body>
     </>
   );
 }

@@ -17,6 +17,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { Moment } from 'moment';
@@ -93,13 +94,21 @@ function CreateAnnotation({
     }
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   let flyout;
   if (isCreateAnnotationsOpen) {
     flyout = (
-      <EuiFlyoutResizable onClose={onCancel} type="push" size="s" maxWidth={700}>
+      <EuiFlyoutResizable
+        onClose={onCancel}
+        type="push"
+        size="s"
+        maxWidth={700}
+        aria-labelledby={flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
-            <h2>
+            <h2 id={flyoutTitleId}>
               {editAnnotation
                 ? i18n.translate(
                     'xpack.observability.createAnnotation.editAnnotationModalHeaderTitleLabel',

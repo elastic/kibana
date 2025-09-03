@@ -441,6 +441,7 @@ export const AzureCredentialsForm = ({
         onChange={(idSelected: SetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
+        name="setupFormat"
       />
       <EuiSpacer size="l" />
       {setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && (

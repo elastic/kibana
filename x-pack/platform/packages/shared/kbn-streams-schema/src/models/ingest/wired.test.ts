@@ -99,7 +99,7 @@ describe('WiredStream', () => {
           text_structure: true,
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},
@@ -127,7 +127,7 @@ describe('WiredStream', () => {
           },
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},

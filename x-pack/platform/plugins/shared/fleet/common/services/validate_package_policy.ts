@@ -345,7 +345,7 @@ export const validatePackagePolicyConfig = (
   safeLoadYaml: (yaml: string) => any,
   packageType?: string
 ): string[] | null => {
-  const errors = [];
+  const errors: string[] = [];
 
   const value = configEntry?.value;
 

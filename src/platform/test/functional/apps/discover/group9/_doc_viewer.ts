@@ -193,6 +193,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
 
+        // Clear any unexpected active type filters
+        const filterToggle = await testSubjects.find(
+          'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
+        );
+        if ((await filterToggle.getVisibleText()) !== '0') {
+          await discover.openFilterByFieldTypeInDocViewer();
+          await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
+          await discover.closeFilterByFieldTypeInDocViewer();
+        }
+
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
         const numberFieldsCount = 6;
 
@@ -514,6 +524,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
           await testSubjects.click('docViewerTab-doc_view_source');
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+        });
+
+        it('should not navigate between documents with arrow keys when resizable button is focused', async () => {
+          await dataGrid.clickRowToggle({ defaultTabId: false });
+          await discover.isShowingDocViewer();
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await testSubjects.click('euiResizableButton');
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
         });

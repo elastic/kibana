@@ -233,6 +233,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
                     disabled={isDismissing}
                     iconType="cross"
                     onClick={dismissGeneration}
+                    data-test-subj="dismissButton"
                   />
                 )}
               </EuiFlexItem>

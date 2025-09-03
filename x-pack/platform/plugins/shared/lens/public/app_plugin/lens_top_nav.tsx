@@ -483,6 +483,11 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
   ]);
 
+  const hasShareIntegration = useMemo(() => {
+    if (!share) return false;
+    return share.availableIntegrations('lens', 'export').length > 0;
+  }, [share]);
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
@@ -785,7 +790,7 @@ export const LensTopNavMenu = ({
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
         export: {
           // Only show the export button if the current user meets the requirements for at least one registered export integration
-          visible: Boolean(share?.availableIntegrations('lens', 'export')?.length),
+          visible: hasShareIntegration,
           enabled: showShareMenu,
           tooltip: () => {
             if (!showShareMenu) {
@@ -917,7 +922,7 @@ export const LensTopNavMenu = ({
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
   }, [
     initialContext,
-    initialInput,
+    initialInput?.savedObjectId,
     isLinkedToOriginatingApp,
     initialContextIsEmbedded,
     activeData,
@@ -927,15 +932,12 @@ export const LensTopNavMenu = ({
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
+    hasShareIntegration,
     layerMetaInfo,
     additionalMenuEntries,
-    lensInspector,
-    title,
     share,
     visualization,
     visualizationMap,
-    shortUrlService,
-    data,
     filters,
     query,
     activeDatasourceId,
@@ -943,9 +945,13 @@ export const LensTopNavMenu = ({
     datasourceMap,
     currentDoc,
     adHocDataViews,
+    data,
     isCurrentStateDirty,
     dataViews.indexPatterns,
+    title,
     defaultLensTitle,
+    shortUrlService,
+    lensInspector,
     onAppLeave,
     runSave,
     setIsSaveModalVisible,

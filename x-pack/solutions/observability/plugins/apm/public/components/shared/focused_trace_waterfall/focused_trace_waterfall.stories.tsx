@@ -30,7 +30,7 @@ export const FocusedIdIsRoot: StoryFn<any> = () => {
         traceItems: {
           rootDoc: {
             id: 'foo',
-            timestamp: '2025-05-21T18:35:26.179Z',
+            timestampUs: new Date('2025-05-21T18:35:26.179Z').getTime() * 1000,
             name: 'root',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 50000,
@@ -40,7 +40,7 @@ export const FocusedIdIsRoot: StoryFn<any> = () => {
 
           focusedTraceDoc: {
             id: 'foo',
-            timestamp: '2025-05-21T18:35:26.179Z',
+            timestampUs: new Date('2025-05-21T18:35:26.179Z').getTime() * 1000,
             name: 'root',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 5000,
@@ -51,7 +51,7 @@ export const FocusedIdIsRoot: StoryFn<any> = () => {
             {
               traceDoc: {
                 id: '41b4177551ba7b6d',
-                timestamp: '2025-05-21T18:35:26.190Z',
+                timestampUs: new Date('2025-05-21T18:35:26.190Z').getTime() * 1000,
                 name: 'child',
                 traceId: '01d9ebaca760279d6d68d29ea5283c58',
                 duration: 5000,
@@ -76,7 +76,7 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
         traceItems: {
           rootDoc: {
             id: 'foo',
-            timestamp: '2025-05-21T18:35:26.179Z',
+            timestampUs: new Date('2025-05-21T18:35:26.179Z').getTime() * 1000,
             name: 'root',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 50000,
@@ -85,7 +85,7 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
           },
           parentDoc: {
             id: 'foo',
-            timestamp: '2025-05-21T18:35:26.179Z',
+            timestampUs: new Date('2025-05-21T18:35:26.179Z').getTime() * 1000,
             name: 'root',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 50000,
@@ -94,7 +94,7 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
           },
           focusedTraceDoc: {
             id: 'bar',
-            timestamp: '2025-05-21T18:35:26.200Z',
+            timestampUs: new Date('2025-05-21T18:35:26.200Z').getTime() * 1000,
             name: 'focused',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 4000,
@@ -106,7 +106,7 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
             {
               traceDoc: {
                 id: '41b4177551ba7b6d',
-                timestamp: '2025-05-21T18:35:26.202Z',
+                timestampUs: new Date('2025-05-21T18:35:26.202Z').getTime() * 1000,
                 name: 'child',
                 traceId: '01d9ebaca760279d6d68d29ea5283c58',
                 duration: 1000,
@@ -131,7 +131,7 @@ export const FocusedWithParent: StoryFn<any> = () => {
         traceItems: {
           rootDoc: {
             id: 'foo',
-            timestamp: '2025-05-21T18:35:26.179Z',
+            timestampUs: new Date('2025-05-21T18:35:26.179Z').getTime() * 1000,
             name: 'root',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 50000,
@@ -140,7 +140,7 @@ export const FocusedWithParent: StoryFn<any> = () => {
           },
           parentDoc: {
             id: 'parent',
-            timestamp: '2025-05-21T18:35:26.190Z',
+            timestampUs: new Date('2025-05-21T18:35:26.190Z').getTime() * 1000,
             name: 'Parent',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 30000,
@@ -149,7 +149,7 @@ export const FocusedWithParent: StoryFn<any> = () => {
           },
           focusedTraceDoc: {
             id: 'bar',
-            timestamp: '2025-05-21T18:35:26.195Z',
+            timestampUs: new Date('2025-05-21T18:35:26.195Z').getTime() * 1000,
             name: 'focused',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 25000,
@@ -161,7 +161,7 @@ export const FocusedWithParent: StoryFn<any> = () => {
             {
               traceDoc: {
                 id: '41b4177551ba7b6d',
-                timestamp: '2025-05-21T18:35:26.200Z',
+                timestampUs: new Date('2025-05-21T18:35:26.200Z').getTime() * 1000,
                 name: 'child',
                 traceId: '01d9ebaca760279d6d68d29ea5283c58',
                 duration: 10000,
@@ -186,7 +186,7 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
         traceItems: {
           rootDoc: {
             id: 'foo',
-            timestamp: '2025-05-21T18:35:26.179Z',
+            timestampUs: new Date('2025-05-21T18:35:26.179Z').getTime() * 1000,
             name: 'root',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 50000,
@@ -195,7 +195,7 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
           },
           parentDoc: {
             id: 'parent',
-            timestamp: '2025-05-21T18:35:26.185Z',
+            timestampUs: new Date('2025-05-21T18:35:26.185Z').getTime() * 1000,
             name: 'Parent',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 40000,
@@ -204,7 +204,7 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
           },
           focusedTraceDoc: {
             id: 'bar',
-            timestamp: '2025-05-21T18:35:26.185Z',
+            timestampUs: new Date('2025-05-21T18:35:26.185Z').getTime() * 1000,
             name: 'focused',
             traceId: '01d9ebaca760279d6d68d29ea5283c58',
             duration: 30000,
@@ -216,7 +216,7 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
             {
               traceDoc: {
                 id: 'child1',
-                timestamp: '2025-05-21T18:35:26.190Z',
+                timestampUs: new Date('2025-05-21T18:35:26.190Z').getTime() * 1000,
                 name: 'child',
                 traceId: '01d9ebaca760279d6d68d29ea5283c58',
                 duration: 10000,
@@ -228,7 +228,7 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
                 {
                   traceDoc: {
                     id: 'child2',
-                    timestamp: '2025-05-21T18:35:26.195Z',
+                    timestampUs: new Date('2025-05-21T18:35:26.195Z').getTime() * 1000,
                     name: 'child_2',
                     traceId: '01d9ebaca760279d6d68d29ea5283c58',
                     duration: 2000,

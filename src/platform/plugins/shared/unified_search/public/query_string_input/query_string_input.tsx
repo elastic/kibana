@@ -210,6 +210,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     this.props.appName
   );
   private componentIsUnmounting = false;
+  private hasScrollListener = false;
 
   /**
    * If any element within the container is currently focused
@@ -652,6 +653,11 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     }
   };
 
+  private handleResize = () => {
+    this.handleAutoHeight();
+    this.handleBlurOnScroll();
+  };
+
   private onClickSuggestion = (suggestion: QuerySuggestion, index: number) => {
     if (!this.inputRef) {
       return;
@@ -684,7 +690,9 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     this.fetchIndexPatterns();
     this.handleAutoHeight();
 
-    window.addEventListener('resize', this.handleAutoHeight);
+    window.addEventListener('resize', this.handleResize);
+
+    this.handleBlurOnScroll();
   }
 
   public componentDidUpdate(prevProps: QueryStringInputProps) {
@@ -722,13 +730,29 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
-    window.removeEventListener('resize', this.handleAutoHeight);
+    window.removeEventListener('resize', this.handleResize);
+    if (this.hasScrollListener) window.removeEventListener('scroll', this.onOutsideClick);
   }
 
   handleAutoHeight = onRaf(() => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
       this.inputRef.classList.add('kbnQueryBar__textarea--autoHeight');
       this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
+    }
+  });
+
+  handleBlurOnScroll = onRaf(() => {
+    // for small screens, unified search bar is no longer sticky,
+    // so we need to blur the input when it scrolls out of view
+    // TODO: replace screen width value with euiTheme breakpoint once this component is converted to a functional component
+    const isSmallScreen = window.innerWidth < 768;
+
+    if (isSmallScreen && !this.hasScrollListener) {
+      window.addEventListener('scroll', this.onOutsideClick);
+      this.hasScrollListener = true;
+    } else if (!isSmallScreen && this.hasScrollListener) {
+      window.removeEventListener('scroll', this.onOutsideClick);
+      this.hasScrollListener = false;
     }
   });
 

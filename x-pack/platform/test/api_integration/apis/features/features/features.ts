@@ -114,7 +114,6 @@ export default function ({ getService }: FtrProviderContext) {
             'monitoring',
             'observabilityAIAssistant',
             'observabilityCasesV3',
-            'onechat',
             'savedObjectsManagement',
             'savedQueryManagement',
             'savedObjectsTagging',
@@ -127,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             'logs',
             'maintenanceWindow',
             'manageReporting',
+            'reportingLegacy',
             'maps_v2',
             'osquery',
             'rulesSettings',
@@ -174,7 +174,6 @@ export default function ({ getService }: FtrProviderContext) {
           'monitoring',
           'observabilityAIAssistant',
           'observabilityCasesV3',
-          'onechat',
           'savedObjectsManagement',
           'savedQueryManagement',
           'savedObjectsTagging',
@@ -209,6 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
           'fleet',
           'fleetv2',
           'manageReporting',
+          'reportingLegacy',
         ];
 
         const features = body.filter(

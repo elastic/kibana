@@ -27,9 +27,10 @@ function generator({
     (dockerTag ? dockerTag : version) + (dockerTagQualifier ? '-' + dockerTagQualifier : '');
   const dockerTargetName = `${imageTag}${imageFlavor}:${tag}`;
   const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
+  const dockerfileName = architecture === 'aarch64' ? 'Dockerfile.aarch64' : 'Dockerfile.x86_64';
   const dockerBuild = dockerCrossCompile
-    ? `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;`
-    : `docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;`;
+    ? `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f ${dockerfileName} . || exit 1;`
+    : `docker build -t ${dockerTargetName} -f ${dockerfileName} . || exit 1;`;
   return dedent(`
   #!/usr/bin/env bash
   #

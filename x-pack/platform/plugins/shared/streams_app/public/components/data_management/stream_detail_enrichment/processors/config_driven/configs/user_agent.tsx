@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { UserAgentProcessorConfig, UserAgentProcessorDefinition } from '@kbn/streams-schema';
+import { DocLinksStart } from '@kbn/core/public';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
@@ -99,7 +100,7 @@ export const userAgentProcessorConfig: ConfigDrivenProcessorConfiguration<
       defaultMessage: 'User agent',
     }
   ),
-  getDocUrl: (esDocUrl: string) => {
+  getDocUrl: (docLinks: DocLinksStart) => {
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentHelpText"
@@ -110,7 +111,7 @@ export const userAgentProcessorConfig: ConfigDrivenProcessorConfiguration<
               data-test-subj="streamsAppAvailableProcessorsUserAgentLink"
               external
               target="_blank"
-              href={esDocUrl + 'user-agent-processor.html'}
+              href={docLinks.links.ingest.userAgent}
             >
               {i18n.translate('xpack.streams.availableProcessors.userAgentLinkLabel', {
                 defaultMessage: 'The user_agent processor',

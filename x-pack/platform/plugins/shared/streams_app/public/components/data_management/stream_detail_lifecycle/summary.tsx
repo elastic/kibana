@@ -21,19 +21,16 @@ const statCss = css`
 export function RetentionSummary({
   definition,
   stats,
-  isLoadingStats,
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
-  isLoadingStats: boolean;
   statsError?: Error;
 }) {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiStat
         css={statCss}
-        isLoading={isLoadingStats || !stats}
         titleSize="m"
         title={
           <PrivilegesWarningIconWrapper
@@ -49,7 +46,6 @@ export function RetentionSummary({
       />
       <EuiStat
         css={statCss}
-        isLoading={isLoadingStats || !stats}
         titleSize="m"
         title={
           <PrivilegesWarningIconWrapper

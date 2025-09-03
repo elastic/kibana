@@ -18,7 +18,7 @@ import {
   ATTACK_DISCOVERY,
 } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 import { usePollApi } from './use_poll_api/use_poll_api';
@@ -33,6 +33,11 @@ import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 interface FetchAttackDiscoveriesOptions {
   end?: string;
   filter?: Record<string, unknown>;
+  overrideConnectorId?: string;
+  overrideEnd?: string;
+  overrideFilter?: Record<string, unknown>;
+  overrideSize?: number;
+  overrideStart?: string;
   size?: number;
   start?: string;
 }
@@ -105,19 +110,6 @@ export const useAttackDiscovery = ({
   // number of alerts sent as context to the LLM:
   const [alertsContextCount, setAlertsContextCount] = useState<number | null>(null);
 
-  const requestBody = useMemo(() => {
-    const selectedConnector = aiConnectors?.find((connector) => connector.id === connectorId);
-    const genAiConfig = getGenAiConfig(selectedConnector);
-    return getRequestBody({
-      alertsIndexPattern,
-      anonymizationFields,
-      genAiConfig,
-      size,
-      selectedConnector,
-      traceOptions,
-    });
-  }, [aiConnectors, alertsIndexPattern, anonymizationFields, connectorId, size, traceOptions]);
-
   useEffect(() => {
     if (
       !attackDiscoveryAlertsEnabled &&
@@ -187,21 +179,38 @@ export const useAttackDiscovery = ({
   const fetchAttackDiscoveries = useCallback(
     async (options: FetchAttackDiscoveriesOptions | undefined) => {
       try {
-        if (options?.size != null) {
-          setAlertsContextCount(options.size);
+        const effectiveSize = options?.overrideSize ?? options?.size ?? size;
+        if (effectiveSize != null) {
+          setAlertsContextCount(effectiveSize);
         }
 
-        const end = options?.end;
-        const filter = !isEmpty(options?.filter) ? options?.filter : undefined;
-        const start = options?.start;
+        const effectiveEnd = options?.overrideEnd ?? options?.end;
+        const effectiveFilter =
+          options?.overrideFilter ?? (!isEmpty(options?.filter) ? options?.filter : undefined);
+        const effectiveStart = options?.overrideStart ?? options?.start;
+        const effectiveConnectorId = options?.overrideConnectorId ?? connectorId;
+
+        // Get the request body with the effective connector ID
+        const effectiveConnector = aiConnectors?.find(
+          (connector) => connector.id === effectiveConnectorId
+        );
+        const effectiveGenAiConfig = getGenAiConfig(effectiveConnector);
+        const effectiveRequestBody = getRequestBody({
+          alertsIndexPattern,
+          anonymizationFields,
+          genAiConfig: effectiveGenAiConfig,
+          size,
+          selectedConnector: effectiveConnector,
+          traceOptions,
+        });
 
         const bodyWithOverrides = {
-          ...requestBody,
-          connectorName,
-          end,
-          filter,
-          size,
-          start,
+          ...effectiveRequestBody,
+          connectorName: effectiveConnector?.name ?? connectorName,
+          end: effectiveEnd,
+          filter: effectiveFilter,
+          size: effectiveSize,
+          start: effectiveStart,
         };
 
         if (
@@ -210,7 +219,7 @@ export const useAttackDiscovery = ({
         ) {
           throw new Error(CONNECTOR_ERROR);
         }
-        setLoadingConnectorId?.(connectorId ?? null);
+        setLoadingConnectorId?.(effectiveConnectorId ?? null);
         // sets isLoading to true
         setPollStatus('running');
         setIsLoadingPost(true);
@@ -232,7 +241,7 @@ export const useAttackDiscovery = ({
         if (attackDiscoveryAlertsEnabled) {
           toasts?.addSuccess({
             title: i18n.GENERATION_STARTED_TITLE,
-            text: i18n.GENERATION_STARTED_TEXT(connectorName),
+            text: i18n.GENERATION_STARTED_TEXT(effectiveConnector?.name ?? connectorName),
           });
         }
       } catch (error) {
@@ -247,16 +256,19 @@ export const useAttackDiscovery = ({
       }
     },
     [
+      aiConnectors,
+      alertsIndexPattern,
+      anonymizationFields,
       attackDiscoveryAlertsEnabled,
       connectorId,
       connectorName,
       http,
       invalidateGetAttackDiscoveryGenerations,
-      requestBody,
       setLoadingConnectorId,
       setPollStatus,
       size,
       toasts,
+      traceOptions,
     ]
   );
 

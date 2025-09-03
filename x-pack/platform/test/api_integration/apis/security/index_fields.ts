@@ -16,10 +16,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Index Fields', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security/flstest/data');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/security/flstest/data');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security/flstest/data');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/security/flstest/data');
     });
 
     describe('GET /internal/security/fields/{query}', () => {

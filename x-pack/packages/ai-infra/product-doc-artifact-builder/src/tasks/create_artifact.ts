@@ -15,7 +15,7 @@ import {
 } from '@kbn/product-doc-common';
 import { getArtifactMappings } from '../artifact/mappings';
 import { getArtifactManifest } from '../artifact/manifest';
-import { DEFAULT_ELSER } from './create_index';
+import { DEFAULT_ELSER, SemanticTextMapping } from './create_index';
 
 export const createArtifact = async ({
   productName,
@@ -23,12 +23,14 @@ export const createArtifact = async ({
   buildFolder,
   targetFolder,
   log,
+  semanticTextMapping,
 }: {
   buildFolder: string;
   targetFolder: string;
   productName: ProductName;
   stackVersion: string;
   log: ToolingLog;
+  semanticTextMapping?: SemanticTextMapping;
 }) => {
   log.info(
     `Starting to create artifact from build folder [${buildFolder}] into target [${targetFolder}]`
@@ -36,7 +38,9 @@ export const createArtifact = async ({
 
   const zip = new AdmZip();
 
-  const mappings = getArtifactMappings(DEFAULT_ELSER);
+  const inferenceId = semanticTextMapping?.inference_id || DEFAULT_ELSER;
+
+  const mappings = getArtifactMappings(semanticTextMapping);
   const mappingFileContent = JSON.stringify(mappings, undefined, 2);
   zip.addFile('mappings.json', Buffer.from(mappingFileContent, 'utf-8'));
 
@@ -53,6 +57,7 @@ export const createArtifact = async ({
   const artifactName = getArtifactName({
     productName,
     productVersion: stackVersion,
+    inferenceId,
   });
   zip.writeZip(Path.join(targetFolder, artifactName));
 

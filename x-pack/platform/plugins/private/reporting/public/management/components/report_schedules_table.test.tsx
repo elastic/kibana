@@ -358,7 +358,7 @@ describe('ReportSchedulesTable', () => {
 
     await waitFor(() => {
       expect(window.open).toHaveBeenCalledWith(
-        '/app/reportingRedirect?scheduledReportId=scheduled-report-1',
+        '/app/reportingRedirect?page=1&perPage=50&scheduledReportId=scheduled-report-1',
         '_blank'
       );
     });

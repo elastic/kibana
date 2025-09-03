@@ -80,6 +80,7 @@ describe('updateResultOnCheckCompleted', () => {
               version: 1,
               modified_date_in_millis: 1675536751205,
             },
+            skip: false,
           },
           '.ds-packetbeat-8.5.3-2023.02.04-000001': {
             index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
@@ -100,6 +101,7 @@ describe('updateResultOnCheckCompleted', () => {
               version: 1,
               modified_date_in_millis: 1675536751205,
             },
+            skip: false,
           },
         },
         ilmExplainPhaseCounts: {
@@ -182,6 +184,7 @@ describe('updateResultOnCheckCompleted', () => {
               version: 1,
               modified_date_in_millis: 1675536751205,
             },
+            skip: false,
           },
           '.ds-packetbeat-8.5.3-2023.02.04-000001': {
             index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
@@ -202,6 +205,7 @@ describe('updateResultOnCheckCompleted', () => {
               version: 1,
               modified_date_in_millis: 1675536751205,
             },
+            skip: false,
           },
         },
         ilmExplainPhaseCounts: {
@@ -279,6 +283,7 @@ describe('updateResultOnCheckCompleted', () => {
               version: 1,
               modified_date_in_millis: 1675536751205,
             },
+            skip: false,
           },
           '.ds-packetbeat-8.5.3-2023.02.04-000001': {
             index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
@@ -299,6 +304,7 @@ describe('updateResultOnCheckCompleted', () => {
               version: 1,
               modified_date_in_millis: 1675536751205,
             },
+            skip: false,
           },
         },
         ilmExplainPhaseCounts: {

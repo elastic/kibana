@@ -217,12 +217,29 @@ describe('when using EffectedPolicySelect component', () => {
   });
 
   describe('and space awareness is enabled', () => {
+    const unAccessiblePolicyId = 'policy-321-not-in-space';
+
     beforeEach(() => {
       mockedContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
-      componentProps.item.tags = [buildPerPolicyTag('policy-321-not-in-space')];
+      componentProps.item.tags = [buildPerPolicyTag(unAccessiblePolicyId)];
       apiMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
         items: [],
       });
+    });
+
+    it('should display un-accessible policies in a group and disabled', async () => {
+      const { getByTestId } = await render();
+      await policySelectorTestUtils.waitForDataToLoad();
+
+      expect(getByTestId('test-unaccessibleGroupLabel')).toBeTruthy();
+      expect(getByTestId(`test-unAccessiblePolicy-${unAccessiblePolicyId}`)).toBeTruthy();
+      expect(
+        (
+          getByTestId(
+            `${policySelectorTestUtils.testIds.root}-test-unAccessiblePolicy-${unAccessiblePolicyId}-checkbox`
+          ) as HTMLInputElement
+        ).disabled
+      ).toBe(true);
     });
 
     it('should display count of policies assigned to artifact that are not accessible in active space', async () => {
@@ -258,7 +275,7 @@ describe('when using EffectedPolicySelect component', () => {
 
       expect(handleOnChange).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          tags: [buildPerPolicyTag('policy-321-not-in-space'), buildPerPolicyTag(policyId)],
+          tags: [buildPerPolicyTag(policyId), buildPerPolicyTag(unAccessiblePolicyId)],
         })
       );
     });

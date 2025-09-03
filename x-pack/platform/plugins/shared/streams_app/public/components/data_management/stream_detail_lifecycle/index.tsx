@@ -33,7 +33,7 @@ function useLifecycleState({
 
   const lifecycleActions = useMemo(() => {
     const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
-    const isWired = Streams.WiredStream.GetResponse.is(definition);
+    const isUnwired = Streams.UnwiredStream.GetResponse.is(definition);
 
     actions.push({
       name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
@@ -51,7 +51,7 @@ function useLifecycleState({
       });
     }
 
-    if (isWired && !isRoot(definition.stream.name)) {
+    if (isUnwired || !isRoot(definition.stream.name)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
@@ -161,19 +161,13 @@ export function StreamDetailLifecycle({
       />
       <EuiFlexGroup gutterSize="m" css={flexRowCss}>
         <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="m">
-          <RetentionSummary
-            definition={definition}
-            isLoadingStats={isLoadingStats}
-            stats={stats}
-            statsError={statsError}
-          />
+          <RetentionSummary definition={definition} stats={stats} statsError={statsError} />
         </EuiPanel>
         <EuiPanel grow hasShadow={false} hasBorder paddingSize="m">
           <RetentionMetadata
             definition={definition}
             lifecycleActions={lifecycleActions}
             openEditModal={(action) => setOpenEditModal(action)}
-            isLoadingStats={isLoadingStats}
             stats={stats}
             statsError={statsError}
           />
@@ -194,7 +188,11 @@ export function StreamDetailLifecycle({
         {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
           <EuiFlexItem grow={3}>
             <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-              <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
+              <IlmSummary
+                definition={definition}
+                stats={stats}
+                lifecycle={definition.effective_lifecycle}
+              />
             </EuiPanel>
           </EuiFlexItem>
         ) : null}

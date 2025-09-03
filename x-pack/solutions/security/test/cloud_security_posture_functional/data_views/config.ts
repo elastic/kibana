@@ -8,6 +8,7 @@
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../page_objects';
+import { services } from '../services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -17,6 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     pageObjects,
+    services,
     testFiles: [resolve(__dirname, './data_views')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture Functional Tests',

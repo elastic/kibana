@@ -45,6 +45,12 @@ export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
 }
+interface RecalcColumnWidthsParams {
+  columnId: string;
+  width: number | undefined; // undefined -> reset width
+  prevWidths: Record<string, number | undefined>;
+  visibleColumns: string[];
+}
 
 const PRIORITIZED_CONTENT_FIELDS = [
   'message',
@@ -363,4 +369,25 @@ const dataSourceToUrlSchema = (
 export const dataSourceConverter = {
   toUIDefinition: dataSourceToUIDefinition,
   toUrlSchema: dataSourceToUrlSchema,
+};
+
+export const recalcColumnWidths = ({
+  columnId,
+  width,
+  prevWidths,
+  visibleColumns,
+}: RecalcColumnWidthsParams): Record<string, number | undefined> => {
+  const next = { ...prevWidths };
+  if (width === undefined) {
+    delete next[columnId];
+  } else {
+    next[columnId] = width;
+  }
+
+  const allExplicit = visibleColumns.every((c) => next[c] !== undefined);
+  if (allExplicit) {
+    delete next[visibleColumns[visibleColumns.length - 1]];
+  }
+
+  return next;
 };

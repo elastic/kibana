@@ -15,6 +15,7 @@ export class ESQLService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly log = this.ctx.getService('log');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
   public async expectEsqlStatement(statement: string) {
@@ -112,11 +113,13 @@ export class ESQLService extends FtrService {
     });
   }
 
-  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor') {
-    await this.monacoEditor.waitCodeEditorReady(editorSubjId);
+  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor'): Promise<WebElementWrapper> {
+    this.log.debug('waitESQLEditorLoaded: ', editorSubjId);
+    return await this.monacoEditor.waitCodeEditorReady(editorSubjId);
   }
 
   public async getEsqlEditorQuery() {
+    await this.waitESQLEditorLoaded();
     return await this.monacoEditor.getCodeEditorValue();
   }
 

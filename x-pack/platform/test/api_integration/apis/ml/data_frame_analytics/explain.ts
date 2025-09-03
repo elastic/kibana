@@ -77,9 +77,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST data_frame/analytics/_explain', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 

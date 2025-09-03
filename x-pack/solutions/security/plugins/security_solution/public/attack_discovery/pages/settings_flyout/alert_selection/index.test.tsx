@@ -135,4 +135,14 @@ describe('AlertSelection', () => {
 
     expect(secondTab).toHaveAttribute('aria-selected', 'true');
   });
+
+  it('does not render the connector selector or customize text when showConnectorSelector is false', () => {
+    render(
+      <TestProviders>
+        <AlertSelection {...defaultProps} showConnectorSelector={false} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('customizeAlerts')).toBeNull();
+  });
 });

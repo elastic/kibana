@@ -18,6 +18,7 @@ import {
   SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
 import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
+import { APP_ID } from '@kbn/security-solution-plugin/common';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export const getSecurityProductFeaturesConfigurator =
@@ -105,6 +106,13 @@ const securityProductFeaturesConfig: Record<
                 }
               ),
             },
+
+            api: [
+              ...(baseFeatureConfig.privileges.all.api ?? []),
+
+              // API access must be also added, as only UI privileges are copied when replacing a deprecated feature
+              `${APP_ID}-writeGlobalArtifacts`,
+            ],
 
             // minimal_all is not overwritten, as it does not includes Endpoint Exceptions ALL.
           },

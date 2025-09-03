@@ -201,6 +201,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                 fullWidth
               >
                 <EuiFieldText
+                  isInvalid={isInvalid}
                   defaultValue={retentionSchedule}
                   fullWidth
                   onChange={(e) => setRetentionSchedule(e.target.value)}

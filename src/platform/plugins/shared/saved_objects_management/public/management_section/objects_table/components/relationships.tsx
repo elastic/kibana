@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiLoadingSpinner,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -91,6 +92,32 @@ export class RelationshipsClass extends Component<
   RelationshipsProps & EuiTablePersistInjectedProps<SavedObjectRelation>,
   RelationshipsState
 > {
+  render() {
+    const modalTitleId = htmlIdGenerator()('relationshipsFlyoutTitle');
+    const { close, savedObject, allowedTypes } = this.props;
+    const typeLabel = getSavedObjectLabel(savedObject.type, allowedTypes);
+
+    return (
+      <EuiFlyout onClose={close} aria-labelledby={modalTitleId}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id={modalTitleId}>
+              <EuiToolTip position="top" content={typeLabel}>
+                <EuiIcon aria-label={typeLabel} size="m" type={savedObject.meta.icon || 'apps'} />
+              </EuiToolTip>
+              &nbsp;&nbsp;
+              {savedObject.meta.title || getDefaultTitle(savedObject)}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {this.renderInvalidRelationship()}
+          {this.renderRelationshipsTable()}
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
+  }
+
   constructor(props: RelationshipsProps & EuiTablePersistInjectedProps<SavedObjectRelation>) {
     super(props);
 
@@ -407,31 +434,6 @@ export class RelationshipsClass extends Component<
           })}
         />
       </>
-    );
-  }
-
-  render() {
-    const { close, savedObject, allowedTypes } = this.props;
-    const typeLabel = getSavedObjectLabel(savedObject.type, allowedTypes);
-
-    return (
-      <EuiFlyout onClose={close}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>
-              <EuiToolTip position="top" content={typeLabel}>
-                <EuiIcon aria-label={typeLabel} size="m" type={savedObject.meta.icon || 'apps'} />
-              </EuiToolTip>
-              &nbsp;&nbsp;
-              {savedObject.meta.title || getDefaultTitle(savedObject)}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {this.renderInvalidRelationship()}
-          {this.renderRelationshipsTable()}
-        </EuiFlyoutBody>
-      </EuiFlyout>
     );
   }
 }

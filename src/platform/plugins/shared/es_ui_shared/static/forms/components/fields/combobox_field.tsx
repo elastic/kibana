@@ -82,6 +82,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
       {...rest}
     >
       <EuiComboBox
+        isInvalid={isInvalid}
         noSuggestions
         placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',

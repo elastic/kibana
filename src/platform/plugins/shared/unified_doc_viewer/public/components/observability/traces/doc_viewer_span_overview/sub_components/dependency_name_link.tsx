@@ -73,6 +73,6 @@ export function DependencyNameLink({
       {content}
     </EuiLink>
   ) : (
-    dependencyName
+    content
   );
 }

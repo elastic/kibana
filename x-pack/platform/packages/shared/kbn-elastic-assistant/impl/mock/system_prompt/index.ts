@@ -36,16 +36,6 @@ export const defaultSystemPrompt: PromptResponse = {
   isNewConversationDefault: true,
 };
 
-export const defaultQuickPrompt: PromptResponse = {
-  id: 'default-system-prompt',
-  content:
-    'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:',
-  name: 'Default system prompt',
-  promptType: 'quick',
-  consumer: 'securitySolutionUI',
-  color: 'red',
-};
-
 export const mockSystemPrompts: PromptResponse[] = [
   mockSystemPrompt,
   mockSuperheroSystemPrompt,

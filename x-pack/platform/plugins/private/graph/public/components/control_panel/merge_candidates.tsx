@@ -110,7 +110,7 @@ export const MergeCandidates = ({
         return (
           <div>
             <span>
-              <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg}>
+              <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="doubleArrowRight"
                   size="xs"
@@ -127,7 +127,7 @@ export const MergeCandidates = ({
                 {mc.term2}
               </span>
 
-              <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg}>
+              <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="doubleArrowLeft"
                   size="xs"

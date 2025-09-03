@@ -14,12 +14,12 @@ import {
   ServiceStatus,
 } from '@kbn/core/server';
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { metrics } from '@opentelemetry/api-metrics';
+import { api, metrics, resources } from '@elastic/opentelemetry-node/sdk';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
-import { resourceFromAttributes } from '@opentelemetry/resources';
-import { diag, DiagLogger, DiagLogLevel } from '@opentelemetry/api';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+// import { ATTR_SERVICE_INSTANCE_ID } from '@opentelemetry/semantic-conventions/incubating';
+// Ideally we would import. But our tooling doesn't like how subdirs in these packages are exported (via "exports" in package.json).
+const ATTR_SERVICE_INSTANCE_ID = 'service.instance.id';
 import * as grpc from '@grpc/grpc-js';
 import { PrometheusExporter } from './lib/prometheus_exporter';
 import { MonitoringCollectionConfig } from './config';
@@ -42,7 +42,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   private readonly initializerContext: PluginInitializerContext;
   private readonly logger: Logger;
   private readonly config: MonitoringCollectionConfig;
-  private readonly otlpLogger: DiagLogger;
+  private readonly otlpLogger: api.DiagLogger;
 
   private metrics: Record<string, Metric<any>> = {};
 
@@ -126,15 +126,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     serviceInstanceId?: string,
     serviceVersion?: string
   ) {
-    const meterProvider = new MeterProvider({
-      resource: resourceFromAttributes({
-        [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-        [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: serviceInstanceId,
-        [SemanticResourceAttributes.SERVICE_VERSION]: serviceVersion,
-      }),
-    });
-
-    metrics.setGlobalMeterProvider(meterProvider);
+    const meterReaders: metrics.IMetricReader[] = [];
 
     const otlpConfig = this.config.opentelemetry?.metrics.otlp;
     const url =
@@ -153,12 +145,12 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         }
       }
 
-      const otlpLogLevel = otlpConfig.logLevel.toUpperCase() as keyof typeof DiagLogLevel;
-      diag.setLogger(this.otlpLogger, DiagLogLevel[otlpLogLevel]);
+      const otlpLogLevel = otlpConfig.logLevel.toUpperCase() as keyof typeof api.DiagLogLevel;
+      api.diag.setLogger(this.otlpLogger, api.DiagLogLevel[otlpLogLevel]);
 
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
-      meterProvider.addMetricReader(
-        new PeriodicExportingMetricReader({
+      meterReaders.push(
+        new metrics.PeriodicExportingMetricReader({
           exporter: new OTLPMetricExporter({ url, metadata }),
           exportIntervalMillis: otlpConfig.exportIntervalMillis,
         })
@@ -169,8 +161,19 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       // Add Prometheus exporter
       this.logger.debug(`Starting prometheus exporter at ${PROMETHEUS_PATH}`);
       this.prometheusExporter = new PrometheusExporter();
-      meterProvider.addMetricReader(this.prometheusExporter);
+      meterReaders.push(this.prometheusExporter);
     }
+
+    const meterProvider = new metrics.MeterProvider({
+      resource: resources.resourceFromAttributes({
+        [ATTR_SERVICE_NAME]: serviceName,
+        [ATTR_SERVICE_INSTANCE_ID]: serviceInstanceId,
+        [ATTR_SERVICE_VERSION]: serviceVersion,
+      }),
+      readers: meterReaders,
+    });
+
+    api.metrics.setGlobalMeterProvider(meterProvider);
   }
 
   start() {}

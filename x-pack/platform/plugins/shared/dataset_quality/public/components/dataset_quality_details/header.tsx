@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createAlertText, openInDiscoverText } from '../../../common/translations';
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import {
@@ -51,7 +52,7 @@ export function Header() {
     navigationSource: navigationSources.Header,
   });
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: `${datasetDetails.rawName},${datasetDetails.rawName}${FAILURE_STORE_SELECTOR}`,
     timeRangeConfig: timeRange,
     sendTelemetry,
   });

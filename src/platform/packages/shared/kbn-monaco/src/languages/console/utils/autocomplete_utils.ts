@@ -72,5 +72,5 @@ export const checkForTripleQuotesAndQueries = (
  * This function unescapes chars that are invalid in a Console string.
  */
 export const unescapeInvalidChars = (str: string): string => {
-  return str.replace(/\\\\/g, '\\').replace(/\\"/g, '"');
+  return str.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
 };

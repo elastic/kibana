@@ -43,7 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
             observabilityCasesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCasesV3: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-            onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -86,7 +85,14 @@ export default function ({ getService }: FtrProviderContext) {
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: [
+            'fleet-setup',
+            'ml_user',
+            'ml_admin',
+            'ml_apm_user',
+            'monitoring',
+            'reporting_user',
+          ],
         };
 
         await supertest
@@ -187,7 +193,6 @@ export default function ({ getService }: FtrProviderContext) {
               'cases_assign',
             ],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
-            onechat: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -427,7 +432,14 @@ export default function ({ getService }: FtrProviderContext) {
             guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
             aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
-          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: [
+            'fleet-setup',
+            'ml_user',
+            'ml_admin',
+            'ml_apm_user',
+            'monitoring',
+            'reporting_user',
+          ],
         };
 
         await supertest

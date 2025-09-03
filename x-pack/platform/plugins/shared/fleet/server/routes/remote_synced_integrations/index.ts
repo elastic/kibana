@@ -32,9 +32,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Get CCR Remote synced integrations status`,
+      summary: `Get remote synced integrations status`,
       options: {
-        tags: ['oas-tag:CCR Remote synced integrations'],
+        tags: ['oas-tag:Fleet remote synced integrations'],
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
       },
     })
     .addVersion(
@@ -66,9 +70,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Get CCR Remote synced integrations status by outputId`,
+      summary: `Get remote synced integrations status by outputId`,
       options: {
-        tags: ['oas-tag:CCR Remote synced integrations'],
+        tags: ['oas-tag:Fleet remote synced integrations'],
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
       },
     })
     .addVersion(

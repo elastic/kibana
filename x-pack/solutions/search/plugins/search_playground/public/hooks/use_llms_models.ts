@@ -29,7 +29,8 @@ const mapLlmToModels: Record<
     icon: string | ((connector: PlaygroundConnector) => string);
     getModels: (
       connectorName: string,
-      includeName: boolean
+      includeName: boolean,
+      modelId?: string
     ) => Array<{ label: string; value?: string; promptTokenLimit?: number }>;
   }
 > = {
@@ -88,12 +89,11 @@ const mapLlmToModels: Record<
         ? SERVICE_PROVIDERS[connector.config.provider].icon
         : '';
     },
-    getModels: (connectorName) => [
+    getModels: (connectorName, _, modelId) => [
       {
-        label: i18n.translate('xpack.searchPlayground.inferenceModel', {
-          defaultMessage: '{name}',
-          values: { name: connectorName },
-        }),
+        label: connectorName,
+        value: modelId,
+        promptTokenLimit: MODELS.find((m) => m.model === modelId)?.promptTokenLimit,
       },
     ],
   },
@@ -128,7 +128,13 @@ export const LLMsQuery =
       const showConnectorName = Number(mapConnectorTypeToCount?.[connectorType]) > 1;
 
       llmParams
-        .getModels(connector.name, false)
+        .getModels(
+          connector.name,
+          false,
+          isInferenceActionConnector(connector)
+            ? connector.config?.providerConfig?.model_id
+            : undefined
+        )
         .map(({ label, value, promptTokenLimit }) => ({
           id: connector?.id + label,
           name: label,

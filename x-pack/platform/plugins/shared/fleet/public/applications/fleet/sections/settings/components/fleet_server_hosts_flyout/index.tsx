@@ -26,6 +26,7 @@ import {
   EuiSwitch,
   EuiComboBox,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
@@ -53,6 +54,8 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   defaultFleetServerHost,
   proxies,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { docLinks, cloud } = useStartServices();
 
   const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);
@@ -128,11 +131,11 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   };
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={modalTitleId}>
               {fleetServerHost ? (
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetServerHostsFlyout.editTitle"

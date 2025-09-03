@@ -14,12 +14,10 @@ import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { GradientColorMode } from '../config/types';
-import {
-  DEFAULT_NEUTRAL_PALETTE_INDEX,
-  DEFAULT_OTHER_ASSIGNMENT_INDEX,
-} from '../config/default_color_mapping';
+import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../config/default_color_mapping';
 import { getColorAssignmentMatcher } from './color_assignment_matcher';
 import { getValueKey } from './utils';
+import { getOtherAssignmentColor } from '../config/utils';
 
 const FALLBACK_ASSIGNMENT_COLOR = 'red';
 
@@ -131,11 +129,11 @@ export function getColorFactory(
       const totalColorsIfGradient = assignments.length || unassignedAutoAssignmentsMap.size;
       const indexIfGradient = (categoryIndex - autoAssignments.length) % totalColorsIfGradient;
 
+      const otherColor = getOtherAssignmentColor(specialAssignments, assignments);
       // if no auto-assign color rule/color is available then use the color looping palette
       return getAssignmentColor(
         colorMode,
-        // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-        specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
+        otherColor.isLoop
           ? colorMode.type === 'gradient'
             ? { type: 'gradient' }
             : {
@@ -144,7 +142,7 @@ export function getColorFactory(
                 colorIndex: categoryIndex - autoAssignments.length + nextCategoricalIndex,
                 paletteId,
               }
-          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
+          : otherColor.color,
         palettes,
         isDarkMode,
         indexIfGradient,
@@ -192,7 +190,7 @@ export function getGradientColorScale(
           ),
         ]
       : colorMode.steps.map((d) => getColor(d, palettes));
-  steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
+  if (colorMode.sort === 'asc') steps.reverse();
   const scale = chroma.scale(steps).mode('lab');
   return (value: number) => scale(value).hex();
 }

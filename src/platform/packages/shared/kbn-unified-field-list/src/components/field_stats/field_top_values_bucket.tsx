@@ -169,7 +169,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             />
           ) : (
             <div>
-              <EuiToolTip content={filterForLabel}>
+              <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="plusInCircle"
@@ -186,7 +186,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                   }}
                 />
               </EuiToolTip>
-              <EuiToolTip content={filterOutLabel}>
+              <EuiToolTip content={filterOutLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="minusInCircle"

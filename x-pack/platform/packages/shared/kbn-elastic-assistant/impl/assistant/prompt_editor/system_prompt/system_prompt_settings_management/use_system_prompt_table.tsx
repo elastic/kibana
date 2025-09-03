@@ -55,6 +55,7 @@ export const useSystemPromptTable = () => {
         render: ({ conversations, id }: SystemPromptSettings) => (
           <BadgesColumn items={conversations.map(({ title }) => title)} prefix={id} />
         ),
+        width: '50%',
       },
       {
         align: 'left',

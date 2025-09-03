@@ -10,6 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -24,7 +25,8 @@ export function createIndexDocRecordsStream(
   stats: Stats,
   progress: Progress,
   useCreate: boolean = false,
-  performance?: LoadActionPerfOptions
+  performance?: LoadActionPerfOptions,
+  targetsWithoutIdGeneration: string[] = []
 ) {
   async function indexDocs(docs: any[]) {
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
@@ -39,10 +41,12 @@ export function createIndexDocRecordsStream(
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
           const index = doc.data_stream || doc.index;
+          // generate id for valid targets if it doesn't exist yet
+          const id = targetsWithoutIdGeneration.includes(index) ? doc.id : doc.id ?? uuidv4();
           ops.set(body, {
             [op]: {
               _index: index,
-              _id: doc.id,
+              _id: id,
             },
           });
           return body;

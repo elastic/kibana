@@ -67,6 +67,7 @@ export const MaxRestoreField: React.FunctionComponent<Props> = ({
         }
       >
         <EuiFieldText
+          isInvalid={isInvalid}
           defaultValue={defaultValue}
           fullWidth
           onChange={(e) => updateSettings('maxRestoreBytesPerSec', e.target.value)}

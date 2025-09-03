@@ -22,15 +22,15 @@ export const createGetDocViewer =
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
-
+    const tabTitle = i18n.translate('discover.docViews.observability.traces.spanOverview.title', {
+      defaultMessage: 'Span overview',
+    });
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_obs_traces_span_overview',
-          title: i18n.translate('discover.docViews.observability.traces.spanOverview.title', {
-            defaultMessage: 'Span overview',
-          }),
+          title: tabTitle,
           order: 0,
           component: (props) => {
             return <UnifiedDocViewerObservabilityTracesSpanOverview {...props} indexes={indexes} />;

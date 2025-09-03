@@ -106,7 +106,7 @@ export async function fetchRollupSavedSearches(
 
   while (savedSearchesList.hits.hits && savedSearchesList.hits.hits.length !== 0) {
     const savedSearches = get(savedSearchesList, 'hits.hits', []);
-    savedSearches.map(async (savedSearch: any) => {
+    void savedSearches.map(async (savedSearch: any) => {
       const { _id: savedObjectId } = savedSearch;
       const references: Array<{ name: string; id: string; type: string }> | undefined = get(
         savedSearch,

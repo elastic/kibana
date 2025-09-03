@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs/promises';
 import path from 'path';
@@ -15,12 +15,10 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { FakeLLM } from '@langchain/core/utils/testing';
-import { createOpenAIFunctionsAgent } from 'langchain/agents';
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { FakeChatModel, FakeLLM } from '@langchain/core/utils/testing';
+import { ContentReferencesStore } from '@kbn/elastic-assistant-common';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -35,45 +33,40 @@ import {
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
 import { getDefaultAttackDiscoveryGraph } from '../server/lib/attack_discovery/graphs/default_attack_discovery_graph';
 
+/**
+ * Sometimes there is a cloudflare error from mermaid.ink (mermaid js rendered).
+ *  Error: Failed to render the graph using the Mermaid.INK API.
+ *  Status code: 502
+ *  Status text: Bad Gateway
+ * The error seems to be intermittent, try again after a few minutes.
+ */
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
 }
-
-// Just defining some test variables to get the graph to compile..
-const testPrompt = ChatPromptTemplate.fromMessages([
-  ['system', 'You are a helpful assistant'],
-  ['placeholder', '{chat_history}'],
-  ['human', '{input}'],
-  ['placeholder', '{agent_scratchpad}'],
-]);
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
+class FakeChatModelWithBindTools extends FakeChatModel {
+  bindTools = () => this;
+}
+
 const createLlmInstance = () => {
-  return Promise.resolve(mockLlm);
+  const model = new FakeChatModelWithBindTools({});
+  return Promise.resolve(model);
 };
 
 async function getAssistantGraph(logger: Logger): Promise<Drawable> {
-  const agentRunnable = await createOpenAIFunctionsAgent({
-    llm: mockLlm,
-    tools: [],
-    prompt: testPrompt,
-    streamRunnable: false,
-  });
-  const graph = getDefaultAssistantGraph({
-    actionsClient: actionsClientMock.create(),
-    agentRunnable,
+  const graph = await getDefaultAssistantGraph({
+    actionsClient: {} as unknown as PublicMethodsOf<ActionsClient>,
     logger,
     createLlmInstance,
     tools: [],
-    replacements: {},
-    savedObjectsClient: savedObjectsClientMock.create(),
-    contentReferencesStore: newContentReferencesStoreMock(),
-    telemetry: coreMock.createSetup().analytics,
+    savedObjectsClient: {} as unknown as SavedObjectsClientContract,
+    contentReferencesStore: {} as unknown as ContentReferencesStore,
   });
-  return graph.getGraph();
+  return graph.getGraphAsync({ xray: true });
 }
 
 async function getAttackDiscoveryGraph(logger: Logger): Promise<Drawable> {

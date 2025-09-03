@@ -79,7 +79,8 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   durationMs: number;
   toolsInvoked: {
     AlertCountsTool?: number;
-    NaturalLanguageESQLTool?: number;
+    GenerateESQLTool?: number;
+    AskAboutESQLTool?: number;
     KnowledgeBaseRetrievalTool?: number;
     KnowledgeBaseWriteTool?: number;
     OpenAndAcknowledgedAlertsTool?: number;
@@ -139,7 +140,14 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
             optional: true,
           },
         },
-        NaturalLanguageESQLTool: {
+        GenerateESQLTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AskAboutESQLTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',

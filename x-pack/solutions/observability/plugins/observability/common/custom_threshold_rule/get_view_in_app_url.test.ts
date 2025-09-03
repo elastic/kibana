@@ -302,7 +302,7 @@ describe('getViewInAppUrl', () => {
       { spaceId }
     );
   });
-  it('should call getRedirectUrl with dataViewSpec', () => {
+  it('should call getRedirectUrl with dataViewSpec of the AD-HOC data view', () => {
     const spaceId = 'mockedSpaceId';
     const dataViewSpec = {
       id: 'mockedDataViewId',
@@ -335,6 +335,41 @@ describe('getViewInAppUrl', () => {
       {
         dataset: undefined,
         dataViewSpec,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedFilter',
+          language: 'kuery',
+        },
+      },
+      { spaceId }
+    );
+  });
+  it('should call getRedirectUrl with the id of the SAVED data view ', () => {
+    const spaceId = 'mockedSpaceId';
+    const mockedDataViewId = 'uuid-mocked-dataView-id';
+    const args: GetViewInAppUrlArgs = {
+      dataViewId: mockedDataViewId,
+      searchConfiguration: {
+        index: 'uuid-mockedDataViewId',
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+        filter: [],
+      },
+      logsLocator,
+      startedAt,
+      endedAt,
+      spaceId,
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        dataViewSpec: undefined,
+        dataViewId: mockedDataViewId,
         timeRange: returnedTimeRange,
         filters: [],
         query: {

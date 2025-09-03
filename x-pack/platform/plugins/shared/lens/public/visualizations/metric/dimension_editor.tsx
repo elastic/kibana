@@ -381,7 +381,7 @@ function TrendEditor({
             }}
           />
           <EuiSpacer size="s" />
-          {secondaryTrend.baselineValue !== 'primary' ? (
+          {!isPrimaryMetricOptionSelected ? (
             <DebouncedInput
               data-test-subj="lnsMetric_secondary_trend_baseline_input"
               compressed
@@ -422,6 +422,7 @@ function SecondaryMetricEditor({
   const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
   const defaultPrefix = columnName || '';
   const { isNumeric: isNumericType } = getAccessorType(datasource, accessor);
+  const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
   const colorMode = getColorMode(state.secondaryTrend, isNumericType);
   const [prevColorConfig, setPrevColorConfig] = useState<{
     static: SecondaryTrendConfigByType<'static'> | undefined;
@@ -446,7 +447,11 @@ function SecondaryMetricEditor({
     [state]
   );
 
-  const prefixConfig = getPrefixSelected(state, { defaultPrefix, colorMode });
+  const prefixConfig = getPrefixSelected(state, {
+    defaultPrefix,
+    colorMode,
+    isPrimaryMetricNumeric,
+  });
 
   return (
     <>

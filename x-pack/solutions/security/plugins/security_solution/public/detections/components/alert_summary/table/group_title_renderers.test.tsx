@@ -42,7 +42,7 @@ describe('groupTitleRenderers', () => {
     (usePackageIconType as jest.Mock).mockReturnValue('iconType');
   });
 
-  it('should render correctly for signal.rule.id field', () => {
+  it('should render correctly for signal.rule.rule_id field', () => {
     (useTableSectionContext as jest.Mock).mockReturnValue({
       packages: [],
       ruleResponse: { isLoading: false },
@@ -51,7 +51,7 @@ describe('groupTitleRenderers', () => {
 
     const { getByTestId } = render(
       groupTitleRenderers(
-        'signal.rule.id',
+        'signal.rule.rule_id',
         {
           key: ['rule_id'],
           doc_count: 10,
@@ -183,7 +183,7 @@ describe('IntegrationNameGroupContent', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should render loading for signal.rule.id field when rule and packages are loading', () => {
+  it('should render loading for signal.rule.rule_id field when rule and packages are loading', () => {
     (useTableSectionContext as jest.Mock).mockReturnValue({
       packages: [],
       ruleResponse: { isLoading: true },

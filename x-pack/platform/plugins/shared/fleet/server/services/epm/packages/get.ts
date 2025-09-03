@@ -16,7 +16,7 @@ import type {
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-
+import { errors } from '@elastic/elasticsearch';
 import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -57,6 +57,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageInvalidArchiveError,
+  FleetUnauthorizedError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
@@ -212,10 +213,22 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
   const { dataStreamType } = otherOptions;
 
-  const [packageSavedObjects, allFleetDataStreams] = await Promise.all([
-    getInstalledPackageSavedObjects(savedObjectsClient, otherOptions),
-    showOnlyActiveDataStreams ? dataStreamService.getAllFleetDataStreams(esClient) : undefined,
-  ]);
+  const packageSavedObjects = await getInstalledPackageSavedObjects(
+    savedObjectsClient,
+    otherOptions
+  );
+
+  let allFleetDataStreams: IndicesDataStream[] | undefined;
+
+  if (showOnlyActiveDataStreams) {
+    allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient).catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new FleetUnauthorizedError(`Unauthorized to query fleet datastreams: ${err.message}`);
+      }
+      throw err;
+    });
+  }
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
     const {

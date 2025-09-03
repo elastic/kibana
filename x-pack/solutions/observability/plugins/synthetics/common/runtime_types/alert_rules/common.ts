@@ -37,7 +37,7 @@ export interface AlertStatusMetaData {
   status: string;
   locationId: string;
   timestamp: string;
-  ping: t.TypeOf<typeof OverviewPingCodec>;
+  latestPing: t.TypeOf<typeof OverviewPingCodec>;
   checks: {
     downWithinXChecks: number;
     down: number;
@@ -92,7 +92,7 @@ export interface AlertPendingStatusMetaData {
   locationId: string;
   monitorInfo: MissingPingMonitorInfo;
   timestamp?: string;
-  ping?: t.TypeOf<typeof OverviewPingCodec>;
+  latestPing?: t.TypeOf<typeof OverviewPingCodec>;
 }
 
 export interface AlertOverviewStatus {

@@ -131,7 +131,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       dataType: 'number',
       operationType: COUNT_ID,
       isBucketed: false,
-      scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),

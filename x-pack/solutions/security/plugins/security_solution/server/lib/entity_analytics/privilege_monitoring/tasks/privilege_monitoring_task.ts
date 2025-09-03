@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, AnalyticsServiceSetup } from '@kbn/core/server';
+import { type Logger, type AnalyticsServiceSetup, type AuditLogger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -14,6 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import moment from 'moment';
+import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -23,11 +24,15 @@ import {
   stateSchemaByVersion,
   type LatestTaskStateSchema as PrivilegeMonitoringTaskState,
 } from './state';
+import { getApiKeyManager } from '../auth/api_key';
+import { PrivilegeMonitoringDataClient } from '../privilege_monitoring_data_client';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
+  auditLogger?: AuditLogger;
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
@@ -39,6 +44,9 @@ interface RunParams {
   telemetry: AnalyticsServiceSetup;
   experimentalFeatures: ExperimentalFeatures;
   taskInstance: ConcreteTaskInstance;
+  getPrivilegedUserMonitoringDataClient: (
+    namespace: string
+  ) => Promise<undefined | PrivilegeMonitoringDataClient>;
 }
 
 interface StartParams {
@@ -54,6 +62,7 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 export const registerPrivilegeMonitoringTask = ({
   getStartServices,
   logger,
+  auditLogger,
   telemetry,
   taskManager,
   kibanaVersion,
@@ -65,6 +74,39 @@ export const registerPrivilegeMonitoringTask = ({
     );
     return;
   }
+  const getPrivilegedUserMonitoringDataClient = async (namespace: string) => {
+    const [core, { taskManager: taskManagerStart, security, encryptedSavedObjects }] =
+      await getStartServices();
+
+    const apiKeyManager = getApiKeyManager({
+      core,
+      logger,
+      security,
+      encryptedSavedObjects,
+      namespace,
+    });
+
+    const client = await apiKeyManager.getClient();
+
+    if (!client) {
+      logger.error('[Privilege Monitoring] Unable to create Elasticsearch client from API key.');
+      return undefined;
+    }
+
+    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart: core, namespace });
+
+    return new PrivilegeMonitoringDataClient({
+      logger,
+      clusterClient: client.clusterClient,
+      namespace,
+      soClient,
+      taskManager: taskManagerStart,
+      auditLogger,
+      kibanaVersion,
+      telemetry,
+      apiKeyManager,
+    });
+  };
 
   taskManager.registerTaskDefinitions({
     [getTaskName()]: {
@@ -75,6 +117,7 @@ export const registerPrivilegeMonitoringTask = ({
         logger,
         telemetry,
         experimentalFeatures,
+        getPrivilegedUserMonitoringDataClient,
       }),
     },
   });
@@ -85,6 +128,9 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     experimentalFeatures: ExperimentalFeatures;
+    getPrivilegedUserMonitoringDataClient: (
+      namespace: string
+    ) => Promise<undefined | PrivilegeMonitoringDataClient>;
   }): TaskRunCreatorFunction =>
   ({ taskInstance }) => {
     let cancelled = false;
@@ -97,6 +143,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
           telemetry: deps.telemetry,
           taskInstance,
           experimentalFeatures: deps.experimentalFeatures,
+          getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
         }),
       cancel: async () => {
         cancelled = true;
@@ -110,6 +157,7 @@ const runPrivilegeMonitoringTask = async ({
   telemetry,
   taskInstance,
   experimentalFeatures,
+  getPrivilegedUserMonitoringDataClient,
 }: RunParams): Promise<{
   state: PrivilegeMonitoringTaskState;
 }> => {
@@ -127,9 +175,16 @@ const runPrivilegeMonitoringTask = async ({
 
   try {
     logger.info('[Privilege Monitoring] Running privilege monitoring task');
+    const dataClient = await getPrivilegedUserMonitoringDataClient(state.namespace);
+    if (!dataClient) {
+      logger.error('[Privilege Monitoring] error creating data client.');
+      throw Error('No data client was found');
+    }
+    await dataClient.plainIndexSync();
   } catch (e) {
-    logger.error('[Privilege Monitoring] Error running privilege monitoring task', e);
+    logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }
+  logger.info('[Privilege Monitoring] Finished running privilege monitoring task');
   return { state: updatedState };
 };
 
@@ -139,7 +194,6 @@ export const startPrivilegeMonitoringTask = async ({
   taskManager,
 }: StartParams) => {
   const taskId = getTaskId(namespace);
-
   try {
     await taskManager.ensureScheduled({
       id: taskId,
@@ -157,6 +211,47 @@ export const startPrivilegeMonitoringTask = async ({
     logger.warn(
       `[Privilege Monitoring]  [task ${taskId}]: error scheduling task, received ${e.message}`
     );
+    throw e;
+  }
+};
+
+export const removePrivilegeMonitoringTask = async ({
+  taskManager,
+  namespace,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+  logger: Logger;
+}) => {
+  const taskId = getTaskId(namespace);
+  try {
+    await taskManager.removeIfExists(taskId);
+    logger.info(`Removed privilege monitoring task with id ${taskId}`);
+  } catch (e) {
+    logger.warn(
+      `[Privilege Monitoring]  [task ${taskId}]: error removing task, received ${e.message}`
+    );
+    throw e;
+  }
+};
+
+export const scheduleNow = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}): Promise<RunSoonResult> => {
+  const taskId = getTaskId(namespace);
+
+  logger.info('[Privilege Monitoring] Attempting to schedule task to run now');
+  try {
+    return taskManager.runSoon(taskId);
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
     throw e;
   }
 };

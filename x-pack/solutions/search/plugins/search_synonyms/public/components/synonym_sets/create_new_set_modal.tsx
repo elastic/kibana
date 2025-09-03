@@ -33,7 +33,7 @@ interface CreateSynonymsSetModalProps {
   onClose: () => void;
 }
 export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalTitle' });
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalForm' });
   const overwriteId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalOverwrite' });
 
@@ -51,9 +51,9 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
   );
   const usageTracker = useUsageTracker();
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId}>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.searchSynonyms.createSynonymsSetModal.title"
             defaultMessage="Name your synonyms set"
