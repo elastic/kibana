@@ -129,10 +129,15 @@ const getFiles = async ({
   // attachment request failed)
   const fileSettleResults = await pMap(
     fileIds,
-    async (fileId) => fileService.getById({ id: fileId }),
+    async (fileId) => {
+      try {
+        return await fileService.getById({ id: fileId });
+      } catch (error) {
+        return error;
+      }
+    },
     {
       concurrency: MAX_CONCURRENT_SEARCHES,
-      stopOnError: false,
     }
   );
 
