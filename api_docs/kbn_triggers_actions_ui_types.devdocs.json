@@ -110,7 +110,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\" | \"autoRecoverAlerts\">"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,

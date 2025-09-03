@@ -8,11 +8,9 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
-  CustomPaletteParams,
-  PaletteOutput,
-  PaletteRegistry,
   applyPaletteParams,
   canCreateCustomMatch,
   getFallbackDataBounds,
@@ -20,7 +18,7 @@ import {
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
@@ -34,7 +32,7 @@ import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 import { getColumnAlignment } from '../utils';
-import { FormatFactory } from '../../../../common/types';
+import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
 const idPrefix = htmlIdGenerator()();

@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiStepsHorizontalProps, EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,11 +21,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiStepStatus,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -52,6 +52,7 @@ export interface AddInferencePipelineFlyoutProps {
 }
 
 export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProps) => {
+  const modalTitleId = useGeneratedHtmlId();
   const { indexName } = useValues(IndexNameLogic);
   const { setIndexName, makeMlInferencePipelinesRequest, startPollingModels, makeMappingRequest } =
     useActions(MLInferenceLogic);
@@ -65,10 +66,15 @@ export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProp
   }, [indexName]);
 
   return (
-    <EuiFlyout onClose={props.onClose} className="enterpriseSearchInferencePipelineFlyout" size="l">
+    <EuiFlyout
+      onClose={props.onClose}
+      className="enterpriseSearchInferencePipelineFlyout"
+      size="l"
+      aria-labelledby={modalTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.title',
               {

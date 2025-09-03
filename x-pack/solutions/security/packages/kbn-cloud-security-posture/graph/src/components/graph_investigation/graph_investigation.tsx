@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { Graph, isEntityNode } from '../../..';
+import { Graph, isEntityNode, type NodeProps } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
@@ -26,14 +26,32 @@ import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
+import type { NodeViewModel } from '../types';
+import { showErrorToast } from '../utils';
 
-const useGraphPopovers = (
-  dataViewId: string,
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
-  searchFilters: Filter[]
-) => {
-  const nodeExpandPopover = useEntityNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
-  const labelExpandPopover = useLabelNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
+const useGraphPopovers = ({
+  dataViewId,
+  searchFilters,
+  setSearchFilters,
+  nodeDetailsClickHandler,
+}: {
+  dataViewId: string;
+  searchFilters: Filter[];
+  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
+  nodeDetailsClickHandler?: (node: NodeProps) => void;
+}) => {
+  const nodeExpandPopover = useEntityNodeExpandPopover(
+    setSearchFilters,
+    dataViewId,
+    searchFilters,
+    nodeDetailsClickHandler
+  );
+  const labelExpandPopover = useLabelNodeExpandPopover(
+    setSearchFilters,
+    dataViewId,
+    searchFilters,
+    nodeDetailsClickHandler
+  );
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
@@ -69,6 +87,11 @@ export interface GraphInvestigationProps {
    */
   initialState: {
     /**
+     * The index patterns to use for the graph investigation view.
+     */
+    indexPatterns?: string[];
+
+    /**
      * The data view to use for the graph investigation view.
      */
     dataView: DataView;
@@ -93,6 +116,11 @@ export interface GraphInvestigationProps {
      */
     timeRange: TimeRange;
   };
+
+  /**
+   * Callback when show event preview is clicked.
+   */
+  onOpenEventPreview?: (node: NodeViewModel) => void;
 
   /**
    * Whether to show investigate in timeline action button. Defaults value is false.
@@ -122,10 +150,11 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
-    initialState: { dataView, originEventIds, timeRange: initialTimeRange },
+    initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
+    onOpenEventPreview,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
@@ -183,22 +212,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers(
-      dataView?.id ?? '',
-      setSearchFilters,
-      searchFilters
-    );
-    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
-    const labelExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
-      ({ state: { isOpen } }) => isOpen
-    );
-    const { data, refresh, isFetching } = useFetchGraphData({
+    const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
           originEventIds,
+          indexPatterns,
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
@@ -210,6 +228,35 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         keepPreviousData: true,
       },
     });
+
+    useEffect(() => {
+      const toasts = notifications?.toasts;
+      if (isError && error && toasts) {
+        showErrorToast(toasts, error);
+      }
+    }, [error, isError, notifications]);
+
+    const nodeDetailsClickHandler = useCallback(
+      (node: NodeProps) => {
+        onOpenEventPreview?.(node.data);
+      },
+      [onOpenEventPreview]
+    );
+
+    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers({
+      dataViewId: dataView?.id ?? '',
+      searchFilters,
+      setSearchFilters,
+      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+    });
+
+    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
+    const labelExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
+      ({ state: { isOpen } }) => isOpen
+    );
 
     const nodes = useMemo(() => {
       return (
@@ -322,6 +369,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               edges={data?.edges ?? []}
               interactive={true}
               isLocked={isPopoverOpen}
+              showMinimap={true}
             >
               <Panel position="top-right">
                 <Actions

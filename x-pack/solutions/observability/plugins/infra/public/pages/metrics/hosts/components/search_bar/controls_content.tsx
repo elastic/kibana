@@ -15,9 +15,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
-import { controlPanelConfigs } from './control_panels_config';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { getControlPanelConfigs } from './control_panels_config';
 import { ControlTitle } from './controls_title';
 
 interface Props {
@@ -25,44 +26,73 @@ interface Props {
   timeRange: TimeRange;
   filters: Filter[];
   query: Query;
+
+  schema?: DataSchemaFormat | null;
   onFiltersChange: (filters: Filter[]) => void;
 }
 
-export const ControlsContent: React.FC<Props> = ({
+export const ControlsContent = ({
   dataView,
   filters,
   query,
   timeRange,
+  schema,
   onFiltersChange,
-}) => {
-  const [controlPanels, setControlPanels] = useControlPanels(controlPanelConfigs, dataView);
+}: Props) => {
+  const controlConfigs = useMemo(() => getControlPanelConfigs(schema), [schema]);
+  const [controlPanels, setControlPanels] = useControlPanels(controlConfigs.controls, dataView);
+  const controlGroupAPI = useRef<ControlGroupRendererApi | undefined>();
+
   const subscriptions = useRef<Subscription>(new Subscription());
 
-  const getInitialInput = useCallback(
-    () => async () => {
-      const initialInput: Partial<ControlGroupRuntimeState> = {
-        chainingSystem: 'HIERARCHICAL',
-        labelPosition: 'oneLine',
-        initialChildControlState: controlPanels,
-      };
+  const getInitialInput = useCallback(async () => {
+    const initialInput: Partial<ControlGroupRuntimeState> = {
+      chainingSystem: 'HIERARCHICAL',
+      labelPosition: 'oneLine',
+      initialChildControlState: controlPanels,
+    };
 
-      return { initialState: initialInput };
-    },
-    [controlPanels]
-  );
+    return { initialState: initialInput };
+  }, [controlPanels]);
+
+  useEffect(() => {
+    const current = controlGroupAPI.current;
+    if (!current || !controlConfigs.replace) {
+      return;
+    }
+
+    Object.entries(controlConfigs.replace).forEach(([key, replaceable]) => {
+      current.replacePanel(key, {
+        panelType: replaceable.control.type,
+        maybePanelId: replaceable.key,
+        serializedState: {
+          rawState: {
+            ...replaceable.control,
+            dataViewId: dataView?.id,
+          },
+        },
+      });
+    });
+  }, [schema, controlConfigs, dataView?.id]);
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupRendererApi) => {
       if (!controlGroup) return;
 
+      controlGroupAPI.current = controlGroup;
+
       controlGroup.untilInitialized().then(() => {
-        const children = controlGroup.children$.getValue();
-        Object.keys(children).map((childId) => {
-          const child = children[childId] as DataControlApi;
-          child.CustomPrependComponent = () => (
-            <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
-          );
-        });
+        subscriptions.current.add(
+          controlGroup.children$.subscribe((children) => {
+            Object.keys(children).map((childId) => {
+              const child = children[childId] as DataControlApi;
+
+              child.CustomPrependComponent = () => (
+                <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
+              );
+            });
+          })
+        );
       });
 
       subscriptions.current.add(
@@ -82,6 +112,7 @@ export const ControlsContent: React.FC<Props> = ({
 
   useEffect(() => {
     const currentSubscriptions = subscriptions.current;
+
     return () => {
       currentSubscriptions.unsubscribe();
     };
@@ -94,7 +125,7 @@ export const ControlsContent: React.FC<Props> = ({
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
-        getCreationOptions={getInitialInput()}
+        getCreationOptions={getInitialInput}
         onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}
         query={query}

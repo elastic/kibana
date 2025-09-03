@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, MouseEventHandler } from 'react';
+import type { MouseEventHandler } from 'react';
 import type { Location } from 'history';
 import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -104,7 +104,9 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
+export type SideNavVersion = 'v1' | 'v2';
+
+export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item' | 'home';
 
 export type EuiThemeSize = Exclude<
   (typeof EuiThemeSizes)[number],
@@ -129,6 +131,11 @@ interface NodeDefinitionBase {
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
    */
   icon?: IconType;
+
+  /**
+   * Icon that will be rendered only in new sidenav
+   */
+  iconV2?: IconType;
   /**
    * href for absolute links only. Internal links should use "link".
    */
@@ -147,6 +154,11 @@ interface NodeDefinitionBase {
    * @default 'visible'
    */
   sideNavStatus?: SideNavNodeStatus;
+  /**
+   * Optional version to specify which side navigation version this node is intended for.
+   * This allows for version-specific rendering behavior.
+   */
+  sideNavVersion?: SideNavVersion;
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
@@ -212,6 +224,10 @@ interface NodeDefinitionBase {
     /** Text shown on tooltip attached to the badge. */
     tooltip?: string;
   };
+  /**
+   * Sidenav v2 for now supports only 2 types of badges:
+   */
+  badgeTypeV2?: 'beta' | 'techPreview';
 }
 
 /** @public */
@@ -247,14 +263,6 @@ export type PanelSelectedNode = Pick<
   ChromeProjectNavigationNode,
   'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink' | 'title'
 >;
-
-/** @public */
-export interface SideNavCompProps {
-  activeNodes: ChromeProjectNavigationNode[][];
-}
-
-/** @public */
-export type SideNavComponent = ComponentType<SideNavCompProps>;
 
 /** @public */
 export interface ChromeSetProjectBreadcrumbsParams {
@@ -440,10 +448,10 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
-  /** React component to render in the side nav for the navigation */
-  sideNavComponent?: SideNavComponent;
   /** The page to navigate to when clicking on the Kibana (or custom) logo. */
   homePage?: LinkId;
+  /** data-test-subj attribute for the solution navigation. */
+  dataTestSubj?: string;
 }
 
 export type SolutionNavigationDefinitions = {

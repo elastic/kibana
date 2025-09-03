@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  CSSProperties,
-  useState,
-  useLayoutEffect,
-  useCallback,
-  createContext,
-  useContext,
-} from 'react';
+import type { CSSProperties } from 'react';
+import React, { useState, useLayoutEffect, useCallback, createContext, useContext } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';

@@ -8,7 +8,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { SomeDevLog } from '@kbn/some-dev-log';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import { startTSWorker } from '@kbn/dev-utils';
 import type { Result } from './extract_field_lists_from_plugins_worker';
 

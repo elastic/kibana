@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/logging';
 import { getFips } from 'crypto';
 import { CriticalError } from '@kbn/core-base-server-internal';
-import { PKCS12ConfigType, SecurityServiceConfigType } from '../utils';
+import type { PKCS12ConfigType, SecurityServiceConfigType } from '../utils';
 export function isFipsEnabled(config: SecurityServiceConfigType): boolean {
   return config?.fipsMode?.enabled ?? false;
 }

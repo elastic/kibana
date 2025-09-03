@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -42,6 +42,8 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   packagePolicies,
   agentPolicy,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -147,6 +149,8 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           <FormattedMessage
             id="xpack.fleet.deleteAgentPolicy.confirmModal.deletePolicyTitle"

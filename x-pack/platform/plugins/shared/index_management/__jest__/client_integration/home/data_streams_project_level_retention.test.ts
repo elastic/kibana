@@ -15,8 +15,8 @@ import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 import { notificationService } from '../../../public/application/services/notification';
 
+import type { DataStreamsTabTestBed } from './data_streams_tab.helpers';
 import {
-  DataStreamsTabTestBed,
   setup,
   createDataStreamPayload,
   createDataStreamBackingIndex,

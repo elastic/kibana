@@ -8,7 +8,7 @@
  */
 
 import { get } from 'lodash';
-import { SomeDevLog } from '@kbn/some-dev-log';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 

@@ -33,7 +33,7 @@ info:
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
-  version: '1.0.2'
+  version: '' # Leave empty
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/

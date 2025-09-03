@@ -11,10 +11,10 @@ import { mockAppDataView, mockDataView } from '../../rtl_helpers';
 import { getDefaultConfigs } from '../default_configs';
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import { buildExistsFilter } from '../utils';
-import { LensAttributes } from '../lens_attributes';
+import type { LensAttributes } from '../lens_attributes';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { sampleMetricFormulaAttribute } from '../test_data/test_formula_metric_attribute';
 import { DataTypes } from '../..';
 
@@ -86,7 +86,6 @@ describe('SingleMetricAttributes', () => {
                     isBucketed: false,
                     label: 'Page load time',
                     operationType: 'median',
-                    scale: 'ratio',
                     sourceField: 'transaction.duration.us',
                     params: {
                       emptyAsNull: true,
@@ -157,7 +156,6 @@ describe('SingleMetricAttributes', () => {
                     params: {
                       percentile: 99,
                     },
-                    scale: 'ratio',
                     sourceField: 'transaction.duration.us',
                   },
                 },

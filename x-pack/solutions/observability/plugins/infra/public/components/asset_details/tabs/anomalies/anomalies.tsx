@@ -20,7 +20,7 @@ export const Anomalies = () => {
   const { isActiveTab } = useTabSwitcherContext();
   const { request$ } = useRequestObservable();
   const { getParsedDateRange } = useDatePickerContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
 
   const parsedDateRange = useMemo(() => getParsedDateRange(), [getParsedDateRange]);
@@ -28,7 +28,7 @@ export const Anomalies = () => {
   return (
     <div ref={ref}>
       <AnomaliesTable
-        hostName={asset.name}
+        hostName={entity.name}
         dateRange={parsedDateRange}
         hideDatePicker
         fetcherOpts={{

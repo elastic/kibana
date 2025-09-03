@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
@@ -63,7 +63,7 @@ export function TraceIdLink({ traceId, formattedTraceId }: TraceIdLinkProps) {
           {formattedTraceId}
         </EuiLink>
       ) : (
-        traceId
+        <EuiText size="xs">{traceId}</EuiText>
       )}
     </>
   );

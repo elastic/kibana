@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
-import { AgentPolicyInfo } from '../../../../common/types';
+import type { AgentPolicyInfo } from '../../../../common/types';
 import type {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
@@ -16,12 +16,10 @@ import type {
   SyntheticsPrivateLocationsAttributes,
   PrivateLocationAttributes,
 } from '../../../runtime_types/private_locations';
-import { PrivateLocation } from '../../../../common/runtime_types';
-import {
-  MonitorConfigUpdate,
-  syncEditedMonitorBulk,
-} from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
-import { RouteContext } from '../../types';
+import type { PrivateLocation } from '../../../../common/runtime_types';
+import type { MonitorConfigUpdate } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import { syncEditedMonitorBulk } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import type { RouteContext } from '../../types';
 
 export const toClientContract = (
   locationObject: SavedObject<PrivateLocationAttributes>

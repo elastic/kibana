@@ -14,6 +14,7 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: '',
         group: {
+          tags: [],
           members: [],
         },
       },
@@ -43,7 +44,7 @@ describe('GroupStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(GroupStream.Definition.is(val as any)).toBe(false);
+      expect(() => GroupStream.Definition.asserts(val as any)).toThrow();
     });
   });
 
@@ -54,6 +55,7 @@ describe('GroupStream', () => {
           name: 'group-stream',
           description: '',
           group: {
+            tags: [],
             members: [],
           },
         },
@@ -107,6 +109,7 @@ describe('GroupStream', () => {
         stream: {
           description: '',
           group: {
+            tags: [],
             members: [],
           },
         },

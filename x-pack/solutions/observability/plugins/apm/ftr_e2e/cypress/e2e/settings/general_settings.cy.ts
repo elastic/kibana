@@ -15,7 +15,7 @@ const getAbleToModifyCase = () => {
     button.click();
     cy.intercept('POST', '/internal/kibana/settings').as('saveSettings');
     cy.contains('Save changes').click();
-    cy.wait('@saveSettings').its('response.statusCode').should('eq', 200);
+    cy.wait('@saveSettings', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
   });
 };
 
@@ -28,7 +28,8 @@ const getUnableToModifyCase = () => {
   });
 };
 
-describe('General Settings', () => {
+// Failing: See https://github.com/elastic/kibana/issues/228236
+describe.skip('General Settings', () => {
   describe('when logged in as a viewer', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();

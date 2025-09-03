@@ -22,16 +22,16 @@ We recently concluded one of our quarterly Elastic OnWeek events, which provides
 
 Elastic provides the ability to audit LLM applications for malicious behaviors; we’ll show you one approach with just four steps:
 
- 1. Intercepting and analyzing the LLM requests and responses
+ 1. Intercepting and analyzing the LLM requests and responses 
  2. Enriching data with LLM-specific analysis results
  3. Sending data to Elastic Security
- 4. Writing ES|QL detection rules that can later be used to respond
+ 4. Writing ES|QL detection rules that can later be used to respond 
 
-This approach reflects our ongoing efforts to explore and implement advanced detection strategies, including developing detection rules tailored specifically for LLMs, while keeping pace with emerging generative AI technologies and security challenges. Building on this foundation, last year marked a significant enhancement to our toolkit and overall capability to continue this proactive path forward.
+This approach reflects our ongoing efforts to explore and implement advanced detection strategies, including developing detection rules tailored specifically for LLMs, while keeping pace with emerging generative AI technologies and security challenges. Building on this foundation, last year marked a significant enhancement to our toolkit and overall capability to continue this proactive path forward. 
 
 Elastic [released](https://www.elastic.co/blog/introducing-elastic-ai-assistant) the AI Assistant for Security, introducing how the open generative AI sidekick is powered by the [Search AI Platform](https://www.elastic.co/platform) — a collection of relevant tools for developing advanced search applications. Backed by machine learning (ML) and artificial intelligence (AI), this AI Assistant provides powerful pre-built workflows like alert summarization, workflow suggestions, query conversions, and agent integration advice. I highly recommend you read more on Elastic’s [AI Assistant](https://www.elastic.co/elasticsearch/ai-assistant) about how the capabilities seamlessly span across Observability and Security.
 
-We can use the  AI Assistant’s capabilities as a third-party LLM application to capture, audit, and analyze requests and responses for convenience and to run experiments. Once data is in an index, writing behavioral detections on it becomes business as usual —  we can also leverage the entire security detection engine. Even though we’re proxying the Elastic AI Assistant LLM activity in this experiment, it’s merely used as a vehicle to demonstrate auditing LLM-based applications. Furthermore, this proxy approach is intended for third-party applications to ship data to [Elastic Security](https://www.elastic.co/guide/en/security/current/es-overview.html).
+We can use the  AI Assistant’s capabilities as a third-party LLM application to capture, audit, and analyze requests and responses for convenience and to run experiments. Once data is in an index, writing behavioral detections on it becomes business as usual —  we can also leverage the entire security detection engine. Even though we’re proxying the Elastic AI Assistant LLM activity in this experiment, it’s merely used as a vehicle to demonstrate auditing LLM-based applications. Furthermore, this proxy approach is intended for third-party applications to ship data to [Elastic Security](https://www.elastic.co/guide/en/security/current/es-overview.html). 
 
 We can introduce security mechanisms into the application's lifecycle by intercepting LLM activity or leveraging observable LLM metrics. It’s common practice to address prompt-based threats by [implementing various safety tactics](https://platform.openai.com/docs/guides/safety-best-practices):
 
@@ -46,18 +46,18 @@ We can introduce security mechanisms into the application's lifecycle by interce
  9. **HITL Feedback for Model Training**: Learn from human-in-the-loop, flagged issues to refine the model over time
  10. **Restrict API Access**: Limit model access based on specific needs and user verification
 
-Two powerful features provided by OpenAI, and many other LLM implementers, is the ability to [submit end-user IDs](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids) and check content against a [moderation API](https://platform.openai.com/docs/guides/moderation), features that set the bar for LLM safety. Sending hashed IDs along with the original request aids in abuse detection and provides targeted feedback, allowing unique user identification without sending personal information. Alternatively, OpenAI's moderation endpoint helps developers identify potentially harmful content like hate speech, self-harm encouragement, or violence, allowing them to filter such content. It even goes a step further by detecting threats and intent to self-harm.
+Two powerful features provided by OpenAI, and many other LLM implementers, is the ability to [submit end-user IDs](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids) and check content against a [moderation API](https://platform.openai.com/docs/guides/moderation), features that set the bar for LLM safety. Sending hashed IDs along with the original request aids in abuse detection and provides targeted feedback, allowing unique user identification without sending personal information. Alternatively, OpenAI's moderation endpoint helps developers identify potentially harmful content like hate speech, self-harm encouragement, or violence, allowing them to filter such content. It even goes a step further by detecting threats and intent to self-harm. 
 
-Despite all of the recommendations and best practices to protect against malicious prompts, we recognize that there is no single perfect solution. When using capabilities like OpenAI’s API, some of these threats may be detected by the content filter, which will respond with a usage policy violation notification:
+Despite all of the recommendations and best practices to protect against malicious prompts, we recognize that there is no single perfect solution. When using capabilities like OpenAI’s API, some of these threats may be detected by the content filter, which will respond with a usage policy violation notification:   
 
 ![Violation notification from OpenAI](/assets/images/embedding-security-in-llm-workflows/image5.png)
 
 
-This content filtering is beneficial to address many issues; however, it cannot identify further threats in the broader context of the environment, application ecosystem, or other alerts that may appear. The more we can integrate generative AI use cases into our existing protection capabilities, the more control and possibilities we have to address potential threats. Furthermore, even if LLM safeguards are in place to stop rudimentary attacks, we can still use the detection engine to alert and take future remediation actions instead of silently blocking or permitting abuse.
+This content filtering is beneficial to address many issues; however, it cannot identify further threats in the broader context of the environment, application ecosystem, or other alerts that may appear. The more we can integrate generative AI use cases into our existing protection capabilities, the more control and possibilities we have to address potential threats. Furthermore, even if LLM safeguards are in place to stop rudimentary attacks, we can still use the detection engine to alert and take future remediation actions instead of silently blocking or permitting abuse. 
 
 ## Proxying LLM Requests and Setup
 
-The optimal security solution integrates additional safeguards directly within the LLM application's ecosystem. This allows enriching alerts with the complete context surrounding requests and responses. As requests are sent to the LLM, we can intercept and analyze them for potential malicious activity. If necessary, a response action can be triggered to defer subsequent HTTP calls. Similarly, inspecting the LLM's response can uncover further signs of malicious behavior.
+The optimal security solution integrates additional safeguards directly within the LLM application's ecosystem. This allows enriching alerts with the complete context surrounding requests and responses. As requests are sent to the LLM, we can intercept and analyze them for potential malicious activity. If necessary, a response action can be triggered to defer subsequent HTTP calls. Similarly, inspecting the LLM's response can uncover further signs of malicious behavior. 
 
 Using a proxy to handle these interactions offers several advantages:
 
@@ -123,7 +123,7 @@ def azure_openai_proxy():
    })
 ```
 
-With the Flask server, you can configure the [OpenAI Kibana Connector](https://www.elastic.co/guide/en/kibana/current/openai-action-type.html) to use your proxy.
+With the Flask server, you can configure the [OpenAI Kibana Connector](https://www.elastic.co/guide/en/kibana/current/openai-action-type.html) to use your proxy. 
 
 ![](/assets/images/embedding-security-in-llm-workflows/image10.png)
 
@@ -148,7 +148,7 @@ The LangSmith Proxy is designed to simplify LLM API interaction. It's a sidecar 
 
 **It’s important to understand that even though documented lists of protections do not accompany some LLMs, simply trying some of these prompts may be immediately denied or result in banning on whatever platform used to submit the prompt. We recommend experimenting with caution and understand the SLA prior to sending any malicious prompts. Since this exploration leverages OpenAI’s resources, we recommend following the bugcrowd [guidance](https://bugcrowd.com/openai) and sign up for an additional testing account using your @bugcrowdninja.com email address.**
 
-Here is a list of several plausible examples to illustrate detection opportunities. Each LLM topic includes the OWASP description, an example prompt, a sample document, the detection opportunity, and potential actions users could take if integrating additional security mechanisms in their workflow.
+Here is a list of several plausible examples to illustrate detection opportunities. Each LLM topic includes the OWASP description, an example prompt, a sample document, the detection opportunity, and potential actions users could take if integrating additional security mechanisms in their workflow. 
 
 While this list is currently not extensive, Elastic Security Labs is currently undertaking a number of initiatives to ensure future development, and formalization of rules will continue.
 
@@ -175,7 +175,7 @@ FROM azure-openai-logs |
    OR response.choices LIKE "*I'm sorry, but I can't assist*"
 ```
 
-A slightly more advanced query detects more than two similar attempts within the last day.
+A slightly more advanced query detects more than two similar attempts within the last day. 
 
 ``` sql
 FROM azure-openai-logs
@@ -197,7 +197,7 @@ FROM azure-openai-logs
 **Sample Response**:
 ![](/assets/images/embedding-security-in-llm-workflows/image17.png)
 
-With the additional analysis from OpenAI’s filtering, we can immediately detect the first occurrence of abuse.
+With the additional analysis from OpenAI’s filtering, we can immediately detect the first occurrence of abuse. 
 
 **Detection Rule Opportunity**:
 ``` sql
@@ -241,7 +241,7 @@ This query detects suspicious behavior related to Molotov Cocktails across multi
  - **Session-Level Analysis**: By grouping events by connectorId, it analyzes the complete sequence of attempts within a session. It then calculates the total number of attempts (```attempts = count(*)```) and the highest sensitivity score (```max_sensitivity = max(analysis.llm_guard_response_scores.Sensitive)```) across all attempts in that session
  - **Flagging High-Risk Sessions**: It filters sessions with at least one attempt (```attempts >= 1```) and a maximum sensitivity score exceeding 0.5 (```max_sensitivity > 0.5```). This threshold helps focus on sessions where users persistently discussed or revealed potentially risky content.
 
-By analyzing these factors across multiple events within a session, we can start building an approach to detect a pattern of escalating discussions, even if individual events might not be flagged alone.
+By analyzing these factors across multiple events within a session, we can start building an approach to detect a pattern of escalating discussions, even if individual events might not be flagged alone. 
 
 ### LLM02 - insecure output handling
 
@@ -280,13 +280,13 @@ FROM azure-openai-logs
 | WHERE total_attempts >= 2
 ```
 
-This pseudo query detects potential insecure output handling by identifying LLM responses containing scripting elements or cookie access attempts, which are common in Cross-Site Scripting (XSS) attacks. It is a shell that could be extended by allow or block lists for well-known keywords.
+This pseudo query detects potential insecure output handling by identifying LLM responses containing scripting elements or cookie access attempts, which are common in Cross-Site Scripting (XSS) attacks. It is a shell that could be extended by allow or block lists for well-known keywords. 
 
 ### LLM04 - model DoS
 
 **OWASP Description**: Overloading LLMs with resource-heavy operations can cause service disruptions and increased costs. Reference [here](https://github.com/OWASP/www-project-top-10-for-large-language-model-applications/blob/main/2_0_vulns/LLM04_ModelDoS.md).
 
-**Example**: An adversary may send complex prompts that consume excessive computational resources.
+**Example**: An adversary may send complex prompts that consume excessive computational resources. 
 
 **Prompt**:
 ![](/assets/images/embedding-security-in-llm-workflows/image2.png)
@@ -304,9 +304,9 @@ FROM azure-openai-logs
 | WHERE total_attempts >= 2
 ```
 
-This detection illustrates another simple example of how the LLM response is used to identify potentially abusive behavior. Although this example may not represent a traditional security threat, it could emulate how adversaries can impose costs on victims, either consuming resources or tokens.
+This detection illustrates another simple example of how the LLM response is used to identify potentially abusive behavior. Although this example may not represent a traditional security threat, it could emulate how adversaries can impose costs on victims, either consuming resources or tokens. 
 
-**Example 2**: An adversary may send complex prompts that consume excessive computational resources.
+**Example 2**: An adversary may send complex prompts that consume excessive computational resources. 
 
 **Prompt**:
 ![](/assets/images/embedding-security-in-llm-workflows/image16.png)
@@ -314,7 +314,7 @@ This detection illustrates another simple example of how the LLM response is use
 **Sample Response**:
 ![](/assets/images/embedding-security-in-llm-workflows/image14.png)
 
-At a glance, this prompt appears to be benign. However, excessive requests and verbose responses in a short time can significantly increase costs.
+At a glance, this prompt appears to be benign. However, excessive requests and verbose responses in a short time can significantly increase costs. 
 
 **Detection Rule Opportunity**:
 
@@ -332,7 +332,7 @@ In the context of example 2, this working query efficiently tracks and analyzes 
 
 **OWASP Description**: Failure to protect against disclosure of sensitive information in LLM outputs can result in legal consequences or a loss of competitive advantage. Reference [here](https://github.com/OWASP/www-project-top-10-for-large-language-model-applications/blob/main/2_0_vulns/LLM06_SensitiveInformationDisclosure.md).
 
-**Example**: An adversary may craft prompts to extract sensitive information embedded in the training data.
+**Example**: An adversary may craft prompts to extract sensitive information embedded in the training data. 
 
 **Prompt**:
 ![](/assets/images/embedding-security-in-llm-workflows/image1.png)
@@ -359,8 +359,8 @@ By routing LLM requests through a proxy, we can capitalize on specialized securi
 
 We don’t deep-dive on every tool available, but several open-source tools have emerged to offer varying approaches to analyzing and securing LLM interactions. Some of these tools are backed by machine learning models trained to detect malicious prompts:
 
- - **Rebuff** ([GitHub](https://github.com/protectai/rebuff)): Utilizes machine learning to identify and mitigate attempts at social engineering, phishing, and other malicious activities through LLM interactions. Example usage involves passing request content through Rebuff's analysis engine and tagging requests with a "malicious" boolean field based on the findings.
- - **LLM-Guard** ([GitHub](https://github.com/protectai/llm-guard)): Provides a rule-based engine for detecting harmful patterns in LLM requests. LLM-Guard can categorize detected threats based on predefined categories, enriching requests with detailed threat classifications.
+ - **Rebuff** ([GitHub](https://github.com/protectai/rebuff)): Utilizes machine learning to identify and mitigate attempts at social engineering, phishing, and other malicious activities through LLM interactions. Example usage involves passing request content through Rebuff's analysis engine and tagging requests with a "malicious" boolean field based on the findings. 
+ - **LLM-Guard** ([GitHub](https://github.com/protectai/llm-guard)): Provides a rule-based engine for detecting harmful patterns in LLM requests. LLM-Guard can categorize detected threats based on predefined categories, enriching requests with detailed threat classifications. 
  - **LangKit** ([GitHub](https://github.com/whylabs/langkit/tree/main)): A toolkit designed for monitoring and securing LLMs, LangKit can analyze request content for signs of adversarial inputs or unintended model behaviors. It offers hooks for integrating custom analysis functions.
  - **Vigil-LLM** ([GitHub](https://github.com/deadbits/vigil-llm)): Focuses on real-time monitoring and alerting for suspicious LLM requests. Integration into the proxy layer allows for immediate flagging potential security issues, enriching the request data with vigilance scores.
  - **Open-Prompt Injection** ([GitHub](https://github.com/liu00222/Open-Prompt-Injection)): Offers methodologies and tools for detecting prompt injection attacks, allowing for the enrichment of request data with specific indicators of compromise related to prompt injection techniques.
@@ -463,9 +463,9 @@ In Part two of this series, we will discuss how we’ve taken a more formal appr
 
 ## Alternative Options for LLM Application Auditing
 
-While using a proxy may be straightforward, other approaches may better suit a production setup; for example:
+While using a proxy may be straightforward, other approaches may better suit a production setup; for example: 
 
- - Utilizing [application performance monitoring](https://www.elastic.co/observability/application-performance-monitoring) (APM)
+ - Utilizing [application performance monitoring](https://www.elastic.co/observability/application-performance-monitoring) (APM) 
  - Using the OpenTelemetry integration
  - Modifying changes in Kibana directly to audit and trace LLM activity
 
@@ -477,17 +477,17 @@ Elastic [APM](https://www.elastic.co/guide/en/observability/current/apm.html) pr
 
 ### Utilizing OpenTelemetry for Enhanced Observability
 
-For applications already employing OpenTelemetry, leveraging its [integration](https://www.elastic.co/guide/en/observability/current/apm-open-telemetry.html) with Elastic APM can enhance observability without requiring extensive instrumentation changes. This integration supports capturing a wide array of telemetry data, including traces and metrics, which can be seamlessly sent to the Elastic Stack. This approach allows developers to continue using familiar libraries while benefiting from the robust monitoring capabilities of Elastic. OpenTelemetry’s compatibility across multiple programming languages and its [support through Elastic’s native protocol](https://www.elastic.co/guide/en/observability/current/apm-open-telemetry.html) (OTLP) facilitate straightforward data transmission, providing a robust foundation for monitoring distributed systems. Compared to the proxy example, this approach more natively ingests data than maintaining an independent index and logging mechanism to Elastic.
+For applications already employing OpenTelemetry, leveraging its [integration](https://www.elastic.co/guide/en/observability/current/apm-open-telemetry.html) with Elastic APM can enhance observability without requiring extensive instrumentation changes. This integration supports capturing a wide array of telemetry data, including traces and metrics, which can be seamlessly sent to the Elastic Stack. This approach allows developers to continue using familiar libraries while benefiting from the robust monitoring capabilities of Elastic. OpenTelemetry’s compatibility across multiple programming languages and its [support through Elastic’s native protocol](https://www.elastic.co/guide/en/observability/current/apm-open-telemetry.html) (OTLP) facilitate straightforward data transmission, providing a robust foundation for monitoring distributed systems. Compared to the proxy example, this approach more natively ingests data than maintaining an independent index and logging mechanism to Elastic. 
 
 ### LLM Auditing with Kibana
 
-Like writing custom logic for your LLM application to audit and ship data, you can test the approach with Elastic’s AI Assistant. If you're comfortable with TypeScript, consider deploying a local Elastic instance using the Kibana [Getting Started Guide](https://www.elastic.co/guide/en/kibana/current/development-getting-started.html). Once set up, navigate to the [Elastic AI Assistant](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/elastic_assistant) and configure it to intercept LLM requests and responses for auditing and analysis. Note: This approach primarily tracks Elastic-specific LLM integration compared to using APM and other integrations or a proxy to track third-party applications. It should only be considered for experimentation and exploratory testing purposes.
+Like writing custom logic for your LLM application to audit and ship data, you can test the approach with Elastic’s AI Assistant. If you're comfortable with TypeScript, consider deploying a local Elastic instance using the Kibana [Getting Started Guide](https://www.elastic.co/guide/en/kibana/current/development-getting-started.html). Once set up, navigate to the [Elastic AI Assistant](https://github.com/elastic/kibana/tree/main/x-pack/plugins/elastic_assistant) and configure it to intercept LLM requests and responses for auditing and analysis. Note: This approach primarily tracks Elastic-specific LLM integration compared to using APM and other integrations or a proxy to track third-party applications. It should only be considered for experimentation and exploratory testing purposes. 
 
-Fortunately, Kibana is already instrumented with APM, so if you configure an APM server, you will automatically start ingesting logs from this source (by setting ```elastic.apm.active: true```). See the [README](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/kbn-langchain/server/tracers/README.mdx) for more details.
+Fortunately, Kibana is already instrumented with APM, so if you configure an APM server, you will automatically start ingesting logs from this source (by setting ```elastic.apm.active: true```). See the [README](https://github.com/elastic/kibana/blob/main/x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx) for more details.
 
 ## Closing Thoughts
 
-As we continue with this exploration into integrating security practices within the lifecycle of large language models at Elastic, it's clear that embedding security into LLM workflows can provide a path forward for creating safer and more reliable applications. These contrived examples, drawn from our work during OnWeek, illustrate how someone can proactively detect, alert, and triage malicious activity, leveraging the security solutions that analysts find most intuitive and effective.
+As we continue with this exploration into integrating security practices within the lifecycle of large language models at Elastic, it's clear that embedding security into LLM workflows can provide a path forward for creating safer and more reliable applications. These contrived examples, drawn from our work during OnWeek, illustrate how someone can proactively detect, alert, and triage malicious activity, leveraging the security solutions that analysts find most intuitive and effective. 
 
 It’s also worth noting that with the example proxy approach, we can incorporate a model to actively detect and prevent requests. Additionally, we can triage the LLM response before sending it back to the user if we’ve identified malicious threats. At this point, we have the flexibility to extend our security protections to cover a variety of defensive approaches. In this case, there is a fine line between security and performance, as each additional check will consume time and impede the natural conversational flow that users would expect.
 

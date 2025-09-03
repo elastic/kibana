@@ -7,8 +7,9 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { MouseEvent } from 'react';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import { useSpace } from '../../../../hooks/use_space';
 import { createRemoteSloDetailsUrl } from '../../../../utils/slo/remote_slo_urls';
 

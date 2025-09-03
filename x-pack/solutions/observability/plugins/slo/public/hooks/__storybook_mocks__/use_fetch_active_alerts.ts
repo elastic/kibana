@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseFetchActiveAlerts } from '../use_fetch_active_alerts';
+import type { UseFetchActiveAlerts } from '../use_fetch_active_alerts';
 import { ActiveAlerts } from '../active_alerts';
 
 export const useFetchActiveAlerts = ({

@@ -71,14 +71,16 @@ export async function getESQLQueryColumnsRaw({
   search,
   signal,
   timeRange,
+  variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
   timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getStartEndParams(esqlQuery, timeRange);
+    const namedParams = getNamedParams(esqlQuery, timeRange, variables);
     const response = await lastValueFrom(
       search(
         {
@@ -112,14 +114,22 @@ export async function getESQLQueryColumns({
   search,
   signal,
   timeRange,
+  variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
   timeRange?: TimeRange;
+  variables?: ESQLControlVariable[];
 }): Promise<DatatableColumn[]> {
   try {
-    const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal, timeRange });
+    const rawColumns = await getESQLQueryColumnsRaw({
+      esqlQuery,
+      search,
+      signal,
+      timeRange,
+      variables,
+    });
     const columns = formatESQLColumns(rawColumns) ?? [];
     return columns;
   } catch (error) {

@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 
 import { removeLifecycleForIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
@@ -55,9 +55,12 @@ export class RemoveLifecyclePolicyConfirmModal extends Component<Props> {
 
   render() {
     const { closeModal, indexNames } = this.props;
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.modalTitle"

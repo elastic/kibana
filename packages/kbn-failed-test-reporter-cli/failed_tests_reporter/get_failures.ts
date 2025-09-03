@@ -9,7 +9,8 @@
 
 import stripAnsi from 'strip-ansi';
 
-import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
+import type { FailedTestCase, TestReport } from './test_report';
+import { makeFailedTestCaseIter } from './test_report';
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;

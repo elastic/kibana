@@ -6,8 +6,8 @@
  */
 
 import Papa from 'papaparse';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Datatable } from '../../../types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {

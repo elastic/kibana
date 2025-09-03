@@ -8,15 +8,14 @@
  */
 
 import React from 'react';
-import { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface ICoreStartContext {
   appName: string;
   uiSettings: IUiSettingsClient;
-  savedObjectsClient: SavedObjectsClientContract;
   storage: IStorageWrapper;
   core: CoreStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

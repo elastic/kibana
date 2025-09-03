@@ -6,11 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { BasePayload } from '@kbn/reporting-common/types';
 
 import { Report } from '../store';
-import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
+import type { ReportingEventLogger } from './logger';
+import { reportingEventLoggerFactory } from './logger';
 
 describe('Event Logger', () => {
   const mockReport = new Report({

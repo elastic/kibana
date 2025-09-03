@@ -19,16 +19,17 @@ import {
   isReferenced,
   getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '.';
-import { TermsIndexPatternColumn } from './definitions/terms';
-import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
-import { AvgIndexPatternColumn } from './definitions/metrics';
+import type { OperationType } from '.';
+import { operationDefinitionMap } from '.';
+import type { TermsIndexPatternColumn } from './definitions/terms';
+import type { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
+import type { AvgIndexPatternColumn } from './definitions/metrics';
 import type { FormBasedLayer, FormBasedPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
-import {
+import type {
   CounterRateIndexPatternColumn,
   FiltersIndexPatternColumn,
   FormulaIndexPatternColumn,
@@ -38,8 +39,8 @@ import {
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
-import { TinymathAST } from '@kbn/tinymath';
-import { IndexPattern } from '../../../types';
+import type { TinymathAST } from '@kbn/tinymath';
+import type { IndexPattern } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 
@@ -166,7 +167,6 @@ describe('state_helpers', () => {
         isBucketed: false,
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'sum' as const,
-        scale: 'ratio' as const,
         sourceField: 'bytes',
       };
       const movingAvg = {
@@ -1290,7 +1290,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1319,7 +1318,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1348,7 +1346,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1376,7 +1373,6 @@ describe('state_helpers', () => {
                   dataType: 'number',
                   operationType: 'counter_rate',
                   isBucketed: false,
-                  scale: 'ratio',
                   references: ['col2'],
                   timeScale: 's',
                   timeShift: '',
@@ -1387,7 +1383,6 @@ describe('state_helpers', () => {
                   label: 'Max of bytes',
                   dataType: 'number',
                   operationType: 'max',
-                  scale: 'ratio',
                   sourceField: indexPattern.fields[2].displayName,
                 } as MaxIndexPatternColumn,
               },
@@ -2008,7 +2003,6 @@ describe('state_helpers', () => {
               isBucketed: false,
               label: 'formulaX0',
               operationType: 'sum' as const,
-              scale: 'ratio' as const,
               sourceField: 'bytes',
             },
             formulaX1: {
@@ -2307,7 +2301,6 @@ describe('state_helpers', () => {
                 dataType: 'number',
                 operationType: 'formula',
                 isBucketed: false,
-                scale: 'ratio',
                 params: {
                   isFormulaBroken: false,
                   formula: 'average(bytes)',
@@ -2785,7 +2778,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'count',
               isBucketed: false,
-              scale: 'ratio',
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2795,7 +2787,6 @@ describe('state_helpers', () => {
               operationType: 'date_histogram',
               sourceField: 'timestamp',
               isBucketed: true,
-              scale: 'interval',
               params: {
                 interval: 'auto',
               },
@@ -2805,7 +2796,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'formula',
               isBucketed: false,
-              scale: 'ratio',
               params: {
                 formula: 'count() + count()',
                 isFormulaBroken: false,
@@ -2817,7 +2807,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'count',
               isBucketed: false,
-              scale: 'ratio',
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2826,7 +2815,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               operationType: 'math',
               isBucketed: false,
-              scale: 'ratio',
               params: {
                 tinymathAst: {
                   type: 'function',
@@ -2959,7 +2947,6 @@ describe('state_helpers', () => {
             dataType: 'number',
             operationType: 'moving_average',
             isBucketed: false,
-            scale: 'ratio',
             references: ['col2'],
             timeScale: undefined,
             filter: undefined,
@@ -3496,7 +3483,6 @@ describe('state_helpers', () => {
             isBucketed: false,
             label: 'formulaX0',
             operationType: 'sum' as const,
-            scale: 'ratio' as const,
             sourceField: 'bytes',
           },
           formulaX1: {

@@ -35,8 +35,8 @@ export const onboardingConfig: TopicConfig[] = [
   },
   {
     id: OnboardingTopicId.siemMigrations,
-    title: i18n.translate('xpack.securitySolution.onboarding.topic.siemMigrations', {
-      defaultMessage: 'SIEM rule migration',
+    title: i18n.translate('xpack.securitySolution.onboarding.topic.automaticMigration', {
+      defaultMessage: 'Automatic migration',
     }),
     body: siemMigrationsBodyConfig,
     disabledExperimentalFlagRequired: 'siemMigrationsDisabled',

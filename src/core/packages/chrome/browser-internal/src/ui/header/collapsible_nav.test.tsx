@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
@@ -55,7 +56,6 @@ function mockProps() {
     navLinks$: new BehaviorSubject([]),
     recentlyAccessed$: new BehaviorSubject([]),
     storage: new StubBrowserStorage(),
-    onIsLockedUpdate: () => {},
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),

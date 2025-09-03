@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useBulkDeleteSlo } from '../../../pages/slo_management/hooks/use_bulk_delete_slo';
 
@@ -19,9 +19,12 @@ export interface Props {
 
 export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: Props) {
   const { mutate: bulkDelete } = useBulkDeleteSlo({ onConfirm });
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="sloBulkDeleteConfirmationModal"
       title={i18n.translate('xpack.slo.bulkDeleteConfirmationModal.title', {

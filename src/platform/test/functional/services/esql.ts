@@ -8,13 +8,15 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class ESQLService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly log = this.ctx.getService('log');
+  private readonly browser = this.ctx.getService('browser');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
   public async expectEsqlStatement(statement: string) {
@@ -28,6 +30,29 @@ export class ESQLService extends FtrService {
     });
 
     expect(queryAdded).to.be(true);
+  }
+
+  public async isHistoryPanelOpen() {
+    return await this.testSubjects.exists('ESQLEditor-history-container');
+  }
+
+  public async toggleHistoryPanel() {
+    const isHistoryOpen = await this.isHistoryPanelOpen();
+    await this.testSubjects.click('ESQLEditor-toggle-query-history-button');
+    await this.retry.waitFor('history queries to toggle', async () => {
+      const isHistoryOpenAfterToggle = await this.isHistoryPanelOpen();
+      return isHistoryOpen !== isHistoryOpenAfterToggle;
+    });
+  }
+
+  public async getEditorHeight() {
+    const editor = await this.testSubjects.find('ESQLEditor');
+    return (await editor.getSize()).height;
+  }
+
+  public async resizeEditorBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('ESQLEditor-resize');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: 0, y: distance } });
   }
 
   public async getHistoryItems(): Promise<string[][]> {
@@ -112,11 +137,13 @@ export class ESQLService extends FtrService {
     });
   }
 
-  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor') {
-    await this.monacoEditor.waitCodeEditorReady(editorSubjId);
+  public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor'): Promise<WebElementWrapper> {
+    this.log.debug('waitESQLEditorLoaded: ', editorSubjId);
+    return await this.monacoEditor.waitCodeEditorReady(editorSubjId);
   }
 
   public async getEsqlEditorQuery() {
+    await this.waitESQLEditorLoaded();
     return await this.monacoEditor.getCodeEditorValue();
   }
 

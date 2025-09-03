@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { styles } from './layout_sidebar_panel.styles';
 
 export interface LayoutSidebarPanelProps {
@@ -21,5 +22,13 @@ export interface LayoutSidebarPanelProps {
  * @returns The rendered LayoutSidebarPanel component.
  */
 export const LayoutSidebarPanel = ({ children }: LayoutSidebarPanelProps) => {
-  return <aside css={styles.root}>{children}</aside>;
+  return (
+    <aside
+      css={styles.root}
+      className="kbnChromeLayoutSidebarPanel"
+      data-test-subj="kbnChromeLayoutSidebarPanel"
+    >
+      {children}
+    </aside>
+  );
 };

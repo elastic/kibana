@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiToolTip, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,12 +35,14 @@ export const NoPermissionsTooltip = ({
   canEditSynthetics = true,
   canUsePublicLocations = true,
   canManagePrivateLocations = true,
+  content,
   children,
 }: {
   canEditSynthetics?: boolean;
   canUsePublicLocations?: boolean;
   canManagePrivateLocations?: boolean;
   children: ReactNode;
+  content?: ReactNode;
 }) => {
   const { isServiceAllowed } = useEnablement();
 
@@ -60,6 +63,14 @@ export const NoPermissionsTooltip = ({
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>
+        <span>{children}</span>
+      </EuiToolTip>
+    );
+  }
+
+  if (content) {
+    return (
+      <EuiToolTip content={content}>
         <span>{children}</span>
       </EuiToolTip>
     );

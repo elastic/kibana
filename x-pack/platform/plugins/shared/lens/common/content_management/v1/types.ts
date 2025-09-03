@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type { UpdateIn } from '@kbn/content-management-plugin/common';
 import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
+import type { UpdateIn } from '@kbn/content-management-plugin/common';
 
 import type { LensContentType } from '../types';
-
-export interface Reference {
-  type: string;
-  id: string;
-  name: string;
-}
 
 export interface CreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */

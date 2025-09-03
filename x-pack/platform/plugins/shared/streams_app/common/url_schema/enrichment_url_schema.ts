@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Filter, TimeRange } from '@kbn/es-query';
-import { SampleDocument, sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { SampleDocument } from '@kbn/streams-schema/src/shared/record_types';
+import { sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { z } from '@kbn/zod';
 
 /**
@@ -46,7 +47,7 @@ export interface KqlSamplesDataSource extends BaseDataSource {
     query: string;
   };
   filters?: Filter[];
-  timeRange: TimeRange;
+  timeRange?: TimeRange;
 }
 
 const kqlSamplesDataSourceSchema = baseDataSourceSchema.extend({
@@ -56,10 +57,12 @@ const kqlSamplesDataSourceSchema = baseDataSourceSchema.extend({
     query: z.string(),
   }),
   filters: z.array(z.any()).optional(),
-  timeRange: z.object({
-    from: z.string(),
-    to: z.string(),
-  }),
+  timeRange: z
+    .object({
+      from: z.string(),
+      to: z.string(),
+    })
+    .optional(),
 }) satisfies z.Schema<KqlSamplesDataSource>;
 
 /**

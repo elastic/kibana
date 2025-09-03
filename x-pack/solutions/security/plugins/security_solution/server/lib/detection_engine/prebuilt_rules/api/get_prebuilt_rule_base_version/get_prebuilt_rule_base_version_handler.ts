@@ -9,13 +9,13 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import type { FullRuleDiff } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   ThreeWayDiffOutcome,
   type GetPrebuiltRuleBaseVersionRequest,
   type GetPrebuiltRuleBaseVersionResponseBody,
   type PartialRuleDiff,
   type ThreeWayDiff,
+  type FullRuleDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';

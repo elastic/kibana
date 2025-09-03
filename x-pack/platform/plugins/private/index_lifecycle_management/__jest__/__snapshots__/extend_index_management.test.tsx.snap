@@ -3,7 +3,7 @@
 exports[`extend index management ilm banner extension should return extension when any index has lifecycle error 1`] = `
 Object {
   "action": Object {
-    "buttonLabel": "Retry lifecycle step",
+    "buttonLabel": "Retry failed lifecycle step",
     "indexNames": Array [
       "testy3",
     ],
@@ -752,9 +752,9 @@ Object {
 }
 `;
 
-exports[`extend index management retry lifecycle action extension should return extension when all indices have lifecycle errors 1`] = `
+exports[`extend index management retry lifecycle action extension should return extension when all indices have failed step lifecycle errors 1`] = `
 Object {
-  "buttonLabel": "Retry lifecycle step",
+  "buttonLabel": "Retry failed lifecycle step",
   "icon": "play",
   "indexNames": Array [
     Array [
@@ -764,5 +764,19 @@ Object {
   ],
   "requestMethod": [Function],
   "successMessage": "Called retry lifecycle step for: \\"testy3\\", \\"testy3\\"",
+}
+`;
+
+exports[`extend index management retry lifecycle action extension should return extension with only indices that have failed step lifecycle errors 1`] = `
+Object {
+  "buttonLabel": "Retry failed lifecycle step",
+  "icon": "play",
+  "indexNames": Array [
+    Array [
+      "testy3",
+    ],
+  ],
+  "requestMethod": [Function],
+  "successMessage": "Called retry lifecycle step for: \\"testy3\\"",
 }
 `;

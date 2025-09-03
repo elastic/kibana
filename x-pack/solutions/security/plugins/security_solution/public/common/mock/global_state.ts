@@ -327,6 +327,17 @@ export const mockGlobalState: State = {
       linkTo: [InputsModelId.global, InputsModelId.timeline],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
+    valueReport: {
+      timerange: {
+        kind: 'relative',
+        fromStr: DEFAULT_FROM,
+        toStr: DEFAULT_TO,
+        from: '2020-07-06T08:20:18.966Z',
+        to: '2020-07-07T08:20:18.966Z',
+      },
+      linkTo: [],
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
+    },
   },
   dragAndDrop: { dataProviders: {} },
   timeline: {
@@ -489,6 +500,16 @@ export const mockGlobalState: State = {
         ),
       },
       [SourcererScopeName.analyzer]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [SourcererScopeName.explore]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(

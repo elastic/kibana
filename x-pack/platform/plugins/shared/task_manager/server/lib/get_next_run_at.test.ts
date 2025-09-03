@@ -65,7 +65,9 @@ describe('getNextRunAt', () => {
   });
 
   test('should use the rrule with a fixed time when it is given to calculate the next runAt (same day)', () => {
-    const now = new Date('2025-06-30T10:00:00.000Z');
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-06-30T10:00:00.000Z'));
+    const now = new Date();
     const testStart = new Date(now.getTime() - 500);
     const testRunAt = new Date(now.getTime() - 1000);
     const nextRunAt = getNextRunAt(
@@ -87,10 +89,13 @@ describe('getNextRunAt', () => {
     );
     const expectedNextRunAt = new Date('2025-06-30T12:15:59.500Z');
     expect(nextRunAt).toEqual(expectedNextRunAt);
+    jest.useRealTimers();
   });
 
   test('should use the rrule with a fixed time when it is given to calculate the next runAt (next day)', () => {
-    const now = new Date('2025-06-30T13:00:00.000Z');
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-06-30T13:00:00.000Z'));
+    const now = new Date();
     const testStart = new Date(now.getTime() - 500);
     const testRunAt = new Date(now.getTime() - 1000);
     const nextRunAt = getNextRunAt(
@@ -112,6 +117,38 @@ describe('getNextRunAt', () => {
     );
     const expectedNextRunAt = new Date('2025-07-01T12:15:59.500Z');
     expect(nextRunAt).toEqual(expectedNextRunAt);
+    jest.useRealTimers();
+  });
+
+  test('should use now even if dtstart defined in rrule with a fixed time when it is given to calculate the next runAt', () => {
+    jest.useFakeTimers();
+    const now = new Date('2025-04-30T10:00:00.000Z');
+    jest.setSystemTime(now);
+    const testStart = new Date(now.getTime() - 500);
+    const testRunAt = new Date(now.getTime() - 1000);
+    const nextRunAt = getNextRunAt(
+      taskManagerMock.createTask({
+        schedule: {
+          rrule: {
+            dtstart: '2025-01-15T13:01:02Z',
+            freq: 3, // Daily
+            interval: 1,
+            tzid: 'UTC',
+            byhour: [12],
+            byminute: [15],
+          },
+        },
+        runAt: testRunAt,
+        startedAt: testStart,
+      }),
+      0,
+      mockLogger
+    );
+
+    const expectedNextRunAt = new Date('2025-04-30T12:15:59.500Z');
+    expect(nextRunAt).toEqual(expectedNextRunAt);
+
+    jest.clearAllTimers();
   });
 
   test('should use the rrule with a basic interval time when it is given to calculate the next runAt', () => {

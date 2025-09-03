@@ -6,9 +6,10 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
+  NodeContainer,
   NodeShapeContainer,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
@@ -16,26 +17,41 @@ import {
   NodeButton,
   HandleStyleOverride,
   useNodeFillColor,
-  NODE_WIDTH,
-  NODE_HEIGHT,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
 import { NodeExpandButton } from './node_expand_button';
-import { Label } from './label';
+import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
+import { NodeDetails } from './node_details';
+import { GRAPH_ENTITY_NODE_ID } from '../test_ids';
+
+const NODE_SHAPE_WIDTH = 90;
+const NODE_SHAPE_HEIGHT = 90;
 
 export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
-    props.data as EntityNodeViewModel;
+  const {
+    id,
+    color,
+    icon,
+    label,
+    tag,
+    count,
+    ips,
+    countryCodes,
+    interactive,
+    expandButtonClick,
+    nodeClick,
+  } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
+  const shadow = useEuiShadow('m', { property: 'filter' });
   return (
-    <>
+    <NodeContainer data-test-subj={GRAPH_ENTITY_NODE_ID}>
       <NodeShapeContainer>
         {interactive && (
           <NodeShapeOnHoverSvg
-            width={NODE_WIDTH}
-            height={NODE_HEIGHT}
-            viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
+            width={NODE_SHAPE_WIDTH}
+            height={NODE_SHAPE_HEIGHT}
+            viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -48,6 +64,7 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
           viewBox="0 0 72 72"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          shadow={shadow}
         >
           <EllipseShape
             fill={useNodeFillColor(color)}
@@ -61,7 +78,7 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
             <NodeExpandButton
               color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 2}px`}
+              x={`${NODE_WIDTH - (NodeExpandButton.ExpandButtonSize * 3) / 4}px`}
               y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
             />
           </>
@@ -81,8 +98,14 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <Label text={label ? label : id} />
-    </>
+      <NodeDetails
+        count={count}
+        tag={tag}
+        label={label ? label : id}
+        ips={ips}
+        countryCodes={countryCodes}
+      />
+    </NodeContainer>
   );
 });
 

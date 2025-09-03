@@ -5,13 +5,8 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  getUsageStats,
-  combineStats,
-  rollUpTotals,
-  ensureTimeSpan,
-  KibanaUsageStats,
-} from './get_kibana_stats';
+import type { KibanaUsageStats } from './get_kibana_stats';
+import { getUsageStats, combineStats, rollUpTotals, ensureTimeSpan } from './get_kibana_stats';
 
 describe('Get Kibana Stats', () => {
   describe('Make a map of usage stats for each cluster', () => {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Agent, PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Agent, AgentPolicy, NewAgentPolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type {
   AgentPolicyServiceInterface,
   AgentService,
   PackagePolicyClient,
@@ -15,7 +16,6 @@ import {
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
-import { createAgentPolicyWithPackages } from '@kbn/fleet-plugin/server/services/agent_policy_create';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 export interface ConnectorMetadata {
@@ -160,7 +160,7 @@ export class AgentlessConnectorsInfraService {
     return policiesMetadata;
   };
 
-  public deployConnector = async (connector: ConnectorMetadata): Promise<PackagePolicy> => {
+  public deployConnector = async (connector: ConnectorMetadata): Promise<AgentPolicy> => {
     this.logger.info(
       `Connector ${connector.id} has no integration policy associated with it, creating`
     );
@@ -186,77 +186,73 @@ export class AgentlessConnectorsInfraService {
     const pkgVersion = await this.getPackageVersion();
     this.logger.debug(`Latest package version for ${pkgName} is ${pkgVersion}`);
 
-    const createdPolicy = await createAgentPolicyWithPackages({
+    const agentPolicyToCreate: NewAgentPolicy = {
+      name: `Agentless policy for ${connector.service_type} connector: ${connector.id}`,
+      description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
+      global_data_tags: [
+        {
+          name: 'organization',
+          value: 'elastic',
+        },
+        {
+          name: 'division',
+          value: 'engineering',
+        },
+        {
+          name: 'team',
+          value: 'search-extract-and-transform',
+        },
+      ],
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      inactivity_timeout: 3600,
+      is_protected: false,
+      supports_agentless: true,
+    };
+
+    const packagePolicyToCreate = {
+      package: {
+        title: pkgTitle,
+        name: pkgName,
+        version: pkgVersion,
+      },
+      name: `${connector.service_type} connector ${connector.id}`,
+      description: '',
+      namespace: '',
+      enabled: true,
+      inputs: [
+        {
+          type: connectorsInputName,
+          policy_template: connector.service_type,
+          enabled: true,
+          vars: {
+            connector_id: { type: 'string', value: connector.id },
+            connector_name: { type: 'string', value: connector.name },
+            service_type: { type: 'string', value: connector.service_type },
+          },
+          streams: [],
+        },
+      ],
+      supports_agentless: true,
+    };
+
+    const agentPolicy = await this.agentPolicyService.createWithPackagePolicies({
       soClient: this.soClient,
       esClient: this.esClient,
-      newPolicy: {
-        name: `Agentless policy for ${connector.service_type} connector: ${connector.id}`,
-        description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
-        global_data_tags: [
-          {
-            name: 'organization',
-            value: 'elastic',
-          },
-          {
-            name: 'division',
-            value: 'engineering',
-          },
-          {
-            name: 'team',
-            value: 'search-extract-and-transform',
-          },
-        ],
-        namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
-        inactivity_timeout: 3600,
-        is_protected: false,
-        supports_agentless: true,
+      agentPolicy: agentPolicyToCreate,
+      packagePolicies: [packagePolicyToCreate],
+      options: {
+        withSysMonitoring: true,
+        spaceId: this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+        forcePackagePolicyCreation: true,
       },
-      withSysMonitoring: true,
-      spaceId: this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
     });
 
     this.logger.info(
-      `Successfully created agent policy ${createdPolicy.id} for agentless connector ${connector.id}`
-    );
-    this.logger.debug(`Creating a package policy for agentless connector ${connector.id}`);
-    const packagePolicy = await this.packagePolicyService.create(
-      this.soClient,
-      this.esClient,
-      {
-        policy_ids: [createdPolicy.id],
-        package: {
-          title: pkgTitle,
-          name: pkgName,
-          version: pkgVersion,
-        },
-        name: `${connector.service_type} connector ${connector.id}`,
-        description: '',
-        namespace: '',
-        enabled: true,
-        inputs: [
-          {
-            type: connectorsInputName,
-            policy_template: connector.service_type,
-            enabled: true,
-            vars: {
-              connector_id: { type: 'string', value: connector.id },
-              connector_name: { type: 'string', value: connector.name },
-              service_type: { type: 'string', value: connector.service_type },
-            },
-            streams: [],
-          },
-        ],
-        supports_agentless: true,
-      },
-      { force: true }
+      `Successfully created agent policy ${agentPolicy.id} for agentless connector ${connector.id}`
     );
 
-    this.logger.info(
-      `Successfully created package policy ${packagePolicy.id} for agentless connector ${connector.id}`
-    );
-
-    return packagePolicy;
+    return agentPolicy;
   };
 
   public removeDeployment = async (packagePolicyId: string): Promise<void> => {

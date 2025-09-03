@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 
 import { pauseFollowerIndex } from '../../store/actions';
 import { arrify } from '../../../../common/services/utils';
@@ -68,10 +68,14 @@ class FollowerIndexPauseProviderUi extends PureComponent {
         );
     const hasCustomSettings = indices.some((index) => !areAllSettingsDefault(index));
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return (
       // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={title}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this.closeConfirmModal}
         onConfirm={this.onConfirm}
         cancelButtonText={i18n.translate(

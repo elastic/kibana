@@ -8,7 +8,10 @@
 import './space_selector.scss';
 
 import {
+  EuiButtonGroup,
   EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
@@ -32,10 +35,15 @@ import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { SpaceCards } from './components';
+import { SpaceCards, SpaceTable } from './components';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
+
+// Number of spaces above which the selector defaults to table view for better scalability
+const VIEW_MODE_THRESHOLD = 20;
+
+type ViewMode = 'grid' | 'table';
 
 interface Props {
   spacesManager: SpacesManager;
@@ -49,6 +57,7 @@ interface State {
   spaces: Space[];
   error?: Error;
   customLogo?: string;
+  viewMode: ViewMode;
 }
 
 export class SpaceSelector extends Component<Props, State> {
@@ -62,6 +71,7 @@ export class SpaceSelector extends Component<Props, State> {
       loading: false,
       searchTerm: '',
       spaces: [],
+      viewMode: 'grid',
     };
   }
 
@@ -96,6 +106,7 @@ export class SpaceSelector extends Component<Props, State> {
         this.setState({
           loading: false,
           spaces,
+          viewMode: spaces.length > VIEW_MODE_THRESHOLD ? 'table' : 'grid',
         });
       })
       .catch((err) => {
@@ -173,13 +184,16 @@ export class SpaceSelector extends Component<Props, State> {
           </EuiText>
           <EuiSpacer size="xl" />
 
-          {this.getSearchField()}
+          {this.getSearchAndToggle()}
 
           {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
-          {!this.state.loading && (
-            <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
-          )}
+          {!this.state.loading &&
+            (this.state.viewMode === 'grid' ? (
+              <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+            ) : (
+              <SpaceTable spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+            ))}
 
           {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
             <Fragment>
@@ -261,6 +275,91 @@ export class SpaceSelector extends Component<Props, State> {
     this.setState({
       searchTerm: searchTerm.trim().toLowerCase(),
     });
+  };
+
+  public onViewModeChange = (viewMode: ViewMode) => {
+    this.setState({ viewMode });
+  };
+
+  public getViewToggle = () => {
+    const { viewMode } = this.state;
+
+    const toggleOptions = [
+      {
+        id: 'grid',
+        label: i18n.translate('xpack.spaces.spaceSelector.gridViewLabel', {
+          defaultMessage: 'Grid view',
+        }),
+        iconType: 'apps',
+      },
+      {
+        id: 'table',
+        label: i18n.translate('xpack.spaces.spaceSelector.tableViewLabel', {
+          defaultMessage: 'Table view',
+        }),
+        iconType: 'list',
+      },
+    ];
+
+    return (
+      <EuiButtonGroup
+        css={css`
+          .euiButtonGroup__buttons .euiButtonGroupButton {
+            min-width: 40px;
+            width: 40px;
+          }
+        `}
+        legend={i18n.translate('xpack.spaces.spaceSelector.viewToggleLegend', {
+          defaultMessage: 'View options',
+        })}
+        options={toggleOptions}
+        idSelected={viewMode}
+        onChange={(id) => this.onViewModeChange(id as ViewMode)}
+        buttonSize="m"
+        isIconOnly
+      />
+    );
+  };
+
+  public getSearchAndToggle = () => {
+    const { spaces } = this.state;
+
+    // Show search field and toggle if we have enough spaces to warrant them
+    const showSearchAndToggle = spaces && spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD;
+
+    if (!showSearchAndToggle) {
+      return null;
+    }
+
+    const inputLabel = i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
+      defaultMessage: 'Find a space',
+    });
+
+    return (
+      <>
+        <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="center">
+          {showSearchAndToggle && (
+            <EuiFlexItem grow={false}>
+              <div
+                css={css`
+                  width: ${euiThemeVars.euiFormMaxWidth};
+                  max-width: 100%;
+                `}
+              >
+                <EuiFieldSearch
+                  placeholder={inputLabel}
+                  aria-label={inputLabel}
+                  incremental={true}
+                  onSearch={this.onSearch}
+                />
+              </div>
+            </EuiFlexItem>
+          )}
+          {showSearchAndToggle && <EuiFlexItem grow={false}>{this.getViewToggle()}</EuiFlexItem>}
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+      </>
+    );
   };
 }
 

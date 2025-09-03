@@ -135,6 +135,9 @@ export function createProfilingEsClient({
             {
               signal: controller.signal,
               meta: true,
+              requestTimeout: 60000,
+              maxRetries: 5,
+              retryOnTimeout: true,
             }
           ),
           request,

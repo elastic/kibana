@@ -6,11 +6,12 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useSelector } from 'react-redux';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -26,13 +27,9 @@ import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { isActiveTimeline } from '../../../../helpers';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 /**
@@ -43,21 +40,20 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
 export const CorrelationsOverview: React.FC = () => {
   const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
     useDocumentDetailsContext();
-  const { isTourShown, activeStep } = useTourContext();
 
-  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
 
   const { navigateToLeftPanel: goToCorrelationsTab, isEnabled: isLinkEnabled } =
     useNavigateToLeftPanel({
       tab: LeftPanelInsightsTab,
       subTab: CORRELATIONS_TAB_ID,
     });
-
-  useEffect(() => {
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
-      goToCorrelationsTab();
-    }
-  }, [activeStep, goToCorrelationsTab, isTourShown]);
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
@@ -129,7 +125,7 @@ export const CorrelationsOverview: React.FC = () => {
           {showAlertsByAncestry && (
             <RelatedAlertsByAncestry
               documentId={documentId}
-              indices={selectedPatterns}
+              indices={securityDefaultPatterns}
               scopeId={scopeId}
             />
           )}

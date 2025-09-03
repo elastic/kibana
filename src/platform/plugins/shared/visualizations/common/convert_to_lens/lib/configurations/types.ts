@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Range } from '@kbn/expressions-plugin/common';
-import { ColorSchemas } from '@kbn/charts-plugin/common';
+import type { Range } from '@kbn/expressions-plugin/common';
+import type { ColorSchemas } from '@kbn/charts-plugin/common';
 
 export interface PaletteParams {
   colorSchema: ColorSchemas;

@@ -15,6 +15,7 @@
       "apmDataAccess",
       "data",
       "dashboard",
+      "contentManagement",
       "controls",
       "embeddable",
       "features",
@@ -35,11 +36,13 @@
       "uiActions",
       "logsDataAccess",
       "savedSearch",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "discoverShared"
     ],
     "optionalPlugins": [
       "actions",
       "alerting",
+      "cases",
       "charts",
       "cloud",
       "discover",
@@ -55,7 +58,6 @@
       "customIntegrations",
       "licenseManagement",
       "profilingDataAccess",
-      "cases",
       "observabilityAIAssistant",
       "share"
     ],

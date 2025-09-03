@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
 import {
   removeDropCommandsFromESQLQuery,
@@ -39,12 +40,8 @@ import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import {
-  UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramSuggestionContext,
-  UnifiedHistogramSuggestionType,
-  UnifiedHistogramVisContext,
-} from '../types';
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
 import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,
@@ -135,6 +132,7 @@ export class LensVisService {
     table,
     onSuggestionContextChange,
     onVisContextChanged,
+    getModifiedVisAttributes,
   }: {
     externalVisContext: UnifiedHistogramVisContext | undefined;
     queryParams: QueryParams;
@@ -148,6 +146,9 @@ export class LensVisService {
       visContext: UnifiedHistogramVisContext | undefined,
       externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => void;
+    getModifiedVisAttributes?: (
+      attributes: TypedLensByValueInput['attributes']
+    ) => TypedLensByValueInput['attributes'];
   }) => {
     const suggestionState = this.getCurrentSuggestionState({
       externalVisContext,
@@ -163,6 +164,7 @@ export class LensVisService {
       timeInterval,
       breakdownField,
       table,
+      getModifiedVisAttributes,
     });
 
     onSuggestionContextChange(suggestionState.currentSuggestionContext);
@@ -657,6 +659,7 @@ export class LensVisService {
     timeInterval,
     breakdownField,
     table,
+    getModifiedVisAttributes,
   }: {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
     externalVisContext: UnifiedHistogramVisContext | undefined;
@@ -664,6 +667,9 @@ export class LensVisService {
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     table: Datatable | undefined;
+    getModifiedVisAttributes?: (
+      attributes: TypedLensByValueInput['attributes']
+    ) => TypedLensByValueInput['attributes'];
   }): {
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     visContext: UnifiedHistogramVisContext | undefined;
@@ -767,6 +773,13 @@ export class LensVisService {
           table,
         }),
       };
+    }
+
+    if (
+      externalVisContextStatus !== UnifiedHistogramExternalVisContextStatus.applied &&
+      getModifiedVisAttributes
+    ) {
+      visContext.attributes = getModifiedVisAttributes(visContext.attributes);
     }
 
     return {

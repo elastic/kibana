@@ -1,2 +1,4 @@
 # Security Essentials tier config
 
+## Cloud settings
+xpack.cloud.serverless.product_tier: essentials

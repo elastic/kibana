@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NodeColorAccessor, PATH_KEY } from '@elastic/charts';
+import type { NodeColorAccessor } from '@elastic/charts';
+import { PATH_KEY } from '@elastic/charts';
 import { decreaseOpacity } from '@kbn/charts-plugin/public';
-import { getColorFactory } from '@kbn/coloring';
+import type { getColorFactory } from '@kbn/coloring';
 import { MultiFieldKey } from '@kbn/data-plugin/common';
 import { ChartTypes } from '../../../common/types';
 

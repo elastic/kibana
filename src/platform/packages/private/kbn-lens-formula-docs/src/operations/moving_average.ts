@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDocumentationType } from './types';
+import type { OperationDocumentationType } from './types';
 
 export const MOVING_AVERAGE_ID = 'moving_average';
 export const MOVING_AVERAGE_NAME = i18n.translate('lensFormulaDocs.movingAverage', {

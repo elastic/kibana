@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformMatrix2d, Vector2d } from '.';
+import type { TransformMatrix2d, Vector2d } from '.';
 
 export const ORIGIN: Vector2d = [0, 0, 1];
 export const UNITMATRIX: TransformMatrix2d = [1, 0, 0, 0, 1, 0, 0, 0, 1];

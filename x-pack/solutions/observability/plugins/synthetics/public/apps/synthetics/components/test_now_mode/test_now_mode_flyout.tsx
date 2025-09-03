@@ -20,7 +20,7 @@ import {
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import type { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { TestNowMode } from './test_now_mode';
 
 export interface TestRun {

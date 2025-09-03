@@ -16,6 +16,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 
 export const getExceptionsPreSummaryHandler = (
@@ -43,6 +44,15 @@ export const getExceptionsPreSummaryHandler = (
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
       await new TrustedAppValidator(endpointAppContextService, request).validatePreGetListSummary();
+      isEndpointArtifact = true;
+    }
+
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      await new TrustedDeviceValidator(
+        endpointAppContextService,
+        request
+      ).validatePreGetListSummary();
       isEndpointArtifact = true;
     }
 

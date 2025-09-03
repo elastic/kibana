@@ -6,7 +6,7 @@
  */
 
 import { NodeType } from '@kbn/wc-framework-types-common';
-import { NodeTypeDefinition, PromptNodeConfigType } from '@kbn/wc-framework-types-server';
+import type { NodeTypeDefinition, PromptNodeConfigType } from '@kbn/wc-framework-types-server';
 import { interpolateValue } from '../../state';
 
 export const getPromptNodeTypeDefinition = (): NodeTypeDefinition<PromptNodeConfigType> => {

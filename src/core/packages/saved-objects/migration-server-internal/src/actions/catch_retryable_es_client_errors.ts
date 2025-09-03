@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { errors as EsErrors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-internal';
 
 export interface RetryableEsClientError {
@@ -34,7 +34,10 @@ export const catchRetryableEsClientErrors = (
 export const catchRetryableSearchPhaseExecutionException = (
   e: EsErrors.ResponseError
 ): Either.Either<RetryableEsClientError, never> => {
-  if (e?.body?.error?.type === 'search_phase_execution_exception') {
+  if (
+    e?.body?.error?.type === 'search_phase_execution_exception' &&
+    e?.body?.error?.caused_by?.reason?.includes('Search rejected due to missing shards')
+  ) {
     return Either.left({
       type: 'retryable_es_client_error' as const,
       message: e?.message,

@@ -15,5 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/scout",
+    "@kbn/data-forge",
+    "@kbn/test",
   ]
 }

@@ -155,7 +155,7 @@ describe('Telemetry config watcher', () => {
         page: 1,
         perPage: 100,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-        spaceId: undefined,
+        spaceId: '*',
       };
       expect(packagePolicyServiceMock.list.mock.calls[0][1]).toStrictEqual(expectedParams);
       expect(packagePolicyServiceMock.list.mock.calls[1][1]).toStrictEqual(expectedParams);

@@ -205,7 +205,6 @@ describe('GroupedAlertsTable', () => {
     });
     expect(mockDispatch.mock.calls[1][0].payload).toEqual({
       activeGroups: ['none'],
-      options: mockOptions,
       tableId: testProps.tableId,
     });
   });

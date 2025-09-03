@@ -41,7 +41,12 @@ export function FieldFinalSideHeader(): JSX.Element {
         <FieldUpgradeSideHeader>
           <StaticHeaderContent>
             {hasConflict && (
-              <EuiButton iconType="checkInCircleFilled" size="s" onClick={handleAccept}>
+              <EuiButton
+                iconType="checkInCircleFilled"
+                size="s"
+                onClick={handleAccept}
+                data-test-subj="prebuilt-rule-upgrade-flyout-field-accept"
+              >
                 {i18n.ACCEPT}
               </EuiButton>
             )}
@@ -57,6 +62,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               size="s"
               disabled={!form?.isValid}
               onClick={handleSave}
+              data-test-subj="prebuilt-rule-upgrade-flyout-field-save"
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
             </EuiButton>

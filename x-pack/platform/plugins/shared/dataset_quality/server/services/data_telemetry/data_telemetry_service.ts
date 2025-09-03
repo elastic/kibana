@@ -17,17 +17,17 @@ import {
   firstValueFrom,
   throwError,
 } from 'rxjs';
-import { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { TelemetryTaskState } from './types';
+import type { TelemetryTaskState } from './types';
 import { registerLogsDataUsageCollector } from './register_collector';
 import {
   BREATHE_DELAY_MEDIUM,

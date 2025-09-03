@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useMemo, useState } from 'react';
+import React, { type MouseEvent, useMemo, useState } from 'react';
+import dedent from 'dedent';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,8 +21,8 @@ import {
   EuiText,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { css } from '@kbn/kibana-react-plugin/common';
 import { INSPECT_DOCUMENT, ViewDocument } from '../../common/components/view_document';
 import {
@@ -38,7 +39,8 @@ import {
   getTestRunDetailRelativeLink,
   TestDetailsLink,
 } from '../../common/links/test_details_link';
-import { ConfigKey, MonitorTypeEnum, Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
@@ -49,6 +51,7 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
+import { useScreenContext } from '../../../hooks/use_screen_context';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -87,6 +90,29 @@ export const TestRunsTable = ({
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);
+
+  const isLast10 = paginable === false && page.size === 10;
+  const timeRangeContext = `between ${from} and ${to} UTC`;
+
+  const screenContext = dedent`
+    This table shows ${isLast10 ? 'the last ' : ''}${page.size} test runs for the monitor${
+    isLast10 ? '' : ` ${timeRangeContext}`
+  }.
+
+    ${pings
+      .map((ping, i) => {
+        return `${i + 1}. Executed at ${ping['@timestamp']} from ${
+          ping.observer.geo.name
+        } with status ${ping.monitor.status} and duration ${formatTestDuration(
+          ping.monitor.duration?.us
+        )}.\n ${ping.error?.message ? `Error: ${ping.error.message}` : ''}\n`;
+      })
+      .join('\n')}
+  `;
+
+  useScreenContext({
+    screenDescription: screenContext,
+  });
 
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();

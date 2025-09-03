@@ -6,31 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { camelCase } from 'lodash';
-import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '../../definitions/all_operators';
-import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
-import { timeUnitsToSuggest } from '../../definitions/literals';
-import {
-  FunctionDefinitionTypes,
+import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
+import { TRIGGER_SUGGESTION_COMMAND, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
+import type {
   Location,
-  getLocationFromCommandOrOptionName,
-} from '../../definitions/types';
-import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
+  ESQLFieldWithMetadata,
+  ISuggestionItem,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
+import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLFieldWithMetadata } from '../../validation/types';
-import {
-  FieldType,
-  fieldTypes,
-  FunctionParameterType,
-  FunctionReturnType,
-  SupportedDataType,
-} from '../../definitions/types';
 import {
   joinIndices,
   timeseriesIndices,
@@ -38,24 +33,12 @@ import {
   inferenceEndpoints,
 } from '../../__tests__/helpers';
 
-export interface Integration {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams: Array<{
-    name: string;
-    title?: string;
-  }>;
-}
-
-export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
 
 export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
   text: '',
   label: 'Choose from the time picker',
 };
-
-export const triggerCharacters = [',', '(', '=', ' '];
 
 export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
 
@@ -100,18 +83,6 @@ export const indexes = (
   )
 );
 
-export const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
-  name,
-  hidden: false,
-  title: `integration-${name}`,
-  dataStreams: [
-    {
-      name: `${name}-1`,
-      title: `integration-${name}-1`,
-    },
-  ],
-}));
-
 export const policies = [
   {
     name: 'policy',
@@ -147,6 +118,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -155,11 +127,15 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
-  option?: string
+  option?: string,
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
+    license === 'platinum',
+  activeProduct?: PricingProduct
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -176,6 +152,9 @@ export function getFunctionSignaturesByReturnType(
   if (scalar) {
     list.push(...scalarFunctionDefinitions);
   }
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
+  }
   if (operators) {
     list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
@@ -185,39 +164,64 @@ export function getFunctionSignaturesByReturnType(
   const locations = Array.isArray(location) ? location : [location];
 
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
-      if (ignoreAsSuggestion) {
-        return false;
-      }
-      if (
-        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-          (loc) => locationsAvailable.includes(loc)
-        )
-      ) {
-        return false;
-      }
-      const filteredByReturnType = signatures.filter(
-        ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
-      );
-      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
-        return false;
-      }
-      if (paramsTypes?.length) {
-        return filteredByReturnType.some(
-          ({ params }) =>
-            !params.length ||
-            (paramsTypes.length <= params.length &&
-              paramsTypes.every(
-                (expectedType, i) =>
-                  expectedType === 'any' ||
-                  params[i].type === 'any' ||
-                  expectedType === params[i].type
-              ))
+    .filter(
+      ({ signatures, ignoreAsSuggestion, locationsAvailable, observabilityTier, license }) => {
+        const hasRestrictedSignature = signatures.some((signature) => signature.license);
+        if (hasRestrictedSignature) {
+          const availableSignatures = signatures.filter((signature) => {
+            if (!signature.license) return true;
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
+          });
+
+          if (availableSignatures.length === 0) {
+            return false;
+          }
+        }
+
+        const hasObservabilityAccess = !(
+          observabilityTier &&
+          activeProduct &&
+          activeProduct.type === 'observability' &&
+          activeProduct.tier !== observabilityTier.toLowerCase()
         );
+
+        if (!hasObservabilityAccess) {
+          return false;
+        }
+
+        if (ignoreAsSuggestion) {
+          return false;
+        }
+        if (
+          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+            (loc) => locationsAvailable.includes(loc)
+          )
+        ) {
+          return false;
+        }
+        const filteredByReturnType = signatures.filter(
+          ({ returnType }) =>
+            expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
+        );
+        if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
+          return false;
+        }
+        if (paramsTypes?.length) {
+          return filteredByReturnType.some(
+            ({ params }) =>
+              !params.length ||
+              (paramsTypes.length <= params.length &&
+                paramsTypes.every(
+                  (expectedType, i) =>
+                    expectedType === 'any' ||
+                    params[i].type === 'any' ||
+                    expectedType === params[i].type
+                ))
+          );
+        }
+        return true;
       }
-      return true;
-    })
+    )
     .filter(({ name }) => {
       if (ignored?.length) {
         return !ignored?.includes(name);
@@ -258,20 +262,6 @@ export function getFieldNamesByType(
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
-  const type = Array.isArray(_type) ? _type : [_type];
-  if (type.includes('time_duration')) {
-    // return only singular
-    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
-  }
-  return [];
-}
-
-export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
-  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
-}
-
 export function createCustomCallbackMocks(
   /**
    * Columns that will come from Elasticsearch since the last command
@@ -290,16 +280,19 @@ export function createCustomCallbackMocks(
     sourceIndices: string[];
     matchField: string;
     enrichFields: string[];
-  }>
-) {
+  }>,
+  customLicenseType = 'platinum',
+  customActiveProduct?: PricingProduct
+): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
     fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
+
   return {
-    getColumnsFor: jest.fn(async ({ query }) => {
-      if (query === 'FROM join_index') {
+    getColumnsFor: jest.fn(async (params) => {
+      if (params?.query === 'FROM join_index') {
         return lookupIndexFields;
       }
 
@@ -319,15 +312,10 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
-  };
-}
-
-export function createCompletionContext(triggerCharacter?: string) {
-  if (triggerCharacter) {
-    return { triggerCharacter, triggerKind: 1 }; // any number is fine here
-  }
-  return {
-    triggerKind: 0,
+    getLicense: jest.fn(async () => ({
+      hasAtLeast: (requiredLevel: string) => customLicenseType === requiredLevel,
+    })),
+    getActiveProduct: jest.fn(() => customActiveProduct),
   };
 }
 
@@ -348,19 +336,7 @@ export type AssertSuggestionsFn = (
   opts?: SuggestOptions
 ) => Promise<void>;
 
-export type AssertSuggestionOrderFn = (
-  // query to test
-  query: string,
-  // field name to check the order of
-  fieldName: string,
-  // expected order of the field
-  order: string
-) => Promise<void>;
-
-export type SuggestFn = (
-  query: string,
-  opts?: SuggestOptions
-) => Promise<SuggestionRawDefinition[]>;
+export type SuggestFn = (query: string, opts?: SuggestOptions) => Promise<ISuggestionItem[]>;
 
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
@@ -373,11 +349,7 @@ export const setup = async (caret = '/') => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    const ctx: EditorContext = opts.triggerCharacter
-      ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
-      : { triggerKind: 0 };
-
-    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
+    return await autocomplete.suggest(querySansCaret, pos, opts.callbacks ?? callbacks);
   };
 
   const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
@@ -406,25 +378,10 @@ export const setup = async (caret = '/') => {
     }
   };
 
-  const assertSuggestionsOrder: AssertSuggestionOrderFn = async (query, fieldName, order) => {
-    try {
-      const result = await suggest(query);
-      const resultField = result.find((s) => s.text === fieldName);
-      expect(resultField).toBeDefined();
-      expect(resultField?.sortText).toBeDefined();
-      expect(resultField?.sortText).toEqual(order);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`Failed query\n-------------\n${query}`);
-      throw error;
-    }
-  };
-
   return {
     callbacks,
     suggest,
     assertSuggestions,
-    assertSuggestionsOrder,
   };
 };
 

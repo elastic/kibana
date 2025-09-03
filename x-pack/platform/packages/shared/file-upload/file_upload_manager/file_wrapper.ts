@@ -13,7 +13,7 @@ import type {
   ImportFailure,
   IngestPipeline,
   InputOverrides,
-} from '@kbn/file-upload-plugin/common/types';
+} from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isTikaType } from './tika_utils';
 
@@ -166,7 +166,8 @@ export class FileWrapper {
     try {
       const resp = await this.fileUpload.analyzeFile(
         fileContents,
-        overrides as Record<string, string>
+        overrides as Record<string, string>,
+        true
       );
 
       const serverSettings = processResults(resp);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { EuiFlexItem } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { TimeBounds } from '../types';
+import type { TimeBounds } from '../types';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { SliChartPanel } from './sli_chart_panel';
 

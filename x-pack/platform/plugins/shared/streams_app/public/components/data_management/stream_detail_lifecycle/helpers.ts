@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IlmPolicyDeletePhase, IlmPolicyPhase, IlmPolicyPhases } from '@kbn/streams-schema';
+import type { IlmPolicyDeletePhase, IlmPolicyPhase, IlmPolicyPhases } from '@kbn/streams-schema';
 
 export const parseDuration = (duration: string = '') => {
   const result = /^(\d+)([d|m|s|h])$/.exec(duration);

@@ -7,4 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { serviceDefinition } from './cm_services';
+export type {
+  GridData,
+  DashboardPanel,
+  DashboardSection,
+  DashboardAttributes,
+  DashboardItem,
+  DashboardGetIn,
+  DashboardGetOut,
+  DashboardCreateIn,
+  DashboardCreateOut,
+  DashboardCreateOptions,
+  DashboardSearchIn,
+  DashboardSearchOut,
+  DashboardSearchOptions,
+  DashboardUpdateIn,
+  DashboardUpdateOut,
+  DashboardUpdateOptions,
+  DashboardOptions,
+  DashboardFilter,
+  DashboardQuery,
+} from './types';
+export {
+  serviceDefinition,
+  dashboardAttributesSchema,
+  dashboardGetResultSchema,
+  dashboardCreateResultSchema,
+  dashboardItemSchema,
+  dashboardSearchResultsSchema,
+  referenceSchema,
+} from './cm_services';
+export { savedObjectToItem } from './transform_utils';
+export { transformDashboardIn } from './transforms';

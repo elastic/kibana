@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCopy,
@@ -20,9 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSwitch,
-  EuiSwitchEvent,
   withEuiTheme,
-  WithEuiThemeProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -33,8 +32,8 @@ import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
-import { UrlParamExtension } from '../types';
-import {
+import type { UrlParamExtension } from '../types';
+import type {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
@@ -498,6 +497,7 @@ class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, Wi
     return (
       <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
+          name="exportUrlAs"
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}

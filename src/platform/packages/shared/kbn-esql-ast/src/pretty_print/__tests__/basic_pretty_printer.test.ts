@@ -8,9 +8,10 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction, ESQLMap } from '../../types';
+import type { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import type { BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
 const reprint = (src: string) => {
   const { root } = parse(src);
@@ -19,6 +20,12 @@ const reprint = (src: string) => {
   // console.log(JSON.stringify(root, null, 2));
 
   return { text };
+};
+
+const assertReprint = (src: string, expected: string = src) => {
+  const { text } = reprint(src);
+
+  expect(text).toBe(expected);
 };
 
 describe('single line query', () => {
@@ -66,6 +73,14 @@ describe('single line query', () => {
         const { text } = reprint('FROM a | SORT b DESC NULLS FIRST');
 
         expect(text).toBe('FROM a | SORT b DESC NULLS FIRST');
+      });
+    });
+
+    describe('WHERE', () => {
+      test('escapes field parts which match keywords (FIRST)', () => {
+        const { text } = reprint('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
+
+        expect(text).toBe('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
       });
     });
 
@@ -190,39 +205,49 @@ describe('single line query', () => {
       });
     });
 
-    /**
-     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-     * get back to it after 9.1 release.
-     */
-    describe.skip('RERANK', () => {
-      test('single field', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+    describe('RERANK', () => {
+      test('single field with inference map', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}');
       });
 
-      test('two fields', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+      test('target assignment and multiple fields', () => {
+        const { text } = reprint(
+          `FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}'
+        );
       });
 
-      test('param as query', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+      test('field assignment in ON clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}'
+        );
       });
 
-      test('param as field part', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+      test('multi props in WITH clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}'
+        );
       });
 
-      test('param as inference ID', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+      test('without WITH clause', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1`);
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+        expect(text).toBe('FROM a | RERANK "query" ON field1');
       });
     });
 
@@ -266,14 +291,14 @@ describe('single line query', () => {
       });
     });
 
-    describe('RRF', () => {
+    describe('FUSE', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score
         `);
 
         expect(text).toBe(
-          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
         );
       });
 
@@ -282,12 +307,12 @@ describe('single line query', () => {
   | FORK
     (WHERE semantic_title : "Shakespeare" | SORT _score)
     (WHERE title : "Shakespeare" | SORT _score)
-  | RRF
+  | FUSE
   | KEEP title, _score
           `);
 
         expect(text).toBe(
-          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
         );
       });
     });
@@ -295,24 +320,24 @@ describe('single line query', () => {
     describe('COMPLETION', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}
         `);
 
         expect(text).toBe(
-          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}'
         );
       });
 
       test('from multiline', () => {
         const { text } = reprint(
           `FROM kibana_sample_data_ecommerce
-                 | COMPLETION result = "prompt" WITH \`openai-completion\`
+                 | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"}
                  | LIMIT 2
           `
         );
 
         expect(text).toBe(
-          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"} | LIMIT 2'
         );
       });
     });
@@ -517,36 +542,6 @@ describe('single line query', () => {
           expect(text).toBe('FROM a | WHERE a LIKE "b"');
         });
 
-        test('inserts brackets where necessary due precedence', () => {
-          const { text } = reprint('FROM a | WHERE (1 + 2) * 3');
-
-          expect(text).toBe('FROM a | WHERE (1 + 2) * 3');
-        });
-
-        test('inserts brackets where necessary due precedence - 2', () => {
-          const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4)');
-
-          expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4)');
-        });
-
-        test('inserts brackets where necessary due precedence - 3', () => {
-          const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
-
-          expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
-        });
-
-        test('inserts brackets where necessary due precedence - 4', () => {
-          const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * ((3 - 4) / (5 + 6 + 7))');
-
-          expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * (3 - 4) / (5 + 6 + 7)');
-        });
-
-        test('inserts brackets where necessary due precedence - 5', () => {
-          const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * (((3 - 4) / (5 + 6 + 7)) + 1)');
-
-          expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * ((3 - 4) / (5 + 6 + 7) + 1)');
-        });
-
         test('formats WHERE binary-expression', () => {
           const { text } = reprint('FROM a | STATS a WHERE b');
 
@@ -557,6 +552,72 @@ describe('single line query', () => {
           const { text } = reprint('FROM a | STATS a = agg(123) WHERE b == test(c, 123)');
 
           expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)');
+        });
+
+        describe('grouping', () => {
+          test('inserts brackets where necessary due precedence', () => {
+            const { text } = reprint('FROM a | WHERE (1 + 2) * 3');
+
+            expect(text).toBe('FROM a | WHERE (1 + 2) * 3');
+          });
+
+          test('inserts brackets where necessary due precedence - 2', () => {
+            const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4)');
+
+            expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4)');
+          });
+
+          test('inserts brackets where necessary due precedence - 3', () => {
+            const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
+
+            expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
+          });
+
+          test('inserts brackets where necessary due precedence - 4', () => {
+            const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * ((3 - 4) / (5 + 6 + 7))');
+
+            expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * (3 - 4) / (5 + 6 + 7)');
+          });
+
+          test('inserts brackets where necessary due precedence - 5', () => {
+            const { text } = reprint(
+              'FROM a | WHERE (1 + (1 + 2)) * (((3 - 4) / (5 + 6 + 7)) + 1)'
+            );
+
+            expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * ((3 - 4) / (5 + 6 + 7) + 1)');
+          });
+
+          test('AND has higher precedence than OR', () => {
+            assertReprint('FROM a | WHERE b AND (c OR d)');
+            assertReprint('FROM a | WHERE (b AND c) OR d', 'FROM a | WHERE b AND c OR d');
+            assertReprint('FROM a | WHERE b OR c AND d');
+            assertReprint('FROM a | WHERE (b OR c) AND d');
+          });
+
+          test('addition has higher precedence than AND', () => {
+            assertReprint('FROM a | WHERE b + (c AND d)');
+            assertReprint('FROM a | WHERE (b + c) AND d', 'FROM a | WHERE b + c AND d');
+            assertReprint('FROM a | WHERE b AND c + d');
+            assertReprint('FROM a | WHERE (b AND c) + d');
+          });
+
+          test('multiplication (division) has higher precedence than addition (subtraction)', () => {
+            assertReprint('FROM a | WHERE b / (c - d)');
+            assertReprint('FROM a | WHERE b * (c - d)');
+            assertReprint('FROM a | WHERE b * (c + d)');
+            assertReprint('FROM a | WHERE (b / c) - d', 'FROM a | WHERE b / c - d');
+            assertReprint('FROM a | WHERE (b * c) - d', 'FROM a | WHERE b * c - d');
+            assertReprint('FROM a | WHERE (b * c) + d', 'FROM a | WHERE b * c + d');
+            assertReprint('FROM a | WHERE b - c / d');
+            assertReprint('FROM a | WHERE (b - c) / d');
+          });
+
+          test('issue: https://github.com/elastic/kibana/issues/224990', () => {
+            assertReprint('FROM a | WHERE b AND (c OR d)');
+            assertReprint(
+              'FROM kibana_sample_data_logs | WHERE agent.keyword == "meow" AND (geo.dest == "GR" OR geo.dest == "ES")'
+            );
+          });
         });
       });
     });
@@ -790,7 +851,7 @@ describe('multiline query', () => {
     const query = `FROM kibana_sample_data_logs
 | SORT @timestamp
 | EVAL t = NOW()
-| EVAL key = CASE(timestamp < (t - 1 hour) AND timestamp > (t - 2 hour), "Last hour", "Other")
+| EVAL key = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, "Last hour", "Other")
 | STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) BY key, extension.keyword
 | EVAL sum_last_hour = CASE(key == "Last hour", sum), sum_rest = CASE(key == "Other", sum), count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
 | STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) BY key, extension.keyword
@@ -858,4 +919,64 @@ describe('single line expression', () => {
   });
 });
 
-it.todo('test for NOT unary expression');
+describe('unary operator precedence and grouping', () => {
+  test('NOT should not parenthesize literals', () => {
+    assertReprint('ROW NOT a');
+  });
+
+  test('NOT should not parenthesize literals unnecessarily', () => {
+    assertReprint('ROW NOT (a)', 'ROW NOT a');
+  });
+
+  test('NOT should parenthesize OR expressions', () => {
+    assertReprint('ROW NOT (a OR b)');
+  });
+
+  test('NOT should parenthesize AND expressions', () => {
+    assertReprint('ROW NOT (a AND b)');
+  });
+
+  test('NOT should not parenthesize expressions with higher precedence', () => {
+    assertReprint('ROW NOT (a > b)', 'ROW NOT a > b');
+  });
+
+  test('NOT should parenthesize OR expressions on the right side', () => {
+    assertReprint('ROW NOT a OR NOT (a == b OR b == c)');
+  });
+
+  test('unary minus should parenthesize addition', () => {
+    assertReprint('ROW -(a + b)');
+  });
+
+  test('unary minus should parenthesize subtraction', () => {
+    assertReprint('ROW -(a - b)');
+  });
+
+  test('unary minus should not parenthesize addition of negative number', () => {
+    assertReprint('ROW -a + -b');
+  });
+
+  test('unary minus should not parenthesize subtraction of negative number', () => {
+    assertReprint('ROW -a - -b');
+  });
+
+  test('unary minus should not parenthesize multiplication', () => {
+    assertReprint('ROW -a * b');
+  });
+
+  test('should not unnecessarily parenthesize multiplication', () => {
+    assertReprint('ROW a * b', 'ROW a * b');
+  });
+
+  test('should parenthesize addition in multiplication', () => {
+    assertReprint('ROW (a + b) * c');
+  });
+
+  test('should not parenthesize multiplication in addition', () => {
+    assertReprint('ROW a + b * c');
+  });
+
+  test('should parenthesize multiplication of addition', () => {
+    assertReprint('ROW (a + b) * (c + d)');
+  });
+});

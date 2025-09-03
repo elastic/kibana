@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { shallow, render } from 'enzyme';
-import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import { KibanaPageTemplate } from './page_template';

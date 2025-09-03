@@ -30,7 +30,7 @@ export const ONBOARDING_PAGE_DESCRIPTION = i18n.translate(
 export const ONBOARDING_SEARCH_AI_LAKE_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.searchAILake.title',
   {
-    defaultMessage: `Welcome to Elastic’s AI for the SOC`,
+    defaultMessage: `Welcome to Elastic AI SOC Engine`,
   }
 );
 

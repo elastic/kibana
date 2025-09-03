@@ -34,7 +34,7 @@ export class EsqlDocumentBase {
   }
 
   getDocumentation(
-    keywords: string[],
+    rawKeywords: string[],
     {
       generateMissingKeywordDoc = true,
       addSuggestions = true,
@@ -42,7 +42,7 @@ export class EsqlDocumentBase {
       resolveAliases = true,
     }: GetDocsOptions = {}
   ) {
-    keywords = keywords.map((raw) => {
+    const keywords = rawKeywords.map((raw) => {
       let keyword = format(raw);
       if (resolveAliases) {
         keyword = tryResolveAlias(keyword);

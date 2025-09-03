@@ -12,6 +12,9 @@ import type {
   RequestHandlerContext,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -27,7 +30,12 @@ import type {
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
-import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
+import type {
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  PackagePolicy,
+  PackagePolicySOAttributes,
+} from '../types';
 import type { ExternalCallback } from '..';
 
 import type { NewPackagePolicyWithId } from './package_policy';
@@ -265,6 +273,31 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemsOptions
   ): Promise<AsyncIterable<PackagePolicy[]>>;
+
+  getPackagePolicySavedObjects(
+    soClient: SavedObjectsClientContract,
+    options: PackagePolicyClientRollbackOptions
+  ): Promise<SavedObjectsFindResponse<PackagePolicySOAttributes, unknown>>;
+
+  rollback(
+    soClient: SavedObjectsClientContract,
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+  ): Promise<RollbackResult>;
+
+  restoreRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  cleanupRollbackSavedObjects(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
+
+  bumpAgentPolicyRevisionAfterRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ): Promise<void>;
 }
 
 interface WithSpaceIdsOption {
@@ -275,6 +308,12 @@ interface WithSpaceIdsOption {
    * all space, use a value of `*` (ex. `spaceIds: ['*']`)
    */
   spaceIds?: string[];
+}
+
+export interface RollbackResult {
+  updatedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  copiedPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
+  previousVersionPolicies: Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>;
 }
 
 export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> &
@@ -311,3 +350,6 @@ export interface PackagePolicyClientGetOptions {
 }
 
 export type PackagePolicyClientListIdsOptions = ListWithKuery & WithSpaceIdsOption;
+
+export type PackagePolicyClientRollbackOptions = Omit<SavedObjectsFindOptions, 'type'> &
+  WithSpaceIdsOption;

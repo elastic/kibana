@@ -28,6 +28,7 @@ export const InvestigationSection = memo(() => {
   const { dataFormattedForFieldBrowser, getFieldsData, investigationFields, scopeId } =
     useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+  const ancestorIndex = getField(getFieldsData('signal.ancestors.index')) ?? '';
 
   const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
@@ -58,6 +59,7 @@ export const InvestigationSection = memo(() => {
         scopeId={scopeId}
         showCellActions={true}
         showEditButton={editHighlightedFieldsEnabled}
+        ancestorsIndexName={ancestorIndex}
       />
     </ExpandableSection>
   );

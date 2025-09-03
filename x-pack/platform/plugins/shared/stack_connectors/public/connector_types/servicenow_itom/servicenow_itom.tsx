@@ -11,8 +11,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
-import { ServiceNowITOMActionParams } from './types';
+import type { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
+import type { ServiceNowITOMActionParams } from './types';
 
 export const SERVICENOW_ITOM_TITLE = i18n.translate(
   'xpack.stackConnectors.components.serviceNowITOM.connectorTypeTitle',

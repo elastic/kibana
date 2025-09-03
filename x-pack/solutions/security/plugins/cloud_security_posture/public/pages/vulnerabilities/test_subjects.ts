@@ -30,3 +30,4 @@ export const VULNERABILITY_OVERVIEW_TAB_ID_MORE_BTN = 'vulnerability-overview-ta
 export const VULNERABILITY_OVERVIEW_TAB_ID_LESS_BTN = 'vulnerability-overview-tab-id-more-less';
 export const VULNERABILITY_OVERVIEW_PUBLISHED_DATE = 'vulnerability-overview-tab-published-date';
 export const VULNERABILITY_EMPTY_VALUE = 'vulnerability-empty-value';
+export const VULNERABILITY_RESOURCE_TABLE = 'vulnerability-resource-table';

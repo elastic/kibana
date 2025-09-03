@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeneratorFunction } from '../../../types';
+import type { GeneratorFunction } from '../../../types';
 import { bad } from './lib/events/bad';
 import { good } from './lib/events/good';
 

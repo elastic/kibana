@@ -58,9 +58,9 @@ export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArti
       direction="row"
       alignItems="center"
       justifyContent="spaceBetween"
-      style={{ flexWrap: 'nowrap' }}
+      css={{ flexWrap: 'nowrap' }}
     >
-      <EuiFlexItem grow={true} style={{ alignItems: 'flex-start' }} className={'eui-textTruncate'}>
+      <EuiFlexItem grow={true} css={{ alignItems: 'flex-start' }} className={'eui-textTruncate'}>
         <EuiToolTip position="top" content={artifact.name} anchorClassName={'eui-textTruncate'}>
           <StyledArtifactName data-test-subj="endpointPolicyResponseArtifactName">
             {artifact.name}
@@ -73,7 +73,7 @@ export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArti
           alignItems="center"
           justifyContent="flexEnd"
           gutterSize="s"
-          style={{ flexWrap: 'nowrap' }}
+          css={{ flexWrap: 'nowrap' }}
         >
           <EuiFlexItem grow={false}>
             <IconContainer size={'xs'}>{'sha256'}</IconContainer>
@@ -85,7 +85,7 @@ export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArti
               </EuiToolTip>
             </StyledShaValue>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginTop: '-4px' }}>
+          <EuiFlexItem grow={false} css={{ marginTop: '-4px' }}>
             <EuiCopy
               textToCopy={artifact.sha256}
               beforeMessage={COPY_TOOLTIP.BEFORE}

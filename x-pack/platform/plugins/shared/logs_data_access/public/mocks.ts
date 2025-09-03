@@ -6,6 +6,7 @@
  */
 
 import { type LogsDataAccessPluginStart } from './plugin';
+import { createLogDataServiceStartMock } from './services/log_data_service/log_data_service.mock';
 
 export type Start = jest.Mocked<LogsDataAccessPluginStart>;
 
@@ -17,6 +18,7 @@ const createStartContract = (): Start => {
         getFlattenedLogSources: jest.fn(),
         setLogSources: jest.fn(),
       },
+      logDataService: createLogDataServiceStartMock(),
     },
   };
   return startContract;

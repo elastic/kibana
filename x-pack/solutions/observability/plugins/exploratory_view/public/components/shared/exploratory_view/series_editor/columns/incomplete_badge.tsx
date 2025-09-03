@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
   series: SeriesUrl;

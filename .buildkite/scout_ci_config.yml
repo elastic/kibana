@@ -4,8 +4,10 @@ ui_tests:
     - apm
     - discover_enhanced
     - maps
+    - observability
     - observability_onboarding
     - painless_lab
     - security_solution
     - streams_app
+    - slo
   disabled:

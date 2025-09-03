@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { css } from '@emotion/react';
+import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
   EuiPopover,
   EuiHorizontalRule,
@@ -20,7 +21,6 @@ import {
   useIsWithinBreakpoints,
   EuiIcon,
   EuiText,
-  EuiContextMenuPanelProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
@@ -70,6 +70,7 @@ export function ChangeDataView({
   onEditDataView,
   onCreateDefaultAdHocDataView,
   onClosePopover,
+  getDataViewHelpText,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -178,6 +179,7 @@ export function ChangeDataView({
                   onSave: (updatedDataView) => {
                     onEditDataView(updatedDataView);
                   },
+                  getDataViewHelpText,
                 });
               } else {
                 application.navigateToApp('management', {
@@ -272,6 +274,7 @@ export function ChangeDataView({
     onEditDataView,
     searchListInputId,
     selectableProps,
+    getDataViewHelpText,
   ]);
 
   return (

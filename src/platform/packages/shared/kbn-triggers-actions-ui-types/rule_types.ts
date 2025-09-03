@@ -27,6 +27,7 @@ export interface RuleType<
     | 'doesSetRecoveryContext'
     | 'category'
     | 'isExportable'
+    | 'autoRecoverAlerts'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;

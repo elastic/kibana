@@ -428,6 +428,36 @@
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.EsqlTable.is_partial",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_partial",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.EsqlTable._clusters",
+            "type": "Object",
+            "tags": [],
+            "label": "_clusters",
+            "description": [],
+            "signature": [
+              "{ details?: { [key: string]: { failures?: ",
+              "EsqlEsqlShardFailure",
+              "[] | undefined; }; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -6,13 +6,17 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { StorageContext } from '@kbn/content-management-plugin/server';
-import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { CreateResult, SearchQuery, DeleteResult } from '@kbn/content-management-plugin/common';
+import type {
+  CreateResult,
+  SearchQuery,
+  DeleteResult,
+} from '@kbn/content-management-plugin/common';
 import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
-import {
+import type {
   MapsSavedObjectAttributes,
   MapsGetOut,
   MapsSearchOptions,
@@ -98,6 +102,7 @@ export class MapsStorage {
       }
     }
     const { value, error: resultError } = transforms.get.out.result.down<MapsGetOut, MapsGetOut>(
+      // @ts-expect-error - fix type error
       response,
       undefined,
       { validate: false }
@@ -232,6 +237,7 @@ export class MapsStorage {
       MapsUpdateOut,
       MapsUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above

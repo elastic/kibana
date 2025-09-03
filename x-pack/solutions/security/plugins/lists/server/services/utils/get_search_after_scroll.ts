@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
-import { Scroll } from '../lists/types';
+import type { Scroll } from '../lists/types';
 
 import { getQueryFilter } from './get_query_filter';
 import { getSortWithTieBreaker } from './get_sort_with_tie_breaker';
 import { getSourceWithTieBreaker } from './get_source_with_tie_breaker';
-import { TieBreaker, getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
+import type { TieBreaker } from './get_search_after_with_tie_breaker';
+import { getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
 
 interface GetSearchAfterOptions {
   esClient: ElasticsearchClient;

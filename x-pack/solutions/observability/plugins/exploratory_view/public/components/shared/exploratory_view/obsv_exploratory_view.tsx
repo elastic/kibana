@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import { EuiErrorBoundary } from '@elastic/eui';
 import { getAlertsSingleMetricConfig } from './configurations/alerts_configs/single_metric_config';
 import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
 import { DataTypes, DataTypesLabels } from './labels';
@@ -14,7 +13,7 @@ import { getSyntheticsHeatmapConfig } from './configurations/synthetics/heatmap_
 import { getSyntheticsSingleMetricConfig } from './configurations/synthetics/single_metric_config';
 import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
-import { AppDataType, ReportViewType } from './types';
+import type { AppDataType, ReportViewType } from './types';
 
 import {
   CORE_WEB_VITALS_LABEL,
@@ -24,7 +23,7 @@ import {
   PERF_DIST_LABEL,
   SINGLE_METRIC_LABEL,
 } from './configurations/constants/labels';
-import { SELECT_REPORT_TYPE } from './series_editor/series_editor';
+import type { SELECT_REPORT_TYPE } from './series_editor/series_editor';
 import { getRumDistributionConfig } from './configurations/rum/data_distribution_config';
 import { getKPITrendsLensConfig } from './configurations/rum/kpi_over_time_config';
 import { getCoreWebVitalsConfig } from './configurations/rum/core_web_vitals_config';
@@ -36,7 +35,7 @@ import { getMobileDeviceDistributionConfig } from './configurations/mobile/devic
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
-import { StartServices } from '../../../application';
+import type { StartServices } from '../../../application';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
@@ -111,19 +110,16 @@ export const obsvReportConfigMap = {
 
 export function ObservabilityExploratoryView(props: { startServices: StartServices }) {
   const { appMountParameters } = usePluginContext();
-
   return (
-    <EuiErrorBoundary>
-      <ExploratoryViewContextProvider
-        reportTypes={reportTypesList}
-        dataTypes={dataTypes}
-        reportConfigMap={obsvReportConfigMap}
-        setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
-        theme$={appMountParameters.theme$}
-        {...props.startServices}
-      >
-        <ExploratoryViewPage />
-      </ExploratoryViewContextProvider>
-    </EuiErrorBoundary>
+    <ExploratoryViewContextProvider
+      reportTypes={reportTypesList}
+      dataTypes={dataTypes}
+      reportConfigMap={obsvReportConfigMap}
+      setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+      theme$={appMountParameters.theme$}
+      {...props.startServices}
+    >
+      <ExploratoryViewPage />
+    </ExploratoryViewContextProvider>
   );
 }

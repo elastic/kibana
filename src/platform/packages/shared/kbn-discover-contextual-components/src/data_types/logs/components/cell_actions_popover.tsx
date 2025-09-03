@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   type EuiBadgeProps,
@@ -26,6 +27,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -41,7 +43,8 @@ import { truncateAndPreserveHighlightTags } from './utils';
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
   /** ECS mapping for the key */
-  property: string;
+  property?: DataViewField;
+  name: string;
   /** Formatted value from the mapping, which will be displayed */
   value: string;
   /** The raw value from the mapping, can be an object */
@@ -61,6 +64,7 @@ interface CellActionsPopoverProps {
 export function CellActionsPopover({
   onFilter,
   property,
+  name,
   value,
   rawValue,
   renderValue,
@@ -71,14 +75,14 @@ export function CellActionsPopover({
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
-      onFilter(property, rawValue, operator);
+      onFilter(property ?? name, rawValue, operator);
     }
   };
 
   const popoverTriggerProps = {
     onClick: togglePopover,
     onClickAriaLabel: openCellActionPopoverAriaText,
-    'data-test-subj': `dataTableCellActionsPopover_${property}`,
+    'data-test-subj': `dataTableCellActionsPopover_${name}`,
   };
 
   return (
@@ -102,7 +106,7 @@ export function CellActionsPopover({
               font-family: ${euiTheme.font.familyCode};
             `}
           >
-            <strong>{property}</strong>{' '}
+            <strong>{name}</strong>{' '}
             {typeof renderValue === 'function'
               ? renderValue(value)
               : rawValue != null && typeof rawValue !== 'object'
@@ -130,7 +134,7 @@ export function CellActionsPopover({
               iconType="plusInCircle"
               aria-label={actionFilterForText(value)}
               onClick={makeFilterHandlerByOperator('+')}
-              data-test-subj={`dataTableCellAction_addToFilterAction_${property}`}
+              data-test-subj={`dataTableCellAction_addToFilterAction_${name}`}
             >
               {filterForText}
             </EuiButtonEmpty>
@@ -140,7 +144,7 @@ export function CellActionsPopover({
               iconType="minusInCircle"
               aria-label={actionFilterOutText(value)}
               onClick={makeFilterHandlerByOperator('-')}
-              data-test-subj={`dataTableCellAction_removeFromFilterAction_${property}`}
+              data-test-subj={`dataTableCellAction_removeFromFilterAction_${name}`}
             >
               {filterOutText}
             </EuiButtonEmpty>
@@ -154,9 +158,9 @@ export function CellActionsPopover({
               key="copyToClipboardAction"
               size="s"
               iconType="copyClipboard"
-              aria-label={copyValueAriaText(property)}
+              aria-label={copyValueAriaText(name)}
               onClick={copy}
-              data-test-subj={`dataTableCellAction_copyToClipboardAction_${property}`}
+              data-test-subj={`dataTableCellAction_copyToClipboardAction_${name}`}
             >
               {copyValueText}
             </EuiButtonEmpty>
@@ -170,7 +174,7 @@ export function CellActionsPopover({
 export interface FieldBadgeWithActionsProps
   extends Pick<
     CellActionsPopoverProps,
-    'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
+    'onFilter' | 'name' | 'property' | 'value' | 'rawValue' | 'renderValue'
   > {
   icon?: EuiBadgeProps['iconType'];
   color?: string;
@@ -187,6 +191,7 @@ export type FieldBadgeWithActionsPropsAndDependencies = FieldBadgeWithActionsPro
 export function FieldBadgeWithActions({
   icon,
   onFilter,
+  name,
   property,
   renderValue,
   value,
@@ -198,6 +203,7 @@ export function FieldBadgeWithActions({
   return (
     <CellActionsPopover
       onFilter={onFilter}
+      name={name}
       property={property}
       value={value}
       rawValue={rawValue}

@@ -6,13 +6,12 @@
  */
 
 import { Observable } from 'rxjs';
-import { Logger } from '@kbn/logging';
-import {
-  createInferenceInternalError,
+import type { Logger } from '@kbn/logging';
+import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
-  ChatCompletionEventType,
 } from '@kbn/inference-common';
+import { createInferenceInternalError, ChatCompletionEventType } from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
 function matchOnSignalStart(buffer: string) {

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
+import { FieldType } from '../types/types';
+import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
+import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
@@ -32,19 +34,19 @@ export const generateInferenceEndpointId = (config: Config) => {
 };
 
 export const getNonEmptyValidator = (
-  schema: ConfigEntryView[],
+  requiredFieldsSchema: ConfigEntryView[],
   validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
   isSubmitting: boolean = false,
   isSecrets: boolean = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path }] = args;
-    const newSchema: ConfigEntryView[] = [];
+    const updatedFormFields: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
-    if (schema) {
-      schema.map((field: ConfigEntryView) => {
+    if (requiredFieldsSchema) {
+      requiredFieldsSchema.map((field: ConfigEntryView) => {
         // validate if submitting or on field edit - value is not default to null
         if (field.required && (configData[field.key] !== null || isSubmitting)) {
           // validate secrets fields separately from regular
@@ -62,10 +64,11 @@ export const getNonEmptyValidator = (
             }
           }
         }
-        newSchema.push(field);
+
+        updatedFormFields.push(field);
       });
 
-      validationEventHandler(newSchema);
+      validationEventHandler(updatedFormFields);
       if (hasErrors) {
         return {
           code: 'ERR_FIELD_MISSING',
@@ -79,11 +82,25 @@ export const getNonEmptyValidator = (
 
 export const mapProviderFields = (
   taskType: string,
-  newProvider: InferenceProvider
+  newProvider: InferenceProvider,
+  fieldOverrides?: OverrideFieldsContentType
 ): ConfigEntryView[] => {
+  // fieldOverrides.additional
+  // e.g. [ { field: { default_value: 'value', ...}, other_field: { default_value: 'value', ...} } ]
+  if (fieldOverrides?.additional) {
+    fieldOverrides?.additional.forEach((additionalField) => {
+      const fieldKey = Object.keys(additionalField)[0];
+      if (!newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = additionalField[fieldKey];
+      }
+    });
+  }
+
   return Object.keys(newProvider.configurations ?? {})
-    .filter((pk) =>
-      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
+    .filter(
+      (pk) =>
+        (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
+        (fieldOverrides?.hidden ?? []).indexOf(pk) === -1
     )
     .map(
       (k): ConfigEntryView => ({

@@ -162,6 +162,7 @@ export const generateFleetPackageInfo = (): PackageInfo => {
     path: '',
     assets: {
       kibana: {
+        alert: [],
         csp_rule_template: [],
         dashboard: [],
         visualization: [],

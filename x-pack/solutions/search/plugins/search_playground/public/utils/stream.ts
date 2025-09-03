@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JSONValue } from '../types';
+import type { JSONValue } from '../types';
 
 export interface StreamPart<CODE extends string, NAME extends string, TYPE> {
   code: CODE;

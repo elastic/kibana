@@ -6,8 +6,8 @@
  */
 
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { localPrompts, promptDictionary, promptGroupId } from './mock_prompts';
 
 jest.mock('@kbn/core-saved-objects-api-server');
@@ -110,6 +110,29 @@ describe('get_prompt', () => {
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
                 default: 'Hello world this is a system prompt for bedrock claude-3-5-sonnet',
+              },
+            },
+            references: [],
+            managed: false,
+            updated_at: '2025-01-22T19:11:48.806Z',
+            updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+            created_at: '2025-01-22T19:11:48.806Z',
+            created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+            version: 'Wzk4MCwxXQ==',
+            coreMigrationVersion: '8.8.0',
+            score: 0.13353139,
+          },
+          {
+            type: 'security-ai-prompt',
+            id: 'k6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
+            attributes: {
+              promptId: promptDictionary.systemPrompt,
+              promptGroupId: promptGroupId.aiAssistant,
+              provider: 'bedrock',
+              model: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+              description: 'Default prompt for AI Assistant system prompt.',
+              prompt: {
+                default: 'Hello world this is a system prompt for bedrock claude-3-7-sonnet',
               },
             },
             references: [],
@@ -254,7 +277,7 @@ describe('get_prompt', () => {
         connectorId: 'connector-123',
       });
 
-      expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
+      expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-7-sonnet');
     });
 
     it('returns the bedrock prompt when provider is "elastic" but model does not match elasticModelDictionary', async () => {

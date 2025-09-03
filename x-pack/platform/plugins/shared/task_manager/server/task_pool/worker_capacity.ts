@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { isNullish } from 'utility-types';
 import type { TaskRunner } from '../task_running';
 import type { CapacityOpts, ICapacity } from './types';
 import type { TaskDefinition } from '../task';
@@ -60,7 +61,7 @@ export class WorkerCapacity implements ICapacity {
     taskDefinition?: TaskDefinition | null
   ): number {
     const allAvailableCapacity = this.capacity - this.usedCapacity(tasksInPool);
-    if (taskDefinition && taskDefinition.maxConcurrency) {
+    if (taskDefinition && !isNullish(taskDefinition.maxConcurrency)) {
       // calculate the max workers that can be used for this task type
       return Math.max(
         Math.min(

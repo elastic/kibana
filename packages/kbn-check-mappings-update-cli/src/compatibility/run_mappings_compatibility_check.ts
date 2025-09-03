@@ -8,8 +8,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { ToolingLog } from '@kbn/tooling-log';
-import { CleanupTask } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { CleanupTask } from '@kbn/dev-cli-runner';
 import { createTestEsCluster } from '@kbn/test';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
 import { checkAdditiveOnlyChange } from './check_additive_only_change';

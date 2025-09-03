@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryGenerationFieldDescriptors } from './types';
+import type { QueryGenerationFieldDescriptors } from './types';
 import { generateSearchQuery } from './generate_query';
 
 describe('generate_query', () => {

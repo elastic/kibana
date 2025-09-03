@@ -7,16 +7,10 @@
 
 import datemath from '@elastic/datemath';
 import moment from 'moment';
-import {
-  tint,
-  transparentize,
-  VISUALIZATION_COLORS,
-  EuiThemeComputed,
-  EuiThemeColorModeStandard,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import type { EuiThemeComputed, EuiThemeColorModeStandard } from '@elastic/eui';
+import { tint, transparentize, VISUALIZATION_COLORS, COLOR_MODES_STANDARD } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
-import { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
+import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
 export const CHART_CELL_WIDTH = 17;
 

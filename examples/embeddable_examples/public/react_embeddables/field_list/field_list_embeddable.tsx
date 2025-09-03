@@ -10,12 +10,12 @@
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Reference } from '@kbn/content-management-utils';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   type DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   type SerializedPanelState,
@@ -35,7 +35,12 @@ import React, { useEffect } from 'react';
 import { merge, skip, Subscription, switchMap } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
-import { FieldListApi, Services, FieldListSerializedState, FieldListRuntimeState } from './types';
+import type {
+  FieldListApi,
+  Services,
+  FieldListSerializedState,
+  FieldListRuntimeState,
+} from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 

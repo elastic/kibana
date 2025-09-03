@@ -19,7 +19,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -29,7 +29,8 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../constants';
-import { CsvESQLGenerator, JobParamsCsvESQL } from './generate_csv_esql';
+import type { JobParamsCsvESQL } from './generate_csv_esql';
+import { CsvESQLGenerator } from './generate_csv_esql';
 import moment from 'moment';
 
 const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({

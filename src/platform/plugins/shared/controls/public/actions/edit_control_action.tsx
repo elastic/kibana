@@ -25,9 +25,9 @@ import {
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ACTION_EDIT_CONTROL } from './constants';
-import { DataControlApi } from '../controls/data_controls/types';
+import type { DataControlApi } from '../controls/data_controls/types';
 
 const compatibilityCheck = (api: unknown): api is DataControlApi => {
   return Boolean(
@@ -36,7 +36,7 @@ const compatibilityCheck = (api: unknown): api is DataControlApi => {
       hasEditCapabilities(api) &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsOfType(api.parentApi, CONTROLS_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
 };
@@ -50,7 +50,7 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     return (
-      <EuiToolTip content={this.getDisplayName(context)}>
+      <EuiToolTip content={this.getDisplayName(context)} disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj={`control-action-${(context.embeddable as HasUniqueId).uuid}-edit`}
           aria-label={this.getDisplayName(context)}

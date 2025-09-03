@@ -9,18 +9,20 @@ import moment from 'moment';
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty, omit } from 'lodash';
-import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
+import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { IKibanaResponse } from '@kbn/core/server';
-import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
+import type { IKibanaResponse } from '@kbn/core/server';
+import type { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
-import {
+import type {
   ScheduledReportApiJSON,
   ScheduledReportType,
   ScheduledReportingJobResponse,
 } from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RequestHandler, RequestParams } from './request_handler';
+import type { RequestParams } from './request_handler';
+import { RequestHandler } from './request_handler';
 import {
   transformRawScheduledReportToReport,
   transformRawScheduledReportToTaskParams,
@@ -34,7 +36,7 @@ const MAX_ALLOWED_EMAILS = 30;
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
-    schedule: scheduleRruleSchema,
+    schedule: scheduleRruleSchemaV2,
     notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),
@@ -82,6 +84,13 @@ export class ScheduleRequestHandler extends RequestHandler<
       throw res.customError({
         statusCode: 400,
         body: 'A schedule is required to create a scheduled report.',
+      });
+    }
+
+    if (rruleDef.dtstart && !moment(rruleDef.dtstart).isValid()) {
+      throw res.customError({
+        statusCode: 400,
+        body: `Invalid startedAt date: ${rruleDef.dtstart}`,
       });
     }
 

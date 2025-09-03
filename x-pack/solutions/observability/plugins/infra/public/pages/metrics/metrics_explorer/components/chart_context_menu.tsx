@@ -104,8 +104,8 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
 
   const nodeDetailLinkProps = nodeType
     ? getAssetDetailUrl({
-        assetType: nodeType,
-        assetId: series.id,
+        entityType: nodeType,
+        entityId: series.id,
         search: {
           from: dateMathExpressionToEpoch(timeRange.from),
           to: dateMathExpressionToEpoch(timeRange.to, true),
@@ -187,6 +187,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   });
   const button = (
     <EuiButtonEmpty
+      aria-label={actionAriaLabel}
       data-test-subj="infraMetricsExplorerChartContextMenuButton"
       contentProps={{ 'aria-label': actionAriaLabel }}
       onClick={togglePopover}

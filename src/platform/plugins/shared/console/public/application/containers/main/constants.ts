@@ -17,14 +17,11 @@ export const HISTORY_TOUR_STEP = 3;
 export const CONFIG_TOUR_STEP = 4;
 export const FILES_TOUR_STEP = 5;
 
-// Key used for storing tour state in local storage
-export const TOUR_STORAGE_KEY = 'consoleTour';
-
 export const INITIAL_TOUR_CONFIG = {
   currentTourStep: 1,
-  isTourActive: true,
+  isTourActive: false,
   tourPopoverWidth: 360,
-  tourSubtitle: 'Console onboarding', // Used for state in local storage
+  tourSubtitle: 'Console onboarding',
 };
 
 export const EXPORT_FILE_NAME = 'console_export';

@@ -5,18 +5,20 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import {
+import type {
   Criteria,
-  EuiButtonEmpty,
   EuiTableFieldDataColumnType,
-  EuiBasicTable,
   EuiBasicTableProps,
+  EuiTableSortingType,
+} from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiBasicTable,
   useEuiTheme,
   EuiSwitch,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -189,6 +191,9 @@ const getColumns = ({
             ? onChangeDeselectAllThisPageFn()
             : onChangeSelectAllThisPageFn();
         }}
+        aria-label={i18n.translate('xpack.csp.rules.rulesTable.selectAllRulesAriaLabel', {
+          defaultMessage: 'Select all rules on current page',
+        })}
       />
     ),
     width: '40px',
@@ -211,6 +216,10 @@ const getColumns = ({
                   )
                 );
           }}
+          aria-label={i18n.translate('xpack.csp.rules.rulesTable.selectRuleAriaLabel', {
+            defaultMessage: 'Select rule: {ruleName}',
+            values: { ruleName: item.metadata?.name || item.metadata?.id },
+          })}
         />
       );
     },
@@ -296,6 +305,9 @@ const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiSwitch
+          aria-label={i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
+            defaultMessage: 'Rule Enabled',
+          })}
           className="eui-textTruncate"
           checked={!isRuleMuted}
           onChange={changeCspRuleStateFn}

@@ -19,8 +19,7 @@ const renderMitreAttack = (contextValue: DocumentDetailsContext) =>
     </DocumentDetailsContext.Provider>
   );
 
-// FLAKY: https://github.com/elastic/kibana/issues/176002
-describe.skip('<MitreAttack />', () => {
+describe('<MitreAttack />', () => {
   it('should render mitre attack information', async () => {
     const contextValue = { searchHit: mockSearchHit } as unknown as DocumentDetailsContext;
 

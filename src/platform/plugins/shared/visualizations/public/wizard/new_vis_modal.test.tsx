@@ -8,15 +8,18 @@
  */
 
 import React from 'react';
-import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
-import NewVisModal, { TypeSelectionProps } from './new_vis_modal';
-import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
+import type { TypesStart, BaseVisType } from '../vis_types';
+import { VisGroups } from '../vis_types';
+import type { TypeSelectionProps } from './new_vis_modal';
+import NewVisModal from './new_vis_modal';
+import type { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { VisParams } from '../../common';
+import type { VisParams } from '../../common';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -100,19 +103,21 @@ describe('NewVisModal', () => {
 
   const renderNewVisModal = (propsOverrides?: Partial<TypeSelectionProps>) => {
     return render(
-      <I18nProvider>
-        <NewVisModal
-          isOpen={true}
-          onClose={() => null}
-          visTypesRegistry={visTypes}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{} as ApplicationStart}
-          docLinks={docLinks}
-          contentClient={contentManagement.client}
-          {...propsOverrides}
-        />
-      </I18nProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <NewVisModal
+            isOpen={true}
+            onClose={() => null}
+            visTypesRegistry={visTypes}
+            addBasePath={addBasePath}
+            uiSettings={uiSettings}
+            application={{} as ApplicationStart}
+            docLinks={docLinks}
+            contentClient={contentManagement.client}
+            {...propsOverrides}
+          />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
   };
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { Criteria, EuiBasicTableColumn, EuiTableSortingType, IconType } from '@elastic/eui';
 import {
   Comparators,
-  Criteria,
   EuiAvatar,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiDescriptionList,
@@ -24,12 +24,10 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiTableSortingType,
   EuiText,
-  IconType,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { IntegrationType } from '@kbn/wci-common';
+import type { IntegrationType } from '@kbn/wci-common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { Integration } from '../../../../../common/integrations';
