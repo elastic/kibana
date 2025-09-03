@@ -15,10 +15,12 @@ import type {
   TypeSpecificResponse,
 } from '../../../api/detection_engine/model/rule_schema';
 import { addEcsToRequiredFields } from '../../rule_management/utils';
-import { normalizeThreatArray } from './normalizers/normalize_threat_array';
-import { normalizeRuleThreshold } from './normalizers/normalize_rule_threshold';
-import { normalizeFilterArray } from './normalizers/normalize_filter_array';
-import { normalizeQueryField } from './normalizers/normalize_query_field';
+import {
+  normalizeThreatArray,
+  normalizeRuleThreshold,
+  normalizeFilterArray,
+  normalizeQueryField,
+} from './normalizers';
 
 export const normalizeRuleResponse = (rule: RuleResponse): RuleResponse => {
   const typeSpecificFields = normalizeTypeSpecificFields(rule);

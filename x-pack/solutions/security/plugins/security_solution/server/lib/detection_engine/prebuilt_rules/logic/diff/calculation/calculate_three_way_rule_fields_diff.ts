@@ -48,11 +48,11 @@ import {
   esqlQueryDiffAlgorithm,
   ruleTypeDiffAlgorithm,
   forceTargetVersionDiffAlgorithm,
-} from './algorithms';
+} from './three_way_diff_algorithms';
 import {
   ScalarArrayDiffMissingBaseVersionStrategy,
   createScalarArrayDiffAlgorithm,
-} from './algorithms/scalar_array_diff_algorithm';
+} from './three_way_diff_algorithms/scalar_array_diff_algorithm';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;
 const TARGET_TYPE_ERROR = `Target version can't be of different rule type`;
