@@ -201,14 +201,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.openSection(
         'search_project_nav_footer.project_settings_project_nav'
       );
+      const isV2 = await solutionNavigation.sidenav.isV2();
+      const isV1 = !isV2;
+
       // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Home' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'RAG Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
@@ -219,32 +219,65 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await solutionNavigation.sidenav.expectLinkMissing({ text: 'Billing and subscription' }); // Billing is not shown for developer role
 
+      if (isV1) {
+        // v2 ignores sections
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
+      }
+
       await solutionNavigation.sidenav.openSection(
         'search_project_nav_footer.project_settings_project_nav'
       );
       await solutionNavigation.sidenav.expectSectionOpen(
         'search_project_nav_footer.project_settings_project_nav'
       );
-      await solutionNavigation.sidenav.expectOnlyDefinedLinks([
-        'search_project_nav',
-        'home',
-        'discover',
-        'dashboards',
-        'build',
-        'elasticsearchIndexManagement',
-        'searchPlayground',
-        'relevance',
-        'searchSynonyms',
-        'searchQueryRules',
-        'searchInferenceEndpoints',
-        'search_project_nav_footer',
-        'dev_tools',
-        'project_settings_project_nav',
-        'management:trained_models',
-        'management',
-        'cloudLinkDeployment',
-        // 'cloudLinkBilling', // Billing is not shown for developer role
-      ]);
+      if (isV1) {
+        await solutionNavigation.sidenav.expectOnlyDefinedLinks([
+          'search_project_nav',
+          'home',
+          'discover',
+          'dashboards',
+          'build',
+          'elasticsearchIndexManagement',
+          'searchPlayground',
+          'relevance',
+          'searchSynonyms',
+          'searchQueryRules',
+          'searchInferenceEndpoints',
+          'search_project_nav_footer',
+          'dev_tools',
+          'project_settings_project_nav',
+          'management:trained_models',
+          'management',
+          'cloudLinkDeployment',
+          // 'cloudLinkBilling', // Billing is not shown for developer role
+        ]);
+      } else {
+        // in v2 we don't have "sections" and order is different because items under "more" are in the end
+        await solutionNavigation.sidenav.expectOnlyDefinedLinks(
+          [
+            // home:
+            'home',
+
+            // main;
+            'discover',
+            'dashboards',
+            'elasticsearchIndexManagement',
+            'searchPlayground',
+            'searchSynonyms',
+            'searchQueryRules',
+            'searchInferenceEndpoints',
+
+            // footer:
+            'dev_tools',
+            'management:trained_models',
+            'management',
+            'cloudLinkDeployment',
+            // 'cloudLinkBilling', // Billing is not shown for developer role
+          ],
+          { checkOrder: false }
+        );
+      }
     });
   });
 }

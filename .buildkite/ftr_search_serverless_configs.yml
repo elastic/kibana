@@ -11,6 +11,7 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.examples.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.screenshots.ts
+  - x-pack/solutions/search/test/serverless/functional/configs/config.nav_v2.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.saved_objects_management.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.config_compat_mode.ts
