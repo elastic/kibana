@@ -544,7 +544,7 @@ describe('createPointInTimeFinder()', () => {
       await expect(finder.find().next()).rejects.toThrow('bad_request');
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to open PIT for types [visualization]: 400 bad_request: Invalid query syntax'
+        'Failed to open PIT for types [visualization]: 400 ResponseError: Invalid query syntax: bad_request'
       );
     });
 
@@ -565,7 +565,7 @@ describe('createPointInTimeFinder()', () => {
       await expect(finder.find().next()).rejects.toThrow('Forbidden');
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to open PIT for types [visualization]: 403 Forbidden'
+        'Failed to open PIT for types [visualization]: 403 Error: Forbidden'
       );
     });
 
@@ -586,7 +586,7 @@ describe('createPointInTimeFinder()', () => {
       await expect(finder.find().next()).rejects.toThrow('Generic error message');
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to open PIT for types [visualization]: Generic error message'
+        'Failed to open PIT for types [visualization]: 500 Error: Generic error message'
       );
     });
   });
