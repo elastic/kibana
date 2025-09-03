@@ -77,10 +77,6 @@ export function getTimeDifferenceInSeconds(
     const fromTime = new Date(input.from).getTime();
     const toTime = new Date(input.to).getTime();
 
-    if (isNaN(fromTime) || isNaN(toTime)) {
-      return NaN;
-    }
-
     return Math.round((toTime - fromTime) / 1000);
   }
 }
