@@ -205,7 +205,7 @@ export interface ITelemetryReceiver {
   paginate<T>(
     index: string,
     query: ESSearchRequest,
-    queryConfig: TelemetryQueryConfiguration | undefined = undefined
+    queryConfig: TelemetryQueryConfiguration | undefined
   ): AsyncGenerator<T[], void, unknown>;
 
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
@@ -1363,7 +1363,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     try {
       do {
-        const response = await this.esClient().search(esQuery, queryOptions);
+        const response = await this.nextPage(esQuery, queryOptions);
         const hits = response?.hits.hits.length ?? 0;
 
         if (hits === 0) {
@@ -1384,6 +1384,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     } finally {
       await this.closePointInTime(pit.id);
     }
+  }
+
+  private async nextPage(
+    esQuery: ESSearchRequest,
+    queryOptions: {}
+  ): Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>> {
+    return this.esClient().search(esQuery, queryOptions);
   }
 
   public setMaxPageSizeBytes(bytes: number) {
