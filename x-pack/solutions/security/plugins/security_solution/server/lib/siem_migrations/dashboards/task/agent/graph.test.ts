@@ -17,6 +17,13 @@ import type { OriginalDashboard } from '../../../../../../common/siem_migrations
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
+jest.mock(
+  '../../../../../assistant/tools/esql/graphs/select_index_pattern/select_index_pattern',
+  () => {
+    return { getSelectIndexPatternGraph: jest.fn() };
+  }
+);
+
 const mockOriginalDashboardData = fs
   .readFileSync(`${__dirname}/../../__mocks__/original_dashboard_example.xml`)
   .toString('utf-8');
@@ -66,7 +73,7 @@ describe('getDashboardMigrationAgent', () => {
   });
 
   it('should run graph', async () => {
-    const agent = setupAgent([{ nodeId: '', response: '' }]);
+    const agent = setupAgent([{ nodeId: 'createDescriptions', response: '{}' }]);
     const result = await agent.invoke({
       id: 'testId',
       original_dashboard: mockOriginalDashboard,
