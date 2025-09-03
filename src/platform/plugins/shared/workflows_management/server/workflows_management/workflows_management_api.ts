@@ -156,9 +156,11 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     request: KibanaRequest
   ): Promise<string> {
+    const { event, ...manualInputs } = inputs;
     const context = {
-      ...inputs,
+      event,
       spaceId,
+      inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(

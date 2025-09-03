@@ -18,7 +18,7 @@ import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/wor
 import { ExecutionStatus } from '@kbn/workflows';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { v4 as generateUuid } from 'uuid';
@@ -53,24 +53,15 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private esClient: Client = new Client({
-    node: 'http://localhost:9200', // or your ES URL
-    auth: {
-      username: 'elastic',
-      password: 'changeme',
-    },
-  });
-  private readonly workflowExecutionRepository: WorkflowExecutionRepository;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(this.esClient);
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
     this.logger.debug('workflows-execution-engine: Setup');
-    const esClient = this.esClient;
+
     const logger = this.logger;
     const config = this.config;
 
@@ -81,8 +72,6 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
-          const workflowExecutionRepository = this.workflowExecutionRepository;
-
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -90,6 +79,10 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+
+              // Get ES client from core services (guaranteed to be available at task execution time)
+              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
               // Task Manager automatically provides fakeRequest if task was scheduled with user context
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
@@ -122,7 +115,6 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
-          const workflowExecutionRepository = this.workflowExecutionRepository;
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -130,6 +122,10 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+
+              // Get ES client from core services (guaranteed to be available at task execution time)
+              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
               // Task Manager automatically provides fakeRequest if task was scheduled with user context
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
@@ -167,6 +163,10 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       const workflowCreatedAt = new Date();
 
+      // Get ES client and create repository for this execution
+      const esClient = core.elasticsearch.client.asInternalUser as Client;
+      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
         id: generateUuid(),
@@ -183,7 +183,7 @@ export class WorkflowsExecutionEnginePlugin
         lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
-      await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const taskInstance = {
         id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
         taskType: 'workflow:run',

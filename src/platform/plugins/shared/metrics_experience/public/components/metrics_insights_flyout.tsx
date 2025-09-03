@@ -67,10 +67,10 @@ export const MetricInsightsFlyout = ({
               <h2>{metric.name}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          {metric.time_series_metric && (
+          {metric.instrument && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color={metric.time_series_metric === 'counter' ? 'success' : 'primary'}>
-                {metric.time_series_metric.toUpperCase()}
+              <EuiBadge color={metric.instrument === 'counter' ? 'success' : 'primary'}>
+                {metric.instrument.toUpperCase()}
               </EuiBadge>
             </EuiFlexItem>
           )}
