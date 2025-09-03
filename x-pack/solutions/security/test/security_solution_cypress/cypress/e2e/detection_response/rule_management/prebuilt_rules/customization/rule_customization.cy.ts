@@ -126,7 +126,7 @@ describe(
       login();
     });
 
-    describe('navigation to the prebuilt rule editing page', () => {
+    describe('navigation to the rule editing page', () => {
       it('navigates from the rule details page', () => {
         cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
           visitRuleDetailsPage(prebuiltRuleId)
