@@ -12,6 +12,7 @@ import React from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
@@ -30,6 +31,10 @@ export interface NavigationProps {
    * The active path for the navigation, used for highlighting the current item.
    */
   activeItemId?: string;
+  /**
+   * The solution id, used for building feedback survey links.
+   */
+  solutionId: SolutionId;
   /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
@@ -58,6 +63,7 @@ export const Navigation = ({
   items,
   logo,
   setWidth,
+  solutionId,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -341,7 +347,7 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (
-        <SideNav.Panel>
+        <SideNav.Panel solutionId={solutionId}>
           <SecondaryMenu
             badgeType={sidePanelContent.badgeType}
             isPanel
