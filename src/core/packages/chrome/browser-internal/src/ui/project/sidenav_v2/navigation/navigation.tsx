@@ -56,13 +56,14 @@ export const Navigation = (props: ChromeNavigationProps) => {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId } = state;
+  const { navItems, logoItem, activeItemId, solutionId } = state;
 
   return (
     <RedirectNavigationAppLinks application={props.application}>
       <NavigationComponent
         items={navItems}
         logo={logoItem}
+        solutionId={solutionId}
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         activeItemId={activeItemId}

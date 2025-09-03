@@ -12,10 +12,13 @@ import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useRovingIndex } from '../../utils/use_roving_index';
+import { FeedbackSnippet } from '../feedback_snippet';
 
 export interface SideNavPanelProps {
   children: ReactNode;
+  solutionId: SolutionId;
 }
 
 /**
@@ -25,7 +28,7 @@ export interface SideNavPanelProps {
  *
  * TODO: pass ref to EuiPanel
  */
-export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
+export const SideNavPanel = ({ children, solutionId }: SideNavPanelProps): JSX.Element => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
@@ -41,6 +44,8 @@ export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
           border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
           height: 100%;
           scroll-padding-top: 44px; /* account for fixed header when scrolling to elements */
+          display: flex;
+          flex-direction: column;
         `}
         color="subdued"
         // > For instance, only plain or transparent panels can have a border and/or shadow.
@@ -50,7 +55,15 @@ export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
         borderRadius="none"
         grow={false}
       >
-        {children}
+        <div
+          css={css`
+            flex-grow: 1;
+            overflow-y: auto;
+          `}
+        >
+          {children}
+        </div>
+        <FeedbackSnippet solutionId={solutionId} />
       </EuiPanel>
     </div>
   );
