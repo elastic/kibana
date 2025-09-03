@@ -24,7 +24,7 @@ import { STATUS } from './file_manager';
 import { analyzeTikaFile } from './tika_analyzer';
 import { FileSizeChecker } from './file_size_check';
 import { processResults, readFile, isSupportedFormat } from '../src/utils';
-import { getSampleDocs } from './docs_preview';
+import { getSampleDocs } from './doc_count_service';
 
 interface FileSizeInfo {
   fileSize: number;

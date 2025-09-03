@@ -40,5 +40,3 @@ export {
 } from './src/constants';
 
 export { FileReaderBase, MessageReader, NdjsonReader, TikaReader } from './src/file_reader';
-
-export { FieldTypeIcon } from './src/field_type_icon';

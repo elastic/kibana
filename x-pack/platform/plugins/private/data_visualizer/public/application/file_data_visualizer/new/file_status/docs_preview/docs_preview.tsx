@@ -7,15 +7,11 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EsHitRecord } from '@kbn/discover-utils';
-import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
-import { FieldTypeIcon, type AnalysisResult } from '@kbn/file-upload-common';
+import { type DataTableRecord } from '@kbn/discover-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-
-const DOC_COUNT = 10;
+import { FieldTypeIcon } from './field_type_icon';
 
 interface ResultsPreviewProps {
   sampleDocs: DataTableRecord[];
@@ -68,36 +64,3 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }
     </>
   );
 };
-
-export async function getSampleDocs(
-  data: DataPublicPluginStart,
-  analysisResult: AnalysisResult,
-  fileName: string
-): Promise<DataTableRecord[]> {
-  const docs = analysisResult.preview?.docs.filter((doc) => !doc.error);
-  if (docs === undefined || docs.length === 0) {
-    return [];
-  }
-
-  const tempDataView = await data.dataViews.create(
-    {
-      id: fileName,
-      title: `temp_${fileName}`,
-      allowNoIndex: true,
-    },
-    true,
-    false
-  );
-  return (
-    docs.slice(0, DOC_COUNT).map((doc, i) => {
-      return buildDataTableRecord(
-        {
-          ...doc.doc,
-          _id: `${fileName}-${i}`,
-          _index: `temp_index_${i}`,
-        } as EsHitRecord,
-        tempDataView
-      );
-    }) ?? []
-  );
-}
