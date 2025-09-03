@@ -7,4 +7,4 @@
 
 export type * from './src/types';
 export * from './src/constants';
-export * from './src/log_readiness_task';
+export * from './src/use_log_readiness_task';
