@@ -25,6 +25,7 @@ import type {
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
@@ -228,6 +229,7 @@ export class WorkflowsService {
         lastUpdatedBy: so.attributes.lastUpdatedBy,
         definition: so.attributes.definition as any,
         history: historyWithWorkflowName,
+        valid: so.attributes.valid ?? false,
       };
     });
 
@@ -300,6 +302,7 @@ export class WorkflowsService {
         lastUpdatedBy: response.attributes.lastUpdatedBy,
         definition: response.attributes.definition,
         yaml: response.attributes.yaml,
+        valid: response.attributes.valid ?? false,
       };
     } catch (error: any) {
       if (error.statusCode === 404) {
@@ -320,8 +323,8 @@ export class WorkflowsService {
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
-    // @ts-expect-error - TODO: fix this
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+    // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
@@ -333,6 +336,7 @@ export class WorkflowsService {
       definition: workflowToCreate.definition,
       createdBy: authenticatedUser,
       lastUpdatedBy: authenticatedUser,
+      valid: true,
       deleted_at: null,
     };
 
@@ -361,6 +365,7 @@ export class WorkflowsService {
       lastUpdatedBy: response.attributes.lastUpdatedBy,
       definition: response.attributes.definition,
       yaml: response.attributes.yaml,
+      valid: response.attributes.valid ?? false,
     };
   }
 
@@ -373,7 +378,7 @@ export class WorkflowsService {
   ): Promise<UpdatedWorkflowResponseDto | null> {
     const baseSavedObjectsClient = await this.getSavedObjectsClient();
     const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
-    const { yaml, definition, ...rest } = workflow;
+    const { yaml, definition, valid, ...rest } = workflow;
 
     try {
       const existed = await savedObjectsClient.get<WorkflowSavedObjectAttributes>(
@@ -393,42 +398,64 @@ export class WorkflowsService {
     if (yaml) {
       const parsedYaml = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
       if (!parsedYaml.success) {
-        throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
-      }
-      // @ts-expect-error - TODO: fix this
-      const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
-      updateData = {
-        name: updatedWorkflow.name,
-        description: updatedWorkflow.description,
-        enabled: updatedWorkflow.enabled,
-        tags: updatedWorkflow.tags || [],
-        yaml,
-        definition: updatedWorkflow.definition,
-        lastUpdatedBy: getAuthenticatedUser(request, this.security),
-      };
+        updateData = {
+          ...rest,
+          yaml,
+          definition: null,
+          lastUpdatedBy: getAuthenticatedUser(request, this.security),
+          valid: false,
+          enabled: false,
+        };
+      } else {
+        // parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
+        const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(
+          parsedYaml.data as WorkflowYaml
+        );
+        updateData = {
+          name: updatedWorkflow.name,
+          description: updatedWorkflow.description,
+          enabled: updatedWorkflow.enabled,
+          tags: updatedWorkflow.tags || [],
+          yaml,
+          definition: updatedWorkflow.definition,
+          lastUpdatedBy: getAuthenticatedUser(request, this.security),
+          valid: true,
+        };
+        // Update scheduled tasks if triggers changed
+        if (this.taskScheduler && updatedWorkflow.definition?.triggers) {
+          // Remove existing scheduled tasks for this workflow
+          await this.taskScheduler.unscheduleWorkflowTasks(id);
 
-      // Update scheduled tasks if triggers changed
-      if (this.taskScheduler && updatedWorkflow.definition?.workflow?.triggers) {
-        // Remove existing scheduled tasks for this workflow
-        await this.taskScheduler.unscheduleWorkflowTasks(id);
-
-        // Add new scheduled tasks
-        for (const trigger of updatedWorkflow.definition.workflow.triggers) {
-          if (trigger.type === 'scheduled') {
-            await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
+          // Add new scheduled tasks
+          for (const trigger of updatedWorkflow.definition.triggers) {
+            if (trigger.type === 'scheduled') {
+              await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
+            }
           }
         }
       }
     } else {
-      const updatedYAML = this.updateYAMLFields(originalWorkflow.yaml, rest);
+      if (!originalWorkflow.yaml || !originalWorkflow.valid) {
+        updateData = {
+          ...rest,
+          lastUpdatedBy: getAuthenticatedUser(request, this.security),
+          enabled: false,
+          valid: false,
+        };
+      } else {
+        const updatedYAML = this.updateYAMLFields(originalWorkflow.yaml, rest);
 
-      updateData = {
-        ...rest,
-        lastUpdatedBy: getAuthenticatedUser(request, this.security),
-        yaml: updatedYAML,
-      };
+        updateData = {
+          ...rest,
+          lastUpdatedBy: getAuthenticatedUser(request, this.security),
+          yaml: updatedYAML,
+          valid: true,
+        };
+      }
     }
-
+    if (updateData.definition!.inputs === undefined) {
+      updateData.definition!.inputs = [];
+    }
     const response = await savedObjectsClient.update<WorkflowSavedObjectAttributes>(
       WORKFLOW_SAVED_OBJECT_TYPE,
       id,
@@ -439,6 +466,7 @@ export class WorkflowsService {
       id: response.id,
       lastUpdatedAt: new Date(response.updated_at!),
       lastUpdatedBy: response.attributes.lastUpdatedBy,
+      valid: response.attributes.valid ?? false,
     };
   }
 
