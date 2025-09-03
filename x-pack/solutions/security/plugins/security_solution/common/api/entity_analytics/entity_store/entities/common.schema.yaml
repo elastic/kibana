@@ -13,6 +13,70 @@ components:
       properties:
         Type:
           type: string
+
+    EntityField:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        sub_type:
+          type: string
+        source:
+          type: string
+        attributes:
+          type: object
+          properties:
+            StorageClass:
+              type: string
+            MfaEnabled:
+              type: boolean
+            Privileged:
+              type: boolean
+            GrantedPermissions:
+              type: string
+            KnownRedirect:
+              type: boolean
+            Asset:
+              type: boolean
+            Managed:
+              type: boolean
+            OsCurrent:
+              type: string
+            OsPatchCurrent:
+              type: string
+            OauthConsentRestriction:
+              type: string
+        behavior: 
+          type: object
+          properties:
+            UsedUsbDevice:
+              type: boolean
+            BruteForceVictim:
+              type: boolean
+            NewCountryLogin:
+              type: boolean
+        lifecycle:
+          type: object
+          properties:
+            FirstSeen:
+              type: string
+              format: date-time
+            LastActivity:
+              type: string
+              format: date-time
+            IssuedAt:
+              type: string
+              format: date-time
+            LastPasswordChange:
+              type: string
+              format: date-time
+
     UserEntity:
       type: object
       required:
@@ -68,6 +132,8 @@ components:
                 type: string
             risk:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+            entity:
+              $ref: '#/components/schemas/EntityField'
           required:
             - name
         asset:
@@ -83,6 +149,7 @@ components:
             ingested:
               type: string
               format: date-time
+    
     HostEntity:
       type: object
       required:
@@ -142,6 +209,8 @@ components:
                 type: string
             risk:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+            entity:
+              $ref: '#/components/schemas/EntityField'
           required:
             - name
         asset:
@@ -157,6 +226,7 @@ components:
             ingested:
               type: string
               format: date-time
+   
     ServiceEntity:
       type: object
       required:
@@ -188,6 +258,8 @@ components:
               type: string
             risk:
               $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+            entity:
+              $ref: '#/components/schemas/EntityField'
           required:
             - name
         asset:
@@ -250,32 +322,12 @@ components:
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
         - $ref: '#/components/schemas/GenericEntity'
+
     CRUDEntity:
       type: object
       required:
         - entity
       properties:
         entity:
-          type: object
-          required:
-            - id
-          properties:
-            id:
-              type: string
-            name:
-              type: string
-            type:
-              type: string
-            category:
-              type: string
-            source:
-              type: string
-            attributes:
-              type: object
-              additionalProperties: true
-            behavior: 
-              type: object
-              additionalProperties: true
-            lifecyle:
-              type: object
-              additionalProperties: true
+          $ref: '#/components/schemas/EntityField'
+         

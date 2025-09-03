@@ -7,7 +7,7 @@
 
 import { newestValue } from './field_utils';
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions } from './common';
+import { getCommonFieldDescriptions, getNestedEntityFieldsDescriptions } from './common';
 
 export const GENERIC_DEFINITION_VERSION = '1.0.0';
 export const GENERIC_IDENTITY_FIELD = 'entity.id';
@@ -108,5 +108,6 @@ export const genericEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'orchestrator.type' }),
 
     ...getCommonFieldDescriptions('entity'),
+    ...getNestedEntityFieldsDescriptions('generic'),
   ],
 };
