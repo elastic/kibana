@@ -30,10 +30,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { css } from '@emotion/react';
 import { PanelText } from '../../../../common/components/panel_text';
-import {
-  convertTranslationResultIntoText,
-  useResultVisColors,
-} from '../../utils/translation_results';
+import { convertTranslationResultIntoText, useResultVisColors } from '../../../common/utils';
 import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
