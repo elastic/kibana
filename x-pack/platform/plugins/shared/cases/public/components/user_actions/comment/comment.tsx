@@ -211,12 +211,8 @@ const getCreateCommentUserAction = ({
     case AttachmentType.event:
       const eventBuilder = createEventAttachmentUserActionBuilder({
         userProfiles,
-        alertData,
         attachment,
         userAction,
-        getRuleDetailsHref,
-        loadingAlertData,
-        onRuleDetailsClick,
         onShowAlertDetails,
         handleDeleteComment,
         loadingCommentIds,
