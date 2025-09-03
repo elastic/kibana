@@ -42,7 +42,7 @@ export function RumHome() {
               defaultMessage: 'Enable RUM with the APM agent to collect user experience data.',
             }),
             href: http.basePath.prepend('/app/apm/tutorial'),
-            button: i18n.translate('xpack.ux.overview.beatsCard.buttonLabel', {
+            buttonText: i18n.translate('xpack.ux.overview.beatsCard.buttonLabel', {
               defaultMessage: 'Add RUM data',
             }),
             docsLink: docLinks.links.observability.guide,

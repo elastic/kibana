@@ -48,7 +48,7 @@ function getNoDataConfigDetails({
     }),
     href: `${basePath}/app/integrations/detail/apm/overview`,
     description,
-    button: i18n.translate('xpack.apm.noDataConfig.addApmIntegrationButtonLabel', {
+    buttonText: i18n.translate('xpack.apm.noDataConfig.addApmIntegrationButtonLabel', {
       defaultMessage: 'Add the APM integration',
     }),
   };
@@ -87,7 +87,7 @@ export function getNoDataConfig({
         title: noDataConfigDetails.title,
         description: noDataConfigDetails.description,
         href: noDataConfigDetails.href,
-        button: noDataConfigDetails.button,
+        buttonText: noDataConfigDetails.buttonText,
         'data-test-subj': 'apmNoDataCard',
         docsLink,
       },

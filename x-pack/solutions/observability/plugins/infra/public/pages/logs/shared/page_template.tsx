@@ -77,7 +77,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
                 'Use the Elastic Agent or Beats to send logs to Elasticsearch. We make it easy with integrations for many popular systems and apps.',
             }),
             href,
-            button: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.buttonLabel', {
+            buttonText: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.buttonLabel', {
               defaultMessage: 'Add a logging integration',
             }),
             docsLink: docLinks.links.observability.guide,
