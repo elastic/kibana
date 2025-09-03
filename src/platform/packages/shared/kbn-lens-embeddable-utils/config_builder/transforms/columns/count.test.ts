@@ -44,7 +44,7 @@ describe('Count Transforms', () => {
       };
 
       const result = fromCountAPItoLensState(input);
-      expect(result.sourceField).toBe('__records__');
+      expect(result.sourceField).toBe('___records___');
     });
 
     it('should handle format configuration', () => {
@@ -160,7 +160,7 @@ describe('Count Transforms', () => {
     it('should handle empty source field', () => {
       const input: CountIndexPatternColumn = {
         operationType: 'count',
-        sourceField: '__records__',
+        sourceField: '___records___',
         customLabel: true,
         label: 'Count of Records',
         isBucketed: false,
