@@ -300,6 +300,30 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
     });
 
+    describe('saved query rule type fields', () => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [SAVED_QUERY_PREBUILT_RULE_ASSET]);
+        await installPrebuiltRules(es, supertest);
+      });
+
+      it('"saved_id" field', () =>
+        testFieldCustomization({
+          fieldName: 'saved_id',
+          customizedValue: 'customized-saved-query-id',
+          ruleType: 'saved_query',
+        }));
+
+      it('"alert_suppression" field', () =>
+        testFieldCustomization({
+          fieldName: 'alert_suppression',
+          customizedValue: {
+            group_by: ['host.name'],
+            duration: { value: 5, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+          },
+        }));
+    });
+
     describe('EQL rule type fields', () => {
       beforeEach(async () => {
         await createPrebuiltRuleAssetSavedObjects(es, [EQL_PREBUILT_RULE_ASSET]);
@@ -550,6 +574,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
 const PREBUILT_RULE_ID = 'test-prebuilt-rule';
 const QUERY_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});
+const SAVED_QUERY_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  type: 'saved_query',
+  saved_id: 'saved-query-id',
   rule_id: PREBUILT_RULE_ID,
   version: 3,
 });
