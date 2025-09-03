@@ -496,6 +496,15 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
+    if (
+      await doAnyChangesMatch([
+        /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
+        /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
+      ])
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     emitPipeline(pipeline);
