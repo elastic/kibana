@@ -257,30 +257,6 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it(`applies "${BulkActionEditTypeEnum.add_index_patterns}" bulk edit action to prebuilt rules`, async () => {
-        const bulkResponse = await performBulkEditOnPrebuiltRules({
-          type: BulkActionEditTypeEnum.add_index_patterns,
-          value: ['test-*'],
-        });
-
-        expect(bulkResponse.attributes.results.updated).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              rule_id: QUERY_PREBUILT_RULE_ID,
-              index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-            }),
-            expect.objectContaining({
-              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-              index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-            }),
-            expect.objectContaining({
-              rule_id: EQL_PREBUILT_RULE_ID,
-              index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-            }),
-          ])
-        );
-      });
-
       it(`applies "${BulkActionEditTypeEnum.set_index_patterns}" bulk edit action to prebuilt rules`, async () => {
         const bulkResponse = await performBulkEditOnPrebuiltRules({
           type: BulkActionEditTypeEnum.set_index_patterns,

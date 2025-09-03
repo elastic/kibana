@@ -63,6 +63,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Hovering on rule's "Modified" badge should show a tooltip if rule base version is missing**](#scenario-hovering-on-rules-modified-badge-should-show-a-tooltip-if-rule-base-version-is-missing)
     - [**Scenario: Per-field "Modified" badges should not be displayed if rule base version is missing**](#scenario-per-field-modified-badges-should-not-be-displayed-if-rule-base-version-is-missing)
   - [Licensing](#licensing)
+    - [**Scenario: User can customize a prebuilt rule by importing a customized version under an insufficient license**](#scenario-user-can-customize-a-prebuilt-rule-by-importing-a-customized-version-under-an-insufficient-license)
     - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
     - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
     - [**Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-in-a-mixture-of-prebuilt-and-custom-rules-under-an-insufficient-license)
@@ -533,6 +534,26 @@ Then no per-field "Modified" badges should be displayed
 ```
 
 ### Licensing
+
+#### **Scenario: User can customize a prebuilt rule by importing a customized version under an insufficient license**
+
+If this rule is already installed, it should be updated. Its `is_customized` field should stay unchanged (`false` or `true`) if the rule from the import payload is equal to the installed rule.
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And the import payload contains a customized prebuilt rule
+And its rule_id matches the currently installed prebuilt rule
+And this installed prebuilt rule marked as non-customized
+And the installed rule is NOT equal to the import payload
+When the user imports the rule
+Then the installed prebuilt rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as customized
+And the updated rule's version  should match the import payload
+And the updated rule's parameters should match the import payload
+```
 
 #### **Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**
 
