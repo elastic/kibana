@@ -14,6 +14,7 @@ import {
   updateConversationMock$,
   generateTitleMock$,
   getChatModelMock$,
+  resolveSelectedConnectorIdMock,
 } from './chat_service.test.mocks';
 
 import { firstValueFrom, toArray, of } from 'rxjs';
@@ -72,6 +73,9 @@ describe('ChatService', () => {
     generateTitleMock$.mockReturnValue(of('generated title'));
     getChatModelMock$.mockReturnValue(of(createChatModel()));
 
+    // Ensure a connector is available by default
+    resolveSelectedConnectorIdMock.mockResolvedValue('test-connector-id');
+
     executeAgentMock$.mockReturnValue(of());
     createConversationMock$.mockReturnValue(of());
     updateConversationMock$.mockReturnValue(of());
@@ -85,6 +89,7 @@ describe('ChatService', () => {
     updateConversationMock$.mockReset();
     generateTitleMock$.mockReset();
     getChatModelMock$.mockReset();
+    resolveSelectedConnectorIdMock.mockReset();
   });
 
   it('calls executeAgent$ with the right parameters', async () => {
@@ -99,15 +104,19 @@ describe('ChatService', () => {
     await firstValueFrom(obs$.pipe(toArray()));
 
     expect(executeAgentMock$).toHaveBeenCalledTimes(1);
-    expect(executeAgentMock$).toHaveBeenCalledWith({
-      nextInput: {
-        message: 'hello',
-      },
-      conversation$: expect.anything(),
-      agentId: 'my-agent',
-      request,
-      agentService,
-    });
+    expect(executeAgentMock$).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nextInput: {
+          message: 'hello',
+        },
+        conversation$: expect.anything(),
+        agentId: 'my-agent',
+        request,
+        agentService,
+        defaultConnectorId: 'test-connector-id',
+        abortSignal: undefined,
+      })
+    );
   });
 
   describe('autoCreateConversationWithId', () => {
@@ -242,5 +251,18 @@ describe('ChatService', () => {
         conversationClient: expect.anything(),
       });
     });
+  });
+
+  it('throws when no connector is available for chat execution', async () => {
+    resolveSelectedConnectorIdMock.mockResolvedValue(undefined);
+    getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+
+    const obs$ = chatService.converse({
+      agentId: 'my-agent',
+      request,
+      nextInput: { message: 'hello' },
+    });
+
+    await expect(firstValueFrom(obs$)).rejects.toThrow('No connector available for chat execution');
   });
 });
