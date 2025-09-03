@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n as i18nLib } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,23 +18,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { ExecutiveSummaryListItem } from './executive_summary_list_item';
 import { CostSavings } from './cost_savings';
-import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
-import { ComparePercentage } from './compare_percentage';
-import {
-  getTimeRangeAsDays,
-  formatDollars,
-  formatPercent,
-  formatThousands,
-  getFormattedPercChange,
-} from './metrics';
+import { getTimeRangeAsDays, formatDollars, formatThousands } from './metrics';
 import * as i18n from './translations';
 import type { ValueMetrics } from './metrics';
 import logo from './logo.svg';
 import logoDark from './logo-dark.svg';
 import { useGetCurrentUserProfile } from '../../../common/components/user_profiles/use_get_current_user_profile';
 import { TimeSaved } from './time_saved';
+import { FilteringRate } from './filtering_rate';
+import { ThreatsDetected } from './threats_detected';
+
 interface Props {
   from: string;
   to: string;
@@ -43,10 +38,6 @@ interface Props {
   minutesPerAlert: number;
   analystHourlyRate: number;
 }
-
-const LI_PADDING = css`
-  padding: 5px 0;
-`;
 
 export const ExecutiveSummary: React.FC<Props> = ({
   minutesPerAlert,
@@ -58,35 +49,28 @@ export const ExecutiveSummary: React.FC<Props> = ({
   valueMetricsCompare,
 }) => {
   const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const subtitle = useMemo(() => {
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    const currentLocale = i18nLib.getLocale();
 
+    return `${fromDate.toLocaleDateString(currentLocale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })} - ${toDate.toLocaleDateString(currentLocale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })}`;
+  }, [from, to]);
   const isDarkMode = useKibanaIsDarkMode();
   const isSmall = useIsWithinMaxBreakpoint('l');
   const costSavings = useMemo(
     () => formatDollars(valueMetrics.costSavings),
     [valueMetrics.costSavings]
   );
-  const costSavingsCompare = useMemo(
-    () => formatDollars(valueMetricsCompare.costSavings),
-    [valueMetricsCompare.costSavings]
-  );
 
-  const hasAttackDiscoveryComparison = useMemo(
-    () => valueMetrics.attackDiscoveryCount > 0 && valueMetricsCompare.attackDiscoveryCount > 0,
-    [valueMetrics.attackDiscoveryCount, valueMetricsCompare.attackDiscoveryCount]
-  );
-
-  const attackDiscoveryStat = useMemo(() => {
-    return hasAttackDiscoveryComparison
-      ? getFormattedPercChange(
-          valueMetrics.attackDiscoveryCount,
-          valueMetricsCompare.attackDiscoveryCount
-        )
-      : valueMetrics.attackDiscoveryCount;
-  }, [
-    hasAttackDiscoveryComparison,
-    valueMetrics.attackDiscoveryCount,
-    valueMetricsCompare.attackDiscoveryCount,
-  ]);
   const timerangeAsDays = useMemo(() => getTimeRangeAsDays({ from, to }), [from, to]);
 
   const logoSvg = useMemo(() => (isDarkMode ? logoDark : logo), [isDarkMode]);
@@ -106,6 +90,16 @@ export const ExecutiveSummary: React.FC<Props> = ({
         min-height: 200px;
       `}
     >
+      <EuiTitle size="l" data-test-subj="executiveSummaryTitle">
+        <h1>{i18n.EXECUTIVE_SUMMARY_TITLE}</h1>
+      </EuiTitle>
+
+      <EuiText size="s" color="subdued" data-test-subj="executiveSummaryDateRange">
+        <p>{subtitle}</p>
+      </EuiText>
+
+      <EuiSpacer size="l" />
+
       <EuiFlexGroup
         direction={isSmall ? 'column' : 'row'}
         data-test-subj="executiveSummaryFlexGroup"
@@ -144,27 +138,16 @@ export const ExecutiveSummary: React.FC<Props> = ({
             <EuiText size="s">
               {hasAttackDiscoveries && (
                 <p data-test-subj="executiveSummaryMessage">
-                  {i18n.EXECUTIVE_MESSAGE_START} <strong>{costSavings}</strong>{' '}
-                  {i18n.EXECUTIVE_COST_SAVINGS_LABEL} {i18n.EXECUTIVE_AND}{' '}
-                  <strong>
-                    {formatThousands(valueMetrics.hoursSaved)} {i18n.EXECUTIVE_HOURS_SAVED_LABEL}
-                  </strong>{' '}
-                  {i18n.EXECUTIVE_MESSAGE_END(i18n.TIME_RANGE(timerangeAsDays))}{' '}
-                  {i18n.EXECUTIVE_FILTERING}
+                  {i18n.EXECUTIVE_SUMMARY_MAIN_TEXT({
+                    costSavings,
+                    hoursSaved: formatThousands(valueMetrics.hoursSaved),
+                    timeRange: timerangeAsDays,
+                    minutesPerAlert,
+                    analystRate: analystHourlyRate,
+                  })}
                   <br />
                   <br />
-                  {i18n.EXECUTIVE_CALC} <strong>{i18n.ESCALATED.toLowerCase()}</strong>{' '}
-                  {i18n.EXECUTIVE_SUSPICIOUS} <strong>{i18n.NON_SUSPICIOUS}</strong>
-                  {'. '}
-                  {i18n.EXECUTIVE_CALC2}{' '}
-                  <strong>{i18n.MINUTES_PER_ALERT(`${minutesPerAlert}`)}</strong>
-                  {', '}
-                  {i18n.EXECUTIVE_CONVERT}{' '}
-                  <strong>{i18n.ANALYST_RATE(`$${analystHourlyRate}`)}</strong>
-                  {'.'}
-                  <br />
-                  <br />
-                  {i18n.EXECUTIVE_MESSAGE_SECOND}
+                  {i18n.EXECUTIVE_SUMMARY_SECONDARY_TEXT}
                 </p>
               )}
               {!hasAttackDiscoveries && (
@@ -173,88 +156,10 @@ export const ExecutiveSummary: React.FC<Props> = ({
                 </p>
               )}
             </EuiText>
-
-            <EuiSpacer size="m" />
-
-            {hasAttackDiscoveries && (
-              <EuiText size="s">
-                <ul
-                  css={css`
-                    list-style: none !important;
-                    padding: 0 !important;
-                    margin: 0 !important;
-                  `}
-                  data-test-subj="executiveSummaryStatsList"
-                >
-                  <li css={LI_PADDING} data-test-subj="executiveSummaryCostSavingsStat">
-                    <ExecutiveSummaryListItem>
-                      <strong>{costSavings}</strong> {i18n.EXECUTIVE_COST_SAVINGS_DESC}
-                      {'. '}
-                      <ComparePercentage
-                        currentCount={valueMetrics.filteredAlerts}
-                        previousCount={valueMetricsCompare.filteredAlerts}
-                        stat={costSavingsCompare}
-                        statType={i18n.COST_SAVINGS_TITLE.toLowerCase()}
-                        timeRange={timerangeAsDays}
-                      />
-                    </ExecutiveSummaryListItem>
-                  </li>
-                  <li css={LI_PADDING} data-test-subj="executiveSummaryAlertFilteringStat">
-                    <ExecutiveSummaryListItem>
-                      <strong>{formatPercent(valueMetrics.filteredAlertsPerc)}</strong>{' '}
-                      {i18n.EXECUTIVE_ALERT_FILTERING_DESC}
-                      {'. '}
-                      <ComparePercentage
-                        currentCount={valueMetrics.filteredAlertsPerc}
-                        previousCount={valueMetricsCompare.filteredAlertsPerc}
-                        stat={formatPercent(valueMetricsCompare.filteredAlertsPerc)}
-                        statType={i18n.FILTERING_RATE.toLowerCase()}
-                        timeRange={timerangeAsDays}
-                      />
-                    </ExecutiveSummaryListItem>
-                  </li>
-                  <li css={LI_PADDING} data-test-subj="executiveSummaryHoursSavedStat">
-                    <ExecutiveSummaryListItem>
-                      <strong>{formatThousands(valueMetrics.hoursSaved)}</strong>{' '}
-                      {i18n.EXECUTIVE_HOURS_SAVED_DESC}
-                      {'. '}
-                      <ComparePercentage
-                        currentCount={valueMetrics.hoursSaved}
-                        previousCount={valueMetricsCompare.hoursSaved}
-                        stat={formatThousands(valueMetricsCompare.hoursSaved)}
-                        statType={i18n.TIME_SAVED_DESC.toLowerCase()}
-                        timeRange={timerangeAsDays}
-                      />
-                    </ExecutiveSummaryListItem>
-                  </li>
-                  <li css={LI_PADDING} data-test-subj="executiveSummaryThreatsDetectedStat">
-                    <ExecutiveSummaryListItem>
-                      <strong>{attackDiscoveryStat}</strong>{' '}
-                      {hasAttackDiscoveryComparison
-                        ? i18n.EXECUTIVE_THREATS_DETECTED_DESC(
-                            (
-                              getPercChange(
-                                valueMetrics.attackDiscoveryCount,
-                                valueMetricsCompare.attackDiscoveryCount
-                              ) ?? '0.0%'
-                            ).charAt(0) !== '-'
-                          )
-                        : i18n.EXECUTIVE_THREATS_DETECTED_DESC_NO_COMPARE}
-                      {'. '}
-                      <ComparePercentage
-                        currentCount={valueMetrics.attackDiscoveryCount}
-                        previousCount={valueMetricsCompare.attackDiscoveryCount}
-                        stat={`${valueMetricsCompare.attackDiscoveryCount}`}
-                        statType={i18n.ATTACK_DISCOVERY_COUNT.toLowerCase()}
-                        timeRange={timerangeAsDays}
-                      />
-                    </ExecutiveSummaryListItem>
-                  </li>
-                </ul>
-              </EuiText>
-            )}
           </span>
         </EuiFlexItem>
+
+        {/* Right side - Only Cost Savings card */}
         {hasAttackDiscoveries && (
           <EuiFlexItem
             css={css`
@@ -263,30 +168,55 @@ export const ExecutiveSummary: React.FC<Props> = ({
             grow={isSmall}
             data-test-subj="executiveSummarySideStats"
           >
-            <EuiFlexGroup direction={isSmall ? 'row' : 'column'}>
-              <EuiFlexItem>
-                <CostSavings
-                  analystHourlyRate={analystHourlyRate}
-                  costSavings={valueMetrics.costSavings}
-                  costSavingsCompare={valueMetricsCompare.costSavings}
-                  minutesPerAlert={minutesPerAlert}
-                  from={from}
-                  to={to}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <TimeSaved
-                  minutesPerAlert={minutesPerAlert}
-                  hoursSaved={valueMetrics.hoursSaved}
-                  hoursSavedCompare={valueMetricsCompare.hoursSaved}
-                  from={from}
-                  to={to}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <CostSavings
+              analystHourlyRate={analystHourlyRate}
+              costSavings={valueMetrics.costSavings}
+              costSavingsCompare={valueMetricsCompare.costSavings}
+              minutesPerAlert={minutesPerAlert}
+              from={from}
+              to={to}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+
+      {/* Bottom row - Three KPI cards */}
+      {hasAttackDiscoveries && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup direction={isSmall ? 'column' : 'row'} gutterSize="m">
+            <EuiFlexItem>
+              <TimeSaved
+                minutesPerAlert={minutesPerAlert}
+                hoursSaved={valueMetrics.hoursSaved}
+                hoursSavedCompare={valueMetricsCompare.hoursSaved}
+                from={from}
+                to={to}
+              />
+            </EuiFlexItem>
+            {/* Alert filtering rate card */}
+            <EuiFlexItem>
+              <FilteringRate
+                totalAlerts={valueMetrics.totalAlerts}
+                filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
+                filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
+                from={from}
+                to={to}
+              />
+            </EuiFlexItem>
+
+            {/* Real threats detected card */}
+            <EuiFlexItem>
+              <ThreatsDetected
+                attackDiscoveryCount={valueMetrics.attackDiscoveryCount}
+                attackDiscoveryCountCompare={valueMetricsCompare.attackDiscoveryCount}
+                from={from}
+                to={to}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </div>
   );
 };

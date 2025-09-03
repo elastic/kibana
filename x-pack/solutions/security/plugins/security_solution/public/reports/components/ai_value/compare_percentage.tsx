@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import { getPercentInfo } from './utils';
 import * as i18n from './translations';
 
@@ -15,6 +16,7 @@ interface Props {
   stat: string;
   statType: string;
   timeRange: string;
+  positionForLens?: boolean; // Optional prop for positioning in Lens Metric
 }
 export const ComparePercentage = ({
   currentCount,
@@ -22,6 +24,7 @@ export const ComparePercentage = ({
   stat,
   statType,
   timeRange,
+  positionForLens = false,
 }: Props) => {
   const percentInfo = useMemo(() => {
     return getPercentInfo({
@@ -37,7 +40,19 @@ export const ComparePercentage = ({
     return null;
   }
   return (
-    <span data-test-subj="comparePercentage">
+    <span
+      data-test-subj="comparePercentage"
+      css={css`
+        display: flex;
+        flex-direction: column;
+        z-index: 9999;
+        position: relative;
+        // positioning hack for Lens Metric
+        top: ${positionForLens ? '-55px' : 'initial'};
+        left: ${positionForLens ? '20px' : 'initial'};
+        width: ${positionForLens ? '90%' : 'auto'};
+      `}
+    >
       {percentInfo.note}
       {` `}
       {i18n.TIME_RANGE(timeRange)}
