@@ -15,6 +15,7 @@ import {
   generateHistoryIndexTemplateId,
   generateResetIndexTemplateId,
   generateResetILMPolicyId,
+  generateHistoryILMPolicyId,
 } from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
@@ -93,6 +94,7 @@ export async function installEntityDefinition({
     });
 
     await deleteILMPolicy(esClient, generateResetILMPolicyId(definition), logger);
+    await deleteILMPolicy(esClient, generateHistoryILMPolicyId(definition), logger);
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {
       if (err instanceof EntityDefinitionNotFound) {

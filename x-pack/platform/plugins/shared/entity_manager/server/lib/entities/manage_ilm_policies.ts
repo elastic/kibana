@@ -10,19 +10,23 @@ import type { EntityDefinition } from '@kbn/entities-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/types';
 import { generateEntitiesResetILMPolicy } from './ilm_policies/reset_ilm_policy';
+import { generateEntitiesHistoryILMPolicy } from './ilm_policies/history_ilm_policy';
 import { retryTransientEsErrors } from './helpers/retry';
 
 export async function createAndInstallILMPolicies(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
-): Promise<Array<{ type: 'template'; id: string }>> {
-  const policies: Array<{ type: 'template'; id: string }> = [];
+): Promise<Array<{ type: 'ilm_policy'; id: string }>> {
+  const policies: Array<{ type: 'ilm_policy'; id: string }> = [];
 
   const resetPolicy: IlmPutLifecycleRequest = generateEntitiesResetILMPolicy(definition);
-  // Creates OR Updates the policy
   await esClient.ilm.putLifecycle(resetPolicy);
-  policies.push({ type: 'template', id: resetPolicy.name });
+  policies.push({ type: 'ilm_policy', id: resetPolicy.name });
+
+  const historyPolicy: IlmPutLifecycleRequest = generateEntitiesHistoryILMPolicy(definition);
+  await esClient.ilm.putLifecycle(historyPolicy);
+  policies.push({ type: 'ilm_policy', id: historyPolicy.name });
 
   return policies;
 }
