@@ -23,6 +23,25 @@ describe('ClassicStream', () => {
           classic: {},
         },
       },
+      {
+        name: 'classic-stream-with-fields',
+        description: '',
+        ingest: {
+          lifecycle: {
+            inherit: {},
+          },
+          processing: {
+            steps: [],
+          },
+          classic: {
+            field_overrides: {
+              xxx: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
     ])('is valid', (val) => {
       expect(ClassicStream.Definition.asserts(val)).toBe(true);
       expect(ClassicStream.Definition.right.parse(val)).toEqual(val);
