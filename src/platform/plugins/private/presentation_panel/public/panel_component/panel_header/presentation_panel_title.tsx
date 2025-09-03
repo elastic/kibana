@@ -87,13 +87,10 @@ export const PresentationPanelTitle = ({
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
 
-    if (!panelDescription) {
-      return panelTitleElement;
-    }
     return (
       <EuiToolTip
         title={panelTitle}
-        content={panelDescription}
+        content={panelDescription ?? ''}
         delay="regular"
         position="top"
         anchorProps={{
