@@ -24,7 +24,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import { ResultsPreview } from '@kbn/file-upload/file_upload_manager/docs_preview';
 import { FileClashIcon, FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
@@ -35,6 +34,7 @@ import { FileContents } from './file_contents';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { Failures } from './failures';
 import { AnalysisExplanation } from './analysis_explanation';
+import { ResultsPreview } from './docs_preview';
 
 enum TAB {
   SUMMARY,
