@@ -41,6 +41,8 @@ export interface EsWorkflowExecution {
   createdBy: string;
   startedAt: string;
   finishedAt: string;
+  cancelRequestedAt?: string;
+  cancelRequestedBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   traceId?: string; // APM trace ID for observability
