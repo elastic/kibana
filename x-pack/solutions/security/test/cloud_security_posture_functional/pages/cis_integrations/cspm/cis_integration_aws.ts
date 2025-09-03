@@ -45,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('CIS_AWS pasting direct and secret access keys enables the save button', async () => {
-      it.only('CIS_AWS pasting direct and secret access keys enables the save button', async () => {
+      it('CIS_AWS pasting direct and secret access keys enables the save button', async () => {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
 
