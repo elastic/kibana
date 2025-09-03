@@ -597,7 +597,7 @@ export function defineRoutes(
         authz: {
           requiredPrivileges: [
             {
-              anyRequired: ['read', 'workflow_execution_write'], // TODO: To ask Vladimir is this correct privilege
+              anyRequired: ['read', 'workflow_execution_read'], // TODO: To ask Vladimir is this correct privilege
             },
           ],
         },
@@ -612,6 +612,7 @@ export function defineRoutes(
       try {
         const { workflowExecutionId } = request.params;
         const spaceId = spaces.getSpaceId(request);
+
         await api.cancelWorkflowExecution(workflowExecutionId, spaceId);
         return response.ok();
       } catch (error) {

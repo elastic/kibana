@@ -233,6 +233,14 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
+      // Request cancellation
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowExecution.id,
+        cancelRequested: true,
+        cancelRequestedAt: new Date().toISOString(),
+        cancelRequestedBy: 'system', // TODO: set user if available
+      });
+
       if (
         [ExecutionStatus.WAITING, ExecutionStatus.WAITING_FOR_INPUT].includes(
           workflowExecution.status
@@ -241,14 +249,6 @@ export class WorkflowsExecutionEnginePlugin
         // TODO: handle WAITING states
         // It should clean up resume tasks, etc
       }
-
-      // Update status to CANCELING
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        status: ExecutionStatus.CANCELLING,
-        cancelRequestedAt: new Date().toISOString(),
-        cancelRequestedBy: 'system', // TODO: set user if available
-      });
     };
 
     return {

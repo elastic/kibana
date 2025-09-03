@@ -42,6 +42,7 @@ export interface EsWorkflowExecution {
   createdBy: string;
   startedAt: string;
   finishedAt: string;
+  cancelRequested: boolean;
   cancelRequestedAt?: string;
   cancelRequestedBy?: string;
   duration: number;
