@@ -39,5 +39,6 @@
     "@kbn/es-types",
     "@kbn/file-upload-common",
     "@kbn/esql-utils",
+    "@kbn/test-jest-helpers",
   ]
 }
