@@ -169,7 +169,7 @@ export class StreamsClient {
    * Disabling streams means deleting the logs root stream
    * AND its descendants, including any Elasticsearch objects,
    * such as data streams. That means it deletes all data
-   * belonging to wired streams.
+   * belonging to wired and group streams.
    *
    * It does NOT delete classic streams.
    */
@@ -190,13 +190,21 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (rootStreamExists) {
+      const streams = await this.getManagedStreams();
+      const groupStreams = streams.filter((stream) => Streams.GroupStream.Definition.is(stream));
+
       await State.attemptChanges(
         [
           {
-            type: 'delete',
+            type: 'delete' as const,
             name: rootStreamDefinition.name,
           },
-        ],
+        ].concat(
+          groupStreams.map((stream) => ({
+            type: 'delete' as const,
+            name: stream.name,
+          }))
+        ),
         {
           ...this.dependencies,
           streamsClient: this,
