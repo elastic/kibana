@@ -102,7 +102,6 @@ export interface LensConfigOptions {
 export interface LensAxisTitleVisibilityConfig {
   showXAxisTitle?: boolean;
   showYAxisTitle?: boolean;
-
   showBreakdownTitle?: boolean;
 }
 

@@ -19,6 +19,5 @@
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
     "@kbn/config-schema",
-    "@kbn/esql-ast",
   ]
 }

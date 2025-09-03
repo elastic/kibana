@@ -59,7 +59,6 @@ export const useChartLayers = ({
         label: col.name,
         value: col.name,
         decimals: 1,
-        format: 'percent',
         compactValues: true,
         seriesColor: color,
       }));

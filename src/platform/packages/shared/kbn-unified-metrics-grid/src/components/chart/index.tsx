@@ -82,7 +82,7 @@ export const Chart: React.FC<ChartProps> = ({
     query: esqlQuery,
     timeRange: getTimeRange(),
     color,
-    seriesType: 'line',
+    seriesType: dimensions.length > 0 ? 'line' : 'area',
     services,
     searchSessionId,
     unit: metric.unit,

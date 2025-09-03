@@ -100,10 +100,14 @@ test('generates xy chart config', async () => {
                   Object {
                     "columnId": "x_metric_formula_accessor0",
                     "fieldName": "@timestamp",
+                    "meta": Object {
+                      "type": "date",
+                    },
                   },
                   Object {
                     "columnId": "metric_formula_accessor0_0",
                     "fieldName": "count",
+                    "inMetricDimension": true,
                     "meta": Object {
                       "type": "number",
                     },
@@ -113,10 +117,14 @@ test('generates xy chart config', async () => {
                   Object {
                     "columnId": "x_metric_formula_accessor0",
                     "fieldName": "@timestamp",
+                    "meta": Object {
+                      "type": "date",
+                    },
                   },
                   Object {
                     "columnId": "metric_formula_accessor0_0",
                     "fieldName": "count",
+                    "inMetricDimension": true,
                     "meta": Object {
                       "type": "number",
                     },
@@ -165,6 +173,12 @@ test('generates xy chart config', async () => {
               "layerType": "data",
               "seriesType": "bar",
               "xAccessor": "x_metric_formula_accessor0",
+              "yConfig": Array [
+                Object {
+                  "color": undefined,
+                  "forAccessor": "metric_formula_accessor0_0",
+                },
+              ],
             },
           ],
           "legend": Object {

@@ -14,12 +14,12 @@ export function getValueColumn(
   id: string,
   fieldName?: string,
   type?: DatatableColumnType,
-  isMetricsDimension?: boolean
+  inMetricDimension?: boolean
 ): TextBasedLayerColumn {
   return {
     columnId: id,
     fieldName: fieldName || id,
     ...(type ? { meta: { type } } : {}),
-    inMetricDimension: isMetricsDimension,
+    ...(inMetricDimension ? { inMetricDimension } : {}),
   };
 }
