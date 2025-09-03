@@ -1338,8 +1338,32 @@ export class CstToAstConverter {
     }
 
     const withOption = this.fromCommandNamedParameters(namedParamsCtx);
-    if (withOption && !withOption.incomplete) {
+
+    if (!withOption) {
+      return;
+    }
+
+    // check the existence of inference_id
+    const namedParameters = withOption.args[0] as ast.ESQLMap | undefined;
+    command.inferenceId = undefined;
+
+    if (namedParameters) {
       command.args.push(withOption);
+
+      command.inferenceId = Builder.expression.literal.string(
+        '',
+        { name: 'inferenceId' },
+        { incomplete: true }
+      );
+
+      const inferenceIdParam = namedParameters?.entries.find(
+        (param) => param.key.valueUnquoted === 'inference_id'
+      )?.value as ast.ESQLStringLiteral;
+
+      if (inferenceIdParam) {
+        command.inferenceId = inferenceIdParam;
+        command.inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
+      }
     }
   }
 

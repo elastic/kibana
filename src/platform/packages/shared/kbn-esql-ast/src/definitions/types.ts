@@ -356,6 +356,10 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  inferenceIdRequired: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

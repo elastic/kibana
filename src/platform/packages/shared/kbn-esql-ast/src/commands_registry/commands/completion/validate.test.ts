@@ -182,20 +182,20 @@ describe('COMPLETION Validation', () => {
 
       it('inference_id is not provided', () => {
         completionExpectErrors(`FROM index | COMPLETION "prompt"`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required.',
         ]);
         completionExpectErrors(`FROM index | COMPLETION "prompt" WITH`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required.',
         ]);
         completionExpectErrors(`FROM index | COMPLETION "prompt" WITH {}`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required.',
         ]);
         completionExpectErrors(`FROM index | COMPLETION "prompt" WITH { "": ""}`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required.',
         ]);
         completionExpectErrors(
           `FROM index | COMPLETION "prompt" WITH { "some_param": "some_value"}`,
-          ['[COMPLETION] inference_id parameter is required']
+          ['"inference_id" parameter is required.']
         );
       });
     });

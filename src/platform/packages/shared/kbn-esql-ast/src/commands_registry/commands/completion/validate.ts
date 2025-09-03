@@ -11,6 +11,7 @@ import type { ESQLAst, ESQLAstCompletionCommand, ESQLCommand, ESQLMessage } from
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { getExpressionType } from '../../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
+import { errors } from '../../../definitions/utils/errors';
 
 const supportedPromptTypes = ['text', 'keyword', 'unknown', 'param'];
 
@@ -43,15 +44,8 @@ export const validate = (
     });
   }
 
-  if (inferenceId.incomplete) {
-    messages.push({
-      location: command.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.completionInferenceIdRequired', {
-        defaultMessage: '[COMPLETION] inference_id parameter is required',
-      }),
-      type: 'error',
-      code: 'completionInferenceIdRequired',
-    });
+  if (inferenceId?.incomplete) {
+    messages.push(errors.byId('inferenceIdRequired', command.location, {}));
   }
 
   const targetName = targetField?.name || 'completion';

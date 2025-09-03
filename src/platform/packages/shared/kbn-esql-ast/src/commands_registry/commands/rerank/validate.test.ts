@@ -21,13 +21,13 @@ describe('RERANK Validation', () => {
     });
 
     test('unsupported field type', () => {
-      const msg = (type: string) => `[RERANK] query must be of type [text] but is [${type}]`;
-
-      rerankExpectErrors('FROM index | RERANK col0=2 ON keywordField', [msg('integer')]);
+      rerankExpectErrors('FROM index | RERANK col0=2 ON keywordField', [
+        '[RERANK] query must be of type [text]. Found [integer]',
+      ]);
     });
   });
 
-  describe('WITH inference_id', () => {
+  describe('Inference_id check', () => {
     test('inference_id as parameter', () => {
       rerankExpectErrors(
         'FROM index | RERANK "q" ON keywordField WITH { "inference_id": ?named_param }',
@@ -35,7 +35,7 @@ describe('RERANK Validation', () => {
       );
     });
 
-    const msg = '[RERANK] inference_id parameter is required.';
+    const msg = '"inference_id" parameter is required.';
 
     test('WITH without map (partial: WITH)', () => {
       rerankExpectErrors('FROM index | RERANK "q" ON keywordField WITH', [msg]);
