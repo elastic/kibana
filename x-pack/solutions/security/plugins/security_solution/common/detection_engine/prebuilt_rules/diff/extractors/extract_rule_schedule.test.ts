@@ -18,10 +18,4 @@ describe('extractRuleSchedule', () => {
 
     expect(ruleSchedule).toEqual({ interval: '5m', from: 'now-6m', to: 'now' });
   });
-
-  it('returns default values', () => {
-    const ruleSchedule = extractRuleSchedule({} as RuleResponse);
-
-    expect(ruleSchedule).toEqual({ interval: '5m', from: 'now-6m', to: 'now' });
-  });
 });

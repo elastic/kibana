@@ -11,6 +11,12 @@ import { normalizeThreatArray } from './normalize_threat_array';
 const mockThreat = getThreatMock()[0];
 
 describe('normalizeThreatArray', () => {
+  it('returns an empty array if threat field is undefined', () => {
+    const normalizedThreatArray = normalizeThreatArray(undefined);
+
+    expect(normalizedThreatArray).toEqual([]);
+  });
+
   it('normalizes url ending backslashes', () => {
     const mockThreatArray = [
       {
