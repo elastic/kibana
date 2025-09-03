@@ -625,11 +625,6 @@ export const dashboardStorageCreateResultSchema = schema.object(
 
 export const serviceDefinition: ServicesDefinition = {
   get: {
-    in: {
-      data: {
-        schema: dashboardGetRequestAPISchema,
-      },
-    },
     out: {
       result: {
         schema: dashboardGetResultAPISchema,

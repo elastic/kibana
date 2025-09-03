@@ -107,6 +107,7 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
 export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
+export type LegacyDashboardSearchOut = SearchResult<TypeOf<typeof dashboardItemAPIResponseSchema>>;
 export type LegacyDashboardGetOut = TypeOf<typeof legacyDashboardGetResultSchema>;
 
 export type DashboardSearchAPIResult = SearchResult<TypeOf<typeof dashboardItemAPIResponseSchema>>;
