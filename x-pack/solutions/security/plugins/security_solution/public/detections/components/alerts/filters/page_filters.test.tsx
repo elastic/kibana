@@ -7,21 +7,21 @@
 
 import React, { useEffect } from 'react';
 import { render } from '@testing-library/react';
-import type { DetectionEngineFiltersProps } from './detection_engine_filters';
-import { DetectionEngineFilters } from './detection_engine_filters';
+import { PageFilters } from './page_filters';
 import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
+import type { Filter } from '@kbn/es-query';
 
 jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls');
 jest.mock(
   '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage'
 );
-jest.mock('../../../common/hooks/use_space_id');
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/hooks/use_space_id');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const stubSecurityDataView = createStubDataView({
   spec: {
@@ -36,8 +36,8 @@ const mockDataViewsService = {
   clearInstanceCache: () => Promise.resolve(),
 };
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
 
   return {
     ...original,
@@ -63,22 +63,14 @@ jest
   .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
   .mockImplementation(() => <span data-test-subj="filter-group__loading" />);
 
-describe('DetectionEngineFilters', () => {
-  const mockProps: Partial<DetectionEngineFiltersProps> = {
-    filters: [],
-    onFiltersChange: jest.fn(),
-    query: {
-      query: '',
-      language: 'kql',
-    },
-    timeRange: { from: 'now-15m', to: 'now' },
-    onInit: jest.fn(),
-    dataView: {
-      title: 'mock-title',
-      fields: {},
-    },
-  };
+const filters: Filter[] = [];
+const onFiltersChange = jest.fn();
+const query = { query: '', language: 'kql' };
+const timeRange = { from: 'now-15m', to: 'now' };
+const onInit = jest.fn();
+const dataView = createStubDataView({ spec: {} });
 
+describe('PageFilters', () => {
   const set = jest.fn();
   const get = jest.fn();
 
@@ -95,12 +87,30 @@ describe('DetectionEngineFilters', () => {
 
   it('renders null if a spaceId is missing', () => {
     (useSpaceId as jest.Mock).mockReturnValue(undefined);
-    const { container } = render(<DetectionEngineFilters {...mockProps} />);
+    const { container } = render(
+      <PageFilters
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        query={query}
+        timeRange={timeRange}
+        onInit={onInit}
+        dataView={dataView}
+      />
+    );
     expect(container).toBeEmptyDOMElement();
   });
 
   it('renders correctly when spaceId and dataView are defined', () => {
-    const { container } = render(<DetectionEngineFilters {...mockProps} />);
+    const { container } = render(
+      <PageFilters
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        query={query}
+        timeRange={timeRange}
+        onInit={onInit}
+        dataView={dataView}
+      />
+    );
     expect(container).toBeInTheDocument();
   });
 
@@ -124,7 +134,16 @@ describe('DetectionEngineFilters', () => {
         return <span />;
       });
 
-    render(<DetectionEngineFilters {...mockProps} />);
+    render(
+      <PageFilters
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        query={query}
+        timeRange={timeRange}
+        onInit={onInit}
+        dataView={dataView}
+      />
+    );
 
     expect(set).toHaveBeenCalledWith(URL_PARAM_KEY.pageFilter, controlsConfig);
   });
