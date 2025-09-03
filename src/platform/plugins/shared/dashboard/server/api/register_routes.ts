@@ -20,7 +20,7 @@ import { dashboardAPIGetResultSchema } from '../content_management/v1';
 import {
   dashboardAttributesSchemaRequest,
   dashboardCreateRequestAttributesSchema,
-  dashboardCreateResultSchema,
+  dashboardAPICreateResultSchema,
   dashboardListResultAPISchema,
   dashboardUpdateResultSchema,
 } from '../content_management/v1/cm_services';
@@ -110,7 +110,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
-            body: () => dashboardCreateResultSchema,
+            body: () => dashboardAPICreateResultSchema,
           },
         },
       },

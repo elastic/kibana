@@ -277,6 +277,7 @@ export class DashboardStorage {
       soAttributes,
       { ...optionsToLatest, references: soReferences }
     );
+
     const { item, error: itemError } = savedObjectToItem(savedObject, false, {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
@@ -285,6 +286,7 @@ export class DashboardStorage {
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
+
     const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
@@ -303,6 +305,7 @@ export class DashboardStorage {
       undefined, // do not override version
       { validate: false } // validation is done above
     );
+
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
@@ -337,6 +340,7 @@ export class DashboardStorage {
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
+
     const {
       attributes: soAttributes,
       references: soReferences,
@@ -390,6 +394,7 @@ export class DashboardStorage {
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
+
     return value;
   }
 

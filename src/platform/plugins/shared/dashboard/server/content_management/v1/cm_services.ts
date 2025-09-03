@@ -431,7 +431,7 @@ export const dashboardAPIGetResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardCreateResultSchema = schema.object(
+export const dashboardAPICreateResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
@@ -441,7 +441,7 @@ export const dashboardCreateResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardUpdateResultSchema = dashboardCreateResultSchema;
+export const dashboardUpdateResultSchema = dashboardAPICreateResultSchema;
 
 export const dashboardItemSchema = schema.object(
   {
@@ -490,30 +490,6 @@ export const dashboardListResultAPISchema = schema.object({
   items: schema.arrayOf(dashboardAPIItemSchema),
   total: schema.number(),
 });
-
-export const dashboardGetResultAPISchema = schema.object(
-  {
-    item: dashboardItemSchema,
-    meta: schema.object(
-      {
-        outcome: schema.oneOf([
-          schema.literal('exactMatch'),
-          schema.literal('aliasMatch'),
-          schema.literal('conflict'),
-        ]),
-        aliasTargetId: schema.maybe(schema.string()),
-        aliasPurpose: schema.maybe(
-          schema.oneOf([
-            schema.literal('savedObjectConversion'),
-            schema.literal('savedObjectImport'),
-          ])
-        ),
-      },
-      { unknowns: 'forbid' }
-    ),
-  },
-  { unknowns: 'forbid' }
-);
 
 const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.extends({
   // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
@@ -576,7 +552,7 @@ export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: dashboardGetResultAPISchema,
+        schema: dashboardGetResultSchema,
       },
     },
   },

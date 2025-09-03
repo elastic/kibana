@@ -121,7 +121,7 @@ export async function findDashboardsByIds(ids: string[]): Promise<FindDashboards
 }
 
 export async function findDashboardIdByTitle(title: string): Promise<{ id: string } | undefined> {
-  const result = await contentManagementService.client.search<
+  const { hits } = await contentManagementService.client.search<
     DashboardSearchIn,
     DashboardSearchOut
   >({
@@ -133,7 +133,6 @@ export async function findDashboardIdByTitle(title: string): Promise<{ id: strin
     options: { onlyTitle: true },
   });
 
-  const { hits } = result;
   // The search isn't an exact match, lets see if we can find a single exact match to use
   const matchingDashboards = hits.filter(
     (hit) => hit.attributes.title.toLowerCase() === title.toLowerCase()
