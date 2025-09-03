@@ -94,7 +94,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   dataViewEditorService,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
-  const isMobile = useIsWithinBreakpoints(['s']);
+  const isMobile = useIsWithinBreakpoints(['s', 'xs']);
 
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },
