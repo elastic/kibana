@@ -7926,6 +7926,9 @@
                               },
                               "agent_logging_to_files": {
                                 "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
+                                "nullable": true
                               }
                             },
                             "type": "object"
@@ -8949,6 +8952,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -9265,6 +9271,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -10314,6 +10323,9 @@
                                 "nullable": true
                               },
                               "agent_logging_to_files": {
+                                "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
                                 "nullable": true
                               }
                             },
@@ -11610,6 +11622,9 @@
                             },
                             "agent_logging_to_files": {
                               "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
+                              "nullable": true
                             }
                           },
                           "type": "object"
@@ -12631,6 +12646,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -12950,6 +12968,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -14093,6 +14114,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -15270,6 +15294,12 @@
                                         }
                                       },
                                       "type": "object"
+                                    },
+                                    "target_directory": {
+                                      "type": "string"
+                                    },
+                                    "timeout": {
+                                      "type": "string"
                                     }
                                   },
                                   "required": [
@@ -15322,6 +15352,15 @@
                                     "level": {
                                       "type": "string"
                                     },
+                                    "metrics": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "period": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "to_files": {
                                       "type": "boolean"
                                     }
@@ -15331,6 +15370,9 @@
                                 "monitoring": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "_runtime_experimental": {
+                                      "type": "string"
+                                    },
                                     "apm": {},
                                     "enabled": {
                                       "type": "boolean"
@@ -17110,7 +17152,8 @@
                               "UPDATE_TAGS",
                               "POLICY_CHANGE",
                               "INPUT_ACTION",
-                              "MIGRATE"
+                              "MIGRATE",
+                              "PRIVILEGE_LEVEL_CHANGE"
                             ],
                             "type": "string"
                           },
@@ -27824,6 +27867,9 @@
                                   "elasticsearch"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28056,6 +28102,9 @@
                                   "remote_elasticsearch"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28240,6 +28289,9 @@
                                   "logstash"
                                 ],
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28708,6 +28760,9 @@
                               },
                               "version": {
                                 "type": "string"
+                              },
+                              "write_to_logs_streams": {
+                                "type": "boolean"
                               }
                             },
                             "required": [
@@ -28989,6 +29044,9 @@
                           "elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29221,6 +29279,9 @@
                           "remote_elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29405,6 +29466,9 @@
                           "logstash"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -29873,6 +29937,9 @@
                       },
                       "version": {
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -30087,6 +30154,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -30319,6 +30389,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -30503,6 +30576,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -30971,6 +31047,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31350,6 +31429,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31582,6 +31664,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -31766,6 +31851,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32234,6 +32322,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -32507,6 +32598,9 @@
                           "elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -32732,6 +32826,9 @@
                           "remote_elasticsearch"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -32909,6 +33006,9 @@
                           "logstash"
                         ],
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "type": "object"
@@ -33372,6 +33472,9 @@
                       },
                       "version": {
                         "type": "string"
+                      },
+                      "write_to_logs_streams": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -33583,6 +33686,9 @@
                                 "elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -33815,6 +33921,9 @@
                                 "remote_elasticsearch"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -33999,6 +34108,9 @@
                                 "logstash"
                               ],
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -34467,6 +34579,9 @@
                             },
                             "version": {
                               "type": "string"
+                            },
+                            "write_to_logs_streams": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -41723,387 +41838,6 @@
         "summary": "Update a proxy",
         "tags": [
           "Fleet proxies"
-        ]
-      }
-    },
-    "/api/fleet/remote_synced_integrations/status": {
-      "get": {
-        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
-        "operationId": "get-fleet-remote-synced-integrations-status",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "custom_assets": {
-                      "additionalProperties": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "error": {
-                            "type": "string"
-                          },
-                          "is_deleted": {
-                            "type": "boolean"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "package_name": {
-                            "type": "string"
-                          },
-                          "package_version": {
-                            "type": "string"
-                          },
-                          "sync_status": {
-                            "enum": [
-                              "completed",
-                              "synchronizing",
-                              "failed",
-                              "warning"
-                            ],
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "type",
-                          "name",
-                          "package_name",
-                          "package_version",
-                          "sync_status"
-                        ],
-                        "type": "object"
-                      },
-                      "type": "object"
-                    },
-                    "error": {
-                      "type": "string"
-                    },
-                    "integrations": {
-                      "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "error": {
-                            "type": "string"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "install_status": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "main": {
-                                "type": "string"
-                              },
-                              "remote": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "main"
-                            ],
-                            "type": "object"
-                          },
-                          "package_name": {
-                            "type": "string"
-                          },
-                          "package_version": {
-                            "type": "string"
-                          },
-                          "sync_status": {
-                            "enum": [
-                              "completed",
-                              "synchronizing",
-                              "failed",
-                              "warning"
-                            ],
-                            "type": "string"
-                          },
-                          "updated_at": {
-                            "type": "string"
-                          },
-                          "warning": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "message": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "title"
-                            ],
-                            "type": "object"
-                          }
-                        },
-                        "required": [
-                          "sync_status",
-                          "install_status"
-                        ],
-                        "type": "object"
-                      },
-                      "type": "array"
-                    },
-                    "warning": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "message": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "title"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "integrations"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "description": "Generic Error",
-                  "properties": {
-                    "attributes": {},
-                    "error": {
-                      "type": "string"
-                    },
-                    "errorType": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "attributes"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get CCR Remote synced integrations status",
-        "tags": [
-          "CCR Remote synced integrations"
-        ]
-      }
-    },
-    "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
-      "get": {
-        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
-        "operationId": "get-fleet-remote-synced-integrations-outputid-remote-status",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "outputId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "custom_assets": {
-                      "additionalProperties": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "error": {
-                            "type": "string"
-                          },
-                          "is_deleted": {
-                            "type": "boolean"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "package_name": {
-                            "type": "string"
-                          },
-                          "package_version": {
-                            "type": "string"
-                          },
-                          "sync_status": {
-                            "enum": [
-                              "completed",
-                              "synchronizing",
-                              "failed",
-                              "warning"
-                            ],
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "type",
-                          "name",
-                          "package_name",
-                          "package_version",
-                          "sync_status"
-                        ],
-                        "type": "object"
-                      },
-                      "type": "object"
-                    },
-                    "error": {
-                      "type": "string"
-                    },
-                    "integrations": {
-                      "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "error": {
-                            "type": "string"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "install_status": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "main": {
-                                "type": "string"
-                              },
-                              "remote": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "main"
-                            ],
-                            "type": "object"
-                          },
-                          "package_name": {
-                            "type": "string"
-                          },
-                          "package_version": {
-                            "type": "string"
-                          },
-                          "sync_status": {
-                            "enum": [
-                              "completed",
-                              "synchronizing",
-                              "failed",
-                              "warning"
-                            ],
-                            "type": "string"
-                          },
-                          "updated_at": {
-                            "type": "string"
-                          },
-                          "warning": {
-                            "additionalProperties": false,
-                            "properties": {
-                              "message": {
-                                "type": "string"
-                              },
-                              "title": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "title"
-                            ],
-                            "type": "object"
-                          }
-                        },
-                        "required": [
-                          "sync_status",
-                          "install_status"
-                        ],
-                        "type": "object"
-                      },
-                      "type": "array"
-                    },
-                    "warning": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "message": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "title"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "integrations"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "description": "Generic Error",
-                  "properties": {
-                    "attributes": {},
-                    "error": {
-                      "type": "string"
-                    },
-                    "errorType": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "attributes"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get CCR Remote synced integrations status by outputId",
-        "tags": [
-          "CCR Remote synced integrations"
         ]
       }
     },
@@ -55090,7 +54824,114 @@
                                             "properties": {
                                               "classic": {
                                                 "additionalProperties": false,
-                                                "properties": {},
+                                                "properties": {
+                                                  "field_overrides": {
+                                                    "additionalProperties": {
+                                                      "allOf": [
+                                                        {
+                                                          "additionalProperties": {
+                                                            "anyOf": [
+                                                              {
+                                                                "anyOf": [
+                                                                  {
+                                                                    "type": "string"
+                                                                  },
+                                                                  {
+                                                                    "type": "number"
+                                                                  },
+                                                                  {
+                                                                    "type": "boolean"
+                                                                  },
+                                                                  {
+                                                                    "enum": [
+                                                                      "null"
+                                                                    ],
+                                                                    "nullable": true
+                                                                  },
+                                                                  {
+                                                                    "not": {}
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "items": {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "type": "string"
+                                                                    },
+                                                                    {
+                                                                      "type": "number"
+                                                                    },
+                                                                    {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    {
+                                                                      "enum": [
+                                                                        "null"
+                                                                      ],
+                                                                      "nullable": true
+                                                                    },
+                                                                    {
+                                                                      "not": {}
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                "type": "array"
+                                                              },
+                                                              {}
+                                                            ]
+                                                          },
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "anyOf": [
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "format": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "type": {
+                                                                  "enum": [
+                                                                    "keyword",
+                                                                    "match_only_text",
+                                                                    "long",
+                                                                    "double",
+                                                                    "date",
+                                                                    "boolean",
+                                                                    "ip"
+                                                                  ],
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "type"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "type": {
+                                                                  "enum": [
+                                                                    "system"
+                                                                  ],
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "type"
+                                                              ],
+                                                              "type": "object"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    "type": "object"
+                                                  }
+                                                },
                                                 "type": "object"
                                               }
                                             },
@@ -64524,7 +64365,114 @@
                             "properties": {
                               "classic": {
                                 "additionalProperties": false,
-                                "properties": {},
+                                "properties": {
+                                  "field_overrides": {
+                                    "additionalProperties": {
+                                      "allOf": [
+                                        {
+                                          "additionalProperties": {
+                                            "anyOf": [
+                                              {
+                                                "anyOf": [
+                                                  {
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "number"
+                                                  },
+                                                  {
+                                                    "type": "boolean"
+                                                  },
+                                                  {
+                                                    "enum": [
+                                                      "null"
+                                                    ],
+                                                    "nullable": true
+                                                  },
+                                                  {
+                                                    "not": {}
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "items": {
+                                                  "anyOf": [
+                                                    {
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "type": "number"
+                                                    },
+                                                    {
+                                                      "type": "boolean"
+                                                    },
+                                                    {
+                                                      "enum": [
+                                                        "null"
+                                                      ],
+                                                      "nullable": true
+                                                    },
+                                                    {
+                                                      "not": {}
+                                                    }
+                                                  ]
+                                                },
+                                                "type": "array"
+                                              },
+                                              {}
+                                            ]
+                                          },
+                                          "type": "object"
+                                        },
+                                        {
+                                          "anyOf": [
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "type": {
+                                                  "enum": [
+                                                    "keyword",
+                                                    "match_only_text",
+                                                    "long",
+                                                    "double",
+                                                    "date",
+                                                    "boolean",
+                                                    "ip"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "enum": [
+                                                    "system"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "type": "object"
+                                  }
+                                },
                                 "type": "object"
                               }
                             },
@@ -65570,9 +65518,6 @@
   "tags": [
     {
       "name": "alerting"
-    },
-    {
-      "name": "CCR Remote synced integrations"
     },
     {
       "name": "connectors"
