@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  DashboardSearchIn,
-  DashboardSearchOut,
-} from '../../../../server/content_management';
+import type { DashboardSearchIn, DashboardSearchOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../../utils/extract_title_and_count';
 import { contentManagementService } from '../../kibana_services';
