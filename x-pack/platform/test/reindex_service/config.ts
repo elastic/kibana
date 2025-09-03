@@ -35,11 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xPackApiTestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xPackApiTestsConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${path.resolve(__dirname, '../../../../examples/routing_example')}`,
-        `--plugin-path=${path.resolve(__dirname, '../../../../examples/developer_examples')}`,
-      ],
+      serverArgs: [...xPackApiTestsConfig.get('kbnTestServer.serverArgs')],
     },
     esTestCluster,
   };

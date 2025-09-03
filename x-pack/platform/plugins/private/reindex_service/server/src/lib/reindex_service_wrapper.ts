@@ -267,6 +267,7 @@ export class ReindexServiceWrapper {
           hasRequiredPrivileges,
           meta: {
             indexName,
+            reindexName: reindexOp?.attributes.newIndexName,
             aliases: Object.keys(aliases),
             isFrozen: isTruthy(settings?.frozen),
             isReadonly: isTruthy(settings?.verified_read_only),

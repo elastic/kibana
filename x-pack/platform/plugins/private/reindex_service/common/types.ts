@@ -68,6 +68,7 @@ export interface ReindexOptions {
 export interface ReindexStatusResponse {
   meta: {
     indexName: string;
+    reindexName?: string;
     // Array of aliases pointing to the index being reindexed
     aliases: string[];
     isReadonly: boolean;
