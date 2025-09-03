@@ -23,6 +23,7 @@ import { mount } from 'enzyme';
 import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
+import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 
 const mockTimeHistory = {
   get: () => {
@@ -97,6 +98,7 @@ function wrapSearchBarInContext(testProps: any) {
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
+      search: searchServiceMock.createStartContract(),
       query: {
         savedQueries: {
           findSavedQueries: () =>
