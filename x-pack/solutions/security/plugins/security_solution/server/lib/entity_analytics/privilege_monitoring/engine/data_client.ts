@@ -40,7 +40,7 @@ export interface PrivilegeMonitoringGlobalDependencies {
   apiKeyManager?: ApiKeyManager;
   taskManager?: TaskManagerStartContract;
 
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 /**

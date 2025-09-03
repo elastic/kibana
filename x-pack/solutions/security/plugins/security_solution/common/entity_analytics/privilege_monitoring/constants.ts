@@ -32,32 +32,3 @@ export const STREAM_INDEX_PATTERNS: Record<IntegrationType, (namespace: string) 
 
 export const getStreamPatternFor = (integration: IntegrationType, namespace: string): string =>
   STREAM_INDEX_PATTERNS[integration](namespace);
-
-export interface Matcher {
-  values: string[];
-  fields: string[];
-}
-
-export const OKTA_ADMIN_ROLES: string[] = [
-  'Super Administrator',
-  'Organization Administrator',
-  'Group Administrator',
-  'Application Administrator',
-  'Mobile Administrator',
-  'Help Desk Administrator',
-  'Report Administrator',
-  'API Access Management Administrator',
-  'Group Membership Administrator',
-  'Read-only Administrator',
-];
-
-export const AD_ADMIN_ROLES: string[] = ['Domain Admins', 'Enterprise Admins'];
-
-export const INTEGRATION_MATCHERS_DETAILED: Record<IntegrationType, Matcher> = {
-  okta: { fields: ['user.roles'], values: OKTA_ADMIN_ROLES },
-  ad: { fields: ['user.roles'], values: AD_ADMIN_ROLES },
-};
-
-export const getMatchersFor = (integration: IntegrationType): Matcher[] => [
-  INTEGRATION_MATCHERS_DETAILED[integration],
-];
