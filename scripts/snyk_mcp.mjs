@@ -351,7 +351,7 @@ server.tool(
 
 server.registerResource(
   'sample.snyk-triage-response',
-  pathToFileURL(path.resolve(process.env.DATA_PATH, 'triage_response.md')).href,
+  pathToFileURL(path.resolve(process.env.DATA_PATH, 'samples/triage_response.md')).href,
   {
     description: 'Few-shot examples of how to make triage comments for Snyk issues',
     mimeType: 'text/markdown',
@@ -359,7 +359,7 @@ server.registerResource(
   async (uri) => {
     try {
       const fileContent = await fs.readFile(
-        path.resolve(process.env.DATA_PATH, 'triage_response.md'),
+        path.resolve(process.env.DATA_PATH, 'samples/triage_response.md'),
         'utf-8'
       );
 
