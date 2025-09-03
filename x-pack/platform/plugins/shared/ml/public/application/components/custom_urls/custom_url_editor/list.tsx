@@ -58,15 +58,12 @@ function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
  * Uses source index for partial DFA jobs since destination index doesn't exist yet.
  * For discover URLs: Extracts data view ID directly from the URL state.
  */
-export function findDataViewId(
-  job: Job | DataFrameAnalyticsConfig,
+export function extractDataViewIdFromCustomUrl(
+  dfaJob: DataFrameAnalyticsConfig,
   customUrl: MlKibanaUrlConfig,
   dataViewListItems?: DataViewListItem[],
   isPartialDFAJob?: boolean
 ): string | undefined {
-  // Ensure cast as dfaJob if it's just a partial from the wizard
-  const dfaJob = job as DataFrameAnalyticsConfig;
-
   let dataViewId;
   if (customUrl.url_value.includes('dashboards')) {
     const sourceIndex = Array.isArray(dfaJob.source.index)
@@ -216,7 +213,12 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       customUrl.time_range !== undefined &&
       customUrl.time_range !== TIME_RANGE_TYPE.AUTO
     ) {
-      const dataViewId = findDataViewId(job, customUrl, dataViewListItems, isPartialDFAJob);
+      const dataViewId = extractDataViewIdFromCustomUrl(
+        job as DataFrameAnalyticsConfig,
+        customUrl,
+        dataViewListItems,
+        isPartialDFAJob
+      );
 
       if (dataViewId) {
         const dataView = await dataViews.get(dataViewId);
