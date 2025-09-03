@@ -214,7 +214,7 @@ describe('reindex API', () => {
 
     it('inserts headers into the credentialStore', async () => {
       const reindexOp = {
-        attributes: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' },
+        attributes: { indexName: 'theIndex' },
       } as ReindexSavedObject;
       mockReindexService.createReindexOperation.mockResolvedValueOnce(reindexOp);
 
