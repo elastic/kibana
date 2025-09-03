@@ -42,13 +42,14 @@ export function fromBasicMetricAPItoLensState(
 export function fromSumMetricAPIToLensState(
   options: LensApiSumMetricOperation
 ): SumIndexPatternColumn {
-  const { field, format } = options;
+  const { field, format, empty_as_null } = options;
 
   return {
     operationType: 'sum',
     sourceField: field,
     ...getLensStateMetricSharedProps(options),
     params: {
+      emptyAsNull: Boolean(empty_as_null),
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
   };
