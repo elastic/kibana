@@ -39,7 +39,7 @@ export function useFailureStoreModal() {
     closeModal();
   };
 
-  const renderModal = () => {
+  const renderModal = (): React.ReactElement | null => {
     if (canUserReadFailureStore && isFailureStoreModalOpen && defaultRetentionPeriod) {
       return React.createElement(FailureStoreModal, {
         onCloseModal: closeModal,
