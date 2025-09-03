@@ -84,7 +84,7 @@ export const PresentationPanelTitle = ({
     );
   }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme]);
 
-  const describedPanelTitleElement = useMemo(() => {
+  const tooltipElement = useMemo(() => {
     if (hideTitle) return null;
 
     return (
@@ -143,5 +143,5 @@ export const PresentationPanelTitle = ({
     );
   }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId, euiTheme.size.xs]);
 
-  return describedPanelTitleElement;
+  return tooltipElement;
 };
