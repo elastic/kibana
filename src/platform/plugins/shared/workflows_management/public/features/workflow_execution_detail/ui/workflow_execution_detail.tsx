@@ -15,6 +15,7 @@ import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkf
 import { WorkflowStepExecutionList } from './workflow_step_execution_list';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
+import { CancelExecutionButton } from './cancel_execution_button';
 
 export interface WorkflowExecutionProps {
   workflowExecutionId: string;
@@ -123,6 +124,14 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
   return (
     <>
       {renderSelectedStepExecutionFlyout()}
+      {[
+        ExecutionStatus.RUNNING,
+        ExecutionStatus.WAITING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.PENDING,
+      ].includes(workflowExecution?.status as ExecutionStatus) && (
+        <CancelExecutionButton executionId={workflowExecutionId} />
+      )}
       <WorkflowStepExecutionList
         execution={workflowExecution ?? null}
         isLoading={isLoading}

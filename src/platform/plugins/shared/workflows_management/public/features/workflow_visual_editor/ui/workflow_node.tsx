@@ -111,6 +111,8 @@ const getNodeBorderColor = (status: ExecutionStatus | undefined, euiTheme: EuiTh
       return euiTheme.colors.borderBaseNeutral;
     case ExecutionStatus.RUNNING:
       return euiTheme.colors.borderBaseNeutral;
+    case ExecutionStatus.CANCELLING:
+      return euiTheme.colors.borderBaseNeutral;
     case ExecutionStatus.CANCELLED:
       return euiTheme.colors.borderBaseNeutral;
     case ExecutionStatus.SKIPPED:

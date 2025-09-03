@@ -100,24 +100,27 @@ export const WorkflowStepExecutionList = ({
   }
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      justifyContent="flexStart"
-      css={styles.container}
-    >
-      {execution.stepExecutions.map((stepExecution) => (
-        <WorkflowStepExecutionListItem
-          key={stepExecution.id}
-          stepExecution={stepExecution}
-          selected={stepExecution.id === selectedId}
-          onClick={() => onStepExecutionClick(stepExecution.id)}
-        />
-      ))}
-      <EuiButton onClick={onClose} css={styles.doneButton}>
-        <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
-      </EuiButton>
-    </EuiFlexGroup>
+    <>
+      {/* cancel workflow button */}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        justifyContent="flexStart"
+        css={styles.container}
+      >
+        {execution.stepExecutions.map((stepExecution) => (
+          <WorkflowStepExecutionListItem
+            key={stepExecution.id}
+            stepExecution={stepExecution}
+            selected={stepExecution.id === selectedId}
+            onClick={() => onStepExecutionClick(stepExecution.id)}
+          />
+        ))}
+        <EuiButton onClick={onClose} css={styles.doneButton}>
+          <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
+        </EuiButton>
+      </EuiFlexGroup>
+    </>
   );
 };
 
