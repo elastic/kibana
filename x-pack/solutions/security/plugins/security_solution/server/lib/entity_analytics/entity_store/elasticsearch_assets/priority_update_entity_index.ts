@@ -20,7 +20,7 @@ export const createEntityPriorityUpdateIndex = async (
   namespace: string,
   logger: Logger
 ) => {
-  return createEntityIndex({
+  await createEntityIndex({
     entityType,
     esClient,
     namespace,
