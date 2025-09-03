@@ -110,6 +110,15 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       children: <></>,
       status: uploadStatus.overallImportStatus === STATUS.COMPLETED ? 'complete' : 'incomplete',
     },
+    {
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.allDocsSearchable', {
+        defaultMessage: 'All docs searchable',
+      }),
+      children: <></>,
+      status: generateStatus([
+        uploadStatus.allDocsSearchable ? STATUS.COMPLETED : STATUS.NOT_STARTED,
+      ]),
+    },
   ];
 
   return <EuiSteps steps={steps} titleSize="xxs" css={css} />;
