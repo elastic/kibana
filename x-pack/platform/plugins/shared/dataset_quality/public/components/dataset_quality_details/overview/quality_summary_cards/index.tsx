@@ -63,8 +63,12 @@ export default function QualitySummaryCards({
     loadingState: { dataStreamSettingsLoading },
   } = useDatasetQualityDetailsState();
 
-  const { openModal, canUserReadFailureStore, hasFailureStore, renderModal: renderFailureStoreModal } =
-    useFailureStoreModal();
+  const {
+    openModal,
+    canUserReadFailureStore,
+    hasFailureStore,
+    renderModal: renderFailureStoreModal,
+  } = useFailureStoreModal();
   return (
     <EuiFlexGroup gutterSize="m" direction="column" style={{ height: '100%' }}>
       <EuiFlexItem grow={true}>
