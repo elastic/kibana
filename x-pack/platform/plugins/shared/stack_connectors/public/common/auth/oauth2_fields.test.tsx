@@ -53,6 +53,19 @@ describe('OAuth2Fields', () => {
     expect(screen.getByLabelText(i18n.CLIENT_SECRET)).not.toHaveAttribute('readonly');
     expect(screen.getByLabelText(i18n.SCOPE)).not.toHaveAttribute('readonly');
   });
+
+  it('does not set fields to read-only when readOnly is true', () => {
+    render(
+      <AuthFormTestProvider defaultValue={baseFormData} onSubmit={onSubmit}>
+        <OAuth2Fields readOnly={true} />
+      </AuthFormTestProvider>
+    );
+
+    expect(screen.getByLabelText(i18n.ACCESS_TOKEN_URL)).toHaveAttribute('readonly');
+    expect(screen.getByLabelText(i18n.CLIENT_ID)).toHaveAttribute('readonly');
+    expect(screen.getByLabelText(i18n.CLIENT_SECRET)).toHaveAttribute('readonly');
+    expect(screen.getByLabelText(i18n.SCOPE)).toHaveAttribute('readonly');
+  });
 });
 
 describe('jsonValidator', () => {

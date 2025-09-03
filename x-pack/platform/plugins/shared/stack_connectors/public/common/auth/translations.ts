@@ -175,7 +175,7 @@ export const CLIENT_ID = i18n.translate(
   'xpack.stackConnectors.components.auth.clientIdTextFieldLabel',
   {
     defaultMessage: 'Client ID',
-    description: 'The client ID to use for AOuth2 authentication',
+    description: 'The client ID to use for OAuth2 authentication',
   }
 );
 export const CLIENT_ID_REQUIRED = i18n.translate(
@@ -188,7 +188,7 @@ export const CLIENT_SECRET = i18n.translate(
   'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
   {
     defaultMessage: 'Client secret',
-    description: 'The client secret to use for for AOuth2 authentication',
+    description: 'The client secret to use for for OAuth2 authentication',
   }
 );
 export const CLIENT_SECRET_REQUIRED = i18n.translate(
@@ -201,7 +201,7 @@ export const SCOPE = i18n.translate(
   'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
   {
     defaultMessage: 'Scope',
-    description: 'The scope to use for for AOuth2 authentication',
+    description: 'The scope to use for for OAuth2 authentication',
   }
 );
 

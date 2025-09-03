@@ -183,5 +183,17 @@ describe('SecretConfigurationSchemaValidation', () => {
       });
       expect(result).toBe(errorMessage);
     });
+
+    it('should not accept invalid OAuth2 credentials', () => {
+      const result = validate({
+        user: null,
+        password: 'password',
+        crt: null,
+        key: null,
+        pfx: null,
+        clientSecret: 'oauth2-client-secret',
+      });
+      expect(result).toBe(errorMessage);
+    });
   });
 });
