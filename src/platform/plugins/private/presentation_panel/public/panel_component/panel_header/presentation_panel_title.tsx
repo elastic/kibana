@@ -107,36 +107,36 @@ export const PresentationPanelTitle = ({
             align-items: center;
           `}
         >
-          {!hideTitle ? (
-            <h2
-              // styles necessary for applying ellipsis and showing the info icon if description is present
-              css={css`
-                overflow: hidden;
-              `}
-            >
-              <EuiScreenReaderOnly>
-                <span id={headerId}>
-                  {panelTitle
-                    ? i18n.translate('presentationPanel.ariaLabel', {
-                        defaultMessage: 'Panel: {title}',
-                        values: {
-                          title: panelTitle,
-                        },
-                      })
-                    : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
-                        defaultMessage: 'Untitled panel',
-                      })}
-                </span>
-              </EuiScreenReaderOnly>
-              {panelTitleElement}
-            </h2>
+          <h2
+            // styles necessary for applying ellipsis and showing the info icon if description is present
+            css={css`
+              overflow: hidden;
+            `}
+          >
+            <EuiScreenReaderOnly>
+              <span id={headerId}>
+                {panelTitle
+                  ? i18n.translate('presentationPanel.ariaLabel', {
+                      defaultMessage: 'Panel: {title}',
+                      values: {
+                        title: panelTitle,
+                      },
+                    })
+                  : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                      defaultMessage: 'Untitled panel',
+                    })}
+              </span>
+            </EuiScreenReaderOnly>
+            {panelTitleElement}
+          </h2>
+          {panelDescription ? (
+            <EuiIcon
+              type="info"
+              color="subdued"
+              data-test-subj="embeddablePanelTitleDescriptionIcon"
+              tabIndex={0}
+            />
           ) : null}
-          <EuiIcon
-            type="info"
-            color="subdued"
-            data-test-subj="embeddablePanelTitleDescriptionIcon"
-            tabIndex={0}
-          />
         </div>
       </EuiToolTip>
     );
