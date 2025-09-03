@@ -95,6 +95,9 @@ async function markWorkflowCancelled(
       status: ExecutionStatus.CANCELLED,
     })
   );
+  workflowExecutionState.updateWorkflowExecution({
+    status: ExecutionStatus.CANCELLED,
+  });
 
   await workflowExecutionState.flush();
 }
