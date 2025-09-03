@@ -243,7 +243,8 @@ export interface APMUsage {
     | 'service_groups'
     | 'custom_dashboards'
     | 'per_service'
-    | 'top_traces',
+    | 'top_traces'
+    | 'per_agent_config_settings',
     { took: { ms: number } }
   >;
 }

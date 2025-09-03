@@ -1456,6 +1456,16 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         },
       },
     },
+    per_agent_config_settings: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description: 'Execution time in milliseconds for the "per_agent_config_settings" task',
+          },
+        },
+      },
+    },
     top_traces: {
       took: {
         ms: {
