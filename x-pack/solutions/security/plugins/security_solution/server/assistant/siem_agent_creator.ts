@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import type { AgentCreateRequest } from '@kbn/onechat-plugin/common/agents';
+import { DEFAULT_SYSTEM_PROMPT } from '@kbn/elastic-assistant-plugin/server/lib/prompt/prompts';
 import type {
   SecuritySolutionPluginCoreStartDependencies,
   SecuritySolutionPluginStartDependencies,
@@ -51,8 +52,7 @@ export class SiemAgentCreator {
       const siemAgentRequest: AgentCreateRequest = {
         id: 'siem-security-analyst',
         name: 'SIEM Security Analyst',
-        description:
-          'AI assistant specialized in security analysis and threat detection for SIEM operations',
+        description: DEFAULT_SYSTEM_PROMPT,
         labels: ['security', 'siem', 'threat-detection', 'incident-response'],
         avatar_color: '#ff6b6b',
         avatar_symbol: '🛡️',
@@ -80,6 +80,8 @@ Always provide clear, actionable recommendations and explain your reasoning.`,
             { type: ToolType.builtin, tool_ids: ['.open-and-acknowledged-alerts-internal-tool'] },
             // Include the alert-counts-internal-tool
             { type: ToolType.builtin, tool_ids: ['.alert-counts-internal-tool'] },
+            // Include the product-documentation-internal-tool
+            { type: ToolType.builtin, tool_ids: ['.product-documentation-internal-tool'] },
             // Include all built-in tools for comprehensive security analysis
             { type: ToolType.builtin, tool_ids: ['*'] },
           ],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PRODUCT_DOCUMENTATION_TOOL } from './product_docs/product_documentation_tool';
+import { PRODUCT_DOCUMENTATION_TOOL, productDocumentationInternalTool } from './product_docs';
 import { GENERATE_ESQL_TOOL } from './esql/generate_esql_tool';
 import { ASK_ABOUT_ESQL_TOOL } from './esql/ask_about_esql_tool';
 import { ALERT_COUNTS_TOOL } from './alert_counts';

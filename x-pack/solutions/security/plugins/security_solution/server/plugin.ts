@@ -97,6 +97,7 @@ import {
 import { RequestContextFactory } from './request_context_factory';
 import { openAndAcknowledgedAlertsInternalTool } from './assistant/tools/open_and_acknowledged_alerts';
 import { alertCountsInternalTool } from './assistant/tools/alert_counts';
+import { productDocumentationInternalTool } from './assistant/tools/product_docs';
 import { createSiemAgentCreator } from './assistant/siem_agent_creator';
 
 import type {
@@ -247,6 +248,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Register onechat tools
     plugins.onechat.tools.register(openAndAcknowledgedAlertsInternalTool());
     plugins.onechat.tools.register(alertCountsInternalTool());
+    plugins.onechat.tools.register(productDocumentationInternalTool(core.getStartServices));
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
@@ -588,7 +590,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
       isFeatureEnabled: config.experimentalFeatures.defendInsights,
-      endpointContext: this.endpointAppContextService.service,
+      endpointContext: this.endpointAppContextService,
     });
 
     if (plugins.taskManager) {
