@@ -14,6 +14,7 @@ import {
   COVERAGE_OVERVIEW_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
+  AI_ASSISTED_RULE_CREATE_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../common/constants';
@@ -65,6 +66,13 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
   {
     path: '/rules/create',
     main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
+      omitSpyRoute: true,
+    }),
+    exact: true,
+  },
+  {
+    path: AI_ASSISTED_RULE_CREATE_PATH,
+    main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.aiAssistedRuleCreate, {
       omitSpyRoute: true,
     }),
     exact: true,
