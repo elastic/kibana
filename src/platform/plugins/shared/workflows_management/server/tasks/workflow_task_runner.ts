@@ -53,6 +53,14 @@ export function createWorkflowTaskRunner({
             throw new Error(`Workflow ${workflowId} not found`);
           }
 
+          if (!workflow.definition) {
+            throw new Error(`Workflow definition not found: ${workflowId}`);
+          }
+
+          if (!workflow.valid) {
+            throw new Error(`Workflow is not valid: ${workflowId}`);
+          }
+
           // Convert to execution model
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
