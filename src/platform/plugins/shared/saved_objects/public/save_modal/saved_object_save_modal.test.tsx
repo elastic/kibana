@@ -202,4 +202,43 @@ describe('SavedObjectSaveModal', () => {
       });
     });
   });
+
+  it('disables the Save button during submission', async () => {
+    let resolveSave: () => void;
+    const onSave = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+
+    render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => {}}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+        />
+      </I18nProvider>
+    );
+
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    expect(saveButton).not.toBeDisabled();
+
+    await userEvent.click(saveButton);
+
+    // Should be disabled immediately while onSave is in progress
+    expect(saveButton).toBeDisabled();
+    expect(onSave).toHaveBeenCalled();
+
+    // Finish the in-flight save
+    resolveSave!();
+
+    await waitFor(() => {
+      expect(saveButton).not.toBeDisabled();
+    });
+  });
 });

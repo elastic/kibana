@@ -366,7 +366,7 @@ class SavedObjectSaveModalComponent extends React.Component<
       <EuiButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
-        isLoading={isLoading}
+        disabled={isLoading}
         type="submit"
         form={this.formId}
       >
