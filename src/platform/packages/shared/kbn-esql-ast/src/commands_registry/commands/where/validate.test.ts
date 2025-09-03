@@ -28,7 +28,7 @@ describe('WHERE Validation', () => {
   // @TODO - this test is largely about function/operator validation, which is not the focus of this file.
   // consider merging with the functions validation tests (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/__tests__/functions.test.ts).
   test('validates the WHERE command', () => {
-    whereExpectErrors('from a_index | where b', ['Unknown column [b]']);
+    whereExpectErrors('from a_index | where b', ['Unknown column "b"']);
     for (const cond of ['true', 'false']) {
       whereExpectErrors(`from a_index | where ${cond}`, []);
       whereExpectErrors(`from a_index | where NOT ${cond}`, []);
@@ -103,7 +103,7 @@ describe('WHERE Validation', () => {
     }
 
     whereExpectErrors(`from a_index | where cidr_match(ipField)`, [
-      `[cidr_match] expected at least 2 arguments, but got 1.`,
+      `CIDR_MATCH expected at least 2 arguments, but got 1.`,
     ]);
     whereExpectErrors(
       `from a_index | eval keywordField = "172.0.0.1/30" | where cidr_match(ipField, "172.0.0.1/30", keywordField)`,
