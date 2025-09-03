@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo, useCallback, useState } from 'react';
+import { EuiText, EuiBadge, EuiButtonEmpty, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -21,13 +21,10 @@ import {
 } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
-  EuiText,
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiDataGrid,
-  EuiPanel,
-  type HorizontalAlignment,
-} from '@elastic/eui';
+  getRenderCustomToolbarWithElements,
+  UnifiedDataTable,
+  DataLoadingState,
+} from '@kbn/unified-data-table';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useScopedServices } from '../../../../components/scoped_services_provider/scoped_services_provider';
@@ -42,6 +39,7 @@ import {
   type ESQLStatsQueryMeta,
 } from './util';
 import { getPatternCellRenderer } from '../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
+import { esqlCascadeStyles } from './esql_data_cascade.styles';
 
 export { getESQLStatsQueryMeta } from './util';
 
@@ -54,47 +52,69 @@ interface ESQLDataCascadeProps {
   defaultFilters?: Filter[];
   onGroupClose: () => void;
   stateContainer: DiscoverStateContainer;
+  viewModeToggle?: React.ReactElement;
+}
+
+interface ESQLDataCascadeLeafCellProps {
+  cellData: DataTableRecord[];
+  queryMeta: ESQLStatsQueryMeta;
+  dataView: DataView;
 }
 
 const ESQLDataCascadeLeafCell = React.memo(
-  ({ cellData, queryMeta }: { cellData: DataTableRecord[]; queryMeta: ESQLStatsQueryMeta }) => {
-    const [visibleColumns, setVisibleColumns] = React.useState(
+  ({ cellData, queryMeta, dataView }: ESQLDataCascadeLeafCellProps) => {
+    const { data, uiSettings, theme, storage, toastNotifications, fieldFormats } =
+      useDiscoverServices();
+    const [visibleColumns, setVisibleColumns] = useState(
       queryMeta.groupByFields.map((group) => group.field)
     );
 
+    const renderCustomToolbarWithElements = useMemo(
+      () =>
+        getRenderCustomToolbarWithElements({
+          leftSide: (
+            <React.Fragment>
+              <EuiText size="xs">
+                <b>
+                  <FormattedMessage
+                    id="discover.esql_data_cascade.row.cell.toolbar.heading"
+                    defaultMessage="{count, plural, =0 {no results} =1 {1 result} other {# results}}"
+                    values={{ count: cellData.length }}
+                  />
+                </b>
+              </EuiText>
+            </React.Fragment>
+          ),
+        }),
+      [cellData]
+    );
+
     return (
-      <EuiDataGrid
-        aria-label={`Data grid for ESQL data cascade`}
-        rowCount={cellData?.length ?? 0}
-        columnVisibility={{
-          visibleColumns,
-          setVisibleColumns,
-        }}
-        columns={[
-          ...queryMeta.groupByFields.map((group, index, groupArray) => ({
-            id: group.field,
-            field: group.field,
-            name: group.field.replace(/_/g, ' '),
-            ...(index === groupArray.length - 1 ? { align: 'right' as HorizontalAlignment } : {}),
-          })),
-        ]}
-        renderCellValue={({ rowIndex, columnId, setCellProps }) => {
-          const gridCellData = (cellData ?? [])[rowIndex];
-          return <EuiText>{gridCellData.flattened[columnId] as string}</EuiText>;
-        }}
-        pagination={{
-          pageIndex: 0,
-          pageSize: 10,
-          onChangePage: (page) => {
-            // eslint-disable-next-line no-console -- added for debugging
-            console.log('page changed:: %o \n', page);
-          },
-          onChangeItemsPerPage: (pageSize) => {
-            // eslint-disable-next-line no-console -- added for debugging
-            console.log('items per page changed:: %o \n', pageSize);
-          },
-        }}
-      />
+      <EuiPanel>
+        <UnifiedDataTable
+          showColumnTokens
+          enableInTableSearch
+          rows={cellData}
+          dataView={dataView}
+          loadingState={DataLoadingState.loaded}
+          columns={visibleColumns}
+          showTimeCol={false}
+          onSetColumns={setVisibleColumns}
+          sort={[]}
+          sampleSizeState={cellData.length}
+          services={{
+            theme,
+            data,
+            uiSettings,
+            toastNotifications,
+            storage,
+            fieldFormats,
+          }}
+          ariaLabelledBy="data-cascade-leaf-cell"
+          isPaginationEnabled={false}
+          renderCustomToolbar={renderCustomToolbarWithElements}
+        />
+      </EuiPanel>
     );
   }
 );
@@ -106,10 +126,12 @@ export const ESQLDataCascade = ({
   stateContainer,
   onGroupClose,
   defaultFilters = DEFAULT_FILTERS,
+  viewModeToggle,
 }: ESQLDataCascadeProps) => {
   const globalState = stateContainer.globalState.get();
   const globalFilters = globalState?.filters;
   const globalTimeRange = globalState?.time;
+  const { euiTheme } = useEuiTheme();
   const [query] = useAppStateSelector((state) => [state.query]);
   const { data, expressions } = useDiscoverServices();
   const { scopedProfilesManager } = useScopedServices();
@@ -117,6 +139,8 @@ export const ESQLDataCascade = ({
   const queryMeta = useMemo(() => {
     return getESQLStatsQueryMeta((query as AggregateQuery).esql);
   }, [query]);
+
+  const styles = useMemo(() => esqlCascadeStyles({ euiTheme }), [euiTheme]);
 
   type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
 
@@ -195,34 +219,24 @@ export const ESQLDataCascade = ({
     [fetchCascadeData]
   );
 
+  const cascadeLeafRowRenderer = useCallback<
+    DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
+  >(
+    ({ data: cellData }) => (
+      <ESQLDataCascadeLeafCell dataView={dataView} cellData={cellData!} queryMeta={queryMeta} />
+    ),
+    [dataView, queryMeta]
+  );
+
   return (
-    <div
-      css={({ euiTheme }) => ({
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        width: '100%',
-        padding: euiTheme.size.s,
-      })}
-    >
+    <div css={styles.wrapper}>
       <DataCascade<ESQLDataGroupNode>
         data={initialData.map((datum) => ({
           id: datum.id,
           ...datum.flattened,
         }))}
         cascadeGroups={cascadeGroups}
-        tableTitleSlot={({ rows }) => (
-          <EuiText>
-            {i18n.translate('discover.esql_data_cascade.toolbar.query_string', {
-              defaultMessage: '{entitiesCount} {entitiesAlias} | {groupCount} groups',
-              values: {
-                entitiesCount: Infinity,
-                groupCount: rows.length - 1,
-                entitiesAlias: 'documents',
-              },
-            })}
-          </EuiText>
-        )}
+        tableTitleSlot={() => <React.Fragment>{viewModeToggle}</React.Fragment>}
         onCascadeGroupingChange={() => {}}
       >
         <DataCascadeRow<ESQLDataGroupNode>
@@ -282,18 +296,7 @@ export const ESQLDataCascade = ({
           onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
         >
           <DataCascadeRowCell onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}>
-            {({ data: cellData }) => {
-              return (
-                <EuiPanel
-                  css={{
-                    height: '100%',
-                    maxHeight: 400, // this value should be adjusted based on the device viewport
-                  }}
-                >
-                  <ESQLDataCascadeLeafCell cellData={cellData!} queryMeta={queryMeta} />
-                </EuiPanel>
-              );
-            }}
+            {cascadeLeafRowRenderer}
           </DataCascadeRowCell>
         </DataCascadeRow>
       </DataCascade>
