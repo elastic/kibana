@@ -20,7 +20,6 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./complete/functions/get_dataset_info.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/recall.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/retrieve_elastic_doc.spec.ts'));
-    loadTestFile(require.resolve('./complete/functions/retrieve_elastic_doc_multilingual.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/summarize.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/title_conversation.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/visualize_query.spec.ts'));

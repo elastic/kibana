@@ -46,7 +46,8 @@ const uninstallProductDoc = async (supertest: SuperTest.Agent, inferenceId: stri
     })
     .expect(200);
 };
-const products = ['kibana', 'security', 'observability', 'elasticsearch'];
+const products = ['kibana', 'security', 'observability', 'elasticsearch'] as const;
+type DocumentationProduct = (typeof products)[number];
 
 const getIndexName = (productName: string, optionalInferenceId?: string) => {
   let indexName = `.kibana_ai_product_doc_${productName}`;
@@ -129,7 +130,7 @@ export const productDocsBaseInstallationSuite = (
 
       const statusResponse = await getProductDocStatus(supertest, defaultInferenceEndpoints.ELSER);
       const statusBody = statusResponse.body;
-      expect(statusBody.overall).to.be(
+      expect(statusBody.overall).to.eql(
         'installed',
         `Expected overall product doc installation status to be 'installed', got ${JSON.stringify(
           statusBody,
@@ -152,7 +153,7 @@ export const productDocsBaseInstallationSuite = (
         defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
       );
       const statusBody = statusResponse.body;
-      expect(statusBody.overall).to.be(
+      expect(statusBody.overall).to.eql(
         'installed',
         `Expected overall product doc installation status to be 'installed', got ${JSON.stringify(
           statusBody,
@@ -162,7 +163,7 @@ export const productDocsBaseInstallationSuite = (
       );
       expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL);
       products.forEach((product) => {
-        expect(statusBody.perProducts[product as DocumentationProduct].status).to.be(
+        expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
           'installed',
           `Expected product doc installation status for [${product}] to be installed, got ${JSON.stringify(
             statusBody.perProducts[product as DocumentationProduct],
@@ -205,7 +206,7 @@ export const productDocsBaseInstallationSuite = (
         defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
       );
       const statusBody = statusResponse.body;
-      expect(statusBody.overall).to.be(
+      expect(statusBody.overall).to.eql(
         'uninstalled',
         `Expected overall product doc installation status to be 'uninstalled', got ${JSON.stringify(
           statusBody,
@@ -215,7 +216,7 @@ export const productDocsBaseInstallationSuite = (
       );
       expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL);
       products.forEach((product) => {
-        expect(statusBody.perProducts[product as DocumentationProduct].status).to.be(
+        expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
           'uninstalled',
           `Expected product doc installation status for [${product}] to be 'uninstalled', got ${JSON.stringify(
             statusBody.perProducts[product as DocumentationProduct],
@@ -233,7 +234,7 @@ export const productDocsBaseInstallationSuite = (
     it('stills retains the other installed product docs', async () => {
       const statusResponse = await getProductDocStatus(supertest, defaultInferenceEndpoints.ELSER);
       const statusBody = statusResponse.body;
-      expect(statusBody.overall).to.be(
+      expect(statusBody.overall).to.eql(
         'installed',
         `Expected overall product doc installation status for inferenceId [${
           defaultInferenceEndpoints.ELSER
@@ -241,7 +242,7 @@ export const productDocsBaseInstallationSuite = (
       );
       expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.ELSER);
       products.forEach((product) => {
-        expect(statusBody.perProducts[product as DocumentationProduct].status).to.be(
+        expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
           'installed',
           `Expected product doc installation status for inferenceId [${
             defaultInferenceEndpoints.ELSER

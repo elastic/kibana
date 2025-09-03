@@ -105,10 +105,8 @@ export const registerInstallationRoutes = ({
       let failureReason = null;
       if (status === 'error' && installStatus) {
         failureReason = Object.values(installStatus)
-          .filter(
-            (product: ProductInstallState) => product.status === 'error' && product.failureReason
-          )
-          .map((product: ProductInstallState) => product.failureReason)
+          .filter((product) => product.status === 'error' && product.failureReason)
+          .map((product) => product.failureReason)
           .join('\n');
       }
       return res.ok<PerformInstallResponse>({
@@ -139,8 +137,6 @@ export const registerInstallationRoutes = ({
 
       const resp = await documentationManager.updateAll({
         request: req,
-        force: false,
-        wait: true,
       });
       const inferenceIds = resp.inferenceIds ?? [];
 
@@ -152,28 +148,48 @@ export const registerInstallationRoutes = ({
           })
         )
       );
-      const body = statuses.reduce((acc, installationStatus, index) => {
-        const inferenceId = inferenceIds[index];
-        const { status, installStatus } = installationStatus.value;
+      const body = statuses.reduce<Record<string, PerformInstallResponse>>(
+        (acc, installationStatus, index) => {
+          const inferenceId = inferenceIds[index];
+          // Handle internal server error
+          if (installationStatus.status === 'rejected') {
+            const failureReason = installationStatus.reason;
+            // @TODO: remove
+            return {
+              ...acc,
+              [inferenceId]: {
+                installed: status === 'uninstalled',
+                ...(failureReason ? { failureReason: JSON.stringify(failureReason) } : {}),
+              },
+            };
+          }
+          if (installationStatus.status === 'fulfilled') {
+            const { status, installStatus } = installationStatus.value;
 
-        let failureReason = null;
-        if (status === 'error' && installStatus) {
-          failureReason = Object.values(installStatus)
-            .filter(
-              (product: ProductInstallState) => product.status === 'error' && product.failureReason
-            )
-            .map((product: ProductInstallState) => product.failureReason)
-            .join('\n');
-        }
-        return {
-          ...acc,
-          [inferenceId]: {
-            installed: status === 'installed',
-            ...(failureReason ? { failureReason } : {}),
-          },
-        };
-      }, {});
-      return res.ok<PerformInstallResponse>({
+            let failureReason = null;
+            // Check for real reason of previous installation failure
+            if (status === 'error' && installStatus) {
+              failureReason = Object.values(installStatus)
+                .filter(
+                  (product: ProductInstallState) =>
+                    product.status === 'error' && product.failureReason
+                )
+                .map((product: ProductInstallState) => product.failureReason)
+                .join('\n');
+            }
+            return {
+              ...acc,
+              [inferenceId]: {
+                installed: status === 'installed',
+                ...(failureReason ? { failureReason } : {}),
+              } as PerformInstallResponse,
+            };
+          }
+          return acc;
+        },
+        {}
+      );
+      return res.ok<Record<string, PerformInstallResponse>>({
         body,
       });
     }

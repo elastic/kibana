@@ -35,16 +35,3 @@ export async function uninstallProductDoc(supertest: SuperTest.Agent, inferenceI
     })
     .expect(200);
 }
-
-// @TODO: remove
-export async function updateProductDoc(supertest: SuperTest.Agent, inferenceId: string) {
-  return supertest
-    .post('/internal/product_doc_base/update_all')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .set('kbn-xsrf', 'foo')
-    .send({
-      inferenceId,
-    })
-    .expect(200);
-}

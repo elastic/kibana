@@ -28,6 +28,7 @@ import type {
   DocInstallOptions,
   DocUninstallOptions,
   DocUpdateOptions,
+  DocUpdateAllOptions,
 } from './types';
 import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 
@@ -140,13 +141,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async updateAll(options: DocUpdateAllOptions): Promise<void> {
+  async updateAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }> {
     const previouslyInstalledInferenceIds =
       await this.docInstallClient.getPreviouslyInstalledInferenceIds();
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${previouslyInstalledInferenceIds}`
     );
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       previouslyInstalledInferenceIds.map((inferenceId) => this.update({ inferenceId }))
     );
     return {
