@@ -32,10 +32,13 @@ import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_
 import { EvaluationSettings } from '.';
 import { ManagementSettingsTabs } from './types';
 import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 
 interface Props {
   dataViews: DataViewsContract;
   settings: SettingsStart;
+  docLinks: DocLinksStart;
+  application: ApplicationStart;
   onTabChange?: (tabId: string) => void;
   currentTab: ManagementSettingsTabs;
 }
@@ -45,7 +48,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab: selectedSettingsTab, settings }) => {
+  ({ dataViews, onTabChange, currentTab: selectedSettingsTab, settings, docLinks, application }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -150,7 +153,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           `}
           data-test-subj={`tab-${selectedSettingsTab}`}
         >
-          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement settings={settings} connectors={connectors} />}
+          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement settings={settings} connectors={connectors} docLinks={docLinks} application={application} />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               connectors={connectors}

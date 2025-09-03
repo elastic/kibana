@@ -23,13 +23,16 @@ import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { isEmpty } from 'lodash';
 import { AIConnector } from '../connector_selector';
+import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 
 type Props = {
   settings: SettingsStart
   connectors: AIConnector[] | undefined
+  docLinks: DocLinksStart
+  application: ApplicationStart
 }
 
-const ConnectorsSettingsManagementComponent: React.FC<Props> = ({ settings, connectors }) => {
+const ConnectorsSettingsManagementComponent: React.FC<Props> = ({ settings, connectors, docLinks, application }) => {
   const { navigateToApp } = useAssistantContext();
 
   const onClick = useCallback(
@@ -71,21 +74,21 @@ const ConnectorsSettingsManagementComponent: React.FC<Props> = ({ settings, conn
 
         </EuiDescribedFormGroup>
 
-        <DefaultAIConnectorHoc connectors={connectors} />
+        <DefaultAIConnectorHoc connectors={connectors} docLinks={docLinks} application={application} />
         <BottomBarActionsHoc />
       </EuiPanel>
     </SettingsContextProvider>
   );
 };
 
-export const DefaultAIConnectorHoc: React.FC<Pick<Props, 'connectors'>> = ({ connectors }) => {
+export const DefaultAIConnectorHoc: React.FC<Pick<Props, 'connectors' | 'docLinks' | 'application'>> = ({ connectors, docLinks, application }) => {
   const { toasts } = useAssistantContext();
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
 
   return <DefaultAIConnector toast={toasts!} uiSetting={{ fields, handleFieldChange, unsavedChanges }} connectors={{
     loading: false,
     connectors: connectors
-  }} />
+  }} docLinks={docLinks} application={application} />
 }
 
 export const BottomBarActionsHoc = () => {

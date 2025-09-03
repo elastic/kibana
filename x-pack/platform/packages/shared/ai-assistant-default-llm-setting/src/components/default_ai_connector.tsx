@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiLink,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -23,21 +24,43 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import type { FieldDefinition, OnFieldChangeFn, UnsavedFieldChange } from '@kbn/management-settings-types';
-import type { IToasts, UiSettingsType } from '@kbn/core/public';
+import type { ApplicationStart, DocLinksStart, IToasts, UiSettingsType } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_CONNECTOR } from '../lib/constants'
 
+
+
 type ConnectorData = {
-    connectors?: Array<{
-      id: string
-      name: string
-      isPreconfigured: boolean
-    }> 
-    loading: boolean
+  connectors?: Array<{
+    id: string
+    name: string
+    isPreconfigured: boolean
+    actionTypeId: string
+    config?: Record<string, any>
+  }>
+  loading: boolean
+}
+
+const hasElasticManagedLlm = (
+  connectors: ConnectorData['connectors'] | undefined
+) => {
+  if (!Array.isArray(connectors) || connectors.length === 0) {
+    return false;
   }
+
+  return connectors.find(
+    (connector) =>
+      connector.actionTypeId === '.inference' &&
+      connector.isPreconfigured &&
+      connector.config?.provider === 'elastic'
+  );
+};
+
 
 interface Props {
   toast: IToasts
+  application: ApplicationStart
+  docLinks: DocLinksStart
   uiSetting: {
     unsavedChanges: Record<string, UnsavedFieldChange<UiSettingsType>>
     handleFieldChange: OnFieldChangeFn
@@ -112,7 +135,7 @@ const getOptionsByValues = (
   return options.flatMap(getOptionsByValuesHelper);
 };
 
-export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connectors }) => {
+export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connectors, application, docLinks }) => {
   const options = useMemo(() => getOptions(connectors), [connectors]);
   const { handleFieldChange, fields, unsavedChanges } = uiSetting
 
@@ -169,6 +192,82 @@ export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connecto
 
   const defaultLlmOnlyValue = getDefaultLlmOnlyValue(unsavedChanges, fields);
 
+  const elasticManagedLlmExists = hasElasticManagedLlm(connectors.connectors);
+
+  const connectorDescription = useMemo(() => {
+    if (!elasticManagedLlmExists) {
+      return (
+        <p>
+          <FormattedMessage
+            id="genAiSettings.aiConnectorDescription"
+            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must have a Generative AI connector. {manageConnectors}`}
+            values={{
+              manageConnectors: (
+                <EuiLink
+                  href={application.getUrlForApp('management', {
+                    path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+                  })}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="genAiSettings.manage.connectors"
+                    defaultMessage={
+                      'View connectors'
+                    }
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      );
+    }
+
+    return (
+      <p>
+        <FormattedMessage
+          id="genAiSettings.aiConnectorDescriptionWithLink"
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector. {manageConnectors}`}
+          values={{
+            link: (
+              <EuiLink
+                href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="genAiSettings.additionalCostsLink"
+                  defaultMessage="additional costs incur"
+                />
+              </EuiLink>
+            ),
+            manageConnectors: (
+              <EuiLink
+                href={application.getUrlForApp('management', {
+                  path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+                })}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="genAiSettings.manage.connectors"
+                  defaultMessage="Manage connectors"
+                />
+              </EuiLink>
+            ),
+            elasticManagedLlm: (
+              <strong>
+                <FormattedMessage
+                  id="genAiSettings.elasticManagedLlm"
+                  defaultMessage="Elastic Managed LLM"
+                />
+              </strong>
+            ),
+          }}
+        />
+      </p>
+    )
+
+  }, [hasElasticManagedLlm, application, docLinks])
+
   return (
     <>
 
@@ -190,10 +289,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ toast, uiSetting, connecto
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        description={i18n.translate(
-                    'xpack.gen_ai_settings.settings.defaultLLm.select.placeholder',
-                    { defaultMessage: 'Set the default AI connector for this space.' }
-                  )}
+        description={connectorDescription}
       >
 
         <EuiFormRow fullWidth>

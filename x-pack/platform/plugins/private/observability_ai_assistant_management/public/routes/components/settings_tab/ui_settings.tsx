@@ -30,8 +30,9 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     docLinks,
     settings,
     notifications,
-    application: { capabilities, getUrlForApp },
+    application,
   } = useKibana().services;
+  const { capabilities, getUrlForApp } = application
   const { config } = useAppContext();
   const connectors = useGenAIConnectors();
 
@@ -96,7 +97,7 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
           </FieldRowProvider>
         );
       })}
-      <DefaultAIConnector toast={notifications.toasts} uiSetting={{ fields, handleFieldChange, unsavedChanges }} connectors={connectors} />
+      <DefaultAIConnector toast={notifications.toasts} uiSetting={{ fields, handleFieldChange, unsavedChanges }} connectors={connectors} application={application} docLinks={docLinks} />
 
       {config.logSourcesEnabled && (
         <LogSourcesSettingSynchronisationInfo
