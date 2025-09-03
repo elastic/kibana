@@ -6,11 +6,9 @@
  */
 
 export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
-export { isReservedToolId, isBuiltInToolId, idRegexp } from './tool_ids';
+export { isReservedToolId, idRegexp } from './tool_ids';
 export {
-  builtinToolIds,
-  builtinTags,
-  builtInToolIdPrefix,
+  platformCoreTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,

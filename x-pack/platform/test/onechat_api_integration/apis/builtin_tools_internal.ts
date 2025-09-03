@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Builtin Tools internal API', () => {
     describe('POST /internal/chat/tools/_bulk_delete', () => {
       it('should return error results when attempting to bulk delete builtin system tools', async () => {
-        const toolIds = Object.values(builtinToolIds).slice(0, 3) as string[];
+        const toolIds = Object.values(platformCoreTools).slice(0, 3) as string[];
 
         const response = await supertest
           .post('/internal/chat/tools/_bulk_delete')

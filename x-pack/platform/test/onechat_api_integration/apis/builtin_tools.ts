@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Builtin Tools API', () => {
     describe('DELETE /api/chat/tools/.search', () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
-        for (const toolId of Object.values(builtinToolIds) as string[]) {
+        for (const toolId of Object.values(platformCoreTools) as string[]) {
           const response = await supertest
             .delete(`/api/chat/tools/${toolId}`)
             .set('kbn-xsrf', 'kibana')

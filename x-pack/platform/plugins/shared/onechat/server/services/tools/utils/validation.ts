@@ -7,13 +7,12 @@
 
 import { createBadRequestError, idRegexp, isReservedToolId } from '@kbn/onechat-common';
 
-const builtinToolIdRegexp = /^[.][a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
-
 /**
  * Check if an ID is valid for creation
  * @param id
  */
 export const ensureValidId = (id: string) => {
+  // TODO: check where this is being used
   if (isReservedToolId(id)) {
     throw createBadRequestError(`Tool id ${id} is reserved`);
   }
@@ -23,9 +22,3 @@ export const ensureValidId = (id: string) => {
     );
   }
 };
-
-/**
- * Checks if the provided ID is a valid built-in tool id
- * @param id
- */
-export const isBuiltinToolId = (id: string) => builtinToolIdRegexp.test(id);
