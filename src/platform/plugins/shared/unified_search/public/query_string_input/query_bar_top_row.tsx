@@ -596,7 +596,7 @@ export const QueryBarTopRow = React.memo(
             aria-label={buttonLabelCancel}
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             iconType="cross"
-            data-test-subj="queryCancelButton"
+            data-test-subj="queryCancelSplitButton"
             color="text"
             secondaryButtonIcon="clock"
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
@@ -651,6 +651,7 @@ export const QueryBarTopRow = React.memo(
 
       const updateButton = isBackgroundSearchEnabled ? (
         <SplitButton
+          data-test-subj="querySubmitSplitButton"
           iconType={props.isDirty ? iconDirty : 'refresh'}
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           isDisabled={isDateRangeInvalid || props.isDisabled}
