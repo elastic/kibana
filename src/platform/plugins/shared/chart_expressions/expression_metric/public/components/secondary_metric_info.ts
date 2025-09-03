@@ -206,7 +206,7 @@ export function getSecondaryMetricInfo({
   const label = secondaryLabel ?? secondaryMetricColumn?.name ?? '';
 
   const rawValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
-  const formattedValue = secondaryMetricFormatter && secondaryMetricFormatter(rawValue);
+  const formattedValue = secondaryMetricFormatter(rawValue);
   const safeFormattedValue = formattedValue ?? notAvailable;
 
   if (staticColor) {
