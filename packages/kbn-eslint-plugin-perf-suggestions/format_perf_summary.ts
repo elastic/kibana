@@ -24,13 +24,13 @@ interface EslintJsonFile {
 
 interface EslintRunResult {
   name: string;
-  folder: string;
+  directory: string;
   report: EslintJsonFile[];
   exitCode: number;
   stderr?: string;
 }
 
-export function printPerfSummary(log: MinimalLog, results: EslintRunResult[]): void {
+export default function (log: MinimalLog, results: EslintRunResult[]): void {
   // Build summary: for each package name, count messages by message text
   const summary = new Map<string, Map<string, number>>();
 
@@ -81,5 +81,6 @@ export function printPerfSummary(log: MinimalLog, results: EslintRunResult[]): v
 
 function parseScore(msg: string): number {
   const m = msg.match(/score=(\d+)/);
+
   return m ? parseInt(m[1], 10) : 0;
 }

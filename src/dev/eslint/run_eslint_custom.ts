@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import execa from 'execa';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { Package } from '@kbn/repo-packages';
+import { getPackages } from '@kbn/repo-packages';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-interface KbnDepEntry {
-  name: string;
-  folder: string;
-}
 interface EslintJsonMessage {
   ruleId?: string;
   message?: string;
@@ -30,20 +28,136 @@ interface EslintJsonFile {
 
 interface EslintRunResult {
   name: string;
-  folder: string;
+  directory: string;
   report: EslintJsonFile[];
   exitCode: number;
   stderr?: string;
 }
 
-interface MinimalLog {
-  info: (msg: string) => void;
-  write: (chunk: string) => void;
-}
+type FormatterFn = (log: ToolingLog, results: EslintRunResult[]) => void;
 
-type FormatterFn = (log: MinimalLog, results: EslintRunResult[]) => void;
+run(
+  async ({ log, flags }) => {
+    const eslintConf = String(flags['eslint-config']);
+    const formatter = String(flags.formatter);
+    const concurrency = Number(flags.concurrency);
+    const filter = typeof flags.filter === 'string' ? (flags.filter as string) : '';
 
-const defaultFormatter: FormatterFn = (log, results) => {
+    const availableParallelism = os.availableParallelism() ?? 1;
+
+    if (concurrency > availableParallelism) {
+      log.warning(
+        `Available parallelism (${availableParallelism}) is lower than requested concurrency (${concurrency}). Will use maximum allowed instead (${availableParallelism}).`
+      );
+    }
+
+    const usedConcurrency = Math.max(
+      concurrency > availableParallelism ? availableParallelism : concurrency
+    );
+
+    log.info(`Using eslint config at ${eslintConf}.`);
+
+    if (formatter) {
+      log.info(`Using results formatter at ${formatter}.`);
+    }
+
+    log.info(`Running with ${usedConcurrency} workers.`);
+
+    const items = getPackages(REPO_ROOT);
+
+    const thunks: Array<() => Promise<EslintRunResult>> = items
+      .filter((item) =>
+        filter ? item.directory.includes(filter) || item.name.includes(filter) : true
+      )
+      .map((pkg) => {
+        return () => {
+          if (!formatter) {
+            log.info(`Linting ${pkg.directory} (config: ${eslintConf})`);
+          }
+          return runEslintOnEntry(pkg, {
+            json: !!formatter,
+            stream: !formatter,
+            eslintConf,
+          }).then((res) => {
+            if (!formatter) {
+              log.info(`Completed ${pkg.directory} (exit ${res.exitCode})`);
+            }
+            return res;
+          });
+        };
+      });
+
+    let results: EslintRunResult[] = [];
+
+    if (formatter) {
+      // When a formatter is set, we display a progress bar where we update on each completed package.
+      const total = thunks.length;
+
+      const render = (done: number, tot: number) => {
+        const pct = tot === 0 ? 100 : Math.floor((done / tot) * 100);
+
+        log.write(`\rProgress: ${done}/${tot} (${pct}%)`);
+      };
+
+      render(0, total);
+
+      results = await runBatchedPromises(thunks, usedConcurrency, (done, tot) => render(done, tot));
+
+      // Finalize progress with a newline
+      log.write('\n');
+    } else {
+      // No formatter: stream worker output as-is, no progress bar
+      results = await runBatchedPromises(thunks, usedConcurrency);
+    }
+
+    if (formatter) {
+      const formatterFn = formatter
+        ? (await loadFormatterModule(formatter, log)) || defaultFormatter
+        : defaultFormatter;
+
+      formatterFn(log, results);
+    }
+
+    // Exit status
+    if (formatter) {
+      const totalFindings = results.reduce((acc, r) => {
+        if (!r || !Array.isArray(r.report)) return acc;
+
+        const count = r.report.reduce((fAcc, f) => fAcc + (f.messages?.length || 0), 0);
+
+        return acc + count;
+      }, 0);
+
+      if (totalFindings > 0) {
+        process.exit(1);
+      }
+    } else {
+      const hadFailures = results.some((r) => (r.exitCode ?? 0) !== 0);
+
+      if (hadFailures) {
+        process.exit(1);
+      }
+    }
+  },
+  {
+    description: 'Run a custom eslint config on kibana packages',
+    flags: {
+      string: ['concurrency', 'formatter', 'eslint-config', 'filter'],
+      default: {
+        concurrency: 1,
+        'eslint-config': 'eslintrc.js',
+      },
+      help: `
+        --concurrency <n>       Number of parallel ESLint workers (default: CPU count)
+        --formatter <path>      Optional module path default-exporting a function to format results
+        --eslint-config <path>  Optional path to an eslint config (default: eslintrc.js)
+        --filter <path>         Optional filter: match package folder substring or exact package name
+      `,
+    },
+  }
+);
+
+function defaultFormatter(log: ToolingLog, results: EslintRunResult[]) {
   // Build a simple summary and print it as-is
   const summary = new Map<string, Map<string, number>>();
 
@@ -66,6 +180,7 @@ const defaultFormatter: FormatterFn = (log, results) => {
       }
     }
   }
+
   for (const [name, counts] of summary) {
     if (!counts || counts.size === 0) continue;
 
@@ -77,82 +192,39 @@ const defaultFormatter: FormatterFn = (log, results) => {
 
     log.write('\n');
   }
-};
+}
 
-async function loadFormatterModule(modPath: string): Promise<FormatterFn | null> {
-  const abs = path.isAbsolute(modPath) ? modPath : path.resolve(REPO_ROOT, modPath);
-  // Try require (supported by @kbn/babel-register), then dynamic import
+async function loadFormatterModule(modPath: string, log: ToolingLog): Promise<FormatterFn | null> {
+  const absoluteModulePath = path.isAbsolute(modPath) ? modPath : path.resolve(REPO_ROOT, modPath);
+
+  const isFormatterFn = (x: unknown): x is FormatterFn => typeof x === 'function';
+
+  const isDict = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null;
+
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const reqMod = require(abs);
-    const fn = (reqMod && (reqMod.default || reqMod.printPerfSummary || reqMod.format)) as unknown;
-    if (typeof fn === 'function') return fn as FormatterFn;
-  } catch (_e) {
-    // ignore, fall back to dynamic import
+    const module = await import(absoluteModulePath);
+    if (isDict(module)) {
+      const d = (module as { default?: unknown }).default;
+
+      if (isFormatterFn(d)) {
+        return d;
+      }
+    }
+  } catch (e) {
+    log.error(`Error in loading formatter ${e}`);
   }
-  try {
-    const mod = await import(abs);
-    const fn = (mod &&
-      (mod.default || (mod as any).printPerfSummary || (mod as any).format)) as unknown;
-    if (typeof fn === 'function') return fn as FormatterFn;
-  } catch (_e) {
-    // ignore
-  }
+
+  log.warning(
+    `Formatter module does not have a default exported function. Please export a default function from ${modPath}.`
+  );
   return null;
 }
 
-function listKbnDependencyFolders(rootDir: string): KbnDepEntry[] {
-  const LEADING_DOT_SLASH = /^\.\//;
-
-  const pkgJsonPath = path.join(rootDir, 'package.json');
-
-  const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8')) as {
-    dependencies?: Record<string, string>;
-  };
-
-  const deps = pkg.dependencies || {};
-
-  const entries: KbnDepEntry[] = [];
-
-  for (const [name, spec] of Object.entries(deps)) {
-    if (!name.startsWith('@kbn/')) continue;
-    if (typeof spec !== 'string') continue;
-    if (!spec.startsWith('link:')) continue;
-
-    const rel = spec.slice('link:'.length);
-
-    if (!rel) continue;
-
-    const folder = rel.replace(LEADING_DOT_SLASH, '');
-
-    const abs = path.join(rootDir, folder);
-
-    if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) {
-      entries.push({ name, folder });
-    }
-  }
-  const seen = new Set<string>();
-
-  const out: KbnDepEntry[] = [];
-
-  for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    const key = `${e.name}|${e.folder}`;
-
-    if (seen.has(key)) continue;
-
-    seen.add(key);
-
-    out.push(e);
-  }
-
-  return out;
-}
-
 async function runEslintOnEntry(
-  entry: KbnDepEntry,
+  { name, directory }: Package,
   opts: { json: boolean; stream: boolean; eslintConf: string }
 ): Promise<EslintRunResult> {
-  const glob = `${entry.folder}/**/*.{ts,tsx,js,jsx}`;
+  const glob = `${directory}/**/*.{ts,tsx,js,jsx}`;
 
   const args = [
     'scripts/eslint',
@@ -177,18 +249,21 @@ async function runEslintOnEntry(
   });
 
   let report: EslintJsonFile[] = [];
-
   if (opts.json && !opts.stream) {
+    // Try robustly reading JSON via ESLint's --output-file to avoid stdout noise
     try {
-      report = stdout ? (JSON.parse(stdout) as EslintJsonFile[]) : [];
-    } catch (e) {
-      // keep empty report and pass stderr up for debugging
+      // If stdout is valid JSON, use it first
+      if (stdout && stdout.trim().startsWith('[')) {
+        report = JSON.parse(stdout) as EslintJsonFile[];
+      }
+    } catch (_e) {
+      // ignore
     }
   }
 
   return {
-    name: entry.name,
-    folder: entry.folder,
+    name,
+    directory,
     report,
     exitCode: exitCode ?? 1,
     stderr,
@@ -226,134 +301,3 @@ function runBatchedPromises<T>(
 
   return Promise.all(tasks).then(() => results);
 }
-
-run(
-  async ({ log, flags }) => {
-    const allEntries = listKbnDependencyFolders(REPO_ROOT);
-
-    const userFilters: string[] = (flags._ as string[]).filter((a) => !String(a).startsWith('--'));
-
-    let targets: KbnDepEntry[];
-    if (userFilters.length) {
-      // Build regex tests for folder gates (precompiled to avoid creating regex in loops)
-      const folderRegexes = userFilters.map((f) => {
-        // Use the provided string as a literal substring matcher
-        const escaped = f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return new RegExp(escaped);
-      });
-      const exactNames = new Set(userFilters.filter((f) => f.startsWith('@kbn/')));
-
-      const out: KbnDepEntry[] = [];
-      for (const e of allEntries) {
-        let match = false;
-        if (exactNames.has(e.name)) {
-          match = true;
-        } else {
-          for (const rx of folderRegexes) {
-            if (rx.test(e.folder)) {
-              match = true;
-              break;
-            }
-          }
-        }
-        if (match) out.push(e);
-      }
-      targets = out;
-    } else {
-      targets = allEntries;
-    }
-
-    const defaultCpus = Math.max(1, os.cpus()?.length || 1);
-
-    const concurrency = Math.max(1, Number(flags.concurrency ?? defaultCpus));
-
-    const hasFormatter = Boolean(flags.formatter);
-    const eslintConf = String(flags.eslint_conf);
-
-    const thunks = targets.map((t) => () => {
-      if (!hasFormatter) {
-        log.info(`Linting ${t.folder} (config: ${eslintConf})`);
-      }
-      return runEslintOnEntry(t, {
-        json: !!hasFormatter,
-        stream: !hasFormatter,
-        eslintConf,
-      }).then((res) => {
-        if (!hasFormatter) {
-          log.info(`Completed ${t.folder} (exit ${res.exitCode})`);
-        }
-        return res;
-      });
-    });
-
-    let results: EslintRunResult[] = [];
-    if (hasFormatter) {
-      // Progress bar: update on each completed package
-      const total = thunks.length;
-
-      const render = (done: number, tot: number) => {
-        const pct = tot === 0 ? 100 : Math.floor((done / tot) * 100);
-        // overwrite the same line
-        log.write(`\rProgress: ${done}/${tot} (${pct}%)`);
-      };
-
-      // initial render
-      render(0, total);
-
-      results = await runBatchedPromises(thunks, concurrency, (done, tot) => render(done, tot));
-
-      // finalize progress line with newline
-      log.write('\n');
-    } else {
-      // No formatter: stream worker output as-is, no progress bar
-      results = await runBatchedPromises(thunks, concurrency);
-    }
-
-    if (hasFormatter) {
-      const fmtFlag = (flags.formatter as string | undefined) || '';
-
-      const formatter = fmtFlag
-        ? (await loadFormatterModule(fmtFlag)) || defaultFormatter
-        : defaultFormatter;
-
-      formatter(log as MinimalLog, results);
-    }
-
-    // Exit status
-    if (hasFormatter) {
-      const totalFindings = results.reduce((acc, r) => {
-        if (!r || !Array.isArray(r.report)) return acc;
-
-        const count = r.report.reduce((fAcc, f) => fAcc + (f.messages?.length || 0), 0);
-
-        return acc + count;
-      }, 0);
-
-      if (totalFindings > 0) {
-        process.exit(1);
-      }
-    } else {
-      const hadFailures = results.some((r) => (r.exitCode ?? 0) !== 0);
-
-      if (hadFailures) {
-        process.exit(1);
-      }
-    }
-  },
-  {
-    description: 'Run a custom eslint config on kibana packages',
-    flags: {
-      string: ['concurrency', 'formatter', 'eslint_conf'],
-      default: {
-        concurrency: String(Math.max(1, os.cpus()?.length || 1)),
-        eslint_conf: 'eslint.single-rule.config.cjs',
-      },
-      help: `
-        --concurrency <n>       Number of parallel ESLint workers (default: CPU count)
-        --formatter <path>      Optional module path exporting a function to format results
-        --eslint_conf <path>    Optional path to an eslint config (default: eslint.single-rule.config.cjs)
-        [filters...]            Optional filters: match package folder substring or exact package name
-      `,
-    },
-  }
-);
