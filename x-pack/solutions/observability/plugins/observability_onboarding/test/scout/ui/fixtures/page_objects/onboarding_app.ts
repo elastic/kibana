@@ -92,6 +92,21 @@ export class OnboardingApp {
   async openWithCategory(category: 'host' | 'kubernetes' | 'cloud' | 'application') {
     await this.page.gotoApp('observabilityOnboarding', { params: { category } });
     await this.waitForMainTilesToLoad();
+    
+    switch (category) {
+      case 'host':
+        await this.autoDetectLogsCard.waitFor({ state: 'visible' });
+        break;
+      case 'kubernetes':
+        await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+        break;
+      case 'cloud':
+        await this.awsLogsVirtualCard.waitFor({ state: 'visible' });
+        break;
+      case 'application':
+        await this.apmVirtualCard.waitFor({ state: 'visible' });
+        break;
+    }
   }
 
   async selectHostUseCase() {
@@ -124,9 +139,7 @@ export class OnboardingApp {
 
     const nonRouting =
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
-    if (nonRouting.test(cardSelector)) {
-      await this.waitForIntegrationCards();
-    } else {
+    if (!nonRouting.test(cardSelector)) {
       await this.page.waitForURL(
         /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/
       );
@@ -168,7 +181,4 @@ export class OnboardingApp {
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
   }
 
-  async waitForIntegrationCards() {
-    await this.page.waitForSelector('[data-test-subj^="integration-card:"]', { state: 'visible', timeout: 5000 });
-  }
 }

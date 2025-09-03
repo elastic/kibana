@@ -61,7 +61,6 @@ test.describe('Onboarding UI Validation', () => {
     
     await test.step('selects Host use case and shows integration cards', async () => {
       await pageObjects.onboarding.selectHostUseCase();
-      await pageObjects.onboarding.waitForIntegrationCards();
 
       await expect(pageObjects.onboarding.autoDetectLogsCard).toBeVisible();
       await expect(pageObjects.onboarding.otelLogsCard).toBeVisible();
@@ -90,7 +89,6 @@ test.describe('Onboarding UI Validation', () => {
     
     await test.step('selects Host use case and shows integration cards', async () => {
       await pageObjects.onboarding.selectHostUseCase();
-      await pageObjects.onboarding.waitForIntegrationCards();
     });
 
     await test.step('navigates correctly when OTel logs card is clicked', async () => {
@@ -100,7 +98,6 @@ test.describe('Onboarding UI Validation', () => {
 
     await test.step('supports deep-linking to host category', async () => {
       await pageObjects.onboarding.openWithCategory('host');
-      await pageObjects.onboarding.waitForIntegrationCards();
     });
   });
 
@@ -110,7 +107,6 @@ test.describe('Onboarding UI Validation', () => {
     
     await test.step('selects Kubernetes use case and shows integration cards', async () => {
       await pageObjects.onboarding.selectKubernetesUseCase();
-      await pageObjects.onboarding.waitForIntegrationCards();
 
       await expect(pageObjects.onboarding.kubernetesQuickStartCard).toBeVisible();
       await expect(pageObjects.onboarding.otelKubernetesCard).toBeVisible();
@@ -123,7 +119,6 @@ test.describe('Onboarding UI Validation', () => {
 
     await test.step('supports deep-linking to kubernetes category', async () => {
       await pageObjects.onboarding.openWithCategory('kubernetes');
-      await pageObjects.onboarding.waitForIntegrationCards();
     });
   });
 
@@ -133,7 +128,6 @@ test.describe('Onboarding UI Validation', () => {
     
     await test.step('selects Cloud use case and shows integration cards', async () => {
       await pageObjects.onboarding.selectCloudUseCase();
-      await pageObjects.onboarding.waitForIntegrationCards();
 
       await expect(pageObjects.onboarding.awsLogsVirtualCard).toBeVisible();
       await expect.soft(pageObjects.onboarding.azureLogsVirtualCard).toBeVisible();
@@ -142,13 +136,11 @@ test.describe('Onboarding UI Validation', () => {
 
     await test.step('navigates correctly when AWS logs card is clicked', async () => {
       await pageObjects.onboarding.clickIntegrationCard('integration-card:aws-logs-virtual');
-      await pageObjects.onboarding.waitForIntegrationCards();
       expect(page.url()).toContain('category=cloud');
     });
 
     await test.step('supports deep-linking to cloud category', async () => {
       await pageObjects.onboarding.openWithCategory('cloud');
-      await pageObjects.onboarding.waitForIntegrationCards();
     });
   });
 
@@ -162,7 +154,6 @@ test.describe('Onboarding UI Validation', () => {
 
     await test.step('selects Application use case and shows integration cards', async () => {
       await pageObjects.onboarding.selectApplicationUseCase();
-      await pageObjects.onboarding.waitForIntegrationCards();
 
       await expect(pageObjects.onboarding.apmVirtualCard).toBeVisible();
       await expect(pageObjects.onboarding.otelVirtualCard).toBeVisible();
@@ -171,7 +162,6 @@ test.describe('Onboarding UI Validation', () => {
 
     await test.step('supports deep-linking to application category', async () => {
       await pageObjects.onboarding.openWithCategory('application');
-      await pageObjects.onboarding.waitForIntegrationCards();
     });
   });
 
