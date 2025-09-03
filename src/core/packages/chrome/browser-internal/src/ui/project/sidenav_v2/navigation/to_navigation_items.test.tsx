@@ -32,6 +32,7 @@ describe('toNavigationItems', () => {
   it('should return missing logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "data-test-subj": undefined,
         "href": "/missing-href-😭",
         "iconType": "broom",
         "id": "kibana",
@@ -210,6 +211,7 @@ describe('logo node', () => {
     const { logoItem } = toNavigationItems(treeWithLogo, [], []);
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome",
         "href": "/tzo/s/sec/app/security/get_started",
         "iconType": "launch",
         "id": "securityHome",

@@ -173,6 +173,36 @@ const countDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'geohash',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: true,
         },
@@ -894,6 +924,36 @@ const firstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'value',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'value',
           type: 'long',
           optional: false,
         },
@@ -919,6 +979,36 @@ const firstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
     },
   ],
   locationsAvailable: [Location.STATS],
@@ -1002,6 +1092,36 @@ const lastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'value',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'value',
           type: 'long',
           optional: false,
         },
@@ -1027,6 +1147,36 @@ const lastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'sort',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
     },
   ],
   locationsAvailable: [Location.STATS],
@@ -1686,6 +1836,51 @@ const sampleDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
         },
@@ -2009,7 +2204,7 @@ const topDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           constantOnly: true,
-          acceptedValues: ['asc', 'desc'],
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'boolean',
@@ -2032,7 +2227,7 @@ const topDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           constantOnly: true,
-          acceptedValues: ['asc', 'desc'],
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'date',
@@ -2055,7 +2250,7 @@ const topDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           constantOnly: true,
-          acceptedValues: ['asc', 'desc'],
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'double',
@@ -2078,7 +2273,7 @@ const topDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           constantOnly: true,
-          acceptedValues: ['asc', 'desc'],
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'integer',
@@ -2101,7 +2296,7 @@ const topDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           constantOnly: true,
-          acceptedValues: ['asc', 'desc'],
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'ip',
@@ -2124,7 +2319,7 @@ const topDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           constantOnly: true,
-          acceptedValues: ['asc', 'desc'],
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'keyword',
@@ -2266,6 +2461,36 @@ const valuesDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'geotile',
     },
     {
       params: [

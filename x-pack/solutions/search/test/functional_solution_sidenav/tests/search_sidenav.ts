@@ -64,7 +64,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
@@ -80,7 +79,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await expectNoPageReload();
       });
 
-      it('renders a feedback callout', async () => {
+      it('renders a feedback callout', async function () {
+        await solutionNavigation.sidenav.skipIfV2(this);
+
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
