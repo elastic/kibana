@@ -267,14 +267,18 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  allOf:
-                    - $ref: '#/components/schemas/AlertIds'
-                    - description: >-
-                        If this action is associated with any alerts, they can
-                        be specified here. The action will be logged in any
-                        cases associated with the specified alerts.
-                      type: object
-                      properties: {}
+                  description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  example:
+                    - alert-id-1
+                    - alert-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 case_ids:
                   description: The IDs of cases where the action taken will be logged.
                   example:
@@ -471,14 +475,18 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  allOf:
-                    - $ref: '#/components/schemas/AlertIds'
-                    - description: >-
-                        If this action is associated with any alerts, they can
-                        be specified here. The action will be logged in any
-                        cases associated with the specified alerts.
-                      type: object
-                      properties: {}
+                  description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  example:
+                    - alert-id-1
+                    - alert-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 case_ids:
                   description: The IDs of cases where the action taken will be logged.
                   example:
@@ -724,14 +732,6 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
-    AlertIds:
-      description: A list of alerts `id`s.
-      items:
-        format: nonempty
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
     CloudFileScriptParameters:
       type: object
       properties:
@@ -884,14 +884,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              allOf:
-                - $ref: '#/components/schemas/AlertIds'
-                - description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
-                  type: object
-                  properties: {}
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
               description: The IDs of cases where the action taken will be logged.
               example:
@@ -1052,14 +1056,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              allOf:
-                - $ref: '#/components/schemas/AlertIds'
-                - description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
-                  type: object
-                  properties: {}
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
               description: The IDs of cases where the action taken will be logged.
               example:
@@ -1130,14 +1138,18 @@ components:
         agent_type:
           $ref: '#/components/schemas/AgentTypes'
         alert_ids:
-          allOf:
-            - $ref: '#/components/schemas/AlertIds'
-            - description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts.
-              type: object
-              properties: {}
+          description: >-
+            If this action is associated with any alerts, they can be specified
+            here. The action will be logged in any cases associated with the
+            specified alerts.
+          example:
+            - alert-id-1
+            - alert-id-2
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
         case_ids:
           description: The IDs of cases where the action taken will be logged.
           example:
@@ -1244,14 +1256,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              allOf:
-                - $ref: '#/components/schemas/AlertIds'
-                - description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
-                  type: object
-                  properties: {}
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
               description: The IDs of cases where the action taken will be logged.
               example:
@@ -1704,14 +1720,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              allOf:
-                - $ref: '#/components/schemas/AlertIds'
-                - description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
-                  type: object
-                  properties: {}
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
               description: The IDs of cases where the action taken will be logged.
               example:
@@ -1749,14 +1769,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              allOf:
-                - $ref: '#/components/schemas/AlertIds'
-                - description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
-                  type: object
-                  properties: {}
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
               description: The IDs of cases where the action taken will be logged.
               example:
@@ -1881,14 +1905,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              allOf:
-                - $ref: '#/components/schemas/AlertIds'
-                - description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
-                  type: object
-                  properties: {}
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
               description: The IDs of cases where the action taken will be logged.
               example:
@@ -2011,14 +2039,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              allOf:
-                - $ref: '#/components/schemas/AlertIds'
-                - description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts.
-                  type: object
-                  properties: {}
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             case_ids:
               description: The IDs of cases where the action taken will be logged.
               example:
