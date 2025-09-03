@@ -74,7 +74,9 @@ describe('Shared Schemas', () => {
         sampling: -0.1,
       };
 
-      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(/\[sampling\]: Value must be/);
+      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(
+        /\[sampling\]: Value must be/
+      );
     });
 
     it('throws on invalid sampling value above maximum', () => {
@@ -82,7 +84,9 @@ describe('Shared Schemas', () => {
         sampling: 1.1,
       };
 
-      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(/\[sampling\]: Value must be/);
+      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(
+        /\[sampling\]: Value must be/
+      );
     });
 
     it('validates sampling edge cases', () => {

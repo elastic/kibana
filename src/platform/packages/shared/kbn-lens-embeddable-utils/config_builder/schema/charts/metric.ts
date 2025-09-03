@@ -202,31 +202,31 @@ export const metricStateSchema = schema.object({
   /**
    * Secondary value configuration, must define operation.
    */
-    secondary_metric: schema.maybe(
+  secondary_metric: schema.maybe(
+    schema.oneOf([
+      // oneOf allows only 12 items
+      // so break down metrics based on the type: field-based, reference-based, formula-like
       schema.oneOf([
-        // oneOf allows only 12 items
-        // so break down metrics based on the type: field-based, reference-based, formula-like
-        schema.oneOf([
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, countMetricOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, metricOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, sumMetricOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, lastValueOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileRanksOperationSchema]),
-        ]),
-        schema.oneOf([
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, differencesOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, movingAverageOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, cumulativeSumOperationSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, counterRateOperationSchema]),
-        ]),
-        schema.oneOf([
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, staticOperationDefinitionSchema]),
-          schema.allOf([metricStateSecondaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-        ]),
-      ])
-    ),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, countMetricOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, metricOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, sumMetricOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, lastValueOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, percentileRanksOperationSchema]),
+      ]),
+      schema.oneOf([
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, differencesOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, movingAverageOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, cumulativeSumOperationSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, counterRateOperationSchema]),
+      ]),
+      schema.oneOf([
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, staticOperationDefinitionSchema]),
+        schema.allOf([metricStateSecondaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
+      ]),
+    ])
+  ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
    */
