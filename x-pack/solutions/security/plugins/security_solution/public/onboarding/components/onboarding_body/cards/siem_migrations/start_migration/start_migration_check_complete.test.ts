@@ -38,7 +38,7 @@ describe('startMigrationCheckComplete', () => {
       rules: {
         getMissingCapabilities: jest.fn().mockReturnValue([]),
         isAvailable: jest.fn().mockReturnValue(true),
-        getRuleMigrationsStats: jest.fn().mockReturnValue([
+        getMigrationsStats: jest.fn().mockReturnValue([
           {
             status: SiemMigrationTaskStatus.FINISHED,
           },
@@ -53,7 +53,7 @@ describe('startMigrationCheckComplete', () => {
 
     const result = await checkStartMigrationCardComplete(services);
 
-    expect(siemMigrations.rules.getRuleMigrationsStats).toHaveBeenCalled();
+    expect(siemMigrations.rules.getMigrationsStats).toHaveBeenCalled();
 
     expect(result).toEqual({
       completeBadgeText: '1 migration',
