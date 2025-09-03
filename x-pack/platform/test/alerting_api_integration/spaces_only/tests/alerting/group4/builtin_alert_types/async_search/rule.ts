@@ -10,6 +10,11 @@ import expect from '@kbn/expect';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/common';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
@@ -23,6 +28,7 @@ interface AlertSource {
 interface CreateRuleParams {
   name: string;
   ruleTypeId: string;
+  strategy: string;
 }
 
 const RULE_INTERVAL_SECONDS = 6;
@@ -60,43 +66,47 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('generates alerts when there are doc', async () => {
-      await createEsDocuments(
-        es,
-        esTestIndexTool,
-        endDate,
-        RULE_INTERVALS_TO_WRITE,
-        RULE_INTERVAL_MILLIS,
-        ES_GROUPS_TO_WRITE
-      );
+    [ESQL_ASYNC_SEARCH_STRATEGY, ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY].forEach(
+      (strategy) =>
+        it(`Generates alerts when there are docs for the search strategy: ${strategy}`, async () => {
+          await createEsDocuments(
+            es,
+            esTestIndexTool,
+            endDate,
+            RULE_INTERVALS_TO_WRITE,
+            RULE_INTERVAL_MILLIS,
+            ES_GROUPS_TO_WRITE
+          );
 
-      const ruleId = await createRule({
-        name: 'rule with async search',
-        ruleTypeId: 'test.ruleWithAsyncSearch',
-      });
+          const ruleId = await createRule({
+            name: 'rule with async search',
+            ruleTypeId: 'test.ruleWithAsyncSearch',
+            strategy,
+          });
 
-      const events = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: ruleId,
-          provider: 'alerting',
-          actions: new Map([['execute', { gte: 1 }]]),
-        });
-      });
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: Spaces.space1.id,
+              type: 'alert',
+              id: ruleId,
+              provider: 'alerting',
+              actions: new Map([['execute', { gte: 1 }]]),
+            });
+          });
 
-      const alerts = await queryForAlertDocs();
+          const alerts = await queryForAlertDocs();
 
-      expect(alerts.length).to.be.greaterThan(0);
-      const source = alerts[0]._source as AlertSource;
-      expect(source[ALERT_RULE_NAME]).to.eql('rule with async search');
+          expect(alerts.length).to.be.greaterThan(0);
+          const source = alerts[0]._source as AlertSource;
+          expect(source[ALERT_RULE_NAME]).to.eql('rule with async search');
 
-      const event = events[0];
-      expect(event?.rule?.name).to.eql('rule with async search');
-      expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.eql(1);
-      expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.eql(1);
-    });
+          const event = events[0];
+          expect(event?.rule?.name).to.eql('rule with async search');
+          expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.eql(1);
+          expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.eql(1);
+        })
+    );
 
     async function createRule(params: CreateRuleParams): Promise<string> {
       const { status, body: createdRule } = await supertest
@@ -110,7 +120,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
           actions: [],
           notify_when: 'onActiveAlert',
-          params: {},
+          params: { strategy: params.strategy },
         });
 
       expect(status).to.be(200);

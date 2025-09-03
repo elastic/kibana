@@ -50,11 +50,14 @@ export function wrapAsyncSearchClient<P extends AsyncSearchParams>({
 
       return lastValueFrom(
         client
-          .search(request, {
-            ...options,
-            strategy,
-            abortSignal: abortController.signal,
-          })
+          .search(
+            { params: { ...request.params, wait_for_completion_timeout: '2s' } },
+            {
+              ...options,
+              strategy,
+              abortSignal: abortController.signal,
+            }
+          )
           .pipe(
             catchError((error) => {
               if (abortController.signal.aborted) {

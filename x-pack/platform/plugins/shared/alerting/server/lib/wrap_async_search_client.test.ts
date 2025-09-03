@@ -76,13 +76,13 @@ describe('wrapScopedClusterClient', () => {
 
     await asyncSearchClient.search({
       request: {
-        params: { query: '', filter: '', keep_alive: '10m', wait_for_completion_timeout: '10m' },
+        params: { query: '', filter: '', keep_alive: '10m' },
       },
       options: { retrieveResults: true },
     });
 
     expect(client.search).toHaveBeenCalledWith(
-      { params: { query: '', filter: '', keep_alive: '10m', wait_for_completion_timeout: '10m' } },
+      { params: { query: '', filter: '', keep_alive: '10m', wait_for_completion_timeout: '2s' } },
       {
         abortSignal: abortController.signal,
         strategy: ESQL_ASYNC_SEARCH_STRATEGY,
