@@ -411,6 +411,7 @@ describe('common utils', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -456,6 +457,7 @@ describe('common utils', () => {
               "title": "Damaging Data Destruction Detected",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T22:32:00.900Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -505,6 +507,7 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -558,6 +561,7 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -640,6 +644,7 @@ describe('common utils', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -710,6 +715,7 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -771,6 +777,7 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -855,6 +862,7 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -914,6 +922,7 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -978,6 +987,7 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
