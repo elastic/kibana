@@ -24,6 +24,7 @@ import {
 } from '@kbn/discover-utils';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
@@ -83,7 +84,9 @@ export function Overview({
   const formattedId = formattedDoc[TRANSACTION_ID_FIELD] || formattedDoc[SPAN_ID_FIELD];
   const formattedName = formattedDoc[TRANSACTION_NAME_FIELD] || formattedDoc[SPAN_NAME_FIELD];
 
-  const displayType = formattedDoc[TRANSACTION_NAME_FIELD] ? 'transaction' : 'span';
+  const displayType = formattedDoc[TRANSACTION_NAME_FIELD]
+    ? ProcessorEvent.transaction
+    : ProcessorEvent.span;
 
   const apmDurationField =
     flattenedDoc[TRANSACTION_DURATION_FIELD] ?? flattenedDoc[SPAN_DURATION_FIELD];
