@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiSwitch, EuiSpacer } from '@elastic/eui';
+import { EuiSwitch, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JsonEditor, EDITOR_MODE } from './json_editor';
 
@@ -54,14 +54,21 @@ export const Settings: FC<Props> = ({ settings, setSettings, readonly = false })
       <EuiSpacer size="m" />
 
       {showSettings ? (
-        <JsonEditor
-          mode={EDITOR_MODE.JSON}
-          readOnly={readonly}
-          value={localSettings}
-          onChange={(value) => {
-            setLocalSettings(value);
-          }}
-        />
+        <EuiPanel
+          hasShadow={false}
+          hasBorder={true}
+          paddingSize="none"
+          data-test-subj="dvSettingsEditor"
+        >
+          <JsonEditor
+            mode={EDITOR_MODE.JSON}
+            readOnly={readonly}
+            value={localSettings}
+            onChange={(value) => {
+              setLocalSettings(value);
+            }}
+          />
+        </EuiPanel>
       ) : null}
     </>
   );

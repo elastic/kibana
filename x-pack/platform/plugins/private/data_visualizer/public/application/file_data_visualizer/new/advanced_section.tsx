@@ -64,6 +64,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
         setMappings={(m) => fileUploadManager.updateMappings(m)}
         showTitle={true}
         fileCount={filesStatus.length}
+        showBorder={true}
       />
 
       <EuiSpacer />

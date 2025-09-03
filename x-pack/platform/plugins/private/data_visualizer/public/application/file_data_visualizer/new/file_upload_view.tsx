@@ -101,11 +101,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
           </>
         ) : null}
 
-        {showImportControls ? (
-          <>
-            <AdvancedSection />
-          </>
-        ) : null}
+        {showImportControls ? <AdvancedSection /> : null}
         {uploadStarted ? (
           <>
             <UploadImage />
