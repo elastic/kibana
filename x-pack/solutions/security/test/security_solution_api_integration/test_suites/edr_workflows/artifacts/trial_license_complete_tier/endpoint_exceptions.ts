@@ -9,6 +9,7 @@ import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
 import {
   ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_LIST_ID,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -35,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`and using Import API`, function () {
       const buildImportBuffer = (
-        listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number]
+        listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID
       ): Buffer => {
         const generator = new ExceptionsListItemGenerator();
         const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
@@ -48,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const createItem = () => {
           switch (listId) {
-            case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id:
+            case ENDPOINT_LIST_ID:
               return generator.generateEndpointException();
 
             case ENDPOINT_ARTIFACT_LISTS.blocklists.id:
@@ -62,9 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
 
             case ENDPOINT_ARTIFACT_LISTS.trustedApps.id:
               return generator.generateTrustedApp();
-
-            case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id:
-              return generator.generateTrustedDevice();
 
             default:
               throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
@@ -88,9 +86,7 @@ ${JSON.stringify(createItem())}
       };
 
       // All non-Endpoint exceptions artifacts are not allowed to import
-      ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
-        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-      ).forEach((listId) => {
+      ALL_ENDPOINT_ARTIFACT_LIST_IDS.forEach((listId) => {
         it(`should error when importing ${listId} artifacts`, async () => {
           await endpointArtifactTestResources.deleteList(listId);
 
@@ -108,19 +104,13 @@ ${JSON.stringify(createItem())}
       });
 
       it('should import endpoint exceptions and add global artifact tag if missing', async () => {
-        await endpointArtifactTestResources.deleteList(
-          ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-        );
+        await endpointArtifactTestResources.deleteList(ENDPOINT_LIST_ID);
 
         await endpointOpsAnalystSupertest
           .post(`${EXCEPTION_LIST_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .on('error', createSupertestErrorLogger(log))
-          .attach(
-            'file',
-            buildImportBuffer(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id),
-            'import_exceptions.ndjson'
-          )
+          .attach('file', buildImportBuffer(ENDPOINT_LIST_ID), 'import_exceptions.ndjson')
           .expect(200);
 
         const { body } = await endpointOpsAnalystSupertest

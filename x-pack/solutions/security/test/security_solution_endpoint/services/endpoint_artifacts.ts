@@ -73,7 +73,7 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
      * @param supertest
      */
     async deleteList(
-      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID,
       supertest: TestAgent = this.supertest
     ): Promise<void> {
       await supertest
