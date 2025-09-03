@@ -37,7 +37,7 @@ export const useAccessControl = ({ accessControl, createdBy }: UseAccessControl)
       const canManage = checkUserAccessControl({
         accessControl,
         createdBy,
-        userId: user.profile_uid,
+        userId: user?.profile_uid,
       });
       setCanManageAccessControl(isGloballyAuthorized || canManage);
     };
@@ -48,7 +48,7 @@ export const useAccessControl = ({ accessControl, createdBy }: UseAccessControl)
   useEffect(() => {
     const getAuthorName = async () => {
       const author = await getBulkAuthorNames([accessControl?.owner || createdBy]);
-      setAuthorName(author[0].username);
+      setAuthorName(author[0]?.username);
     };
 
     getAuthorName();

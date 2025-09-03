@@ -45,6 +45,14 @@ exports[`renders DashboardSaveModal 1`] = `
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+      <React.Fragment>
+        <EuiSpacer
+          size="l"
+        />
+        <AccessModeContainer
+          onChangeAccessMode={[Function]}
+        />
+      </React.Fragment>
     </React.Fragment>
   }
   showCopyOnSave={true}

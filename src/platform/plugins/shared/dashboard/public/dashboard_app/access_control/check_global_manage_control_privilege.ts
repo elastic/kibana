@@ -10,11 +10,11 @@
 import { coreServices } from '../../services/kibana_services';
 
 export const checkGlobalManageControlPrivilege = async () => {
-  const { isGloballyAuthorized } = await coreServices.http.get<{
+  const response = await coreServices.http.get<{
     isGloballyAuthorized: boolean;
   }>('/api/dashboards/dashboard/access-control/global-authorization', {
     query: { apiVersion: '1' },
   });
 
-  return isGloballyAuthorized;
+  return Boolean(response?.isGloballyAuthorized);
 };

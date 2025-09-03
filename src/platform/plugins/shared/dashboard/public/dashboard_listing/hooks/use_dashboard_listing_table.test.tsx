@@ -156,11 +156,11 @@ describe('useDashboardListingTable', () => {
       urlStateEnabled: false,
       contentEditor: {
         onSave: expect.any(Function),
-        isReadonly: false,
         customValidators: expect.any(Object),
       },
       createdByEnabled: true,
       recentlyAccessed: expect.objectContaining({ get: expect.any(Function) }),
+      rowItemActions: expect.any(Function),
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

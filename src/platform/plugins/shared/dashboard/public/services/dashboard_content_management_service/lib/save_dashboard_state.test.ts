@@ -71,7 +71,9 @@ describe('Save dashboard state', () => {
     expect(result.redirectRequired).toBe(true);
     expect(contentManagementService.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: { references: [] },
+        options: expect.objectContaining({
+          references: [],
+        }),
       })
     );
     expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
