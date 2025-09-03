@@ -121,7 +121,7 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
   const uuid = '1234';
   return await factory.buildEmbeddable({
     initialState: {
-      rawState: state
+      rawState: state,
     },
     finalizeApi: (api) => {
       return {
@@ -129,12 +129,12 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
         uuid,
         parentApi,
         type: LINKS_EMBEDDABLE_TYPE,
-      } as LinksApi
+      } as LinksApi;
     },
     parentApi,
-    uuid
+    uuid,
   });
-};
+}
 
 describe('getLinksEmbeddableFactory', () => {
   describe('by reference embeddable', () => {
@@ -151,7 +151,7 @@ describe('getLinksEmbeddableFactory', () => {
         <EuiThemeProvider>
           <Component />
         </EuiThemeProvider>
-      )
+      );
       expect(await screen.findByTestId('links--component')).toBeInTheDocument();
     });
 
@@ -199,7 +199,7 @@ describe('getLinksEmbeddableFactory', () => {
         <EuiThemeProvider>
           <Component />
         </EuiThemeProvider>
-      )
+      );
 
       expect(await screen.findByTestId('links--component')).toBeInTheDocument();
     });
