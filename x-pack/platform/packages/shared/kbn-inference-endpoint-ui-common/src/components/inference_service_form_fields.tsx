@@ -92,21 +92,27 @@ export function isProviderForSolutions(
 }
 
 interface InferenceServicesProps {
+  config: {
+    isEdit?: boolean;
+    enforceAdaptiveAllocations?: boolean;
+    currentSolution?: SolutionView;
+    isPreconfigured?: boolean;
+    allowContextWindowLength?: boolean;
+  };
   http: HttpSetup;
   toasts: IToasts;
-  isEdit?: boolean;
-  enforceAdaptiveAllocations?: boolean;
-  isPreconfigured?: boolean;
-  currentSolution?: SolutionView;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
-  isEdit,
-  enforceAdaptiveAllocations,
-  isPreconfigured,
-  currentSolution,
+  config: {
+    allowContextWindowLength,
+    isEdit,
+    enforceAdaptiveAllocations,
+    isPreconfigured,
+    currentSolution,
+  },
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
@@ -131,6 +137,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       'secrets.providerSecrets',
       'config.taskType',
       'config.inferenceId',
+      'config.contextWindowLength',
       'config.provider',
       'config.providerConfig',
     ],
@@ -272,6 +279,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           provider: newProvider?.service,
           providerConfig: defaultProviderConfig,
           inferenceId,
+          contextWindowLength: '',
         },
         secrets: {
           providerSecrets: defaultProviderSecrets,
@@ -572,6 +580,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
             isEdit={isEdit}
+            allowContextWindowLength={allowContextWindowLength}
           />
           {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField
