@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import { API_BASE_PATH_REINDEX_SERVICE } from '../constants';
+import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
@@ -37,12 +37,10 @@ export const reindexSchema = schema.object({
 });
 
 export function registerReindexIndicesRoutes({ router, getReindexService }: RouteDependencies) {
-  const BASE_PATH = `${API_BASE_PATH_REINDEX_SERVICE}/reindex`;
-
   // Start reindex for an index
   router.post(
     {
-      path: `${BASE_PATH}`,
+      path: REINDEX_SERVICE_BASE_PATH,
       security: {
         authz: {
           enabled: false,
@@ -90,7 +88,7 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
   // Get status
   router.get(
     {
-      path: `${BASE_PATH}/{indexName}`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/{indexName}`,
       security: {
         authz: {
           enabled: false,
@@ -134,7 +132,7 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
   // Cancel reindex
   router.post(
     {
-      path: `${BASE_PATH}/{indexName}/cancel`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/{indexName}/cancel`,
       security: {
         authz: {
           enabled: false,

@@ -33,3 +33,5 @@ export interface ReindexArgs {
 export type BatchReindexArgs = Omit<ReindexArgs, 'reindexOptions'> & {
   reindexOptions?: Omit<ReindexArgs['reindexOptions'], 'enqueue'>;
 };
+
+export const REINDEX_SERVICE_BASE_PATH = '/api/reindex_service/reindex';
