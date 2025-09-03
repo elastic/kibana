@@ -15,7 +15,7 @@ import { ReindexStatus, ReindexStep } from '../../../common';
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexActions } from './reindex_actions';
 import { LOCK_WINDOW, reindexActionsFactory } from './reindex_actions';
-import { getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '@kbn/upgrade-assistant-pkg-server/src/__fixtures__/version';
 
 const { currentMajor } = getMockVersionInfo();
 
