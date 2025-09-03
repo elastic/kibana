@@ -77,6 +77,7 @@ export const createDataControlOfType = <
       panelType: type,
       serializedState: {
         rawState: state,
+        // references: [],
       },
     });
   } else {

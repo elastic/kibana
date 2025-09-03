@@ -30,6 +30,7 @@ import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plug
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
+import { ControlsRenderer } from '@kbn/controls-renderer';
 
 import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -402,6 +403,12 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
+      <ControlsRenderer
+        parentApi={dashboardApi}
+        getInitialState={() => {
+          return dashboardApi.layout$.getValue().controls;
+        }}
+      />
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />

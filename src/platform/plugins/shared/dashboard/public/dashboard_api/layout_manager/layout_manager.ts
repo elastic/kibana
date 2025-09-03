@@ -11,6 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { filter, map as lodashMap, max } from 'lodash';
 import {
   BehaviorSubject,
+  Subject,
   combineLatest,
   combineLatestWith,
   debounceTime,
@@ -63,18 +64,25 @@ import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from '.
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardState['panels'],
+  initialControls: DashboardState['controlGroupInput'] | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
+  references$: BehaviorSubject<Reference[] | undefined>,
   getReferences: (id: string) => Reference[]
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
+  // console.log({ initialControls, references: references$.value });
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
+    initialControls,
+    references$.value ?? [],
     getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
+  // console.log({ initialChildState });
+
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
     layout$.pipe(
@@ -115,7 +123,9 @@ export function initializeLayoutManager(
   );
 
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
+  // console.log({ initialChildState });
   let lastSavedLayout = initialLayout;
+
   let lastSavedChildState = initialChildState;
   const resetLayout = () => {
     layout$.next({ ...lastSavedLayout });
@@ -225,6 +235,7 @@ export function initializeLayoutManager(
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
     if (!childApi || !childLayout) throw new PanelNotFoundError();
+    // console.log('getDashboardPanelFromId');
     return {
       type: childLayout.type,
       gridData: childLayout.gridData,
@@ -384,9 +395,11 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
-      getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
+      getSerializedStateForPanel: (panelId: string) => {
+        // console.log('getSerializedStateForPanel', currentChildState[panelId]);
+        return currentChildState[panelId];
+      },
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
-      layout$,
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
@@ -398,7 +411,14 @@ export function initializeLayoutManager(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
-              map((lastSaved) => deserializeLayout(lastSaved.panels, getReferences)),
+              map((lastSaved) =>
+                deserializeLayout(
+                  lastSaved.panels,
+                  lastSaved.controlGroupInput,
+                  references$.value ?? [],
+                  getReferences
+                )
+              ),
               tap(({ layout, childState }) => {
                 lastSavedChildState = childState;
                 lastSavedLayout = layout;
@@ -414,18 +434,23 @@ export function initializeLayoutManager(
           })
         );
       },
-      registerChildApi: (api: DefaultEmbeddableApi) => {
-        children$.next({
-          ...children$.value,
-          [api.uuid]: api,
-        });
-      },
+
       setChildState: (uuid: string, state: SerializedPanelState<object>) => {
+        // console.log('SET CHILD STATE', { uuid, state });
         currentChildState[uuid] = state;
       },
       isSectionCollapsed,
     },
     api: {
+      layout$,
+      registerChildApi: (api: DefaultEmbeddableApi) => {
+        children$.next({
+          ...children$.value,
+          [api.uuid]: api,
+        });
+        // currentChildState[api.uuid] = api.serializeState();
+      },
+
       /** Panels */
       children$,
       getChildApi,

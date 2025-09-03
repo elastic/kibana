@@ -9,19 +9,40 @@
 
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
-import { type DashboardState, isDashboardSection } from '../../../common';
+import { type DashboardState, isDashboardSection, getReferencesForControls } from '../../../common';
 import type { DashboardPanel } from '../../../server';
 import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
+  initialControls: DashboardState['controlGroupInput'],
+  references: Reference[],
   getReferences: (id: string) => Reference[]
 ) {
+  if (typeof initialControls === 'function') debugger;
+  // console.log({ panels, initialControls });
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
+    controls: Object.values((initialControls ?? { controls: {} }).controls).reduce(
+      (prev, control) => {
+        return { ...prev, [control.id ?? v4()]: control };
+      },
+      {}
+    ),
   };
-  const childState: DashboardChildState = {};
+  const childState: DashboardChildState = {
+    ...Object.values((initialControls ?? { controls: {} }).controls).reduce((prev, control) => {
+      // console.log('REFS', references, getReferencesForControls(references, control.id));
+      return {
+        ...prev,
+        [control.id ?? v4()]: {
+          rawState: control.controlConfig,
+          references: control.id ? getReferencesForControls(references, control.id) : [],
+        },
+      };
+    }, {}),
+  };
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
     const panelId = panel.panelIndex ?? v4();
@@ -33,6 +54,7 @@ export function deserializeLayout(
         i: panelId,
       },
     };
+    // console.log('OTHER REFS', getReferences(panelId));
     childState[panelId] = {
       rawState: {
         ...panel.panelConfig,

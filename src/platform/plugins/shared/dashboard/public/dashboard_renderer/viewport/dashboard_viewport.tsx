@@ -39,7 +39,7 @@ export const DashboardViewport = ({
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
-    dashboardInternalApi.layout$,
+    dashboardApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
