@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/backstage-catalog/emit_kibana_plugins_matrix');
+require('../src/dev/backstage_catalog/emit_kibana_plugins_matrix');
