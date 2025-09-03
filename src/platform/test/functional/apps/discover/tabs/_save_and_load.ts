@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const adHocTabHitCount = '6,045';
 
       const esqlTabLabel = 'ES|QL';
-      const esqlTabQuery = 'from logstash-* | limit 50';
+      const esqlTabQuery = 'FROM logstash-* | SORT @timestamp DESC | LIMIT 50';
       const esqlTabTime = {
         start: 'Sep 20, 2015 @ 12:00:00.000',
         end: 'Sep 22, 2015 @ 12:00:00.000',
@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         };
         const esqlUnsaved = {
           time: { start: 'Sep 20, 2015 @ 13:00:00.000', end: 'Sep 22, 2015 @ 13:00:00.000' },
-          query: 'from logstash-* | limit 25',
+          query: 'FROM logstash-* | SORT @timestamp DESC | LIMIT 25',
         };
 
         // Persisted data view tab
@@ -490,7 +490,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('FROM logstash-* | LIMIT 10');
+        await monacoEditor.setCodeEditorValue('FROM logstash-* | SORT @timestamp DESC | LIMIT 10');
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
 
