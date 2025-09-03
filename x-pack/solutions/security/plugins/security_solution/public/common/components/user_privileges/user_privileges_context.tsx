@@ -7,7 +7,7 @@
 
 import React, { createContext, useMemo } from 'react';
 import type { Capabilities } from '@kbn/core/types';
-import { RULES_UI_EDIT } from '@kbn/security-solution-features/constants';
+import { RULES_UI_EDIT, RULES_UI_READ } from '@kbn/security-solution-features/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
@@ -76,7 +76,7 @@ export const UserPrivilegesProvider = ({
   const rulesPrivileges = useMemo(() => {
     const rulesCapabilities = kibanaCapabilities.securitySolutionRulesV1;
     return {
-      read: rulesCapabilities?.[RULES_UI_EDIT] === true,
+      read: rulesCapabilities?.[RULES_UI_READ] === true,
       edit: rulesCapabilities?.[RULES_UI_EDIT] === true,
     };
   }, [kibanaCapabilities]);
