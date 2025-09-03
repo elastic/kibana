@@ -44,37 +44,59 @@ export async function workflowExecutionLoop(
   nodesFactory: StepFactory
 ) {
   while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    const currentNode = workflowRuntime.getCurrentStep();
-    const step = nodesFactory.create(currentNode as any);
-
-    try {
-      await step.run();
-    } catch (error) {
-      workflowRuntime.setWorkflowError(error);
-    } finally {
-      await catchError(workflowRuntime, workflowLogger, nodesFactory);
-      await workflowRuntime.saveState(); // Ensure state is updated after each step
-      await workflowLogger.flushEvents();
+    if (
+      workflowRuntime.getWorkflowExecution().cancelRequested ||
+      workflowRuntime.getWorkflowExecution().status === ExecutionStatus.CANCELLED
+    ) {
+      await markWorkflowCancelled(workflowExecutionState);
+      break;
     }
+
+    await runStep(workflowRuntime, nodesFactory, workflowLogger);
+    await workflowLogger.flushEvents();
   }
+}
 
-  if ([ExecutionStatus.CANCELLED].includes(workflowRuntime.getWorkflowExecution().status)) {
-    workflowExecutionState.updateWorkflowExecution({
-      status: ExecutionStatus.CANCELLED,
-    });
-    const runningSteps = workflowExecutionState
-      .getAllStepExecutions()
-      .filter((stepExecution) => stepExecution.status === ExecutionStatus.RUNNING);
+async function runStep(
+  workflowRuntime: WorkflowExecutionRuntimeManager,
+  nodesFactory: StepFactory,
+  workflowLogger: WorkflowEventLogger
+): Promise<void> {
+  const currentNode = workflowRuntime.getCurrentStep();
+  const step = nodesFactory.create(currentNode as any);
 
-    runningSteps.forEach((runningStep) =>
-      workflowExecutionState.upsertStep({
-        id: runningStep.id,
-        status: ExecutionStatus.CANCELLED,
-      })
+  try {
+    await step.run();
+  } catch (error) {
+    workflowRuntime.setWorkflowError(error);
+  } finally {
+    await catchError(workflowRuntime, workflowLogger, nodesFactory);
+    await workflowRuntime.saveState(); // Ensure state is updated after each step
+  }
+}
+
+async function markWorkflowCancelled(
+  workflowExecutionState: WorkflowExecutionState
+): Promise<void> {
+  const inProgressSteps = workflowExecutionState
+    .getAllStepExecutions()
+    .filter((stepExecution) =>
+      [
+        ExecutionStatus.RUNNING,
+        ExecutionStatus.WAITING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.PENDING,
+      ].includes(stepExecution.status)
     );
 
-    workflowExecutionState.flush();
-  }
+  inProgressSteps.forEach((runningStep) =>
+    workflowExecutionState.upsertStep({
+      id: runningStep.id,
+      status: ExecutionStatus.CANCELLED,
+    })
+  );
+
+  await workflowExecutionState.flush();
 }
 
 /**
