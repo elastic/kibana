@@ -138,12 +138,12 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
 
 describe('getLinksEmbeddableFactory', () => {
   describe('by reference embeddable', () => {
-    const byRefState = {
+    const byRefState: LinksEmbeddableState = {
       title: 'my links',
       description: 'just a few links',
       hidePanelTitles: false,
       savedObjectId: '123',
-    } as LinksEmbeddableState;
+    };
 
     test('component renders', async () => {
       const { Component } = await buildLinksEmbeddable(byRefState);
@@ -185,13 +185,13 @@ describe('getLinksEmbeddableFactory', () => {
   });
 
   describe('by value embeddable', () => {
-    const byValueState = {
+    const byValueState: LinksEmbeddableState = {
       description: 'just a few links',
       title: 'my links',
       hidePanelTitles: true,
       links: getLinks(),
       layout: 'horizontal',
-    } as LinksEmbeddableState;
+    };
 
     test('component renders', async () => {
       const { Component } = await buildLinksEmbeddable(byValueState);
