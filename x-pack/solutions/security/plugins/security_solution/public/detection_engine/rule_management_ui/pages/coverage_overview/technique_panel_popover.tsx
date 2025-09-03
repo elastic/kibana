@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiAccordion,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -37,6 +38,8 @@ export interface CoverageOverviewMitreTechniquePanelPopoverProps {
 const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   technique,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
+  const popoverTitleId = useGeneratedHtmlId();
+
   const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -138,8 +141,10 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       anchorPosition="rightCenter"
       data-test-subj="coverageOverviewPopover"
       ownFocus={false}
+      aria-labelledby={popoverTitleId}
     >
       <EuiPopoverTitle
+        id={popoverTitleId}
         className={css`
           min-width: 30em;
         `}

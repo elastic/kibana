@@ -21,6 +21,7 @@ import {
   EuiRange,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -71,6 +72,7 @@ export const LegendControls = ({
   dataBounds,
   options,
 }: Props) => {
+  const popoverTitleId = useGeneratedHtmlId();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [draftAuto, setDraftAuto] = useState(autoBounds);
   const [draftLegend, setLegendOptions] = useState(options);
@@ -196,8 +198,9 @@ export const LegendControls = ({
       button={buttonComponent}
       anchorPosition="leftCenter"
       data-test-subj="legendControls"
+      aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTitleLabel', {
           defaultMessage: 'Legend Options',
         })}
