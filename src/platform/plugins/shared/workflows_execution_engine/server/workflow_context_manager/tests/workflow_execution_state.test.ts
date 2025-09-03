@@ -332,8 +332,8 @@ describe('WorkflowExecutionState', () => {
       workflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue({
         id: 'test-workflow-execution-id',
         status: ExecutionStatus.CANCELLED,
-        cancelRequestedAt: '2025-08-05T20:02:00.000Z',
-        cancelRequestedBy: 'user-123',
+        cancelledAt: '2025-08-05T20:02:00.000Z',
+        cancelledBy: 'user-123',
       } as EsWorkflowExecution);
       underTest.updateWorkflowExecution({
         status: ExecutionStatus.SKIPPED,
@@ -348,8 +348,8 @@ describe('WorkflowExecutionState', () => {
       expect(underTest.getWorkflowExecution()).toEqual({
         id: 'test-workflow-execution-id',
         status: ExecutionStatus.CANCELLED,
-        cancelRequestedAt: '2025-08-05T20:02:00.000Z',
-        cancelRequestedBy: 'user-123',
+        cancelledAt: '2025-08-05T20:02:00.000Z',
+        cancelledBy: 'user-123',
       } as EsWorkflowExecution);
     });
   });

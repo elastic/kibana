@@ -237,8 +237,8 @@ export class WorkflowsExecutionEnginePlugin
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
-        cancelRequestedAt: new Date().toISOString(),
-        cancelRequestedBy: 'system', // TODO: set user if available
+        cancelledAt: new Date().toISOString(),
+        cancelledBy: 'system', // TODO: set user if available
       });
 
       if (
