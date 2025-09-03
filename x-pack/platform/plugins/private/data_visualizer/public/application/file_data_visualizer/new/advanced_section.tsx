@@ -132,10 +132,10 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
               isInvalid={dataViewNameError !== ''}
             />
           </EuiFormRow>
-
-          <EuiSpacer />
         </>
       ) : null}
+
+      <EuiSpacer />
 
       <SectionTitle>
         <FormattedMessage
