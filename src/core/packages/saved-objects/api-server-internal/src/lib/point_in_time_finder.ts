@@ -138,8 +138,8 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       // Since `find` swallows 404s, it is expected that finder will do the same,
       // so we only rethrow non-404 errors here.
       const findOptionsType = this.#findOptions.type;
-      const statusCode = e.output?.statusCode;
       const decoratedError = decorateEsError(e);
+      const statusCode = decoratedError.output?.statusCode;
       if (statusCode !== 404) {
         this.#log.error(
           `Failed to open PIT for types [${findOptionsType}]: ${statusCode} ${decoratedError}`
