@@ -539,11 +539,6 @@ export class WorkflowExecutionRuntimeManager {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
     }
 
-    if (workflowExecution.cancelRequested) {
-      this.cancelRunningSteps();
-      workflowExecutionUpdate.status = ExecutionStatus.CANCELLED;
-    }
-
     if (
       [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
         workflowExecutionUpdate.status as ExecutionStatus
@@ -581,26 +576,6 @@ export class WorkflowExecutionRuntimeManager {
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
     await this.workflowExecutionState.flush();
-  }
-
-  private cancelRunningSteps(): void {
-    const runningSteps = this.workflowExecutionState
-      .getAllStepExecutions()
-      .filter((stepExecution) =>
-        [
-          ExecutionStatus.RUNNING,
-          ExecutionStatus.WAITING,
-          ExecutionStatus.WAITING_FOR_INPUT,
-          ExecutionStatus.PENDING,
-        ].includes(stepExecution.status)
-      );
-
-    runningSteps.forEach((runningStep) =>
-      this.workflowExecutionState.upsertStep({
-        id: runningStep.id,
-        status: ExecutionStatus.CANCELLED,
-      })
-    );
   }
 
   private logWorkflowStart(): void {
