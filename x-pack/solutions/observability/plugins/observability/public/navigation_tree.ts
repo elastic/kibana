@@ -458,16 +458,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 id: 'stack_monitoring_title',
                 title: '',
                 renderAs: 'panelOpener',
-                children: [
-                  {
-                    id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                    title: i18n.translate('xpack.observability.obltNav.stackManagement', {
-                      defaultMessage: 'Management',
-                    }),
-                    link: 'management',
-                  },
-                  { link: 'monitoring' },
-                ],
+                children: [{ link: 'monitoring' }],
               },
               {
                 id: 'alerts_and_insights',
