@@ -14,6 +14,7 @@ export {
   builtinToolIds,
   builtinTags,
   defaultAgentToolIds,
+  editableToolTypes,
   isReservedToolId,
   isBuiltInToolId,
   type ByIdsToolSelection,
@@ -67,6 +68,7 @@ export {
   type SerializedOnechatError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
+export { EsResourceType } from './base/resources';
 export {
   oneChatDefaultAgentId,
   AgentType,

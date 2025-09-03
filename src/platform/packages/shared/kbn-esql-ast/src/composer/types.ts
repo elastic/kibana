@@ -8,7 +8,7 @@
  */
 
 import type * as synth from '../synth';
-import type { ESQLOrderExpression } from '../types';
+import type { ESQLOrderExpression, ESQLSource } from '../types';
 import type { ComposerQuery } from './composer_query';
 import type { ParameterHole } from './parameter_hole';
 
@@ -64,8 +64,16 @@ export type ComposerTag<Return> = <T extends ComposerQueryTagHole[]>(
    */
   ...holes: { [K in keyof T]: T[K] extends ParameterShorthandHole ? SingleKey<T[K]> : T[K] }
 ) => Return;
+
+export type ParametrizedComposerTag<Return> = (
+  paramsValues?: Record<string, unknown>
+) => ComposerTag<Return> & ComposerQueryGenerator<Return>;
 export type ComposerQueryTag = ComposerTag<ComposerQuery>;
-export type ComposerQueryGenerator = (query: string) => ComposerQuery;
+export type ParametrizedComposerQueryTag = ParametrizedComposerTag<ComposerQuery>;
+export type ComposerQueryGenerator<Return = ComposerQuery> = (
+  query: string,
+  paramsValues?: Record<string, unknown>
+) => Return;
 
 type SynthMethods = typeof import('../synth');
 
@@ -75,7 +83,47 @@ type SynthMethods = typeof import('../synth');
  */
 export interface ComposerQueryTagMethods extends Omit<SynthMethods, 'par'> {
   par: (value: unknown, name?: string) => ParameterHole;
+
+  /**
+   * Creates a new {@link ComposerQuery} instance with a `FROM` command with
+   * the specified list of sources.
+   *
+   * Example:
+   *
+   * ```typescript
+   * const query = esql.from('kibana_ecommerce_index', 'kibana_logs_index');
+   * // FROM kibana_ecommerce_index, kibana_logs_index
+   * ```
+   *
+   * @param source The source to use in the `FROM` command, at least one source
+   *     is required.
+   * @param moreSources Additional sources to include in the `FROM` command.
+   */
+  from: (
+    source: ComposerSourceShorthand,
+    ...moreSources: ComposerSourceShorthand[]
+  ) => ComposerQuery;
 }
+
+export type ComposerSourceShorthand = string | ESQLSource;
+
+/**
+ * A shorthand for specifying a column in the query.
+ * It can be a string a simple column or an array of strings for a nested column.
+ */
+export type ComposerColumnShorthand = string | synth.SynthColumnShorthand;
+
+/**
+ * A shorthand for specifying a rename expression in the `RENAME` command.
+ *
+ * ```
+ * ... | RENAME <oldName> AS <newName> | ...
+ * ```
+ */
+export type ComposerRenameShorthand = [
+  newName: ComposerColumnShorthand,
+  oldName: ComposerColumnShorthand
+];
 
 /**
  * A shorthand for specifying a sort condition.
@@ -95,7 +143,7 @@ export type ComposerSortShorthand =
        * or an array of strings for a nested column. For example,
        * `['user', 'name']` is equivalent to `user.name`.
        */
-      column: string | synth.SynthColumnShorthand,
+      column: ComposerColumnShorthand,
       order?: ESQLOrderExpression['order'],
       nulls?: ESQLOrderExpression['nulls']
     ];
@@ -115,3 +163,12 @@ export type EsqlRequestParams = EsqlRequestParamEntry[];
 export type EsqlRequestParamEntry = EsqlRequestParamPositionalEntry | EsqlRequestParamNamedEntry;
 export type EsqlRequestParamPositionalEntry = string | number | boolean | null;
 export type EsqlRequestParamNamedEntry = Record<string, unknown>;
+
+export interface QueryCommandTag extends QueryCommandTagParametrized {
+  (initialParams: Record<string, unknown>): QueryCommandTagParametrized;
+}
+
+export interface QueryCommandTagParametrized {
+  (template: TemplateStringsArray, ...holes: ComposerQueryTagHole[]): ComposerQuery;
+  (query: string, paramsValues?: Record<string, unknown>): ComposerQuery;
+}

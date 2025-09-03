@@ -58,8 +58,10 @@ describe('initializeESQLControlSelections', () => {
         expect(mockIsSuccess).toHaveBeenCalledTimes(1);
       });
 
-      const availableOptions = selections.internalApi.availableOptions$.getValue();
-      expect(availableOptions?.length).toBe(5);
+      await waitFor(() => {
+        const availableOptions = selections.internalApi.availableOptions$.getValue();
+        expect(availableOptions?.length).toBe(5);
+      });
 
       const latestState = selections.getLatestState();
       expect('availableOptions' in latestState).toBeFalsy();
@@ -90,8 +92,10 @@ describe('initializeESQLControlSelections', () => {
 
       const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
 
-      const availableOptions = selections.internalApi.availableOptions$.getValue();
-      expect(availableOptions?.length).toBe(2);
+      await waitFor(() => {
+        const availableOptions = selections.internalApi.availableOptions$.getValue();
+        expect(availableOptions?.length).toBe(2);
+      });
 
       const latestState = selections.getLatestState();
       expect(latestState).toMatchInlineSnapshot(`

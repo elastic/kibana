@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
   SIEM_MIGRATIONS_MIGRATION_ABORTED,
@@ -15,10 +16,11 @@ import {
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
 } from '../../../telemetry/event_based/events';
-import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
-import type { MigrateRuleState } from './agent/types';
 import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
 import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
+import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
+// import type { MigrateRuleState } from './agent/types';
+import type { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
 
 interface IntegrationMatchEvent {
   preFilterIntegrations: RuleMigrationIntegration[];
@@ -30,7 +32,9 @@ interface PrebuiltRuleMatchEvent {
   postFilterRule?: RuleSemanticSearchResult;
 }
 
-export class SiemMigrationTelemetryClient {
+export class RuleMigrationTelemetryClient
+  implements SiemMigrationTelemetryClient<RuleMigrationRule>
+{
   constructor(
     private readonly telemetry: AnalyticsServiceSetup,
     private readonly logger: Logger,
@@ -81,10 +85,10 @@ export class SiemMigrationTelemetryClient {
     const stats = { completed: 0, failed: 0 };
 
     return {
-      startRuleTranslation: () => {
+      startItemTranslation: () => {
         const ruleStartTime = Date.now();
         return {
-          success: (migrationResult: MigrateRuleState) => {
+          success: (migrationResult: RuleMigrationRule) => {
             stats.completed++;
             this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
               migrationId: this.migrationId,

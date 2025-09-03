@@ -259,20 +259,22 @@ describe('commands', () => {
     });
   });
 
-  /**
-   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-   * get back to it after 9.1 release.
-   */
-  describe.skip('RERANK', () => {
+  describe('DISSECT', () => {
+    test('prints basic DISSECT command', () => {
+      assertPrint('FROM index | DISSECT foo.bar "asdf"');
+    });
+  });
+
+  describe('RERANK', () => {
     test('comments around all elements', () => {
       assertPrint(
-        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ id /*6*/'
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ {"id1": "value1"} /*6*/'
       );
     });
 
     test('comments around all elements, two fields', () => {
       assertPrint(
-        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ id1 /*8*/'
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ {"id1": "value1"} /*8*/'
       );
     });
   });
