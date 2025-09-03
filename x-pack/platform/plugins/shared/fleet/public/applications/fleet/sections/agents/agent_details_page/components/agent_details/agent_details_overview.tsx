@@ -330,13 +330,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               description:
                 agent.local_metadata.elastic.agent.fips === true ? (
                   <FormattedMessage
-                    id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
-                    defaultMessage="Compliant"
+                    id="xpack.fleet.agentDetails.fipsModeCompliantText"
+                    defaultMessage="Enabled"
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
-                    defaultMessage="Not compliant"
+                    defaultMessage="Not enabled"
                   />
                 ),
             },
