@@ -93,6 +93,7 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { DetectionEngineAlertsTable } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -130,12 +131,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
-      canUserREAD,
       hasIndexRead,
       hasIndexWrite,
       hasIndexMaintenance,
     },
   ] = useUserData();
+  const canReadRules = useUserPrivileges().rulesPrivileges.read;
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
@@ -388,12 +389,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {!signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false) ? (
+      {!signalIndexNeedsInit && (hasIndexRead === false || canReadRules === false) ? (
         <NoPrivileges
           pageName={i18n.PAGE_TITLE.toLowerCase()}
           docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges}
         />
-      ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
+      ) : !signalIndexNeedsInit && hasIndexRead && canReadRules ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
