@@ -95,11 +95,15 @@ export const getSingleDocumentData = (
     return undefined;
   }
 
-  // For single-alert we might have both event and alert documents. We prefer to return the alert document if it exists.
+  // For single-entity mode, prioritize finding the entity document
+  if (mode === 'single-entity') {
+    return node.documentsData.find((doc) => doc.type === 'entity');
+  }
+
+  // For single-alert and single-event modes, prefer alert document over event document
   const documentData =
     node.documentsData.find((doc) => doc.type === 'alert') ??
-    node.documentsData.find((doc) => doc.type === 'event') ??
-    node.documentsData.find((doc) => doc.type === 'entity');
+    node.documentsData.find((doc) => doc.type === 'event');
 
   return documentData;
 };
