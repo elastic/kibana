@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { CRUDEntity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityStoreDataClient } from './entity_store_data_client';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
 import { getEntitiesIndexName } from './utils';
-import { buildUpdateEntityPainlessScript } from './painless/build_update_sctipt';
+import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
+import { getEntityPriorityUpdateIndexName } from './elasticsearch_assets/priority_update_entity_index';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -46,7 +48,7 @@ export class EntityStoreCrudClient {
       throw new BadCRUDRequestError(`The request doesn't contain any update`);
     }
 
-    const resp = await this.esClient.updateByQuery({
+    const updateByQueryResp = await this.esClient.updateByQuery({
       index: getEntitiesIndexName(type, this.namespace),
       query: {
         term: {
@@ -59,9 +61,26 @@ export class EntityStoreCrudClient {
       },
     });
 
-    if ((resp.updated || 0) < 1) {
+    if ((updateByQueryResp.updated || 0) < 1) {
       throw new DocumentNotFoundError();
     }
+
+    await this.esClient.create({
+      id: uuidv4(),
+      index: getEntityPriorityUpdateIndexName(type, this.namespace),
+      document: {
+        '@timestamp': new Date().toISOString(),
+        [type]: {
+          name: entityId,
+          entity: {
+            ...doc.entity,
+            Metadata: {
+              priority: 1,
+            },
+          },
+        },
+      },
+    });
   }
 
   private validEntityUpdate(doc: CRUDEntity, entityId: string) {
