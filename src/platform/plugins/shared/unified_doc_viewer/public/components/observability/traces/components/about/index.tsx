@@ -82,7 +82,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
       <div
         css={css`
           margin-top: calc(${euiTheme.base * -1.5}px);
-          // margin-bottom: calc(${euiTheme.base * -3}px);
+          margin-bottom: calc(${euiTheme.base * -2.25}px);
         `}
       >
         <ContentFrameworkTable
