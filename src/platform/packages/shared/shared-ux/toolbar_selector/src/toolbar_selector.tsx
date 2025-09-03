@@ -153,7 +153,7 @@ export const ToolbarSelector = ({
             'data-test-subj': `${dataTestSubj}SelectorSearch`,
             compressed: true,
             placeholder: i18n.translate(
-              'unifiedHistogram.toolbarSelectorPopover.searchPlaceholder',
+              'sharedUXPackages.toolbarSelectorPopover.searchPlaceholder',
               {
                 defaultMessage: 'Search',
               }
@@ -227,7 +227,7 @@ export const ToolbarSelector = ({
               noMatchesMessage: (
                 <p>
                   <FormattedMessage
-                    id="unifiedHistogram.toolbarSelectorPopover.noResults"
+                    id="sharedUXPackages.toolbarSelectorPopover.noResults"
                     defaultMessage="No results found for {term}"
                     values={{
                       term: <strong>{searchTerm}</strong>,
