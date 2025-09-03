@@ -79,7 +79,7 @@ export const SentinelOneRunScriptParameters = z.object({
    */
   script: z.string().min(1),
   /**
-   * The input parameter arguments for the script that was selected
+   * The input parameter arguments for the script that was selected.
    */
   inputParams: z.string().min(1).optional(),
 });
