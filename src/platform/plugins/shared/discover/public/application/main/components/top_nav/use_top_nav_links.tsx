@@ -49,6 +49,7 @@ export const useTopNavLinks = ({
   adHocDataViews,
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
+  hasShareIntegration,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -58,6 +59,7 @@ export const useTopNavLinks = ({
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
+  hasShareIntegration: boolean;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const [newSearchUrl, setNewSearchUrl] = useState<string | undefined>(undefined);
@@ -141,12 +143,21 @@ export const useTopNavLinks = ({
           discoverParams,
           services,
           stateContainer: state,
+          hasIntegrations: hasShareIntegration,
         });
         items.push(...shareAppMenuItem);
       }
 
       return items;
-    }, [discoverParams, state, services, defaultMenu, onOpenInspector, newSearchUrl]);
+    }, [
+      discoverParams,
+      state,
+      services,
+      defaultMenu,
+      onOpenInspector,
+      newSearchUrl,
+      hasShareIntegration,
+    ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
   const appMenuRegistry = useMemo(() => {

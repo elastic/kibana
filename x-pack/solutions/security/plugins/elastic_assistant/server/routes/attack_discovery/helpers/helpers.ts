@@ -161,6 +161,22 @@ export const updateAttackDiscoveries = async ({
   telemetry: AnalyticsServiceSetup;
 }) => {
   try {
+    const endTime = moment();
+    const durationMs = endTime.diff(startTime);
+    const alertsContextCount = anonymizedAlerts.length;
+
+    reportAttackDiscoveryGenerationSuccess({
+      alertsContextCount,
+      apiConfig,
+      attackDiscoveries,
+      durationMs,
+      end,
+      hasFilter,
+      size,
+      start,
+      telemetry,
+    });
+
     const currentAd = await dataClient.getAttackDiscovery({
       id: executionUuid,
       authenticatedUser,
@@ -168,9 +184,7 @@ export const updateAttackDiscoveries = async ({
     if (currentAd === null || currentAd?.status === 'canceled') {
       return;
     }
-    const endTime = moment();
-    const durationMs = endTime.diff(startTime);
-    const alertsContextCount = anonymizedAlerts.length;
+
     const updateProps = {
       alertsContextCount,
       attackDiscoveries: attackDiscoveries ?? undefined,
@@ -191,18 +205,6 @@ export const updateAttackDiscoveries = async ({
     await dataClient.updateAttackDiscovery({
       attackDiscoveryUpdateProps: updateProps,
       authenticatedUser,
-    });
-
-    reportAttackDiscoveryGenerationSuccess({
-      alertsContextCount,
-      apiConfig,
-      attackDiscoveries,
-      durationMs,
-      end,
-      hasFilter,
-      size,
-      start,
-      telemetry,
     });
   } catch (updateErr) {
     logger.error(updateErr);
