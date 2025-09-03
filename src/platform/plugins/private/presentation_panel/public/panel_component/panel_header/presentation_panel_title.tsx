@@ -110,6 +110,7 @@ export const PresentationPanelTitle = ({
           <h2
             // styles necessary for applying ellipsis and showing the info icon if description is present
             css={css`
+               ${euiTextTruncate()};
               overflow: hidden;
             `}
           >
