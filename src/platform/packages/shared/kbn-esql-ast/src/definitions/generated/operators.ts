@@ -751,6 +751,51 @@ const equalsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'integer',
           optional: false,
         },
@@ -2145,6 +2190,36 @@ const isNotNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'integer',
           optional: false,
         },
@@ -2338,6 +2413,36 @@ const isNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
           optional: false,
         },
       ],
@@ -4709,6 +4814,51 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohash',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohash',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geohex',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geohex',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geotile',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geotile',
           optional: false,
         },
       ],
