@@ -53,6 +53,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
   const {
     euiTheme: { size },
   } = useEuiTheme();
+
   return (
     <div
       css={css`
