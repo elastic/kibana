@@ -91,12 +91,19 @@ export function RuleActions({
       {ruleActions.map((action, index) => {
         const { actionTypeId, id } = action;
         const actionName = getActionName(id);
+        const iconType = getActionIconClass(actionTypeId) ?? 'apps';
 
         return (
           <EuiFlexItem key={index}>
             <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
               <EuiFlexItem grow={false}>
-                <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
+                <EuiIcon
+                  size="m"
+                  type={iconType}
+                  data-test-subj={`ruleActionIcon${
+                    typeof iconType === 'string' ? `-${iconType}` : ''
+                  }`}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText

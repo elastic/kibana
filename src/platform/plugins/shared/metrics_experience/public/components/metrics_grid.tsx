@@ -9,18 +9,8 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiFlexGroup, EuiText } from '@elastic/eui';
 import React from 'react';
+import type { MetricField } from '../../common/types';
 import { MetricChart } from './metric_chart';
-
-interface MetricField {
-  name: string;
-  index: string;
-  dimensions: Array<{ name: string; type: string; description?: string }>;
-  type: string;
-  time_series_metric?: string;
-  unit?: string;
-  brief?: string;
-  stability?: string;
-}
 
 type MetricsGridProps = {
   timeRange: { from?: string; to?: string };

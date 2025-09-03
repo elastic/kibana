@@ -82,3 +82,17 @@ export const DELETE_MIGRATION_FAILURE = i18n.translate(
     defaultMessage: 'Failed to delete migration',
   }
 );
+
+export const UPDATE_INDEX_PATTERN_SUCCESS = (updated: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.updateIndexPatternSuccess', {
+    defaultMessage:
+      '{updated, plural, one {# migration} other {# migrations}} updated successfully.',
+    values: { updated },
+  });
+
+export const UPDATE_INDEX_PATTERN_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.updateIndexPatternFailDescription',
+  {
+    defaultMessage: 'Failed to update index pattern',
+  }
+);

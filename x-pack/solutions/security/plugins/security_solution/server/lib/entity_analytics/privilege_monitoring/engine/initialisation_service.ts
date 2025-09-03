@@ -6,12 +6,17 @@
  */
 
 import moment from 'moment';
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { defaultMonitoringUsersIndex } from '../../../../../common/constants';
 import type { CreateMonitoringEntitySource } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import {
+  MonitoringEngineComponentResourceEnum,
+  type CreateMonitoringEntitySource,
+  type InitMonitoringEngineResponse,
+} from '../../../../../common/api/entity_analytics';
+import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
@@ -20,7 +25,6 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../../telemetry/event_based/events';
 import { createPrivmonIndexService } from './elasticsearch/indices';
-
 import {
   MonitoringEntitySourceDescriptorClient,
   PrivilegeMonitoringEngineDescriptorClient,
@@ -56,7 +60,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
 
     dataClient.audit(
       PrivilegeMonitoringEngineActions.INIT,
-      EngineComponentResourceEnum.privmon_engine,
+      MonitoringEngineComponentResourceEnum.privmon_engine,
       'Initializing privilege monitoring engine'
     );
     const descriptor = await descriptorClient.init();
@@ -94,7 +98,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
       dataClient.log('error', `Error initializing privilege monitoring engine: ${e}`);
       dataClient.audit(
         PrivilegeMonitoringEngineActions.INIT,
-        EngineComponentResourceEnum.privmon_engine,
+        MonitoringEngineComponentResourceEnum.privmon_engine,
         'Failed to initialize privilege monitoring engine',
         e
       );
@@ -148,7 +152,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
         );
         dataClient.audit(
           PrivilegeMonitoringEngineActions.INIT,
-          EngineComponentResourceEnum.privmon_engine,
+          MonitoringEngineComponentResourceEnum.privmon_engine,
           'Failed to update default index source for privilege monitoring',
           e
         );
@@ -170,7 +174,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
         );
         dataClient.audit(
           PrivilegeMonitoringEngineActions.INIT,
-          EngineComponentResourceEnum.privmon_engine,
+          MonitoringEngineComponentResourceEnum.privmon_engine,
           'Failed to create default index source for privilege monitoring',
           e
         );
