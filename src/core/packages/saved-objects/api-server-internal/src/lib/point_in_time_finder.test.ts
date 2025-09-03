@@ -549,7 +549,13 @@ describe('createPointInTimeFinder()', () => {
     });
 
     test('logs Boom error when openPointInTimeForType fails with Boom error', async () => {
-      const boomError = Boom.boomify(new Error('Forbidden'), { statusCode: 403 });
+      const boomError = new EsErrors.ResponseError({
+        body: { error: { type: 'forbidden', reason: 'Forbidden' }, status: 403 },
+        statusCode: 403,
+        warnings: null,
+        headers: {},
+        meta: {} as any,
+      });
       repository.openPointInTimeForType.mockRejectedValueOnce(boomError);
 
       const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
