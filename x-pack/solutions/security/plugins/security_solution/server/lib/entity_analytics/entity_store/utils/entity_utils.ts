@@ -36,6 +36,18 @@ export const buildIndexPatterns = async (
   ];
 };
 
+export const buildIndexPatternsByEngine = async (
+  space: string,
+  entityType: EntityTypeOpenAPI,
+  appClient: AppClient,
+  dataViewsService: DataViewsService
+) => {
+  const patterns = await buildIndexPatterns(space, appClient, dataViewsService);
+  patterns.push(getEntitiesResetIndexName(entityType, space));
+  return patterns;
+};
+
+
 const getSecuritySolutionIndices = async (
   appClient: AppClient,
   dataViewsService: DataViewsService
