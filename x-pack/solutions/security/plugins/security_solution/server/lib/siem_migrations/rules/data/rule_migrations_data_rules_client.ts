@@ -14,7 +14,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
-import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationStatus,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
+} from '../../../../../common/siem_migrations/constants';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
@@ -22,8 +25,8 @@ import {
   type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
+import { MAX_ES_SEARCH_SIZE } from '../constants';
 import { dsl } from './dsl_queries';
-import { MAX_ES_SEARCH_SIZE, SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 import type {
   CreateMigrationItemInput,
   SiemMigrationItemSort,
@@ -164,12 +167,16 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         script: {
           source: `
                 def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
               `,
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query,
+        refresh: true,
       })
       .catch((error) => {
         this.logger.error(`Error updating index pattern for migration ${id}: ${error}`);
