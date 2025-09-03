@@ -123,6 +123,10 @@ import { convertToEntityManagerDefinition } from './entity_definitions/entity_ma
 import type { ApiKeyManager } from './auth/api_key';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 import { entityEngineDescriptorTypeName } from './saved_object';
+import {
+  createEntityPriorityUpdateIndex,
+  deleteEntityPriorityUpdateIndex,
+} from './elasticsearch_assets/priority_update_entity_index';
 import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
@@ -503,6 +507,8 @@ export class EntityStoreDataClient {
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
+      await createEntityPriorityUpdateIndex(entityType, this.esClient, namespace, logger);
+      this.log(`debug`, entityType, `Created entity priority update index`);
 
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });
@@ -760,6 +766,9 @@ export class EntityStoreDataClient {
 
       await removeEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
       this.log('debug', entityType, `Deleted entity store snapshot task`);
+
+      await deleteEntityPriorityUpdateIndex(entityType, this.esClient, namespace, logger);
+      this.log('debug', entityType, `Delete entity priority index`);
 
       if (deleteData) {
         await deleteEntityIndex({

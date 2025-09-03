@@ -20,9 +20,11 @@ export const buildUpdateEntityPainlessScript = (doc: CRUDEntity) => {
       notNullOrUndefined(getEntityVal(doc, attr))
   );
 
+  const attrAccess = (attr: string) => `ctx._source.entity['${attr}']`;
+
   // Add non nested fields
   attributes.forEach((attr) => {
-    script += `ctx._source.entity['${attr}'] = ${convertToPainlessValue(getEntityVal(doc, attr))};`;
+    script += `${attrAccess(attr)} = ${convertToPainlessValue(getEntityVal(doc, attr))};`;
   });
 
   // Add nested fields
@@ -30,12 +32,12 @@ export const buildUpdateEntityPainlessScript = (doc: CRUDEntity) => {
     .filter((attr) => notNullOrUndefined(getEntityVal(doc, attr)))
     .forEach((attr) => {
       // init nested fields if not yet defined
-      script += `ctx._source.entity['${attr}'] = ctx._source.entity['${attr}'] == null ? [:] : ctx._source.entity['${attr}'];`;
+      script += `${attrAccess(attr)} = ${attrAccess(attr)} == null ? [:] : ${attrAccess(attr)};`;
 
       Object.keys(getEntityVal(doc, attr) as object)
         .filter((subAttr) => notNullOrUndefined(getNestedEntityVal(doc, attr, subAttr)))
         .forEach((subAttr) => {
-          script += `ctx._source.entity['${attr}']['${subAttr}'] = ${convertToPainlessValue(
+          script += `${attrAccess(attr)}['${subAttr}'] = ${convertToPainlessValue(
             getNestedEntityVal(doc, attr, subAttr)
           )};`;
         });
