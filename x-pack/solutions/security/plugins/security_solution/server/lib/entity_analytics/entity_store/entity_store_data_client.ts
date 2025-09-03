@@ -31,6 +31,7 @@ import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/managemen
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
+  ENTITY_STORE_HISTORY_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
 } from '../../../../common/entity_analytics/entity_store/constants';
@@ -963,6 +964,12 @@ export class EntityStoreDataClient {
     // The entity store has to create the following indices
     indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
     indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[ENTITY_STORE_HISTORY_INDEX_PATTERN] = [
+      'create_index',
+      'manage',
+      'read',
+      'write',
+    ];
 
     return checkAndFormatPrivileges({
       request: this.options.request,
