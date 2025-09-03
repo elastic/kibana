@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { StatusFilter } from '../../../../common/types';
 import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/rules/types';
 import type { FilterOptions } from '../../../types';
-import { AuthorFilter, StatusFilter } from '../../../types';
+import { AuthorFilter } from '../../../types';
 
 const AUTHOR_FILTERS: Record<AuthorFilter, RuleMigrationFilters> = {
   [AuthorFilter.ELASTIC]: { prebuilt: true },
@@ -20,6 +21,7 @@ const STATUS_FILTERS: Record<StatusFilter, RuleMigrationFilters> = {
   [StatusFilter.TRANSLATED]: { installed: false, fullyTranslated: true },
   [StatusFilter.PARTIALLY_TRANSLATED]: { partiallyTranslated: true },
   [StatusFilter.UNTRANSLATABLE]: { untranslatable: true },
+  [StatusFilter.INDEX_PATTERN_MISSING]: { missingIndex: true },
 };
 
 export const convertFilterOptions = (filterOptions?: FilterOptions) => {
