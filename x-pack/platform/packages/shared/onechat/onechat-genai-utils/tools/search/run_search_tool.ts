@@ -52,14 +52,14 @@ export const runSearchTool = async ({
 
       // handle errors that come from the search tool itself
       if (ToolResultType.error) {
-        let allErrorDetails = [];
+        const allErrorDetails = [];
         for (const msg of outState.messages) {
           if (msg.getType() == 'tool' && msg.name) {
             allErrorDetails.push({
               innerTool: msg.name,
               errorMessage: msg.content,
             });
-          };
+          }
         }
         return [
           {
@@ -67,7 +67,7 @@ export const runSearchTool = async ({
             data: {
               message: `An error occurred within the .search tool`,
               error_details: allErrorDetails,
-           },
+            },
           },
         ];
       }
