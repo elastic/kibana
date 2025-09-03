@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { privilegedMonitorBaseIndexName } from '../../../../../common/constants';
+import { PRIVMON_BASE_INDEX_NAME } from '../../../../../common/constants';
 
 export interface Matcher {
   values: string[];
@@ -43,7 +43,7 @@ export const defaultMonitoringUsersIndex = (namespace: string) =>
 
 // .entity_analytics.monitoring.sources.okta-<space>
 export const integrationsSourceIndex = (namespace: string, integrationName: string) =>
-  `${privilegedMonitorBaseIndexName}.sources.${integrationName}-${namespace}`;
+  `${PRIVMON_BASE_INDEX_NAME}.sources.${integrationName}-${namespace}`;
 
 export const PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API =
   '/api/entity_analytics/monitoring/privileges/privileges';
