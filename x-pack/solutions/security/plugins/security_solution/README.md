@@ -17,6 +17,7 @@ the tests given the constraint on an available package registry.
 
 These scenarios will be outlined the sections below.
 
+TODO: update tests location and run commands https://github.com/elastic/kibana/issues/233838
 ### Endpoint API Integration Tests Location
 
 The endpoint api integration tests are located [here](../../../../test/security_solution_endpoint_api_int)
