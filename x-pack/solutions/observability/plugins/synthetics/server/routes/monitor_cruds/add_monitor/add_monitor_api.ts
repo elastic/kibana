@@ -37,11 +37,15 @@ import {
   DEFAULT_NAMESPACE_STRING,
 } from '../../../../common/constants/monitor_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
-import { DefaultAlertService } from '../../default_alerts/default_alert_service';
+import { DefaultRuleService } from '../../default_alerts/default_alert_service';
 import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../../common/constants/synthetics_alerts';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -226,29 +230,32 @@ export class AddEditMonitorAPI {
     }
   }
 
-  initDefaultAlerts(name: string) {
+  /**
+   * Initialize default alerts for the monitor.
+   * @param name The name of the monitor.
+   * @returns A promise that resolves when the alerts have been initialized.
+   * @throws LockAcquisitionError if the function attempts to modify the default rules and fails. Calling code must handle this error.
+   */
+  async initDefaultAlerts() {
     const { server, savedObjectsClient, context, request } = this.routeContext;
+    const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
     const { gettingStarted } = request.query;
     if (!gettingStarted) {
       return;
     }
 
-    try {
-      // we do this async, so we don't block the user, error handling will be done on the UI via separate api
-      const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-      defaultAlertService
-        .setupDefaultAlerts()
-        .then(() => {
-          server.logger.debug(`Successfully created default alert for monitor: ${name}`);
-        })
-        .catch((error) => {
-          server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, {
-            error,
-          });
-        });
-    } catch (error) {
-      server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, { error });
+    const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
+    const [statusRule, tlsRule] = await Promise.all([
+      defaultAlertService.getExistingRule(SYNTHETICS_STATUS_RULE),
+      defaultAlertService.getExistingRule(SYNTHETICS_TLS_RULE),
+    ]);
+    if (statusRule && tlsRule) {
+      return {
+        statusRule,
+        tlsRule,
+      };
     }
+    return await defaultAlertService.setupDefaultRules(activeSpace?.id ?? 'default');
   }
 
   setupGettingStarted = (configId: string) => {
