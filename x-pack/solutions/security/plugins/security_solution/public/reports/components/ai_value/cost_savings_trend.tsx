@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,13 +15,17 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AlertProcessingKeyInsight } from './alert_processing_key_insight';
 import * as i18n from './translations';
-import type { GetLensAttributes } from '../../../common/components/visualization_actions/types';
+import type {
+  EmbeddableData,
+  GetLensAttributes,
+  VisualizationTablesWithMeta,
+} from '../../../common/components/visualization_actions/types';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
+import { CostSavingsKeyInsight } from './cost_savings_key_insight';
 
 interface Props {
   from: string;
@@ -54,6 +58,14 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
     euiTheme: { size },
   } = useEuiTheme();
 
+  const [lensResponse, setLensResponse] = useState<VisualizationTablesWithMeta | null>(null);
+
+  const handleEmbeddableLoad = useCallback((data: EmbeddableData) => {
+    if (data?.tables) {
+      setLensResponse(data.tables);
+    }
+  }, []);
+
   return (
     <div
       css={css`
@@ -77,6 +89,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
             data-test-subj="embeddable-area-chart"
             getLensAttributes={getLensAttributes}
             timerange={timerange}
+            onLoad={handleEmbeddableLoad}
             id={`${ID}-area-embeddable`}
             height={300}
             inspectTitle={i18n.COST_SAVINGS_TREND}
@@ -93,7 +106,13 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
             max-width: ${isSmall ? 'auto' : '300px'};
           `}
         >
-          <AlertProcessingKeyInsight valueMetrics={{}} />
+          <CostSavingsKeyInsight
+            analystHourlyRate={analystHourlyRate}
+            minutesPerAlert={minutesPerAlert}
+            from={from}
+            to={to}
+            lensResponse={lensResponse}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

@@ -5,45 +5,65 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useSelector } from 'react-redux';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { sourcererSelectors } from '../../../sourcerer/store';
-import { useFetchCostSavingsData } from '../../hooks/use_fetch_cost_savings_data';
-import type { ValueMetrics } from './metrics';
+import { MessageRole } from '@kbn/inference-common';
+import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
+import { DEFAULT_AI_CONNECTOR } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 
 interface Props {
-  valueMetrics: ValueMetrics;
+  from: string;
+  to: string;
+  minutesPerAlert: number;
+  analystHourlyRate: number;
+  lensResponse: VisualizationTablesWithMeta | null;
 }
 
-export const CostSavingsKeyInsight: React.FC<Props> = ({ valueMetrics }) => {
+export const CostSavingsKeyInsight: React.FC<Props> = ({
+  minutesPerAlert,
+  analystHourlyRate,
+  from,
+  to,
+  lensResponse,
+}) => {
   const {
     euiTheme: { size },
   } = useEuiTheme();
 
-  const spaceId = useSpaceId();
-  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
-  const { data } = useFetchCostSavingsData({
-    minutesPerAlert: 30, // Default value - you may want to make this configurable
-    analystHourlyRate: 100, // Default value - you may want to make this configurable
-    from: 'now-7d', // Default value - you may want to make this configurable
-    to: 'now', // Default value - you may want to make this configurable
-    indexPattern: signalIndexName ?? `.alerts-security.alerts-${spaceId}`,
-  });
-  if (data) {
-    const prompt = getPrompt(JSON.stringify(data));
-  }
+  const { inference, uiSettings } = useKibana().services;
+  const connectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
+  const [insightResult, setInsightResult] = useState<string>('');
+
+  useEffect(() => {
+    const fetchInsight = async () => {
+      if (lensResponse && connectorId) {
+        try {
+          const prompt = getPrompt(JSON.stringify(lensResponse));
+          const result = await inference.chatComplete({
+            connectorId,
+            messages: [{ role: MessageRole.User, content: prompt }],
+          });
+          setInsightResult(result.content);
+        } catch (error) {
+          // Silently handle error - could add proper error state handling here
+        }
+      }
+    };
+
+    fetchInsight();
+  }, [connectorId, lensResponse, inference]);
   return (
     <div
       data-test-subj="alertProcessingKeyInsightsContainer"
@@ -83,14 +103,14 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ valueMetrics }) => {
             line-height: 1.6em;
           `}
         >
-          <ul>
-            <li
-              css={css`
-                margin-bottom: 5px;
-              `}
+          {insightResult ? (
+            <div
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: insightResult }}
             />
-            <li />
-          </ul>
+          ) : (
+            <EuiSkeletonText lines={3} size="s" isLoading={true} />
+          )}
         </EuiText>
       </span>
     </div>
@@ -98,7 +118,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ valueMetrics }) => {
 };
 
 const getPrompt = (result: string) => {
-  const prompt = `You are given Elasticsearch aggregation results showing cost savings over time:
+  const prompt = `You are given Elasticsearch Lens aggregation results showing cost savings over time:
 
 \`\`\`
 ${result}

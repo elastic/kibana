@@ -93,7 +93,6 @@ export const getPartitionVisRenderer: (
     { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
     handlers
   ) => {
-    console.log('handlers', handlers);
     const performanceTracker = createPerformanceTracker({
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
       subType: PARTITION_VIS_RENDERER_NAME,

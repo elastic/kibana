@@ -154,6 +154,7 @@ export interface StartPlugins {
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
+  inference: InferencePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
