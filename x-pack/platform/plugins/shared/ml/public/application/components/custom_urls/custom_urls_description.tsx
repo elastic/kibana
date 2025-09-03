@@ -7,25 +7,17 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../contexts/kibana';
 
-interface DescriptionPanelProps {
-  descriptionMessageId: string;
-  descriptionDefaultMessage: string;
-  docsUrlPath?: string;
+interface CustomUrlsDescriptionProps {
+  description: React.ReactElement;
 }
 
-export const CustomUrlsDescription: FC<PropsWithChildren<DescriptionPanelProps>> = memo(
-  ({ children, descriptionMessageId, descriptionDefaultMessage, docsUrlPath = 'customUrls' }) => {
-    const {
-      services: { docLinks },
-    } = useMlKibana();
+export const CustomUrlsDescription: FC<PropsWithChildren<CustomUrlsDescriptionProps>> = memo(
+  ({ children, description }) => {
     const { euiTheme } = useEuiTheme();
-    const docsUrl = docLinks.links.ml[docsUrlPath];
 
     const styles = {
       describeForm: css`
@@ -69,22 +61,7 @@ export const CustomUrlsDescription: FC<PropsWithChildren<DescriptionPanelProps>>
         fullWidth
         css={styles.describeForm}
         title={<h3>{title}</h3>}
-        description={
-          <FormattedMessage
-            id={descriptionMessageId}
-            defaultMessage={descriptionDefaultMessage}
-            values={{
-              learnMoreLink: (
-                <EuiLink href={docsUrl} target="_blank">
-                  <FormattedMessage
-                    id="xpack.ml.public.application.components.customUrls.customUrlsDescription.learnMoreLink"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
+        description={description}
       >
         <EuiFormRow fullWidth css={styles.formRow}>
           <>{children}</>
