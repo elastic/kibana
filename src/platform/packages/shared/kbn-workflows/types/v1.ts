@@ -21,6 +21,7 @@ export enum ExecutionStatus {
   // Done
   COMPLETED = 'completed',
   FAILED = 'failed',
+  CANCELLING = 'cancelling',
   CANCELLED = 'cancelled',
   SKIPPED = 'skipped',
 }

@@ -178,6 +178,20 @@ describe('WorkflowExecutionState', () => {
       );
     });
 
+    it('should flush workflow execution changes with execution id even if execution id is not in change', async () => {
+      const updatedWorkflowExecution = {} as EsWorkflowExecution;
+
+      underTest.updateWorkflowExecution(updatedWorkflowExecution);
+
+      await underTest.flush();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-execution-id',
+        })
+      );
+    });
+
     it('should flush new step executions', async () => {
       const mockUuid = 'fake-uuid';
       jest.requireMock('uuid').v4.mockImplementation(() => mockUuid);

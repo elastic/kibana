@@ -12,6 +12,7 @@ import type { StepFactory } from './step/step_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import type { StepErrorCatcher } from './step/step_base';
+import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 
 /**
  * Executes a workflow by continuously processing its steps until completion.
@@ -38,6 +39,7 @@ import type { StepErrorCatcher } from './step/step_base';
  */
 export async function workflowExecutionLoop(
   workflowRuntime: WorkflowExecutionRuntimeManager,
+  workflowExecutionState: WorkflowExecutionState,
   workflowLogger: WorkflowEventLogger,
   nodesFactory: StepFactory
 ) {
@@ -54,6 +56,24 @@ export async function workflowExecutionLoop(
       await workflowRuntime.saveState(); // Ensure state is updated after each step
       await workflowLogger.flushEvents();
     }
+  }
+
+  if ([ExecutionStatus.CANCELLED].includes(workflowRuntime.getWorkflowExecution().status)) {
+    workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.CANCELLED,
+    });
+    const runningSteps = workflowExecutionState
+      .getAllStepExecutions()
+      .filter((stepExecution) => stepExecution.status === ExecutionStatus.RUNNING);
+
+    runningSteps.forEach((runningStep) =>
+      workflowExecutionState.upsertStep({
+        id: runningStep.id,
+        status: ExecutionStatus.CANCELLED,
+      })
+    );
+
+    workflowExecutionState.flush();
   }
 }
 

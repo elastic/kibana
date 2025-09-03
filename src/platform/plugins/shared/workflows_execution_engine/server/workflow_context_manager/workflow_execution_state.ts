@@ -64,6 +64,10 @@ export class WorkflowExecutionState {
     });
   }
 
+  public getAllStepExecutions(): EsWorkflowStepExecution[] {
+    return Array.from(this.stepExecutions.values());
+  }
+
   /**
    * Retrieves all executions for a specific workflow step in chronological order.
    * @param stepId The unique identifier of the step
@@ -113,7 +117,7 @@ export class WorkflowExecutionState {
 
     const accumulated: Partial<EsWorkflowExecution> = this.workflowChanges.reduce(
       (prev, acc) => ({ ...prev, ...acc.change }),
-      {}
+      { id: this.workflowExecution.id } as EsWorkflowExecution
     );
 
     await this.workflowExecutionRepository.updateWorkflowExecution(accumulated);

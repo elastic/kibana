@@ -85,19 +85,25 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
-                workflowRunId,
-                spaceId,
-                actions,
-                taskManager,
-                esClient,
-                logger,
-                config,
-                workflowExecutionRepository
-              );
-              await workflowRuntime.start();
+              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
+                await createContainer(
+                  workflowRunId,
+                  spaceId,
+                  actions,
+                  taskManager,
+                  esClient,
+                  logger,
+                  config,
+                  workflowExecutionRepository
+                );
 
-              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
+              await workflowRuntime.start();
+              await workflowExecutionLoop(
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory
+              );
             },
             async cancel() {
               // Cancel function for the task
@@ -125,19 +131,25 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
-                workflowRunId,
-                spaceId,
-                actions,
-                taskManager,
-                esClient,
-                logger,
-                config,
-                workflowExecutionRepository
-              );
+              const { workflowRuntime, workflowExecutionState, workflowLogger, nodesFactory } =
+                await createContainer(
+                  workflowRunId,
+                  spaceId,
+                  actions,
+                  taskManager,
+                  esClient,
+                  logger,
+                  config,
+                  workflowExecutionRepository
+                );
               await workflowRuntime.resume();
 
-              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
+              await workflowExecutionLoop(
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory
+              );
             },
             async cancel() {},
           };
@@ -233,7 +245,7 @@ export class WorkflowsExecutionEnginePlugin
       // Update status to CANCELING
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
-        status: ExecutionStatus.CANCELLED,
+        status: ExecutionStatus.CANCELLING,
         cancelRequestedAt: new Date().toISOString(),
         cancelRequestedBy: 'system', // TODO: set user if available
       });
@@ -322,6 +334,7 @@ async function createContainer(
 
   return {
     workflowRuntime,
+    workflowExecutionState,
     contextManager,
     connectorExecutor,
     workflowLogger,
