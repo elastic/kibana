@@ -114,7 +114,7 @@ export const AccessModeContainer = ({ onChangeAccessMode, accessControl, created
                           permissionType: isInEditAccessMode ? 'edit' : 'view',
                         }}
                       />
-                    </EuiText>{' '}
+                    </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem
                     grow={false}
