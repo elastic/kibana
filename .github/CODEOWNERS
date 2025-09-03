@@ -687,6 +687,7 @@ src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
+src/platform/plugins/private/inspect_component @elastic/appex-sharedux
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
