@@ -19,7 +19,7 @@ import {
   type Row,
 } from '@tanstack/react-table';
 export { flexRender } from '@tanstack/react-table';
-export type { Row } from '@tanstack/react-table';
+export type { Row, Table, CellContext } from '@tanstack/react-table';
 import type { LeafNode } from '../../../store_provider';
 import {
   useDataCascadeActions,
@@ -27,7 +27,7 @@ import {
   type GroupNode,
 } from '../../../store_provider';
 
-interface TableProps<G>
+interface TableProps<G, L>
   extends Omit<
     TableOptions<G>,
     | 'columns'
@@ -42,7 +42,7 @@ interface TableProps<G>
   > {
   allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
-  rowCell: FC<CellContext<G, unknown>>;
+  rowCell: FC<CellContext<G, L>>;
 }
 
 export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
@@ -51,7 +51,7 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
   header: Header,
   rowCell: RowCell,
   ...rest
-}: TableProps<G>) => {
+}: TableProps<G, L>) => {
   const tableRef = useRef<Table<G>>();
   const columnHelper = createColumnHelper<G>();
   const actions = useDataCascadeActions<G, L>();
@@ -65,7 +65,8 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
       columnHelper.display({
         id: 'cascade',
         header: Header,
-        cell: RowCell,
+        // type cast is needed here to satisfy the generic CellContext type for column display
+        cell: RowCell as FC<CellContext<G, unknown>>,
       }),
     ],
     enableRowSelection,
@@ -123,14 +124,17 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
     getSubRows: (row) => row.children as G[],
   });
 
-  return {
-    get headerColumns() {
-      return tableRef.current!.getHeaderGroups()[0].headers;
-    },
-    get rows() {
-      return tableRef.current!.getRowModel().rows;
-    },
-  };
+  return useMemo(
+    () => ({
+      get headerColumns() {
+        return tableRef.current!.getHeaderGroups()[0].headers;
+      },
+      get rows() {
+        return tableRef.current!.getRowModel().rows;
+      },
+    }),
+    []
+  );
 };
 
 interface TableRowAdapterArgs<G extends GroupNode> {
