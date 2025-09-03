@@ -22,6 +22,7 @@ import {
   parseDocument,
   visit,
 } from 'yaml';
+import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
 
 const YAML_STRINGIFY_OPTIONS = {
   indent: 2,
@@ -112,7 +113,10 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
         } else if (isCollection(pair.key)) {
           actualType = 'collection';
         }
-        error = new Error(`Invalid key type: ${actualType} in ${range ? `range ${range}` : ''}`);
+        error = new InvalidYamlSyntaxError(
+          `Invalid key type: ${actualType} in ${range ? `range ${range}` : ''}`
+        );
+
         return visit.BREAK;
       },
     });
@@ -125,7 +129,14 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
     }
 
     const json = doc.toJSON();
-    return schema.safeParse(json);
+    const result = schema.safeParse(json);
+    if (!result.success) {
+      return {
+        success: false,
+        error: new InvalidYamlSchemaError(result.error.message, result.error),
+      };
+    }
+    return result;
   } catch (error) {
     return {
       success: false,
