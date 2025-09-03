@@ -38,6 +38,7 @@ export const DimensionsSelector = ({
   onChange,
   clearDimensionSelection,
 }: DimensionsFilterProps) => {
+  const { euiTheme } = useEuiTheme();
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
     const dimensionMap = new Map<string, { name: string; type: string; description?: string }>();
@@ -108,7 +109,7 @@ export const DimensionsSelector = ({
     if (selectedDimensions.length === 0) {
       return (
         <FormattedMessage
-          id="metricsExperience.breakdownFieldSelector.breakdownFieldButtonLabel"
+          id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
           defaultMessage="No dimensions selected"
         />
       );
@@ -117,7 +118,7 @@ export const DimensionsSelector = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <FormattedMessage
-            id="metricsExperience.breakdownFieldSelector.breakdownFieldButtonLabelWithSelection"
+            id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
             defaultMessage="Dimensions"
           />
         </EuiFlexItem>
@@ -127,7 +128,42 @@ export const DimensionsSelector = ({
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
-  const { euiTheme } = useEuiTheme();
+
+  const popoverTitleSection = useMemo(() => {
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="s"
+            color="subdued"
+            css={css`
+              padding: ${euiTheme.size.s};
+            `}
+          >
+            <FormattedMessage
+              id="metricsExperience.dimensionsSelector.selectedStatusMessage"
+              defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
+              values={{ count: selectedDimensions?.length }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {selectedDimensions?.length > 0 && (
+            <EuiButtonEmpty size="s" flush="both" onClick={clearDimensionSelection}>
+              {i18n.translate('metricsExperience.dimensionsSelector.clearSelectionButtonLabel', {
+                defaultMessage: 'Clear selection',
+              })}
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, [clearDimensionSelection, euiTheme.size.s, selectedDimensions?.length]);
 
   return (
     <ToolbarSelector
@@ -146,42 +182,7 @@ export const DimensionsSelector = ({
       popoverTitle={i18n.translate('metricsExperience.dimensionsSelector.label', {
         defaultMessage: 'Select dimensions',
       })}
-      popoverTitleSection={
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText
-              size="s"
-              color="subdued"
-              css={css`
-                padding: ${euiTheme.size.s};
-              `}
-            >
-              <FormattedMessage
-                id="metricsExperience.dimentionsSelectable.selectedStatusMessage"
-                defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
-                values={{ count: selectedDimensions?.length }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {selectedDimensions?.length > 0 && (
-              <EuiButtonEmpty size="s" flush="both" onClick={clearDimensionSelection}>
-                {i18n.translate(
-                  'metricsExperience.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
-                  {
-                    defaultMessage: 'Clear selection',
-                  }
-                )}
-              </EuiButtonEmpty>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      popoverTitleSection={popoverTitleSection}
     />
   );
 };

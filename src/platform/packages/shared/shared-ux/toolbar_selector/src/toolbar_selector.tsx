@@ -191,12 +191,6 @@ export const ToolbarSelector = ({
         >
           <ToolbarButton
             size="s"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-              width: 100%;
-              min-width: 0;
-              max-width: ${euiTheme.base * 20}px;
-            `}
             data-test-subj={`${dataTestSubj}Button`}
             data-selected-value={dataSelectedValue}
             aria-label={popoverTitle}
