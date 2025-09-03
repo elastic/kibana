@@ -8838,6 +8838,56 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
+"@moonrepo/cli@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.38.6.tgz#d01438576bdfad796ed4579a2e502f4039ab26cd"
+  integrity sha512-RUXfZA4kDwgk9eTw75Hmmca7AfebJ1RUrYmNmZxnYFc7N9oGBAkevcRbAL58hM3gRA1hl1Vgkm/MbP5L5X2+ww==
+  dependencies:
+    detect-libc "^2.0.3"
+  optionalDependencies:
+    "@moonrepo/core-linux-arm64-gnu" "1.38.6"
+    "@moonrepo/core-linux-arm64-musl" "1.38.6"
+    "@moonrepo/core-linux-x64-gnu" "1.38.6"
+    "@moonrepo/core-linux-x64-musl" "1.38.6"
+    "@moonrepo/core-macos-arm64" "1.38.6"
+    "@moonrepo/core-macos-x64" "1.38.6"
+    "@moonrepo/core-windows-x64-msvc" "1.38.6"
+
+"@moonrepo/core-linux-arm64-gnu@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.38.6.tgz#348105f02049c79dce4fce786207e364303e991d"
+  integrity sha512-uWATtiZi6Tc3kOIOKoikmFPeVb5hMtbCgSfZd7+B1wHc89KJvF3mOy6xsY3497Koro5OK6mhKuOkO3tDPZYwfw==
+
+"@moonrepo/core-linux-arm64-musl@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.38.6.tgz#c9c13258bca42b7e1e4d252ee38aaad56820b7a5"
+  integrity sha512-HRg9llpxr2EkIVKf4ppY8fkjUvm4fmYTLS9p/hryYuOlRF59GazraK+dxh+Cy1dhagWYkYo18JkvtdE7MkhfVw==
+
+"@moonrepo/core-linux-x64-gnu@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.38.6.tgz#459d7b50bd1d2c8ee9d4e5225e8c3df167da620e"
+  integrity sha512-s/O6MewtUK3l7APwjF/aY9ls78ErJTZCl15Jaogc96jqCRGeNWuyX3+Awt6asmztUMkOXUily8R4Z7RggFDIbA==
+
+"@moonrepo/core-linux-x64-musl@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.38.6.tgz#3f24e85eb763ebab12127fb93b6710700f3821f3"
+  integrity sha512-bAoOAmyKijraUkFPDzkoGAMBxiI3J8fRhgruUAsdHfNRAyDvZOYdKajHTMi5wzsoz1Wm85yscR01bFaMbybLQg==
+
+"@moonrepo/core-macos-arm64@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.38.6.tgz#03bbb2d169c171e3051d553e839bd55e208f998a"
+  integrity sha512-RNqlu5K0kTlZ24qxn5X1qKj0FpW9vothNRbsm2GdCXxNp4Wl4GVL9cJRhb1SpCORC698x+OAS2O/u1wPIeN+rA==
+
+"@moonrepo/core-macos-x64@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.38.6.tgz#864396872089c2fccde6f328a1dec4672eec28ad"
+  integrity sha512-mN7QmeEwjj1D97sYX3PmmEpQCsCa/O46hrAJdsd/5O0m4GH5uilMLJoBUa5L2T4kyF7N7TdR0AcRDC9dh2u5Sw==
+
+"@moonrepo/core-windows-x64-msvc@1.38.6":
+  version "1.38.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.38.6.tgz#5f7d80ff4856e9eb4de30be915db4426584d631e"
+  integrity sha512-BWHpCySOIo4YEy9RhJfjauTI7F/imJ8/+GS2Q1yUszVP5BdxzYw5VamO/pVqFBCGQw7BRqi0U+qIUb4uu3nkxw==
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -10308,10 +10358,10 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@puppeteer/browsers@2.10.6":
-  version "2.10.6"
-  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.10.6.tgz#0b1b5046ec4918a4fd4e4c9383153a80af288bd2"
-  integrity sha512-pHUn6ZRt39bP3698HFQlu2ZHCkS/lPcpv7fVQcGBSzNNygw171UXAKrCUhy+TEMw4lEttOKDgNpb04hwUAJeiQ==
+"@puppeteer/browsers@2.10.7":
+  version "2.10.7"
+  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.10.7.tgz#a28f622b2da0ee131c9a576d25d8c4e31fc24135"
+  integrity sha512-wHWLkQWBjHtajZeqCB74nsa/X70KheyOhySYBRmVQDJiNj0zjZR/naPCvdWjMhcG1LmjaMV/9WtTo5mpe8qWLw==
   dependencies:
     debug "^4.4.1"
     extract-zip "^2.0.1"
@@ -15857,10 +15907,10 @@ chromedriver@^139.0.0:
     proxy-from-env "^1.1.0"
     tcp-port-used "^1.0.2"
 
-chromium-bidi@7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-7.1.1.tgz#22da11f1022f549e66cf86d213ebde427328576f"
-  integrity sha512-L2BKQ0rSLADgbPMIdDh3wnYHs3EiUiMay2Sq0CTolheaADmWIf6Pe+T9LJRcnh5rcMz0U7MVk0cQVvKsGRMa1g==
+chromium-bidi@8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-8.0.0.tgz#d73c9beed40317adf2bcfeb9a47087003cd467ec"
+  integrity sha512-d1VmE0FD7lxZQHzcDUCKZSNRtRwISXDsdg4HjdTR5+Ll5nQ/vzU12JeNmupD6VWffrPSlrnGhEWlLESKH3VO+g==
   dependencies:
     mitt "^3.0.1"
     zod "^3.24.1"
@@ -17860,10 +17910,10 @@ detect-libc@^1.0.3:
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==
 
-detect-libc@^2.0.0, detect-libc@^2.0.1, detect-libc@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.2.tgz#8ccf2ba9315350e1241b88d0ac3b0e1fbd99605d"
-  integrity sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw==
+detect-libc@^2.0.0, detect-libc@^2.0.1, detect-libc@^2.0.2, detect-libc@^2.0.3:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.4.tgz#f04715b8ba815e53b4d8109655b6508a6865a7e8"
+  integrity sha512-3UDv+G9CsCKO1WKMGw9fwq/SWJYbI0c5Y7LU1AXYoDdbhE2AHQ6N6Nb34sG8Fj7T5APy8qXDCKuuIHd1BR0tVA==
 
 detect-newline@^3.0.0:
   version "3.1.0"
@@ -17959,15 +18009,15 @@ detective@^5.0.2:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-devtools-protocol@0.0.1464554:
-  version "0.0.1464554"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1464554.tgz#54d88398c99ad93fc81c35569fba9473b6e223d0"
-  integrity sha512-CAoP3lYfwAGQTaAXYvA6JZR0fjGUb7qec1qf4mToyoH2TZgUFeIqYcjh6f9jNuhHfuZiEdH+PONHYrLhRQX6aw==
-
 devtools-protocol@0.0.1467305:
   version "0.0.1467305"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1467305.tgz#dd3f03ceca5b9ecde8bfa96d2fe0b7102e77953e"
   integrity sha512-LxwMLqBoPPGpMdRL4NkLFRNy3QLp6Uqa7GNp1v6JaBheop2QrB9Q7q0A/q/CYYP9sBfZdHOyszVx4gc9zyk7ow==
+
+devtools-protocol@0.0.1475386:
+  version "0.0.1475386"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1475386.tgz#5378401a2c5698ab68c3482c9b7816ff62ec652b"
+  integrity sha512-RQ809ykTfJ+dgj9bftdeL2vRVxASAuGU+I9LEx9Ij5TXU5HrgAQVmzi72VA+mkzscE12uzlRv5/tWWv9R9J1SA==
 
 devtools-protocol@0.0.927104:
   version "0.0.927104"
@@ -19324,11 +19374,6 @@ expect@^29.0.0, expect@^29.7.0:
     jest-matcher-utils "^29.7.0"
     jest-message-util "^29.7.0"
     jest-util "^29.7.0"
-
-expiry-js@0.1.7:
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/expiry-js/-/expiry-js-0.1.7.tgz#76be8c05e572bf936df40c1766448d0b3b2f555f"
-  integrity sha1-dr6MBeVyv5Nt9AwXZkSNCzsvVV8=
 
 exponential-backoff@^3.1.1:
   version "3.1.1"
@@ -27473,28 +27518,28 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@24.14.0, puppeteer-core@^24.10.0:
-  version "24.14.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.14.0.tgz#c2e3e80649b6a0c2855c3dae09c794c981c686d6"
-  integrity sha512-NO9XpCl+i8oB0zJp81iPhzMo2QK8/JTj4ramSvTpGCo9CPCNo4AZ8qVOGpSgXzlcOfOT3VHOkzTfPo08GOE5jA==
+puppeteer-core@24.17.0, puppeteer-core@^24.10.0:
+  version "24.17.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.17.0.tgz#66eaa3532d06c22fbbdc36e09f416cb69b8c8637"
+  integrity sha512-RYOBKFiF+3RdwIZTEacqNpD567gaFcBAOKTT7742FdB1icXudrPI7BlZbYTYWK2wgGQUXt9Zi1Yn+D5PmCs4CA==
   dependencies:
-    "@puppeteer/browsers" "2.10.6"
-    chromium-bidi "7.1.1"
+    "@puppeteer/browsers" "2.10.7"
+    chromium-bidi "8.0.0"
     debug "^4.4.1"
-    devtools-protocol "0.0.1464554"
+    devtools-protocol "0.0.1475386"
     typed-query-selector "^2.12.0"
     ws "^8.18.3"
 
-puppeteer@24.14.0:
-  version "24.14.0"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.14.0.tgz#3f4d3123c2364e8b5c69f6cc48854620462025b5"
-  integrity sha512-GB7suRDkp9pUnxpNGAORICQCtw11KFbg6U2iJXVTflzJLK5D1qzq8xOOmLgN/QnDBpDMdpn96ri52XkuN83Giw==
+puppeteer@24.17.0:
+  version "24.17.0"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.17.0.tgz#2fa286ed7b755846ef6064c1ee42b5491abcd21b"
+  integrity sha512-CGrmJ8WgilK3nyE73k+pbxHggETPpEvL6AQ9H5JSK1RgZRGMQVJ+iO3MocGm9yBQXQJ9U5xijyLvkYXFeb0/+g==
   dependencies:
-    "@puppeteer/browsers" "2.10.6"
-    chromium-bidi "7.1.1"
+    "@puppeteer/browsers" "2.10.7"
+    chromium-bidi "8.0.0"
     cosmiconfig "^9.0.0"
-    devtools-protocol "0.0.1464554"
-    puppeteer-core "24.14.0"
+    devtools-protocol "0.0.1475386"
+    puppeteer-core "24.17.0"
     typed-query-selector "^2.12.0"
 
 pure-rand@^6.0.0:
