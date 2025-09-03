@@ -9,10 +9,12 @@ import type { AgentService } from './agents';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
+import type { DataTypeRegistry } from './data_type_registry';
 
 export interface OnechatInternalService {
   agentService: AgentService;
   chatService: ChatService;
   conversationsService: ConversationsService;
   toolsService: ToolsService;
+  dataTypeRegistry: DataTypeRegistry;
 }

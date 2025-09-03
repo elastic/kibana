@@ -37,6 +37,7 @@
     "@kbn/features-plugin",
     "@kbn/workchat-framework-plugin",
     "@kbn/logging",
+    "@kbn/onechat-plugin",
   ],
   "exclude": [
     "target/**/*",

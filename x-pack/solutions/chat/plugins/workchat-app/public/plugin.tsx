@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -16,6 +17,7 @@ import { registerApp } from './application';
 import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
 import { IntegrationService } from './services/integration/integration_service';
 import { IntegrationRegistry } from './services/integration/integration_registry';
+import { WorkspaceDataType, DocumentDataType } from './data_types';
 
 export class WorkChatAppPlugin
   implements
@@ -28,11 +30,15 @@ export class WorkChatAppPlugin
 {
   private services?: WorkChatServices;
   private readonly integrationRegistry = new IntegrationRegistry();
+  private readonly logger: Logger;
 
-  constructor(context: PluginInitializerContext) {}
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get('workchat.app.public');
+  }
 
   public setup(
-    core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
+    core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>,
+    { onechat }: WorkChatAppPluginSetupDependencies
   ): WorkChatAppPluginSetup {
     registerApp({
       core,
@@ -43,6 +49,10 @@ export class WorkChatAppPlugin
         return this.services;
       },
     });
+
+    // Register custom data type descriptors
+    onechat.dataTypeRegistry.register(new WorkspaceDataType());
+    onechat.dataTypeRegistry.register(new DocumentDataType());
 
     return {
       integrations: {
@@ -78,6 +88,7 @@ export class WorkChatAppPlugin
       integrationRegistry: this.integrationRegistry,
     };
 
+    this.logger.info('WorkChatAppPlugin started.');
     return {};
   }
 
