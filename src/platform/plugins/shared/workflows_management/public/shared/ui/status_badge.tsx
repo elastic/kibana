@@ -57,12 +57,12 @@ const getExecutionStatusColorsMap = (
       backgroundColor: euiTheme.colors.backgroundBaseWarning,
     },
     [ExecutionStatus.CANCELLING]: {
-      color: euiTheme.colors.danger,
-      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
     [ExecutionStatus.CANCELLED]: {
-      color: euiTheme.colors.danger,
-      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
     [ExecutionStatus.SKIPPED]: {
       color: euiTheme.colors.textSubdued,
