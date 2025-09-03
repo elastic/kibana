@@ -28,7 +28,7 @@ import {
   getCustomThresholdRuleData,
   getEsQueryRuleData,
   getSLOBurnRateRuleData,
-} from './getRuleData';
+} from './get_rule_data';
 
 const viewInDiscoverSupportedRuleTypes = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
