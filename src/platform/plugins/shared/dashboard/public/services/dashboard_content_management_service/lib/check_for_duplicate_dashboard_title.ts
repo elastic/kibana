@@ -77,7 +77,7 @@ export async function checkForDuplicateDashboardTitle({
   }
 
   const [largestDuplicationId] = hits
-    .map((hit) => extractTitleAndCount(hit.data.title)[1])
+    .map((hit) => extractTitleAndCount(hit.attributes.title)[1])
     .sort((a, b) => b - a);
 
   const speculativeCollisionFreeTitle = `${baseDashboardName} (${largestDuplicationId + 1})`;
