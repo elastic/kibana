@@ -287,7 +287,7 @@ export function ChangeDataView({
             <EuiFlexItem
               grow={false}
               css={css`
-                padding: 7px;
+                padding: calc(${euiTheme.size.s} - 1px);
                 border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
                 background-color: ${euiTheme.colors.lightestShade};
                 border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
