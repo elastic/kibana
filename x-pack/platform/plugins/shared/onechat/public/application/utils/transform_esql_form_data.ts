@@ -36,7 +36,9 @@ export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): OnechatEs
  * @param data - The ES|QL form data to transform.
  * @returns The transformed data as an ES|QL tool.
  */
-export const transformFormDataToEsqlTool = (data: OnechatEsqlToolFormData): EsqlToolDefinition => {
+export const transformFormDataToEsqlTool = (
+  data: OnechatEsqlToolFormData
+): Omit<EsqlToolDefinition, 'readonly'> => {
   const esqlParams = new Set(getESQLQueryVariables(data.esql));
   return {
     id: data.name,

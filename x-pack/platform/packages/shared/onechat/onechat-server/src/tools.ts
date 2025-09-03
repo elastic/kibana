@@ -20,7 +20,7 @@ import type { ToolEventEmitter } from './events';
  * Onechat tool, as registered by built-in tool providers.
  */
 export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
-  extends Omit<ToolDefinition, 'id' | 'type' | 'configuration'> {
+  extends Omit<ToolDefinition, 'id' | 'type' | 'readonly' | 'configuration'> {
   /**
    * Built-in tool ID
    */

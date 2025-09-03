@@ -35,6 +35,7 @@ describe('transformEsqlFormData', () => {
     mockTool = {
       id: 'my-test-tool',
       description: 'A tool for testing.',
+      readonly: false,
       configuration: {
         query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
         params: {
