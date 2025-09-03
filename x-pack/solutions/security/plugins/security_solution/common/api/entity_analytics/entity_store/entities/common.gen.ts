@@ -24,6 +24,44 @@ export const EngineMetadata = z.object({
   Type: z.string(),
 });
 
+export type EntityField = z.infer<typeof EntityField>;
+export const EntityField = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  type: z.string().optional(),
+  sub_type: z.string().optional(),
+  source: z.string().optional(),
+  attributes: z
+    .object({
+      StorageClass: z.string().optional(),
+      MfaEnabled: z.boolean().optional(),
+      Privileged: z.boolean().optional(),
+      GrantedPermissions: z.string().optional(),
+      KnownRedirect: z.boolean().optional(),
+      Asset: z.boolean().optional(),
+      Managed: z.boolean().optional(),
+      OsCurrent: z.string().optional(),
+      OsPatchCurrent: z.string().optional(),
+      OauthConsentRestriction: z.string().optional(),
+    })
+    .optional(),
+  behavior: z
+    .object({
+      UsedUsbDevice: z.boolean().optional(),
+      BruteForceVictim: z.boolean().optional(),
+      NewCountryLogin: z.boolean().optional(),
+    })
+    .optional(),
+  lifecycle: z
+    .object({
+      FirstSeen: z.string().datetime().optional(),
+      LastActivity: z.string().datetime().optional(),
+      IssuedAt: z.string().datetime().optional(),
+      LastPasswordChange: z.string().datetime().optional(),
+    })
+    .optional(),
+});
+
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z.object({
   '@timestamp': z.string().datetime().optional(),
@@ -42,6 +80,7 @@ export const UserEntity = z.object({
     email: z.array(z.string()).optional(),
     hash: z.array(z.string()).optional(),
     risk: EntityRiskScoreRecord.optional(),
+    entity: EntityField.optional(),
   }),
   asset: z
     .object({
@@ -74,6 +113,7 @@ export const HostEntity = z.object({
     mac: z.array(z.string()).optional(),
     architecture: z.array(z.string()).optional(),
     risk: EntityRiskScoreRecord.optional(),
+    entity: EntityField.optional(),
   }),
   asset: z
     .object({
@@ -99,6 +139,7 @@ export const ServiceEntity = z.object({
   service: z.object({
     name: z.string(),
     risk: EntityRiskScoreRecord.optional(),
+    entity: EntityField.optional(),
   }),
   asset: z
     .object({
@@ -137,14 +178,5 @@ export const Entity = EntityInternal as z.ZodType<Entity>;
 
 export type CRUDEntity = z.infer<typeof CRUDEntity>;
 export const CRUDEntity = z.object({
-  entity: z.object({
-    id: z.string(),
-    name: z.string().optional(),
-    type: z.string().optional(),
-    category: z.string().optional(),
-    source: z.string().optional(),
-    attributes: z.object({}).catchall(z.unknown()).optional(),
-    behavior: z.object({}).catchall(z.unknown()).optional(),
-    lifecyle: z.object({}).catchall(z.unknown()).optional(),
-  }),
+  entity: EntityField,
 });

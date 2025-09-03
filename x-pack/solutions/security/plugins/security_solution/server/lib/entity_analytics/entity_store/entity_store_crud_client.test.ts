@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { EntityStoreCrudClient } from './entity_store_crud_client';
 import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from './errors';
 import type {
+  CRUDEntity,
   EngineDescriptor,
   EntityType,
 } from '../../../../common/api/entity_analytics/entity_store';
@@ -92,18 +91,18 @@ describe('EntityStoreCrudClient', () => {
 
     it('when not allowed attributes are updated, throw error', async () => {
       mockStatusRunning(dataClientMock, 'host');
-      const entity = {
+      const doc: CRUDEntity = {
         entity: {
           id: 'host-1',
           type: 'update',
           sub_type: 'updated-sub',
           attributes: {
-            Storage_class: 'cold',
+            StorageClass: 'cold',
           },
         },
       };
 
-      expect(async () => client.singleUpdateEntity('host', 'host-1', entity)).rejects.toThrow(
+      expect(async () => client.singleUpdateEntity('host', 'host-1', doc)).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
             `updated without forcing it (?force=true): type, sub_type`
@@ -115,20 +114,20 @@ describe('EntityStoreCrudClient', () => {
       mockStatusRunning(dataClientMock, 'host');
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
 
-      const entity = {
+      const doc: CRUDEntity = {
         entity: {
           id: 'host-1',
           attributes: {
-            Storage_class: 'cold',
+            StorageClass: 'cold',
             Managed: true,
           },
           behavior: {
-            Brute_force_victim: false,
+            BruteForceVictim: false,
           },
         },
       };
 
-      expect(async () => client.singleUpdateEntity('host', 'host-1', entity)).rejects.toThrow(
+      expect(async () => client.singleUpdateEntity('host', 'host-1', doc)).rejects.toThrow(
         new DocumentNotFoundError()
       );
     });
@@ -145,15 +144,15 @@ describe('EntityStoreCrudClient', () => {
       // https://github.com/uuidjs/uuid/issues/825#issuecomment-2519038887
       const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
 
-      const doc = {
+      const doc: CRUDEntity = {
         entity: {
           id: 'host-1',
           attributes: {
-            Storage_class: 'cold',
+            StorageClass: 'cold',
             Managed: true,
           },
           behavior: {
-            Brute_force_victim: false,
+            BruteForceVictim: false,
           },
         },
       };
@@ -171,12 +170,16 @@ describe('EntityStoreCrudClient', () => {
         script: {
           lang: 'painless',
           source:
-            "ctx._source.entity['attributes'] = ctx._source.entity['attributes'] == null ? [:] : ctx._source.entity['attributes'];ctx._source.entity['attributes']['Storage_class'] = 'cold';ctx._source.entity['attributes']['Managed'] = true;ctx._source.entity['behavior'] = ctx._source.entity['behavior'] == null ? [:] : ctx._source.entity['behavior'];ctx._source.entity['behavior']['Brute_force_victim'] = false;",
+            "ctx._source.entity['attributes'] = ctx._source.entity['attributes'] == null ? [:] : ctx._source.entity['attributes'];" +
+            "ctx._source.entity['attributes']['StorageClass'] = 'cold';" +
+            "ctx._source.entity['attributes']['Managed'] = true;" +
+            "ctx._source.entity['behavior'] = ctx._source.entity['behavior'] == null ? [:] : ctx._source.entity['behavior'];" +
+            "ctx._source.entity['behavior']['BruteForceVictim'] = false;",
         },
       });
 
       expect(esClientMock.create).toBeCalledWith({
-        index: '.entity-store.host-priority-update-default',
+        index: '.entities.v1.priority_updates.security_host_default',
         id: '123',
         document: {
           '@timestamp': mockedDate.toISOString(),

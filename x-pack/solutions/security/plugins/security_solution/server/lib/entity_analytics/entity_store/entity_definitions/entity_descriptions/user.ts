@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions } from './common';
+import { getCommonFieldDescriptions, getNestedEntityFieldsDescriptions } from './common';
 import { collectValues as collect } from './field_utils';
 
 export const USER_DEFINITION_VERSION = '1.0.0';
@@ -54,5 +54,6 @@ export const userEntityEngineDescription: EntityDescription = {
     collect({ source: 'user.id' }),
     collect({ source: 'user.roles' }),
     ...getCommonFieldDescriptions('user'),
+    ...getNestedEntityFieldsDescriptions('user'),
   ],
 };
