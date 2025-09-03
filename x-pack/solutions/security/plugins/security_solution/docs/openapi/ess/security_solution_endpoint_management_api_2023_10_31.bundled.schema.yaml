@@ -267,9 +267,18 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  $ref: '#/components/schemas/AlertIds'
+                  allOf:
+                    - $ref: '#/components/schemas/AlertIds'
+                    - description: >-
+                        If this action is associated with any alerts, they can
+                        be specified here. The action will be logged in any
+                        cases associated with the specified alerts.
+                      type: object
                 case_ids:
-                  $ref: '#/components/schemas/CaseIds'
+                  allOf:
+                    - $ref: '#/components/schemas/CaseIds'
+                    - description: The IDs of cases where the action taken will be logged.
+                      type: object
                 comment:
                   $ref: '#/components/schemas/Comment'
                 endpoint_ids:
@@ -456,9 +465,18 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  $ref: '#/components/schemas/AlertIds'
+                  allOf:
+                    - $ref: '#/components/schemas/AlertIds'
+                    - description: >-
+                        If this action is associated with any alerts, they can
+                        be specified here. The action will be logged in any
+                        cases associated with the specified alerts.
+                      type: object
                 case_ids:
-                  $ref: '#/components/schemas/CaseIds'
+                  allOf:
+                    - $ref: '#/components/schemas/CaseIds'
+                    - description: The IDs of cases where the action taken will be logged.
+                      type: object
                 comment:
                   $ref: '#/components/schemas/Comment'
                 endpoint_ids:
@@ -864,9 +882,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/AlertIds'
+                - description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1017,9 +1044,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/AlertIds'
+                - description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1080,9 +1116,18 @@ components:
         agent_type:
           $ref: '#/components/schemas/AgentTypes'
         alert_ids:
-          $ref: '#/components/schemas/AlertIds'
+          allOf:
+            - $ref: '#/components/schemas/AlertIds'
+            - description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              type: object
         case_ids:
-          $ref: '#/components/schemas/CaseIds'
+          allOf:
+            - $ref: '#/components/schemas/CaseIds'
+            - description: The IDs of cases where the action taken will be logged.
+              type: object
         comment:
           $ref: '#/components/schemas/Comment'
         endpoint_ids:
@@ -1179,9 +1224,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/AlertIds'
+                - description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1624,9 +1678,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/AlertIds'
+                - description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1654,9 +1717,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/AlertIds'
+                - description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1771,9 +1843,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/AlertIds'
+                - description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1886,9 +1967,18 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              $ref: '#/components/schemas/AlertIds'
+              allOf:
+                - $ref: '#/components/schemas/AlertIds'
+                - description: >-
+                    If this action is associated with any alerts, they can be
+                    specified here. The action will be logged in any cases
+                    associated with the specified alerts.
+                  type: object
             case_ids:
-              $ref: '#/components/schemas/CaseIds'
+              allOf:
+                - $ref: '#/components/schemas/CaseIds'
+                - description: The IDs of cases where the action taken will be logged.
+                  type: object
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
