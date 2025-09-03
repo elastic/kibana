@@ -7,10 +7,10 @@
 
 import React, { memo, useMemo } from 'react';
 import hash from 'object-hash';
-import type { CallOutMessage } from '../../../common/components/callouts';
-import { CallOutSwitcher } from '../../../common/components/callouts';
+import type { CallOutMessage } from '../../../../common/components/callouts';
+import { CallOutSwitcher } from '../../../../common/components/callouts';
 import * as i18n from './translations';
-import { useMissingPrivileges } from '../../hooks/alerts/use_missing_privileges';
+import { useMissingPrivileges } from '../../hooks/use_missing_privileges';
 
 /**
  * Callout that displays a Callout when the user has missing privileges.

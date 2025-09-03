@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import type { ChangeEvent } from 'react';
-import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
+import React, { useEffect } from 'react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { StepDefineRule } from '..';
 import type { StepDefineRuleProps } from '..';
+import { StepDefineRule } from '..';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { useRuleFromTimeline } from '../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+import { useRuleFromTimeline } from '../../../../../detections/hooks/use_rule_from_timeline';
 import { TestProviders } from '../../../../../common/mock';
 import { schema as defineRuleSchema } from '../schema';
 import { stepDefineDefaultValue } from '../../../../common/utils';

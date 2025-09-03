@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { MissingPrivilegesCallOut } from './missing_privileges_callout';
-import { useMissingPrivileges } from '../../hooks/alerts/use_missing_privileges';
+import { useMissingPrivileges } from '../../hooks/use_missing_privileges';
 
-jest.mock('../../hooks/alerts/use_missing_privileges');
+jest.mock('../../hooks/use_missing_privileges');
 
 describe('MissingPrivilegesCallOut', () => {
   it('should show callout', () => {
