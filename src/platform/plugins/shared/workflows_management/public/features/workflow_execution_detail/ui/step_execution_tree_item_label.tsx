@@ -9,30 +9,33 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, euiFontSize } from '@elastic/eui';
-import { ExecutionStatus, type EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import React from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { formatDuration } from '../../../shared/lib/format_duration';
 
 export interface StepExecutionTreeItemLabelProps {
-  stepExecution: EsWorkflowStepExecution;
+  stepId: string;
+  status: ExecutionStatus;
+  executionIndex: number;
+  executionTimeMs: number | null;
   stepType: string;
   selected: boolean;
 }
 
 export function StepExecutionTreeItemLabel({
-  stepExecution,
+  stepId,
+  status,
+  executionIndex,
+  executionTimeMs,
   stepType,
   selected,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
-  const duration = stepExecution.completedAt
-    ? new Date(stepExecution.completedAt).getTime() - new Date(stepExecution.startedAt).getTime()
-    : null;
   const isDangerousStatus =
-    stepExecution.status === ExecutionStatus.FAILED ||
-    stepExecution.status === ExecutionStatus.CANCELLED;
+    status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
+  const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
   return (
     <EuiFlexGroup
       alignItems="baseline"
@@ -46,17 +49,17 @@ export function StepExecutionTreeItemLabel({
           styles.stepName,
           selected && styles.selectedStepName,
           isDangerousStatus && styles.dangerousStepName,
+          isInactiveStatus && styles.inactiveStepName,
         ]}
       >
-        {/* {stepType} */}
-        {stepExecution.stepId}
-        {stepExecution.executionIndex > 0 && (
-          <span css={styles.executionIndex}>{stepExecution.executionIndex + 1}</span>
-        )}
+        {stepId}
+        {executionIndex > 0 && <span css={styles.executionIndex}>{executionIndex + 1}</span>}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={styles.duration}>
-        {duration ? formatDuration(duration) : null}
-      </EuiFlexItem>
+      {executionTimeMs && (
+        <EuiFlexItem grow={false} css={styles.duration}>
+          {executionTimeMs ? formatDuration(executionTimeMs) : null}
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -79,6 +82,10 @@ const componentStyles = {
   dangerousStepName: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.danger,
+    }),
+  inactiveStepName: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textDisabled,
     }),
   duration: ({ euiTheme }: UseEuiTheme) =>
     css({

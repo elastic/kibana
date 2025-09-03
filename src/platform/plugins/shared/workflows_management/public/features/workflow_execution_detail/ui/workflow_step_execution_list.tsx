@@ -21,10 +21,16 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   EuiTreeView,
+  EuiBeacon,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EsWorkflowStepExecution, WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  type EsWorkflowStepExecution,
+  type WorkflowExecutionDto,
+  type WorkflowYaml,
+} from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
@@ -36,6 +42,38 @@ import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getStepIconType } from '../../../shared/ui/get_step_icon_type';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 
+function StepIcon({
+  stepType,
+  executionStatus,
+}: {
+  stepType: string;
+  executionStatus: ExecutionStatus;
+}) {
+  const { euiTheme } = useEuiTheme();
+  if (executionStatus === ExecutionStatus.RUNNING) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+  if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
+    return <EuiBeacon size={14} color="warning" />;
+  }
+  return (
+    <EuiIcon
+      type={getStepIconType(stepType)}
+      color={getExecutionStatusColors(euiTheme, executionStatus).color}
+      css={
+        // change fill and color of the icon for non-completed statuses, for multi-color logos
+        executionStatus !== ExecutionStatus.COMPLETED &&
+        css`
+          & * {
+            fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+            color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+          }
+        `
+      }
+    />
+  );
+}
+
 function transformWorkflowDefinitionToStepListTree(
   workflowDefinition: WorkflowYaml
 ): StepListTreeItem[] {
@@ -44,9 +82,10 @@ function transformWorkflowDefinitionToStepListTree(
 }
 
 function convertTreeToEuiTreeViewItems(
+  euiTheme: EuiThemeComputed,
+  executionStatus: ExecutionStatus,
   treeItems: StepListTreeItem[],
   stepExecutionMap: Map<string, EsWorkflowStepExecution[]>,
-  euiTheme: EuiThemeComputed,
   selectedId: string | null,
   onClickHandler: (stepExecutionId: string) => void
 ): EuiTreeViewProps['items'] {
@@ -55,20 +94,40 @@ function convertTreeToEuiTreeViewItems(
     .map((item) => {
       const stepExecutions = stepExecutionMap.get(item.stepId);
       if (!stepExecutions) {
-        return [];
+        const mockStatus =
+          executionStatus === ExecutionStatus.PENDING ||
+          executionStatus === ExecutionStatus.WAITING ||
+          executionStatus === ExecutionStatus.RUNNING
+            ? ExecutionStatus.PENDING
+            : ExecutionStatus.SKIPPED;
+        return [
+          {
+            id: item.stepId,
+            sortIndex: item.executionIndex,
+            icon: <StepIcon stepType={item.stepType} executionStatus={mockStatus} />,
+            label: (
+              <StepExecutionTreeItemLabel
+                stepId={item.stepId}
+                status={mockStatus}
+                executionIndex={item.executionIndex}
+                executionTimeMs={null}
+                stepType={item.stepType}
+                selected={selectedId === item.stepId}
+              />
+            ),
+          },
+        ];
       }
       return stepExecutions.map((stepExecution) => ({
         id: stepExecution.id,
         sortIndex: stepExecution.executionIndex,
-        icon: (
-          <EuiIcon
-            type={getStepIconType(item.stepType)}
-            color={getExecutionStatusColors(euiTheme, stepExecution.status).color}
-          />
-        ),
+        icon: <StepIcon stepType={item.stepType} executionStatus={stepExecution.status} />,
         label: (
           <StepExecutionTreeItemLabel
-            stepExecution={stepExecution}
+            stepId={stepExecution.stepId}
+            status={stepExecution.status}
+            executionIndex={stepExecution.executionIndex}
+            executionTimeMs={stepExecution.executionTimeMs ?? null}
             stepType={item.stepType}
             selected={selectedId === stepExecution.id}
           />
@@ -76,9 +135,10 @@ function convertTreeToEuiTreeViewItems(
         children:
           item.children.length > 0
             ? convertTreeToEuiTreeViewItems(
+                euiTheme,
+                executionStatus,
                 item.children,
                 stepExecutionMap,
-                euiTheme,
                 selectedId,
                 onClickFn
               )
@@ -118,7 +178,7 @@ export const WorkflowStepExecutionList = ({
 
   let content: React.ReactNode = null;
 
-  if (isLoading) {
+  if (isLoading && !execution) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -149,7 +209,7 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (!execution || !execution.stepExecutions.length) {
+  } else if (!execution) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -157,8 +217,8 @@ export const WorkflowStepExecutionList = ({
         title={
           <h2>
             <FormattedMessage
-              id="workflows.workflowStepExecutionList.noStepExecutionsFound"
-              defaultMessage="No step executions found"
+              id="workflows.workflowStepExecutionList.noExecutionFound"
+              defaultMessage="No execution found"
             />
           </h2>
         }
@@ -175,9 +235,10 @@ export const WorkflowStepExecutionList = ({
     }
     const stepListTree = transformWorkflowDefinitionToStepListTree(execution.workflowDefinition);
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
+      euiTheme,
+      execution.status,
       stepListTree,
       stepExecutionMap,
-      euiTheme,
       selectedId,
       onStepExecutionClick
     );
@@ -242,11 +303,12 @@ const componentStyles = {
     css({
       padding: euiTheme.size.m,
     }),
-  header: css({
-    minHeight: `32px`,
-    display: 'flex',
-    alignItems: 'center',
-  }),
+  header: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minHeight: `32px`,
+      display: 'flex',
+      alignItems: 'center',
+    }),
   doneButton: css({
     justifySelf: 'flex-end',
     marginTop: 'auto',
