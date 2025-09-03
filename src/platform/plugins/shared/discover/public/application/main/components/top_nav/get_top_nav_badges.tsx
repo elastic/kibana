@@ -17,7 +17,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import type { TopNavCustomization } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { SolutionsViewBadge } from './solutions_view_badge';
-import { onSaveDiscoverSession } from './on_save_discover_session';
+import { onSaveDiscoverSession } from './save_discover_session';
 
 /**
  * Helper function to build the top nav badges

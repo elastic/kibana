@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { isObject } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverServices } from '../../../../../build_services';
+import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
-} from '../../state_management/redux';
+} from '../../../state_management/redux';
+import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
+import { DiscoverSessionSaveModal } from './save_modal';
 
 export interface OnSaveDiscoverSessionParams {
   services: DiscoverServices;
@@ -143,110 +142,4 @@ export const onSaveDiscoverSession = async ({
   );
 
   showSaveModal(saveModal);
-};
-
-export type DiscoverSessionSaveModalOnSaveCallback = (
-  props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }
-) => Promise<SaveResult>;
-
-export interface DiscoverSessionSaveModalProps {
-  isTimeBased: boolean;
-  services: DiscoverServices;
-  title: string;
-  showCopyOnSave: boolean;
-  initialCopyOnSave?: boolean;
-  description?: string;
-  timeRestore?: boolean;
-  tags: string[];
-  onSave: DiscoverSessionSaveModalOnSaveCallback;
-  onClose: () => void;
-  managed: boolean;
-}
-
-const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> = ({
-  isTimeBased,
-  services: { savedObjectsTagging },
-  title,
-  description,
-  tags,
-  showCopyOnSave,
-  initialCopyOnSave,
-  timeRestore: savedTimeRestore,
-  onSave,
-  onClose,
-  managed,
-}) => {
-  const [timeRestore, setTimeRestore] = useState((isTimeBased && savedTimeRestore) || false);
-  const [currentTags, setCurrentTags] = useState(tags);
-
-  const onModalSave = (params: OnSaveProps) => {
-    onSave({
-      ...params,
-      newTimeRestore: timeRestore,
-      newTags: currentTags,
-    });
-  };
-
-  const tagSelector = savedObjectsTagging ? (
-    <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-      initialSelection={currentTags}
-      onTagsSelected={(newTags) => {
-        setCurrentTags(newTags);
-      }}
-    />
-  ) : null;
-
-  const timeSwitch = isTimeBased ? (
-    <EuiFormRow
-      helpText={
-        <FormattedMessage
-          id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
-          defaultMessage="Update the time filter and refresh interval to the current selection when using this session."
-        />
-      }
-    >
-      <EuiSwitch
-        data-test-subj="storeTimeWithSearch"
-        checked={timeRestore}
-        onChange={(event) => setTimeRestore(event.target.checked)}
-        label={
-          <FormattedMessage
-            id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
-            defaultMessage="Store time with Discover session"
-          />
-        }
-      />
-    </EuiFormRow>
-  ) : null;
-
-  const options = (
-    <>
-      {tagSelector}
-      {timeSwitch}
-    </>
-  );
-
-  return (
-    <SavedObjectSaveModal
-      title={title}
-      showCopyOnSave={showCopyOnSave}
-      initialCopyOnSave={initialCopyOnSave}
-      description={description}
-      objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
-        defaultMessage: 'Discover session',
-      })}
-      showDescription={true}
-      options={options}
-      onSave={onModalSave}
-      onClose={onClose}
-      mustCopyOnSaveMessage={
-        managed
-          ? i18n.translate('discover.localMenu.mustCopyOnSave', {
-              defaultMessage:
-                'Elastic manages this Discover session. Save any changes to a new Discover session.',
-            })
-          : undefined
-      }
-    />
-  );
 };

@@ -44,7 +44,7 @@ import {
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { onSaveDiscoverSession } from './on_save_discover_session';
+import { onSaveDiscoverSession } from './save_discover_session';
 
 /**
  * Helper function to build the top nav links

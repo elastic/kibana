@@ -7,22 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
+import {
+  savedSearchMock,
+  savedSearchMockWithTimeField,
+} from '../../../../../__mocks__/saved_search';
 import type {
   DiscoverSessionSaveModalOnSaveCallback,
   DiscoverSessionSaveModalProps,
-  OnSaveDiscoverSessionParams,
-} from './on_save_discover_session';
+} from './save_modal';
+import type { OnSaveDiscoverSessionParams } from './on_save_discover_session';
 import { onSaveDiscoverSession } from './on_save_discover_session';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ReactElement } from 'react';
-import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../../build_services';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import { fromTabStateToSavedObjectTab, internalStateActions } from '../../state_management/redux';
+import {
+  fromTabStateToSavedObjectTab,
+  internalStateActions,
+} from '../../../state_management/redux';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { getTabStateMock } from '../../state_management/redux/__mocks__/internal_state.mocks';
+import { getTabStateMock } from '../../../state_management/redux/__mocks__/internal_state.mocks';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { omit } from 'lodash';

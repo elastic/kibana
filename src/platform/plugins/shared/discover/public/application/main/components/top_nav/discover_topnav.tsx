@@ -32,7 +32,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
-import { onSaveDiscoverSession } from './on_save_discover_session';
+import { onSaveDiscoverSession } from './save_discover_session';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
