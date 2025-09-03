@@ -6,6 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  ENTITY_PRIORITY_UPDATES,
+  ENTITY_SCHEMA_VERSION_V1,
+  entitiesIndexPattern,
+} from '@kbn/entities-schema/src/schema/v1/patterns';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
 import { createEntityIndex, deleteEntityIndex } from './entity_index';
 
@@ -40,5 +45,9 @@ export const deleteEntityPriorityUpdateIndex = async (
 };
 
 export const getEntityPriorityUpdateIndexName = (type: EntityType, namespace: string): string => {
-  return `.entity-store.${type}-priority-update-${namespace}`;
+  return entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_PRIORITY_UPDATES,
+    definitionId: `security_${type}_${namespace}`,
+  });
 };

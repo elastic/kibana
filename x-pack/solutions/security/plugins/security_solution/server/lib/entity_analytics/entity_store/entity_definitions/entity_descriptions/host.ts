@@ -7,7 +7,7 @@
 
 import { collectValues as collect } from './field_utils';
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions } from './common';
+import { getCommonFieldDescriptions, getNestedEntityFieldsDescriptions } from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
@@ -55,5 +55,6 @@ export const hostEntityEngineDescription: EntityDescription = {
     collect({ source: 'host.type' }),
     collect({ source: 'host.architecture' }),
     ...getCommonFieldDescriptions('host'),
+    ...getNestedEntityFieldsDescriptions('host'),
   ],
 };
