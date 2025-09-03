@@ -73,7 +73,7 @@ async function updateWiredIngest({
       ...stream,
       ingest,
     },
-    rules: [],
+    rules,
   };
 
   return await streamsClient.upsertStream({
