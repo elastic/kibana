@@ -20,7 +20,7 @@ import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { AddPanelButton } from './add_panel_button/components/add_panel_button';
 import { executeAddLensPanelAction } from '../../dashboard_actions/execute_add_lens_panel_action';
-import { addFromLibrary } from '../../dashboard_renderer/add_panel_from_library';
+import { openAddFromLibraryFlyout } from './add_from_library/open_add_from_library_flyout';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const { euiTheme } = useEuiTheme();
@@ -33,7 +33,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
   const extraButtons = [
     <AddPanelButton isDisabled={isDisabled} />,
     <AddFromLibraryButton
-      onClick={() => addFromLibrary(dashboardApi)}
+      onClick={() => openAddFromLibraryFlyout(dashboardApi)}
       size="s"
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}

@@ -17,17 +17,17 @@ import {
   SavedObjectFinder,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
+import { getAddFromLibraryType, useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { apiHasType } from '@kbn/presentation-publishing';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import {
-  core,
-  savedObjectsTaggingOss,
-  contentManagement,
-  usageCollection,
-} from '../kibana_services';
-import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
+  coreServices,
+  savedObjectsTaggingService,
+  contentManagementService,
+  usageCollectionService,
+} from '../../../services/kibana_services';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -39,7 +39,7 @@ const runAddTelemetry = (
     ? savedObjectMetaData.getSavedObjectSubType(savedObject)
     : savedObjectMetaData.type;
 
-  usageCollection?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
+  usageCollectionService?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
 export const AddFromLibraryFlyout = ({
@@ -60,7 +60,7 @@ export const AddFromLibraryFlyout = ({
     ) => {
       const libraryType = getAddFromLibraryType(type);
       if (!libraryType) {
-        core.notifications.toasts.addWarning(
+        coreServices.notifications.toasts.addWarning(
           i18n.translate('embeddableApi.addPanel.typeNotFound', {
             defaultMessage: 'Unable to load type: {type}',
             values: { type },
@@ -87,9 +87,9 @@ export const AddFromLibraryFlyout = ({
         <SavedObjectFinder
           id="embeddableAddPanel"
           services={{
-            contentClient: contentManagement.client,
-            savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-            uiSettings: core.uiSettings,
+            contentClient: contentManagementService.client,
+            savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
+            uiSettings: coreServices.uiSettings,
           }}
           onChoose={onChoose}
           savedObjectMetaData={libraryTypes}
