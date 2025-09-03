@@ -589,5 +589,42 @@ describe('createPointInTimeFinder()', () => {
         'Failed to open PIT for types [visualization]: 500 Error: Generic error message'
       );
     });
+
+    test('logs debug when openPointInTimeForType fails with 404', async () => {
+      const boom404Error = Boom.boomify(new Error('Not found'), { statusCode: 404 });
+      repository.openPointInTimeForType.mockRejectedValueOnce(boom404Error);
+
+      repository.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 1000,
+        page: 0,
+      });
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: repository,
+      });
+
+      // The find() method should complete successfully even when PIT fails to open (404)
+      // because findNext() can work without a PIT
+      const result = await finder.find().next();
+      expect(result.done).toBe(true); // Should complete successfully
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Unable to open PIT for types [visualization]: 404 Error: Not found'
+      );
+
+      expect(logger.error).not.toHaveBeenCalled();
+
+      // Verify that no additional error logging occurred after the debug message
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledTimes(2); // 404 debug message + "Collected [0] saved objects"
+    });
   });
 });
