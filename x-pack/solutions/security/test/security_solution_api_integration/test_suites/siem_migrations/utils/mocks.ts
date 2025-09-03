@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationStatus,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 
@@ -16,9 +16,10 @@ import type {
   OriginalRule,
   RuleMigrationRuleData,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
-import { INDEX_PATTERN as SIEM_MIGRATIONS_BASE_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
-import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/task/util/comments';
-import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/types';
+import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/task/util/comments';
+import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/types';
+
+const SIEM_MIGRATIONS_BASE_INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
 const SIEM_MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-migrations-default`;
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-rules-default`;
@@ -137,11 +138,11 @@ export const statsOverrideCallbackFactory = ({
       const partiallyTranslatedEndIndex =
         completedEndIndex - completed + fullyTranslated + partiallyTranslated;
       if (index < fullyTranslatedEndIndex) {
-        translationResult = RuleTranslationResult.FULL;
+        translationResult = MigrationTranslationResult.FULL;
       } else if (index < partiallyTranslatedEndIndex) {
-        translationResult = RuleTranslationResult.PARTIAL;
+        translationResult = MigrationTranslationResult.PARTIAL;
       } else {
-        translationResult = RuleTranslationResult.UNTRANSLATABLE;
+        translationResult = MigrationTranslationResult.UNTRANSLATABLE;
       }
     }
     return {

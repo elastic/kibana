@@ -23,15 +23,15 @@ describe('ROW Validation', () => {
   });
 
   test('validates the most basic query', () => {
-    rowExpectErrors('row missing_column', ['Unknown column [missing_column]']);
-    rowExpectErrors('row fn()', ['Unknown function [fn]']);
+    rowExpectErrors('row missing_column', ['Unknown column "missing_column"']);
+    rowExpectErrors('row fn()', ['Unknown function FN']);
     rowExpectErrors('row missing_column, missing_column2', [
-      'Unknown column [missing_column]',
-      'Unknown column [missing_column2]',
+      'Unknown column "missing_column"',
+      'Unknown column "missing_column2"',
     ]);
     rowExpectErrors('row col0=1', []);
-    rowExpectErrors('row col0=1, missing_column', ['Unknown column [missing_column]']);
-    rowExpectErrors('row col0=1, var0 = average()', ['Unknown function [average]']);
+    rowExpectErrors('row col0=1, missing_column', ['Unknown column "missing_column"']);
+    rowExpectErrors('row col0=1, var0 = average()', ['Unknown function AVERAGE']);
     rowExpectErrors('row col0 = [1, 2, 3]', []);
     rowExpectErrors('row col0 = [true, false]', []);
     rowExpectErrors('row col0 = ["a", "b"]', []);
@@ -55,7 +55,7 @@ describe('ROW Validation', () => {
     for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
       rowExpectErrors(`row col0 = 5 ${op} 0`, []);
       rowExpectErrors(`row col0 = NOT 5 ${op} 0`, []);
-      rowExpectErrors(`row col0 = (field ${op} 0)`, ['Unknown column [field]']);
+      rowExpectErrors(`row col0 = (field ${op} 0)`, ['Unknown column "field"']);
       rowExpectErrors(`row col0 = (NOT (5 ${op} 0))`, []);
       rowExpectErrors(`row col0 = to_ip("127.0.0.1") ${op} to_ip("127.0.0.1")`, []);
       rowExpectErrors(`row col0 = now() ${op} now()`, []);
