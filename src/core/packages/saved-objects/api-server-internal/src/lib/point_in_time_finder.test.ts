@@ -571,7 +571,7 @@ describe('createPointInTimeFinder()', () => {
       await expect(finder.find().next()).rejects.toThrow('Forbidden');
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to open PIT for types [visualization]: 403 Error: Forbidden'
+        'Failed to open PIT for types [visualization]: 403 ResponseError: Forbidden: forbidden'
       );
     });
 
