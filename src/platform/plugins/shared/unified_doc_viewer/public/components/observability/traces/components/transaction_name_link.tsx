@@ -10,13 +10,16 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { TRANSACTION_DETAILS_BY_NAME_LOCATOR } from '@kbn/deeplinks-observability';
+import {
+  TRANSACTION_DETAILS_BY_NAME_LOCATOR,
+  type TransactionDetailsByNameParams,
+} from '@kbn/deeplinks-observability';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 interface TransactionNameLinkProps {
   serviceName?: string;
-  transactionName?: string;
-  renderContent?: (name?: string) => React.ReactNode;
+  transactionName: string;
+  renderContent?: (name: string) => React.ReactNode;
 }
 
 export function TransactionNameLink({
@@ -34,16 +37,12 @@ export function TransactionNameLink({
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
 
-  const apmLinkToTransactionByNameLocator = urlService.locators.get<{
-    serviceName: string;
-    transactionName: string;
-    rangeFrom: string;
-    rangeTo: string;
-  }>(TRANSACTION_DETAILS_BY_NAME_LOCATOR);
+  const apmLinkToTransactionByNameLocator = urlService.locators.get<TransactionDetailsByNameParams>(
+    TRANSACTION_DETAILS_BY_NAME_LOCATOR
+  );
 
   const href =
     serviceName &&
-    transactionName &&
     apmLinkToTransactionByNameLocator?.getRedirectUrl({
       serviceName,
       transactionName,

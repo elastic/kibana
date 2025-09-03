@@ -20,7 +20,7 @@ import {
   USER_AGENT_VERSION_FIELD,
 } from '@kbn/discover-utils';
 
-export const spanFields = [
+const spanFields = [
   SERVICE_NAME_FIELD,
   SPAN_DESTINATION_SERVICE_RESOURCE_FIELD,
   TIMESTAMP_FIELD,
@@ -29,9 +29,24 @@ export const spanFields = [
   SPAN_SUBTYPE_FIELD,
 ];
 
-export const transactionFields = [USER_AGENT_NAME_FIELD, USER_AGENT_VERSION_FIELD];
-export const transactionTraceFields = [TRACE_ID_FIELD];
-export const traceFields = [TRACE_ID_FIELD, TRANSACTION_NAME_FIELD];
+const transactionFields = [USER_AGENT_NAME_FIELD, USER_AGENT_VERSION_FIELD];
 
-export const fields = [...spanFields, ...transactionFields];
-export const allFields = [...spanFields, ...transactionFields, ...traceFields];
+/**
+ * Used for Trace waterfall summary fields on `transaction` documents.
+ */
+export const transactionTraceFields = [TRACE_ID_FIELD];
+
+/**
+ * Used for Trace waterfall summary fields on `span` documents.
+ */
+export const spanTraceFields = [TRACE_ID_FIELD, TRANSACTION_NAME_FIELD];
+
+/**
+ * Used for Overview summary fields.
+ */
+export const spanAndTransactionFields = [...spanFields, ...transactionFields];
+
+/**
+ * Used for extracting DataView fields.
+ */
+export const traceFields = [...spanAndTransactionFields, ...spanTraceFields];

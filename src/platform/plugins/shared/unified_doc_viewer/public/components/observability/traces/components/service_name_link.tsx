@@ -42,13 +42,11 @@ export function ServiceNameLink({
     rangeTo: string;
   }>(SERVICE_OVERVIEW_LOCATOR_ID);
 
-  const href =
-    serviceName &&
-    apmLinkToServiceEntityLocator?.getRedirectUrl({
-      serviceName,
-      rangeFrom: timeRangeFrom,
-      rangeTo: timeRangeTo,
-    });
+  const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
+    serviceName,
+    rangeFrom: timeRangeFrom,
+    rangeTo: timeRangeTo,
+  });
 
   const routeLinkProps = href
     ? getRouterLinkProps({

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { SERVICE_NAME_FIELD } from '@kbn/discover-utils';
-import { transactionTraceFields, traceFields } from '../doc_viewer_overview/resources/fields';
+import { transactionTraceFields, spanTraceFields } from '../doc_viewer_overview/resources/fields';
 import { SummaryField } from '../doc_viewer_overview/sub_components/summary_field';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import type { FieldConfiguration } from '../resources/get_field_configuration';
@@ -70,7 +70,7 @@ export const Trace = ({
 
   const fieldRows =
     displayType === 'span'
-      ? traceFields.map((fieldId: string) => (
+      ? spanTraceFields.map((fieldId: string) => (
           <SummaryField
             key={fieldId}
             fieldId={fieldId}

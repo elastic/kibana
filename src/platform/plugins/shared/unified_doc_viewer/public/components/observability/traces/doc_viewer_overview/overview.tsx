@@ -32,7 +32,7 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { SpanLinks } from '../components/span_links';
 import { Trace } from '../components/trace';
 import { RootSpanProvider } from './hooks/use_root_span';
-import { fields, allFields } from './resources/fields';
+import { spanAndTransactionFields, traceFields } from './resources/fields';
 import { getFieldConfiguration } from './resources/get_field_configuration';
 import { DurationSummary } from './sub_components/duration_summary';
 import { SummaryField } from './sub_components/summary_field';
@@ -73,7 +73,7 @@ export function Overview({
     }),
     [dataView, fieldFormats, hit]
   );
-  const { dataViewFields } = useDataViewFields({ fields: allFields, dataView, columnsMeta });
+  const { dataViewFields } = useDataViewFields({ fields: traceFields, dataView, columnsMeta });
   const fieldConfigurations = useMemo(
     () => getFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
     [formattedDoc, flattenedDoc]
@@ -136,7 +136,7 @@ export function Overview({
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                {fields.map((fieldId) => (
+                {spanAndTransactionFields.map((fieldId) => (
                   <SummaryField
                     key={fieldId}
                     fieldId={fieldId}

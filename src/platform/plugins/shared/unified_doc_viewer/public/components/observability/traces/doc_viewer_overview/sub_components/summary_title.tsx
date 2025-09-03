@@ -77,7 +77,6 @@ export const SummaryTitle = ({
   const nameField = transactionName ? TRANSACTION_NAME_FIELD : SPAN_NAME_FIELD;
 
   let nameContent;
-  let idContent;
 
   if (name) {
     nameContent = (
@@ -110,15 +109,13 @@ export const SummaryTitle = ({
     );
   }
 
-  if (id) {
-    idContent = (
-      <FieldContent title={id} value={id} field={idField} showActions={showActions}>
-        <Title isTitle={!name && !serviceName}>
-          <HighlightField value={id} formattedValue={formattedId} />
-        </Title>
-      </FieldContent>
-    );
-  }
+  const idContent = id ? (
+    <FieldContent title={id} value={id} field={idField} showActions={showActions}>
+      <Title isTitle={!name && !serviceName}>
+        <HighlightField value={id} formattedValue={formattedId} />
+      </Title>
+    </FieldContent>
+  ) : undefined;
 
   return (
     <>

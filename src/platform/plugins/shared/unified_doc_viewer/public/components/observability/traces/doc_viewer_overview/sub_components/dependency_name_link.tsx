@@ -8,7 +8,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import {
+  type DependencyOverviewParams,
+  DEPENDENCY_OVERVIEW_LOCATOR_ID,
+} from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
 import { SpanIcon } from '@kbn/apm-ui-shared';
@@ -39,21 +42,16 @@ export function DependencyNameLink({
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
 
-  const apmLinkToDependencyOverviewLocator = urlService.locators.get<{
-    dependencyName: string;
-    environment: string;
-    rangeFrom: string;
-    rangeTo: string;
-  }>(DEPENDENCY_OVERVIEW_LOCATOR_ID);
+  const apmLinkToDependencyOverviewLocator = urlService.locators.get<DependencyOverviewParams>(
+    DEPENDENCY_OVERVIEW_LOCATOR_ID
+  );
 
-  const href =
-    environment &&
-    apmLinkToDependencyOverviewLocator?.getRedirectUrl({
-      dependencyName,
-      environment,
-      rangeFrom: timeRangeFrom,
-      rangeTo: timeRangeTo,
-    });
+  const href = apmLinkToDependencyOverviewLocator?.getRedirectUrl({
+    dependencyName,
+    environment,
+    rangeFrom: timeRangeFrom,
+    rangeTo: timeRangeTo,
+  });
 
   const routeLinkProps = href
     ? getRouterLinkProps({
