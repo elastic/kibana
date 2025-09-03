@@ -9,6 +9,7 @@
 
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface PaginationProps {
   totalPages: number;
@@ -27,7 +28,10 @@ export const Pagination = ({ totalPages, currentPage, onPageChange }: Pagination
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPagination
-            aria-label="Metrics pagination"
+            aria-label={i18n.translate(
+              'metricsExperience.pagination.euiPagination.metricsPaginationLabel',
+              { defaultMessage: 'Metrics pagination' }
+            )}
             pageCount={totalPages}
             activePage={currentPage}
             onPageClick={onPageChange}
