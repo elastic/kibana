@@ -1311,7 +1311,7 @@ components:
           additionalproperties: true
           properties:
             check:
-              type: objects
+              type: object
               description: The check request settings.
               properties:
                 request:
