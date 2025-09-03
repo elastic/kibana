@@ -9,7 +9,6 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
-import { createDatasetQualityIndicator } from './components/quality_indicator';
 import { createDatasetQualityControllerLazyFactory } from './controller/dataset_quality/lazy_create_controller';
 import { createDatasetQualityDetailsControllerLazyFactory } from './controller/dataset_quality_details/lazy_create_controller';
 import { registerRuleTypes } from './rule_types';
@@ -65,12 +64,6 @@ export class DatasetQualityPlugin
       telemetryClient,
     });
 
-    const DatasetQualityIndicator = createDatasetQualityIndicator({
-      core,
-      plugins,
-      telemetryClient,
-    });
-
     const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
       core,
       plugins,
@@ -83,7 +76,6 @@ export class DatasetQualityPlugin
       createDatasetQualityController,
       DatasetQualityDetails,
       createDatasetQualityDetailsController,
-      DatasetQualityIndicator,
     };
   }
 }

@@ -17,7 +17,6 @@ import {
   Streams,
   getIndexPatternsForStream,
 } from '@kbn/streams-schema';
-import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
@@ -170,21 +169,5 @@ export function DiscoverBadgeButton({
         { defaultMessage: 'Open in Discover' }
       )}
     />
-  );
-}
-
-export function StreamDetailDataQualityIndicator({
-  controller,
-}: {
-  controller: DatasetQualityDetailsController | undefined;
-}) {
-  const { datasetQuality } = useKibana().dependencies.start;
-
-  return controller ? (
-    <datasetQuality.DatasetQualityIndicator controller={controller} />
-  ) : (
-    i18n.translate('xpack.streams.streamQualityDetails.loadingMessage', {
-      defaultMessage: 'Loading...',
-    })
   );
 }

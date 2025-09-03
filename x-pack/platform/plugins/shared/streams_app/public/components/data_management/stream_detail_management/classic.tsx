@@ -18,8 +18,6 @@ import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
-import { StreamDetailDataQualityIndicator } from '../../stream_badges';
-import { useDatasetQualityController } from '../../../hooks/use_dataset_quality_controller';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 
 const classicStreamManagementSubTabs = [
@@ -54,8 +52,6 @@ export function ClassicStreamDetailManagement({
     refreshDefinition,
   });
 
-  const dataQualityController = useDatasetQualityController(definition);
-
   if (!definition.data_stream_exists) {
     return (
       <>
@@ -70,7 +66,6 @@ export function ClassicStreamDetailManagement({
               <EuiBadgeGroup gutterSize="s">
                 {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-                <StreamDetailDataQualityIndicator controller={dataQualityController} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
           }
@@ -124,7 +119,7 @@ export function ClassicStreamDetailManagement({
   }
 
   tabs.dataQuality = {
-    content: <StreamDetailDataQuality controller={dataQualityController} definition={definition} />,
+    content: <StreamDetailDataQuality definition={definition} />,
     label: (
       <EuiToolTip
         content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
@@ -181,7 +176,5 @@ export function ClassicStreamDetailManagement({
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'enrich' } }} />;
   }
 
-  return (
-    <Wrapper tabs={tabs} streamId={key} tab={tab} dataQualityController={dataQualityController} />
-  );
+  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
 }

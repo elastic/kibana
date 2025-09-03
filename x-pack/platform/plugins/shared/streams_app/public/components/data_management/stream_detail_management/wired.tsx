@@ -16,7 +16,6 @@ import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
-import { useDatasetQualityController } from '../../../hooks/use_dataset_quality_controller';
 
 const wiredStreamManagementSubTabs = [
   'route',
@@ -49,8 +48,6 @@ export function WiredStreamDetailManagement({
     definition,
     refreshDefinition,
   });
-
-  const dataQualityController = useDatasetQualityController(definition);
 
   const tabs = {
     lifecycle: {
@@ -91,9 +88,7 @@ export function WiredStreamDetailManagement({
       }),
     },
     dataQuality: {
-      content: (
-        <StreamDetailDataQuality controller={dataQualityController} definition={definition} />
-      ),
+      content: <StreamDetailDataQuality definition={definition} />,
       label: (
         <EuiToolTip
           content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
@@ -115,7 +110,5 @@ export function WiredStreamDetailManagement({
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
   }
 
-  return (
-    <Wrapper tabs={tabs} streamId={key} tab={tab} dataQualityController={dataQualityController} />
-  );
+  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
 }
