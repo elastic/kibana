@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
@@ -54,6 +55,12 @@ import {
   StartMigrationModal,
 } from '../../../common/components';
 import type { MigrationSettingsBase } from '../../../common/types';
+import {
+  UtilityBar,
+  UtilityBarGroup,
+  UtilityBarSection,
+  UtilityBarText,
+} from '../../../../common/components/utility_bar';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -454,6 +461,29 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <UtilityBar>
+                      <UtilityBarSection>
+                        <UtilityBarGroup>
+                          <UtilityBarText>
+                            <FormattedMessage
+                              id="xpack.securitySolution.siemMigrations.rules.table.showingPageOfTotalLabel"
+                              defaultMessage="Showing {pageIndex} - {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
+                              values={{
+                                pageIndex: pagination.pageIndex * (pagination.pageSize ?? 0) + 1,
+                                pageSize: (pagination.pageIndex + 1) * (pagination.pageSize ?? 0),
+                                total: pagination.totalItemCount,
+                                selectedRulesAmount: selectedMigrationRules.length || 0,
+                                pipe: '\u2000|\u2000',
+                              }}
+                            />
+                          </UtilityBarText>
+                        </UtilityBarGroup>
+                      </UtilityBarSection>
+                    </UtilityBar>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiBasicTable<RuleMigrationRule>
                   loading={isTableLoading}
                   items={migrationRules}
