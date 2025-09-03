@@ -15,7 +15,7 @@ describe('deduplicateFields', () => {
     index: 'test-index',
     dimensions: [],
     type: 'double',
-    time_series_metric: 'gauge',
+    instrument: 'gauge',
   };
 
   it('should prefer the non-prefixed field when the prefixed one comes first', () => {

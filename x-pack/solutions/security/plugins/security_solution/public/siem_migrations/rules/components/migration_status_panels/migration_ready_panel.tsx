@@ -14,10 +14,10 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
@@ -34,7 +34,7 @@ export interface MigrationReadyPanelProps {
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
   const { openFlyout } = useRuleMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
-  const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceBase[]>([]);
+  const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
   const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
 
   useEffect(() => {
@@ -56,14 +56,14 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   const migrationPanelDescription = useMemo(() => {
     if (migrationStats.last_execution?.error) {
-      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.rules.total);
+      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.items.total);
     }
 
     if (isStopped) {
-      return i18n.RULE_MIGRATION_STOPPED_DESCRIPTION(migrationStats.rules.total);
+      return i18n.RULE_MIGRATION_STOPPED_DESCRIPTION(migrationStats.items.total);
     }
-    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total);
-  }, [migrationStats.last_execution?.error, migrationStats.rules.total, isStopped]);
+    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
+  }, [migrationStats.last_execution?.error, migrationStats.items.total, isStopped]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">

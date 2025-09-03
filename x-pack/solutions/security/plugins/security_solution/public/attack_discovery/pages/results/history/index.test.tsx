@@ -63,9 +63,6 @@ jest.mock('../../../../common/lib/kibana', () => ({
         },
         ui: { getCasesContext: mockCasesContext },
       },
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(true),
-      },
       theme: {
         getTheme: jest.fn().mockReturnValue({ darkMode: false }),
       },
