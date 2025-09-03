@@ -17,7 +17,7 @@ import {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getViewInAppLocatorParams } from '../../../../../../common/custom_threshold_rule/get_view_in_app_url';
 
-export const getCustomThresholdRuleParams = ({ rule }: { rule: Rule }) => {
+export const getCustomThresholdRuleData = ({ rule }: { rule: Rule }) => {
   const ruleParams = rule.params as CustomThresholdParams;
   const { index } = ruleParams.searchConfiguration;
   let dataViewId: string | undefined;
@@ -45,7 +45,7 @@ export const getCustomThresholdRuleParams = ({ rule }: { rule: Rule }) => {
     .filter((f): f is Filter => f !== undefined);
 
   return {
-    params: {
+    discoverAppLocatorParams: {
       ...getViewInAppLocatorParams({
         dataViewId,
         searchConfiguration: {

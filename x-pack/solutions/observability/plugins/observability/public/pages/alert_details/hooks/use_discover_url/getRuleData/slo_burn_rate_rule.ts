@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_URL } from '@kbn/rule-data-utils';
 import type { TopAlert } from '../../../../../typings/alerts';
 
-export const getEsQueryRuleParams = ({ alert }: { alert: TopAlert }) => {
-  const discoverUrl = alert.fields[ALERT_URL];
+export const getSLOBurnRateRuleData = ({ alert }: { alert: TopAlert }) => {
+  const dataViewId = 'slo.dataViewId' in alert.fields ? alert.fields['slo.dataViewId'] : undefined;
 
-  return discoverUrl ? { discoverUrl } : {};
+  return typeof dataViewId === 'string' ? { discoverAppLocatorParams: { dataViewId } } : {};
 };

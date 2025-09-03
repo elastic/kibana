@@ -6,16 +6,25 @@
  */
 
 import type { Rule } from '@kbn/alerts-ui-shared';
-import { ES_QUERY_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import moment from 'moment';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { TopAlert } from '../../../../typings/alerts';
 import { useKibana } from '../../../../utils/kibana_react';
-import { getCustomThresholdRuleParams, getEsQueryRuleParams } from './getLocatorParams';
+import {
+  getCustomThresholdRuleData,
+  getEsQueryRuleData,
+  getSLOBurnRateRuleData,
+} from './getRuleData';
 
 const viewInDiscoverSupportedRuleTypes = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 ] as const;
 
 type ViewInDiscoverSupportedRuleType = (typeof viewInDiscoverSupportedRuleTypes)[number];
@@ -29,31 +38,32 @@ const isViewInDiscoverSupportedRuleType = (
   );
 };
 
-const getLocatorParamsMap: Record<
+const getRuleDataMap: Record<
   (typeof viewInDiscoverSupportedRuleTypes)[number],
   (params: { rule: Rule; alert: TopAlert }) => {
-    params?: DiscoverAppLocatorParams;
+    discoverAppLocatorParams?: DiscoverAppLocatorParams;
     discoverUrl?: string;
   }
 > = {
-  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: getCustomThresholdRuleParams,
-  [ES_QUERY_ID]: getEsQueryRuleParams,
+  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: getCustomThresholdRuleData,
+  [ES_QUERY_ID]: getEsQueryRuleData,
+  [SLO_BURN_RATE_RULE_TYPE_ID]: getSLOBurnRateRuleData,
 };
 
 export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?: Rule }) => {
   const { services } = useKibana();
   const { discover } = services;
 
-  const { discoverUrl, params } =
+  const { discoverUrl, discoverAppLocatorParams } =
     isViewInDiscoverSupportedRuleType(rule?.ruleTypeId) && alert
-      ? getLocatorParamsMap[rule.ruleTypeId]({ rule, alert })
-      : { discoverUrl: undefined, params: undefined };
+      ? getRuleDataMap[rule.ruleTypeId]({ rule, alert })
+      : { discoverUrl: undefined, discoverAppLocatorParams: undefined };
 
   if (discoverUrl) return { discoverUrl };
-  if (params && discover.locator && alert)
+  if (discoverAppLocatorParams && discover.locator && alert)
     return {
       discoverUrl: discover.locator.getRedirectUrl({
-        ...params,
+        ...discoverAppLocatorParams,
         timeRange: {
           from: moment(alert.start).subtract(30, 'minutes').toISOString(),
           to: moment(alert.start).add(30, 'minutes').toISOString(),
