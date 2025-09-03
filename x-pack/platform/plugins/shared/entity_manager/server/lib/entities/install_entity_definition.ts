@@ -28,7 +28,7 @@ import {
   updateEntityDefinition,
 } from './save_entity_definition';
 import { createAndInstallTemplates, deleteTemplate } from '../manage_index_templates';
-import { createAndInstallILMPolicies, deleteILMPolicy, deleteILMPolicies } from './manage_ilm_policies';
+import { createAndInstallILMPolicies, deleteILMPolicy } from './manage_ilm_policies';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
@@ -76,8 +76,6 @@ export async function installEntityDefinition({
 
     await deleteLatestIngestPipeline(esClient, definition, logger);
 
-    await deleteILMPolicy(esClient, generateResetILMPolicyId(definition), logger);
-
     await deleteTemplate({
       esClient,
       logger,
@@ -93,6 +91,8 @@ export async function installEntityDefinition({
       logger,
       name: generateResetIndexTemplateId(definition),
     });
+
+    await deleteILMPolicy(esClient, generateResetILMPolicyId(definition), logger);
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {
       if (err instanceof EntityDefinitionNotFound) {
