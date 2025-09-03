@@ -138,7 +138,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async enterSearchTerm(query: string) {
       const input = await this.clearSearchTerm();
-      // const input = await this.clearSearchTerm();
       // wait for input value to echo the input before submitting
       // this ensures the React state has caught up with the events
       await retry.tryForTime(5000, async () => {
