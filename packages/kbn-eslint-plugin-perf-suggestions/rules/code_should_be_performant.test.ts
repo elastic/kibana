@@ -44,11 +44,6 @@ for (const [name, tester] of [tsTester, babelTester]) {
           filename: 'foo.ts',
           code: `async function f(items){ const tasks = items.map(load); await Promise.all(tasks); }`,
         },
-        // Array concat instead of spread in loop
-        {
-          filename: 'foo.ts',
-          code: `function g(arr){ for (let i=0;i<10;i++){ const x = arr.concat(i); } }`,
-        },
         // Object spread outside loops is fine
         { filename: 'foo.ts', code: `function h(obj){ const o = {...obj}; return o; }` },
         // map result used (not side-effects only)
@@ -85,6 +80,17 @@ for (const [name, tester] of [tsTester, babelTester]) {
             {
               message:
                 'Using array spread in concatenation inside hot paths can be costly. Prefer push/apply or preallocate when possible. (score=3)',
+            },
+          ],
+        },
+        // array concat in loop
+        {
+          filename: 'foo.ts',
+          code: `function g(arr){ for (let i=0;i<10;i++){ const x = arr.concat(i); } }`,
+          errors: [
+            {
+              message:
+                'Array.concat inside loops allocates new arrays. Prefer push or pre-sizing when possible. (score=4)',
             },
           ],
         },
