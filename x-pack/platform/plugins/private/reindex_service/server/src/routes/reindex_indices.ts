@@ -64,6 +64,10 @@ export function registerReindexIndicesRoutes({
         elasticsearch: { client: esClient },
       } = await core;
 
+      if (request.body.newIndexName.trim().length === 0) {
+        return response.badRequest({ body: 'New index name cannot be empty' });
+      }
+
       try {
         const reindexService = (await getReindexService()).getScopedClient({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
@@ -71,7 +75,10 @@ export function registerReindexIndicesRoutes({
           request,
         });
 
-        const result = await reindexService.reindexOrResume(request.body);
+        const result = await reindexService.reindexOrResume({
+          ...request.body,
+          newIndexName: request.body.newIndexName.trim(),
+        });
 
         return response.ok({
           body: result,
