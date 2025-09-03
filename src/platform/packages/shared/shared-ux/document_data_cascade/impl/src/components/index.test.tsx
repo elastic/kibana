@@ -71,7 +71,7 @@ function renderESQLUseCaseComponent({
         tableTitleSlot={({ rows }) => <p data-test-id="table-title">{rows.length} documents</p>}
         onCascadeGroupingChange={onCascadeGroupingChange}
       >
-        <DataCascadeRow<MockGroupData>
+        <DataCascadeRow<MockGroupData, any>
           rowHeaderTitleSlot={rowHeaderTitleSlot}
           rowHeaderActions={rowHeaderActions}
           rowHeaderMetaSlots={rowHeaderMetaSlots}
