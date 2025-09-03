@@ -6,28 +6,36 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo, memo } from 'react';
+import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import * as i18n from './translations';
 import { WithMissingPrivilegesTooltip } from '../../missing_privileges';
+import { SiemMigrationStatus } from '../../../../../../common/siem_migrations/constants';
+import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 interface ReprocessFailedRulesButtonProps {
   onClick?: () => void;
   isLoading?: boolean;
-  numberOfFailedRules: number;
   isDisabled?: boolean;
   isAuthorized: boolean;
-  reprocessFailedRulesSelected: number;
+  translationStats: GetRuleMigrationTranslationStatsResponse;
+  selectedRules: RuleMigrationRule[];
 }
 
-const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesButton({
+const ReprocessFailedRulesButtonComp = memo(function ReprocessFailedRulesButton({
   onClick,
   isLoading = false,
-  numberOfFailedRules = 0,
   isDisabled = false,
   isAuthorized,
-  reprocessFailedRulesSelected,
+  translationStats,
+  selectedRules,
 }: ReprocessFailedRulesButtonProps) {
-  const isSelected = reprocessFailedRulesSelected > 0;
+  const numberOfFailedRules = translationStats.rules.failed;
+  const numberOfFailedRulesSelected = useMemo(
+    () => selectedRules.filter((rule) => rule.status === SiemMigrationStatus.FAILED).length,
+    [selectedRules]
+  );
+  const isSelected = numberOfFailedRulesSelected > 0;
   return (
     <EuiButton
       iconType="refresh"
@@ -39,11 +47,13 @@ const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesB
       aria-label={i18n.REPROCESS_FAILED_ARIA_LABEL}
     >
       {isSelected
-        ? i18n.REPROCESS_FAILED_SELECTED_RULES(reprocessFailedRulesSelected)
+        ? i18n.REPROCESS_FAILED_SELECTED_RULES(numberOfFailedRulesSelected)
         : i18n.REPROCESS_FAILED_RULES(numberOfFailedRules)}
     </EuiButton>
   );
 });
+
+ReprocessFailedRulesButtonComp.displayName = 'ReprocessFailedRulesButton';
 
 export const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
   ReprocessFailedRulesButtonComp,
