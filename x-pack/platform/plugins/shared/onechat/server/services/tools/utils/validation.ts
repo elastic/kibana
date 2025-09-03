@@ -12,6 +12,10 @@ import {
   isInProtectedNamespace,
 } from '@kbn/onechat-common';
 
+export const isValidBuiltinToolId = (toolId: string) => {
+  return toolIdRegexp.test(toolId);
+}
+
 /**
  * Check if an ID is valid for creation
  * @param id
