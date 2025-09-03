@@ -56,8 +56,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
-  // Prefetch conversations before sidebar is opened
-  const { conversations, isLoading } = useConversationList();
+  const { conversations = [], isLoading } = useConversationList();
 
   return (
     <SendMessageProvider>
