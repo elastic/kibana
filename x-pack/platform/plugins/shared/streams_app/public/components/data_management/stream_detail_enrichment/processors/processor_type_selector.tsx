@@ -32,7 +32,7 @@ type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
 export const ProcessorTypeSelector = ({
   disabled = false,
 }: Pick<EuiSuperSelectProps, 'disabled'>) => {
-  const { core } = useKibana();
+  const { core, isServerless } = useKibana();
   const getEnrichmentState = useGetStreamEnrichmentState();
 
   const { reset } = useFormContext();
@@ -54,6 +54,11 @@ export const ProcessorTypeSelector = ({
     reset(formState);
   };
 
+  const selectorOptions = React.useMemo(
+    () => getProcessorTypeSelectorOptions(isServerless),
+    [isServerless]
+  );
+
   return (
     <EuiFormRow
       fullWidth
@@ -61,12 +66,12 @@ export const ProcessorTypeSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(core.docLinks)(processorType)}
+      helpText={getProcessorDescription(core.docLinks, isServerless)(processorType)}
     >
       <EuiSuperSelect
         data-test-subj="streamsAppProcessorTypeSelector"
         disabled={disabled}
-        options={processorTypeSelectorOptions}
+        options={selectorOptions}
         isInvalid={fieldState.invalid}
         valueOfSelected={field.value}
         onChange={handleChange}
@@ -80,7 +85,9 @@ export const ProcessorTypeSelector = ({
   );
 };
 
-const availableProcessors: TAvailableProcessors = {
+const getAvailableProcessors: (isServerless: boolean) => Partial<TAvailableProcessors> = (
+  isServerless
+) => ({
   date: {
     type: 'date',
     inputDisplay: 'Date',
@@ -171,22 +178,29 @@ const availableProcessors: TAvailableProcessors = {
     },
   },
   ...configDrivenProcessors,
-  manual_ingest_pipeline: {
-    type: 'manual_ingest_pipeline',
-    inputDisplay: 'Manual pipeline configuration',
-    getDocUrl: () => (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
-        defaultMessage="Specify an array of ingest pipeline processors using JSON."
-      />
-    ),
-  },
-};
+  ...(isServerless
+    ? {}
+    : {
+        manual_ingest_pipeline: {
+          type: 'manual_ingest_pipeline',
+          inputDisplay: 'Manual pipeline configuration',
+          getDocUrl: () => (
+            <FormattedMessage
+              id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
+              defaultMessage="Specify an array of ingest pipeline processors using JSON."
+            />
+          ),
+        },
+      }),
+});
 
-const getProcessorDescription = (docLinks: DocLinksStart) => (type: ProcessorType) => {
-  return availableProcessors[type].getDocUrl(docLinks);
-};
+const getProcessorDescription =
+  (docLinks: DocLinksStart, isServerless: boolean) => (type: ProcessorType) => {
+    return getAvailableProcessors(isServerless)[type]?.getDocUrl(docLinks);
+  };
 
-const processorTypeSelectorOptions = Object.values(availableProcessors).map(
-  ({ type, inputDisplay }) => ({ value: type, inputDisplay })
-);
+const getProcessorTypeSelectorOptions = (isServerless: boolean) =>
+  Object.values(getAvailableProcessors(isServerless)).map(({ type, inputDisplay }) => ({
+    value: type,
+    inputDisplay,
+  }));
