@@ -32,6 +32,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { CANCEL_BUTTON_TEXT } from '../../assistant/settings/settings_context_menu/translations';
 import { useKnowledgeBaseUpdater } from '../../assistant/settings/use_settings_updater/use_knowledge_base_updater';
 import { ProductDocumentationManagement } from '../../assistant/settings/product_documentation';
 import { KnowledgeBaseTour } from '../../tour/knowledge_base';
@@ -62,7 +63,6 @@ import {
   isKnowledgeBaseSetup,
   useKnowledgeBaseStatus,
 } from '../../assistant/api/knowledge_base/use_knowledge_base_status';
-import { CANCEL_BUTTON_TEXT } from '../../assistant/assistant_header/translations';
 
 interface Params {
   dataViews: DataViewsContract;
@@ -432,6 +432,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
+              http={http}
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
