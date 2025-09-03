@@ -95,7 +95,8 @@ import {
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
-import { openAndAcknowledgedAlertsInternalTool } from './assistant/tools/open_and_acknowledged_alerts/open_and_acknowledged_alerts_internal_tool';
+import { openAndAcknowledgedAlertsInternalTool } from './assistant/tools/open_and_acknowledged_alerts';
+import { alertCountsInternalTool } from './assistant/tools/alert_counts';
 import { createSiemAgentCreator } from './assistant/siem_agent_creator';
 
 import type {
@@ -245,6 +246,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     // Register onechat tools
     plugins.onechat.tools.register(openAndAcknowledgedAlertsInternalTool());
+    plugins.onechat.tools.register(alertCountsInternalTool());
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 

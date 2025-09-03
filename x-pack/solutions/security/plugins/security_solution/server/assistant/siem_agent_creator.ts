@@ -48,9 +48,6 @@ export class SiemAgentCreator {
         return;
       }
 
-      // Import the required types for agent creation
-      const { AgentType, allToolsSelection } = await import('@kbn/onechat-common');
-
       const siemAgentRequest: AgentCreateRequest = {
         id: 'siem-security-analyst',
         name: 'SIEM Security Analyst',
@@ -75,12 +72,16 @@ When analyzing alerts, focus on:
 - Threat actor attribution when possible
 - Compliance and regulatory considerations
 
+When calling the tools prioritize the tools with tag security.
+
 Always provide clear, actionable recommendations and explain your reasoning.`,
           tools: [
             // Include the open-and-acknowledged-alerts-internal-tool
             { type: ToolType.builtin, tool_ids: ['.open-and-acknowledged-alerts-internal-tool'] },
+            // Include the alert-counts-internal-tool
+            { type: ToolType.builtin, tool_ids: ['.alert-counts-internal-tool'] },
             // Include all built-in tools for comprehensive security analysis
-            // { type: ToolType.builtin, tool_ids: ['*'] },
+            { type: ToolType.builtin, tool_ids: ['*'] },
           ],
         },
       };
@@ -92,8 +93,8 @@ Always provide clear, actionable recommendations and explain your reasoning.`,
       });
     } catch (error) {
       logger.error('Failed to create SIEM agent', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
+        error: error.message,
+        stack: error.stack,
       });
       throw error;
     }

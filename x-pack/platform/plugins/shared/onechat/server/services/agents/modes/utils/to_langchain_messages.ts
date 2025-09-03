@@ -46,7 +46,12 @@ export const roundToLangchain = (
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(createUserMessage({ content: round.input.message }));
+  messages.push(
+    createUserMessage({
+      content: round.input.message,
+      toolParameters,
+    })
+  );
 
   // steps
   if (!ignoreSteps) {
@@ -64,7 +69,9 @@ export const roundToLangchain = (
 };
 
 const createUserMessage = ({ content }: { content: string }): HumanMessage => {
-  return new HumanMessage({ content });
+  return new HumanMessage({
+    content,
+  });
 };
 
 const createAssistantMessage = ({ content }: { content: string }): AIMessage => {

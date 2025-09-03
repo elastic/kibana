@@ -13,6 +13,9 @@ import {
   getRawDataOrDefault,
   sizeIsOutOfRange,
   transformRawData,
+  securityAlertReference,
+  contentReferenceBlock,
+  newContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
@@ -45,7 +48,6 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
     description: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION,
     schema: openAndAcknowledgedAlertsToolSchema,
     handler: async ({ alertsIndexPattern, size }, { esClient, request }) => {
-      console.log('alertsIndexPattern', alertsIndexPattern);
       // Validate size is within range
       if (sizeIsOutOfRange(size)) {
         throw new Error(`Size ${size} is out of range`);
@@ -58,9 +60,11 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
       });
 
       const result = await esClient.asCurrentUser.search<SearchResponse>(query);
-      console.log('result', result);
-      // For the internal tool, we'll simplify the response handling
-      // since we don't have access to the full assistant context
+
+      // Create a new contentReferencesStore for this tool execution
+      const contentReferencesStore = newContentReferencesStore();
+
+      // Process the alerts with content references
       const content = result.hits?.hits?.map((hit) => {
         const rawData = getRawDataOrDefault(hit.fields);
         const transformed = transformRawData({
@@ -72,9 +76,12 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
         });
 
         const hitId = hit._id;
-        const citation = hitId ? `\nCitation: ${hitId}` : '';
+        const reference = hitId
+          ? contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
+          : undefined;
+        const citation = reference && `\nCitation:${contentReferenceBlock(reference)}`;
 
-        return `${transformed}${citation}`;
+        return `${transformed}${citation ?? ''}`;
       });
 
       return {

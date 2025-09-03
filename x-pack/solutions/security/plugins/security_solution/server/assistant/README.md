@@ -33,11 +33,16 @@ The agent has access to the following tools:
    - Provides alert details with risk scores and metadata
    - Supports anonymization for privacy compliance
 
-2. **Built-in Tools** (`builtin` type with `*` wildcard)
+2. **Alert Counts Tool** (`.alert-counts-internal-tool`)
+   - Queries alert counts for the last 24 hours
+   - Groups alerts by severity and workflow status
+   - Provides aggregated data for security analysis
+
+3. **Built-in Tools** (`builtin` type with `*` wildcard)
    - All standard onechat built-in tools
    - Includes data retrieval and analysis capabilities
 
-3. **ES|QL Tools** (`esql` type with `*` wildcard)
+4. **ES|QL Tools** (`esql` type with `*` wildcard)
    - Elasticsearch query language tools
    - Enables complex data analysis and aggregation
 
@@ -73,7 +78,7 @@ export class SiemAgentCreator {
 
 1. **Startup**: During plugin startup, the `SiemAgentCreator` is instantiated and `createSiemAgent` method is called
 2. **Existence Check**: Verifies if the agent already exists to avoid duplicates
-3. **Tool Registration**: Registers the `open-and-acknowledged-alerts-internal-tool`
+3. **Tool Registration**: Registers the `open-and-acknowledged-alerts-internal-tool` and `alert-counts-internal-tool`
 4. **Agent Creation**: Creates the agent with comprehensive security analysis instructions
 5. **Error Handling**: Logs success or failure with appropriate error details
 
