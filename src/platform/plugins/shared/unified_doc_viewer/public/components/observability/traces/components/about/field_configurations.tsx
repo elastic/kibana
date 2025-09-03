@@ -36,12 +36,7 @@ import { DependencyNameLink } from '../../doc_viewer_span_overview/sub_component
 import { TransactionNameLink } from '../transaction_name_link';
 import { HighlightField } from '../highlight_field';
 
-// TODO This is currently kind of a duplication of what we have in:
-// src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/resources/get_field_configuration.tsx
-// src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_span_overview/resources/get_span_field_configuration.tsx
-// that will be removed once all the overview is changed
-
-export const sharedFieldConfigurations = (
+export const getSharedFieldConfigurations = (
   flattenedHit: TraceDocumentOverview
 ): ContentFrameworkTableProps['fieldConfigurations'] => {
   return {
@@ -83,7 +78,7 @@ export const sharedFieldConfigurations = (
   };
 };
 
-export const spanFieldConfigurations = (
+export const getSpanFieldConfigurations = (
   flattenedHit: TraceDocumentOverview
 ): ContentFrameworkTableProps['fieldConfigurations'] => {
   return {
@@ -153,7 +148,7 @@ export const spanFieldConfigurations = (
   };
 };
 
-export const transactionFieldConfigurations = (
+export const getTransactionFieldConfigurations = (
   flattenedHit: TraceDocumentOverview
 ): ContentFrameworkTableProps['fieldConfigurations'] => {
   return {

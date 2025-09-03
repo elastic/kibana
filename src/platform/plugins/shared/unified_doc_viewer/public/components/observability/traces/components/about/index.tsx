@@ -31,9 +31,9 @@ import { css } from '@emotion/react';
 import { ContentFrameworkTable } from '../../../../content_framework';
 import { isTransaction } from '../../helpers';
 import {
-  sharedFieldConfigurations,
-  spanFieldConfigurations,
-  transactionFieldConfigurations,
+  getSharedFieldConfigurations,
+  getSpanFieldConfigurations,
+  getTransactionFieldConfigurations,
 } from './field_configurations';
 
 const spanFieldNames = [
@@ -71,10 +71,10 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
 
   const aboutFieldConfigurations = {
-    ...sharedFieldConfigurations(flattenedHit),
+    ...getSharedFieldConfigurations(flattenedHit),
     ...(isSpan
-      ? spanFieldConfigurations(flattenedHit)
-      : transactionFieldConfigurations(flattenedHit)),
+      ? getSpanFieldConfigurations(flattenedHit)
+      : getTransactionFieldConfigurations(flattenedHit)),
   };
 
   return (
