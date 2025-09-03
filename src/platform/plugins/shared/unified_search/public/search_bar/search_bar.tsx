@@ -561,6 +561,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     if (!this.isDirty()) {
       const { formattedName } = await this.services.data.search.session.save();
       this.showBackgroundSearchCreatedToast(formattedName);
+      return;
     }
 
     const currentSessionId = this.services.data.search.session.getSessionId();
