@@ -18,10 +18,11 @@ import { ShowAlertTableLink } from './show_alert_table_link';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { AlertPropertyActions } from '../property_actions/alert_property_actions';
-import { DELETE_ALERTS_SUCCESS_TITLE } from './translations';
+import { DELETE_ALERTS_SUCCESS_TITLE, DELETE_EVENTS_SUCCESS_TITLE } from './translations';
 
 import * as i18n from '../translations';
 import { UserActionShowEvent } from './show_event';
+import { EventPropertyActions } from '../property_actions/event_property_actions';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -50,7 +51,7 @@ const getSingleEventUserAction = ({
       ),
       eventColor: 'subdued',
       event: <SingleEventCommentEvent actionId={userAction.id} />,
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
+      'data-test-subj': `user-action-event-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
@@ -63,10 +64,10 @@ const getSingleEventUserAction = ({
               onShowEventDetails={onShowAlertDetails}
             />
           </EuiFlexItem>
-          <AlertPropertyActions
-            onDelete={() => handleDeleteComment(attachment.id, DELETE_ALERTS_SUCCESS_TITLE(1))}
+          <EventPropertyActions
+            onDelete={() => handleDeleteComment(attachment.id, DELETE_EVENTS_SUCCESS_TITLE(1))}
             isLoading={loadingCommentIds.includes(attachment.id)}
-            totalAlerts={1}
+            totalEvents={1}
           />
         </UserActionContentToolbar>
       ),
@@ -88,7 +89,7 @@ const getMultipleEventsUserAction = ({
       ),
       eventColor: 'subdued',
       event: <MultipleEventsCommentEvent actionId={userAction.id} totalEvents={0} />,
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
+      'data-test-subj': `user-action-event-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (

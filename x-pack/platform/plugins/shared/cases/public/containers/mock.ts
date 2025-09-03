@@ -53,6 +53,7 @@ import type {
   InternalFindCaseUserActions,
   CaseSummary,
   InferenceConnectors,
+  EventAttachmentUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -138,6 +139,21 @@ export const alertCommentWithIndices: AlertAttachmentUI = {
     id: 'rule-id-1',
     name: 'Awesome rule',
   },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const eventComment: EventAttachmentUI = {
+  eventId: 'event-id-1',
+  index: 'event-index-1',
+  type: AttachmentType.event,
+  id: 'event-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
   updatedAt: null,
   updatedBy: null,
   version: 'WzQ3LDFc',
@@ -953,6 +969,24 @@ export const getMultipleAlertsUserAction = (
         id: 'rule-id-1',
         name: 'Awesome rule',
       },
+    },
+  },
+  ...overrides,
+});
+
+export const getEventUserAction = (
+  overrides?: Record<string, unknown>
+): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
+  id: 'event-action-id',
+  commentId: 'event-comment-id',
+  type: UserActionTypes.comment,
+  payload: {
+    comment: {
+      type: AttachmentType.event,
+      eventId: 'event-id-1',
+      index: 'index-id-1',
+      owner: SECURITY_SOLUTION_OWNER,
     },
   },
   ...overrides,
