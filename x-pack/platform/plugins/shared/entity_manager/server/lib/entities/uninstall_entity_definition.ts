@@ -11,11 +11,9 @@ import type { EntityDefinition } from '@kbn/entities-schema';
 import type { Logger } from '@kbn/logging';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIngestPipelines } from './delete_ingest_pipeline';
-
+import { deleteILMPolicies } from './manage_ilm_policies';
 import { deleteTemplates } from '../manage_index_templates';
-
 import { stopTransforms } from './stop_transforms';
-
 import { deleteTransforms } from './delete_transforms';
 import { EntityClient } from '../entity_client';
 import type { EntityManagerServerSetup } from '../../types';
@@ -39,6 +37,8 @@ export async function uninstallEntityDefinition({
   await deleteIngestPipelines(esClient, definition, logger);
 
   await deleteTemplates(esClient, definition, logger);
+
+  await deleteILMPolicies(esClient, definition, logger);
 
   await deleteEntityDefinition(soClient, definition);
 }
