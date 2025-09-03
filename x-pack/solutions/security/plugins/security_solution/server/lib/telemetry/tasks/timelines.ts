@@ -11,7 +11,12 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
-import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
+import {
+  ranges,
+  TelemetryTimelineFetcher,
+  newTelemetryLogger,
+  getPreviousDailyTaskTimestamp,
+} from '../helpers';
 import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryTimelineTaskConfig() {
@@ -23,6 +28,7 @@ export function createTelemetryTimelineTaskConfig() {
     interval: '1h',
     timeout: '15m',
     version: '1.0.1',
+    getLastExecutionTime: getPreviousDailyTaskTimestamp,
     runTask: async (
       taskId: string,
       logger: Logger,
@@ -54,7 +60,7 @@ export function createTelemetryTimelineTaskConfig() {
           telemetryConfiguration.query_config
         );
 
-        log.debug('found alerts to process', { length: alerts.length } as LogMeta);
+        log.debug('found alerts to process', { length: alerts.length, alertsIndex } as LogMeta);
 
         for (const alert of alerts) {
           const result = await fetcher.fetchTimeline(alert);
@@ -79,7 +85,7 @@ export function createTelemetryTimelineTaskConfig() {
           }
         }
 
-        log.debug('Concluding timeline task.', { counter } as LogMeta);
+        log.debug('Concluding timeline task.', { counter, rangeFrom, rangeTo } as LogMeta);
 
         await taskMetricsService.end(trace);
 
