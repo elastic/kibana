@@ -203,6 +203,7 @@ export const get = async (
             ? {
                 totalAlerts: commentStats.get(theCase.id)?.alerts,
                 totalComment: commentStats.get(theCase.id)?.userComments,
+                totalEvents: commentStats.get(theCase.id)?.events,
               }
             : {}),
         })
@@ -222,6 +223,7 @@ export const get = async (
       comments: theComments.saved_objects,
       totalComment: countUserAttachments(theComments.saved_objects),
       totalAlerts: countAlertsForID({ comments: theComments, id }),
+      totalEvents: countEventsForID({ comments: theComments }),
     });
 
     return decodeOrThrow(CaseRt)(res);

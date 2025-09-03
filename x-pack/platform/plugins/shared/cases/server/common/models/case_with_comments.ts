@@ -42,6 +42,7 @@ import {
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeEvent,
+  countEventsForID,
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
@@ -499,10 +500,12 @@ export class CaseCommentModel {
       });
 
       const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
+      const totalEvents = countEventsForID({ comments }) ?? 0;
 
       const caseResponse = {
         comments: flattenCommentSavedObjects(comments.saved_objects),
         totalAlerts,
+        totalEvents,
         ...this.formatForEncoding(comments.total),
       };
 
