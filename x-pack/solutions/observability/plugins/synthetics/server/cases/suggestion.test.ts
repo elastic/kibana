@@ -160,17 +160,17 @@ describe('getMonitorByServiceName', () => {
     it('should return correct suggestion type configuration', () => {
       const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
 
-      expect(suggestionType.id).toBe('syntheticMonitorByServiceName');
+      expect(suggestionType.id).toBe('syntheticMonitor');
       expect(suggestionType.attachmentTypeId).toBe('.page');
       expect(suggestionType.owner).toBe('observability');
       expect(suggestionType.handlers).toBeDefined();
-      expect(suggestionType.handlers.syntheticMonitorByServiceName).toBeDefined();
+      expect(suggestionType.handlers.syntheticMonitor).toBeDefined();
     });
 
     it('should have correct tool description', () => {
       const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
 
-      expect(suggestionType.handlers.syntheticMonitorByServiceName.tool.description).toBe(
+      expect(suggestionType.handlers.syntheticMonitor.tool.description).toBe(
         'Suggest Synthetic monitors operating on the same service.'
       );
     });
@@ -181,7 +181,7 @@ describe('getMonitorByServiceName', () => {
 
     beforeEach(() => {
       const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
-      handler = suggestionType.handlers.syntheticMonitorByServiceName.handler;
+      handler = suggestionType.handlers.syntheticMonitor.handler;
     });
 
     it('should return empty suggestions when no service names provided', async () => {
@@ -560,7 +560,7 @@ describe('getMonitorByServiceName', () => {
 
     beforeEach(() => {
       const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
-      handler = suggestionType.handlers.syntheticMonitorByServiceName.handler;
+      handler = suggestionType.handlers.syntheticMonitor.handler;
     });
 
     it('should handle Elasticsearch search errors', async () => {

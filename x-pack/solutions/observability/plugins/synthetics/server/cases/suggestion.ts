@@ -28,11 +28,11 @@ export function getMonitorByServiceName(
   locatorClient?: LocatorClient
 ): SuggestionType<SyntheticsSuggestion> {
   return {
-    id: 'syntheticMonitorByServiceName',
+    id: 'syntheticMonitor',
     attachmentTypeId: '.page',
     owner: 'observability',
     handlers: {
-      syntheticMonitorByServiceName: {
+      syntheticMonitor: {
         tool: {
           description: 'Suggest Synthetic monitors operating on the same service.',
         },
