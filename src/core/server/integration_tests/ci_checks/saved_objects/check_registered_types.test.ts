@@ -517,7 +517,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "dashboard|10.1.0: 8f91a9fada2ab272768a9c220ada8e5dbe5b1484",
         "dashboard|8.4.0: 062db9fffc526bc492f39fd0cef8ab84e6f6d3fb",
         "dashboard|8.0.1: 062db9fffc526bc492f39fd0cef8ab84e6f6d3fb",
-        "dashboard|8.7.0: 062db9fffc526bc492f39fd0cef8ab84e6f6d3fb",
         "dashboard|8.9.0: 062db9fffc526bc492f39fd0cef8ab84e6f6d3fb",
         "dashboard|8.6.0: 062db9fffc526bc492f39fd0cef8ab84e6f6d3fb",
         "dashboard|8.2.0: 062db9fffc526bc492f39fd0cef8ab84e6f6d3fb",
