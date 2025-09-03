@@ -16,8 +16,6 @@
 
 import { z } from '@kbn/zod';
 
-import { AlertIds } from '../../../model/alert.gen';
-
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();
 
@@ -171,12 +169,6 @@ export type EndpointIds = z.infer<typeof EndpointIds>;
 export const EndpointIds = z.array(z.string().min(1)).min(1);
 
 /**
- * Case IDs to be updated (cannot contain empty strings)
- */
-export type CaseIds = z.infer<typeof CaseIds>;
-export const CaseIds = z.array(z.string().min(1)).min(1);
-
-/**
  * Optional comment
  */
 export type Comment = z.infer<typeof Comment>;
@@ -204,8 +196,14 @@ export const AgentTypesEnum = AgentTypes.enum;
 export type BaseActionSchema = z.infer<typeof BaseActionSchema>;
 export const BaseActionSchema = z.object({
   endpoint_ids: EndpointIds,
-  alert_ids: AlertIds.merge(z.object({})),
-  case_ids: CaseIds.merge(z.object({})),
+  /**
+   * If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+   */
+  alert_ids: z.array(z.string().min(1)).min(1).optional(),
+  /**
+   * The IDs of cases where the action taken will be logged.
+   */
+  case_ids: z.array(z.string().min(1)).min(1).optional(),
   comment: Comment.optional(),
   parameters: Parameters.optional(),
   agent_type: AgentTypes.optional(),

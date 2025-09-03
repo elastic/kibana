@@ -274,11 +274,17 @@ paths:
                         be specified here. The action will be logged in any
                         cases associated with the specified alerts.
                       type: object
+                      properties: {}
                 case_ids:
-                  allOf:
-                    - $ref: '#/components/schemas/CaseIds'
-                    - description: The IDs of cases where the action taken will be logged.
-                      type: object
+                  description: The IDs of cases where the action taken will be logged.
+                  example:
+                    - case-id-1
+                    - case-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 comment:
                   $ref: '#/components/schemas/Comment'
                 endpoint_ids:
@@ -472,11 +478,17 @@ paths:
                         be specified here. The action will be logged in any
                         cases associated with the specified alerts.
                       type: object
+                      properties: {}
                 case_ids:
-                  allOf:
-                    - $ref: '#/components/schemas/CaseIds'
-                    - description: The IDs of cases where the action taken will be logged.
-                      type: object
+                  description: The IDs of cases where the action taken will be logged.
+                  example:
+                    - case-id-1
+                    - case-id-2
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
                 comment:
                   $ref: '#/components/schemas/Comment'
                 endpoint_ids:
@@ -720,16 +732,6 @@ components:
         type: string
       minItems: 1
       type: array
-    CaseIds:
-      description: Case IDs to be updated (cannot contain empty strings)
-      example:
-        - case-id-1
-        - case-id-2
-      items:
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
     CloudFileScriptParameters:
       type: object
       properties:
@@ -889,11 +891,17 @@ components:
                     specified here. The action will be logged in any cases
                     associated with the specified alerts.
                   type: object
+                  properties: {}
             case_ids:
-              allOf:
-                - $ref: '#/components/schemas/CaseIds'
-                - description: The IDs of cases where the action taken will be logged.
-                  type: object
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1051,11 +1059,17 @@ components:
                     specified here. The action will be logged in any cases
                     associated with the specified alerts.
                   type: object
+                  properties: {}
             case_ids:
-              allOf:
-                - $ref: '#/components/schemas/CaseIds'
-                - description: The IDs of cases where the action taken will be logged.
-                  type: object
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1123,11 +1137,17 @@ components:
                 specified here. The action will be logged in any cases
                 associated with the specified alerts.
               type: object
+              properties: {}
         case_ids:
-          allOf:
-            - $ref: '#/components/schemas/CaseIds'
-            - description: The IDs of cases where the action taken will be logged.
-              type: object
+          description: The IDs of cases where the action taken will be logged.
+          example:
+            - case-id-1
+            - case-id-2
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
         comment:
           $ref: '#/components/schemas/Comment'
         endpoint_ids:
@@ -1231,11 +1251,17 @@ components:
                     specified here. The action will be logged in any cases
                     associated with the specified alerts.
                   type: object
+                  properties: {}
             case_ids:
-              allOf:
-                - $ref: '#/components/schemas/CaseIds'
-                - description: The IDs of cases where the action taken will be logged.
-                  type: object
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1685,11 +1711,17 @@ components:
                     specified here. The action will be logged in any cases
                     associated with the specified alerts.
                   type: object
+                  properties: {}
             case_ids:
-              allOf:
-                - $ref: '#/components/schemas/CaseIds'
-                - description: The IDs of cases where the action taken will be logged.
-                  type: object
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1724,11 +1756,17 @@ components:
                     specified here. The action will be logged in any cases
                     associated with the specified alerts.
                   type: object
+                  properties: {}
             case_ids:
-              allOf:
-                - $ref: '#/components/schemas/CaseIds'
-                - description: The IDs of cases where the action taken will be logged.
-                  type: object
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1850,11 +1888,17 @@ components:
                     specified here. The action will be logged in any cases
                     associated with the specified alerts.
                   type: object
+                  properties: {}
             case_ids:
-              allOf:
-                - $ref: '#/components/schemas/CaseIds'
-                - description: The IDs of cases where the action taken will be logged.
-                  type: object
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:
@@ -1974,11 +2018,17 @@ components:
                     specified here. The action will be logged in any cases
                     associated with the specified alerts.
                   type: object
+                  properties: {}
             case_ids:
-              allOf:
-                - $ref: '#/components/schemas/CaseIds'
-                - description: The IDs of cases where the action taken will be logged.
-                  type: object
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
             comment:
               $ref: '#/components/schemas/Comment'
             endpoint_ids:

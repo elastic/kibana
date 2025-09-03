@@ -176,15 +176,6 @@ components:
         minLength: 1
       minItems: 1
 
-    CaseIds:
-      type: array
-      description: Case IDs to be updated (cannot contain empty strings)
-      example: [ "case-id-1", "case-id-2" ]
-      items:
-        type: string
-        minLength: 1
-      minItems: 1
-
     Comment:
       type: string
       description: Optional comment
@@ -211,16 +202,21 @@ components:
         endpoint_ids:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
-          allOf:
-            - $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
-            - type: object
-              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          type: array
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          example: [ "alert-id-1", "alert-id-2" ]
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
         case_ids:
-          allOf:
-            - $ref: '#/components/schemas/CaseIds'
-            - type: object
-              description: The IDs of cases where the action taken will be logged.
-
+          type: array
+          description: The IDs of cases where the action taken will be logged.
+          example: [ "case-id-1", "case-id-2" ]
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
         comment:
           $ref: '#/components/schemas/Comment'
         parameters:
