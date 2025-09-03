@@ -89,7 +89,8 @@
     "@kbn/charts-theme",
     "@kbn/file-upload",
     "@kbn/charts-theme",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/discover-utils"
   ],
   "exclude": [
     "target/**/*",
