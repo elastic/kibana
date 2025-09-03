@@ -10,33 +10,41 @@ import React, { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
-import type { AnalysisResult } from '@kbn/file-upload-common';
+import { FieldTypeIcon, type AnalysisResult } from '@kbn/file-upload-common';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 const DOC_COUNT = 10;
 
 interface ResultsPreviewProps {
   sampleDocs: DataTableRecord[];
+  mappings: MappingTypeMapping;
 }
 
-export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs }) => {
+export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<object>>>(() => {
     if (!sampleDocs?.length) {
       return [];
     }
-    const columnNames = Object.keys(sampleDocs[0].raw._source ?? {}).sort((a, b) =>
-      a.localeCompare(b)
-    );
-    return columnNames.map((name) => {
+    // const columnNames = Object.keys(mappings.properties ?? {}).sort((a, b) => a.localeCompare(b));
+    const fields = Object.entries(mappings.properties ?? {}).sort(([a], [b]) => a.localeCompare(b));
+    return fields.map(([name, { type }]) => {
       return {
         field: name,
-        name,
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FieldTypeIcon type={type!} tooltipEnabled={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>{name}</EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         dataType: 'auto',
         truncateText: { lines: 2 },
       };
     });
-  }, [sampleDocs]);
+  }, [mappings.properties, sampleDocs?.length]);
 
   const items = useMemo(() => {
     return (

@@ -4,16 +4,19 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts", "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     "@kbn/data-plugin",
+    "@kbn/react-field",
+    "@kbn/field-utils",
   ]
 }

@@ -227,7 +227,10 @@ export const FileStatus: FC<Props> = ({
                   {selectedTab === TAB.PREVIEW ? (
                     <>
                       {fileStatus.sampleDocs.length ? (
-                        <ResultsPreview sampleDocs={fileStatus.sampleDocs} />
+                        <ResultsPreview
+                          sampleDocs={fileStatus.sampleDocs}
+                          mappings={fileStatus.results!.mappings as MappingTypeMapping}
+                        />
                       ) : (
                         <FileContents
                           fileContents={fileStatus.fileContents}
