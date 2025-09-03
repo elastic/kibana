@@ -106,7 +106,7 @@ export const Trace = ({
       >
         <div
           css={css`
-            margin-top: calc(${euiTheme.base * -1.5}px);
+            margin-top: calc(${euiTheme.base * -1}px);
           `}
         >
           <ContentFrameworkTable
