@@ -92,7 +92,7 @@ export class OnboardingApp {
   async openWithCategory(category: 'host' | 'kubernetes' | 'cloud' | 'application') {
     await this.page.gotoApp('observabilityOnboarding', { params: { category } });
     await this.waitForMainTilesToLoad();
-    
+
     switch (category) {
       case 'host':
         await this.autoDetectLogsCard.waitFor({ state: 'visible' });
@@ -180,5 +180,4 @@ export class OnboardingApp {
     await this.kubernetesUseCaseTile.waitFor({ state: 'visible' });
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
   }
-
 }
