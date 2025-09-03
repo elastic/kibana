@@ -12,13 +12,17 @@ import type { SelectableEntry } from '@kbn/unified-histogram';
 import { ToolbarSelector } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
 import { useDimensionsQuery } from '../../hooks';
 
@@ -32,6 +36,7 @@ interface ValuesFilterProps {
     to?: string;
   };
   onChange: (values: string[]) => void;
+  clearValuesSelection: () => void;
 }
 export const ValuesSelector = ({
   selectedDimensions,
@@ -40,6 +45,7 @@ export const ValuesSelector = ({
   timeRange,
   disabled = false,
   indices = [],
+  clearValuesSelection,
 }: ValuesFilterProps) => {
   const {
     data: values = [],
@@ -51,6 +57,7 @@ export const ValuesSelector = ({
     from: timeRange?.from,
     to: timeRange?.to,
   });
+  const { euiTheme } = useEuiTheme();
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
     const groupedValues = new Map<string, string[]>();
@@ -121,6 +128,42 @@ export const ValuesSelector = ({
     );
   }, [isLoading, selectedValues.length]);
 
+  const popoverTitleSection = useMemo(() => {
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="s"
+            color="subdued"
+            css={css`
+              padding: ${euiTheme.size.s};
+            `}
+          >
+            <FormattedMessage
+              id="metricsExperience.valuesSelector.selectedStatusMessage"
+              defaultMessage="{count, plural, one {# value selected} other {# values selected}}"
+              values={{ count: selectedValues?.length }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {selectedValues?.length > 0 && (
+            <EuiButtonEmpty size="s" flush="both" onClick={clearValuesSelection}>
+              {i18n.translate('metricsExperience.valuesSelector.clearSelectionButtonLabel', {
+                defaultMessage: 'Clear selection',
+              })}
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, [euiTheme.size.s, selectedValues?.length, clearValuesSelection]);
+
   if (error) {
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
@@ -155,6 +198,7 @@ export const ValuesSelector = ({
       hasArrow={!isLoading}
       onChange={handleChange}
       disabled={disabled}
+      popoverTitleSection={popoverTitleSection}
     />
   );
 };

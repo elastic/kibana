@@ -83,6 +83,12 @@ export const MetricsExperienceGrid = ({
     [dispatch]
   );
 
+  // Clear both dimensions and filters because if there are no dimensions selected the values should also be cleared
+  const onClearAllDimensions = useCallback(() => {
+    dispatch(setDimensions([]));
+    dispatch(setValueFilters([]));
+  }, [dispatch]);
+
   const pageSize = columns === 4 ? 20 : 15;
   const actions: IconButtonGroupProps['buttons'] = [
     {
@@ -112,7 +118,7 @@ export const MetricsExperienceGrid = ({
         fields={fields}
         onChange={onDimensionsChange}
         selectedDimensions={dimensions}
-        clearDimensionSelection={() => dispatch(setDimensions([]))}
+        clearDimensionSelection={() => onClearAllDimensions()}
       />,
       dimensions.length > 0 ? (
         <ValuesSelector
@@ -122,6 +128,7 @@ export const MetricsExperienceGrid = ({
           disabled={dimensions.length === 0}
           indices={[indexPattern]}
           timeRange={timeRange}
+          clearValuesSelection={() => dispatch(setValueFilters([]))}
         />
       ) : null,
     ],
@@ -134,6 +141,7 @@ export const MetricsExperienceGrid = ({
       onValuesChange,
       indexPattern,
       timeRange,
+      onClearAllDimensions,
       dispatch,
     ]
   );
