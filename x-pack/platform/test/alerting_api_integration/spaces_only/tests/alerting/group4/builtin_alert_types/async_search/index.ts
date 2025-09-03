@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
-  describe('builtin alertTypes', () => {
-    loadTestFile(require.resolve('./long_running'));
-    loadTestFile(require.resolve('./cancellable'));
-    loadTestFile(require.resolve('./auto_recover'));
-    loadTestFile(require.resolve('./async_search'));
+  describe('rule_with_async_search', () => {
+    loadTestFile(require.resolve('./rule'));
   });
 }
