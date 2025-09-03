@@ -463,7 +463,6 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         setHasUserSelectedOs(true);
         setHasFormChanged(true);
 
-        // Determine if we need to reset the field due to USERNAME availability change
         let fieldToUse = currentEntry?.field || TrustedDeviceConditionEntryField.USERNAME;
         let shouldResetValue = false;
 

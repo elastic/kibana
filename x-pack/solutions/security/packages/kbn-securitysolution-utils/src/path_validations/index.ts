@@ -80,13 +80,13 @@ export function isTrustedDeviceFieldAvailableForOs(
   field: TrustedDeviceConditionEntryField,
   osTypes: readonly string[]
 ): boolean {
-  // USERNAME field is only available for Windows-only OS selection
-  if (field === TrustedDeviceConditionEntryField.USERNAME) {
+  const { WINDOWS_ONLY, ALL_OS } = TRUSTED_DEVICE_OS_FIELD_AVAILABILITY;
+
+  if (WINDOWS_ONLY.includes(field as (typeof WINDOWS_ONLY)[number])) {
     return osTypes.length === 1 && osTypes.includes(OperatingSystem.WINDOWS);
   }
 
-  // All other fields are available for any OS combination
-  return TRUSTED_DEVICE_OS_FIELD_AVAILABILITY.ALL_OS.includes(field);
+  return ALL_OS.includes(field as (typeof ALL_OS)[number]);
 }
 
 export const validatePotentialWildcardInput = ({
