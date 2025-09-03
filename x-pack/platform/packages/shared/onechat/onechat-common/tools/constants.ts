@@ -37,8 +37,6 @@ export const defaultAgentToolIds = [
   platformCoreTools.getDocumentById,
 ];
 
-export const reservedKeywords = ['new'];
-
 /**
  * The number of active tools that will trigger a warning in the UI.
  * Agent will perform poorly if it has too many tools.

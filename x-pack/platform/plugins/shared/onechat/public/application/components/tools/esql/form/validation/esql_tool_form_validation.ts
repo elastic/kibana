@@ -8,7 +8,12 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { i18n } from '@kbn/i18n';
-import { EsqlToolFieldType, idRegexp, isReservedToolId } from '@kbn/onechat-common';
+import {
+  EsqlToolFieldType,
+  toolIdRegexp,
+  isReservedToolId,
+  isInProtectedNamespace,
+} from '@kbn/onechat-common';
 import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod';
 import { get } from 'lodash';
@@ -23,11 +28,17 @@ const i18nMessages = {
     }),
     formatError: i18n.translate('xpack.onechat.tools.newTool.validation.name.formatError', {
       defaultMessage:
-        'Name must start and end with a letter or number, and can only contain lowercase letters, numbers, and underscores.',
+        'Name must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, and underscores.',
     }),
     reservedError: (name: string) =>
       i18n.translate('xpack.onechat.tools.newTool.validation.name.reservedError', {
         defaultMessage: 'Name "{name}" is reserved. Please choose a different name.',
+        values: { name },
+      }),
+    protectedNamespaceError: (name: string) =>
+      i18n.translate('xpack.onechat.tools.newTool.validation.name.protectedNamespaceError', {
+        defaultMessage:
+          'Name "{name}" is using a reserved namespace. Please choose a different name.',
         values: { name },
       }),
   },
@@ -115,11 +126,17 @@ export const esqlFormValidationSchema = z
     name: z
       .string()
       .min(1, { message: i18nMessages.name.requiredError })
-      .regex(idRegexp, { message: i18nMessages.name.formatError })
+      .regex(toolIdRegexp, { message: i18nMessages.name.formatError })
       .refine(
         (name) => !isReservedToolId(name),
         (name) => ({
           message: i18nMessages.name.reservedError(name),
+        })
+      )
+      .refine(
+        (name) => !isInProtectedNamespace(name),
+        (name) => ({
+          message: i18nMessages.name.protectedNamespaceError(name),
         })
       ),
     description: z.string().min(1, { message: i18nMessages.description.requiredError }),

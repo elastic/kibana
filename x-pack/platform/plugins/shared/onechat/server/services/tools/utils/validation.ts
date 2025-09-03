@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { createBadRequestError, idRegexp, isReservedToolId } from '@kbn/onechat-common';
+import {
+  createBadRequestError,
+  toolIdRegexp,
+  isReservedToolId,
+  isInProtectedNamespace,
+} from '@kbn/onechat-common';
 
 /**
  * Check if an ID is valid for creation
  * @param id
  */
 export const ensureValidId = (id: string) => {
-  // TODO: check where this is being used
   if (isReservedToolId(id)) {
     throw createBadRequestError(`Tool id ${id} is reserved`);
   }
-  if (!idRegexp.test(id)) {
+  if (isInProtectedNamespace(id)) {
+    throw createBadRequestError(`Tool id ${id} is using a protected namespace`);
+  }
+  if (!toolIdRegexp.test(id)) {
     throw createBadRequestError(
-      `Invalid tool id: ${id}: Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, and underscores`
+      `Invalid tool id: ${id}: Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots and underscores`
     );
   }
 };

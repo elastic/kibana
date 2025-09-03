@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { reservedKeywords } from './constants';
+export const toolIdRegexp =
+  /^(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?))*$/;
 
-export const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+const reservedKeywords = ['new'];
 
 /**
  * Check if the given ID is a reserved ID
- * Atm this only checks for built-in IDs, but it will check for MCP and such later.
+ * Atm this only checks for `new` because that's a value we're using for url paths on the UI.
  */
 export const isReservedToolId = (id: string) => {
   return reservedKeywords.includes(id);

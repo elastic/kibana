@@ -28,7 +28,7 @@ export {
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
-  idRegexp,
+  toolIdRegexp,
   activeToolsCountWarningThreshold,
   ToolResultType,
   type ToolResult,
@@ -37,6 +37,9 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
+  internalNamespaces as toolNamespaces,
+  protectedNamespaces as toolReservedNamespaces,
+  isInProtectedNamespace,
 } from './tools';
 export {
   OnechatErrorCode,

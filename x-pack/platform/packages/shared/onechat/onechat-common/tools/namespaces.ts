@@ -7,18 +7,22 @@
 
 /**
  * List of internally used namespaces
+ * Note: those are not necessarily all protected.
  */
 export const internalNamespaces = {
   platformCore: 'platform.core',
 } as const;
 
 /**
- * List of reserved namespaces which can only be used by internal tools.
+ * List of protected namespaces which can only be used by internal tools.
  */
-export const reservedNamespaces = [internalNamespaces.platformCore] as const;
+export const protectedNamespaces = [internalNamespaces.platformCore] as const;
 
-export const isToolInReservedNamespace = (toolName: string) => {
-  for (const namespace of reservedNamespaces) {
+/**
+ * Checks if the provided tool name belongs to a reserved namespace.
+ */
+export const isInProtectedNamespace = (toolName: string) => {
+  for (const namespace of protectedNamespaces) {
     if (toolName.startsWith(`${namespace}.`)) {
       return true;
     }

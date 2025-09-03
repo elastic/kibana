@@ -11,6 +11,7 @@ import type { FtrProviderContext } from '../../api_integration/ftr_provider_cont
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const searchTool = platformCoreTools.search;
 
   describe('Builtin Tools internal API', () => {
     describe('POST /internal/chat/tools/_bulk_delete', () => {
@@ -56,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(customTool)
           .expect(200);
 
-        const mixedToolIds = ['.search', 'test-custom-tool'];
+        const mixedToolIds = [searchTool, 'test-custom-tool'];
 
         const response = await supertest
           .post('/internal/chat/tools/_bulk_delete')
@@ -69,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.results).to.have.length(2);
 
         // Builtin tool should fail
-        const builtinResult = response.body.results.find((r: any) => r.toolId === '.search');
+        const builtinResult = response.body.results.find((r: any) => r.toolId === searchTool);
         expect(builtinResult).to.have.property('success', false);
         expect(builtinResult.reason.error.message).to.contain("is read-only and can't be deleted");
 
