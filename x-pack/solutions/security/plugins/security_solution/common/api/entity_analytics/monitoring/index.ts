@@ -5,4 +5,12 @@
  * 2.0.
  */
 
+export * from './monitoring_entity_source/monitoring_entity_source.gen';
+export * from './privileged_access_detection';
+export * from './engine';
+export * from './users';
+export * from './common.gen';
+export * from './health.gen';
+export * from './privileges.gen';
 export * from './search_indices.gen';
+export * from './create_index.gen';

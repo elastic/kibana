@@ -173,6 +173,7 @@ export const AGENT_API_ROUTES = {
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
+  PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

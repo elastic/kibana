@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ToolType } from './definition';
+
 /**
  * Ids of built-in onechat tools
  */
@@ -17,6 +19,11 @@ export const builtinToolIds = {
   generateEsql: '.generate_esql',
   executeEsql: '.execute_esql',
 } as const;
+
+/**
+ * List of tool types which can be created / edited by a user.
+ */
+export const editableToolTypes: ToolType[] = [ToolType.esql, ToolType.index_search];
 
 export const defaultAgentToolIds = [
   builtinToolIds.search,

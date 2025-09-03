@@ -27,204 +27,307 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
     });
 
-    it('non-wired data streams', async () => {
-      const doc = {
-        message: '2023-01-01T00:00:10.000Z error test',
-      };
-      const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
-      expect(response.result).to.eql('created');
+    describe('Classic streams processing', () => {
+      it('non-wired data streams', async () => {
+        const doc = {
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
 
-      const {
-        body: { streams },
-        status,
-      } = await apiClient.fetch('GET /api/streams 2023-10-31');
+        const {
+          body: { streams },
+          status,
+        } = await apiClient.fetch('GET /api/streams 2023-10-31');
 
-      expect(status).to.eql(200);
+        expect(status).to.eql(200);
 
-      const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
+        const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
 
-      expect(classicStream).to.eql({
-        name: TEST_STREAM_NAME,
-        description: '',
-        ingest: {
-          lifecycle: { inherit: {} },
-          processing: {
-            steps: [],
+        expect(classicStream).to.eql({
+          name: TEST_STREAM_NAME,
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: {
+              steps: [],
+            },
+            classic: {},
           },
-          classic: {},
-        },
+        });
       });
-    });
 
-    it('Allows setting processing on classic streams', async () => {
-      const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-        params: {
-          path: {
-            name: TEST_STREAM_NAME,
+      it('Allows setting processing on classic streams', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: TEST_STREAM_NAME,
+            },
+            body: {
+              dashboards: [],
+              queries: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: {
+                    steps: [
+                      {
+                        action: 'grok',
+                        where: { always: {} },
+                        from: 'message',
+                        patterns: [
+                          '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                        ],
+                      },
+                    ],
+                  },
+                  classic: {},
+                },
+              },
+            },
           },
-          body: {
-            dashboards: [],
-            queries: [],
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: {
-                  steps: [
-                    {
-                      action: 'grok',
-                      where: { always: {} },
-                      from: 'message',
-                      patterns: [
-                        '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                      ],
-                    },
+        });
+
+        expect(putResponse.status).to.eql(200);
+
+        expect(putResponse.body).to.have.property('acknowledged', true);
+
+        const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: { path: { name: TEST_STREAM_NAME } },
+        });
+
+        expect(getResponse.status).to.eql(200);
+
+        const body = getResponse.body;
+        Streams.ClassicStream.GetResponse.asserts(body);
+
+        const {
+          dashboards,
+          queries,
+          stream,
+          effective_lifecycle: effectiveLifecycle,
+          elasticsearch_assets: elasticsearchAssets,
+        } = body;
+
+        expect(dashboards).to.eql([]);
+        expect(queries).to.eql([]);
+
+        expect(stream).to.eql({
+          name: TEST_STREAM_NAME,
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'message',
+                  patterns: [
+                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
+                  where: { always: {} },
                 },
+              ],
+            },
+            classic: {},
+          },
+        });
 
-                classic: {},
+        expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
+
+        expect(elasticsearchAssets).to.eql({
+          ingestPipeline: 'logs@default-pipeline',
+          componentTemplates: ['logs@mappings', 'logs@settings', 'logs@custom', 'ecs@mappings'],
+          indexTemplate: 'logs',
+          dataStream: 'logs-test-default',
+        });
+      });
+
+      it('Executes processing on classic streams', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+          log: {
+            level: 'error',
+          },
+        });
+      });
+
+      it('Allows removing processing on classic streams', async () => {
+        const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: {
+                    steps: [],
+                  },
+                  classic: {},
+                },
               },
             },
           },
-        },
+        });
+
+        expect(response.status).to.eql(200);
+
+        expect(response.body).to.have.property('acknowledged', true);
       });
 
-      expect(putResponse.status).to.eql(200);
+      it('Executes processing on classic streams after removing processing', async () => {
+        const doc = {
+          // default logs pipeline fills in timestamp with current date if not set
+          message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
 
-      expect(putResponse.body).to.have.property('acknowledged', true);
-
-      const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-        params: { path: { name: TEST_STREAM_NAME } },
-      });
-
-      expect(getResponse.status).to.eql(200);
-
-      const body = getResponse.body;
-      Streams.ClassicStream.GetResponse.asserts(body);
-
-      const {
-        dashboards,
-        queries,
-        stream,
-        effective_lifecycle: effectiveLifecycle,
-        elasticsearch_assets: elasticsearchAssets,
-      } = body;
-
-      expect(dashboards).to.eql([]);
-      expect(queries).to.eql([]);
-
-      expect(stream).to.eql({
-        name: TEST_STREAM_NAME,
-        description: '',
-        ingest: {
-          lifecycle: { inherit: {} },
-          processing: {
-            steps: [
-              {
-                action: 'grok' as const,
-                from: 'message',
-                patterns: [
-                  '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                ],
-                where: { always: {} },
-              },
-            ],
-          },
-          classic: {},
-        },
-      });
-
-      expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
-
-      expect(elasticsearchAssets).to.eql({
-        ingestPipeline: 'logs@default-pipeline',
-        componentTemplates: ['logs@mappings', 'logs@settings', 'logs@custom', 'ecs@mappings'],
-        indexTemplate: 'logs',
-        dataStream: 'logs-test-default',
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          // accept any date
+          '@timestamp': (result._source as { [key: string]: unknown })['@timestamp'],
+          message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
+        });
       });
     });
 
-    it('Executes processing on classic streams', async () => {
-      const doc = {
-        '@timestamp': '2024-01-01T00:00:10.000Z',
-        message: '2023-01-01T00:00:10.000Z error test',
-      };
-      const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
-      expect(response.result).to.eql('created');
-
-      const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
-      expect(result._source).to.eql({
-        '@timestamp': '2024-01-01T00:00:10.000Z',
-        message: '2023-01-01T00:00:10.000Z error test',
-        inner_timestamp: '2023-01-01T00:00:10.000Z',
-        message2: 'test',
-        log: {
-          level: 'error',
-        },
-      });
-    });
-
-    it('Allows removing processing on classic streams', async () => {
-      const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-        params: {
-          path: { name: TEST_STREAM_NAME },
-          body: {
-            queries: [],
-            dashboards: [],
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: {
-                  steps: [],
+    describe('Classic streams with field overrides', () => {
+      it('Allows setting field overrides on classic streams', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: {
+                    steps: [],
+                  },
+                  classic: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'keyword',
+                      },
+                    },
+                  },
                 },
-                classic: {},
               },
             },
           },
-        },
+        });
+
+        expect(putResponse.status).to.eql(200);
       });
 
-      expect(response.status).to.eql(200);
-
-      expect(response.body).to.have.property('acknowledged', true);
-    });
-
-    it('Executes processing on classic streams after removing processing', async () => {
-      const doc = {
-        // default logs pipeline fills in timestamp with current date if not set
-        message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
-      };
-      const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
-      expect(response.result).to.eql('created');
-
-      const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
-      expect(result._source).to.eql({
-        // accept any date
-        '@timestamp': (result._source as { [key: string]: unknown })['@timestamp'],
-        message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
-      });
-    });
-
-    it('Allows deleting classic streams', async () => {
-      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-        params: {
-          path: {
-            name: TEST_STREAM_NAME,
+      it('Does a lazy rollover on field change', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: {
+                    steps: [],
+                  },
+                  classic: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'keyword',
+                      },
+                      'foo.baz': {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
-        },
+        });
+
+        expect(putResponse.status).to.eql(200);
+
+        // Verify the stream did not roll over
+        const getResponse = await esClient.indices.getDataStream({
+          name: TEST_STREAM_NAME,
+        });
+        expect(getResponse.data_streams[0].indices).to.have.length(1);
+
+        // Send a document to trigger the rollover
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+          'foo.bar': 'bar_value',
+          'foo.baz': 'baz_value',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        // Verify the rollover happened
+        const getResponseAfterIndexing = await esClient.indices.getDataStream({
+          name: TEST_STREAM_NAME,
+        });
+        expect(getResponseAfterIndexing.data_streams[0].indices).to.have.length(2);
+
+        // Verify the field override is set via field caps
+        const fieldCapsResponse = await esClient.fieldCaps({
+          index: TEST_STREAM_NAME,
+          fields: ['foo.baz', 'foo.bar'],
+        });
+        expect(fieldCapsResponse.fields).to.have.property('foo.bar');
+        expect(fieldCapsResponse.fields['foo.bar']).to.have.property('keyword');
+        expect(fieldCapsResponse.fields).to.have.property('foo.baz');
+        expect(fieldCapsResponse.fields['foo.baz']).to.have.property('keyword');
       });
+    });
 
-      expect(deleteStreamResponse.status).to.eql(200);
+    describe('Deleting classic streams', () => {
+      it('Allows deleting classic streams', async () => {
+        const deleteStreamResponse = await apiClient.fetch(
+          'DELETE /api/streams/{name} 2023-10-31',
+          {
+            params: {
+              path: {
+                name: TEST_STREAM_NAME,
+              },
+            },
+          }
+        );
 
-      const getStreamsResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+        expect(deleteStreamResponse.status).to.eql(200);
 
-      expect(getStreamsResponse.status).to.eql(200);
+        const getStreamsResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
 
-      const classicStream = getStreamsResponse.body.streams.find(
-        (stream) => stream.name === TEST_STREAM_NAME
-      );
-      expect(classicStream).to.eql(undefined);
+        expect(getStreamsResponse.status).to.eql(200);
+
+        const classicStream = getStreamsResponse.body.streams.find(
+          (stream) => stream.name === TEST_STREAM_NAME
+        );
+        expect(classicStream).to.eql(undefined);
+      });
     });
 
     describe('Classic streams sharing template/pipeline', () => {

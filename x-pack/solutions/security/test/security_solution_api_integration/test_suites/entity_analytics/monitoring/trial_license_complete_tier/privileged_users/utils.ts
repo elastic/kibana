@@ -9,8 +9,13 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common/src/constants';
-import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
-import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
+import {
+  API_VERSIONS,
+  MONITORING_ENGINE_INIT_URL,
+  MONITORING_ENGINE_SCHEDULE_NOW_URL,
+  MONITORING_USERS_CSV_UPLOAD_URL,
+} from '@kbn/security-solution-plugin/common/constants';
+import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -49,7 +54,7 @@ export const PrivMonUtils = (
     password: string;
   }) => {
     return await supertestWithoutAuth
-      .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/init', namespace))
+      .post(routeWithNamespace(MONITORING_ENGINE_INIT_URL, namespace))
       .auth(username, password)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', API_VERSIONS.public.v1)
@@ -63,7 +68,7 @@ export const PrivMonUtils = (
   ) => {
     const file = fileContent instanceof Buffer ? fileContent : Buffer.from(fileContent);
     return supertest
-      .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_csv', namespace))
+      .post(routeWithNamespace(MONITORING_USERS_CSV_UPLOAD_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -83,7 +88,7 @@ export const PrivMonUtils = (
       }, ignoreConflict: ${!!ignoreConflict}`
     );
     return supertest
-      .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/schedule_now', namespace))
+      .post(routeWithNamespace(MONITORING_ENGINE_SCHEDULE_NOW_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

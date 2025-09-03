@@ -12,36 +12,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
-  ImportFailure,
   IngestPipeline,
-  ImportDoc,
   InitializeImportResponse,
-} from '../../common/types';
-
-export interface ImportConfig {
-  settings: IndicesIndexSettings;
-  mappings: MappingTypeMapping;
-  pipeline: IngestPipeline;
-}
-
-export interface ImportResults {
-  success: boolean;
-  failures?: ImportFailure[];
-  docCount?: number;
-  error?: any;
-}
-
-export interface CreateDocsResponse<T extends ImportDoc> {
-  success: boolean;
-  remainder: number;
-  docs: T[];
-  error?: any;
-}
-
-export interface ImportFactoryOptions {
-  excludeLinesPattern?: string;
-  multilineStartPattern?: string;
-}
+  ImportResults,
+} from '@kbn/file-upload-common';
 
 export interface IImporter {
   read(data: ArrayBuffer): { success: boolean };

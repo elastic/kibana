@@ -465,12 +465,14 @@ export function QueryColumn({
 export function HistoryAndStarredQueriesTabs({
   containerCSS,
   containerWidth,
+  isSpaceReduced,
   onUpdateAndSubmit,
   height,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
+  isSpaceReduced?: boolean;
   height: number;
 }) {
   const kibana = useKibana<ESQLEditorDeps>();
@@ -650,41 +652,42 @@ export function HistoryAndStarredQueriesTabs({
         </EuiTabs>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            <EuiText
-              size="xs"
-              color="subdued"
-              data-test-subj="ESQLEditor-history-starred-queries-helpText"
-            >
-              <p>
-                {selectedTabId === 'history-queries-tab'
-                  ? (() => {
-                      const stats = getStorageStats();
-                      const displayCount = searchQuery.trim()
-                        ? filteredHistoryItems.length
-                        : stats.queryCount;
-                      return i18n.translate('esqlEditor.history.historyItemsStorage', {
-                        defaultMessage: 'Showing {queryCount} queries ({storageSizeKB}KB used)',
-                        values: {
-                          queryCount: displayCount,
-                          storageSizeKB: stats.storageSizeKB,
-                        },
-                      });
-                    })()
-                  : (() => {
-                      const displayCount = starredSearchQuery.trim()
-                        ? filteredStarredQueries.length
-                        : starredQueries.length;
-                      return i18n.translate('esqlEditor.history.starredItemslimit', {
-                        defaultMessage:
-                          'Showing {starredItemsCount} queries (max {starredItemsLimit})',
-                        values: {
-                          starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
-                          starredItemsCount: displayCount ?? 0,
-                        },
-                      });
-                    })()}
-              </p>
-            </EuiText>
+            {!isSpaceReduced && (
+              <EuiText
+                size="xs"
+                color="subdued"
+                data-test-subj="ESQLEditor-history-starred-queries-helpText"
+              >
+                <p>
+                  {selectedTabId === 'history-queries-tab'
+                    ? (() => {
+                        const stats = getStorageStats();
+                        const displayCount = searchQuery.trim()
+                          ? filteredHistoryItems.length
+                          : stats.queryCount;
+                        return i18n.translate('esqlEditor.history.historyItemsStorage', {
+                          defaultMessage: 'Showing {queryCount} queries',
+                          values: {
+                            queryCount: displayCount,
+                          },
+                        });
+                      })()
+                    : (() => {
+                        const displayCount = starredSearchQuery.trim()
+                          ? filteredStarredQueries.length
+                          : starredQueries.length;
+                        return i18n.translate('esqlEditor.history.starredItemslimit', {
+                          defaultMessage:
+                            'Showing {starredItemsCount} queries (max {starredItemsLimit})',
+                          values: {
+                            starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
+                            starredItemsCount: displayCount ?? 0,
+                          },
+                        });
+                      })()}
+                </p>
+              </EuiText>
+            )}
             {selectedTabId === 'history-queries-tab' && (
               <EuiFlexItem grow={false}>
                 <EuiFieldSearch
@@ -696,7 +699,8 @@ export function HistoryAndStarredQueriesTabs({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   data-test-subj="ESQLEditor-history-search"
                   css={css`
-                    width: 400px;
+                    max-width: 400px;
+                    width: ${isSpaceReduced ? '100%' : '400px'};
                   `}
                 />
               </EuiFlexItem>

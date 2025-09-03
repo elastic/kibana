@@ -46,8 +46,8 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   return (
     findKey(allPaths, (value) =>
       Array.isArray(value)
-        ? value.find((el) => el === path)
-        : typeof value === 'string' && value === path
+        ? value.find((el) => path.includes(el))
+        : typeof value === 'string' && path.includes(value)
     ) ?? 'app_not_found_in_i18nrc'
   );
 }

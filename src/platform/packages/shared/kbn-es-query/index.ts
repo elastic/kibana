@@ -116,6 +116,8 @@ export {
   BooleanRelation,
 } from './src/filters';
 
+export { indexPatternToCcs } from './src/indices';
+
 export {
   KQLSyntaxError,
   fromKueryExpression,

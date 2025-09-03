@@ -16,11 +16,13 @@ export function useWorkflows(params: WorkflowsSearchParams) {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowListDto>({
+    networkMode: 'always',
     queryKey: ['workflows', params],
-    queryFn: () =>
-      http!.post<WorkflowListDto>('/api/workflows/search', {
+    queryFn: () => {
+      return http!.post<WorkflowListDto>('/api/workflows/search', {
         body: JSON.stringify(params),
-      }),
+      });
+    },
     keepPreviousData: true,
   });
 }

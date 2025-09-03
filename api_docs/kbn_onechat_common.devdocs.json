@@ -3316,6 +3316,20 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsResourceType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EsResourceType",
+        "description": [
+          "\nRepresents the type of a \"searchable\" resource in the cluster.\nSearchable resources are indices, aliases and data streams"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/resources.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.OnechatErrorCode",
         "type": "Enum",
         "tags": [],
@@ -3706,6 +3720,30 @@
         "description": [],
         "signature": [
           "(\".search\" | \".list_indices\" | \".get_index_mapping\" | \".get_document_by_id\")[]"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.editableToolTypes",
+        "type": "Array",
+        "tags": [],
+        "label": "editableToolTypes",
+        "description": [
+          "\nList of tool types which can be created / edited by a user."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolType",
+            "text": "ToolType"
+          },
+          "[]"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,

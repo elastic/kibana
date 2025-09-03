@@ -30,7 +30,7 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
-import { getMissingCapabilities } from './capabilities';
+import { getMissingCapabilities } from '../../common/service/capabilities';
 import * as i18n from './translations';
 import {
   TASK_STATS_POLLING_SLEEP_SECONDS,
@@ -52,7 +52,7 @@ jest.mock('../api', () => ({
   addRulesToMigration: jest.fn(),
 }));
 
-jest.mock('./capabilities', () => ({
+jest.mock('../../common/service/capabilities', () => ({
   getMissingCapabilities: jest.fn(() => []),
 }));
 
@@ -72,11 +72,11 @@ jest.mock('./notifications/success_notification', () => ({
   getSuccessToast: jest.fn().mockReturnValue({ title: 'Success' }),
 }));
 
-jest.mock('./notifications/no_connector_notification', () => ({
+jest.mock('../../common/service/notifications/no_connector_notification', () => ({
   getNoConnectorToast: jest.fn().mockReturnValue({ title: 'No Connector' }),
 }));
 
-jest.mock('./notifications/missing_capabilities_notification', () => ({
+jest.mock('../../common/service/notifications/missing_capabilities_notification', () => ({
   getMissingCapabilitiesToast: jest.fn().mockReturnValue({ title: 'Missing Capabilities' }),
 }));
 
@@ -323,7 +323,7 @@ describe('SiemRulesMigrationsService', () => {
       ];
       mockGetRuleMigrationsStatsAll.mockResolvedValue(statsArray);
 
-      const result = await service.getRuleMigrationsStats();
+      const result = await service.getMigrationsStats();
       expect(getRuleMigrationsStatsAll).toHaveBeenCalled();
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('test 1');
@@ -350,7 +350,7 @@ describe('SiemRulesMigrationsService', () => {
         .mockResolvedValue([finishedMigration])
         .mockResolvedValueOnce([runningMigration]);
 
-      service.getRuleMigrationsStats = getStatsMock;
+      service.getMigrationsStats = getStatsMock;
 
       // Ensure a valid connector is present (so that a INTERRUPTED migration would be resumed, if needed)
       jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
@@ -389,7 +389,7 @@ describe('SiemRulesMigrationsService', () => {
         };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
-        service.getRuleMigrationsStats = jest
+        service.getMigrationsStats = jest
           .fn()
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
@@ -419,7 +419,7 @@ describe('SiemRulesMigrationsService', () => {
         const interruptedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
-        service.getRuleMigrationsStats = jest
+        service.getMigrationsStats = jest
           .fn()
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
@@ -459,7 +459,7 @@ describe('SiemRulesMigrationsService', () => {
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
 
-        service.getRuleMigrationsStats = getStatsMock;
+        service.getMigrationsStats = getStatsMock;
 
         // Ensure a valid connector is present (so that a INTERRUPTED migration would be resumed, if needed)
         jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
@@ -495,7 +495,7 @@ describe('SiemRulesMigrationsService', () => {
         };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
-        service.getRuleMigrationsStats = jest
+        service.getMigrationsStats = jest
           .fn()
           .mockResolvedValue([finishedMigration])
           .mockResolvedValueOnce([interruptedMigration]);
