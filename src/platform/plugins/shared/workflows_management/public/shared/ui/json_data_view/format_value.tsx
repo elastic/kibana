@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-check-mappings-update-cli'],
-};
+export function formatValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+  if (Array.isArray(value)) {
+    return `<span class="ffArray__highlight">[</span>${value
+      .map(formatValue)
+      .join(
+        `<span class="ffArray__highlight">, </span>`
+      )}<span class="ffArray__highlight">]</span>`;
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
