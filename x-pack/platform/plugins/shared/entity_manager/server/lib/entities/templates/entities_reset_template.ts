@@ -54,7 +54,11 @@ export const generateEntitiesResetIndexTemplateConfig = (
       [entitiesAliasPattern({ type: definition.type, dataset: ENTITY_RESET })]: {},
     },
     settings: {
-      'index.lifecycle.name': generateResetILMPolicyId(definition),
+      index: {
+        lifecycle: {
+          name: generateResetILMPolicyId(definition),
+        },
+      },
     },
   },
 });
