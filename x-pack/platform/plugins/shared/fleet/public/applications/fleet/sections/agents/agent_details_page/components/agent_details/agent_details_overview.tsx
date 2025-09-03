@@ -325,7 +325,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
-                defaultMessage: 'FIPS compliance',
+                defaultMessage: 'FIPS mode',
               }),
               description:
                 agent.local_metadata.elastic.agent.fips === true ? (
