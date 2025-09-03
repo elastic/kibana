@@ -17,6 +17,12 @@ import {
   generateResetIndexTemplateId,
   generateResetILMPolicyId,
 } from '../helpers/generate_component_id';
+import {
+  ECS_MAPPINGS_COMPONENT_TEMPLATE,
+  ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
+  ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
+  ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
+} from '../../../../common/constants_entities';
 
 export const generateEntitiesResetIndexTemplateConfig = (
   definition: EntityDefinition
@@ -29,7 +35,12 @@ export const generateEntitiesResetIndexTemplateConfig = (
     managed: true,
     managed_by: 'elastic_entity_model',
   },
-  composed_of: [],
+  composed_of: [
+    ECS_MAPPINGS_COMPONENT_TEMPLATE,
+    ENTITY_LATEST_BASE_COMPONENT_TEMPLATE_V1,
+    ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
+    ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
+  ],
   index_patterns: [
     entitiesIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V1,
