@@ -10,9 +10,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SearchHit } from '../../../../../common/search_strategy';
-import {
-  buildThreatDescription
-} from '../../../../detection_engine/rule_creation_ui/components/description_step/helpers';
+import { buildThreatDescription } from '../../../../detection_engine/rule_creation_ui/components/description_step/helpers';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
