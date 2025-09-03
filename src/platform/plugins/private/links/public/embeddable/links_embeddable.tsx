@@ -50,6 +50,8 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      console.log('LINKS!!!!!!', { initialState });
+
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const savedObjectId = (initialState.rawState as LinksByReferenceState).savedObjectId;
