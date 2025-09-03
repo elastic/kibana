@@ -168,41 +168,40 @@ const metricStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const metricStateSchema = schema.allOf([
-  sharedPanelInfoSchema,
-  layerSettingsSchema,
-  schema.object({
-    type: schema.literal('metric'),
-    ...datasetSchema,
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metric: schema.oneOf([
-      // oneOf allows only 12 items
-      // so break down metrics based on the type: field-based, reference-based, formula-like
-      schema.oneOf([
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, metricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, sumMetricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
-      ]),
-      schema.oneOf([
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
-      ]),
-      schema.oneOf([
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-      ]),
+export const metricStateSchema = schema.object({
+  type: schema.literal('metric'),
+  ...sharedPanelInfoSchema,
+  ...layerSettingsSchema,
+  ...datasetSchema,
+  /**
+   * Primary value configuration, must define operation.
+   */
+  metric: schema.oneOf([
+    // oneOf allows only 12 items
+    // so break down metrics based on the type: field-based, reference-based, formula-like
+    schema.oneOf([
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, metricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, sumMetricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
     ]),
-    /**
-     * Secondary value configuration, must define operation.
-     */
+    schema.oneOf([
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
+    ]),
+    schema.oneOf([
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
+    ]),
+  ]),
+  /**
+   * Secondary value configuration, must define operation.
+   */
     secondary_metric: schema.maybe(
       schema.oneOf([
         // oneOf allows only 12 items
@@ -228,19 +227,18 @@ export const metricStateSchema = schema.allOf([
         ]),
       ])
     ),
-    /**
-     * Configure how to break down the metric (e.g. show one metric per term).
-     */
-    breakdown_by: schema.maybe(
-      schema.oneOf([
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
-      ])
-    ),
-  }),
-]);
+  /**
+   * Configure how to break down the metric (e.g. show one metric per term).
+   */
+  breakdown_by: schema.maybe(
+    schema.oneOf([
+      schema.allOf([metricStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema]),
+      schema.allOf([metricStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
+      schema.allOf([metricStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
+      schema.allOf([metricStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
+      schema.allOf([metricStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
+    ])
+  ),
+});
 
 export type MetricState = TypeOf<typeof metricStateSchema>;

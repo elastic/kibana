@@ -64,7 +64,7 @@ describe('Buckets Transforms', () => {
         field: '@timestamp',
         suggested_interval: '1d',
         include_empty_rows: false,
-        use_original_time_rangeoverride_time_range: false,
+        use_original_time_range: false,
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
       expect(result.operationType).toBe('date_histogram');

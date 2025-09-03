@@ -60,7 +60,7 @@ export const bucketDateHistogramOperationSchema = schema.object({
   /**
    * Whether to use original time range
    */
-  use_original_time_rangeoverride_time_range: schema.boolean({
+  use_original_time_range: schema.boolean({
     defaultValue: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
     meta: {
       description: 'Whether to use original time range',
@@ -85,8 +85,9 @@ export const bucketDateHistogramOperationSchema = schema.object({
   ),
 });
 
-export const bucketTermsOperationSchema = formatSchema.extends({
+export const bucketTermsOperationSchema = schema.object({
   operation: schema.literal('terms'),
+  ...formatSchema,
   ...labelSharedProp,
   /**
    * Fields to be used for the terms
@@ -255,8 +256,9 @@ export const bucketFiltersOperationSchema = schema.object({
   filters: schema.arrayOf(filterWithLabelSchema),
 });
 
-export const bucketHistogramOperationSchema = formatSchema.extends({
+export const bucketHistogramOperationSchema = schema.object({
   operation: schema.literal('histogram'),
+  ...formatSchema,
   ...labelSharedProp,
   /**
    * Label for the operation
@@ -305,8 +307,9 @@ export const bucketHistogramOperationSchema = formatSchema.extends({
   }),
 });
 
-export const bucketRangesOperationSchema = formatSchema.extends({
+export const bucketRangesOperationSchema = schema.object({
   operation: schema.literal('range'),
+  ...formatSchema,
   ...labelSharedProp,
   /**
    * Label for the operation

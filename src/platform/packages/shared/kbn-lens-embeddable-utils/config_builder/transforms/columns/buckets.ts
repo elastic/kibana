@@ -31,25 +31,9 @@ import {
   fromRangeOrHistogramLensStateToAPI,
 } from './range';
 import { fromTermsLensApiToLensState, fromTermsLensStateToAPI } from './top_values';
-import type { AnyBucketLensStateColumn, AnyMetricLensStateColumn } from './types';
+import type { AnyBucketLensStateColumn, AnyLensStateColumn, AnyMetricLensStateColumn } from './types';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 
-export function fromBucketLensApiToLensState(
-  options: LensApiFiltersOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): FiltersIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiTermsOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): TermsIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiRangeOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): RangeIndexPatternColumn;
-export function fromBucketLensApiToLensState(
-  options: LensApiDateHistogramOperation,
-  columns: { column: AnyMetricLensStateColumn; id: string }[]
-): DateHistogramIndexPatternColumn;
 export function fromBucketLensApiToLensState(
   options: LensApiBucketOperations,
   columns: { column: AnyMetricLensStateColumn; id: string }[]
@@ -71,24 +55,8 @@ export function fromBucketLensApiToLensState(
 }
 
 export function fromBucketLensStateToAPI(
-  column: FiltersIndexPatternColumn,
-  columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiFiltersOperation;
-export function fromBucketLensStateToAPI(
-  column: DateHistogramIndexPatternColumn,
-  columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiDateHistogramOperation;
-export function fromBucketLensStateToAPI(
-  column: RangeIndexPatternColumn,
-  columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiRangeOperation;
-export function fromBucketLensStateToAPI(
-  column: TermsIndexPatternColumn,
-  columns: { column: LensApiAllMetricOperations; id: string }[]
-): LensApiTermsOperation;
-export function fromBucketLensStateToAPI(
   column: AnyBucketLensStateColumn,
-  columns: { column: LensApiAllMetricOperations; id: string }[]
+  columns: { column: AnyLensStateColumn; id: string }[]
 ): LensApiBucketOperations | undefined {
   if (isLensStateColumnOfType<FiltersIndexPatternColumn>('filters', column)) {
     return fromFiltersLensStateToAPI(column);
@@ -102,7 +70,7 @@ export function fromBucketLensStateToAPI(
   if (isLensStateColumnOfType<TermsIndexPatternColumn>('terms', column)) {
     return fromTermsLensStateToAPI(
       column,
-      columns.map(({ column: c, id }) => ({ ...c, id }))
+      columns
     );
   }
   throw new Error(`Unsupported bucket operation`);

@@ -19,7 +19,8 @@ import {
 } from './constants';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 
-const genericOperationOptionsSchema = formatSchema.extends({
+const genericOperationOptionsSchema = {
+  ...formatSchema,
   /**
    * Label for the operation
    */
@@ -30,9 +31,10 @@ const genericOperationOptionsSchema = formatSchema.extends({
       },
     })
   ),
-});
+};
 
-export const staticOperationDefinitionSchema = genericOperationOptionsSchema.extends({
+export const staticOperationDefinitionSchema = schema.object({
+  ...genericOperationOptionsSchema,
   operation: schema.literal('static_value'),
   /**
    * Static value
@@ -45,7 +47,8 @@ export const staticOperationDefinitionSchema = genericOperationOptionsSchema.ext
   }),
 });
 
-export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.extends({
+export const formulaOperationDefinitionSchema = schema.object({
+  ...genericOperationOptionsSchema,
   operation: schema.literal('formula'),
   /**
    * Formula
@@ -57,7 +60,8 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.ex
   }),
 });
 
-export const metricOperationSharedSchema = genericOperationOptionsSchema.extends({
+export const metricOperationSharedSchema = {
+  ...genericOperationOptionsSchema,
   /**
    * Time scale
    */
@@ -79,14 +83,15 @@ export const metricOperationSharedSchema = genericOperationOptionsSchema.extends
    * Filter
    */
   filter: schema.maybe(filterSchema),
-});
+};
 
-export const fieldBasedOperationSharedSchema = metricOperationSharedSchema.extends({
+export const fieldBasedOperationSharedSchema = {
+  ...metricOperationSharedSchema,
   /**
    * Field to be used for the metric
    */
   field: schema.string({ meta: { description: 'Field to be used for the metric' } }),
-});
+};
 
 const emptyAsNullSchemaRawObject = {
   /**
@@ -100,7 +105,8 @@ const emptyAsNullSchemaRawObject = {
   }),
 };
 
-export const countMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const countMetricOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   ...emptyAsNullSchemaRawObject,
   /**
    * Select the operation type
@@ -112,12 +118,14 @@ export const countMetricOperationSchema = fieldBasedOperationSharedSchema.extend
   field: schema.maybe(schema.string()),
 });
 
-export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const uniqueCountMetricOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   ...emptyAsNullSchemaRawObject,
   operation: schema.literal('unique_count'),
 });
 
-export const metricOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const metricOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   operation: schema.oneOf([
     schema.literal('min'),
     schema.literal('max'),
@@ -127,12 +135,14 @@ export const metricOperationSchema = fieldBasedOperationSharedSchema.extends({
   ]),
 });
 
-export const sumMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const sumMetricOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   ...emptyAsNullSchemaRawObject,
   operation: schema.literal('sum'),
 });
 
-export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const lastValueOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   operation: schema.literal('last_value'),
   sort_by: schema.string(),
   show_array_values: schema.boolean({
@@ -141,7 +151,8 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
   }),
 });
 
-export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const percentileOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   operation: schema.literal('percentile'),
   percentile: schema.number({
     meta: { description: 'Percentile' },
@@ -149,7 +160,8 @@ export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends
   }),
 });
 
-export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const percentileRanksOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   operation: schema.literal('percentile_rank'),
   rank: schema.number({
     meta: { description: 'Percentile Rank' },
@@ -167,12 +179,14 @@ export const fieldMetricOperationsSchema = schema.oneOf([
   percentileRanksOperationSchema,
 ]);
 
-export const differencesOperationSchema = metricOperationSharedSchema.extends({
+export const differencesOperationSchema = schema.object({
+  ...metricOperationSharedSchema,
   operation: schema.literal('differences'),
   of: fieldMetricOperationsSchema,
 });
 
-export const movingAverageOperationSchema = metricOperationSharedSchema.extends({
+export const movingAverageOperationSchema = schema.object({
+  ...metricOperationSharedSchema,
   operation: schema.literal('moving_average'),
   of: fieldMetricOperationsSchema,
   window: schema.number({
@@ -181,11 +195,13 @@ export const movingAverageOperationSchema = metricOperationSharedSchema.extends(
   }),
 });
 
-export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const cumulativeSumOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   operation: schema.literal('cumulative_sum'),
 });
 
-export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const counterRateOperationSchema = schema.object({
+  ...fieldBasedOperationSharedSchema,
   operation: schema.literal('counter_rate'),
 });
 

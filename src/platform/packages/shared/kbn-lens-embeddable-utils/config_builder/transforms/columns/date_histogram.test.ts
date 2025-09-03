@@ -28,7 +28,7 @@ describe('Date Histogram Transforms', () => {
         field: '@timestamp',
         suggested_interval: '1d',
         include_empty_rows: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
-        use_original_time_rangeoverride_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+        use_original_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
       };
 
       const expected: DateHistogramIndexPatternColumn = {
@@ -74,7 +74,7 @@ describe('Date Histogram Transforms', () => {
         field: '@timestamp',
         label: 'Daily Events',
         include_empty_rows: false,
-        use_original_time_rangeoverride_time_range: false,
+        use_original_time_range: false,
         suggested_interval: '1d',
       };
 
@@ -88,7 +88,7 @@ describe('Date Histogram Transforms', () => {
         operation: 'date_histogram',
         field: '@timestamp',
         suggested_interval: '1h',
-        use_original_time_rangeoverride_time_range: true,
+        use_original_time_range: true,
         include_empty_rows: true,
         drop_partial_intervals: true,
         label: 'Hourly Events',
@@ -126,7 +126,7 @@ describe('Date Histogram Transforms', () => {
         field: '@timestamp',
         label: '@timestamp per 1d',
         suggested_interval: '1d',
-        use_original_time_rangeoverride_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+        use_original_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
         include_empty_rows: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
         drop_partial_intervals: false,
       };
@@ -176,7 +176,7 @@ describe('Date Histogram Transforms', () => {
         field: '@timestamp',
         label: 'Hourly Events',
         suggested_interval: '1h',
-        use_original_time_rangeoverride_time_range: true,
+        use_original_time_range: true,
         include_empty_rows: true,
         drop_partial_intervals: true,
       });

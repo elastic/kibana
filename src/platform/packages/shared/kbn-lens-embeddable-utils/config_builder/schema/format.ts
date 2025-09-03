@@ -117,9 +117,9 @@ export const formatTypeSchema = schema.oneOf([
   customFormatSchema,
 ]);
 
-export const formatSchema = schema.object({
+export const formatSchema = {
   /**
    * Format configuration
    */
   format: schema.maybe(formatTypeSchema),
-});
+};

@@ -19,7 +19,7 @@ export function fromDateHistogramLensApiToLensState(
     // eslint-disable-next-line @typescript-eslint/naming-convention
     suggested_interval,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    use_original_time_rangeoverride_time_range,
+    use_original_time_range,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     include_empty_rows,
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -35,7 +35,7 @@ export function fromDateHistogramLensApiToLensState(
       interval: suggested_interval,
       includeEmptyRows: include_empty_rows,
       dropPartials: Boolean(drop_partial_intervals),
-      ignoreTimeRange: use_original_time_rangeoverride_time_range,
+      ignoreTimeRange: use_original_time_range,
     },
   };
 }
@@ -47,7 +47,7 @@ export function fromDateHistogramLensStateToAPI(
     operation: 'date_histogram',
     ...getLensAPIBucketSharedProps(column),
     suggested_interval: column.params.interval,
-    use_original_time_rangeoverride_time_range: Boolean(column.params.ignoreTimeRange),
+    use_original_time_range: Boolean(column.params.ignoreTimeRange),
     include_empty_rows: Boolean(column.params.includeEmptyRows),
     drop_partial_intervals: Boolean(column.params.dropPartials),
   };

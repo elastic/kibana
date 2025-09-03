@@ -28,7 +28,7 @@ describe('Bucket Operation Schemas', () => {
         operation: 'date_histogram',
         field: 'timestamp',suggested_interval: 'auto',
         include_empty_rows: true,
-        use_original_time_rangeoverride_time_range: true,
+        use_original_time_range: true,
       };
 
       const validated = bucketDateHistogramOperationSchema.validate(input);
@@ -195,7 +195,7 @@ describe('Bucket Operation Schemas', () => {
           field: 'timestamp',
           suggested_interval: 'auto',
           include_empty_rows: true,
-          use_original_time_rangeoverride_time_range: true,
+          use_original_time_range: true,
         },
         {
           operation: 'terms',

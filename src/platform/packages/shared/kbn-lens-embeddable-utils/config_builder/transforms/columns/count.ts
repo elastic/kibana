@@ -22,7 +22,7 @@ export const fromCountAPItoLensState = (
 
   return {
     operationType: 'count',
-    sourceField: field || '',
+    sourceField: field || '__records__',
     ...getLensStateMetricSharedProps(options),
     params: {
       emptyAsNull: empty_as_null,
@@ -36,7 +36,7 @@ export const fromCountLensStateToAPI = (
 ): LensApiCountMetricOperation => {
   return {
     operation: 'count',
-    field: options.sourceField,
+    ...(options.sourceField !== '__records__' ? { field: options.sourceField } : {}),
     empty_as_null: Boolean(options.params?.emptyAsNull),
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),

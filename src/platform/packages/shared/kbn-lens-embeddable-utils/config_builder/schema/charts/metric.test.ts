@@ -210,7 +210,7 @@ describe('Metric Schema', () => {
           field: 'timestamp',
           suggested_interval: 'auto',
           include_empty_rows: true,
-          use_original_time_rangeoverride_time_range: true,
+          use_original_time_range: true,
           columns: 4,
           collapse_by: 'avg' as const,
         },

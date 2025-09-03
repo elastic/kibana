@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import { formatTypeSchema, formatSchema } from './format';
 
 describe('Format Schemas', () => {
@@ -148,14 +149,14 @@ describe('Format Schemas', () => {
         },
       };
 
-      const validated = formatSchema.validate(input);
+      const validated = schema.object(formatSchema).validate(input);
       expect(validated).toEqual({ ...input, format: { ...input.format, compact: false } });
     });
 
     it('validates without format configuration', () => {
       const input = {};
 
-      const validated = formatSchema.validate(input);
+      const validated = schema.object(formatSchema).validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -166,7 +167,7 @@ describe('Format Schemas', () => {
         },
       };
 
-      expect(() => formatSchema.validate(input)).toThrow();
+      expect(() => schema.object(formatSchema).validate(input)).toThrow();
     });
   });
 
