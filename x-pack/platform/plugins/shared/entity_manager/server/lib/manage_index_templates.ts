@@ -18,6 +18,7 @@ import { entitiesEventComponentTemplateConfig } from '../templates/components/ev
 import { retryTransientEsErrors } from './entities/helpers/retry';
 import { generateEntitiesLatestIndexTemplateConfig } from './entities/templates/entities_latest_template';
 import { generateEntitiesHistoryIndexTemplateConfig } from './entities/templates/entities_history_template';
+import { generateEntitiesResetIndexTemplateConfig } from './entities/templates/entities_reset_template';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -95,6 +96,10 @@ export async function createAndInstallTemplates(
   const historyTemplate = generateEntitiesHistoryIndexTemplateConfig(definition);
   await upsertTemplate({ esClient, template: historyTemplate, logger });
   templates.push({ type: 'template', id: historyTemplate.name });
+
+  const resetTemplate = generateEntitiesResetIndexTemplateConfig(definition);
+  await upsertTemplate({ esClient, template: resetTemplate, logger });
+  templates.push({ type: 'template', id: resetTemplate.name });
 
   return templates;
 }

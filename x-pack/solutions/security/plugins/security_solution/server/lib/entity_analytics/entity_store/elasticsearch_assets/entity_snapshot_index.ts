@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type EntityType } from '../../../../../common/api/entity_analytics';
 import { getEntitiesSnapshotIndexName, getEntitiesSnapshotIndexPattern } from '../utils';
-import { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 interface Options {
   entityType: EntityType;

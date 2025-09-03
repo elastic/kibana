@@ -26,6 +26,7 @@ interface AliasPatternOptions<TDataset extends Dataset> {
   type: string;
 }
 
+// For both ENTITY_LATEST and ENTITY_RESET
 export function entitiesIndexPattern<TDataset extends Dataset>({
   schemaVersion,
   dataset,
@@ -34,6 +35,7 @@ export function entitiesIndexPattern<TDataset extends Dataset>({
   return `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${definitionId}` as const;
 }
 
+// FOR ENTITY_HISTORY, since it includes a date section
 export function entitiesHistoryIndexPattern<TDataset extends Dataset>({
   schemaVersion,
   dataset,
