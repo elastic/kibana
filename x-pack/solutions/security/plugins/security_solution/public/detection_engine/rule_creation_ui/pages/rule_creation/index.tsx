@@ -83,6 +83,7 @@ import { extractValidationMessages } from '../../../rule_creation/logic/extract_
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
