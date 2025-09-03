@@ -34,7 +34,6 @@
     "@kbn/monaco",
     "@kbn/licensing-plugin",
     "@kbn/code-editor",
-    "@kbn/ml-plugin",
     "@kbn/share-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/inference-common",
@@ -44,6 +43,7 @@
     "@kbn/security-plugin-types-common",
     "@kbn/ml-trained-models-utils",
     "@kbn/licensing-types",
-    "@kbn/product-doc-base-plugin"
+    "@kbn/product-doc-base-plugin",
+    "@kbn/ml-plugin-contracts"
   ]
 }
