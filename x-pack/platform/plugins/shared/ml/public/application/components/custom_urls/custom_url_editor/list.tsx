@@ -138,15 +138,17 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     const checkTimeRangeVisibility = async () => {
       const results = await Promise.all(
         customUrls.map(async (customUrl) => {
-          const kibanaUrl = customUrl as MlKibanaUrlConfig;
-          const dataViewId = findDataViewId(job, kibanaUrl, dataViewListItems, isPartialDFAJob);
+          if (customUrl.url_value.includes('dashboards')) return true;
 
-          // Can't determine data view id - show time range field by default
+          const urlState = parseUrlState(customUrl.url_value);
+          const dataViewId = urlState._a?.index;
+
+          // Show time range field by default for unknown urls
           if (!dataViewId) return true;
 
           try {
             const dataView = await dataViews.get(dataViewId);
-            return !!dataView?.timeFieldName;
+            return dataView?.timeFieldName !== undefined && dataView?.timeFieldName !== '';
           } catch {
             return false;
           }
