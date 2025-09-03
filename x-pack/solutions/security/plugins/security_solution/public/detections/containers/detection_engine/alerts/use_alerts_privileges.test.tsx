@@ -75,9 +75,10 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     canAccessEndpointManagement: false,
     canAccessFleet: false,
   }),
-  kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+  siemPrivileges: { crud: true, read: true },
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
+  rulesPrivileges: { edit: true, read: true },
 };
 
 describe('useAlertsPrivileges', () => {
@@ -182,7 +183,7 @@ describe('useAlertsPrivileges', () => {
   test('returns "hasKibanaCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.kibanaSecuritySolutionsPrivileges = { crud: false, read: true };
+      draft.siemPrivileges = { crud: false, read: true };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -206,7 +207,7 @@ describe('useAlertsPrivileges', () => {
   test('returns "hasKibanaREAD" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.kibanaSecuritySolutionsPrivileges = { crud: false, read: false };
+      draft.siemPrivileges = { crud: false, read: false };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
