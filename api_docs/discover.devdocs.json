@@ -2194,6 +2194,27 @@
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.metricsExperience",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsExperience",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "metricsExperience",
+                "scope": "public",
+                "docId": "kibMetricsExperiencePluginApi",
+                "section": "def-public.MetricsExperiencePluginStart",
+                "text": "MetricsExperiencePluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
