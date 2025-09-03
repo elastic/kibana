@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type { IntegrationType } from './constants';
 import {
   defaultMonitoringUsersIndex,
   integrationsSourceIndex,
   INTEGRATION_TYPES,
   STREAM_INDEX_PATTERNS,
   getStreamPatternFor,
-  OKTA_ADMIN_ROLES,
-  AD_ADMIN_ROLES,
-  INTEGRATION_MATCHERS_DETAILED,
-  getMatchersFor,
 } from './constants';
 
 describe('constants', () => {
@@ -47,41 +42,5 @@ describe('constants', () => {
   it('getStreamPatternFor returns correct pattern', () => {
     expect(getStreamPatternFor('okta', 'default')).toBe('logs-entityanalytics_okta.user-default');
     expect(getStreamPatternFor('ad', 'space1')).toBe('logs-entityanalytics_ad.user-space1');
-  });
-
-  it('should have correct OKTA_ADMIN_ROLES', () => {
-    expect(OKTA_ADMIN_ROLES).toContain('Super Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Organization Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Group Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Application Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Mobile Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Help Desk Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Report Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('API Access Management Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Group Membership Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Read-only Administrator');
-    expect(OKTA_ADMIN_ROLES.length).toBe(10);
-  });
-
-  it('should have correct AD_ADMIN_ROLES', () => {
-    expect(AD_ADMIN_ROLES).toEqual(['Domain Admins', 'Enterprise Admins']);
-    expect(AD_ADMIN_ROLES.length).toBe(2);
-  });
-
-  it('should have correct INTEGRATION_MATCHERS_DETAILED', () => {
-    expect(INTEGRATION_MATCHERS_DETAILED.okta.values).toEqual(OKTA_ADMIN_ROLES);
-    expect(INTEGRATION_MATCHERS_DETAILED.ad.values).toEqual(AD_ADMIN_ROLES);
-    expect(INTEGRATION_MATCHERS_DETAILED.okta.fields).toEqual(['user.roles']);
-    expect(INTEGRATION_MATCHERS_DETAILED.ad.fields).toEqual(['user.roles']);
-  });
-
-  it('getMatchersFor returns correct matcher array', () => {
-    expect(getMatchersFor('okta')).toEqual([INTEGRATION_MATCHERS_DETAILED.okta]);
-    expect(getMatchersFor('ad')).toEqual([INTEGRATION_MATCHERS_DETAILED.ad]);
-  });
-
-  it('IntegrationType type should only allow okta and ad', () => {
-    const types: IntegrationType[] = ['okta', 'ad'];
-    expect(types).toEqual(INTEGRATION_TYPES);
   });
 });
