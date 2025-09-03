@@ -13,8 +13,8 @@ import type { RuleMigrationRule } from '../../../../../common/siem_migrations/mo
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 import { StatusBadge } from '../status_badge';
-import { TableHeader } from './header';
-import { convertTranslationResultIntoText } from '../../utils/translation_results';
+import { TableHeader } from '../../../common/components';
+import { convertTranslationResultIntoText } from '../../../common/utils';
 
 export const SIEM_MIGRATIONS_STATUS_HEADER_ID = 'siemMigrationsStatusHeader';
 
