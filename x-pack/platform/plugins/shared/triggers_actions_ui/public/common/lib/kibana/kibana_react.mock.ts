@@ -20,6 +20,7 @@ import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../..
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -68,6 +69,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     lens: lensPluginMock.createStartContract(),
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+    dashboard: {} as DashboardStart,
   } as TriggersAndActionsUiServices;
 };
 

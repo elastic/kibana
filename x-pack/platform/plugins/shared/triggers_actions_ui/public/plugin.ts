@@ -38,6 +38,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -174,6 +175,7 @@ interface PluginsStart {
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
+  dashboard: DashboardStart;
 }
 
 export class Plugin
@@ -319,6 +321,7 @@ export class Plugin
             fieldsMetadata: pluginsStart.fieldsMetadata,
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
+            dashboard: pluginsStart.dashboard,
           });
         },
       });
@@ -418,6 +421,7 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            dashboard: pluginsStart.dashboard,
           });
         },
       });
