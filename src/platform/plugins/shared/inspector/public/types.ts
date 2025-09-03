@@ -8,7 +8,7 @@
  */
 
 import type { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
-import type { Adapters } from '../common';
+import type { Adapters } from '@kbn/inspector-common';
 
 /**
  * The props interface that a custom inspector view component, that will be passed

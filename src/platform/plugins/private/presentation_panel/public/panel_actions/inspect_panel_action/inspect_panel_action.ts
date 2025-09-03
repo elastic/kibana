@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import { apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type { HasInspectorAdapters } from '@kbn/inspector-browser';
+import { apiHasInspectorAdapters } from '@kbn/inspector-browser';
 import type {
   EmbeddableApiContext,
   PublishesTitle,

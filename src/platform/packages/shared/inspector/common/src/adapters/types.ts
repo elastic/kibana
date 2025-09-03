@@ -8,6 +8,15 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
+import type { RequestAdapter } from './request_adapter';
+
+/**
+ * The interface that the adapters used to open an inspector have to fullfill.
+ */
+export interface Adapters {
+  requests?: RequestAdapter;
+  [key: string]: any;
+}
 
 /**
  * The status a request can have.

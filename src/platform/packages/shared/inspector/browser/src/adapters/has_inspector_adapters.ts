@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestAdapter } from './request';
+import type { Adapters } from '@kbn/inspector-common';
 
-/**
- * The interface that the adapters used to open an inspector have to fullfill.
- */
-export interface Adapters {
-  requests?: RequestAdapter;
-  [key: string]: any;
+export interface HasInspectorAdapters {
+  getInspectorAdapters: () => Adapters | undefined;
 }
+
+export const apiHasInspectorAdapters = (api: unknown | null): api is HasInspectorAdapters =>
+  Boolean((api as HasInspectorAdapters).getInspectorAdapters);

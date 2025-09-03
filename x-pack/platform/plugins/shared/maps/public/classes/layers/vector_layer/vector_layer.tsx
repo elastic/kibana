@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';

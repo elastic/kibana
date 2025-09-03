@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';

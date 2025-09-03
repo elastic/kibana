@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClustersView } from './clusters_view';
-import type { Request } from '../../../../../../common/adapters/request/types';
+import type { Request } from '@kbn/inspector-common';
 
 describe('shouldShow', () => {
   test('should return true when response contains _shards', () => {

@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Adapters } from '../../common';
-
-export interface HasInspectorAdapters {
-  getInspectorAdapters: () => Adapters | undefined;
-}
-
-export const apiHasInspectorAdapters = (api: unknown | null): api is HasInspectorAdapters =>
-  Boolean((api as HasInspectorAdapters).getInspectorAdapters);
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/inspector/browser'],
+};

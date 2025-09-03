@@ -11,7 +11,7 @@ import type { AnyAction, Dispatch } from 'redux';
 import type { ThunkDispatch } from 'redux-thunk';
 import { v4 as uuidv4 } from 'uuid';
 import type { FeatureCollection } from 'geojson';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,

@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './request';
-export type * from './types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/inspector/common'],
+};

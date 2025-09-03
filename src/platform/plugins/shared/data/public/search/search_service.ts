@@ -18,7 +18,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';

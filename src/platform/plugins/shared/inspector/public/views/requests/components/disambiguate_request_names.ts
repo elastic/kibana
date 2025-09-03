@@ -8,7 +8,7 @@
  */
 
 import { groupBy } from 'lodash';
-import type { Request } from '../../../../common/adapters/request/types';
+import type { Request } from '@kbn/inspector-common';
 
 export function disambiguateRequestNames(requests: Request[]): Request[] {
   const requestsByName = groupBy(requests, (r) => r.name);

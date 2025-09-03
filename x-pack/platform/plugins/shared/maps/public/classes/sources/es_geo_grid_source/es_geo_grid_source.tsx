@@ -19,7 +19,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import type { DataView } from '@kbn/data-plugin/common';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';

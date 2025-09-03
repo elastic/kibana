@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { MapAdapter, VectorTileAdapter } from '../inspector';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 

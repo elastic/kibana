@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { WorkspaceLayoutComponent } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type {
   GraphSavePolicy,
@@ -21,6 +21,7 @@ import type {
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { GraphVisualization } from '../graph_visualization';
+import type { RequestAdapter } from '@kbn/inspector-common';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({

@@ -59,6 +59,7 @@
     "@kbn/core-execution-context-server",
     "@kbn/data-service-server",
     "@kbn/css-utils",
+    "@kbn/inspector-common",
     "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": ["target/**/*"]

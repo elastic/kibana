@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import type { Feature, FeatureCollection } from 'geojson';

@@ -18,7 +18,6 @@
     ],
     "extraPublicDirs": [
       "common",
-      "common/adapters/request"
     ]
   }
 }

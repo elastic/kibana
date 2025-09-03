@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Request } from '../../../../common/adapters/request/types';
+import type { Request } from '@kbn/inspector-common';
 import { disambiguateRequestNames } from './disambiguate_request_names';
 
 describe('disambiguateRequestNames', () => {

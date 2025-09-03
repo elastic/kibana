@@ -8,8 +8,8 @@
  */
 
 import { EventEmitter } from 'events';
+import type { Adapters } from '@kbn/inspector-common';
 import type { InspectorViewDescription } from './types';
-import type { Adapters } from '../common';
 
 /**
  * @callback viewShouldShowFunc

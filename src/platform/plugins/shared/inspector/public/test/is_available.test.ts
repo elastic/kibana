@@ -8,7 +8,7 @@
  */
 
 import { inspectorPluginMock } from '../mocks';
-import { RequestAdapter } from '../../common/adapters';
+import { RequestAdapter } from '@kbn/inspector-common';
 
 const adapter2 = new RequestAdapter();
 

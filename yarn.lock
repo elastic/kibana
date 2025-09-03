@@ -6385,6 +6385,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inspector-browser@link:src/platform/packages/shared/inspector/browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inspector-common@link:src/platform/packages/shared/inspector/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
   version "0.0.0"
   uid ""

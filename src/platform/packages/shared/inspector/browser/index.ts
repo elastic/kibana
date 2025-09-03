@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { Request, RequestStatistic, RequestStatistics } from './types';
-export { RequestStatus } from './types';
-export { RequestAdapter } from './request_adapter';
-export { RequestResponder } from './request_responder';
+export {
+  apiHasInspectorAdapters,
+  type HasInspectorAdapters,
+} from './src/adapters/has_inspector_adapters';

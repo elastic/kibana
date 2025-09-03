@@ -10,6 +10,17 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { InspectorPublicPlugin } from './plugin';
 
+/**
+ * The `public/index` file exports must export the inspector plugin.
+ *
+ * Please do not export any static code from this file. All static code
+ * should be exported from the `@kbn/inspector-browser` package.
+ *
+ * Types can be exported from this file, but plugins and packages may prefer to
+ * import them from `@kbn/inspector-browser` or `@kbn/inspector-common`
+ * packages to avoid circular graph issues.
+ */
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new InspectorPublicPlugin(initializerContext);
 }
@@ -18,14 +29,7 @@ export {
   type Request,
   type RequestStatistic,
   type RequestStatistics,
-  RequestAdapter,
-  RequestStatus,
-  RequestResponder,
-} from '../common';
-export {
-  apiHasInspectorAdapters,
-  type HasInspectorAdapters,
-} from './adapters/has_inspector_adapters';
+} from '@kbn/inspector-common';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export type { Setup, Start } from './plugin';
 export type {

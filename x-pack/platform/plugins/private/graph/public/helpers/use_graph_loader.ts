@@ -10,7 +10,7 @@ import type { CoreStart, ToastsStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-common';
 import type {
   ExploreRequest,
   GraphExploreCallback,

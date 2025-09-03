@@ -11,7 +11,7 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type { HasInspectorAdapters } from '@kbn/inspector-browser';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,

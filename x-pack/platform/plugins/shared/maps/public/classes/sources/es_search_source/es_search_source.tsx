@@ -16,7 +16,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView, SortDirectionNumeric } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { SortDirection } from '@kbn/data-plugin/common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { AbstractESSource } from '../es_source';
