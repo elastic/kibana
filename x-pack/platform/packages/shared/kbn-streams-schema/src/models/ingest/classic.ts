@@ -20,7 +20,6 @@ import { failureStoreSchema } from './failure_store';
 import type { FieldDefinition } from '../../fields';
 import { fieldDefinitionSchema } from '../../fields';
 
-
 /* eslint-disable @typescript-eslint/no-namespace */
 
 export interface IngestClassic {
