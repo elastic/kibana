@@ -9,12 +9,17 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
-import type { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesAlias,
+  IndicesIndexSettings,
+  IndicesUpdateAliasesRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus, ReindexStep } from '../../../common';
-import type { IndexSettings, IndexWarning } from '../../../common';
+import type { IndexSettings, IndexWarning, ReindexArgs } from '../../../common';
 import type { ReindexSavedObject } from './types';
+import type { CreateReindexOpArgs } from './reindex_actions';
 
 import type { ReindexActions } from './reindex_actions';
 
@@ -476,16 +481,23 @@ export const reindexServiceFactory = (
 
     const isHidden = await isIndexHidden(indexName);
 
-    const aliasResponse = await esClient.indices.updateAliases({
-      actions: [
-        { add: { index: newIndexName, alias: indexName, is_hidden: isHidden } },
-        { remove_index: { index: indexName } },
-        ...extraAliases,
-      ],
-    });
+    const updateAliasActions: IndicesUpdateAliasesRequest['actions'] = reindexOp.attributes
+      .reindexOptions?.deleteOldIndex
+      ? [
+          { add: { index: newIndexName, alias: indexName, is_hidden: isHidden } },
+          { remove_index: { index: indexName } },
+          ...extraAliases,
+        ]
+      : extraAliases;
 
-    if (!aliasResponse.acknowledged) {
-      throw error.cannotCreateIndex(`Index aliases could not be created.`);
+    if (updateAliasActions.length) {
+      const aliasResponse = await esClient.indices.updateAliases({
+        actions: updateAliasActions,
+      });
+
+      if (!aliasResponse.acknowledged) {
+        throw error.cannotCreateIndex(`Index aliases could not be created.`);
+      }
     }
 
     if (reindexOptions?.openAndClose === true) {
@@ -569,7 +581,7 @@ export const reindexServiceFactory = (
     }: {
       indexName: string;
       newIndexName: string;
-      opts?: { enqueue: boolean };
+      opts?: ReindexArgs['reindexOptions'];
       settings?: IndexSettings;
     }) {
       const indexExists = await esClient.indices.exists({ index: indexName });
@@ -582,7 +594,8 @@ export const reindexServiceFactory = (
         const existingOp = existingReindexOps.saved_objects[0];
         if (
           existingOp.attributes.status === ReindexStatus.failed ||
-          existingOp.attributes.status === ReindexStatus.cancelled
+          existingOp.attributes.status === ReindexStatus.cancelled ||
+          existingOp.attributes.status === ReindexStatus.completed
         ) {
           // Delete the existing one if it failed or was cancelled to give a chance to retry.
           await actions.deleteReindexOp(existingOp);
@@ -593,10 +606,18 @@ export const reindexServiceFactory = (
         }
       }
 
+      const reindexOptions: CreateReindexOpArgs['reindexOptions'] = {};
+      if (opts?.enqueue) {
+        reindexOptions.queueSettings = { queuedAt: Date.now() };
+      }
+      if (opts?.deleteOldIndex) {
+        reindexOptions.deleteOldIndex = true;
+      }
+
       return actions.createReindexOp({
         indexName,
         newIndexName,
-        reindexOptions: opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined,
+        reindexOptions,
         settings,
       });
     },

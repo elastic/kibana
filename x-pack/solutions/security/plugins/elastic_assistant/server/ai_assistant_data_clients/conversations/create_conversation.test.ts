@@ -56,6 +56,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
       name: 'test',
     },
   ],
+  createdBy: { name: 'test' },
 });
 
 describe('createConversation', () => {

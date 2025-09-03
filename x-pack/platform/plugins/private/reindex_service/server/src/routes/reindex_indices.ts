@@ -8,11 +8,33 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH_REINDEX_SERVICE } from '../constants';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
+
+export const reindexSchema = schema.object({
+  indexName: schema.string(),
+  newIndexName: schema.string(),
+  reindexOptions: schema.maybe(
+    schema.object({
+      enqueue: schema.maybe(schema.boolean()),
+      deleteOldIndex: schema.maybe(schema.boolean()),
+    })
+  ),
+  settings: schema.maybe(
+    schema.object({
+      mode: schema.maybe(
+        schema.oneOf([
+          schema.literal('standard'),
+          schema.literal('lookup'),
+          schema.literal('logsdb'),
+          schema.literal('time_series'),
+        ])
+      ),
+    })
+  ),
+});
 
 export function registerReindexIndicesRoutes({
   router,
@@ -32,20 +54,7 @@ export function registerReindexIndicesRoutes({
         },
       },
       validate: {
-        body: schema.object({
-          indexName: schema.string(),
-          newIndexName: schema.string(),
-          reindexOptions: schema.maybe(
-            schema.object({
-              enqueue: schema.maybe(schema.boolean()),
-            })
-          ),
-          settings: schema.maybe(
-            schema.object({
-              index: schema.recordOf(schema.string(), schema.any()),
-            })
-          ),
-        }),
+        body: reindexSchema,
       },
     },
     versionCheckHandlerWrapper(version.getMajorVersion())(async ({ core }, request, response) => {
@@ -54,7 +63,6 @@ export function registerReindexIndicesRoutes({
         elasticsearch: { client: esClient },
       } = await core;
 
-      const { indexName, newIndexName } = request.body;
       try {
         const reindexService = (await getReindexService()).getScopedClient({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
@@ -62,10 +70,7 @@ export function registerReindexIndicesRoutes({
           request,
         });
 
-        const result = await reindexService.reindexOrResume({
-          indexName,
-          newIndexName,
-        });
+        const result = await reindexService.reindexOrResume(request.body);
 
         return response.ok({
           body: result,

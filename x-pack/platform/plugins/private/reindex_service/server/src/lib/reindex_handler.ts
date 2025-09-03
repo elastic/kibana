@@ -66,9 +66,10 @@ ReindexHandlerArgs): Promise<ReindexOperation> => {
 
   if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
     throw error.accessForbidden(
-      i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-        defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
-        values: { indexName },
+      i18n.translate('xpack.reindexService.indexPrivilegesErrorBatch', {
+        defaultMessage:
+          'You do not have adequate privileges to reindex "{indexName}" to "{newIndexName}".',
+        values: { indexName, newIndexName },
       })
     );
   }

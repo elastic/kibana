@@ -24,8 +24,12 @@ import { reindexServiceFactory } from './reindex_service';
 import { error } from './error';
 import { sortAndOrderReindexOperations } from './op_utils';
 import type { GetBatchQueueResponse, PostBatchResponse } from '../../types';
-import { reindexHandler } from './reindex_handler';
-import type { ReindexArgs, ReindexOperation, ReindexStatusResponse } from '../../../common';
+import type {
+  ReindexArgs,
+  ReindexOperation,
+  ReindexStatusResponse,
+  BatchReindexArgs,
+} from '../../../common';
 import type { ReindexSavedObject } from './types';
 import { ReindexStatus } from '../../../common';
 
@@ -132,12 +136,40 @@ export class ReindexServiceWrapper {
     const throwIfNoPrivileges = async (indexName: string, newIndexName: string): Promise<void> => {
       if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
         throw error.accessForbidden(
-          i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-            defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
-            values: { indexName },
+          i18n.translate('xpack.reindexService.reindexPrivilegesErrorBatch', {
+            defaultMessage:
+              'You do not have adequate privileges to reindex "{indexName}" to "{newIndexName}".',
+            values: { indexName, newIndexName },
           })
         );
       }
+    };
+
+    const reindexOrResume = async ({
+      indexName,
+      newIndexName,
+      reindexOptions,
+      settings,
+    }: ReindexArgs): Promise<ReindexOperation> => {
+      await throwIfNoPrivileges(indexName, newIndexName);
+
+      const existingOp = await reindexService.findReindexOperation(indexName);
+
+      // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
+      const reindexOp =
+        existingOp && existingOp.attributes.status === ReindexStatus.paused
+          ? await reindexService.resumeReindexOperation(indexName, reindexOptions)
+          : await reindexService.createReindexOperation({
+              indexName,
+              newIndexName,
+              opts: reindexOptions,
+              settings,
+            });
+
+      // Add users credentials for the worker to use
+      await this.deps.credentialStore.set({ reindexOp, request, security: this.deps.security });
+
+      return reindexOp.attributes;
     };
 
     return {
@@ -148,78 +180,35 @@ export class ReindexServiceWrapper {
           queue: queue.map((savedObject) => savedObject.attributes),
         };
       },
-      addToBatch: async (reindexJobs: ReindexArgs[]): Promise<PostBatchResponse> => {
+      addToBatch: async (reindexJobs: BatchReindexArgs[]): Promise<PostBatchResponse> => {
         const results: PostBatchResponse = {
           enqueued: [],
           errors: [],
         };
 
-        // todo name sure settings are passed
-        await asyncForEach(reindexJobs, async ({ indexName, newIndexName, settings }) => {
-          try {
-            // todo this duplicates code in reindex method and reindexOrResume method
-            // todo this should do a bunch of adds in batch style
-            const result = await reindexHandler({
-              savedObjects,
-              dataClient,
-              indexName,
-              newIndexName,
-              log: this.deps.logger,
-              licensing: this.deps.licensing,
-              request,
-              credentialStore: this.deps.credentialStore,
-              reindexOptions: {
-                enqueue: true,
-              },
-              security: this.deps.security,
-              version: this.deps.version,
-            });
-            results.enqueued.push(result);
-          } catch (e) {
-            results.errors.push({
-              indexName,
-              message: e.message,
-            });
+        await asyncForEach(
+          reindexJobs,
+          async ({ indexName, newIndexName, settings, reindexOptions }) => {
+            try {
+              const result = await reindexOrResume({
+                indexName,
+                newIndexName,
+                settings,
+                reindexOptions: { ...reindexOptions, enqueue: true },
+              });
+              results.enqueued.push(result);
+            } catch (e) {
+              results.errors.push({
+                indexName,
+                message: e.message,
+              });
+            }
           }
-        });
-
-        // todo make sure this happens
-        /*
-              if (results.errors.length < indexNames.length) {
-        // Kick the worker on this node to immediately pickup the batch.
-        getWorker().forceRefresh();
-      }
-        */
+        );
         return results;
       },
       hasRequiredPrivileges: reindexService.hasRequiredPrivileges.bind(reindexService),
-      reindexOrResume: async ({
-        indexName,
-        newIndexName,
-        reindexOptions,
-        settings,
-      }): Promise<ReindexOperation> => {
-        await throwIfNoPrivileges(indexName, newIndexName);
-
-        const existingOp = await reindexService.findReindexOperation(indexName);
-
-        // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
-        const reindexOp =
-          existingOp && existingOp.attributes.status === ReindexStatus.paused
-            ? await reindexService.resumeReindexOperation(indexName, reindexOptions)
-            : await reindexService.createReindexOperation({
-                indexName,
-                newIndexName,
-                opts: reindexOptions,
-                settings,
-              });
-
-        // Add users credentials for the worker to use
-        await this.deps.credentialStore.set({ reindexOp, request, security: this.deps.security });
-
-        return reindexOp.attributes;
-      },
-      // ABOVE AND BELOW add options and mappings, figure out where to move reindexOptions
+      reindexOrResume,
       reindex: async ({
         indexName,
         newIndexName,
@@ -230,9 +219,14 @@ export class ReindexServiceWrapper {
 
         const existingOp = await reindexService.findReindexOperation(indexName);
 
-        if (existingOp) {
+        if (
+          existingOp &&
+          ![ReindexStatus.cancelled, ReindexStatus.completed, ReindexStatus.failed].includes(
+            existingOp.attributes.status
+          )
+        ) {
           throw error.reindexAlreadyInProgress(
-            i18n.translate('xpack.upgradeAssistant.reindex.reindexAlreadyInProgressError', {
+            i18n.translate('xpack.reindexService.reindexAlreadyInProgressError', {
               defaultMessage: 'A reindex operation already in-progress for {indexName}',
               values: { indexName },
             })
@@ -255,9 +249,7 @@ export class ReindexServiceWrapper {
         return reindexOp.attributes;
       },
 
-      // todo - Previously this checked for access on the existing and new indices BUT we might not know the name of the new index
       getStatus: async (indexName: string): Promise<ReindexStatusResponse> => {
-        // todo in theory this should check privs on new index as well
         const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges([indexName]);
         const reindexOp = await reindexService.findReindexOperation(indexName);
         // If the user doesn't have privileges than querying for warnings is going to fail.

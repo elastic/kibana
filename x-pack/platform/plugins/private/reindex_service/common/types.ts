@@ -61,6 +61,8 @@ export interface ReindexOptions {
    * batch to be run in series.
    */
   queueSettings?: QueueSettings;
+
+  deleteOldIndex?: boolean;
 }
 
 export interface ReindexStatusResponse {

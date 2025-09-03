@@ -11,9 +11,13 @@ import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 
+export type WorkflowUrlStateTabType = 'workflow' | 'executions';
+
 export interface WorkflowUrlState {
-  tab?: 'workflow' | 'executions';
+  tab?: WorkflowUrlStateTabType;
   executionId?: string;
+  stepExecutionId?: string;
+  stepId?: string;
 }
 
 export function useWorkflowUrlState() {
@@ -23,8 +27,10 @@ export function useWorkflowUrlState() {
   const urlState = useMemo(() => {
     const params = parse(location.search);
     return {
-      tab: (params.tab as 'workflow' | 'executions') || 'workflow',
+      tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
       executionId: params.executionId as string | undefined,
+      stepExecutionId: params.stepExecutionId as string | undefined,
+      stepId: params.stepId as string | undefined,
     };
   }, [location.search]);
 
@@ -64,6 +70,8 @@ export function useWorkflowUrlState() {
       const updates: Partial<WorkflowUrlState> = { tab };
       if (tab === 'workflow') {
         updates.executionId = undefined;
+        updates.stepId = undefined;
+        updates.stepExecutionId = undefined;
       }
       updateUrlState(updates);
     },
@@ -75,6 +83,27 @@ export function useWorkflowUrlState() {
       updateUrlState({
         tab: 'executions', // Automatically switch to executions tab
         executionId: executionId || undefined,
+        stepExecutionId: undefined,
+        stepId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
+  const setSelectedStepExecution = useCallback(
+    (stepExecutionId: string | null) => {
+      updateUrlState({
+        stepExecutionId: stepExecutionId || undefined,
+        stepId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
+  const setSelectedStep = useCallback(
+    (stepId: string | null) => {
+      updateUrlState({
+        stepId: stepId || undefined,
       });
     },
     [updateUrlState]
@@ -84,10 +113,14 @@ export function useWorkflowUrlState() {
     // Current state
     activeTab: urlState.tab,
     selectedExecutionId: urlState.executionId,
+    selectedStepExecutionId: urlState.stepExecutionId,
+    selectedStepId: urlState.stepId,
 
     // State setters
     setActiveTab,
     setSelectedExecution,
+    setSelectedStepExecution,
+    setSelectedStep,
     updateUrlState,
   };
 }

@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -24,8 +25,8 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
-import type { SchedulerService } from '../scheduler/scheduler_service';
 import type { WorkflowsService } from './workflows_management_service';
+import type { LogSearchResult } from './lib/workflow_logger';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -39,6 +40,7 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
+  stepId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -64,16 +66,33 @@ export interface WorkflowExecutionLogsDto {
   offset: number;
 }
 
+export interface GetStepExecutionParams {
+  executionId: string;
+  stepId: string;
+}
+
+export interface GetExecutionLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetStepLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  stepId: string;
+}
+
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private schedulerService: SchedulerService | null = null,
     private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
-
-  public setSchedulerService(schedulerService: SchedulerService) {
-    this.schedulerService = schedulerService;
-  }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
     return await this.workflowsService.searchWorkflows(params, spaceId);
@@ -136,12 +155,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
+    const { event, ...manualInputs } = inputs;
     const context = {
-      ...inputs,
+      event,
       spaceId,
+      inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
@@ -153,9 +171,6 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     spaceId: string
   ): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
 
     if (parsedYaml.error) {
@@ -176,6 +191,8 @@ export class WorkflowsManagementApi {
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
+        yaml: workflowYaml,
+        isTestRun: true,
       },
       context
     );
@@ -205,7 +222,22 @@ export class WorkflowsManagementApi {
     params: GetWorkflowExecutionLogsParams,
     spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
-    const result = await this.workflowsService.getExecutionLogs(params.executionId, spaceId);
+    let result: LogSearchResult;
+    if (params.stepId) {
+      result = await this.workflowsService.getStepLogs(
+        {
+          executionId: params.executionId,
+          stepId: params.stepId,
+          limit: params.limit,
+          offset: params.offset,
+          sortField: params.sortField,
+          sortOrder: params.sortOrder,
+        },
+        spaceId
+      );
+    } else {
+      result = await this.workflowsService.getExecutionLogs(params, spaceId);
+    }
 
     // Transform the logs to match our API format
     return {
@@ -237,6 +269,13 @@ export class WorkflowsManagementApi {
       limit: params.limit || 100,
       offset: params.offset || 0,
     };
+  }
+
+  public async getStepExecution(
+    params: GetStepExecutionParams,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    return await this.workflowsService.getStepExecution(params, spaceId);
   }
 
   public async getWorkflowStats(spaceId: string) {
