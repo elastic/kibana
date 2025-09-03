@@ -522,6 +522,7 @@ server.tool(
           {
             id: 'perform_upgrades',
             description: `You need to perform upgrades that do not come with breaking changes. Follow the remediation plan below carefully. ${remediationPlan}.  Keep in mind that kibana cannot upgrade to esm only modules. After changing the package.json, use 'yarn kbn bootstrap' to update the lockfile.`,
+            // sometimes Copilot was skipping this step, so added required field to see if it helps
             required: hasUpgradePath,
           },
           {
