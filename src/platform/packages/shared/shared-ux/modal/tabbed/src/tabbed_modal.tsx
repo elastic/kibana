@@ -180,7 +180,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
         <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {AboveTabsContent}
+        {AboveTabsContent && (
+          <div data-test-subj="tabbedModal-above-tabs-content">{AboveTabsContent}</div>
+        )}
         <Fragment>
           <Fragment>{renderTabs()}</Fragment>
           <EuiSpacer size="m" />

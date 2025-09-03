@@ -26,6 +26,7 @@ Many parts of the Content Management service are implemented *in-memory*, hence 
 is possible to test big chunks of the Content Management plugin using Jest
 tests.
 
+
 ### Elasticsearch Integration tests
 
 Some functionality of the Content Management plugin can be tested using *Kibana
