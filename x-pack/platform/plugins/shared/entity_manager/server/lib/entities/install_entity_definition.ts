@@ -10,7 +10,10 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import type { Logger } from '@kbn/logging';
-import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
+import {
+  generateLatestIndexTemplateId,
+  generateHistoryIndexTemplateId,
+} from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
@@ -74,6 +77,11 @@ export async function installEntityDefinition({
       esClient,
       logger,
       name: generateLatestIndexTemplateId(definition),
+    });
+    await deleteTemplate({
+      esClient,
+      logger,
+      name: generateHistoryIndexTemplateId(definition),
     });
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {

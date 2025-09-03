@@ -34,6 +34,14 @@ export function entitiesIndexPattern<TDataset extends Dataset>({
   return `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${definitionId}` as const;
 }
 
+export function entitiesHistoryIndexPattern<TDataset extends Dataset>({
+  schemaVersion,
+  dataset,
+  definitionId,
+}: IndexPatternOptions<TDataset>) {
+  return `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.*.${definitionId}` as const;
+}
+
 export function entitiesAliasPattern<TDataset extends Dataset>({
   type,
   dataset,

@@ -12,10 +12,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { entitiesLatestBaseComponentTemplateConfig } from '../templates/components/base_latest';
+import { entitiesHistoryBaseComponentTemplateConfig } from '../templates/components/base_history';
 import { entitiesEntityComponentTemplateConfig } from '../templates/components/entity';
 import { entitiesEventComponentTemplateConfig } from '../templates/components/event';
 import { retryTransientEsErrors } from './entities/helpers/retry';
 import { generateEntitiesLatestIndexTemplateConfig } from './entities/templates/entities_latest_template';
+import { generateEntitiesHistoryIndexTemplateConfig } from './entities/templates/entities_history_template';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -41,6 +43,11 @@ export const installEntityManagerTemplates = async ({
       esClient,
       logger,
       component: entitiesLatestBaseComponentTemplateConfig,
+    }),
+    upsertComponent({
+      esClient,
+      logger,
+      component: entitiesHistoryBaseComponentTemplateConfig,
     }),
     upsertComponent({
       esClient,
@@ -79,9 +86,17 @@ export async function createAndInstallTemplates(
   definition: EntityDefinition,
   logger: Logger
 ): Promise<Array<{ type: 'template'; id: string }>> {
-  const template = generateEntitiesLatestIndexTemplateConfig(definition);
-  await upsertTemplate({ esClient, template, logger });
-  return [{ type: 'template', id: template.name }];
+  const templates: Array<{ type: 'template'; id: string }> = [];
+
+  const latestTemplate = generateEntitiesLatestIndexTemplateConfig(definition);
+  await upsertTemplate({ esClient, template: latestTemplate, logger });
+  templates.push({ type: 'template', id: latestTemplate.name });
+
+  const historyTemplate = generateEntitiesHistoryIndexTemplateConfig(definition);
+  await upsertTemplate({ esClient, template: historyTemplate, logger });
+  templates.push({ type: 'template', id: historyTemplate.name });
+
+  return templates;
 }
 
 export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateOptions) {
