@@ -17,11 +17,30 @@ import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { useLatencyChart } from '../../hooks/use_latency_chart';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { getEsqlQuery } from './get_esql_query';
+
+const title = i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
+  defaultMessage: 'Similar spans',
+});
+const latencyTitle = i18n.translate(
+  'unifiedDocViewer.observability.traces.similarSpans.latency.title',
+  {
+    defaultMessage: 'Latency',
+  }
+);
+const discoverBtnLabel = i18n.translate(
+  'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.button',
+  { defaultMessage: 'Open in Discover' }
+);
+const discoverBtnAria = i18n.translate(
+  'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.label',
+  { defaultMessage: 'Open in Discover link' }
+);
 
 export interface SimilarSpansProps {
   duration: number;
   spanName?: string;
-  serviceName?: string;
+  serviceName: string;
   transactionName?: string;
   transactionType?: string;
   isOtelSpan?: boolean;
@@ -42,63 +61,42 @@ export function SimilarSpans({
     transactionType,
     isOtelSpan,
   });
-
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.traces });
 
-  const isTransaction = !!transactionType;
-
-  let esqlQuery = null;
-
-  if (isTransaction) {
-    // TODO build queries
-    esqlQuery = {};
-  } else {
-    esqlQuery = {};
-  }
+  const esqlQuery = getEsqlQuery({ serviceName, spanName, transactionName, transactionType });
 
   const discoverUrl = useMemo(
     () => generateDiscoverLink(esqlQuery),
     [generateDiscoverLink, esqlQuery]
   );
 
-  const sectionActions: ContentFrameworkSectionProps['actions'] =
-    esqlQuery && discoverUrl
-      ? [
-          {
-            dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
-            label: i18n.translate(
-              'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.button',
-              {
-                defaultMessage: 'Open in Discover',
-              }
-            ),
-            href: discoverUrl,
-            icon: 'discoverApp',
-            ariaLabel: i18n.translate(
-              'unifiedDocViewer.observability.traces.similarSpans.openInDiscover.label',
-              {
-                defaultMessage: 'Open in Discover link',
-              }
-            ),
-          },
-        ]
-      : [];
+  const sectionActions: ContentFrameworkSectionProps['actions'] = useMemo(
+    () =>
+      esqlQuery && discoverUrl
+        ? [
+            {
+              dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
+              label: discoverBtnLabel,
+              href: discoverUrl,
+              icon: 'discoverApp',
+              ariaLabel: discoverBtnAria,
+            },
+          ]
+        : [],
+    [esqlQuery, discoverUrl]
+  );
 
   return (
     <ContentFrameworkSection
       id="similarSpans"
       data-test-subj="docViewerSimilarSpansSection"
-      title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
-        defaultMessage: 'Similar spans',
-      })}
+      title={title}
       actions={sectionActions}
     >
       <ContentFrameworkChart
         data-test-subj="docViewerSimilarSpansLatencyChart"
-        title={i18n.translate('unifiedDocViewer.observability.traces.similarSpans.latency.title', {
-          defaultMessage: 'Latency',
-        })}
+        title={latencyTitle}
       >
         <DurationDistributionChart
           data={latencyChart.data?.distributionChartData ?? []}
