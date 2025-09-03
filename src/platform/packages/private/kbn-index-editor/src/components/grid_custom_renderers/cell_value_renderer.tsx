@@ -18,7 +18,6 @@ export const getCellValueRenderer =
   (
     rows: DataTableRecord[],
     dataTableRef: RefObject<EuiDataGridRefProps>,
-    isIndexCreated: boolean,
     canEditIndex: boolean
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, colIndex, columnId }) => {

@@ -65,11 +65,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
 
-  const isIndexCreated = useObservable(
-    indexUpdateService.indexCreated$,
-    indexUpdateService.isIndexCreated()
-  );
-
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
   );
@@ -168,13 +163,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [rows, props.columns, onValueChange, dataTableRef]
   );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(
-      rows,
-      dataTableRef,
-      isIndexCreated,
-      indexUpdateService.canEditIndex
-    );
-  }, [rows, isIndexCreated, indexUpdateService.canEditIndex]);
+    return getCellValueRenderer(rows, dataTableRef, indexUpdateService.canEditIndex);
+  }, [rows, indexUpdateService.canEditIndex]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
