@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { EntityDefinition } from '@kbn/entities-schema';
+import {
+  ENTITY_RESET,
+  ENTITY_SCHEMA_VERSION_V1,
+  entitiesIndexPattern,
+  type EntityDefinition,
+} from '@kbn/entities-schema';
 import type {
   QueryDslQueryContainer,
   TransformPutTransformRequest,
@@ -57,6 +62,14 @@ const generateTransformPutRequest = ({
   docsPerSecond?: number;
   maxPageSearchSize?: number;
 }): TransformPutTransformRequest => {
+  const sourceIndices = definition.indexPatterns;
+  sourceIndices.push(
+    entitiesIndexPattern({
+      schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+      dataset: ENTITY_RESET,
+      definitionId: definition.id,
+    })
+  );
   return {
     transform_id: transformId,
     _meta: {
@@ -66,7 +79,7 @@ const generateTransformPutRequest = ({
     defer_validation: true,
     timeout: definition.latest.settings?.timeout,
     source: {
-      index: definition.indexPatterns,
+      index: sourceIndices,
       query: filter,
     },
     dest: {

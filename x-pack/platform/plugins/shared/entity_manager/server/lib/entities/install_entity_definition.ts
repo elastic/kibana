@@ -13,6 +13,8 @@ import type { Logger } from '@kbn/logging';
 import {
   generateLatestIndexTemplateId,
   generateHistoryIndexTemplateId,
+  generateResetIndexTemplateId,
+  generateResetILMPolicyId,
 } from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
@@ -26,6 +28,7 @@ import {
   updateEntityDefinition,
 } from './save_entity_definition';
 import { createAndInstallTemplates, deleteTemplate } from '../manage_index_templates';
+import { createAndInstallILMPolicies, deleteILMPolicy, deleteILMPolicies } from './manage_ilm_policies';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
@@ -73,6 +76,8 @@ export async function installEntityDefinition({
 
     await deleteLatestIngestPipeline(esClient, definition, logger);
 
+    await deleteILMPolicy(esClient, generateResetILMPolicyId(definition), logger);
+
     await deleteTemplate({
       esClient,
       logger,
@@ -82,6 +87,11 @@ export async function installEntityDefinition({
       esClient,
       logger,
       name: generateHistoryIndexTemplateId(definition),
+    });
+    await deleteTemplate({
+      esClient,
+      logger,
+      name: generateResetIndexTemplateId(definition),
     });
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {
@@ -164,6 +174,9 @@ async function install({
   logger.debug(`Installing definition [${definition.id}] v${definition.version}`);
   logger.debug(() => JSON.stringify(definition, null, 2));
 
+  logger.debug(`Installing ilm policies for definition [${definition.id}]`);
+  const ilmPolicies = await createAndInstallILMPolicies(esClient, definition, logger);
+
   logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);
 
@@ -175,7 +188,7 @@ async function install({
 
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
-    installedComponents: [...templates, ...pipelines, ...transforms],
+    installedComponents: [...templates, ...pipelines, ...transforms, ...ilmPolicies],
   });
   return { ...definition, ...updatedProps.attributes };
 }
