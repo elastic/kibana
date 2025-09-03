@@ -127,6 +127,7 @@ describe('DataView component', () => {
 
     await userEvent.click(screen.getByTestId('dataview-trigger'));
 
+    expect(screen.getByTestId('changeDataViewPopover')).toBeInTheDocument();
     const addFieldButton = screen.queryByTestId('indexPattern-add-field');
 
     if (expectPresent) {
@@ -159,7 +160,7 @@ describe('DataView component', () => {
     render(wrapDataViewComponentInContext(testProps, !hasOnDataViewCreated));
 
     await userEvent.click(screen.getByTestId('dataview-trigger'));
-
+    expect(screen.getByTestId('changeDataViewPopover')).toBeInTheDocument();
     const createButton = screen.queryByTestId('dataview-create-new');
 
     if (expectPresent) {

@@ -181,6 +181,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
       expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
@@ -302,6 +303,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
       expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')
@@ -320,6 +322,7 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
       expect(screen.queryByTestId('superDatePickerShowDatesButton')).not.toBeInTheDocument();
       expect(
         container.querySelector('input[placeholder*="search"], textarea')

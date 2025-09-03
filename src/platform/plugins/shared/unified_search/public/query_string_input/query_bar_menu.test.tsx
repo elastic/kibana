@@ -138,27 +138,34 @@ describe('Querybar Menu component', () => {
     };
   });
 
-  it('should not render the popover if the openQueryBarMenu prop is false', async () => {
-    render(wrapQueryBarMenuComponentInContext(props, 'kuery'));
-
-    // When closed, the popover content should not be visible
-    await waitFor(() => {
-      expect(screen.queryByTestId('queryBarMenuPanel')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should render the popover if the openQueryBarMenu prop is true', async () => {
+  it.each([
+    {
+      openQueryBarMenu: false,
+      shouldRender: false,
+      description: 'should not render the popover if the openQueryBarMenu prop is false',
+    },
+    {
+      openQueryBarMenu: true,
+      shouldRender: true,
+      description: 'should render the popover if the openQueryBarMenu prop is true',
+    },
+  ])('$description', async ({ openQueryBarMenu, shouldRender }) => {
     const newProps = {
       ...props,
-      openQueryBarMenu: true,
+      openQueryBarMenu,
     };
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    // When open, the popover content should be visible
-    await waitFor(() => {
-      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
-    });
+    if (shouldRender) {
+      await waitFor(() => {
+        expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
+      });
+    } else {
+      await waitFor(() => {
+        expect(screen.queryByTestId('queryBarMenuPanel')).not.toBeInTheDocument();
+      });
+    }
   });
 
   it('should render the context menu by default', async () => {
@@ -306,16 +313,14 @@ describe('Querybar Menu component', () => {
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
     await waitFor(() => {
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
       expect(screen.getByTestId('filter-sets-removeAllFilters')).toBeInTheDocument();
     });
 
     await user.click(screen.getByTestId('filter-sets-applyToAllFilters'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextMenuPanelTitleButton')).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
       expect(screen.getByTestId('filter-sets-pinAllFilters')).toBeInTheDocument();
       expect(screen.getByTestId('filter-sets-unpinAllFilters')).toBeInTheDocument();
       expect(screen.getByTestId('filter-sets-invertAllFilters')).toBeInTheDocument();
@@ -339,10 +344,7 @@ describe('Querybar Menu component', () => {
     await user.click(screen.getByTestId('filter-sets-applyToAllFilters'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextMenuPanelTitleButton')).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
       expect(screen.queryByTestId('filter-sets-pinAllFilters')).not.toBeInTheDocument();
       expect(screen.queryByTestId('filter-sets-unpinAllFilters')).not.toBeInTheDocument();
 
@@ -367,10 +369,7 @@ describe('Querybar Menu component', () => {
     await user.click(screen.getByTestId('filter-sets-applyToAllFilters'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextMenuPanelTitleButton')).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
       expect(screen.getByTestId('filter-sets-pinAllFilters')).toBeInTheDocument();
       expect(screen.getByTestId('filter-sets-unpinAllFilters')).toBeInTheDocument();
       expect(screen.queryByTestId('filter-sets-invertAllFilters')).not.toBeInTheDocument();
@@ -391,6 +390,7 @@ describe('Querybar Menu component', () => {
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
     await waitFor(() => {
+      expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
       expect(screen.queryByTestId('filter-sets-removeAllFilters')).not.toBeInTheDocument();
     });
   });
