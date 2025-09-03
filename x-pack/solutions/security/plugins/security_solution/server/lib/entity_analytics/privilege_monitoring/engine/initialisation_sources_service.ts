@@ -55,28 +55,10 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
         dataClient.log('debug', `Created all ${requiredInitSources.length} default sources`);
         return;
       }
-      // map existing by name for easy lookup
-      const soNameMap = new Map(existing.map((so) => [so.name, so]));
-      let created = 0;
-      let updated = 0;
-      // update or create sources based on existing sources
-      await Promise.all(
-        requiredInitSources.map(async (attrs) => {
-          const found = soNameMap.get(attrs.name);
-          if (!found) {
-            await client.create(attrs);
-            dataClient.log('debug', `Created source: ${attrs.name}`);
-            created++;
-          } else {
-            await client.update({ id: found.id, ...attrs });
-            dataClient.log('debug', `Updated source: ${attrs.name}`);
-            updated++;
-          }
-        })
-      );
+      const { created, updated, results } = await client.bulkUpsert(requiredInitSources);
       dataClient.log(
         'debug',
-        `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${requiredInitSources.length}.`
+        `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${results.length}.`
       );
     } catch (error) {
       dataClient.log(
