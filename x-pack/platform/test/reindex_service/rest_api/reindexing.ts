@@ -293,9 +293,9 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             indices: [
-              { indexName: test1, newIndexName: `${test1}New`, reindexOptions },
-              { indexName: test2, newIndexName: `${test2}New`, reindexOptions },
-              { indexName: test3, newIndexName: `${test3}New`, reindexOptions },
+              { indexName: test1, newIndexName: `${test1}-new`, reindexOptions },
+              { indexName: test2, newIndexName: `${test2}-new`, reindexOptions },
+              { indexName: test3, newIndexName: `${test3}-new`, reindexOptions },
             ],
           })
           .expect(200);
