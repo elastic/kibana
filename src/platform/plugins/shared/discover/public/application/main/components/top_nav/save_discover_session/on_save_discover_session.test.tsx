@@ -31,7 +31,6 @@ import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { getTabStateMock } from '../../../state_management/redux/__mocks__/internal_state.mocks';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { omit } from 'lodash';
 
 const mockShowSaveModal = jest.mocked(showSaveModal);
 
@@ -114,15 +113,18 @@ describe('onSaveDiscoverSession', () => {
   });
 
   it('should call showSaveModal and set expected props', async () => {
+    const services = createDiscoverServicesMock();
     const { saveModal } = await setup({
       savedSearch: {
         ...savedSearchMock,
         managed: true,
       },
+      services,
     });
     expect(saveModal).toBeDefined();
-    expect(omit(saveModal?.props, 'services')).toEqual({
+    expect(saveModal?.props).toEqual({
       isTimeBased: false,
+      services,
       title: 'A saved search',
       showCopyOnSave: true,
       description: 'description',
