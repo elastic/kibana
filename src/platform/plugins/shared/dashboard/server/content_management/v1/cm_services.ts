@@ -462,25 +462,6 @@ export const dashboardItemSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const dashboardAPIItemRequestSchema = schema.object(
-  {
-    id: schema.string(),
-    type: schema.string(),
-    version: schema.maybe(schema.number()),
-    createdAt: schema.maybe(schema.string()),
-    updatedAt: schema.maybe(schema.string()),
-    createdBy: schema.maybe(schema.string()),
-    updatedBy: schema.maybe(schema.string()),
-    managed: schema.maybe(schema.boolean()),
-    error: schema.maybe(apiError),
-    attributes: dashboardDataAttributesSchema,
-    references: schema.arrayOf(referenceSchema),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    originId: schema.maybe(schema.string()),
-  },
-  { unknowns: 'allow' }
-);
-
 export const dashboardGetResultSchema = schema.object(
   {
     item: dashboardItemSchema,
@@ -513,30 +494,6 @@ export const dashboardListResultAPISchema = schema.object({
 export const dashboardGetResultAPISchema = schema.object(
   {
     item: dashboardItemSchema,
-    meta: schema.object(
-      {
-        outcome: schema.oneOf([
-          schema.literal('exactMatch'),
-          schema.literal('aliasMatch'),
-          schema.literal('conflict'),
-        ]),
-        aliasTargetId: schema.maybe(schema.string()),
-        aliasPurpose: schema.maybe(
-          schema.oneOf([
-            schema.literal('savedObjectConversion'),
-            schema.literal('savedObjectImport'),
-          ])
-        ),
-      },
-      { unknowns: 'forbid' }
-    ),
-  },
-  { unknowns: 'forbid' }
-);
-
-export const dashboardGetRequestAPISchema = schema.object(
-  {
-    item: dashboardAPIItemRequestSchema,
     meta: schema.object(
       {
         outcome: schema.oneOf([

@@ -31,13 +31,13 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
-import type { TypeOf } from '@kbn/config-schema';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
+import type { DashboardItem } from './content_management';
 import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
@@ -48,7 +48,6 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
-import type { dashboardItemAPIResponseSchema } from './content_management/v1/cm_services';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -87,9 +86,7 @@ export class DashboardPlugin
     );
 
     void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
-      const { contentClient } = plugins.contentManagement.register<
-        ContentStorage<TypeOf<typeof dashboardItemAPIResponseSchema>>
-      >({
+      const { contentClient } = plugins.contentManagement.register<ContentStorage<DashboardItem>>({
         id: CONTENT_ID,
         storage: new DashboardStorage({
           throwOnResultValidationError: this.initializerContext.env.mode.dev,

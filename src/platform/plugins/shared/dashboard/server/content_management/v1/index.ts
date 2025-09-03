@@ -13,7 +13,6 @@ export type {
   DashboardPanel,
   DashboardSection,
   DashboardAttributes,
-  LegacyDashboardAttributes,
   DashboardItem,
   DashboardGetIn,
   DashboardAPIGetOut,

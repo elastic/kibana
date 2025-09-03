@@ -33,7 +33,7 @@ import type {
   DashboardItem,
   DashboardGetOut,
 } from './latest';
-import type { DashboardSearchAPIResult } from './v1/types';
+import type { DashboardCreateOut, DashboardSearchOut, DashboardUpdateOut } from './v1/types';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -197,6 +197,7 @@ export class DashboardStorage {
     }
 
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
+
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
       if (this.throwOnResultValidationError) {
@@ -220,6 +221,7 @@ export class DashboardStorage {
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
+
     return value;
   }
 
@@ -232,7 +234,7 @@ export class DashboardStorage {
     ctx: StorageContext,
     data: DashboardAttributes,
     options: DashboardCreateOptions
-  ): Promise<DashboardGetOut> {
+  ): Promise<DashboardCreateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -313,7 +315,7 @@ export class DashboardStorage {
     id: string,
     data: DashboardAttributes,
     options: DashboardUpdateOptions
-  ): Promise<DashboardGetOut> {
+  ): Promise<DashboardUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -376,8 +378,8 @@ export class DashboardStorage {
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
-      DashboardGetOut,
-      DashboardGetOut
+      DashboardUpdateOut,
+      DashboardUpdateOut
     >(
       // @ts-expect-error - fix type error
       { item },
@@ -406,7 +408,7 @@ export class DashboardStorage {
     ctx: StorageContext,
     query: SearchQuery,
     options: DashboardSearchOptions
-  ): Promise<DashboardSearchAPIResult> {
+  ): Promise<DashboardSearchOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -454,8 +456,8 @@ export class DashboardStorage {
 
     // Validate the response and DOWN transform to the request version
     const { value, error: resultError } = transforms.search.out.result.down<
-      DashboardSearchAPIResult,
-      DashboardSearchAPIResult
+      DashboardSearchOut,
+      DashboardSearchOut
     >(
       // @ts-expect-error - fix type error
       response,

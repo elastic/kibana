@@ -11,13 +11,14 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 import type {
-  LegacyDashboardAttributes,
+  DashboardAttributes,
   DashboardGetIn,
   DashboardSearchIn,
   DashboardAPISearchOut,
   DashboardSearchOptions,
   DashboardSearchAPIResult,
   DashboardGetOut,
+  DashboardSearchOut,
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
@@ -68,7 +69,7 @@ export async function searchDashboards({
 }
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: LegacyDashboardAttributes; references: Reference[] }
+  | { status: 'success'; attributes: DashboardAttributes; references: Reference[] }
   | { status: 'error'; error: SavedObjectError }
 );
 
@@ -122,7 +123,7 @@ export async function findDashboardsByIds(ids: string[]): Promise<FindDashboards
 export async function findDashboardIdByTitle(title: string): Promise<{ id: string } | undefined> {
   const result = await contentManagementService.client.search<
     DashboardSearchIn,
-    DashboardAPISearchOut
+    DashboardSearchOut
   >({
     contentTypeId: DASHBOARD_CONTENT_ID,
     query: {
