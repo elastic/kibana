@@ -6,6 +6,10 @@ set -e
 # Default output directory
 OUTPUT_DIR="../target"
 
+# Set directory variables
+KIBANA_ROOT="../../../../../../.."
+CONSOLE_PACKAGING_DIR="$(pwd)"
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -37,13 +41,15 @@ mkdir -p "$OUTPUT_DIR"
 echo "Building to output directory: $OUTPUT_DIR"
 
 echo "Generate translations..."
-node ../../../../../../scripts/extract_plugin_translations.js --output-dir ../translations --starts-with "console."
+cd "$KIBANA_ROOT" && node scripts/extract_plugin_translations.js --output-dir src/platform/plugins/shared/console/packaging/translations --starts-with "console."
+cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Generate console definitions..."
-./generate_console_definitions.sh
+# ./generate_console_definitions.sh
 
 echo "Building JavaScript and CSS..."
-BUILD_OUTPUT_DIR="$OUTPUT_DIR" npx webpack --config webpack.config.js
+cd "$KIBANA_ROOT" && NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" yarn webpack --config src/platform/plugins/shared/console/packaging/webpack.config.js
+cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Build react TS definitions..."
 npx tsc react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/react/index.d.ts" --skipLibCheck

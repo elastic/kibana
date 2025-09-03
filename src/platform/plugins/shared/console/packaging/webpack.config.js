@@ -56,6 +56,7 @@ module.exports = [
         '@elastic/datemath': 'commonjs @elastic/datemath',
         'monaco-editor': 'commonjs monaco-editor',
         '@kbn/monaco': 'commonjs @kbn/monaco',
+        '@kbn/code-editor': 'commonjs @kbn/code-editor',
       },
       // Handle react-dom internal imports only
       function (context, request, callback) {
@@ -66,6 +67,12 @@ module.exports = [
       },
       function (context, request, callback) {
         if (/^monaco-editor\/(esm\/vs|esm|lib|min)/.test(request)) {
+          return callback(null, 'commonjs ' + request);
+        }
+        callback();
+      },
+      function (context, request, callback) {
+        if (/^@kbn\/code-editor\//.test(request)) {
           return callback(null, 'commonjs ' + request);
         }
         callback();
@@ -81,6 +88,10 @@ module.exports = [
               maxSize: 8192,
             },
           },
+        },
+        {
+          test: /\.peggy$/,
+          loader: require.resolve('@kbn/peggy-loader'),
         },
         {
           test: /\.(js|tsx?)$/,
