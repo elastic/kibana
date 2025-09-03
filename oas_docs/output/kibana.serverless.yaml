@@ -69221,6 +69221,23 @@ components:
         type: string
       minItems: 1
       type: array
+    Security_Endpoint_Management_API_CloudFileScriptParameters:
+      type: object
+      properties:
+        cloudFile:
+          description: Script name in cloud storage.
+          minLength: 1
+          type: string
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - cloudFile
     Security_Endpoint_Management_API_Command:
       description: The command to be executed (cannot be an empty string)
       enum:
@@ -69247,62 +69264,6 @@ components:
       description: Optional comment
       example: This is a comment
       type: string
-    Security_Endpoint_Management_API_CrowdStrikeRunScriptCloudFileParameters:
-      type: object
-      properties:
-        cloudFile:
-          description: Script name in cloud storage
-          minLength: 1
-          type: string
-        commandLine:
-          description: Command line arguments
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in milliseconds before the command is killed
-          minimum: 1
-          type: integer
-      required:
-        - cloudFile
-    Security_Endpoint_Management_API_CrowdStrikeRunScriptHostPathParameters:
-      type: object
-      properties:
-        commandLine:
-          description: Command line arguments
-          minLength: 1
-          type: string
-        hostPath:
-          description: Absolute or relative path of script on host machine
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in milliseconds before the command is killed
-          minimum: 1
-          type: integer
-      required:
-        - hostPath
-    Security_Endpoint_Management_API_CrowdStrikeRunScriptParameters:
-      oneOf:
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_CrowdStrikeRunScriptRawParameters'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_CrowdStrikeRunScriptHostPathParameters'
-        - $ref: '#/components/schemas/Security_Endpoint_Management_API_CrowdStrikeRunScriptCloudFileParameters'
-    Security_Endpoint_Management_API_CrowdStrikeRunScriptRawParameters:
-      type: object
-      properties:
-        commandLine:
-          description: Command line arguments
-          minLength: 1
-          type: string
-        raw:
-          description: Raw script content to execute
-          minLength: 1
-          type: string
-        timeout:
-          description: Timeout in milliseconds before the command is killed
-          minimum: 1
-          type: integer
-      required:
-        - raw
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -69661,6 +69622,23 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
+    Security_Endpoint_Management_API_HostPathScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        hostPath:
+          description: Absolute or relative path of script on host machine.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - hostPath
     Security_Endpoint_Management_API_HostStatuses:
       description: A set of agent health statuses to filter by.
       example:
@@ -69955,19 +69933,6 @@ components:
         total: 2
       type: object
       properties: {}
-    Security_Endpoint_Management_API_MSDefenderRunScriptParameters:
-      type: object
-      properties:
-        args:
-          description: Optional arguments for the script
-          minLength: 1
-          type: string
-        scriptName:
-          description: The path to the script in the cloud to run
-          minLength: 1
-          type: string
-      required:
-        - scriptName
     Security_Endpoint_Management_API_Page:
       default: 1
       description: Page number
@@ -70015,42 +69980,33 @@ components:
       properties:
         note:
           type: string
+    Security_Endpoint_Management_API_RawScriptParameters:
+      type: object
+      properties:
+        commandLine:
+          description: Command line arguments.
+          minLength: 1
+          type: string
+        raw:
+          description: Raw script content.
+          minLength: 1
+          type: string
+        timeout:
+          description: Timeout in seconds.
+          minimum: 1
+          type: integer
+      required:
+        - raw
     Security_Endpoint_Management_API_RunScriptRouteRequestBody:
       type: object
       properties:
-        agent_type:
-          default: endpoint
-          description: Type of agent to execute the script on
-          enum:
-            - endpoint
-            - sentinel_one
-            - crowdstrike
-            - microsoft_defender_endpoint
-          type: string
-        alert_ids:
-          description: If defined, any case associated with the given IDs will be updated
-          items:
-            minLength: 1
-            type: string
-          minItems: 1
-          type: array
-        comment:
-          description: Optional comment for the action
-          type: string
-        endpoint_ids:
-          description: A list of endpoint IDs whose hosts will run the script (Fleet Agent IDs will be retrieved for these)
-          items:
-            minLength: 1
-            type: string
-          minItems: 1
-          type: array
         parameters:
+          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
           oneOf:
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CrowdStrikeRunScriptParameters'
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_MSDefenderRunScriptParameters'
-            - $ref: '#/components/schemas/Security_Endpoint_Management_API_SentinelOneRunScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_RawScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_HostPathScriptParameters'
+            - $ref: '#/components/schemas/Security_Endpoint_Management_API_CloudFileScriptParameters'
       required:
-        - endpoint_ids
         - parameters
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
@@ -70115,19 +70071,6 @@ components:
           wasSuccessful: false
       type: object
       properties: {}
-    Security_Endpoint_Management_API_SentinelOneRunScriptParameters:
-      type: object
-      properties:
-        scriptId:
-          description: The SentinelOne Script ID to be executed
-          minLength: 1
-          type: string
-        scriptInput:
-          description: Any input arguments for the selected script
-          minLength: 1
-          type: string
-      required:
-        - scriptId
     Security_Endpoint_Management_API_SortDirection:
       description: Determines the sort order.
       enum:
