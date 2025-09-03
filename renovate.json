@@ -1169,7 +1169,7 @@
         "@elastic/ecs"
       ],
       "reviewers": [
-        "team:kibana-core"
+        "team:obs-ux-logs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -1177,7 +1177,7 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "Team:Core"
+        "Team:obs-ux-logs"
       ],
       "enabled": true
     },
@@ -2807,25 +2807,6 @@
       "groupName": "exit-hook",
       "matchDepNames": [
         "exit-hook"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "expiry-js",
-      "matchDepNames": [
-        "expiry-js"
       ],
       "reviewers": [
         "team:kibana-operations"
