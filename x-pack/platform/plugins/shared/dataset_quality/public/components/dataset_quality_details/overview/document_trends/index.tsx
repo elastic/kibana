@@ -20,8 +20,13 @@ import {
   discoverAriaText,
   openInDiscoverText,
   createAlertText,
+  editFailureStoreText,
 } from '../../../../../common/translations';
-import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
+import {
+  useDatasetQualityDetailsState,
+  useFailureStoreModal,
+  useQualityIssuesDocsChart,
+} from '../../../../hooks';
 import { TrendDocsChart } from './trend_docs_chart';
 import { useKibanaContextForPlugin } from '../../../../utils/use_kibana';
 import { getAlertingCapabilities } from '../../../../alerts/get_alerting_capabilities';
@@ -32,10 +37,12 @@ export default function DocumentTrends({
   lastReloadTime,
   displayCreateRuleButton,
   openAlertFlyout,
+  displayEditFailureStore,
 }: {
   lastReloadTime: number;
   displayCreateRuleButton: boolean;
   openAlertFlyout: () => void;
+  displayEditFailureStore: boolean;
 }) {
   const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
   const {
@@ -58,6 +65,12 @@ export default function DocumentTrends({
     },
     [updateTimeRange, timeRange.refresh]
   );
+
+  const {
+    openModal: openFailureStoreModal,
+    canUserReadFailureStore,
+    renderModal: renderFailureStoreModal,
+  } = useFailureStoreModal();
 
   return (
     <>
@@ -90,7 +103,7 @@ export default function DocumentTrends({
               />
             </EuiToolTip>
             {displayCreateRuleButton && isAlertingAvailable && (
-              <EuiToolTip content={createAlertText}>
+              <EuiToolTip content={createAlertText} disableScreenReaderOutput>
                 <EuiButtonIcon
                   display="base"
                   iconType="bell"
@@ -98,6 +111,18 @@ export default function DocumentTrends({
                   size="s"
                   data-test-subj="datasetQualityDetailsCreateRule"
                   onClick={openAlertFlyout}
+                />
+              </EuiToolTip>
+            )}
+            {displayEditFailureStore && canUserReadFailureStore && (
+              <EuiToolTip content={editFailureStoreText} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="pencil"
+                  aria-label={editFailureStoreText}
+                  size="s"
+                  data-test-subj="datasetQualityDetailsEditFailureStore"
+                  onClick={openFailureStoreModal}
                 />
               </EuiToolTip>
             )}
@@ -111,6 +136,7 @@ export default function DocumentTrends({
         lastReloadTime={lastReloadTime}
         onTimeRangeChange={onTimeRangeChange}
       />
+      {renderFailureStoreModal()}
     </>
   );
 }

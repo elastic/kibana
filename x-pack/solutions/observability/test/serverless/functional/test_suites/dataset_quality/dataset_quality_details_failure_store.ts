@@ -13,6 +13,7 @@
 
 import expect from '@kbn/expect';
 import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import { retry } from 'async';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getLogsForDataset, defaultNamespace, processors } from './data';
 
@@ -182,6 +183,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             .datasetQualityDetailsSummaryCardFailedDocuments
         );
         expect(failedDocsCard).to.not.contain('No failure store');
+      });
+
+      it.only('should edit failure store', async () => {
+        const {
+          datasetQualityDetailsSummaryCardFailedDocuments,
+          editFailureStoreIcon,
+          editFailureStoreModal,
+          failureStoreModalSaveButton,
+          enableFailureStoreToggle,
+          datasetQualityDetailsSummaryCardNoFailureStore,
+        } = PageObjects.datasetQuality.testSubjectSelectors;
+
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: failureStoreDataStreamName,
+        });
+
+        await testSubjects.existOrFail(datasetQualityDetailsSummaryCardFailedDocuments);
+        await testSubjects.click(datasetQualityDetailsSummaryCardFailedDocuments);
+
+        await testSubjects.existOrFail(editFailureStoreIcon);
+        await testSubjects.click(editFailureStoreIcon);
+
+        await testSubjects.existOrFail(editFailureStoreModal);
+
+        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
+        await testSubjects.click(enableFailureStoreToggle);
+
+        expect(await saveModalButton.isEnabled()).to.be(true);
+
+        await testSubjects.click(failureStoreModalSaveButton);
+
+        await testSubjects.missingOrFail(editFailureStoreModal);
+        await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
+        const failedDocsCard = await testSubjects.getVisibleText(
+          datasetQualityDetailsSummaryCardNoFailureStore
+        );
+        expect(failedDocsCard).to.contain('No failure store');
       });
     });
   });

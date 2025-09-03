@@ -17,3 +17,4 @@ export * from './use_quality_issues_filters';
 export * from './use_integration_actions';
 export * from './use_dataset_telemetry';
 export * from './use_dataset_details_telemetry';
+export * from './use_failure_store_modal';

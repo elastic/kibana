@@ -75,6 +75,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
             lastReloadTime={lastReloadTime}
             displayCreateRuleButton={selectedQualityCard === 'degraded'}
             openAlertFlyout={openAlertFlyout}
+            displayEditFailureStore={selectedQualityCard === 'failed'}
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
