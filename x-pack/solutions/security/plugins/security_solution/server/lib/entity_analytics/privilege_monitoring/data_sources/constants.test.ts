@@ -5,31 +5,40 @@
  * 2.0.
  */
 
-import type { IntegrationType } from '../../../../../common/constants';
-import { INTEGRATION_TYPES } from '../../../../../common/constants';
+import type { IntegrationType } from './constants';
 import {
   AD_ADMIN_ROLES,
+  defaultMonitoringUsersIndex,
   getMatchersFor,
+  getStreamPatternFor,
   INTEGRATION_MATCHERS_DETAILED,
+  INTEGRATION_TYPES,
+  integrationsSourceIndex,
   OKTA_ADMIN_ROLES,
+  STREAM_INDEX_PATTERNS,
 } from './constants';
 
 describe('constants', () => {
+  const baseIndex = `entity_analytics.privileged_monitoring`;
+  const baseMonitoringUsersIndex = '.entity_analytics.monitoring';
   it('should export all constants', () => {
     expect(getMatchersFor).toBeDefined();
   });
   it('should have correct OKTA_ADMIN_ROLES', () => {
-    expect(OKTA_ADMIN_ROLES).toContain('Super Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Organization Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Group Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Application Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Mobile Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Help Desk Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Report Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('API Access Management Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Group Membership Administrator');
-    expect(OKTA_ADMIN_ROLES).toContain('Read-only Administrator');
-    expect(OKTA_ADMIN_ROLES.length).toBe(10);
+    expect(OKTA_ADMIN_ROLES).toMatchInlineSnapshot(`
+  Array [
+    "Super Administrator",
+    "Organization Administrator",
+    "Group Administrator",
+    "Application Administrator",
+    "Mobile Administrator",
+    "Help Desk Administrator",
+    "Report Administrator",
+    "API Access Management Administrator",
+    "Group Membership Administrator",
+    "Read-only Administrator",
+  ]
+`);
   });
 
   it('should have correct AD_ADMIN_ROLES', () => {
@@ -52,5 +61,29 @@ describe('constants', () => {
   it('IntegrationType type should only allow okta and ad', () => {
     const types: IntegrationType[] = ['okta', 'ad'];
     expect(types).toEqual(INTEGRATION_TYPES);
+  });
+
+  it('should generate defaultMonitoringUsersIndex', () => {
+    expect(defaultMonitoringUsersIndex('default')).toBe(`${baseIndex}.default`);
+    expect(defaultMonitoringUsersIndex('space1')).toBe(`${baseIndex}.space1`);
+  });
+
+  it('should generate integrationsSourceIndex', () => {
+    expect(integrationsSourceIndex('default', 'okta')).toBe(
+      `${baseMonitoringUsersIndex}.sources.okta-default`
+    );
+    expect(integrationsSourceIndex('space1', 'ad')).toBe(
+      `${baseMonitoringUsersIndex}.sources.ad-space1`
+    );
+  });
+
+  it('should generate correct stream index patterns', () => {
+    expect(STREAM_INDEX_PATTERNS.okta('default')).toBe('logs-entityanalytics_okta.user-default');
+    expect(STREAM_INDEX_PATTERNS.ad('space1')).toBe('logs-entityanalytics_ad.user-space1');
+  });
+
+  it('getStreamPatternFor returns correct pattern', () => {
+    expect(getStreamPatternFor('okta', 'default')).toBe('logs-entityanalytics_okta.user-default');
+    expect(getStreamPatternFor('ad', 'space1')).toBe('logs-entityanalytics_ad.user-space1');
   });
 });

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import {
-  defaultMonitoringUsersIndex,
-  getStreamPatternFor,
-  INTEGRATION_TYPES,
-  integrationsSourceIndex,
-  type IntegrationType,
-} from '../../../../../common/entity_analytics/privilege_monitoring/constants';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { PrivilegeMonitoringDataClient } from './data_client';
-import { getMatchersFor } from '../data_sources';
+import type { IntegrationType } from '../data_sources';
+import {
+  defaultMonitoringUsersIndex,
+  getMatchersFor,
+  getStreamPatternFor,
+  INTEGRATION_TYPES,
+  integrationsSourceIndex,
+} from '../data_sources';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 
 export type InitialisationSourcesService = ReturnType<typeof createInitialisationSourcesService>;
