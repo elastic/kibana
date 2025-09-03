@@ -20,6 +20,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
+import { mockGlobalState } from '../../../../../public/common/mock';
 
 jest.mock('../saved_objects', () => {
   const mockEngineDescriptorInit = jest.fn();
@@ -59,6 +60,7 @@ describe('createInitialisationSourcesService', () => {
     auditLogger: auditMock,
     telemetry: telemetryMock,
     savedObjects: savedObjectServiceMock,
+    experimentalFeatures: mockGlobalState.app.enableExperimental,
   };
 
   let dataClient: PrivilegeMonitoringDataClient;

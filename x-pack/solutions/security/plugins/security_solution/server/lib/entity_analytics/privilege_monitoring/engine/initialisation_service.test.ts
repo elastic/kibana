@@ -19,6 +19,7 @@ import type { InitialisationService } from './initialisation_service';
 import { createInitialisationService } from './initialisation_service';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
+import { mockGlobalState } from '../../../../../public/common/mock';
 
 const mockUpsertIndex = jest.fn();
 jest.mock('./elasticsearch/indices', () => {
@@ -73,6 +74,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
     auditLogger: auditMock,
     telemetry: telemetryMock,
     savedObjects: savedObjectServiceMock,
+    experimentalFeatures: mockGlobalState.app.enableExperimental,
   };
 
   let initService: InitialisationService;
