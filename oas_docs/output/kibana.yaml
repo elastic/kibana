@@ -14172,18 +14172,19 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Run a script on a host. Currently supported only for some agent types
+        Run a script on a host. Currently supported only for some agent types.
       operationId: RunScriptAction
       requestBody:
         content:
           application/json:
             examples:
               SentinelOne:
+                description: SentinelOne runscript
                 summary: Run a script against a SentinelOne agent
                 value:
                   agent_type: sentinel_one
                   endpoint_ids:
-                    - endpoint-id-1
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
                     inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
                     script: 1111-2222-3333-4444-5555-6666-7777-8888
@@ -14195,8 +14196,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
-          description: OK
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Action request was successfully created
       summary: Run a script
       tags:
         - Security Endpoint Management API
@@ -32927,6 +32928,8 @@ paths:
                               enum:
                                 - elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33089,6 +33092,8 @@ paths:
                               enum:
                                 - remote_elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33219,6 +33224,8 @@ paths:
                               enum:
                                 - logstash
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33504,6 +33511,8 @@ paths:
                                 - not: {}
                             version:
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -33709,6 +33718,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -33871,6 +33882,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -34001,6 +34014,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -34286,6 +34301,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -34440,6 +34457,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -34602,6 +34621,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -34732,6 +34753,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35017,6 +35040,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35297,6 +35322,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35459,6 +35486,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35589,6 +35618,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -35874,6 +35905,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -36072,6 +36105,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -36228,6 +36263,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -36352,6 +36389,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -36633,6 +36672,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - compression_level
@@ -36784,6 +36825,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -36946,6 +36989,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -37076,6 +37121,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -37361,6 +37408,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -56730,7 +56779,61 @@ paths:
                                             classic:
                                               additionalProperties: false
                                               type: object
-                                              properties: {}
+                                              properties:
+                                                field_overrides:
+                                                  additionalProperties:
+                                                    allOf:
+                                                      - additionalProperties:
+                                                          anyOf:
+                                                            - anyOf:
+                                                                - type: string
+                                                                - type: number
+                                                                - type: boolean
+                                                                - enum:
+                                                                    - 'null'
+                                                                  nullable: true
+                                                                - not: {}
+                                                            - items:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                  - enum:
+                                                                      - 'null'
+                                                                    nullable: true
+                                                                  - not: {}
+                                                              type: array
+                                                            - {}
+                                                        type: object
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              format:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - keyword
+                                                                  - match_only_text
+                                                                  - long
+                                                                  - double
+                                                                  - date
+                                                                  - boolean
+                                                                  - ip
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              type:
+                                                                enum:
+                                                                  - system
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                  type: object
                                           required:
                                             - classic
                                       required:
@@ -61684,7 +61787,61 @@ paths:
                             classic:
                               additionalProperties: false
                               type: object
-                              properties: {}
+                              properties:
+                                field_overrides:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
                           required:
                             - classic
               required:
@@ -82825,6 +82982,111 @@ components:
           type: integer
       required:
         - raw
+    Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse:
+      example:
+        data:
+          agents:
+            - ed518850-681a-4d60-bb98-e22640cae2a8
+          agentState:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              isCompleted: false
+              wasSuccessful: false
+          agentType: __agent__type__here_
+          command: __command__name__here__
+          createdBy: elastic
+          hosts:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              name: gke-node-1235412
+          id: 233db9ea-6733-4849-9226-5a7039c7161d
+          isCompleted: false
+          isExpired: false
+          outputs: {}
+          parameters: {}
+          startedAt: '2022-07-29T19:08:49.126Z'
+          status: pending
+          wasSuccessful: false
+      type: object
+      properties:
+        data:
+          description: The created response action details
+          type: object
+          properties:
+            agents:
+              description: The agent IDs for the hosts that the response action was sent to
+              type: object
+            agentState:
+              additionalProperties:
+                type: object
+                properties:
+                  completedAt:
+                    description: The date and time the response action was completed for the agent ID
+                    type: string
+                  isCompleted:
+                    description: Whether the response action is completed for the agent ID
+                    type: boolean
+                  wasSuccessful:
+                    description: Whether the response action was successful for the agent ID
+                    type: boolean
+              description: The state of the response action for each agent ID that it was sent to
+              type: object
+            agentType:
+              description: The response action agent type
+              type: string
+            command:
+              description: The response action command
+              type: string
+            createdBy:
+              description: The user who created the response action
+              type: string
+            hosts:
+              additionalProperties:
+                type: object
+                properties:
+                  name:
+                    description: The host name
+                    type: string
+              description: An object containing the host names associated with the agent IDs the response action was sent to
+              type: object
+            id:
+              description: The response action ID
+              type: string
+            isComplete:
+              description: Whether the response action is complete
+              type: boolean
+            isExpired:
+              description: Whether the response action is expired
+              type: boolean
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    description: The response action output content for the agent ID. Exact format depends on the response action command.
+                    oneOf:
+                      - type: object
+                      - type: string
+                  type:
+                    enum:
+                      - json
+                      - text
+                    type: string
+                required:
+                  - type
+                  - content
+              description: The outputs of the response action for each agent ID that it was sent to
+              type: object
+            parameters:
+              description: The parameters of the response action. Content different depending on the response action command
+              type: object
+            startedAt:
+              description: The response action start time
+              type: string
+            status:
+              description: The response action status
+              type: string
+            wasSuccessful:
+              description: Whether the response action was successful
+              type: boolean
     Security_Endpoint_Management_API_RunScriptRouteRequestBody:
       allOf:
         - type: object
@@ -82929,7 +83191,7 @@ components:
           script: 1111-2222-3333-4444-5555-6666-7777-8888
       properties:
         inputParams:
-          description: The input parameter arguments for the script that was selected
+          description: The input parameter arguments for the script that was selected.
           minLength: 1
           type: string
         script:
