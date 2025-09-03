@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { UnifiedHistogramMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
+import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
 import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
@@ -22,7 +22,7 @@ export const createChartSection =
     return {
       ...(prev ? prev() : {}),
       Component: (props) => (
-        <UnifiedHistogramMetricsExperienceGrid {...props} client={metricsExperienceClient} />
+        <UnifiedMetricsExperienceGrid {...props} client={metricsExperienceClient} />
       ),
       replaceDefaultChart: !!metricsExperienceClient,
       localStorageKeyPrefix: 'discover:metricsExperience',

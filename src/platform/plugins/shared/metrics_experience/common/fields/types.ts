@@ -13,13 +13,13 @@ import type { Dimension } from '../dimensions/types';
 export interface MetricField {
   name: string;
   index: string;
-  dimensions: Array<Dimension>;
+  dimensions: Dimension[];
   type: string;
   instrument?: MappingTimeSeriesMetricType;
   unit?: string;
   description?: string;
-  source?: string;
-  stability?: string;
+  source?: 'otel' | 'ecs' | 'custom';
+  stability?: 'stable' | 'beta' | 'experimental';
   display?: string;
   noData?: boolean;
 }
