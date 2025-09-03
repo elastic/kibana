@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness user role backwards compatibility until siemV3', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
 
-    const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3'] as const;
+    const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3', 'siemV4'] as const;
 
     let globalArtifactManagerRole: Role;
 
