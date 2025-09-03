@@ -10,6 +10,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
+import { Global } from '@emotion/react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -128,23 +129,10 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
       handleEventPropagation({ event, callback: handleClickAtPositionOfInspectedElement });
     };
 
-    /**
-     * 'pointer-events: none' on overlay causes the appropriate cursor to render.
-     * This is a workaround which forces the crosshair cursor when inspecting.
-     */
-    const forceCrosshairCursor = document.createElement('style');
-    forceCrosshairCursor.textContent = `
-      body * {
-        cursor: crosshair !important;
-      }
-      `;
-
-    document.head.appendChild(forceCrosshairCursor);
     document.addEventListener('pointerdown', handleMouseEvent, true);
     document.addEventListener('click', handleMouseEvent, true);
 
     return () => {
-      document.head.removeChild(forceCrosshairCursor);
       document.removeEventListener('pointerdown', handleMouseEvent, true);
       document.removeEventListener('click', handleMouseEvent, true);
     };
@@ -152,13 +140,27 @@ export const InspectOverlay = ({ core, branch, setFlyoutOverlayRef, setIsInspect
 
   const overlayContent = useMemo(
     () => (
-      <div className={overlayCss} id={INSPECT_OVERLAY_ID} data-test-subj="inspectOverlayContainer">
-        <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
-        <InspectHighlight
-          currentPosition={highlightPosition}
-          path={sourceComponent?.type || null}
+      <React.Fragment>
+        <Global
+          styles={{
+            // This is a workaround which forces the crosshair cursor when inspecting.
+            'body *': {
+              cursor: 'crosshair !important',
+            },
+          }}
         />
-      </div>
+        <div
+          className={overlayCss}
+          id={INSPECT_OVERLAY_ID}
+          data-test-subj="inspectOverlayContainer"
+        >
+          <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
+          <InspectHighlight
+            currentPosition={highlightPosition}
+            path={sourceComponent?.type || null}
+          />
+        </div>
+      </React.Fragment>
     ),
     [overlayCss, highlightPosition, sourceComponent?.type, handlePointerMove]
   );
