@@ -21,7 +21,7 @@ interface Change<T> {
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
-  private workflowChanges: Change<EsWorkflowStepExecution>[] = [];
+  private workflowChanges: Change<EsWorkflowExecution>[] = [];
   private stepChanges: Change<EsWorkflowStepExecution>[] = [];
 
   /**
@@ -212,7 +212,6 @@ export class WorkflowExecutionState {
       ...step,
     } as EsWorkflowStepExecution);
 
-    // only update if the step is not in changes
     this.stepChanges.push({
       objectId: step.id!,
       changeType: 'update',
