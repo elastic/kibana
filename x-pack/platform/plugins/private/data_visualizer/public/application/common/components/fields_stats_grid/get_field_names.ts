@@ -7,7 +7,7 @@
 
 import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 
