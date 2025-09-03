@@ -436,6 +436,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -483,6 +484,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -603,6 +605,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.one', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -618,6 +621,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.one.two.three', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -652,6 +656,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -671,6 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.WiredStream.UpsertRequest = {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {

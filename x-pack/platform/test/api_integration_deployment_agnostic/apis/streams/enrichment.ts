@@ -51,6 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {

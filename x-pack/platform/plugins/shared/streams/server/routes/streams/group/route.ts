@@ -109,6 +109,10 @@ const upsertGroupRoute = createServerRoute({
       .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
       .map((asset) => asset[ASSET_UUID]);
 
+    const rules = assets
+      .filter((asset) => asset[ASSET_TYPE] === 'rule')
+      .map((asset) => asset[ASSET_UUID]);
+
     const queries = assets
       .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
       .map((asset) => asset.query);
@@ -122,6 +126,7 @@ const upsertGroupRoute = createServerRoute({
         group,
       },
       queries,
+      rules,
     };
 
     return await streamsClient.upsertStream({
