@@ -1,0 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export function extractDeploymentId(cloudId: string) {
+  const tempCloudId = cloudId.replace(/^(.+)?:/, '');
+  try {
+    const matches = atob(tempCloudId).match(/^.+\$(.+)(?=\$)/);
+    return matches !== null && matches.length === 2 ? matches[1] : null;
+  } catch (error) {
+    return null;
+  }
+}
