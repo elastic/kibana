@@ -22,7 +22,6 @@
             ".fleet-agents*",
             ".fleet-actions*",
             ".asset-criticality.asset-criticality-*",
-            ".privmon*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
@@ -73,7 +72,6 @@
             ".fleet-agents*",
             ".fleet-actions*",
             ".asset-criticality.asset-criticality-*",
-            ".privmon*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
@@ -116,7 +114,6 @@
             "winlogbeat-*",
             "logstash-*",
             ".asset-criticality.asset-criticality-*",
-            ".privmon*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["read", "write"]
@@ -198,7 +195,6 @@
             ".lists*",
             ".items*",
             ".asset-criticality.asset-criticality-*",
-            ".privmon*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["read", "write"]
@@ -257,7 +253,6 @@
             ".lists*",
             ".items*",
             ".asset-criticality.asset-criticality-*",
-            ".privmon*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["read", "write"]
@@ -322,7 +317,6 @@
             "packetbeat-*",
             "winlogbeat-*",
             ".asset-criticality.asset-criticality-*",
-            ".privmon*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["manage", "write", "read"]
@@ -376,7 +370,6 @@
             ".fleet-agents*",
             ".fleet-actions*",
             ".asset-criticality.asset-criticality-*",
-            ".privmon*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": ["all"]
