@@ -165,12 +165,16 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         script: {
           source: `
                 def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
               `,
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query,
+        refresh: true,
       })
       .catch((error) => {
         this.logger.error(`Error updating index pattern for migration ${id}: ${error}`);

@@ -33,9 +33,7 @@ export const dsl = {
   },
   isMissingIndex(): QueryDslQueryContainer {
     return {
-      query_string: {
-        query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"`,
-      },
+      query_string: { query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"` },
     };
   },
 };

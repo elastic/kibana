@@ -814,10 +814,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query: {
           bool: {
@@ -836,6 +839,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             ],
           },
         },
+        refresh: true,
       });
       expect(result).toBe(2);
     });
@@ -854,10 +858,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         script: {
           source: expect.stringContaining(
             `def originalQuery = ctx._source.elastic_rule.query;
-                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
+          params: {
+            indexPattern,
+          },
         },
         query: {
           bool: {
@@ -871,6 +878,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             ],
           },
         },
+        refresh: true,
       });
       expect(result).toBe(5);
     });
