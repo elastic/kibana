@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../services/types';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { ConversationActions } from './conversation_actions';
@@ -28,7 +29,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   const { conversationSettingsService } = useOnechatServices();
 
   // Subscribe to conversation settings to get the isFlyoutMode
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
     {}
   );

@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import type { KibanaRequest, RequestHandlerContext } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentClient } from './services/agents';
 
 /**
  * Request handler context for onechat plugin routes
  */
-export interface OnechatRequestHandlerContext extends RequestHandlerContext {
+export type OnechatRequestHandlerContext = CustomRequestHandlerContext<{
   onechat: {
     spaces: {
       getSpaceId: () => string;
     };
   };
-}
+}>;
 
 export interface OnechatSetupDependencies {
   inference: InferenceServerSetup;

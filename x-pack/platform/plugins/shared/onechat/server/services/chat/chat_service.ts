@@ -165,7 +165,7 @@ class ChatServiceImpl implements ChatService {
           const title$ = shouldCreateNewConversation$.pipe(
             switchMap((shouldCreate) =>
               shouldCreate
-                ? generateTitle$({ chatModel, conversation$, nextInput })
+                ? generateTitle$({ chatModel: chatModel.chatModel, conversation$, nextInput })
                 : conversation$.pipe(
                     switchMap((conversation) => {
                       return of(conversation.title);
@@ -186,12 +186,14 @@ class ChatServiceImpl implements ChatService {
                     title$,
                     roundCompletedEvents$,
                     spaceId,
+                    connectorId: chatModel.connectorId,
                   })
                 : updateConversation$({
                     conversationClient,
                     conversation$,
                     title$,
                     roundCompletedEvents$,
+                    connectorId,
                   })
             )
           );

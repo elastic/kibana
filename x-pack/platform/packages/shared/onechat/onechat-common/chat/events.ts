@@ -122,6 +122,7 @@ export const isRoundCompleteEvent = (
 export interface ConversationCreatedEventData {
   conversation_id: string;
   title: string;
+  connector_id: string;
 }
 
 export type ConversationCreatedEvent = ChatEventBase<

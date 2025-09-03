@@ -6,12 +6,17 @@
  */
 
 import type { Observable } from 'rxjs';
-import { defer, switchMap } from 'rxjs';
+import { defer, switchMap, map } from 'rxjs';
 import type { Span } from '@opentelemetry/api';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
+
+export interface ChatModelWithConnectorId {
+  chatModel: InferenceChatModel;
+  connectorId: string;
+}
 
 export const getChatModel$ = ({
   connectorId,
@@ -23,7 +28,7 @@ export const getChatModel$ = ({
   request: KibanaRequest;
   inference: InferenceServerStart;
   span?: Span;
-}): Observable<InferenceChatModel> => {
+}): Observable<ChatModelWithConnectorId> => {
   return defer(async () => {
     let selectedConnectorId = connectorId;
     if (!selectedConnectorId) {
@@ -41,6 +46,10 @@ export const getChatModel$ = ({
           telemetryMetadata: MODEL_TELEMETRY_METADATA,
         },
       });
-    })
+    }),
+    map((chatModel) => ({
+      chatModel,
+      connectorId: chatModel.getConnector().connectorId,
+    }))
   );
 };

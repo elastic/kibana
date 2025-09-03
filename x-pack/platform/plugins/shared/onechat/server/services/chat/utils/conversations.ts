@@ -22,6 +22,7 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
   spaceId,
+  connectorId,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
@@ -29,6 +30,7 @@ export const createConversation$ = ({
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   spaceId?: string;
+  connectorId?: string;
 }) => {
   return forkJoin({
     title: title$,
@@ -41,6 +43,7 @@ export const createConversation$ = ({
         agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
         spaceId,
+        connectorId,
       });
     }),
     switchMap((createdConversation) => {
@@ -57,11 +60,13 @@ export const updateConversation$ = ({
   conversation$,
   title$,
   roundCompletedEvents$,
+  connectorId,
 }: {
   title$: Observable<string>;
   conversation$: Observable<Conversation>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
+  connectorId?: string;
 }) => {
   return forkJoin({
     conversation: conversation$,
@@ -73,6 +78,7 @@ export const updateConversation$ = ({
         id: conversation.id,
         title,
         rounds: [...conversation.rounds, roundCompletedEvent.data.round],
+        connectorId,
       });
     }),
     switchMap((updatedConversation) => {
@@ -151,5 +157,6 @@ const placeholderConversation = ({
       id: 'unknown',
       username: 'unknown',
     },
+    connectorId: undefined,
   };
 };

@@ -26,7 +26,6 @@ import { EMPTY_SCREEN_DESCRIPTION } from '../translations';
 import { AssistantSettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import { useAssistantLastConversation } from '../use_space_aware_context/use_last_conversation';
 import { useAssistantSpaceId } from '../use_space_aware_context';
-import type { LastConversation } from '../use_space_aware_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -45,9 +44,7 @@ export const OneChatOverlay = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   // id if the conversation exists in the data stream, title if it's a new conversation
-  const [lastConversation, setSelectedConversation] = useState<LastConversation | undefined>(
-    undefined
-  );
+
   const [connectorId, setConnectorId] = useState<string | undefined>(undefined);
   const {
     assistantTelemetry,
@@ -69,14 +66,12 @@ export const OneChatOverlay = React.memo(() => {
         promptContextId: pid,
         selectedConversation,
       }: ShowOneChatOverlayProps) => {
-        const nextConversation = getLastConversation(selectedConversation);
         if (so) assistantTelemetry?.reportAssistantInvoked({ invokedBy: 'click' });
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setSelectedConversation(nextConversation);
       },
-    [assistantTelemetry, getLastConversation]
+    [assistantTelemetry]
   );
   useEffect(() => {
     setShowOneChatOverlay(showOverlay);
@@ -85,28 +80,26 @@ export const OneChatOverlay = React.memo(() => {
   // Called whenever platform specific shortcut for assistant is pressed
   const handleShortcutPress = useCallback(() => {
     if (!isModalVisible) {
-      setSelectedConversation(getLastConversation());
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [isModalVisible, getLastConversation, assistantTelemetry]);
+  }, [isModalVisible, assistantTelemetry]);
 
   const hasOpenedFromUrl = useRef(false);
 
   const handleOpenFromUrlState = useCallback(
     (id: string) => {
       if (!isModalVisible) {
-        setSelectedConversation(getLastConversation({ id }));
         assistantTelemetry?.reportAssistantInvoked({
           invokedBy: 'url',
         });
         setIsModalVisible(true);
       }
     },
-    [isModalVisible, getLastConversation, assistantTelemetry]
+    [isModalVisible, assistantTelemetry]
   );
 
   // Handle connector selection change
@@ -143,7 +136,6 @@ export const OneChatOverlay = React.memo(() => {
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
     setPromptContextId(undefined);
-    setSelectedConversation(undefined);
   }, []);
 
   const handleCloseModal = useCallback(() => {
@@ -206,7 +198,7 @@ export const OneChatOverlay = React.memo(() => {
     if (onechatServices && isModalVisible) {
       onechatServices.conversationSettingsService.setConversationSettings({
         isFlyoutMode: true,
-        selectedConversationId: lastConversation?.id,
+        getLastConversation,
         newConversationSubtitle: EMPTY_SCREEN_DESCRIPTION,
         newConversationPrompts: fetchedPromptGroups,
         selectedConnectorId: connectorId,
@@ -214,6 +206,7 @@ export const OneChatOverlay = React.memo(() => {
         setLastConversation,
         defaultAgentId: 'siem-security-analyst',
         commentActionsMounter,
+        setConnectorId,
       });
     }
   }, [
@@ -224,7 +217,6 @@ export const OneChatOverlay = React.memo(() => {
     connectorId,
     assistantSettings,
     setLastConversation,
-    lastConversation,
     commentActionsMounter,
   ]);
 

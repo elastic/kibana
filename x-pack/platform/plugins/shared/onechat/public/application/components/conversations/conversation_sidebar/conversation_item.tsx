@@ -10,6 +10,7 @@ import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import type { ConversationSettings } from '../../../../services/types';
 import { useConversationId } from '../../../hooks/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
@@ -30,7 +31,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
 
   // Subscribe to conversation settings to get the isFlyoutMode
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
     {}
   );
@@ -38,8 +39,11 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
   const isFlyoutMode = conversationSettings?.isFlyoutMode;
 
   const handleClick = useCallback(() => {
-    setSelectedConversation({ conversationId: conversation.id });
-  }, [setSelectedConversation, conversation.id]);
+    setSelectedConversation({
+      conversationId: conversation.id,
+      connectorId: conversation.connectorId,
+    });
+  }, [setSelectedConversation, conversation.id, conversation.connectorId]);
 
   const handleDelete = useCallback(async () => {
     setShowDeleteModal(false);

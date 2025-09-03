@@ -35,6 +35,7 @@ const convertBaseFromEs = (
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
     spaceId: document._source.space_id,
+    connectorId: document._source.connector_id,
   };
 };
 
@@ -88,6 +89,7 @@ export const toEs = (conversation: Conversation): ConversationProperties => {
     updated_at: conversation.updated_at,
     rounds: serializeStepResults(conversation.rounds),
     space_id: conversation.spaceId,
+    connector_id: conversation.connectorId,
   };
 };
 
@@ -127,5 +129,6 @@ export const createRequestToEs = ({
     updated_at: creationDate.toISOString(),
     rounds: serializeStepResults(conversation.rounds),
     space_id: conversation.spaceId,
+    connector_id: conversation.connectorId,
   };
 };

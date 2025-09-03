@@ -9,6 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../services/types';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { useConversationId } from '../../hooks/use_conversation_id';
@@ -22,7 +23,7 @@ export const NewConversationButton: React.FC<{}> = () => {
   const { setSelectedConversation } = useConversationActions();
 
   // Subscribe to conversation settings to get the isFlyoutMode
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
     {}
   );

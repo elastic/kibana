@@ -19,15 +19,20 @@ export interface StarterPrompt {
 }
 
 export interface ConversationSettings {
-  isFlyoutMode: boolean;
-  settingsMenuComponent: React.ReactNode | undefined;
-  selectedConversationId: string | undefined;
-  newConversationSubtitle: string | undefined;
-  newConversationPrompts: StarterPrompt[] | undefined;
-  selectedConnectorId: string | undefined;
-  setLastConversation: (lastConversation: any) => void;
-  defaultAgentId: string | undefined;
+  isFlyoutMode?: boolean;
+  settingsMenuComponent?: React.ReactNode;
+  getLastConversation?: (selectedConversation?: { id: string; title?: string }) => {
+    id: string;
+    title?: string;
+  };
+  selectedConversationId?: string;
+  newConversationSubtitle?: string;
+  newConversationPrompts?: StarterPrompt[];
+  selectedConnectorId?: string;
+  setLastConversation?: (lastConversation: any) => void;
+  defaultAgentId?: string;
   commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
+  setConnectorId?: (connectorId?: string) => void;
 }
 
 export interface OnechatInternalService {

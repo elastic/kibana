@@ -29,7 +29,7 @@ import {
 } from './converters';
 
 export interface ConversationClient {
-  get(conversationId: string, spaceId: string): Promise<Conversation>;
+  get(conversationId: string, spaceId?: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;

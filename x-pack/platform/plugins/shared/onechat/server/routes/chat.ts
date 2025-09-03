@@ -24,6 +24,7 @@ import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { getTechnicalPreviewWarning } from './utils';
+import type { OnechatRequestHandlerContext } from '../types';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Chat API');
 
@@ -98,7 +99,7 @@ export function registerChatRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
-        const context = await ctx.onechat;
+        const context = await (ctx as OnechatRequestHandlerContext).onechat;
         const spaceId = context.spaces.getSpaceId();
 
         const abortController = new AbortController();
@@ -162,7 +163,7 @@ export function registerChatRoutes({
         const [, { cloud }] = await coreSetup.getStartServices();
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
-        const context = await ctx.onechat;
+        const context = await (ctx as OnechatRequestHandlerContext).onechat;
         const spaceId = context.spaces.getSpaceId();
 
         const abortController = new AbortController();

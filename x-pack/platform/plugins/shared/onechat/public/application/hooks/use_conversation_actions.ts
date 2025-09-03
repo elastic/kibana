@@ -20,6 +20,7 @@ import { queryKeys } from '../query_keys';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
 import { useOnechatServices } from './use_onechat_service';
+import type { ConversationSettings } from '../../services/types';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
@@ -28,7 +29,7 @@ export const useConversationActions = () => {
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
 
   // Subscribe to conversation settings to get the isFlyoutMode
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
     {}
   );
@@ -58,23 +59,47 @@ export const useConversationActions = () => {
       shouldAllowConversationRedirectRef.current = false;
     };
   }, []);
-  const setSelectedConversation = ({ conversationId: id }: { conversationId?: string }) => {
+  const setSelectedConversation = ({
+    conversationId: id,
+    connectorId,
+  }: {
+    conversationId?: string;
+    connectorId?: string;
+  }) => {
     conversationSettingsService.setConversationSettings({
       ...conversationSettings,
+      selectedConnectorId: connectorId, // Add missing required property
       selectedConversationId: id,
     });
-    conversationSettings?.setLastConversation({
-      id,
-    });
+
+    // Only call setLastConversation if id is defined
+    if (conversationSettings?.setLastConversation) {
+      conversationSettings.setLastConversation({
+        id: id ?? '',
+      });
+    }
+    if (conversationSettings?.setConnectorId) {
+      conversationSettings?.setConnectorId(connectorId);
+    }
   };
 
-  const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
+  const navigateToConversation = ({
+    nextConversationId,
+    connectorId,
+  }: {
+    nextConversationId: string | undefined;
+    connectorId: string | undefined;
+  }) => {
     // Navigate to the new conversation if user is still on the "new" conversation page
     if (!conversationId && shouldAllowConversationRedirectRef.current) {
       if (isFlyoutMode) {
-        setSelectedConversation({ conversationId: nextConversationId });
+        setSelectedConversation({ conversationId: nextConversationId, connectorId });
       } else {
-        navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+        navigateToOnechatUrl(
+          nextConversationId
+            ? appPaths.chat.conversation({ conversationId: nextConversationId })
+            : appPaths.chat.new
+        );
       }
     }
   };
@@ -147,9 +172,11 @@ export const useConversationActions = () => {
     onConversationCreated: ({
       conversationId: id,
       title,
+      connectorId,
     }: {
       conversationId: string;
       title: string;
+      connectorId: string;
     }) => {
       const current = queryClient.getQueryData<Conversation>(queryKey);
       if (!current) {
@@ -165,13 +192,13 @@ export const useConversationActions = () => {
       removeNewConversationQuery();
       // Invalidate all conversations to refresh conversation history
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-      navigateToConversation({ nextConversationId: id });
+      navigateToConversation({ nextConversationId: id, connectorId });
     },
     deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       removeNewConversationQuery();
-      navigateToConversation();
+      navigateToConversation({ nextConversationId: '', connectorId: undefined });
     },
   };
 };

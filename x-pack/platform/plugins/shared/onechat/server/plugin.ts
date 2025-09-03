@@ -56,18 +56,21 @@ export class OnechatPlugin
     const router = coreSetup.http.createRouter<OnechatRequestHandlerContext>();
 
     // Register spaces context for route handlers
-    coreSetup.http.registerRouteHandlerContext('onechat', async (_context, request) => {
-      const [, { spaces }] = await coreSetup.getStartServices();
+    coreSetup.http.registerRouteHandlerContext<OnechatRequestHandlerContext, 'onechat'>(
+      'onechat',
+      async (_context, request) => {
+        const [, { spaces }] = await coreSetup.getStartServices();
 
-      const getSpaceId = (): string =>
-        spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+        const getSpaceId = (): string =>
+          spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
 
-      return {
-        spaces: {
-          getSpaceId,
-        },
-      };
-    });
+        return {
+          spaces: {
+            getSpaceId,
+          },
+        };
+      }
+    );
 
     registerRoutes({
       router,

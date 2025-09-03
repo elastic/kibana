@@ -122,6 +122,7 @@ export interface Conversation {
   updated_at: string;
   rounds: ConversationRound[];
   spaceId?: string;
+  connectorId?: string;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

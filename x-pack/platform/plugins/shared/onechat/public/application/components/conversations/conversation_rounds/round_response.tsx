@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../../services/types';
 import { useTimer } from '../../../hooks/use_timer';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import { ChatMessageText } from './chat_message_text';
@@ -30,9 +31,9 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   const { conversationSettingsService } = useOnechatServices();
 
   // Subscribe to conversation settings to get the commentActionsMounter
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
-    { commentActionsMounter: undefined }
+    {}
   );
 
   const commentActionsMounter = conversationSettings?.commentActionsMounter;

@@ -24,6 +24,7 @@ import { useConversationId } from '../hooks/use_conversation_id';
 import { useOnechatServices } from '../hooks/use_onechat_service';
 import { useReportConverseError } from '../hooks/use_report_error';
 import { mutationKeys } from '../mutation_keys';
+import type { ConversationSettings } from '../../services/types';
 interface UseSendMessageMutationProps {
   connectorId?: string;
 }
@@ -80,8 +81,16 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
             // Now we have the full response and can stop the loading indicators
             setIsResponseLoading(false);
           } else if (isConversationCreatedEvent(event)) {
-            const { conversation_id: id, title } = event.data;
-            conversationActions.onConversationCreated({ conversationId: id, title });
+            const {
+              conversation_id: id,
+              title,
+              connector_id: conversationConnectorId,
+            } = event.data;
+            conversationActions.onConversationCreated({
+              conversationId: id,
+              title,
+              connectorId: conversationConnectorId,
+            });
           }
         },
         complete: () => {
@@ -179,7 +188,7 @@ const SendMessageContext = createContext<SendMessageState | null>(null);
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
   const { conversationSettingsService } = useOnechatServices();
 
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
     {}
   );

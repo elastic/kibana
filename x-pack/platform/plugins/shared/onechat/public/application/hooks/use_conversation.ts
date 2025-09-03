@@ -7,12 +7,15 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { useSendMessage } from '../context/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
+import type { ConversationSettings } from '../../services/types';
 
 const useConversation = () => {
   const conversationId = useConversationId();
@@ -37,7 +40,16 @@ const useConversation = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
-  return conversation?.agent_id;
+  const { conversationSettingsService } = useOnechatServices();
+
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  // Return the agent_id from conversation if available, otherwise return the defaultAgentId from settings
+  // If no defaultAgentId is set in settings, fall back to the oneChatDefaultAgentId constant
+  return conversation?.agent_id ?? conversationSettings?.defaultAgentId ?? oneChatDefaultAgentId;
 };
 
 export const useConversationTitle = () => {

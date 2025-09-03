@@ -10,6 +10,7 @@ import { EuiPageHeaderSection, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@e
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../services/types';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { NewConversationButton } from './new_conversation_button';
@@ -20,7 +21,7 @@ export const ConversationActions: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
 
   // Subscribe to conversation settings to get the settingsMenuComponent
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
     {}
   );
@@ -50,7 +51,9 @@ export const ConversationActions: React.FC<{}> = () => {
             <NewConversationButton />
           </EuiFlexItem>
         )}
-        {settingsMenuComponent && <EuiFlexItem grow={false}>{settingsMenuComponent}</EuiFlexItem>}
+        {settingsMenuComponent && isFlyoutMode && (
+          <EuiFlexItem grow={false}>{settingsMenuComponent}</EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPageHeaderSection>
   );

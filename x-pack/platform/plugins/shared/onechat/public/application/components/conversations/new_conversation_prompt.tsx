@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../services/types';
 import { ConversationContent } from './conversation_grid';
 import { StarterPrompts } from './starter_prompts';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
@@ -29,7 +30,7 @@ export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({
   const { conversationSettingsService } = useOnechatServices();
 
   // Subscribe to conversation settings to get the newConversationSubtitle
-  const conversationSettings = useObservable(
+  const conversationSettings = useObservable<ConversationSettings>(
     conversationSettingsService.getConversationSettings$(),
     {}
   );
