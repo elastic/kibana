@@ -16,11 +16,10 @@ import { startDashboardSearchSessionIntegration } from './start_dashboard_search
 export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   incomingEmbeddable: EmbeddablePackageState | undefined,
-  dashboardApi: Omit<DashboardApi, 'searchSessionId$' | 'searchSessionIdFromUrl'>,
+  dashboardApi: Omit<DashboardApi, 'searchSessionId$'>,
   dashboardInternalApi: DashboardInternalApi
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
-  const searchSessionIdFromUrl$ = new BehaviorSubject<string | undefined>(undefined);
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   if (searchSessionSettings) {
@@ -32,7 +31,6 @@ export function initializeSearchSessionManager(
     }
     if (sessionIdToRestore) {
       dataService.search.session.restore(sessionIdToRestore);
-      searchSessionIdFromUrl$.next(sessionIdToRestore);
     }
     const existingSession = dataService.search.session.getSessionId();
 
@@ -56,7 +54,6 @@ export function initializeSearchSessionManager(
   return {
     api: {
       searchSessionId$,
-      searchSessionIdFromUrl$,
     },
     cleanup: () => {
       stopSearchSessionIntegration?.();

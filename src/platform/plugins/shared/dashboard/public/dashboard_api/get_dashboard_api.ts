@@ -214,7 +214,7 @@ export function getDashboardApi({
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
-  } as Omit<DashboardApi, 'searchSessionId$' | 'searchSessionIdFromUrl$'>;
+  } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
     ...layoutManager.internalApi,
