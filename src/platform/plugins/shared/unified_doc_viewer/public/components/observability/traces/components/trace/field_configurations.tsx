@@ -11,10 +11,7 @@ import React from 'react';
 import { TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { TraceIdLink } from '../trace_id_link';
-
-// TODO This is currently kind of a duplication of what we have in:
-// src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/resources/get_field_configuration.tsx
-// that will be removed once all the overview is changed
+import { HighlightField } from '../highlight_field';
 
 export const traceFieldConfigurations = {
   [TRACE_ID]: {
@@ -22,7 +19,9 @@ export const traceFieldConfigurations = {
       defaultMessage: 'Trace ID',
     }),
     formatter: (value: unknown, formattedValue: string) => (
-      <TraceIdLink traceId={value as string} formattedTraceId={formattedValue} />
+      <HighlightField value={value as string} formattedValue={formattedValue}>
+        {({ content }) => <TraceIdLink traceId={value as string} formattedTraceId={content} />}
+      </HighlightField>
     ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
   },
   [TRANSACTION_ID]: {

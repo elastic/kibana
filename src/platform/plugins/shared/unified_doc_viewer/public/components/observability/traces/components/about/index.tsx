@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { type DataTableRecord } from '@kbn/discover-utils';
+import { getFlattenedTraceDocumentOverview, type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
   AT_TIMESTAMP,
@@ -68,10 +68,13 @@ export interface AboutProps
 export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: AboutProps) => {
   const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
+  const flattenedHit = getFlattenedTraceDocumentOverview(hit);
 
   const aboutFieldConfigurations = {
-    ...sharedFieldConfigurations,
-    ...(isSpan ? spanFieldConfigurations : transactionFieldConfigurations),
+    ...sharedFieldConfigurations(flattenedHit),
+    ...(isSpan
+      ? spanFieldConfigurations(flattenedHit)
+      : transactionFieldConfigurations(flattenedHit)),
   };
 
   return (

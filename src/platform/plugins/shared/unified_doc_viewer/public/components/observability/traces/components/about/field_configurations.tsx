@@ -9,8 +9,10 @@
 import React from 'react';
 
 import {
+  AGENT_NAME,
   AT_TIMESTAMP,
   HTTP_RESPONSE_STATUS_CODE,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
@@ -27,129 +29,165 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Duration, HttpStatusCode, Timestamp } from '@kbn/apm-ui-shared';
 import { EuiBadge } from '@elastic/eui';
+import type { TraceDocumentOverview } from '@kbn/discover-utils';
 import type { ContentFrameworkTableProps } from '../../../../content_framework';
 import { ServiceNameLink } from '../service_name_link';
 import { DependencyNameLink } from '../../doc_viewer_span_overview/sub_components/dependency_name_link';
 import { TransactionNameLink } from '../transaction_name_link';
+import { HighlightField } from '../highlight_field';
 
 // TODO This is currently kind of a duplication of what we have in:
 // src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/resources/get_field_configuration.tsx
 // src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_span_overview/resources/get_span_field_configuration.tsx
 // that will be removed once all the overview is changed
 
-export const sharedFieldConfigurations: ContentFrameworkTableProps['fieldConfigurations'] = {
-  [SERVICE_NAME]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.serviceName.title', {
-      defaultMessage: 'Service Name',
-    }),
-    formatter: (value: unknown, formattedValue: string) => (
-      <ServiceNameLink
-        serviceName={value as string}
-        agentName={''} // {flattenedDoc[AGENT_NAME_FIELD]} TODO check how to get this
-        formattedServiceName={formattedValue}
-      />
-    ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
-  },
-  [AT_TIMESTAMP]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.timestamp.title', {
-      defaultMessage: 'Start time',
-    }), // TODO check timestamp formatter, something is happening here
-    formatter: (value: unknown) => <Timestamp timestamp={value as number} size="xs" />,
-  },
-  [HTTP_RESPONSE_STATUS_CODE]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.httpResponseStatusCode.title', {
-      defaultMessage: 'Status code',
-    }),
-    formatter: (value: unknown) => <HttpStatusCode code={value as number} />,
-  },
-  [TRANSACTION_ID]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.transactionId.title', {
-      defaultMessage: 'Transaction ID',
-    }), // TODO add link? Same question as in the trace section.
-  },
+export const sharedFieldConfigurations = (
+  flattenedHit: TraceDocumentOverview
+): ContentFrameworkTableProps['fieldConfigurations'] => {
+  return {
+    [SERVICE_NAME]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.serviceName.title', {
+        defaultMessage: 'Service Name',
+      }),
+      formatter: (value: unknown, formattedValue: string) => (
+        <>
+          <HighlightField value={value as string} formattedValue={formattedValue}>
+            {({ content }) => (
+              <ServiceNameLink
+                serviceName={value as string}
+                agentName={flattenedHit[AGENT_NAME] ?? ''}
+                formattedServiceName={content}
+              />
+            )}
+          </HighlightField>
+        </>
+      ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
+    },
+    [AT_TIMESTAMP]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.timestamp.title', {
+        defaultMessage: 'Start time',
+      }), // TODO check timestamp formatter, something is happening here
+      formatter: (value: unknown) => <Timestamp timestamp={value as number} size="xs" />,
+    },
+    [HTTP_RESPONSE_STATUS_CODE]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.httpResponseStatusCode.title', {
+        defaultMessage: 'Status code',
+      }),
+      formatter: (value: unknown) => <HttpStatusCode code={value as number} />,
+    },
+    [TRANSACTION_ID]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.transactionId.title', {
+        defaultMessage: 'Transaction ID',
+      }), // TODO add link? Same question as in the trace section.
+    },
+  };
 };
 
-export const spanFieldConfigurations: ContentFrameworkTableProps['fieldConfigurations'] = {
-  [SPAN_ID]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.spanId.title', {
-      defaultMessage: 'Span ID',
-    }), // TODO add link?
-  },
-  [SPAN_NAME]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.spanName.title', {
-      defaultMessage: 'Span Name',
-    }), // TODO add link?
-  },
-  [SPAN_DESTINATION_SERVICE_RESOURCE]: {
-    title: i18n.translate(
-      'unifiedDocViewer.observability.traces.spanDestinationServiceResource.title',
-      {
-        defaultMessage: 'Dependency',
-      }
-    ),
-    formatter: (value: unknown, formattedValue: string) => (
-      <DependencyNameLink
-        dependencyName={value as string}
-        spanType={''} // {flattenedDoc[SPAN_TYPE_FIELD]} TODO check how to get this
-        spanSubtype={''} // {flattenedDoc[SPAN_SUBTYPE_FIELD]} TODO check how to get this
-        environment={''} // {flattenedDoc[SERVICE_ENVIRONMENT_FIELD]} TODO check how to get this
-        formattedDependencyName={formattedValue}
-      />
-    ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
-    description: i18n.translate(
-      'unifiedDocViewer.observability.traces.spanDestinationServiceResource.description',
-      {
-        defaultMessage: 'Identifier for the destination service resource being operated on.',
-      }
-    ),
-  },
-  [SPAN_DURATION]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.spanDuration.title', {
-      defaultMessage: 'Duration',
-    }),
-    formatter: (value: unknown) => <Duration duration={value as number} size="xs" />,
-  },
-  [SPAN_TYPE]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.spanType.title', {
-      defaultMessage: 'Type',
-    }),
-    formatter: (value, formattedValue) => <EuiBadge color="hollow">{formattedValue}</EuiBadge>,
-  },
-  [SPAN_SUBTYPE]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.spanSubtype.title', {
-      defaultMessage: 'Subtype',
-    }),
-    formatter: (value, formattedValue) => <EuiBadge color="hollow">{formattedValue}</EuiBadge>,
-  },
+export const spanFieldConfigurations = (
+  flattenedHit: TraceDocumentOverview
+): ContentFrameworkTableProps['fieldConfigurations'] => {
+  return {
+    [SPAN_ID]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.spanId.title', {
+        defaultMessage: 'Span ID',
+      }), // TODO add link?
+    },
+    [SPAN_NAME]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.spanName.title', {
+        defaultMessage: 'Span Name',
+      }), // TODO add link?
+    },
+    [SPAN_DESTINATION_SERVICE_RESOURCE]: {
+      title: i18n.translate(
+        'unifiedDocViewer.observability.traces.spanDestinationServiceResource.title',
+        {
+          defaultMessage: 'Dependency',
+        }
+      ),
+      formatter: (value: unknown, formattedValue: string) => (
+        <HighlightField value={value as string} formattedValue={formattedValue}>
+          {({ content }) => (
+            <DependencyNameLink
+              dependencyName={value as string}
+              spanType={flattenedHit[SPAN_TYPE] ?? ''}
+              spanSubtype={flattenedHit[SPAN_SUBTYPE] ?? ''}
+              environment={flattenedHit[SERVICE_ENVIRONMENT] ?? ''}
+              formattedDependencyName={content}
+            />
+          )}
+        </HighlightField>
+      ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
+      description: i18n.translate(
+        'unifiedDocViewer.observability.traces.spanDestinationServiceResource.description',
+        {
+          defaultMessage: 'Identifier for the destination service resource being operated on.',
+        }
+      ),
+    },
+    [SPAN_DURATION]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.spanDuration.title', {
+        defaultMessage: 'Duration',
+      }),
+      formatter: (value: unknown) => <Duration duration={value as number} size="xs" />,
+    },
+    [SPAN_TYPE]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.spanType.title', {
+        defaultMessage: 'Type',
+      }),
+      formatter: (value, formattedValue) => (
+        <HighlightField value={value as string} formattedValue={formattedValue}>
+          {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
+        </HighlightField>
+      ),
+    },
+    [SPAN_SUBTYPE]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.spanSubtype.title', {
+        defaultMessage: 'Subtype',
+      }),
+      formatter: (value, formattedValue) => (
+        <HighlightField value={value as string} formattedValue={formattedValue}>
+          {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
+        </HighlightField>
+      ),
+    },
+  };
 };
 
-export const transactionFieldConfigurations: ContentFrameworkTableProps['fieldConfigurations'] = {
-  [TRANSACTION_NAME]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.transactionName.title', {
-      defaultMessage: 'Transaction name',
-    }),
-    formatter: (value, formattedValue) => (
-      <TransactionNameLink
-        serviceName={''} // flattenedDoc[SERVICE_NAME_FIELD] TODO check how to get this
-        transactionName={value as string}
-        renderContent={() => formattedValue}
-      />
-    ),
-  },
-  [TRANSACTION_DURATION]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.transactionDuration.title', {
-      defaultMessage: 'Duration',
-    }),
-    formatter: (value: unknown) => <Duration duration={value as number} size="xs" />,
-  },
-  [USER_AGENT_NAME]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.userAgent.title', {
-      defaultMessage: 'User agent',
-    }),
-  },
-  [USER_AGENT_VERSION]: {
-    title: i18n.translate('unifiedDocViewer.observability.traces.userAgentVersion.title', {
-      defaultMessage: 'User agent version',
-    }),
-  },
+export const transactionFieldConfigurations = (
+  flattenedHit: TraceDocumentOverview
+): ContentFrameworkTableProps['fieldConfigurations'] => {
+  return {
+    [TRANSACTION_NAME]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.transactionName.title', {
+        defaultMessage: 'Transaction name',
+      }),
+      formatter: (value, formattedValue) => (
+        <HighlightField value={value as string} formattedValue={formattedValue}>
+          {({ content }) => (
+            <TransactionNameLink
+              serviceName={flattenedHit[SERVICE_NAME] ?? ''}
+              transactionName={value as string}
+              renderContent={() => content}
+            />
+          )}
+        </HighlightField>
+      ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
+    },
+    [TRANSACTION_DURATION]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.transactionDuration.title', {
+        defaultMessage: 'Duration',
+      }),
+      formatter: (value: unknown) => <Duration duration={value as number} size="xs" />,
+    },
+    [USER_AGENT_NAME]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.userAgent.title', {
+        defaultMessage: 'User agent',
+      }),
+    },
+    [USER_AGENT_VERSION]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.userAgentVersion.title', {
+        defaultMessage: 'User agent version',
+      }),
+    },
+  };
 };
