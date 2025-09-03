@@ -61,11 +61,14 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
     );
     const descriptor = await descriptorClient.init();
     dataClient.log('info', `Initialized privileged monitoring engine saved object`);
-    const upsert = deps.experimentalFeatures.integrationsSyncEnabled
-      ? createOrUpdateAllDefaultSources // integrations and index default sources
-      : createOrUpdateDefaultDataSource; // index only default source
 
-    await upsert(monitoringIndexSourceClient);
+    if (deps.experimentalFeatures?.integrationsSyncEnabled ?? false) {
+      // upsert index AND integration sources
+      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
+    } else {
+      // upsert ONLY index source
+      await createOrUpdateDefaultDataSource(monitoringIndexSourceClient);
+    }
 
     try {
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
@@ -174,25 +177,5 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
       }
     }
   };
-
-  const createOrUpdateAllDefaultSources = async (
-    monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient
-  ) => {
-    try {
-      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
-    } catch (e) {
-      dataClient.log(
-        'error',
-        `Failed to create default index source for privilege monitoring: ${e.message}`
-      );
-      dataClient.audit(
-        PrivilegeMonitoringEngineActions.INIT,
-        EngineComponentResourceEnum.privmon_engine,
-        'Failed to create default index source for privilege monitoring',
-        e
-      );
-    }
-  };
-
   return { init };
 };
