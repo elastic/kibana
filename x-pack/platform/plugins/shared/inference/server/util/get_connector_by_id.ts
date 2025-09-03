@@ -31,6 +31,7 @@ export const getConnectorById = async ({
     const actionsClient = await actions.getActionsClientWithRequest(request);
     connector = await actionsClient.get({
       id: connectorId,
+      throwIfSystemAction: false,
     });
   } catch (error) {
     throw createInferenceRequestError(

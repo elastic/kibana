@@ -49,6 +49,7 @@ describe('getConnectorById', () => {
     expect(actionsClient.get).toHaveBeenCalledTimes(1);
     expect(actionsClient.get).toHaveBeenCalledWith({
       id: connectorId,
+      throwIfSystemAction: false,
     });
   });
 
