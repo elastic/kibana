@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type DataTableRecord, TRACE_ID_FIELD, getFieldValue } from '@kbn/discover-utils';
+import type { ContextWithProfileId } from '../../../../profile_service';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
-import type { DocumentProfileProvider } from '../../../../profiles';
+import type { DataSourceContext, DocumentProfileProvider } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
@@ -31,10 +33,10 @@ export const createObservabilityTracesDocumentProfileProvider = ({
       logs: logsContextService.getAllLogsIndexPattern(),
     }),
   },
-  resolve: ({ rootContext, dataSourceContext }) => {
+  resolve: ({ record, rootContext, dataSourceContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
-    if (isObservabilitySolutionView && dataSourceContext.category === DataSourceCategory.Traces) {
+    if (isObservabilitySolutionView && isTraceDocument(record, dataSourceContext)) {
       return {
         isMatch: true,
         context: {
@@ -46,3 +48,12 @@ export const createObservabilityTracesDocumentProfileProvider = ({
     return { isMatch: false };
   },
 });
+
+function isTraceDocument(
+  record: DataTableRecord,
+  dataSourceContext: ContextWithProfileId<DataSourceContext>
+): boolean {
+  const traceId = getFieldValue(record, TRACE_ID_FIELD);
+
+  return dataSourceContext.category === DataSourceCategory.Traces && !!traceId;
+}
