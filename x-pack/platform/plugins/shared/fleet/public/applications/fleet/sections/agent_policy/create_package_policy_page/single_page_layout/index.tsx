@@ -459,7 +459,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
           {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}

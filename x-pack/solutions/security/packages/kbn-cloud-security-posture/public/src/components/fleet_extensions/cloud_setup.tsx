@@ -221,7 +221,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
           <>
             <EuiSpacer size="m" />
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={isEditPage}
               setupTechnology={setupTechnology}
               allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
