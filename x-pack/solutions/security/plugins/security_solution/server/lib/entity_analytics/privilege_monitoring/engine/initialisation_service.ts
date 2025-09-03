@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { defaultMonitoringUsersIndex } from '../../../../../common/constants';
 import {
   MonitoringEngineComponentResourceEnum,
   type CreateMonitoringEntitySource,

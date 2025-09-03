@@ -35,9 +35,6 @@ export const INTEGRATION_MATCHERS_DETAILED: Record<IntegrationType, Matcher> = {
 export const getMatchersFor = (integration: IntegrationType): Matcher[] => [
   INTEGRATION_MATCHERS_DETAILED[integration],
 ];
-// Default index for privileged monitoring users.
-export const defaultMonitoringUsersIndex = (namespace: string) =>
-  `entity_analytics.privileged_monitoring.${namespace}`;
 // TODO: this should be index source? If so, can follow pattern outlined below.
 // e.g. .entity_analytics.monitoring.sources.index-<space>
 
