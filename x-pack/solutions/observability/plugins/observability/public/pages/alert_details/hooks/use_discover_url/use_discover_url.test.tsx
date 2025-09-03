@@ -14,6 +14,7 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
   ES_QUERY_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../typings/alerts';
@@ -206,6 +207,57 @@ describe('useDiscoverUrl', () => {
     } as unknown as Rule;
 
     const { result } = renderHook(() => useDiscoverUrl({ alert: alertWithoutUrl, rule }));
+
+    expect(result.current.discoverUrl).toBeNull();
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+  });
+
+  it('builds Discover url for SLO burn rate rule when alert has dataViewId', () => {
+    const expectedDataViewId = 'slo-data-view-id';
+    const alertWithDataViewId = {
+      ...MOCK_ALERT,
+      fields: {
+        'slo.dataViewId': expectedDataViewId,
+      },
+    } as unknown as TopAlert;
+
+    const rule = {
+      ruleTypeId: SLO_BURN_RATE_RULE_TYPE_ID,
+      params: {
+        sloId: 'test-slo-id',
+      },
+    } as unknown as Rule;
+
+    const expectedTimeRange = {
+      from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+      to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+    };
+
+    mockGetRedirectUrl.mockReturnValue('slo-discover-url');
+
+    const { result } = renderHook(() => useDiscoverUrl({ alert: alertWithDataViewId, rule }));
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      dataViewId: expectedDataViewId,
+      timeRange: expectedTimeRange,
+    });
+    expect(result.current.discoverUrl).toBe('slo-discover-url');
+  });
+
+  it('returns null for SLO burn rate rule when alert has no dataViewId', () => {
+    const alertWithoutDataViewId = {
+      ...MOCK_ALERT,
+      fields: {},
+    } as unknown as TopAlert;
+
+    const rule = {
+      ruleTypeId: SLO_BURN_RATE_RULE_TYPE_ID,
+      params: {
+        sloId: 'test-slo-id',
+      },
+    } as unknown as Rule;
+
+    const { result } = renderHook(() => useDiscoverUrl({ alert: alertWithoutDataViewId, rule }));
 
     expect(result.current.discoverUrl).toBeNull();
     expect(mockGetRedirectUrl).not.toHaveBeenCalled();

@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { getCustomThresholdRuleParams } from './custom_threshold_rule';
-export { getEsQueryRuleParams } from './es_query_rule';
+export { getCustomThresholdRuleData } from './custom_threshold_rule';
+export { getEsQueryRuleData } from './es_query_rule';
+export { getSLOBurnRateRuleData } from './slo_burn_rate_rule';

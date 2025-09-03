@@ -9,6 +9,7 @@ import type { Rule } from '@kbn/alerts-ui-shared';
 import {
   ES_QUERY_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '@kbn/rule-data-utils';
@@ -23,13 +24,18 @@ import {
   syntheticsMonitorStatusAlertParamsToKqlQuery,
   syntheticsTlsAlertParamsToKqlQuery,
 } from './synthetics_alert_params_to_kql';
-import { getCustomThresholdRuleParams, getEsQueryRuleParams } from './getLocatorParams';
+import {
+  getCustomThresholdRuleData,
+  getEsQueryRuleData,
+  getSLOBurnRateRuleData,
+} from './getRuleData';
 
 const viewInDiscoverSupportedRuleTypes = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
   ES_QUERY_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 ] as const;
 
 type ViewInDiscoverSupportedRuleType = (typeof viewInDiscoverSupportedRuleTypes)[number];
@@ -66,7 +72,7 @@ const getCustomDataViewParams = (rule?: Rule): DataViewSpec | undefined => {
 const getLocatorParamsMap: Record<
   (typeof viewInDiscoverSupportedRuleTypes)[number],
   (params: { rule: Rule; alert: TopAlert }) => {
-    params?: DiscoverAppLocatorParams;
+    discoverAppLocatorParams?: DiscoverAppLocatorParams;
     discoverUrl?: string;
   }
 > = {
@@ -74,7 +80,7 @@ const getLocatorParamsMap: Record<
     const params = rule.params as SyntheticsMonitorStatusRuleParams;
     const query = syntheticsMonitorStatusAlertParamsToKqlQuery(params);
     return {
-      params: {
+      discoverAppLocatorParams: {
         query: {
           language: 'kuery',
           query,
@@ -87,7 +93,7 @@ const getLocatorParamsMap: Record<
     const params = rule.params as TLSRuleParams;
     const query = syntheticsTlsAlertParamsToKqlQuery(params);
     return {
-      params: {
+      discoverAppLocatorParams: {
         query: {
           language: 'kuery',
           query,
@@ -96,24 +102,25 @@ const getLocatorParamsMap: Record<
       },
     };
   },
-  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: getCustomThresholdRuleParams,
-  [ES_QUERY_ID]: getEsQueryRuleParams,
+  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: getCustomThresholdRuleData,
+  [ES_QUERY_ID]: getEsQueryRuleData,
+  [SLO_BURN_RATE_RULE_TYPE_ID]: getSLOBurnRateRuleData,
 };
 
 export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?: Rule }) => {
   const { services } = useKibana();
   const { discover } = services;
 
-  const { discoverUrl, params } =
+  const { discoverUrl, discoverAppLocatorParams } =
     isViewInDiscoverSupportedRuleType(rule?.ruleTypeId) && alert
       ? getLocatorParamsMap[rule.ruleTypeId]({ rule, alert })
-      : { discoverUrl: undefined, params: undefined };
+      : { discoverUrl: undefined, discoverAppLocatorParams: undefined };
 
   if (discoverUrl) return { discoverUrl };
-  if (params && discover?.locator && alert)
+  if (discoverAppLocatorParams && discover?.locator && alert)
     return {
       discoverUrl: discover.locator.getRedirectUrl({
-        ...params,
+        ...discoverAppLocatorParams,
         timeRange: {
           from: moment(alert.start).subtract(30, 'minutes').toISOString(),
           to: moment(alert.start).add(30, 'minutes').toISOString(),
