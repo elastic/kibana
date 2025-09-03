@@ -123,7 +123,16 @@ export const getSpanFieldConfigurations = (
       title: i18n.translate('unifiedDocViewer.observability.traces.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
-      formatter: (value: unknown) => <Duration duration={value as number} size="xs" />,
+      formatter: (value: unknown) => (
+        <Duration
+          duration={value as number}
+          size="xs"
+          parent={{
+            duration: flattenedHit[TRANSACTION_DURATION],
+            type: 'transaction',
+          }}
+        />
+      ),
     },
     [SPAN_TYPE]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.spanType.title', {

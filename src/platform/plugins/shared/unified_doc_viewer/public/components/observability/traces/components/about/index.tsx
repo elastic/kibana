@@ -35,6 +35,7 @@ import {
   getSpanFieldConfigurations,
   getTransactionFieldConfigurations,
 } from './field_configurations';
+import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
 
 const spanFieldNames = [
   SPAN_ID,
@@ -69,6 +70,11 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
+  const rootTrace = useRootTransactionContext();
+
+  if (isSpan && !flattenedHit[TRANSACTION_DURATION]) {
+    flattenedHit[TRANSACTION_DURATION] = rootTrace.transaction?.duration;
+  }
 
   const aboutFieldConfigurations = {
     ...getSharedFieldConfigurations(flattenedHit),

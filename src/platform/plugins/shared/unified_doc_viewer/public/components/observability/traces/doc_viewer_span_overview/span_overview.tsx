@@ -72,7 +72,7 @@ export function SpanOverview({
 
   const duration = isSpan
     ? flattenedHit[SPAN_DURATION] || flattenedHit[SPAN_DURATION]
-    : flattenedHit[TRANSACTION_DURATION];
+    : flattenedHit[TRANSACTION_DURATION]; // TODO improve with the OTel compat once we merge https://github.com/elastic/kibana/pull/233716
 
   const isOtelSpan = flattenedHit[SPAN_DURATION] == null && flattenedHit[DURATION] != null;
 
