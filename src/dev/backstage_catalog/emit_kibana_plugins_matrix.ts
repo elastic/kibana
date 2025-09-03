@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -18,14 +17,19 @@ import { getPackages } from '@kbn/repo-packages';
 
 const items = getPackages(REPO_ROOT).map((p) => {
   const id = p.manifest.id;
+
   const title = `Kibana ${(p.name || p.manifest.id)
     .replace('@kbn/', '')
     .split('-')
     .map((part) => `${part[0].toLocaleUpperCase()}${part.substring(1)}`)
     .join(' ')}`;
+
   const desc = p.manifest.description || '';
+
   const owner = p.manifest.owner?.map((team) => team.replace('@elastic', '')) || 'unknown';
+
   const type = p.manifest.type === 'plugin' ? 'plugin' : 'package';
+
   const folder = `https://github.com/elastic/kibana/tree/main${p.directory.replace(REPO_ROOT, '')}`;
 
   return {
