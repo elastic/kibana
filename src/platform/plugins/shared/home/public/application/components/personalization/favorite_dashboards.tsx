@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiButton,
   EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFavorites } from '@kbn/content-management-favorites-public';
@@ -92,7 +93,13 @@ export const HomeFavoriteDashboards = ({ dashboards, addBasePath }: FavoriteDash
   const showEmptyState = items.length === 0;
 
   return (
-    <EuiPanel style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <EuiPanel
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        ...(showEmptyState ? { alignItems: 'center' } : {}),
+      }}
+    >
       {showEmptyState ? (
         <NoDataCardProvider
           addBasePath={addBasePath}
@@ -126,35 +133,7 @@ export const HomeFavoriteDashboards = ({ dashboards, addBasePath }: FavoriteDash
           </EuiFlexItem>
         </NoDataCardProvider>
       ) : (
-        // <div style={{ textAlign: 'center' }}>
-        //   <EuiTitle size="xs">
-        //     <h4>
-        //       {i18n.translate('home.favoriteDashboards.emptyTitle', {
-        //         defaultMessage: "You don't have any favorite dashboards yet",
-        //       })}
-        //     </h4>
-        //   </EuiTitle>
-        //   <EuiSpacer size="s" />
-        //   <EuiText size="s">
-        //     <p>
-        //       {i18n.translate('home.favoriteDashboards.emptyDescription', {
-        //         defaultMessage:
-        //           'To add dashboards to your favorites, open the dashboards list and mark your favorites.',
-        //       })}
-        //     </p>
-        //   </EuiText>
-        //   <EuiSpacer size="m" />
-        //   <EuiButton
-        //     fill
-        //     href={addBasePath('/app/dashboards#/list')}
-        //     data-test-subj="seeDashboardsListButton"
-        //   >
-        //     {i18n.translate('home.favoriteDashboards.seeDashboardsListButton', {
-        //       defaultMessage: 'See all dashboards',
-        //     })}
-        //   </EuiButton>
-        // </div>
-        <>
+        <EuiFlexGroup direction="column">
           <EuiTitle size="s">
             <h3>
               {i18n.translate('home.favoriteDashboards.title', {
@@ -175,7 +154,7 @@ export const HomeFavoriteDashboards = ({ dashboards, addBasePath }: FavoriteDash
             pagination={pagination}
             onChange={onTableChange}
           />
-        </>
+        </EuiFlexGroup>
       )}
     </EuiPanel>
   );

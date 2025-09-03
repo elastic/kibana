@@ -87,7 +87,11 @@ export class Home extends Component<HomeProps, State> {
       selectedTabId: 'recentlyViewed', // <-- default tab id
       hideSolutionsSection:
         props.localStorage.getItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY) === 'true',
-      tagIds: localStorage.getItem(HOME_SELECTED_TAG_LOCAL_STORAGE_KEY)?.split(',') || [],
+      tagIds: [
+        'f7e34298-c11f-4a11-afc5-69ae22059a26',
+        '1caca570-de5f-47fb-a0eb-88c2ecd25f9a',
+        '38a1c838-0c41-4982-a498-9bc399e965f7',
+      ],
     };
   }
 
@@ -188,8 +192,8 @@ export class Home extends Component<HomeProps, State> {
             </div>
           </EuiFlexItem>
 
-          <EuiFlexItem>
-            {this.state.tagIds.map((tagId: string, index: number) => (
+          {this.state.tagIds.map((tagId: string, index: number) => (
+            <EuiFlexItem>
               <ContentByTagTable
                 tagId={tagId}
                 saveTag={(newTagId: string) => {
@@ -202,8 +206,8 @@ export class Home extends Component<HomeProps, State> {
                   );
                 }}
               />
-            ))}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          ))}
         </EuiFlexGrid>
       </KibanaPageTemplate.Section>
     );
