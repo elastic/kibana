@@ -33,8 +33,9 @@ describe('Access Mode Container', () => {
 
   it('should render access mode container', async () => {
     (useAccessControl as jest.Mock).mockReturnValue({
-      isCurrentUserAuthor: true,
+      canManageAccessControl: true,
       isInEditAccessMode: true,
+      authorName: 'Test User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
@@ -49,10 +50,11 @@ describe('Access Mode Container', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('should render access mode select when current user is the author', async () => {
+  it('should render access mode select when current user can manage access control', async () => {
     (useAccessControl as jest.Mock).mockReturnValue({
-      isCurrentUserAuthor: true,
+      canManageAccessControl: true,
       isInEditAccessMode: true,
+      authorName: 'Test User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
@@ -70,8 +72,9 @@ describe('Access Mode Container', () => {
 
   it('should not render access mode select when accessControl is undefined', async () => {
     (useAccessControl as jest.Mock).mockReturnValue({
-      isCurrentUserAuthor: false,
+      canManageAccessControl: false,
       isInEditAccessMode: true,
+      authorName: null,
     });
 
     await act(async () => {
@@ -87,10 +90,11 @@ describe('Access Mode Container', () => {
     });
   });
 
-  it('should not render access mode select when current user is not the author', async () => {
+  it('should not render access mode select when current user cannot manage access control', async () => {
     (useAccessControl as jest.Mock).mockReturnValue({
-      isCurrentUserAuthor: false,
+      canManageAccessControl: false,
       isInEditAccessMode: true,
+      authorName: 'Other User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id2', accessMode: 'default' };
@@ -110,8 +114,9 @@ describe('Access Mode Container', () => {
 
   it('should render space name', async () => {
     (useAccessControl as jest.Mock).mockReturnValue({
-      isCurrentUserAuthor: false,
+      canManageAccessControl: false,
       isInEditAccessMode: true,
+      authorName: null,
     });
 
     await act(async () => {
@@ -127,10 +132,11 @@ describe('Access Mode Container', () => {
     });
   });
 
-  it('should render description tooltip when current user is not the author', async () => {
+  it('should render description tooltip when current user cannot manage access control', async () => {
     (useAccessControl as jest.Mock).mockReturnValue({
-      isCurrentUserAuthor: false,
+      canManageAccessControl: false,
       isInEditAccessMode: true,
+      authorName: 'Other User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id2', accessMode: 'default' };
@@ -148,10 +154,11 @@ describe('Access Mode Container', () => {
     });
   });
 
-  it('should not render description tooltip when current user is the author', async () => {
+  it('should not render description tooltip when current user can manage access control', async () => {
     (useAccessControl as jest.Mock).mockReturnValue({
-      isCurrentUserAuthor: true,
+      canManageAccessControl: true,
       isInEditAccessMode: true,
+      authorName: 'Test User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
