@@ -331,7 +331,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/runscript:
     post:
-      description: Run a script on a host. Currently supported only for some agent types
+      description: Run a script on a host. Currently supported only for some agent types.
       operationId: RunScriptAction
       requestBody:
         content:
@@ -1723,7 +1723,7 @@ components:
           script: 1111-2222-3333-4444-5555-6666-7777-8888
       properties:
         inputParams:
-          description: The input parameter arguments for the script that was selected
+          description: The input parameter arguments for the script that was selected.
           minLength: 1
           type: string
         script:
