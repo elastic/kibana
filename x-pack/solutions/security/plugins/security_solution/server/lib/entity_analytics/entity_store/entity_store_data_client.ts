@@ -405,7 +405,12 @@ export class EntityStoreDataClient {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     try {
-      const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const defaultIndexPatterns = await buildIndexPatterns(
+        namespace,
+        appClient,
+        dataViewsService,
+        entityType
+      );
       const options = merge(defaultOptions, requestParams);
 
       const description = createEngineDescription({
@@ -472,6 +477,7 @@ export class EntityStoreDataClient {
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
+      // @TODO FIX MAPPING
       await createEntityPriorityUpdateIndex(entityType, this.esClient, namespace, logger);
       this.log(`debug`, entityType, `Created entity priority update index`);
 
@@ -667,7 +673,12 @@ export class EntityStoreDataClient {
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
-    const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+    const defaultIndexPatterns = await buildIndexPatterns(
+      namespace,
+      appClient,
+      dataViewsService,
+      entityType
+    );
 
     const description = createEngineDescription({
       entityType,
@@ -841,12 +852,6 @@ export class EntityStoreDataClient {
       };
     }
 
-    const defaultIndexPatterns = await buildIndexPatterns(
-      this.options.namespace,
-      this.options.appClient,
-      this.options.dataViewsService
-    );
-
     const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
         const originalStatus = engine.status;
@@ -861,6 +866,13 @@ export class EntityStoreDataClient {
             `Error updating entity store: There are changes already in progress for engine ${id}`
           );
         }
+
+        const defaultIndexPatterns = await buildIndexPatterns(
+          this.options.namespace,
+          this.options.appClient,
+          this.options.dataViewsService,
+          engine.type
+        );
 
         const indexPatterns = mergeEntityStoreIndices(defaultIndexPatterns, engine.indexPattern);
 

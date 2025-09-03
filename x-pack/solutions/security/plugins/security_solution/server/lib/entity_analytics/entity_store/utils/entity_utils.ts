@@ -15,13 +15,15 @@ import { uniq } from 'lodash/fp';
 import type { AppClient } from '../../../../types';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
-import { type EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from '../saved_object';
+import { getEntityPriorityUpdateIndexName } from '../elasticsearch_assets/priority_update_entity_index';
 
 export const buildIndexPatterns = async (
   space: string,
   appClient: AppClient,
-  dataViewsService: DataViewsService
+  dataViewsService: DataViewsService,
+  onlyForType?: EntityTypeOpenAPI
 ) => {
   const { alertsIndex, securitySolutionDataViewIndices } = await getSecuritySolutionIndices(
     appClient,
@@ -31,6 +33,7 @@ export const buildIndexPatterns = async (
     ...securitySolutionDataViewIndices.filter((item) => item !== alertsIndex),
     getAssetCriticalityIndex(space),
     getRiskScoreLatestIndex(space),
+    ...getEntityPriorityUpdateIndexPatterns(space, onlyForType),
   ];
 };
 
@@ -66,6 +69,20 @@ export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: s
     dataset: ENTITY_LATEST,
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
+
+export const getEntityPriorityUpdateIndexPatterns = (
+  space: string,
+  onlyForType?: EntityTypeOpenAPI
+): string[] => {
+  const types = Object.values(EntityTypeOpenAPI.enum).filter(
+    (type) => !onlyForType || type === onlyForType
+  );
+  const patterns = [];
+  for (let i = 0; i < types.length; i++) {
+    patterns.push(getEntityPriorityUpdateIndexName(types[i], space));
+  }
+  return patterns;
+};
 
 export const buildEntityDefinitionId = (entityType: EntityTypeOpenAPI, space: string) => {
   return `security_${entityType}_${space}`;
