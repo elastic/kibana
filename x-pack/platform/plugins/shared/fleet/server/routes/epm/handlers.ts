@@ -12,8 +12,6 @@ import { type HttpResponseOptions } from '@kbn/core/server';
 
 import { omit, pick } from 'lodash';
 
-import { defaultFleetErrorHandler } from '../../errors';
-
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
