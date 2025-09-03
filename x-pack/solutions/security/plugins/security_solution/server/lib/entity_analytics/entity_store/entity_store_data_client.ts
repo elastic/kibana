@@ -104,6 +104,7 @@ import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
   buildEntityDefinitionId,
   buildIndexPatterns,
+  buildIndexPatternsByEngine,
   getEntitiesIndexName,
   isPromiseFulfilled,
   isPromiseRejected,
@@ -411,7 +412,12 @@ export class EntityStoreDataClient {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     try {
-      const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const defaultIndexPatterns = await buildIndexPatternsByEngine(
+        namespace,
+        entityType,
+        appClient,
+        dataViewsService
+      );
       const options = merge(defaultOptions, requestParams);
 
       const description = createEngineDescription({
@@ -680,8 +686,12 @@ export class EntityStoreDataClient {
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
-    const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
-
+    const defaultIndexPatterns = await buildIndexPatternsByEngine(
+      namespace,
+      entityType,
+      appClient,
+      dataViewsService
+    );
     const description = createEngineDescription({
       entityType,
       namespace,
