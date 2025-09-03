@@ -101,14 +101,28 @@ export class WorkflowExecutionState {
   }
 
   public async flush(): Promise<void> {
+    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
+  }
+
+  private async flushWorkflowChanges(): Promise<void> {
     const workflowChanges = Array.from(this.workflowChanges.values());
-    const tasks: Promise<void>[] = [];
 
     if (workflowChanges.length > 0) {
-      tasks.push(this.workflowExecutionRepository.updateWorkflowExecution(this.workflowExecution));
+      await this.workflowExecutionRepository.updateWorkflowExecution(this.workflowExecution);
     }
+    const fetchedWorkflowExecution =
+      await this.workflowExecutionRepository.getWorkflowExecutionById(
+        this.workflowExecution.id,
+        this.workflowExecution.spaceId
+      );
+    this.workflowExecution = fetchedWorkflowExecution!;
 
+    this.workflowChanges.clear();
+  }
+
+  private async flushStepChanges(): Promise<void> {
     const stepChanges = Array.from(this.stepChanges.values());
+    const tasks: Promise<void>[] = [];
 
     if (stepChanges.length > 0) {
       const createChanges = stepChanges.filter((change) => change.changeType === 'create');
@@ -137,8 +151,6 @@ export class WorkflowExecutionState {
     }
 
     await Promise.all(tasks);
-
-    this.workflowChanges.clear();
     this.stepChanges.clear();
   }
 

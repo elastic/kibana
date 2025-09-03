@@ -154,6 +154,12 @@ describe('WorkflowExecutionState', () => {
   });
 
   describe('flush', () => {
+    beforeEach(() => {
+      workflowExecutionRepository.getWorkflowExecutionById = jest
+        .fn()
+        .mockResolvedValue({} as EsWorkflowExecution);
+    });
+
     it('should flush workflow execution changes', async () => {
       const updatedWorkflowExecution = {
         id: 'test-workflow-execution-id',
@@ -311,6 +317,31 @@ describe('WorkflowExecutionState', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
       expect(stepExecutionRepository.createStepExecution).toHaveBeenCalledTimes(2); // create the first step execution and the second one
       expect(stepExecutionRepository.updateStepExecutions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should sync workflow execution with latest from repository', async () => {
+      workflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue({
+        id: 'test-workflow-execution-id',
+        status: ExecutionStatus.CANCELED,
+        cancelRequestedAt: '2025-08-05T20:02:00.000Z',
+        cancelRequestedBy: 'user-123',
+      } as EsWorkflowExecution);
+      underTest.updateWorkflowExecution({
+        status: ExecutionStatus.SKIPPED,
+      });
+
+      await underTest.flush();
+
+      expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+        'test-workflow-execution-id',
+        undefined
+      );
+      expect(underTest.getWorkflowExecution()).toEqual({
+        id: 'test-workflow-execution-id',
+        status: ExecutionStatus.CANCELED,
+        cancelRequestedAt: '2025-08-05T20:02:00.000Z',
+        cancelRequestedBy: 'user-123',
+      } as EsWorkflowExecution);
     });
   });
 
