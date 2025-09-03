@@ -15,6 +15,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 
 import type { PluginStartContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
@@ -68,12 +69,12 @@ export const getWebhookSecretHeadersKeyRoute = (
       const [, { encryptedSavedObjects }] = await getStartServices();
 
       const encryptedClient = encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['action'],
+        includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
       });
 
       const decryptedConnector =
         await encryptedClient.getDecryptedAsInternalUser<ConnectorAttributes>(
-          'action',
+          ACTION_SAVED_OBJECT_TYPE,
           connectorId
         );
 
@@ -81,7 +82,7 @@ export const getWebhookSecretHeadersKeyRoute = (
 
       const secretHeadersArray = Object.keys(secretHeaders).map((key) => ({
         key,
-        value: '', // always empty
+        value: '',
       }));
 
       return res.ok({ body: { secretHeaders: secretHeadersArray } });

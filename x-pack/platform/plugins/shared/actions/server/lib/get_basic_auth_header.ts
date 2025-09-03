@@ -31,13 +31,3 @@ export const combineHeadersWithBasicAuthHeader = ({
     ? { ...getBasicAuthHeader({ username, password }), ...headers }
     : headers ?? undefined;
 };
-
-export function mergeConfigHeadersWithSecretHeaders(
-  configHeaders?: Record<string, string> | null,
-  secretHeaders?: Record<string, string> | null
-): Record<string, string> {
-  return {
-    ...(configHeaders ?? {}),
-    ...(secretHeaders ?? {}),
-  };
-}

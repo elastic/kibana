@@ -454,6 +454,54 @@ describe('execute()', () => {
     });
   });
 
+  test('execute with secret headers and basic auth when header keys overlap', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: { Authorization: 'secretAuthorizationValue' },
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    delete requestMock.mock.calls[0][0].configurationUtilities;
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: undefined,
+      connectorUsageCollector: {
+        usage: {
+          requestBodyBytes: 0,
+        },
+      },
+      data: 'some data',
+      headers: {
+        Authorization: 'secretAuthorizationValue',
+        aheader: 'a value',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      sslOverrides: {},
+      url: 'https://abc.def/my-webhook',
+    });
+  });
+
   test('execute with ssl adds ssl settings to sslOverrides', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',

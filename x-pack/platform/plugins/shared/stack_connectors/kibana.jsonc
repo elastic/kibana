@@ -9,8 +9,13 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "stack_connectors"],
-    "requiredPlugins": ["actions", "esUiShared", "kibanaReact", "triggersActionsUi"],
-    "optionalPlugins": ["encryptedSavedObjects"],
+    "requiredPlugins": [
+      "actions",
+      "esUiShared",
+      "kibanaReact",
+      "triggersActionsUi",
+      "encryptedSavedObjects"
+    ],
     "extraPublicDirs": ["public/common"]
   }
 }

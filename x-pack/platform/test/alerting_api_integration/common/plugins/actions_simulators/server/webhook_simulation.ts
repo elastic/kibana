@@ -33,9 +33,7 @@ export async function initPlugin() {
 
 function createServerCallback() {
   const payloads: string[] = [];
-  const headersReceived: any[] = [];
   return (request: http.IncomingMessage, response: http.ServerResponse) => {
-    const headers = request.headers;
     const credentials = pipe(
       fromNullable(request.headers.authorization),
       map((authorization) => authorization.split(/\s+/)),
@@ -63,7 +61,6 @@ function createServerCallback() {
         data += chunk;
       });
       request.on('end', () => {
-        headersReceived.push(headers);
         switch (data) {
           case 'success':
             response.statusCode = 200;
@@ -75,8 +72,8 @@ function createServerCallback() {
             return validateRequestUsesMethod(request.method ?? '', 'post', response);
           case 'success_put_method':
             return validateRequestUsesMethod(request.method ?? '', 'put', response);
-          case 'headers':
-            return validateReceivedHeaders(headersReceived, response);
+          case 'success_config_secret_headers':
+            return validateReceivedHeaders(request.headers, response);
           case 'failure':
             response.statusCode = 500;
             response.end('Error');
@@ -135,9 +132,7 @@ function validateRequestUsesMethod(requestMethod: string, method: string, res: a
 
 function validateReceivedHeaders(headers: any, res: any) {
   try {
-    const hasValidHeader = headers.some(
-      (obj: any) => obj.config === 'configValue' && obj.secret === 'secretValue'
-    );
+    const hasValidHeader = headers.config === 'configValue' && headers.secret === 'secretValue';
 
     expect(hasValidHeader).to.eql(true);
     res.statusCode = 200;
