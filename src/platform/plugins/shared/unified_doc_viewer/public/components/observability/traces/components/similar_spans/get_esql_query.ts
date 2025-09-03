@@ -23,7 +23,9 @@ export function getEsqlQuery({
   if (serviceName && spanName) {
     return getSimilarSpansESQL({ serviceName, spanName });
   }
-  return undefined;
+  return where(`${SERVICE_NAME} == ?serviceName`, {
+    serviceName,
+  });
 }
 
 function getSimilarSpansESQL({ serviceName, spanName }: { serviceName: string; spanName: string }) {

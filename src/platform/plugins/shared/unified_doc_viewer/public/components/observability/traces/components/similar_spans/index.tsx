@@ -73,7 +73,7 @@ export function SimilarSpans({
 
   const sectionActions: ContentFrameworkSectionProps['actions'] = useMemo(
     () =>
-      esqlQuery && discoverUrl
+      discoverUrl
         ? [
             {
               dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
@@ -84,7 +84,7 @@ export function SimilarSpans({
             },
           ]
         : [],
-    [esqlQuery, discoverUrl]
+    [, discoverUrl]
   );
 
   return (
