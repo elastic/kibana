@@ -12,16 +12,16 @@ import { generateHistoryILMPolicyId } from '../helpers/generate_component_id';
 export const generateEntitiesHistoryILMPolicy = (
   definition: EntityDefinition
 ): IlmPutLifecycleRequest => ({
+  // TODO(kuba): Not sure about the exact definition/behavior of this policy for snapshots.
+  // To be considered in code review phase.
   policy: {
     phases: {
       hot: {
         actions: {},
       },
-      frozen: {
+      cold: {
         min_age: '365d',
-        actions: {
-          freeze: {},
-        },
+        actions: {},
       },
     },
   },
