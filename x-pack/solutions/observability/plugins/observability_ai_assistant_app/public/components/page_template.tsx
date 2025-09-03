@@ -15,6 +15,7 @@ const pageSectionContentClassName = css`
   padding-top: 0;
   padding-bottom: 0;
   max-block-size: var(--kbn-application--content-height);
+  min-block-size: var(--kbn-application--content-height);
 `;
 
 export function ObservabilityAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {
