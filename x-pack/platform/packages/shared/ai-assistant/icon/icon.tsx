@@ -14,11 +14,13 @@ import assistantIcon from './svg/assistant';
 /**
  * Props for the AI Assistant icon.
  */
-export type AssistantIconProps = Omit<EuiIconProps, 'type'>;
+export interface AssistantIconProps extends Omit<EuiIconProps, 'type'> {
+  multicolor?: boolean;
+}
 
 /**
  * Default Elastic AI Assistant icon.
  */
-export const AssistantIcon = ({ size = 'm', ...rest }: AssistantIconProps) => {
-  return <EuiIcon {...{ type: assistantIcon, size, ...rest }} />;
+export const AssistantIcon = ({ size = 'm', multicolor = true, ...rest }: AssistantIconProps) => {
+  return <EuiIcon {...{ type: assistantIcon, size, multicolor, ...rest }} />;
 };
