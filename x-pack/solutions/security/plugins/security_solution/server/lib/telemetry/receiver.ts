@@ -205,7 +205,7 @@ export interface ITelemetryReceiver {
   paginate<T>(
     index: string,
     query: ESSearchRequest,
-    queryConfig: TelemetryQueryConfiguration | undefined
+    queryConfig: TelemetryQueryConfiguration | undefined = undefined
   ): AsyncGenerator<T[], void, unknown>;
 
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
