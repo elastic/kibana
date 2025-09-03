@@ -1,9 +1,3 @@
 # @kbn/ml-common-api-schemas
 
-This package provides centralized schema definitions for validating ML API requests and responses. It ensures consistent data validation across different ML services and endpoints.
-
-## Related Packages
-
-- `@kbn/ml-server-api-schemas` - Server-side API schemas
-- `@kbn/ml-common-types` - Common type definitions
-- `@kbn/config-schema` - Base schema utilities
+This package provides schema definitions for validating ML API requests and responses. At the moment just the type `SupportedPath` gets used as part of `JsonSchemaQuerySchema`. Having this package and just exporting/using the type is a workaround to avoid client side bundle bloat due to `@kbn/config-schema`.
