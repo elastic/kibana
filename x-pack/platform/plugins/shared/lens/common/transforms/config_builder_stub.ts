@@ -16,7 +16,11 @@ export const ConfigBuilderStub = {
    * @returns Lens item
    */
   in(config: LensAPIConfig): LensItem {
-    return config;
+    const { isNewApiFormat: _, ...cleanedState } = config.state;
+    return {
+      ...config,
+      state: cleanedState,
+    };
   },
 
   /**
