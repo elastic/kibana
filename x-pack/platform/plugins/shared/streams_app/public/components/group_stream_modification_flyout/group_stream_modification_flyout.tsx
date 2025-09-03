@@ -97,6 +97,8 @@ export function GroupStreamModificationFlyout({
           body: {
             queries: [],
             dashboards: formData.dashboards.map((dashboard) => dashboard.id),
+            rules: [], // Need to read original rules
+            slos: [], // Need to read original SLOs
             stream: {
               description: formData.description,
               group: {

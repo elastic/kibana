@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -168,9 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             },
-            queries: [],
-            dashboards: [],
-            rules: [],
+            ...emptyAssets,
           },
           500
         );
@@ -209,9 +208,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             },
-            queries: [],
-            dashboards: [],
-            rules: [],
+            ...emptyAssets,
           },
           200
         );

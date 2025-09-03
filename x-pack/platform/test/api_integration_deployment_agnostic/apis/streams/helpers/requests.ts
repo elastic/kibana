@@ -195,6 +195,30 @@ export async function unlinkRule(
   expect(response.status).to.be(200);
 }
 
+export async function linkSlo(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  id: string
+) {
+  const response = await apiClient.fetch('PUT /api/streams/{name}/slos/{sloId} 2023-10-31', {
+    params: { path: { name: stream, sloId: id } },
+  });
+
+  expect(response.status).to.be(200);
+}
+
+export async function unlinkSlo(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  id: string
+) {
+  const response = await apiClient.fetch('DELETE /api/streams/{name}/slos/{sloId} 2023-10-31', {
+    params: { path: { name: stream, sloId: id } },
+  });
+
+  expect(response.status).to.be(200);
+}
+
 export async function exportContent(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,

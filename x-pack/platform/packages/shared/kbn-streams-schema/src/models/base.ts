@@ -22,16 +22,18 @@ export namespace BaseStream {
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
 
   export interface GetResponse<TDefinition extends Definition = Definition> {
+    stream: TDefinition;
     dashboards: string[];
     rules: string[];
-    stream: TDefinition;
+    slos: string[];
     queries: StreamQuery[];
   }
 
   export interface UpsertRequest<TDefinition extends Definition = Definition> {
+    stream: OmitName<TDefinition>;
     dashboards: string[];
     rules: string[];
-    stream: OmitName<TDefinition>;
+    slos: string[];
     queries: StreamQuery[];
   }
 
@@ -52,11 +54,13 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
   GetResponse: z.object({
     dashboards: z.array(z.string()),
     rules: z.array(z.string()),
+    slos: z.array(z.string()),
     queries: z.array(streamQuerySchema),
   }),
   UpsertRequest: z.object({
     dashboards: z.array(z.string()),
     rules: z.array(z.string()),
+    slos: z.array(z.string()),
     queries: z.array(streamQuerySchema),
   }),
 });

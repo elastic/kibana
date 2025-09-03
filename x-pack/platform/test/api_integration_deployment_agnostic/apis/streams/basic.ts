@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
@@ -434,9 +434,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should allow to update field type to incompatible type', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -482,9 +480,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should not allow to update field type to system', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -609,9 +605,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'attributes.bar': { type: 'long' },
         };
         await putStream(apiClient, 'logs.one', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -625,9 +619,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, 'logs.one.two.three', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -660,9 +652,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           index,
           {
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -680,9 +670,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('reports when it fails to create a stream', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
@@ -721,9 +709,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('does not allow super deeply nested streams', async () => {
         const body: Streams.WiredStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {

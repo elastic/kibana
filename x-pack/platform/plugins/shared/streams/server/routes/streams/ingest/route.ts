@@ -25,11 +25,19 @@ async function getAssets({
 }: {
   name: string;
   assetClient: AssetClient;
-}): Promise<{ dashboards: string[]; queries: StreamQuery[] }> {
+}): Promise<{ dashboards: string[]; rules: string[]; slos: string[]; queries: StreamQuery[] }> {
   const assets = await assetClient.getAssets(name);
 
   const dashboards = assets
     .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
+    .map((asset) => asset[ASSET_ID]);
+
+  const rules = assets
+    .filter((asset) => asset[ASSET_TYPE] === 'rule')
+    .map((asset) => asset[ASSET_ID]);
+
+  const slos = assets
+    .filter((asset) => asset[ASSET_TYPE] === 'slo')
     .map((asset) => asset[ASSET_ID]);
 
   const queries = assets
@@ -38,6 +46,8 @@ async function getAssets({
 
   return {
     dashboards,
+    rules,
+    slos,
     queries,
   };
 }
@@ -53,7 +63,7 @@ async function updateWiredIngest({
   name: string;
   ingest: WiredIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, rules, slos, queries } = await getAssets({
     name,
     assetClient,
   });
@@ -73,7 +83,8 @@ async function updateWiredIngest({
       ...stream,
       ingest,
     },
-    rules: [],
+    rules,
+    slos,
   };
 
   return await streamsClient.upsertStream({
@@ -93,7 +104,7 @@ async function updateClassicIngest({
   name: string;
   ingest: ClassicIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, rules, slos, queries } = await getAssets({
     name,
     assetClient,
   });
@@ -113,7 +124,8 @@ async function updateClassicIngest({
       ...stream,
       ingest,
     },
-    rules: [],
+    rules,
+    slos,
   };
 
   return await streamsClient.upsertStream({

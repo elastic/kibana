@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
@@ -97,9 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow processing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -128,9 +127,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow fields changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -157,9 +154,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should allow routing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
-        rules: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {

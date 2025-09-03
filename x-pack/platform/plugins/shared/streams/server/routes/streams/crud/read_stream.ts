@@ -18,7 +18,7 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import type { DashboardLink, RuleLink, QueryLink } from '../../../../common/assets';
+import type { DashboardLink, RuleLink, QueryLink, SloLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
@@ -34,9 +34,10 @@ export async function readStream({
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { [name]: assets }] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetLinks([name], ['dashboard', 'rule', 'query']),
+    assetClient.getAssetLinks([name], ['dashboard', 'rule', 'slo', 'query']),
   ]);
 
+  // This should be a shared helper
   const assetsByType = assets.reduce(
     (acc, asset) => {
       const assetType = asset[ASSET_TYPE];
@@ -44,6 +45,8 @@ export async function readStream({
         acc.dashboards.push(asset);
       } else if (assetType === 'rule') {
         acc.rules.push(asset);
+      } else if (assetType === 'slo') {
+        acc.slos.push(asset);
       } else if (assetType === 'query') {
         acc.queries.push(asset);
       }
@@ -52,12 +55,14 @@ export async function readStream({
     {
       dashboards: [] as DashboardLink[],
       rules: [] as RuleLink[],
+      slos: [] as SloLink[],
       queries: [] as QueryLink[],
     }
   );
 
   const dashboards = assetsByType.dashboards.map((dashboard) => dashboard['asset.id']);
   const rules = assetsByType.rules.map((rule) => rule['asset.id']);
+  const slos = assetsByType.slos.map((slo) => slo['asset.id']);
   const queries = assetsByType.queries.map((query) => {
     return query.query;
   });
@@ -67,6 +72,7 @@ export async function readStream({
       stream: streamDefinition,
       dashboards,
       rules,
+      slos,
       queries,
     };
   }
@@ -99,6 +105,7 @@ export async function readStream({
       dashboards,
       rules,
       queries,
+      slos,
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
@@ -111,6 +118,7 @@ export async function readStream({
     stream: streamDefinition,
     dashboards,
     rules,
+    slos,
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),

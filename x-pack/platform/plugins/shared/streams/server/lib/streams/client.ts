@@ -744,9 +744,8 @@ export class StreamsClient {
   }
 
   private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
-    const { dashboards, queries, rules } = request;
+    const { dashboards, queries, rules, slos } = request;
 
-    // sync dashboards as before
     await this.dependencies.assetClient.syncAssetList(
       name,
       dashboards.map((dashboard) => ({
@@ -756,7 +755,6 @@ export class StreamsClient {
       'dashboard'
     );
 
-    // sync rules
     await this.dependencies.assetClient.syncAssetList(
       name,
       rules.map((rule) => ({
@@ -766,7 +764,15 @@ export class StreamsClient {
       'rule'
     );
 
-    // sync rules with asset links
+    await this.dependencies.assetClient.syncAssetList(
+      name,
+      slos.map((slow) => ({
+        [ASSET_ID]: slow,
+        [ASSET_TYPE]: 'slo' as const,
+      })),
+      'slo'
+    );
+
     await this.dependencies.queryClient.syncQueries(name, queries);
   }
 }

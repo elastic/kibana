@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./flush_config'));
     loadTestFile(require.resolve('./assets/dashboard'));
     loadTestFile(require.resolve('./assets/rule'));
+    loadTestFile(require.resolve('./assets/slo'));
     loadTestFile(require.resolve('./schema'));
     loadTestFile(require.resolve('./processing_date_suggestions'));
     loadTestFile(require.resolve('./processing_simulate'));
