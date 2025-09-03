@@ -115,6 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       },
       dashboards: [],
       queries: [],
+      rules: [],
     };
 
     describe('Wired streams update', () => {
@@ -124,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await putStream(apiClient, 'logs', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -157,6 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -174,6 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -200,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -211,6 +216,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.overrides', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -245,6 +251,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -256,6 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -270,6 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -298,6 +307,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.no', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -310,6 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.no.retention', {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -333,6 +344,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               dashboards: [],
               queries: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -350,6 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, 'logs.ilm', {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -376,6 +389,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -391,6 +405,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -412,6 +427,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -431,6 +447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -463,6 +480,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         dashboards: [],
         queries: [],
+        rules: [],
       };
 
       let clean: () => Promise<void>;
@@ -515,6 +533,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -537,6 +556,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -560,6 +580,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               dashboards: [],
               queries: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -579,6 +600,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -598,6 +620,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -624,6 +647,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -668,6 +692,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -682,6 +707,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -705,6 +731,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -726,6 +753,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
@@ -758,6 +786,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
+            rules: [],
             stream: {
               description: '',
               ingest: {
