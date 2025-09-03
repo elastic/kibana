@@ -20,15 +20,17 @@ export const getEsqlQuery = ({
 }) => {
   const queryStrings: string[] = [];
 
-  queryStrings.push(`${TRACE_ID_FIELD} == "${traceId}"`);
+  queryStrings.push(`${TRACE_ID_FIELD} == ?traceId`);
 
   if (transactionId) {
-    queryStrings.push(`${TRANSACTION_ID_FIELD} == "${transactionId}"`);
+    queryStrings.push(`${TRANSACTION_ID_FIELD} == ?transactionId`);
   }
   if (spanId) {
-    queryStrings.push(`${SPAN_ID_FIELD} == "${spanId}"`);
+    queryStrings.push(`${SPAN_ID_FIELD} == ?spanId`);
   }
 
   const filters = queryStrings.join(' AND ');
-  return where(filters);
+  const params = [{ traceId }, { transactionId }, { spanId }];
+
+  return where(filters, params);
 };
