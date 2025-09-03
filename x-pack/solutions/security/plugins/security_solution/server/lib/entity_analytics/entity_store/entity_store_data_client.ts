@@ -507,6 +507,7 @@ export class EntityStoreDataClient {
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
+      // @TODO FIX MAPPING
       await createEntityPriorityUpdateIndex(entityType, this.esClient, namespace, logger);
       this.log(`debug`, entityType, `Created entity priority update index`);
 

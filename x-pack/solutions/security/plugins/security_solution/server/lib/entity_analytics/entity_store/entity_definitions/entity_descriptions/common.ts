@@ -40,29 +40,78 @@ export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldD
 
 export const getNestedEntityFieldsDescriptions = (field: EntityType) => {
   return [
-    newestValue({ source: `${field}.entity.name` }),
-    newestValue({ source: `${field}.entity.source` }),
-    newestValue({ source: `${field}.entity.type` }),
-    newestValue({ source: `${field}.entity.sub_type` }),
-    newestValue({ source: `${field}.entity.url` }),
-
-    newestValue({ source: `${field}.entity.url` }),
-    newestValue({ source: `${field}.entity.attributes.Storage_class` }),
-    newestValue({ source: `${field}.entity.attributes.Mfa_enabled` }),
-    newestValue({ source: `${field}.entity.attributes.Privileged` }),
-    newestValue({ source: `${field}.entity.attributes.Granted_permissions` }),
-    newestValue({ source: `${field}.entity.attributes.Known_redirect` }),
-    newestValue({ source: `${field}.entity.attributes.Asset` }),
-    newestValue({ source: `${field}.entity.attributes.Managed` }),
-    newestValue({ source: `${field}.entity.attributes.Os_current` }),
-    newestValue({ source: `${field}.entity.attributes.Os_patch_current` }),
-    newestValue({ source: `${field}.entity.attributes.Oauth_consent_restriction` }),
-    newestValue({ source: `${field}.entity.lifecycle.First_seen` }),
-    newestValue({ source: `${field}.entity.lifecycle.Last_activity` }),
-    newestValue({ source: `${field}.entity.lifecycle.Issued_at` }),
-    newestValue({ source: `${field}.entity.lifecycle.Last_password_change` }),
-    newestValue({ source: `${field}.entity.behavior.Used_usb_device` }),
-    newestValue({ source: `${field}.entity.behavior.Brute_force_victim` }),
-    newestValue({ source: `${field}.entity.behavior.New_country_login` }),
+    newestValue({ source: `${field}.entity.name`, destination: 'entity.name' }),
+    newestValue({ source: `${field}.entity.source`, destination: 'entity.source' }),
+    newestValue({ source: `${field}.entity.type`, destination: 'entity.type' }),
+    newestValue({ source: `${field}.entity.sub_type`, destination: 'entity.sub_type' }),
+    newestValue({ source: `${field}.entity.url`, destination: 'entity.url' }),
+    newestValue({
+      source: `${field}.entity.attributes.StorageClass`,
+      destination: 'entity.attributes.StorageClass',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.MfaEnabled`,
+      destination: 'entity.attributes.MfaEnabled',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.Privileged`,
+      destination: 'entity.attributes.Privileged',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.GrantedPermissions`,
+      destination: 'entity.attributes.GrantedPermissions',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.KnownRedirect`,
+      destination: 'entity.attributes.KnownRedirect',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.Asset`,
+      destination: 'entity.attributes.Asset',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.Managed`,
+      destination: 'entity.attributes.Managed',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.OsCurrent`,
+      destination: 'entity.attributes.OsCurrent',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.OsPatchCurrent`,
+      destination: 'entity.attributes.OsPatchCurrent',
+    }),
+    newestValue({
+      source: `${field}.entity.attributes.OauthConsentRestriction`,
+      destination: 'entity.attributes.OauthConsentRestriction',
+    }),
+    newestValue({
+      source: `${field}.entity.lifecycle.FirstSeen`,
+      destination: 'entity.lifecycle.FirstSeen',
+    }),
+    newestValue({
+      source: `${field}.entity.lifecycle.LastActivity`,
+      destination: 'entity.lifecycle.LastActivity',
+    }),
+    newestValue({
+      source: `${field}.entity.lifecycle.IssuedAt`,
+      destination: 'entity.lifecycle.IssuedAt',
+    }),
+    newestValue({
+      source: `${field}.entity.lifecycle.LastPasswordChange`,
+      destination: 'entity.lifecycle.LastPasswordChange',
+    }),
+    newestValue({
+      source: `${field}.entity.behavior.UsedUsbDevice`,
+      destination: 'entity.behavior.UsedUsbDevice',
+    }),
+    newestValue({
+      source: `${field}.entity.behavior.BruteForceVictim`,
+      destination: 'entity.behavior.BruteForceVictim',
+    }),
+    newestValue({
+      source: `${field}.entity.behavior.NewCountryLogin`,
+      destination: 'entity.behavior.NewCountryLogin',
+    }),
   ];
 };
