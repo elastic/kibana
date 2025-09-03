@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -19,7 +20,27 @@ import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 const meta: Meta<typeof WorkflowStepExecutionList> = {
   component: WorkflowStepExecutionList,
   title: 'Workflows Management/Step Execution List',
-  decorators: [kibanaReactDecorator],
+  decorators: [
+    kibanaReactDecorator,
+    (story) => (
+      <>
+        <style>{`
+      body {
+      min-height: 100%;
+      display: flex !important;
+      flex-direction: column;
+    }
+      #storybook-root {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0;
+        overflow: hidden;
+      }
+    `}</style>
+        {story()}
+      </>
+    ),
+  ],
 };
 
 export default meta;

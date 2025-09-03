@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowYaml } from '../spec/schema';
-import type { EsWorkflow } from './v1';
+import { type EsWorkflow, ExecutionStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -27,4 +27,8 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     deleted_at: null,
     valid: true,
   };
+}
+
+export function isDangerousStatus(status: ExecutionStatus) {
+  return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }

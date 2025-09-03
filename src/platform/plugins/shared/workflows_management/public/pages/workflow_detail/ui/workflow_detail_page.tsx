@@ -293,7 +293,8 @@ const componentStyles = {
   pageContainer: css({
     display: 'flex',
     flexDirection: 'column',
-    flex: '1 1 auto',
+    flex: '1 1 0',
+    overflow: 'hidden',
   }),
   container: css`
     flex: 1;

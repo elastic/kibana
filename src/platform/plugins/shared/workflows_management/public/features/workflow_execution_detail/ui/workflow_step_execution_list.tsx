@@ -27,6 +27,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ExecutionStatus,
+  isDangerousStatus,
   type EsWorkflowStepExecution,
   type WorkflowExecutionDto,
   type WorkflowYaml,
@@ -122,6 +123,20 @@ function convertTreeToEuiTreeViewItems(
         id: stepExecution.id,
         sortIndex: stepExecution.executionIndex,
         icon: <StepIcon stepType={item.stepType} executionStatus={stepExecution.status} />,
+        css: isDangerousStatus(stepExecution.status)
+          ? css`
+              &,
+              &:active,
+              &:focus {
+                background-color: ${getExecutionStatusColors(euiTheme, stepExecution.status)
+                  .backgroundColor};
+              }
+
+              &:hover {
+                background-color: ${euiTheme.colors.backgroundLightDanger};
+              }
+            `
+          : undefined,
         label: (
           <StepExecutionTreeItemLabel
             stepId={stepExecution.stepId}
@@ -144,6 +159,9 @@ function convertTreeToEuiTreeViewItems(
               )
             : undefined,
         callback: () => {
+          if (item.children && item.children.length > 0) {
+            return;
+          }
           onClickFn(stepExecution.id);
           // string is expected by EuiTreeView for some reason
           return stepExecution.id;
@@ -243,14 +261,14 @@ export const WorkflowStepExecutionList = ({
       onStepExecutionClick
     );
     content = (
-      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="spaceBetween">
+      <>
         <div css={styles.treeViewContainer}>
           <EuiTreeView items={items} showExpansionArrows expandByDefault />
         </div>
         <EuiButton onClick={onClose} css={styles.doneButton}>
           <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
         </EuiButton>
-      </EuiFlexGroup>
+      </>
     );
   } else {
     content = (
@@ -293,7 +311,7 @@ export const WorkflowStepExecutionList = ({
           </EuiFlexGroup>
         </header>
       </EuiFlexItem>
-      <EuiFlexItem>{content}</EuiFlexItem>
+      <EuiFlexItem css={styles.content}>{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -302,18 +320,23 @@ const componentStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
+      overflow: 'hidden',
     }),
-  header: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      minHeight: `32px`,
-      display: 'flex',
-      alignItems: 'center',
-    }),
+  content: css({
+    overflow: 'hidden',
+  }),
+  header: css({
+    minHeight: `32px`,
+    display: 'flex',
+    alignItems: 'center',
+  }),
   doneButton: css({
-    justifySelf: 'flex-end',
     marginTop: 'auto',
+    justifySelf: 'flex-end',
+    flexShrink: 0,
   }),
   treeViewContainer: css({
+    overflowY: 'auto',
     '& .euiTreeView__nodeLabel': {
       flexGrow: 1,
       textAlign: 'left',

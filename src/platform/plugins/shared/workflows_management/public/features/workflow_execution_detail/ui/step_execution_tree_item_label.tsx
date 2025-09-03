@@ -9,7 +9,7 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, euiFontSize } from '@elastic/eui';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
 import React from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -33,8 +33,7 @@ export function StepExecutionTreeItemLabel({
   selected,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
-  const isDangerousStatus =
-    status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
+  const isDangerous = isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
   return (
     <EuiFlexGroup
@@ -48,7 +47,7 @@ export function StepExecutionTreeItemLabel({
         css={[
           styles.stepName,
           selected && styles.selectedStepName,
-          isDangerousStatus && styles.dangerousStepName,
+          isDangerous && styles.dangerousStepName,
           isInactiveStatus && styles.inactiveStepName,
         ]}
       >
@@ -56,7 +55,7 @@ export function StepExecutionTreeItemLabel({
         {executionIndex > 0 && <span css={styles.executionIndex}>{executionIndex + 1}</span>}
       </EuiFlexItem>
       {executionTimeMs && (
-        <EuiFlexItem grow={false} css={styles.duration}>
+        <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>
           {executionTimeMs ? formatDuration(executionTimeMs) : null}
         </EuiFlexItem>
       )}
@@ -90,6 +89,11 @@ const componentStyles = {
   duration: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.textDisabled,
+      paddingRight: euiTheme.size.xs,
+    }),
+  durationDangerous: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textDanger,
     }),
   executionIndex: ({ euiTheme }: UseEuiTheme) =>
     css({
