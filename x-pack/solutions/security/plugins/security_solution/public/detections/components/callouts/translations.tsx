@@ -14,13 +14,13 @@ import {
   DEFAULT_LISTS_INDEX,
   DEFAULT_SIGNALS_INDEX,
   SECURITY_FEATURE_ID,
-} from '../../../../../common/constants';
+} from '../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
-import type { MissingPrivileges } from './use_missing_privileges';
+import type { MissingPrivileges } from '../../hooks/alerts/use_missing_privileges';
 import {
   DetectionsRequirementsLink,
   SecuritySolutionRequirementsLink,
-} from '../../../../common/components/links_to_docs';
+} from '../../../common/components/links_to_docs';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageTitle',
