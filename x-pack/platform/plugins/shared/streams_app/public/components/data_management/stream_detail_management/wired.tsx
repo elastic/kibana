@@ -15,6 +15,7 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { WiredAdvancedView } from './wired_advanced_view';
 
 const wiredStreamManagementSubTabs = [
   'route',
@@ -23,6 +24,7 @@ const wiredStreamManagementSubTabs = [
   'lifecycle',
   'significantEvents',
   'references',
+  'advanced',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
@@ -86,6 +88,29 @@ export function WiredStreamDetailManagement({
       }),
     },
     ...otherTabs,
+    ...(definition.privileges.manage
+      ? {
+          advanced: {
+            content: (
+              <WiredAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
+            ),
+            label: (
+              <EuiToolTip
+                content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
+                  defaultMessage:
+                    'View technical details about this classic stream’s underlying index setup',
+                })}
+              >
+                <span>
+                  {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+                    defaultMessage: 'Advanced',
+                  })}
+                </span>
+              </EuiToolTip>
+            ),
+          },
+        }
+      : {}),
   };
 
   if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
