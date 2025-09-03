@@ -8,7 +8,7 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Streams Endpoints', () => {
+  describe.only('Streams Endpoints', () => {
     loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./enrichment'));
     loadTestFile(require.resolve('./classic'));

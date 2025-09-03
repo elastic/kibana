@@ -14,18 +14,19 @@ export const getLogsDefaultPipelineProcessors = (isServerless?: boolean) => [
       copy_from: '_ingest.timestamp',
     },
   },
-  {
-    pipeline: {
-      name: 'logs@json-pipeline',
-      ignore_missing_pipeline: true,
-    },
-  },
-  isServerless
-    ? {
-        // This is a placeholder for the ECS migration - since it's not yet exposed on serverless, we need to handle it via painless script.
-        script: {
-          lang: 'painless',
-          source: `
+  ...(isServerless
+    ? [
+        {
+          pipeline: {
+            name: 'logs@json-pipeline',
+            ignore_missing_pipeline: true,
+          },
+        },
+        {
+          // This is a placeholder for the ECS migration - since it's not yet exposed on serverless, we need to handle it via painless script.
+          script: {
+            lang: 'painless',
+            source: `
       if (ctx.resource?.attributes != null) return;
       
       // Initialize resource container.
@@ -90,11 +91,14 @@ export const getLogsDefaultPipelineProcessors = (isServerless?: boolean) => [
         ctx.remove(key);
       }
       `,
+          },
         },
-      }
-    : {
-        // On stateful, we use the normalize_for_stream processor to handle the ECS migration.
-        // Later on this will be replaced by the /logs endpoint
-        normalize_for_stream: {},
-      },
+      ]
+    : [
+        {
+          // On stateful, we use the normalize_for_stream processor to handle the ECS migration.
+          // Later on this will be replaced by the /logs endpoint
+          normalize_for_stream: {},
+        },
+      ]),
 ];
