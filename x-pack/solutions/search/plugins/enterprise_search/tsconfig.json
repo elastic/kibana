@@ -86,6 +86,7 @@
     "@kbn/search-indices",
     "@kbn/charts-theme",
     "@kbn/licensing-types",
-    "@kbn/ml-common-types"
+    "@kbn/ml-common-types",
+    "@kbn/ml-plugin-contracts"
   ]
 }
