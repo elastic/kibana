@@ -17,7 +17,6 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
       'xpack.apm_data.enabled=true',
-      // logs essentials tier configuration
       'serverless.project_type=observability',
       'serverless.observability.tier=logs_essentials',
     ],
@@ -29,7 +28,6 @@ export const servers: ScoutServerConfig = {
       '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
-      // Pricing tier configuration for logs essentials
       `--pricing.tiers.products=${JSON.stringify([
         { name: 'observability', tier: 'logs_essentials' },
       ])}`,
