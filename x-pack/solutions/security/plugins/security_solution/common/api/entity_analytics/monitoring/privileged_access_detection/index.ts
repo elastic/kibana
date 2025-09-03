@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { registerMonitoringEntitySourceRoutes } from './register_monitoring_entity_source_routes';
+export * from './install.gen';
+export * from './status.gen';
