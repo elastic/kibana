@@ -13,6 +13,7 @@ import CacheableLookup from 'cacheable-lookup';
 import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
+import { metrics, ValueType } from '@opentelemetry/api';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 const HTTPS = 'https:';
@@ -68,6 +69,57 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         maxTtl: options.dnsCacheTtlInSeconds,
       });
     }
+
+    this.registerMetrics();
+  }
+
+  private registerMetrics() {
+    const meter = metrics.getMeter('kibana.elasticsearch.client');
+
+    const totalActiveSocketsObservable = meter.createObservableGauge(
+      'elasticsearch.client.total_active_sockets',
+      {
+        description:
+          'Elasticsearch Clients: Total number of active sockets (all nodes, all connections)',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+    const totalIdleSocketsObservable = meter.createObservableGauge(
+      'elasticsearch.client.total_idle_sockets',
+      {
+        description:
+          'Elasticsearch Clients: Total number of available sockets (alive but idle, all nodes, all connections)',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+    const totalQueuedRequestsObservable = meter.createObservableGauge(
+      'elasticsearch.client.total_queued_requests',
+      {
+        description:
+          'Elasticsearch Clients: Total number of queued requests (all nodes, all connections)',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    meter.addBatchObservableCallback(
+      (result) => {
+        let totalActiveSockets = 0;
+        let totalIdleSockets = 0;
+        let totalQueuedRequests = 0;
+        this.agents.forEach(({ requests = {}, sockets = {}, freeSockets = {} }) => {
+          totalQueuedRequests += Object.values(requests).flat().length;
+          totalActiveSockets += Object.values(sockets).flat().length;
+          totalIdleSockets += Object.values(freeSockets).flat().length;
+        });
+        result.observe(totalActiveSocketsObservable, totalActiveSockets);
+        result.observe(totalIdleSocketsObservable, totalIdleSockets);
+        result.observe(totalQueuedRequestsObservable, totalQueuedRequests);
+      },
+      [totalActiveSocketsObservable, totalIdleSocketsObservable, totalQueuedRequestsObservable]
+    );
   }
 
   public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
