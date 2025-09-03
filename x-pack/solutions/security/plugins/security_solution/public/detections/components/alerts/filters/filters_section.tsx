@@ -83,18 +83,18 @@ export const FiltersSection = memo(
     const onFilterControlsChange = useCallback(
       (newFilters: Filter[]) => {
         setPageFilters(newFilters);
-        if (newFilters.length) {
-          const newStatusFilter = newFilters.find(
-            (filter) => filter.meta.key === 'kibana.alert.workflow_status'
-          );
-          if (newStatusFilter) {
-            const status: Status[] = newStatusFilter.meta.params
-              ? (newStatusFilter.meta.params as Status[])
-              : [newStatusFilter.query?.match_phrase['kibana.alert.workflow_status']];
-            setStatusFilter(status);
-          } else {
-            setStatusFilter([]);
-          }
+        if (!newFilters.length) return;
+
+        const newStatusFilter = newFilters.find(
+          (filter) => filter.meta.key === 'kibana.alert.workflow_status'
+        );
+        if (newStatusFilter) {
+          const status: Status[] = newStatusFilter.meta.params
+            ? (newStatusFilter.meta.params as Status[])
+            : [newStatusFilter.query?.match_phrase['kibana.alert.workflow_status']];
+          setStatusFilter(status);
+        } else {
+          setStatusFilter([]);
         }
       },
       [setPageFilters, setStatusFilter]
