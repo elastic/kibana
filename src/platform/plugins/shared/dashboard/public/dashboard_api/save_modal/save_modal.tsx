@@ -12,7 +12,8 @@ import React, { Fragment, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import type { SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
 import { savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
@@ -25,7 +26,7 @@ interface DashboardSaveModalProps {
     newTimeRestore,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-  }: DashboardSaveOptions) => void;
+  }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
   title: string;
   description: string;
@@ -66,7 +67,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     }) => {
-      onSave({
+      return onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
@@ -131,7 +132,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
 
   return (
-    <SavedObjectSaveModal
+    <SavedObjectSaveModalWithSaveResult
       onSave={saveDashboard}
       onClose={onClose}
       title={title}

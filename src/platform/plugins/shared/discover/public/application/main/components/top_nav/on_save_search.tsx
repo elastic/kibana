@@ -11,8 +11,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import type {
+  OnSaveProps,
+  SaveResult,
+  ShowSaveModalMinimalSaveModalProps,
+} from '@kbn/saved-objects-plugin/public';
+import {
+  SavedObjectSaveModalWithSaveResult,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import type { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -114,7 +121,7 @@ export async function onSaveSearch({
     newTags: string[];
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
-  }) => {
+  }): Promise<SaveResult> => {
     const appState = state.appState.getState();
     const currentTitle = savedSearch.title;
     const currentTimeRestore = savedSearch.timeRestore;
@@ -184,10 +191,10 @@ export async function onSaveSearch({
 
     onSaveCb?.();
 
-    return response;
+    return response ?? {};
   };
 
-  const saveModal = (
+  const saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps> = (
     <SaveSearchObjectModal
       isTimeBased={dataView?.isTimeBased() ?? false}
       services={services}
@@ -215,7 +222,9 @@ const SaveSearchObjectModal: React.FC<{
   description?: string;
   timeRestore?: boolean;
   tags: string[];
-  onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
+  onSave: (
+    props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }
+  ) => Promise<SaveResult>;
   onClose: () => void;
   managed: boolean;
 }> = ({
@@ -237,8 +246,8 @@ const SaveSearchObjectModal: React.FC<{
   );
   const [currentTags, setCurrentTags] = useState(tags);
 
-  const onModalSave = (params: OnSaveProps) => {
-    onSave({
+  const onModalSave = async (params: OnSaveProps) => {
+    return onSave({
       ...params,
       newTimeRestore: timeRestore,
       newTags: currentTags,
@@ -287,7 +296,7 @@ const SaveSearchObjectModal: React.FC<{
   );
 
   return (
-    <SavedObjectSaveModal
+    <SavedObjectSaveModalWithSaveResult
       title={title}
       showCopyOnSave={showCopyOnSave}
       initialCopyOnSave={initialCopyOnSave}
