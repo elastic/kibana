@@ -45,7 +45,49 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
 
     this._definition = definition;
 
-    return { cascadingChanges: [], changeStatus: 'upserted' };
+    const missingMembers: string[] = [];
+    for (const member of this._definition.group.members) {
+      if (!desiredState.has(member)) {
+        missingMembers.push(member);
+      }
+    }
+
+    const cascadingChanges: StreamChange[] = [];
+    if (missingMembers.length > 0) {
+      for (const member of missingMembers) {
+        try {
+          const dataStreamResult =
+            await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+              name: member,
+            });
+
+          if (dataStreamResult.data_streams.length > 0) {
+            cascadingChanges.push({
+              type: 'upsert',
+              definition: {
+                name: member,
+                description: '',
+                ingest: {
+                  classic: {},
+                  lifecycle: {
+                    inherit: {},
+                  },
+                  processing: {
+                    steps: [],
+                  },
+                },
+              },
+            });
+          }
+        } catch (error) {
+          if (!isNotFoundError(error)) {
+            throw error;
+          }
+        }
+      }
+    }
+
+    return { cascadingChanges, changeStatus: 'upserted' };
   }
 
   protected async doHandleDeleteChange(
