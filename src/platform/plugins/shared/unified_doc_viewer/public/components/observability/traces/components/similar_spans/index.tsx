@@ -18,7 +18,7 @@ import type { LatencyChartData } from '../../doc_viewer_overview/hooks/use_laten
 export interface SimilarSpansProps {
   spanDuration: number;
   latencyChart: {
-    data: LatencyChartData | null; // TODO move this interface
+    data: LatencyChartData | null;
     loading: boolean;
     hasError: boolean;
   };
