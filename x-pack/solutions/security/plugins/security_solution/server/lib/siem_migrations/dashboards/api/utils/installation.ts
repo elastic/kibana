@@ -146,7 +146,7 @@ const installDashboards = async (
         dashboardsToUpdate.push({
           id: dashboard.id,
           elastic_dashboard: {
-            id: result.item?.id ?? '',
+            id: result.item?.id || null,
           },
         });
       } catch (error) {
