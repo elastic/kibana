@@ -43,6 +43,11 @@ export function generateIndexTemplate(name: string) {
           default_pipeline: getProcessingPipelineName(name),
         },
       },
+      data_stream_options: {
+        failure_store: {
+          enabled: true,
+        },
+      },
       mappings: {
         properties: {
           'stream.name': {
