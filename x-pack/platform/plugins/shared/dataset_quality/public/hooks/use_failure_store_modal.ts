@@ -16,6 +16,7 @@ export function useFailureStoreModal() {
     defaultRetentionPeriod,
     customRetentionPeriod,
     updateFailureStore,
+    canUserManageFailureStore,
   } = useDatasetQualityDetailsState();
 
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
@@ -40,7 +41,7 @@ export function useFailureStoreModal() {
   };
 
   const renderModal = (): React.ReactElement | null => {
-    if (canUserReadFailureStore && isFailureStoreModalOpen && defaultRetentionPeriod) {
+    if (canUserManageFailureStore && isFailureStoreModalOpen && defaultRetentionPeriod) {
       return React.createElement(FailureStoreModal, {
         onCloseModal: closeModal,
         onSaveModal: handleSaveModal,
@@ -60,6 +61,7 @@ export function useFailureStoreModal() {
     closeModal,
     handleSaveModal,
     canUserReadFailureStore,
+    canUserManageFailureStore,
     hasFailureStore,
     defaultRetentionPeriod,
     customRetentionPeriod,

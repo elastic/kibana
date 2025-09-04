@@ -35,14 +35,15 @@ import { getAlertingCapabilities } from '../../../../alerts/get_alerting_capabil
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({
   lastReloadTime,
-  displayCreateRuleButton,
   openAlertFlyout,
-  displayEditFailureStore,
+  displayActions: { displayCreateRuleButton, displayEditFailureStore },
 }: {
   lastReloadTime: number;
-  displayCreateRuleButton: boolean;
   openAlertFlyout: () => void;
-  displayEditFailureStore: boolean;
+  displayActions: {
+    displayCreateRuleButton: boolean;
+    displayEditFailureStore: boolean;
+  };
 }) {
   const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
   const {
@@ -68,7 +69,7 @@ export default function DocumentTrends({
 
   const {
     openModal: openFailureStoreModal,
-    canUserReadFailureStore,
+    canUserManageFailureStore,
     renderModal: renderFailureStoreModal,
   } = useFailureStoreModal();
 
@@ -114,7 +115,7 @@ export default function DocumentTrends({
                 />
               </EuiToolTip>
             )}
-            {displayEditFailureStore && canUserReadFailureStore && (
+            {displayEditFailureStore && canUserManageFailureStore && (
               <EuiToolTip content={editFailureStoreText} disableScreenReaderOutput>
                 <EuiButtonIcon
                   display="base"

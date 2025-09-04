@@ -66,6 +66,7 @@ export default function QualitySummaryCards({
   const {
     openModal,
     canUserReadFailureStore,
+    canUserManageFailureStore,
     hasFailureStore,
     renderModal: renderFailureStoreModal,
   } = useFailureStoreModal();
@@ -119,7 +120,7 @@ export default function QualitySummaryCards({
                 defaultMessage: 'No failure store',
               })}
               footer={
-                canUserReadFailureStore && (
+                canUserManageFailureStore && (
                   <EuiButtonEmpty
                     onClick={openModal}
                     data-test-subj="datasetQualityDetailsEnableFailureStoreButton"

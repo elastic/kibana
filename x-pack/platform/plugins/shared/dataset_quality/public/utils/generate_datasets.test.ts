@@ -46,6 +46,7 @@ describe('generateDatasets', () => {
       userPrivileges: {
         canMonitor: true,
         canReadFailureStore: true,
+        canManageFailureStore: true,
       },
     },
     {
@@ -58,6 +59,7 @@ describe('generateDatasets', () => {
       userPrivileges: {
         canMonitor: true,
         canReadFailureStore: true,
+        canManageFailureStore: true,
       },
     },
   ];
@@ -434,6 +436,7 @@ describe('generateDatasets', () => {
       userPrivileges: {
         canMonitor: true,
         canReadFailureStore: true,
+        canManageFailureStore: true,
       },
     };
 
