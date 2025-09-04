@@ -36,7 +36,6 @@ import type {
   AnyLensStateColumn,
   AnyMetricLensStateColumn,
 } from './types';
-import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 
 export function fromBucketLensApiToLensState(
   options: LensApiFiltersOperation,

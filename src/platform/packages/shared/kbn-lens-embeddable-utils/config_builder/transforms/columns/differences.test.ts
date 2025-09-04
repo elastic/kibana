@@ -98,9 +98,7 @@ describe('Differences Transforms', () => {
         of: referenceOp,
       };
 
-      expect(fromDifferencesLensStateToAPI(input, referenceOp)).toEqual(
-        expected
-      );
+      expect(fromDifferencesLensStateToAPI(input, referenceOp)).toEqual(expected);
     });
 
     it('should preserve custom label', () => {
@@ -171,7 +169,7 @@ describe('Differences Transforms', () => {
       for (const ref of referenceMetrics) {
         const result = fromDifferencesLensStateToAPI(
           { ...input, label: `Differences of ${ref.label!}` },
-          ref,
+          ref
         );
         expect(result.of).toEqual(ref);
         expect(result.label).toBeUndefined();
