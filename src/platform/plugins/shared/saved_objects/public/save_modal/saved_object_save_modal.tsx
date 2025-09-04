@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiButton,
@@ -24,12 +25,10 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTextArea,
   EuiIconTip,
   EuiText,
   withEuiTheme,
-  WithEuiThemeProps,
   mathWithUnits,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +42,19 @@ export interface OnSaveProps {
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
   newDescription: string;
+}
+
+export interface Reference {
+  type: string;
+  id: string;
+  name: string;
+}
+
+export interface SaveDashboardReturn {
+  id?: string;
+  error?: string;
+  references?: Reference[];
+  redirectRequired?: boolean;
 }
 
 interface Props {
@@ -265,13 +277,20 @@ class SavedObjectSaveModalComponent extends React.Component<
       isLoading: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
+    // Although `onSave` is an asynchronous function, it is typed as returning `void`
+    // somewhere deeper in the call chain, which causes its asynchronous nature to be lost.
+    // We still need to treat it as async here to properly handle the loading state.
+    try {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
+        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

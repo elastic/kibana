@@ -12,14 +12,10 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { registerApp } from './register';
-import {
-  AgentService,
-  ChatService,
-  ConversationsService,
-  OnechatInternalService,
-  ToolsService,
-} from './services';
+import { ONECHAT_UI_SETTING_ID } from '../common/constants';
+import { registerAnalytics, registerApp } from './register';
+import type { OnechatInternalService } from './services';
+import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -27,7 +23,6 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -57,11 +52,14 @@ export class OnechatPlugin
           return this.internalServices;
         },
       });
+
+      registerAnalytics({ analytics: core.analytics });
     }
+
     return {};
   }
 
-  start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+  start({ http }: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
@@ -72,6 +70,7 @@ export class OnechatPlugin
       chatService,
       conversationsService,
       toolsService,
+      startDependencies,
     };
 
     return {};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ImageMode } from '../../../i18n/functions/dict/image';
+import type { ImageMode } from '../../../i18n/functions/dict/image';
 
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
 

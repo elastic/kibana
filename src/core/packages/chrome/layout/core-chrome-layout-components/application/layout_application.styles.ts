@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { EmotionFn } from '../types';
+import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) =>
   css`
@@ -17,8 +17,40 @@ const root: EmotionFn = ({ euiTheme }) =>
     position: relative;
     width: 100%;
     z-index: ${euiTheme.levels.content};
+
+    display: flex;
+    flex-direction: column;
+
+    &:focus-visible {
+      border: 2px solid ${euiTheme.colors.textParagraph};
+    }
   `;
+
+const content: EmotionFn = () => css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
+
+const topBar: EmotionFn = ({ euiTheme }) => css`
+  position: sticky;
+  top: 0;
+  z-index: ${euiTheme.levels.header};
+  height: var(--kbn-application--top-bar-height);
+  flex-shrink: 0;
+`;
+
+const bottomBar: EmotionFn = ({ euiTheme }) => css`
+  position: sticky;
+  bottom: 0;
+  z-index: ${euiTheme.levels.header};
+  height: var(--kbn-application--bottom-bar-height);
+  flex-shrink: 0;
+`;
 
 export const styles = {
   root,
+  content,
+  topBar,
+  bottomBar,
 };

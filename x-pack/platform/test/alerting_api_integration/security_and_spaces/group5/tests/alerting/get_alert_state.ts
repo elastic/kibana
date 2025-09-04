@@ -15,7 +15,6 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetAlertStateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

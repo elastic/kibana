@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ESQLControlVariable, PublishesESQLVariable } from '@kbn/esql-types';
+import { apiPublishesESQLVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  PublishesDataViews,
-  apiPublishesDataViews,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import { apiPublishesDataViews, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { ControlGroupSerializedState } from '../../common';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { coreServices, dataViewsService } from '../services/kibana_services';
 import { ControlGroup } from './components/control_group';
@@ -36,11 +33,8 @@ import { deserializeControlGroup } from './utils/serialization_utils';
 import { initializeEditorStateManager } from './initialize_editor_state_manager';
 
 export const getControlGroupEmbeddableFactory = () => {
-  const controlGroupEmbeddableFactory: EmbeddableFactory<
-    ControlGroupSerializedState,
-    ControlGroupApi
-  > = {
-    type: CONTROL_GROUP_TYPE,
+  const controlGroupEmbeddableFactory: EmbeddableFactory<ControlsGroupState, ControlGroupApi> = {
+    type: CONTROLS_GROUP_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const initialRuntimeState = deserializeControlGroup(initialState);
 

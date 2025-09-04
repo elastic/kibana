@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { MockRouter } from '../__mocks__/router.mock';
 import { ConversationalChain } from './lib/conversational_chain';

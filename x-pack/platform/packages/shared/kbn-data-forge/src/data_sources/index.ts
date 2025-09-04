@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeneratorFunction, Dataset, IndexTemplateDef } from '../types';
+import type { GeneratorFunction, Dataset, IndexTemplateDef } from '../types';
 import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, SERVICE_LOGS } from '../constants';
 
 import * as fakeLogs from './fake_logs';

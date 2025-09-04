@@ -70,14 +70,48 @@ describe('genericValidator', () => {
 });
 
 describe('validateDomain', () => {
-  it('should return undefined for a valid domain', () => {
+  it('should return undefined for a valid domain (example.com)', () => {
     const result = validateDomain('example.com');
 
     expect(result).toBeUndefined();
   });
 
-  it('should return an error for an invalid domain', () => {
+  it('should return undefined for a valid domain ending with "." (example.com.)', () => {
+    const result = validateDomain('example.com.');
+
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined for a valid sub-domain (sub.example.com)', () => {
+    const result = validateDomain('sub.example.com');
+
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined for a valid UK sub-domain (sub.example.co.uk)', () => {
+    const result = validateDomain('sub.example.co.uk');
+
+    expect(result).toBeUndefined();
+  });
+
+  it('should return an error for a domain with a label starting with "-"', () => {
     const result = validateDomain('-invalid.com');
+
+    expect(result).toEqual({
+      code: 'ERR_NOT_VALID',
+    });
+  });
+
+  it('should return an error for a domain with a label ending with "-"', () => {
+    const result = validateDomain('invalid-.com');
+
+    expect(result).toEqual({
+      code: 'ERR_NOT_VALID',
+    });
+  });
+
+  it('should return an error for a domain with a label containing "--"', () => {
+    const result = validateDomain('invalid--domain.com');
 
     expect(result).toEqual({
       code: 'ERR_NOT_VALID',

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ScoutPage, Locator, expect } from '@kbn/scout';
+import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '@kbn/scout';
 
 const PAGE_URL = 'security/alerts';
 
@@ -15,7 +16,7 @@ export class AlertsTablePage {
   public alertsTable: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.detectionsAlertsWrapper = this.page.testSubj.locator('detectionsAlertsPage');
+    this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertRow = this.page.locator('div.euiDataGridRow');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
   }

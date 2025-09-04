@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Request } from '@kbn/inspector-plugin/common';
+import type { Request } from '@kbn/inspector-plugin/common';
 
 export type ObservabilityApp =
   | 'infra_metrics'

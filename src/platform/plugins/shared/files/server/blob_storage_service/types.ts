@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AnalyticsServiceStart } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { Readable, Transform } from 'stream';
 

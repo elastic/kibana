@@ -15,7 +15,7 @@ import {
 } from '@kbn/discover-utils';
 import React from 'react';
 import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
-import { HighlightField } from '../../components/highlight_field.tsx';
+import { HighlightField } from '../../components/highlight_field';
 import { TransactionNameLink } from '../../components/transaction_name_link';
 
 export interface TransactionSummaryTitleProps {

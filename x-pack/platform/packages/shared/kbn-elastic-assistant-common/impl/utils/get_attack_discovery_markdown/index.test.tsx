@@ -12,7 +12,7 @@ import {
   getMarkdownFields,
   getMarkdownWithOriginalValues,
 } from '.';
-import { AttackDiscovery } from '../../schemas';
+import type { AttackDiscovery } from '../../schemas';
 
 export const mockAttackDiscovery: AttackDiscovery = {
   alertIds: [
@@ -76,6 +76,15 @@ describe('getAttackDiscoveryMarkdown', () => {
     it('handles empty markdown', () => {
       const markdown = '';
       const expected = '';
+
+      const result = getMarkdownFields(markdown);
+
+      expect(result).toBe(expected);
+    });
+
+    it('handles whitespaces within the value correctly', () => {
+      const markdown = 'This is a {{ field1 value one }} and {{ field2 value two }}.';
+      const expected = 'This is a `value one` and `value two`.';
 
       const result = getMarkdownFields(markdown);
 

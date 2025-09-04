@@ -7,19 +7,21 @@
 
 import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IlmLocatorParams, ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamEffectiveLifecycle,
   isIlmLifecycle,
   isErrorLifecycle,
   isDslLifecycle,
   Streams,
+  getIndexPatternsForStream,
 } from '@kbn/streams-schema';
 import React from 'react';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIndexPatterns } from '../../util/hierarchy_helpers';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
@@ -136,21 +138,25 @@ export function DiscoverBadgeButton({
       start: { share },
     },
   } = useKibana();
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatterns(definition.stream);
+  const indexPatterns = getIndexPatternsForStream(definition.stream);
   const esqlQuery = indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
+  const useUrl = share.url.locators.useUrl;
 
-  if (!discoverLocator || !dataStreamExists || !esqlQuery) {
+  const discoverLink = useUrl<DiscoverAppLocatorParams>(
+    () => ({
+      id: DISCOVER_APP_LOCATOR,
+      params: {
+        query: { esql: esqlQuery || '' },
+      },
+    }),
+    [esqlQuery]
+  );
+
+  if (!discoverLink || !dataStreamExists || !esqlQuery) {
     return null;
   }
-
-  const discoverLink = discoverLocator.useUrl({
-    query: {
-      esql: esqlQuery,
-    },
-  });
 
   return (
     <EuiButtonIcon

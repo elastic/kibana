@@ -154,7 +154,7 @@
             "label": "addons",
             "description": [],
             "signature": [
-              "(string | { name: string; options: { rules: ({ test: RegExp; use: string[]; } | { test: RegExp; exclude: RegExp; use: ({ loader: string; } | { loader: string; options: { importLoaders: number; }; } | { loader: string; options: { postcssOptions: { config: string; }; }; } | { loader: string; options: { additionalData(content: string, loaderContext: any): string; implementation: any; sassOptions: { includePaths: string[]; quietDeps: boolean; }; }; })[]; })[]; }; })[]"
+              "(string | { name: string; options: { rules: ({ test: RegExp; use: string[]; } | { test: RegExp; exclude: RegExp; use: ({ loader: string; } | { loader: string; options: { importLoaders: number; }; } | { loader: string; options: { postcssOptions: { config: string; }; }; } | { loader: string; options: { additionalData(content: string, loaderContext: any): string; implementation: any; sassOptions: { includePaths: string[]; quietDeps: boolean; silenceDeprecations: string[]; }; }; })[]; })[]; }; })[]"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,

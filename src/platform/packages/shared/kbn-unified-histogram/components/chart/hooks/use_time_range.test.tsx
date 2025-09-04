@@ -8,9 +8,9 @@
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { renderHook } from '@testing-library/react';
-import { UnifiedHistogramBucketInterval } from '../../../types';
+import type { UnifiedHistogramBucketInterval } from '../../../types';
 import { useTimeRange } from './use_time_range';
 
 jest.mock('@kbn/datemath', () => ({

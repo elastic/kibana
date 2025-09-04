@@ -9,9 +9,10 @@
 
 import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
+import { visContainerStyle } from '@kbn/visualizations-plugin/public';
 
 export const TimeseriesLoading = () => (
-  <div className="visChart__spinner">
+  <div className="visChart__spinner" css={visContainerStyle}>
     <EuiLoadingChart size="l" />
   </div>
 );

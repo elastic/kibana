@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class UnifiedTabsPageObject extends FtrService {
@@ -59,6 +59,10 @@ export class UnifiedTabsPageObject extends FtrService {
     return numberOfTabs.length;
   }
 
+  public async hideTabPreview() {
+    await this.testSubjects.moveMouseTo('breadcrumbs');
+  }
+
   public async createNewTab() {
     const numberOfTabs = await this.getNumberOfTabs();
     await this.testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
@@ -69,6 +73,7 @@ export class UnifiedTabsPageObject extends FtrService {
         (await this.getSelectedTab())?.index === newNumberOfTabs - 1
       );
     });
+    await this.hideTabPreview();
   }
 
   public async selectTab(index: number) {
@@ -80,6 +85,7 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.retry.waitFor('the selected tab to change', async () => {
       return (await this.getSelectedTab())?.index === index;
     });
+    await this.hideTabPreview();
   }
 
   public async closeTab(index: number) {
@@ -107,6 +113,24 @@ export class UnifiedTabsPageObject extends FtrService {
     await menuButton.click();
     await this.retry.waitFor('the menu to open', async () => {
       return (await this.getContextMenuItems()).length > 0;
+    });
+  }
+
+  public async duplicateTab(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    await this.openTabMenu(index);
+    const duplicateButton = await this.testSubjects.find('unifiedTabs_tabMenuItem_duplicate');
+    await duplicateButton.click();
+    await this.retry.waitFor('the new tab to appear after duplication', async () => {
+      const newNumberOfTabs = await this.getNumberOfTabs();
+      return newNumberOfTabs === tabElements.length + 1;
+    });
+    await this.retry.waitFor('the duplicated tab to be selected', async () => {
+      const selectedTab = await this.getSelectedTab();
+      return selectedTab?.index === index + 1;
     });
   }
 
@@ -182,5 +206,9 @@ export class UnifiedTabsPageObject extends FtrService {
         ((await this.canScrollMoreLeft()) || (await this.canScrollMoreRight()))
       );
     });
+  }
+
+  public async isTabsBarVisible() {
+    return await this.testSubjects.exists('unifiedTabs_tabsBar');
   }
 }

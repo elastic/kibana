@@ -8,10 +8,10 @@
  */
 
 import { BasicPrettyPrinter, Builder, synth } from '../../..';
-import { SynthNode } from '../helpers';
+import { SynthNode } from '../synth_node';
 
 test('synthesized nodes have SynthNodePrototype prototype', () => {
-  const expression = synth.expr`?my_param`;
+  const expression = synth.exp`?my_param`;
   const command = synth.cmd`LIMIT 123`;
 
   expect(expression).toBeInstanceOf(SynthNode);
@@ -19,7 +19,7 @@ test('synthesized nodes have SynthNodePrototype prototype', () => {
 });
 
 test('can cast expression to string', () => {
-  const expression = synth.expr`?my_param`;
+  const expression = synth.exp`?my_param`;
 
   expect(expression).toMatchObject({
     type: 'literal',
@@ -31,7 +31,7 @@ test('can cast expression to string', () => {
 });
 
 test('can build the same expression with Builder', () => {
-  const expression1 = synth.expr`my.field = max(10, ?my_param)`;
+  const expression1 = synth.exp`my.field = max(10, ?my_param)`;
   const expression2 = Builder.expression.func.binary('=', [
     Builder.expression.column({
       args: [Builder.identifier({ name: 'my' }), Builder.identifier({ name: 'field' })],

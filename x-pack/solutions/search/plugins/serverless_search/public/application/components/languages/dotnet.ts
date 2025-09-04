@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+import type { LanguageDefinition } from '@kbn/search-api-panels';
+import { Languages } from '@kbn/search-api-panels';
 // import { docLinks } from '../../../../common/doc_links';
 
 export const dotnetDefinition: LanguageDefinition = {

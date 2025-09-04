@@ -16,9 +16,10 @@ import {
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
-import type { ExpandableFlyoutState, FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import {
   type ExpandableFlyoutApi,
+  type ExpandableFlyoutState,
+  type FlyoutPanelHistory,
   useExpandableFlyoutApi,
   useExpandableFlyoutHistory,
   useExpandableFlyoutState,

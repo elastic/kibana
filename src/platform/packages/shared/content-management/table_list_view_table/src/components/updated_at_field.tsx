@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 
-import { DateFormatter } from '../services';
+import type { DateFormatter } from '../services';
 
 const DefaultDateFormatter: DateFormatter = ({ value, children }) =>
   children(new Date(value).toDateString());

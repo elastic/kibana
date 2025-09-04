@@ -129,7 +129,7 @@ components:
       properties:
         signal_ids:
           type: array
-          description: List of alert `id`s.
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
             type: string
             format: nonempty

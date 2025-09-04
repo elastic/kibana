@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
-import { Meta } from '../../../../../common/types/pagination';
+import type { Meta } from '../../../../../common/types/pagination';
 
-import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchConnectorsApiLogicArgs {

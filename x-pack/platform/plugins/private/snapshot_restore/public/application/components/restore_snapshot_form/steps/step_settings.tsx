@@ -22,10 +22,10 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { RestoreSettings } from '../../../../../common/types';
+import type { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
-import { StepProps } from '.';
+import type { StepProps } from '.';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -281,6 +281,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                   error={errors.ignoreIndexSettings}
                 >
                   <EuiComboBox
+                    isInvalid={Boolean(errors.ignoreIndexSettings)}
                     placeholder={i18n.translate(
                       'xpack.snapshotRestore.restoreForm.stepSettings.ignoreIndexSettingsPlaceholder',
                       {

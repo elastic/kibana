@@ -6,15 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLControlVariable,
   IndexAutocompleteItem,
   RecommendedQuery,
   RecommendedField,
+  InferenceEndpointsAutocompleteResult,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types/src/inference_endpoint_autocomplete_types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { ESQLFieldWithMetadata } from '../validation/types';
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
@@ -32,15 +36,6 @@ export interface PartialFieldsMetadataClient {
       }
     >;
   }>;
-}
-
-/** @public **/
-export interface ESQLSourceResult {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams?: Array<{ name: string; title?: string }>;
-  type?: string;
 }
 
 export interface ESQLCallbacks {
@@ -63,6 +58,32 @@ export interface ESQLCallbacks {
   getInferenceEndpoints?: (
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
+  getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
+  getActiveProduct?: () => PricingProduct | undefined;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
+
+const commandOptionNameToLocation: Record<string, Location> = {
+  eval: Location.EVAL,
+  where: Location.WHERE,
+  row: Location.ROW,
+  sort: Location.SORT,
+  stats: Location.STATS,
+  by: Location.STATS_BY,
+  enrich: Location.ENRICH,
+  with: Location.ENRICH_WITH,
+  dissect: Location.DISSECT,
+  rename: Location.RENAME,
+  join: Location.JOIN,
+  show: Location.SHOW,
+  completion: Location.COMPLETION,
+};
+
+/**
+ * Pause before using this in new places. Where possible, use the Location enum directly.
+ *
+ * This is primarily around for backwards compatibility with the old system of command and option names.
+ */
+export const getLocationFromCommandOrOptionName = (name: string) =>
+  commandOptionNameToLocation[name];

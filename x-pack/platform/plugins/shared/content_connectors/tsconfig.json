@@ -52,11 +52,11 @@
     "@kbn/code-editor",
     "@kbn/console-plugin",
     "@kbn/discover-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-http-browser-mocks",
-    "@kbn/home-plugin"
+    "@kbn/home-plugin",
+    "@kbn/logging"
   ]
 }

@@ -264,31 +264,50 @@ import type {
   CreatePrivilegesImportIndexResponse,
 } from './entity_analytics/monitoring/create_index.gen';
 import type {
+  DeleteMonitoringEngineRequestQueryInput,
+  DeleteMonitoringEngineResponse,
+} from './entity_analytics/monitoring/engine/delete.gen';
+import type { DisableMonitoringEngineResponse } from './entity_analytics/monitoring/engine/disable.gen';
+import type { InitMonitoringEngineResponse } from './entity_analytics/monitoring/engine/init.gen';
+import type { ScheduleMonitoringEngineResponse } from './entity_analytics/monitoring/engine/schedule_now.gen';
+import type { PrivMonHealthResponse } from './entity_analytics/monitoring/health.gen';
+import type {
+  CreateEntitySourceRequestBodyInput,
+  CreateEntitySourceResponse,
+  DeleteEntitySourceRequestParamsInput,
+  GetEntitySourceRequestParamsInput,
+  GetEntitySourceResponse,
+  ListEntitySourcesRequestQueryInput,
+  ListEntitySourcesResponse,
+  UpdateEntitySourceRequestParamsInput,
+  UpdateEntitySourceRequestBodyInput,
+  UpdateEntitySourceResponse,
+} from './entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/monitoring/privileged_access_detection/install.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/monitoring/privileged_access_detection/status.gen';
+import type { PrivMonPrivilegesResponse } from './entity_analytics/monitoring/privileges.gen';
+import type {
   SearchPrivilegesIndicesRequestQueryInput,
   SearchPrivilegesIndicesResponse,
 } from './entity_analytics/monitoring/search_indices.gen';
-import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
-import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
-import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
-import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/create.gen';
+} from './entity_analytics/monitoring/users/create.gen';
 import type {
   DeletePrivMonUserRequestParamsInput,
   DeletePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/delete.gen';
+} from './entity_analytics/monitoring/users/delete.gen';
 import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
-} from './entity_analytics/privilege_monitoring/users/list.gen';
+} from './entity_analytics/monitoring/users/list.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
   UpdatePrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/update.gen';
-import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
+} from './entity_analytics/monitoring/users/update.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/monitoring/users/upload_csv.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -374,6 +393,29 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateDashboardMigrationRequestBodyInput,
+  CreateDashboardMigrationResponse,
+  CreateDashboardMigrationDashboardsRequestParamsInput,
+  CreateDashboardMigrationDashboardsRequestBodyInput,
+  GetDashboardMigrationRequestParamsInput,
+  GetDashboardMigrationResponse,
+  GetDashboardMigrationResourcesRequestQueryInput,
+  GetDashboardMigrationResourcesRequestParamsInput,
+  GetDashboardMigrationResourcesResponse,
+  GetDashboardMigrationResourcesMissingRequestParamsInput,
+  GetDashboardMigrationResourcesMissingResponse,
+  GetDashboardMigrationStatsRequestParamsInput,
+  GetDashboardMigrationStatsResponse,
+  StartDashboardsMigrationRequestParamsInput,
+  StartDashboardsMigrationRequestBodyInput,
+  StartDashboardsMigrationResponse,
+  StopDashboardsMigrationRequestParamsInput,
+  StopDashboardsMigrationResponse,
+  UpsertDashboardMigrationResourcesRequestParamsInput,
+  UpsertDashboardMigrationResourcesRequestBodyInput,
+  UpsertDashboardMigrationResourcesResponse,
+} from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
@@ -409,6 +451,9 @@ import type {
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
+  UpdateRuleMigrationIndexPatternRequestParamsInput,
+  UpdateRuleMigrationIndexPatternRequestBodyInput,
+  UpdateRuleMigrationIndexPatternResponse,
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
   UpdateRuleMigrationRulesResponse,
@@ -627,6 +672,54 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Creates a new dashboard migration and returns the corresponding migration_id
+   */
+  async createDashboardMigration(props: CreateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigration`);
+    return this.kbnClient
+      .request<CreateDashboardMigrationResponse>({
+        path: '/internal/siem_migrations/dashboards',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Adds dashboards to an alreayd existing dashboard migration
+   */
+  async createDashboardMigrationDashboards(props: CreateDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createEntitySource(props: CreateEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
+    return this.kbnClient
+      .request<CreateEntitySourceResponse>({
+        path: '/api/entity_analytics/monitoring/entity_source',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
     return this.kbnClient
@@ -656,7 +749,7 @@ If a record already exists for the specified entity, that record is overwritten 
   /**
     * Create a new detection rule.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -830,6 +923,32 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async deleteEntitySource(props: DeleteEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntitySource`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
+    return this.kbnClient
+      .request<DeleteMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/delete',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Delete a note from a Timeline using the note ID.
    */
@@ -930,6 +1049,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async disableMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
+    return this.kbnClient
+      .request<DisableMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/disable',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async disableRiskEngine() {
     this.log.info(`${new Date().toISOString()} Calling API DisableRiskEngine`);
     return this.kbnClient
@@ -971,8 +1102,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Download a file from an endpoint.
-   */
+    * Download a file from an endpoint. 
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+    */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
     return this.kbnClient
@@ -989,8 +1124,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get information for the specified file using the file ID.
-   */
+    * Get information for the specified file using the file ID.
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+    */
   async endpointFileInfo(props: EndpointFileInfoProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileInfo`);
     return this.kbnClient
@@ -1348,6 +1487,77 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the dashboard migration document stored in the system given the dashboard migration id
+   */
+  async getDashboardMigration(props: GetDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigration`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResponse>({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves resources for an existing SIEM dashboards migration
+   */
+  async getDashboardMigrationResources(props: GetDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResources`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies missing resources from all the dashboards of an existing SIEM dashboard migration
+   */
+  async getDashboardMigrationResourcesMissing(props: GetDashboardMigrationResourcesMissingProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResourcesMissing`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesMissingResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources/missing',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboard migrations stats for given migrations stored in the system
+   */
+  async getDashboardMigrationStats(props: GetDashboardMigrationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationStats`);
+    return this.kbnClient
+      .request<GetDashboardMigrationStatsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stats',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
    */
   async getDraftTimelines(props: GetDraftTimelinesProps) {
@@ -1396,6 +1606,18 @@ finalize it.
     return this.kbnClient
       .request<GetEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getEntitySource(props: GetEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntitySource`);
+    return this.kbnClient
+      .request<GetEntitySourceResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1745,7 +1967,7 @@ finalize it.
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 > info
@@ -1956,6 +2178,20 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async listEntitySources(props: ListEntitySourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntitySources`);
+    return this.kbnClient
+      .request<ListEntitySourcesResponse>({
+        path: '/api/entity_analytics/monitoring/entity_source/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
@@ -1975,7 +2211,7 @@ providing you with the most current and effective threat detection capabilities.
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -2015,7 +2251,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
 The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
 > warn
-> When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -2116,6 +2352,21 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     return this.kbnClient
       .request<PrivMonHealthResponse>({
         path: '/api/entity_analytics/monitoring/privileges/health',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Check if the current user has all required permissions for Privilege Monitoring
+   */
+  async privMonPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
+    return this.kbnClient
+      .request<PrivMonPrivilegesResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/privileges',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2294,7 +2545,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Run a shell command on an endpoint.
+   * Run a script on a host. Currently supported only for some agent types.
    */
   async runScriptAction(props: RunScriptActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
@@ -2306,6 +2557,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async scheduleMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
+    return this.kbnClient
+      .request<ScheduleMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/schedule_now',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2408,6 +2671,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Starts a SIEM dashboards migration using the migration id provided
+   */
+  async startDashboardsMigration(props: StartDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StartDashboardsMigration`);
+    return this.kbnClient
+      .request<StartDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/start',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -2433,6 +2715,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Stops a running SIEM dashboards migration using the migration id provided
+   */
+  async stopDashboardsMigration(props: StopDashboardsMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API StopDashboardsMigration`);
+    return this.kbnClient
+      .request<StopDashboardsMigrationResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stop',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2496,6 +2796,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updateEntitySource(props: UpdateEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
+    return this.kbnClient
+      .request<UpdateEntitySourceResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updatePrivMonUser(props: UpdatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
     return this.kbnClient
@@ -2514,7 +2827,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 > warn
-> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -2544,6 +2857,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates the index pattern for eligible and/or selected rules of a migration
+   */
+  async updateRuleMigrationIndexPattern(props: UpdateRuleMigrationIndexPatternProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigrationIndexPattern`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationIndexPatternResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/update_index_pattern',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -2591,6 +2923,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Creates or updates resources for an existing SIEM dashboards migration
+   */
+  async upsertDashboardMigrationResources(props: UpsertDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertDashboardMigrationResources`);
+    return this.kbnClient
+      .request<UpsertDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Creates or updates resources for an existing SIEM rules migration
    */
   async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
@@ -2632,6 +2983,16 @@ export interface CreateAlertsMigrationProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
+export interface CreateDashboardMigrationProps {
+  body: CreateDashboardMigrationRequestBodyInput;
+}
+export interface CreateDashboardMigrationDashboardsProps {
+  params: CreateDashboardMigrationDashboardsRequestParamsInput;
+  body: CreateDashboardMigrationDashboardsRequestBodyInput;
+}
+export interface CreateEntitySourceProps {
+  body: CreateEntitySourceRequestBodyInput;
+}
 export interface CreatePrivilegesImportIndexProps {
   body: CreatePrivilegesImportIndexRequestBodyInput;
 }
@@ -2661,6 +3022,12 @@ export interface DeleteAssetCriticalityRecordProps {
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
+}
+export interface DeleteEntitySourceProps {
+  params: DeleteEntitySourceRequestParamsInput;
+}
+export interface DeleteMonitoringEngineProps {
+  query: DeleteMonitoringEngineRequestQueryInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -2742,6 +3109,19 @@ export interface FindRulesProps {
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
+export interface GetDashboardMigrationProps {
+  params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesProps {
+  query: GetDashboardMigrationResourcesRequestQueryInput;
+  params: GetDashboardMigrationResourcesRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesMissingProps {
+  params: GetDashboardMigrationResourcesMissingRequestParamsInput;
+}
+export interface GetDashboardMigrationStatsProps {
+  params: GetDashboardMigrationStatsRequestParamsInput;
+}
 export interface GetDraftTimelinesProps {
   query: GetDraftTimelinesRequestQueryInput;
 }
@@ -2754,6 +3134,9 @@ export interface GetEndpointSuggestionsProps {
 }
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
+}
+export interface GetEntitySourceProps {
+  params: GetEntitySourceRequestParamsInput;
 }
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
@@ -2834,6 +3217,9 @@ export interface InternalUploadAssetCriticalityRecordsProps {
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
 }
+export interface ListEntitySourcesProps {
+  query: ListEntitySourcesRequestQueryInput;
+}
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
 }
@@ -2893,12 +3279,19 @@ export interface SetAlertsStatusProps {
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
 }
+export interface StartDashboardsMigrationProps {
+  params: StartDashboardsMigrationRequestParamsInput;
+  body: StartDashboardsMigrationRequestBodyInput;
+}
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;
   body: StartRuleMigrationRequestBodyInput;
+}
+export interface StopDashboardsMigrationProps {
+  params: StopDashboardsMigrationRequestParamsInput;
 }
 export interface StopEntityEngineProps {
   params: StopEntityEngineRequestParamsInput;
@@ -2912,6 +3305,10 @@ export interface SuggestUserProfilesProps {
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
 }
+export interface UpdateEntitySourceProps {
+  params: UpdateEntitySourceRequestParamsInput;
+  body: UpdateEntitySourceRequestBodyInput;
+}
 export interface UpdatePrivMonUserProps {
   params: UpdatePrivMonUserRequestParamsInput;
   body: UpdatePrivMonUserRequestBodyInput;
@@ -2923,6 +3320,10 @@ export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
 }
+export interface UpdateRuleMigrationIndexPatternProps {
+  params: UpdateRuleMigrationIndexPatternRequestParamsInput;
+  body: UpdateRuleMigrationIndexPatternRequestBodyInput;
+}
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;
   body: UpdateRuleMigrationRulesRequestBodyInput;
@@ -2933,6 +3334,10 @@ export interface UpdateWorkflowInsightProps {
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface UpsertDashboardMigrationResourcesProps {
+  params: UpsertDashboardMigrationResourcesRequestParamsInput;
+  body: UpsertDashboardMigrationResourcesRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

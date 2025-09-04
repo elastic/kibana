@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { IndexDataEnricher } from './services';
-import { handleEsError } from './shared_imports';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { IndexDataEnricher } from './services';
+import type { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;

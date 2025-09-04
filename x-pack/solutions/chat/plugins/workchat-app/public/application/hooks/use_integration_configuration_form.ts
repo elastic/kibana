@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { IntegrationType } from '@kbn/wci-common';
+import type { IntegrationType } from '@kbn/wci-common';
 import { useWorkChatServices } from './use_workchat_service';
 
 /**

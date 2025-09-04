@@ -8,20 +8,20 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { checkForDuplicateTitle, SavedObjectIndexStore, LensDocument } from '../persistence';
+import type { LensDocumentService, LensDocument } from '../persistence';
 import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
-import { Simplify, VisualizeEditorContext } from '../types';
+import type { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
-import { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState } from '../react_embeddable/types';
 import { isLegacyEditorEmbeddable } from './app_helpers';
 
 type ExtraProps = Simplify<
@@ -54,7 +54,7 @@ export type SaveModalContainerProps = {
     | 'theme'
     | 'userProfile'
     | 'stateTransfer'
-    | 'savedObjectStore'
+    | 'lensDocumentService'
   >;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   // is this visualization managed by the system?
@@ -205,7 +205,7 @@ function fromDocumentToSerializedState(
 const getDocToSave = (
   lastKnownDoc: LensDocument,
   saveProps: SaveProps,
-  references: SavedObjectReference[]
+  references: Reference[]
 ): LensDocument => {
   const docToSave = {
     ...removePinnedFilters(lastKnownDoc)!,
@@ -231,7 +231,7 @@ export type SaveVisualizationProps = Simplify<
     getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
-    savedObjectStore: SavedObjectIndexStore;
+    lensDocumentService: LensDocumentService;
   } & ExtraProps &
     Pick<
       LensAppServices,
@@ -269,10 +269,7 @@ export const runSaveLensVisualization = async (
     textBasedLanguageSave,
     switchDatasource,
     application,
-    savedObjectStore,
-    getOriginatingPath,
-    originatingApp,
-    ...startServices
+    lensDocumentService,
   } = props;
 
   if (!lastKnownDoc) {
@@ -297,9 +294,7 @@ export const runSaveLensVisualization = async (
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
   const originalSavedObjectId = originalInput?.savedObjectId;
   if (options.saveToLibrary) {
-    // this is a lower level call that the Lens attribute service one
-    // @TODO: check if it's worth to replace it witht he attribute service one
-    await checkForDuplicateTitle(
+    await lensDocumentService.checkForDuplicateTitle(
       {
         id: originalSavedObjectId,
         title: docToSave.title,
@@ -310,11 +305,7 @@ export const runSaveLensVisualization = async (
         copyOnSave: saveProps.newCopyOnSave,
         isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
       },
-      saveProps.onTitleDuplicate,
-      {
-        client: savedObjectStore,
-        ...startServices,
-      }
+      saveProps.onTitleDuplicate
     );
     // ignore duplicate title failure, user notified in save modal
   }

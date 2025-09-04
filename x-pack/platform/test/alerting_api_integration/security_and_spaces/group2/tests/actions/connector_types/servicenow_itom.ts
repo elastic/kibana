@@ -18,7 +18,6 @@ import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

@@ -18,7 +18,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
-      "cases",
+      "contentManagement",
       "data",
       "fleet",
       "embeddable",
@@ -45,6 +45,7 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [
+      "cases",
       "cloud",
       "data",
       "fleet",
@@ -56,7 +57,7 @@
       "telemetry",
       "licenseManagement",
       "observabilityAIAssistant",
-      "embeddableEnhanced",
+      "embeddableEnhanced"
     ],
     "requiredBundles": [
       "data",

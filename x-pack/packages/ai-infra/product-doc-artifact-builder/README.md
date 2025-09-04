@@ -8,17 +8,23 @@ Script to build the knowledge base artifacts.
 node scripts/build_product_doc_artifacts.js --stack-version {version} --product-name {product}
 ```
 
+Example:
+
+```
+node scripts/build_product_doc_artifacts.js --product-name=security --stack-version=8.18  --inference-id=.multilingual-e5-small-elasticsearch
+```
+
 ### parameters
 
-#### `stack-version`: 
+#### `stack-version`:
 
 the stack version to generate the artifacts for.
 
-#### `product-name`: 
+#### `product-name`:
 
 (multi-value) the list of products to generate artifacts for.
 
-possible values: 
+possible values:
 - "kibana"
 - "elasticsearch"
 - "observability"
@@ -34,6 +40,11 @@ Defaults to `{REPO_ROOT}/build-kb-artifacts`.
 
 The folder to use for temporary files.
 
+#### inference-id:
+
+The inference endpoint to use to generate the embeddings. If the inference ID provided and is not the ELSER default, the artifacts will be generated with `{artifactName}--{inference-id}.zip`. Note the double dash before inference-id.
+
+
 Defaults to `{REPO_ROOT}/build/temp-kb-artifacts`
 
 #### Cluster infos
@@ -47,3 +58,6 @@ Defaults to `{REPO_ROOT}/build/temp-kb-artifacts`
 `embeddingClusterUrl` / env.KIBANA_EMBEDDING_CLUSTER_URL
 `embeddingClusterUsername` / env.KIBANA_EMBEDDING_CLUSTER_USERNAME
 `embeddingClusterPassword` / env.KIBANA_EMBEDDING_CLUSTER_PASSWORD
+
+- params for the inference endpoint:
+`inferenceId`

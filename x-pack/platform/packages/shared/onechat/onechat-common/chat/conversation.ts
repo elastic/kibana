@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { StructuredToolIdentifier } from '../tools/tools';
-import type { SerializedAgentIdentifier } from '../agents';
 import type { UserIdAndName } from '../base/users';
+import type { ToolResult } from '../tools/tool_result';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -30,7 +29,7 @@ export interface AssistantResponse {
 }
 
 export enum ConversationRoundStepType {
-  toolCall = 'toolCall',
+  toolCall = 'tool_call',
   reasoning = 'reasoning',
 }
 
@@ -43,29 +42,36 @@ export type ConversationRoundStepMixin<TType extends ConversationRoundStepType, 
 /**
  * Represents a tool call with the corresponding result.
  */
-export interface ToolCallWithResult {
+export interface ToolCallWithResult<T = ToolResult[]> {
   /**
    * Id of the tool call, as returned by the LLM
    */
-  toolCallId: string;
+  tool_call_id: string;
   /**
-   * Structured identifier of the tool.
+   * Identifier of the tool.
    */
-  toolId: StructuredToolIdentifier;
+  tool_id: string;
   /**
    * Arguments the tool was called with.
    */
-  args: Record<string, any>;
+  params: Record<string, any>;
   /**
-   * Result of the tool, serialized as string.
+   * Result of the tool
    */
-  result: string;
+  results: T;
 }
 
-export type ToolCallStep = ConversationRoundStepMixin<
+export type ToolCallStep<T = ToolResult[]> = ConversationRoundStepMixin<
   ConversationRoundStepType.toolCall,
-  ToolCallWithResult
+  ToolCallWithResult<T>
 >;
+
+export const createToolCallStep = (toolCallWithResult: ToolCallWithResult): ToolCallStep => {
+  return {
+    type: ConversationRoundStepType.toolCall,
+    ...toolCallWithResult,
+  };
+};
 
 export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallStep => {
   return step.type === ConversationRoundStepType.toolCall;
@@ -90,27 +96,31 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 /**
  * Defines all possible types for round steps.
  */
-export type ConversationRoundStep = ToolCallStep | ReasoningStep;
+export type ConversationRoundStep<T = ToolResult[]> = ToolCallStep<T> | ReasoningStep;
 
 /**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
-export interface ConversationRound {
+export interface ConversationRound<T = ToolResult[]> {
   /** The user input that initiated the round */
-  userInput: RoundInput;
+  input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
-  steps: ConversationRoundStep[];
+  steps: Array<ConversationRoundStep<T>>;
   /** The final response from the assistant */
-  assistantResponse: AssistantResponse;
+  response: AssistantResponse;
+  /** when tracing is enabled, contains the traceId associated with this round */
+  trace_id?: string;
 }
 
 export interface Conversation {
   id: string;
-  agentId: SerializedAgentIdentifier;
+  agent_id: string;
   user: UserIdAndName;
   title: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   rounds: ConversationRound[];
 }
+
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

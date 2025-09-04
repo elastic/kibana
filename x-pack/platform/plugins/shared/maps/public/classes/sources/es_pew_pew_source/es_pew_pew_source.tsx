@@ -8,7 +8,7 @@
 import React from 'react';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
@@ -27,15 +27,16 @@ import { AbstractESAggSource } from '../es_agg_source';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
 import { mergeExecutionContext } from '../execution_context_utils';
-import { SourceEditorArgs } from '../source';
-import {
+import type { SourceEditorArgs } from '../source';
+import type {
   DataFilters,
   ESPewPewSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { BoundsRequestMeta, GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
+import type { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
+import { getLayerFeaturesRequestName } from '../vector_source';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -44,9 +45,12 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 });
 
 export class ESPewPewSource extends AbstractESAggSource {
-  readonly _descriptor: ESPewPewSourceDescriptor;
+  readonly _descriptor: ESPewPewSourceDescriptor &
+    Required<Pick<ESPewPewSourceDescriptor, 'metrics'>>;
 
-  static createDescriptor(descriptor: Partial<ESPewPewSourceDescriptor>): ESPewPewSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESPewPewSourceDescriptor>
+  ): ESPewPewSourceDescriptor & Required<Pick<ESPewPewSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.sourceGeoField)) {
       throw new Error('Cannot create ESPewPewSourceDescriptor, sourceGeoField is not provided');
@@ -63,8 +67,9 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   constructor(descriptor: ESPewPewSourceDescriptor) {
-    super(descriptor);
-    this._descriptor = descriptor;
+    const normalizedDescriptor = ESPewPewSource.createDescriptor(descriptor);
+    super(normalizedDescriptor);
+    this._descriptor = normalizedDescriptor;
   }
 
   getBucketsName() {

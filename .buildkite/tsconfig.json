@@ -2,7 +2,7 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "mocha"],
+    "types": ["node", "jest"],
     "paths": {
       "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
       "#pipeline-utils/*": [".buildkite/pipeline-utils/*"]

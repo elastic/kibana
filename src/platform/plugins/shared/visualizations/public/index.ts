@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicContract } from '@kbn/utility-types';
-import { PluginInitializerContext } from '@kbn/core/public';
-import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
+import type { PublicContract } from '@kbn/utility-types';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { VisualizationsSetup, VisualizationsStart } from './plugin';
+import { VisualizationsPlugin } from './plugin';
 import type { VisualizeEmbeddable } from './legacy/embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -90,3 +91,5 @@ export const getConvertToLensModule = async () => {
   return await import('./convert_to_lens');
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
+
+export { visContainerClassName, visContainerStyle } from './vis.styles';

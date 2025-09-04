@@ -1,0 +1,21 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/cases-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render",
+  ]
+}

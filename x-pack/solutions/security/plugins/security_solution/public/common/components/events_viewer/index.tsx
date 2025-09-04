@@ -34,7 +34,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
@@ -148,23 +148,36 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     sourcererDataView: oldSourcererDataView,
     loading: oldIsLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+  const oldGetFieldSpec = useGetFieldSpec(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec, status } = useDataViewSpec(sourcererScope);
+  const { dataView: experimentalDataView, status } = useDataView(sourcererScope);
+
   const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const isLoadingIndexPattern = newDataViewPickerEnabled
     ? status !== 'ready'
     : oldIsLoadingIndexPattern;
-  const dataViewId = newDataViewPickerEnabled ? dataViewSpec.id ?? null : oldDataViewId;
-  const selectedDataViewId = newDataViewPickerEnabled ? dataViewSpec.id : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? null : oldDataViewId;
+  const selectedDataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const runtimeMappings = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
+      : (oldSourcererDataView?.runtimeFieldMap as RunTimeMappings) ?? {};
+  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]);
+
+  const experimentalGetFieldSpec = useCallback(
+    (fieldName: string) => {
+      return experimentalDataView.fields?.getByName(fieldName)?.toSpec();
+    },
+    [experimentalDataView.fields]
+  );
+  const getFieldSpec = newDataViewPickerEnabled ? experimentalGetFieldSpec : oldGetFieldSpec;
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
@@ -231,12 +244,22 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
+    [
+      esQueryConfig,
+      browserFields,
+      globalFilters,
+      start,
+      oldSourcererDataView,
+      experimentalDataView,
+      query,
+      end,
+    ]
   );
 
   const canQueryTimeline = useMemo(
@@ -278,7 +301,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,

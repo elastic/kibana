@@ -7,7 +7,8 @@
 
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState } from 'react';
 
 interface Props {
   initialBurnRate?: number;
@@ -56,6 +57,7 @@ export function BudgetConsumed({
       isInvalid={hasError}
     >
       <EuiFieldNumber
+        isInvalid={hasError}
         fullWidth
         step={0.01}
         min={0.01}

@@ -1026,6 +1026,9 @@ exports[`buildOSSFeatures with a basic license returns the advancedSettings feat
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -2160,6 +2163,9 @@ exports[`buildOSSFeatures with a enterprise license returns the advancedSettings
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "manage_advanced_settings",
+      ],
       "app": Array [
         "kibana",
       ],

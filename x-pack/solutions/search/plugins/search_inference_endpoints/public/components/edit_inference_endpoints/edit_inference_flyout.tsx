@@ -7,9 +7,9 @@
 
 import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common/src/components/inference_flyout_wrapper';
 import React, { useCallback } from 'react';
-import { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
+import type { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
 import { flattenObject } from '@kbn/object-utils';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 
@@ -25,6 +25,7 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
     services: {
       http,
       notifications: { toasts },
+      serverless,
     },
   } = useKibana();
   const { refetch } = useQueryInferenceEndpoints();
@@ -49,6 +50,7 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       http={http}
       toasts={toasts}
       isEdit={true}
+      enforceAdaptiveAllocations={!!serverless}
       onSubmitSuccess={onEditSuccess}
       inferenceEndpoint={inferenceEndpoint}
     />

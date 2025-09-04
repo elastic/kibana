@@ -1,73 +1,194 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = `
-<Fragment>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="xl"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-xl-flexStart-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
-    <EuiFlexItem>
-      <EuiSearchBar
-        filters={Array []}
-        onChange={[MockFunction]}
-        toolsRight={
-          Array [
-            <AddItemPopover
-              addItems={[MockFunction]}
-              canCreateFilter={true}
-            />,
-            <EuiButton
-              color="danger"
-              data-test-subj="mlFilterListDeleteItemButton"
-              disabled={true}
-              onClick={[MockFunction]}
-              size="s"
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
+      >
+        <div
+          class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlLeftIconsCount: 1;"
+          >
+            <div
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
             >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="Delete item"
-                id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-              />
-            </EuiButton>,
-          ]
-        }
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Fragment>
+              <span
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="search"
+                />
+              </span>
+            </div>
+            <input
+              aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
+              class="euiFieldSearch emotion-euiFieldSearch-fullWidth"
+              placeholder="Search..."
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiSearchBar__filtersHolder emotion-euiFlexItem-growZero-euiSearchBar__filtersHolder"
+      >
+        <div
+          class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+        />
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div>
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+            id="add_item_popover"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+              data-test-subj="mlFilterListOpenNewItemsPopoverButton"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Add item
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
+          data-test-subj="mlFilterListDeleteItemButton"
+          disabled=""
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Delete item
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = `
-<Fragment>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="xl"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-xl-flexStart-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
-    <EuiFlexItem>
-      <EuiSearchBar
-        filters={Array []}
-        onChange={[MockFunction]}
-        toolsRight={
-          Array [
-            <AddItemPopover
-              addItems={[MockFunction]}
-              canCreateFilter={true}
-            />,
-            <EuiButton
-              color="danger"
-              data-test-subj="mlFilterListDeleteItemButton"
-              disabled={false}
-              onClick={[MockFunction]}
-              size="s"
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
+      >
+        <div
+          class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlLeftIconsCount: 1;"
+          >
+            <div
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
             >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="Delete item"
-                id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-              />
-            </EuiButton>,
-          ]
-        }
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Fragment>
+              <span
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="search"
+                />
+              </span>
+            </div>
+            <input
+              aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
+              class="euiFieldSearch emotion-euiFieldSearch-fullWidth"
+              placeholder="Search..."
+              type="search"
+              value=""
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiSearchBar__filtersHolder emotion-euiFlexItem-growZero-euiSearchBar__filtersHolder"
+      >
+        <div
+          class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+        />
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div>
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+            id="add_item_popover"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+              data-test-subj="mlFilterListOpenNewItemsPopoverButton"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                Add item
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
+          data-test-subj="mlFilterListDeleteItemButton"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Delete item
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 `;

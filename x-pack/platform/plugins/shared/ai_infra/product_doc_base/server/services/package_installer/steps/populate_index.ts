@@ -19,14 +19,14 @@ export const populateIndex = async ({
   manifestVersion,
   archive,
   log,
-  elserInferenceId,
+  inferenceId = internalElserInferenceId,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
   manifestVersion: string;
   archive: ZipArchive;
   log: Logger;
-  elserInferenceId?: string;
+  inferenceId?: string;
 }) => {
   log.debug(`Starting populating index ${indexName}`);
 
@@ -43,7 +43,7 @@ export const populateIndex = async ({
       esClient,
       contentBuffer,
       legacySemanticText,
-      elserInferenceId,
+      inferenceId,
     });
   }
 
@@ -56,12 +56,14 @@ const indexContentFile = async ({
   esClient,
   legacySemanticText,
   elserInferenceId = internalElserInferenceId,
+  inferenceId,
 }: {
   indexName: string;
   contentBuffer: Buffer;
   esClient: ElasticsearchClient;
   legacySemanticText: boolean;
   elserInferenceId?: string;
+  inferenceId?: string;
 }) => {
   const fileContent = contentBuffer.toString('utf-8');
   const lines = fileContent.split('\n');
@@ -75,7 +77,7 @@ const indexContentFile = async ({
     .map((doc) =>
       rewriteInferenceId({
         document: doc,
-        inferenceId: elserInferenceId,
+        inferenceId: inferenceId ?? elserInferenceId,
         legacySemanticText,
       })
     );

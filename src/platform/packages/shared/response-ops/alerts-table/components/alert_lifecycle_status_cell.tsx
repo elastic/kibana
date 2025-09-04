@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AlertStatus, ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

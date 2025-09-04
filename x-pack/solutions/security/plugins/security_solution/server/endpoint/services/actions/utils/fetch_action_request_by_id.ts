@@ -25,7 +25,6 @@ import { REF_DATA_KEYS } from '../../../lib/reference_data';
  * @param endpointService
  * @param spaceId
  * @param actionId
- *
  * @throws
  */
 export const fetchActionRequestById = async <
@@ -35,7 +34,16 @@ export const fetchActionRequestById = async <
 >(
   endpointService: EndpointAppContextService,
   spaceId: string,
-  actionId: string
+  actionId: string,
+  {
+    bypassSpaceValidation = false,
+  }: Partial<{
+    /**
+     * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
+     * USE IT CAREFULLY!
+     */
+    bypassSpaceValidation: boolean;
+  }> = {}
 ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> => {
   const logger = endpointService.createLogger('fetchActionRequestById');
   const searchResponse = await endpointService
@@ -54,7 +62,10 @@ export const fetchActionRequestById = async <
 
   if (!actionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
-  } else if (endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+  } else if (
+    endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
+    !bypassSpaceValidation
+  ) {
     if (!actionRequest.agent.policy || actionRequest.agent.policy.length === 0) {
       const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine if response action is accessible for space [${spaceId}]`;
 

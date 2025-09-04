@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { ILicense } from '@kbn/licensing-plugin/server';
-import { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { ILicense } from '@kbn/licensing-types';
+import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { formatAnnotation } from './format_annotations';
 import { checkAnnotationsPermissions } from './permissions';
 import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
-import {
+import type {
   Annotation,
   CreateAnnotationParams,
-  DEFAULT_ANNOTATION_INDEX,
   DeleteAnnotationParams,
   FindAnnotationParams,
   GetByIdAnnotationParams,
 } from '../../../common/annotations';
+import { DEFAULT_ANNOTATION_INDEX } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
 

@@ -6,13 +6,14 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { getDateISORange } from '@kbn/timerange';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
-import { DatasetDetailsEbtProps, NavigationSource, NavigationTarget } from '../services/telemetry';
-import { BasicDataStream, TimeRangeConfig } from '../../common/types';
-import { DataStreamDetails } from '../../common/api_types';
-import { Integration } from '../../common/data_streams_stats/integration';
+import type { DatasetDetailsEbtProps } from '../services/telemetry';
+import { NavigationSource, NavigationTarget } from '../services/telemetry';
+import type { BasicDataStream, TimeRangeConfig } from '../../common/types';
+import type { DataStreamDetails } from '../../common/api_types';
+import type { Integration } from '../../common/data_streams_stats/integration';
 import { mapPercentageToQuality } from '../../common/utils';
 import { MASKED_FIELD_PLACEHOLDER, UNKOWN_FIELD_PLACEHOLDER } from '../../common/constants';
 import { calculatePercentage } from '../utils';

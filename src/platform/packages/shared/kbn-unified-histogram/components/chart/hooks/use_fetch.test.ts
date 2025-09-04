@@ -9,7 +9,7 @@
 
 import { useFetch } from './use_fetch';
 import { renderHook } from '@testing-library/react';
-import { UnifiedHistogramInput$ } from '../../../types';
+import type { UnifiedHistogramInput$ } from '../../../types';
 import { Subject } from 'rxjs';
 
 describe('useFetch', () => {

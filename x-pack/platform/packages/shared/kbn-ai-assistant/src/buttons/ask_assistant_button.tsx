@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonSize,
-  EuiButtonEmptySizes,
-  EuiToolTip,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import type { EuiButtonSize, EuiButtonEmptySizes } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export type AskAssistantButtonProps = (

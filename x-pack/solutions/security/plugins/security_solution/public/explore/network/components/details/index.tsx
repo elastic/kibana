@@ -57,6 +57,7 @@ export interface IpOverviewProps {
   type: networkModel.NetworkType;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
+  isFlyoutOpen?: boolean;
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -76,6 +77,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     scopeId,
     indexPatterns,
     jobNameById,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -153,6 +155,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
                   ipFilter: ip,
                   contextID,
                   scopeId,
+                  isFlyoutOpen,
                 })
               : getEmptyTagValue(),
         },
@@ -160,7 +163,13 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.HOST_NAME,
           description:
             typeData && data.host
-              ? hostNameRenderer(scopeId, data.host, ip, contextID)
+              ? hostNameRenderer({
+                  scopeId,
+                  host: data.host,
+                  ipFilter: ip,
+                  contextID,
+                  isFlyoutOpen,
+                })
               : getEmptyTagValue(),
         },
       ],

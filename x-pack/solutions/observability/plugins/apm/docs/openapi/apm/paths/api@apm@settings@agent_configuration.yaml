@@ -46,7 +46,7 @@ delete:
     content:
       application/json:
         schema:
-          $ref: '../components/schemas/service_object.yaml'
+          $ref: '../components/schemas/delete_service_object.yaml'
         examples:
           deleteAgentConfigurationRequest1:
             $ref: '../components/examples/agent_configuration_intake_object_delete_request1.yaml'

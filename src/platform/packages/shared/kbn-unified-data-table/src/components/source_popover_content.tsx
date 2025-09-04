@@ -10,6 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 import JsonCodeEditor from './json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from '../constants';
 import { getInnerColumns } from '../utils/columns';
@@ -33,6 +34,7 @@ export const SourcePopoverContent = ({
       direction="column"
       justifyContent="flexEnd"
       className="unifiedDataTable__cellPopover"
+      css={styles.cellPopover}
       data-test-subj={dataTestSubj}
     >
       <EuiFlexItem grow={false}>
@@ -60,3 +62,13 @@ function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumn
 
 // eslint-disable-next-line import/no-default-export
 export default SourcePopoverContent;
+
+const styles = {
+  cellPopover: css({
+    // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
+    '.lines-content.monaco-editor-background': {
+      overflow: 'unset !important',
+      contain: 'unset !important',
+    },
+  }),
+};

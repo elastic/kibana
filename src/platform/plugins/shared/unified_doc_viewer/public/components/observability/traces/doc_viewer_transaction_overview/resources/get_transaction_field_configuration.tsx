@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  USER_AGENT_NAME_FIELD,
-  USER_AGENT_VERSION_FIELD,
-  TransactionDocumentOverview,
-} from '@kbn/discover-utils';
+import type { TransactionDocumentOverview } from '@kbn/discover-utils';
+import { USER_AGENT_NAME_FIELD, USER_AGENT_VERSION_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  FieldConfiguration,
-  getCommonFieldConfiguration,
-} from '../../resources/get_field_configuration';
-import { HighlightField } from '../../components/highlight_field.tsx';
+import type { FieldConfiguration } from '../../resources/get_field_configuration';
+import { getCommonFieldConfiguration } from '../../resources/get_field_configuration';
+import { HighlightField } from '../../components/highlight_field';
 
 export const getTransactionFieldConfiguration = ({
   attributes,

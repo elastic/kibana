@@ -327,6 +327,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   summaryActionMessageParams={actionMessageParams}
                   form={actionsStepForm}
                   key="actionsStep"
+                  ruleInterval={scheduleStepData.interval}
                 />
               )}
               <EuiSpacer />

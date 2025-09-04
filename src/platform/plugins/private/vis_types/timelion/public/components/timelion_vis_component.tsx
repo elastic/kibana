@@ -9,27 +9,27 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { compact, last, map } from 'lodash';
+import type { LegendPositionConfig, BrushEndListener } from '@elastic/charts';
 import {
   Chart,
   Settings,
   Position,
   Axis,
   TooltipType,
-  LegendPositionConfig,
   LayoutDirection,
   Placement,
   Tooltip,
   LegendValue,
-  BrushEndListener,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import { RangeFilterParams } from '@kbn/es-query';
+import type { RangeFilterParams } from '@kbn/es-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -45,8 +45,6 @@ import { getCharts, getFieldFormats } from '../helpers/plugin_services';
 
 import type { Series, Sheet } from '../helpers/timelion_request_handler';
 import type { TimelionVisDependencies } from '../plugin';
-
-import './timelion_vis.scss';
 
 declare global {
   interface Window {
@@ -101,6 +99,18 @@ const renderYAxis = (series: Series[]) => {
   ));
 
   return yAxis.length ? yAxis : <DefaultYAxis />;
+};
+
+const timelionStyles = {
+  base: css({
+    height: '100%',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+  topTitle: css({
+    textAlign: 'center',
+  }),
 };
 
 export const TimelionVisComponent = ({
@@ -194,9 +204,9 @@ export const TimelionVisComponent = ({
   }, [chart]);
 
   return (
-    <div className="timelionChart" data-test-subj="timelionChart">
+    <div className="timelionChart" data-test-subj="timelionChart" css={timelionStyles.base}>
       {title && (
-        <EuiTitle className="timelionChart__topTitle" size="xxxs">
+        <EuiTitle size="xxxs" css={timelionStyles.topTitle}>
           <h4>{title}</h4>
         </EuiTitle>
       )}

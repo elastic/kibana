@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AttackDiscovery, Replacements } from '../../schemas';
+import type { AttackDiscovery, Replacements } from '../../schemas';
 import { getTacticLabel, getTacticMetadata } from '../attack_discovery_helpers';
 
 export const getMarkdownFields = (markdown: string): string => {
-  const regex = new RegExp('{{\\s*(\\S+)\\s+(\\S+)\\s*}}', 'gm');
+  const regex = new RegExp('{{\\s*(\\S+)\\s+(.*?)\\s*}}', 'gm');
 
   return markdown.replace(regex, (_, field, value) => `\`${value}\``);
 };

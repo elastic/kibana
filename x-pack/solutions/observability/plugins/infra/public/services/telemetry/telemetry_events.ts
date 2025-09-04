@@ -51,6 +51,13 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         optional: false,
       },
     },
+    schema_selected: {
+      type: 'text',
+      _meta: {
+        description: 'Preferred schema for the performed search.',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -124,6 +131,29 @@ const hostViewTotalHostCountRetrieved: InfraTelemetryEvent = {
         optional: false,
       },
     },
+    schema_selected: {
+      type: 'text',
+      _meta: {
+        description: 'Preferred schema for the performed search.',
+        optional: true,
+      },
+    },
+    schemas_available: {
+      type: 'array',
+      items: {
+        type: 'text',
+        _meta: {
+          description: 'Available schemas for the performed search.',
+        },
+      },
+    },
+    schema_error: {
+      type: 'boolean',
+      _meta: {
+        description: 'Indicates if there was an error with the selected schema.',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -148,6 +178,13 @@ const assetDetailsFlyoutViewed: InfraTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Tab id for the clicked asset.',
+        optional: true,
+      },
+    },
+    schema_selected: {
+      type: 'text',
+      _meta: {
+        description: 'Preferred schema for the displayed asset.',
         optional: true,
       },
     },
@@ -182,6 +219,13 @@ const assetDetailsPageViewed: InfraTelemetryEvent = {
       type: 'pass_through',
       _meta: {
         description: 'Integrations enabled for the displayed asset.',
+        optional: true,
+      },
+    },
+    schema_selected: {
+      type: 'text',
+      _meta: {
+        description: 'Preferred schema for the displayed asset.',
         optional: true,
       },
     },
@@ -357,6 +401,34 @@ const anomalyDetectionFilterFieldChange: InfraTelemetryEvent = {
   },
 };
 
+const schemaSelectorInteractions: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.SCHEMA_SELECTOR_INTERACTION,
+  schema: {
+    interaction: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of interaction with the schema selector',
+      },
+    },
+    schema_selected: {
+      type: 'keyword',
+      _meta: {
+        description: 'The schema that was selected',
+        optional: true,
+      },
+    },
+    schemas_available: {
+      type: 'array',
+      items: {
+        type: 'text',
+        _meta: {
+          description: 'Available schemas for the performed search.',
+        },
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
   assetDetailsFlyoutViewed,
   assetDetailsPageViewed,
@@ -374,4 +446,5 @@ export const infraTelemetryEvents = [
   anomalyDetectionDateFieldChange,
   anomalyDetectionPartitionFieldChange,
   anomalyDetectionFilterFieldChange,
+  schemaSelectorInteractions,
 ];

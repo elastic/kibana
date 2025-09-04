@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
 import { CANCEL_BUTTON_TEXT } from '../sections/rules_list/translations';
 
@@ -23,19 +23,25 @@ export const RulesDeleteModalConfirmation = ({
   onCancel: () => void;
   showWarningText?: boolean;
   warningText?: string;
-}) => (
-  <EuiConfirmModal
-    buttonColor="danger"
-    data-test-subj="rulesDeleteConfirmation"
-    title={confirmButtonText}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={CANCEL_BUTTON_TEXT}
-    confirmButtonText={confirmButtonText}
-  >
-    <p>{confirmModalText}</p>
-    {showWarningText && (
-      <EuiCallOut title={<>{warningText}</>} color="warning" iconType="warning" />
-    )}
-  </EuiConfirmModal>
-);
+}) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      title={confirmButtonText}
+      titleProps={{ id: modalTitleId }}
+      buttonColor="danger"
+      data-test-subj="rulesDeleteConfirmation"
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={CANCEL_BUTTON_TEXT}
+      confirmButtonText={confirmButtonText}
+    >
+      <p>{confirmModalText}</p>
+      {showWarningText && (
+        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="warning" />
+      )}
+    </EuiConfirmModal>
+  );
+};

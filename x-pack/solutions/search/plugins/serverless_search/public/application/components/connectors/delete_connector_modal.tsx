@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
@@ -29,6 +35,8 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
   closeDeleteModal,
   onSuccess,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { http } = useKibanaServices();
   const { isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {
@@ -52,10 +60,12 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.serverlessSearch.connectors.deleteModal.title', {
         defaultMessage: 'Are you sure you want to delete connector {connectorName}',
         values: { connectorName: connectorName || connectorId },
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={() => {
         closeDeleteModal();
       }}

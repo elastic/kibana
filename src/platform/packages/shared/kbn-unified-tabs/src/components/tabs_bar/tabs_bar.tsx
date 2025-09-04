@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KeyboardEvent } from 'react';
 import React, {
-  KeyboardEvent,
   useCallback,
   useEffect,
   useRef,
@@ -18,8 +18,8 @@ import React, {
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { DropResult } from '@elastic/eui';
 import {
-  DropResult,
   EuiButtonIcon,
   EuiDragDropContext,
   EuiDraggable,
@@ -265,7 +265,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
             {!hasReachedMaxItemsCount && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={addButtonLabel}>
+                <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="unifiedTabs_tabsBar_newTabBtn"
                     iconType="plus"

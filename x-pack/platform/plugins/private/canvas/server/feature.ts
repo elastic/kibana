@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import { ReportingStart } from '@kbn/reporting-plugin/server/types';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { ReportingStart } from '@kbn/reporting-plugin/server/types';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 /*

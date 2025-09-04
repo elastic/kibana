@@ -18,7 +18,7 @@ import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
-import { SyntheticsRestApiRouteFactory } from './types';
+import type { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
@@ -73,7 +73,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsProjectMonitorsRoute,
   installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
-  testNowMonitorRoute,
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
@@ -123,4 +122,5 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deleteSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
   syntheticsGetLatestTestRunRoute,
+  testNowMonitorRoute,
 ];

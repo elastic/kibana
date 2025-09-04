@@ -13,7 +13,7 @@ import { mount, shallow } from 'enzyme';
 
 import { act } from 'react-dom/test-utils';
 
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { FormulaPublicApi } from '@kbn/lens-plugin/public';
 
 import { findOrCreateDataView } from '../utils/find_or_create_data_view';
 

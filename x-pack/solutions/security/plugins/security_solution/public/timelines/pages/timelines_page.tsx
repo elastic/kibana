@@ -22,6 +22,7 @@ import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { PageLoader } from '../../common/components/page_loader';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
@@ -31,9 +32,9 @@ export const TimelinesPage = React.memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { indicesExist: oldIndicesExist } = useSourcererDataView();
 
-  const { dataView } = useDataView(DataViewManagerScopeName.default);
+  const { dataView, status } = useDataView(DataViewManagerScopeName.default);
   // NOTE: there should be a Suspense / some kind of loader here as this value is not settled immediately
-  const experimentalIndicesExist = !!dataView?.matchedIndices?.length;
+  const experimentalIndicesExist = !!dataView.matchedIndices.length;
 
   const indicesExist = newDataViewPickerEnabled ? experimentalIndicesExist : oldIndicesExist;
 
@@ -48,6 +49,10 @@ export const TimelinesPage = React.memo(() => {
 
   const timelineType =
     tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <SecurityRoutePageWrapper pageName={SecurityPageName.timelines}>

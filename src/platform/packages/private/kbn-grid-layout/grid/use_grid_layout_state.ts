@@ -10,9 +10,9 @@
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
-  Observable,
   combineLatest,
   debounceTime,
   distinctUntilChanged,

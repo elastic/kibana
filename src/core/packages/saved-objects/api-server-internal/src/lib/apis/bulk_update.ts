@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Payload } from '@hapi/boom';
+import type { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObject,
+import type {
   DecoratedError,
   AuthorizeUpdateObject,
   SavedObjectsRawDoc,
@@ -19,9 +17,10 @@ import {
   SavedObjectSanitizedDoc,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
-import {
+import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
@@ -42,7 +41,7 @@ import {
   getSavedObjectFromSource,
   mergeForUpdate,
 } from './utils';
-import { ApiExecutionContext } from './types';
+import type { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
   objects: Array<SavedObjectsBulkUpdateObject<T>>;
@@ -150,6 +149,13 @@ export const performBulkUpdate = async <T>(
     };
   }
 
+  /*
+   * Gets the namespace ID for a given object defaulting to the current namespace.
+   *
+   * If the `objectNamespace` is defined, it will convert it to an ID using
+   * `SavedObjectsUtils.namespaceStringToId()`. Otherwise, it will use the current
+   * namespace ID.
+   */
   const getNamespaceId = (objectNamespace?: string) =>
     objectNamespace !== undefined
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
@@ -262,7 +268,7 @@ export const performBulkUpdate = async <T>(
         ];
       } else if (registry.isSingleNamespace(type)) {
         // if `objectNamespace` is undefined, fall back to `options.namespace`
-        savedObjectNamespace = objectNamespace ?? namespace;
+        savedObjectNamespace = getNamespaceId(objectNamespace);
       }
 
       const document = getSavedObjectFromSource<T>(
@@ -361,7 +367,7 @@ export const performBulkUpdate = async <T>(
         return expectedResult.value as any;
       }
 
-      const { type, id, namespaces, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
+      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
         expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
@@ -376,11 +382,18 @@ export const performBulkUpdate = async <T>(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
-      const { originId } = rawMigratedUpdatedDoc._source;
+      const {
+        originId,
+        namespaces: docNamespaces,
+        namespace: docNamespace,
+      } = rawMigratedUpdatedDoc._source;
       return {
         id,
         type,
-        ...(namespaces && { namespaces }),
+        ...(registry.isMultiNamespace(type) && { namespaces: docNamespaces }),
+        ...(registry.isSingleNamespace(type) && {
+          namespaces: [SavedObjectsUtils.namespaceIdToString(docNamespace)],
+        }),
         ...(originId && { originId }),
         updated_at,
         updated_by,

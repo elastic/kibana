@@ -8,8 +8,8 @@
  */
 
 import { Worker } from 'worker_threads';
-import { Logger } from '../../../lib/utils/create_logger';
-import { StreamManager } from '../stream_manager';
+import type { Logger } from '../../../lib/utils/create_logger';
+import type { StreamManager } from '../stream_manager';
 import { logMessage } from './log_message';
 
 interface WorkerServiceOptions<TWorkerData> {

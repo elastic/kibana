@@ -23,7 +23,7 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../../../common/constants/synthetics_alerts';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useGetUrlParams, useRefreshedRange } from '../../../../hooks';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';

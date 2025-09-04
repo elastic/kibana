@@ -9,7 +9,7 @@
 
 import createContainer from 'constate';
 import { useState, useEffect } from 'react';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
@@ -24,11 +24,11 @@ import {
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import { useDataSourcesContext } from '../../../hooks/use_data_sources';
 
 interface UseTransactionPrams {
   traceId?: string;
   transactionId?: string;
-  indexPattern: string;
 }
 
 interface GetTransactionParams {
@@ -104,7 +104,9 @@ export interface Trace {
   duration: number;
 }
 
-const useRootSpan = ({ traceId, transactionId, indexPattern }: UseTransactionPrams) => {
+const useRootSpan = ({ traceId, transactionId }: UseTransactionPrams) => {
+  const { indexes } = useDataSourcesContext();
+  const indexPattern = indexes.apm.traces;
   const { data, core } = getUnifiedDocViewerServices();
   const [trace, setTrace] = useState<Trace | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -122,15 +124,17 @@ const useRootSpan = ({ traceId, transactionId, indexPattern }: UseTransactionPra
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getRootSpanData({
-          traceId,
-          transactionId,
-          indexPattern,
-          data,
-          signal,
-        });
+        const result = indexPattern
+          ? await getRootSpanData({
+              traceId,
+              transactionId,
+              indexPattern,
+              data,
+              signal,
+            })
+          : undefined;
 
-        const fields = result.rawResponse.hits.hits[0]?.fields;
+        const fields = result?.rawResponse.hits.hits[0]?.fields;
         const name = fields?.[TRANSACTION_NAME_FIELD] || fields?.[SPAN_NAME_FIELD];
         const duration = resolveDuration(fields);
 

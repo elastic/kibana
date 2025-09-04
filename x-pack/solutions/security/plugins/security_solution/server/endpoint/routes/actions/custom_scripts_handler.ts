@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { ResponseActionsClient } from '../../services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import { errorHandler } from '../error_handler';
@@ -48,7 +50,7 @@ export const registerCustomScriptsRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
+        { all: ['canWriteExecuteOperations'] },
         endpointContext.logFactory.get('customScriptsRoute'),
         getCustomScriptsRouteHandler(endpointContext)
       )
@@ -68,12 +70,27 @@ export const getCustomScriptsRouteHandler = (
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointContext.logFactory.get('customScriptsRoute');
+  const logger = endpointContext.logFactory.get('customScriptsRouteHandler');
 
   return async (context, request, response) => {
-    const { agentType = 'endpoint' } = request.query;
+    const { agentType = 'endpoint', ...otherQueryOptions } = request.query;
 
     logger.debug(`Retrieving custom scripts for: agentType ${agentType}`);
+
+    if (
+      !isActionSupportedByAgentType(agentType, 'runscript', 'manual') ||
+      (agentType === 'sentinel_one' &&
+        !endpointContext.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled)
+    ) {
+      return errorHandler(
+        logger,
+        response,
+        new CustomHttpRequestError(
+          `Agent type [${agentType}] does not support 'runscript' response action`,
+          400
+        )
+      );
+    }
 
     try {
       const coreContext = await context.core;
@@ -89,7 +106,7 @@ export const getCustomScriptsRouteHandler = (
         connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
       });
 
-      const data = await responseActionsClient.getCustomScripts();
+      const data = await responseActionsClient.getCustomScripts(otherQueryOptions);
 
       return response.ok({ body: data });
     } catch (e) {

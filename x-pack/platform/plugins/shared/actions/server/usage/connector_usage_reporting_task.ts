@@ -34,7 +34,7 @@ export class ConnectorUsageReportingTask {
   private readonly eventLogIndex: string;
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
-  private readonly usageApiUrl: string;
+  private readonly usageApiUrl: string | undefined;
   private readonly enabled: boolean;
 
   constructor({
@@ -55,9 +55,9 @@ export class ConnectorUsageReportingTask {
     this.logger = logger;
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
-    this.usageApiUrl = config.url;
-    this.enabled = config.enabled ?? true;
-    const caCertificatePath = config.ca?.path;
+    this.usageApiUrl = config?.url;
+    this.enabled = config?.enabled ?? true;
+    const caCertificatePath = config?.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
       try {
@@ -143,6 +143,15 @@ export class ConnectorUsageReportingTask {
       };
     }
 
+    if (!this.usageApiUrl) {
+      this.logger.error(
+        `Missing required Usage API url while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+      );
+      return {
+        state,
+      };
+    }
+
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
@@ -186,7 +195,7 @@ export class ConnectorUsageReportingTask {
 
     try {
       attempts = attempts + 1;
-      await this.pushUsageRecord(record);
+      await this.pushUsageRecord({ url: this.usageApiUrl, record });
       this.logger.info(
         `Connector usage record has been successfully reported, ${record.creation_timestamp}, usage: ${record.usage.quantity}, period:${record.usage.period_seconds}`
       );
@@ -304,8 +313,14 @@ export class ConnectorUsageReportingTask {
     };
   };
 
-  private pushUsageRecord = async (record: ConnectorUsageReport) => {
-    return axios.post(this.usageApiUrl, [record], {
+  private pushUsageRecord = async ({
+    url,
+    record,
+  }: {
+    url: string;
+    record: ConnectorUsageReport;
+  }) => {
+    return axios.post(url, [record], {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({

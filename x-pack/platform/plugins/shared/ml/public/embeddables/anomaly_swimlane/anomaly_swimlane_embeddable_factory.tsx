@@ -6,6 +6,7 @@
  */
 
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -19,6 +20,7 @@ import {
   apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesTimeRange,
+  apiPublishesTimeslice,
   fetch$,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -58,6 +60,7 @@ import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_exe
 import { initializeSwimLaneControls, swimLaneComparators } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
 import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import { AnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -70,13 +73,11 @@ export const getServices = async (
     { AnomalyDetectorService },
     { AnomalyTimelineService },
     { mlApiProvider },
-    { mlResultsServiceProvider },
   ] = await Promise.all([
     getStartServices(),
     import('../../application/services/anomaly_detector_service'),
     import('../../application/services/anomaly_timeline_service'),
     import('../../application/services/ml_api_service'),
-    import('../../application/services/results_service'),
   ]);
 
   const httpService = new HttpService(coreStart.http);
@@ -84,7 +85,7 @@ export const getServices = async (
   const anomalyTimelineService = new AnomalyTimelineService(
     pluginsStart.data.query.timefilter.timefilter,
     coreStart.uiSettings,
-    mlResultsServiceProvider(mlApiProvider(httpService))
+    mlApiProvider(httpService)
   );
 
   return [
@@ -118,11 +119,10 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ? new BehaviorSubject(initialState.rawState.query)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
-      const filters$ =
-        (initialState.rawState.query
-          ? new BehaviorSubject(initialState.rawState.filters)
-          : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
-        (new BehaviorSubject(undefined) as PublishesUnifiedSearch['filters$']);
+      const filters$ = ((initialState.rawState.filters
+        ? new BehaviorSubject(initialState.rawState.filters)
+        : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
+        new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
       const refresh$ = new BehaviorSubject<void>(undefined);
 
@@ -179,25 +179,27 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             defaultMessage: 'swim lane',
           }),
         onEdit: async () => {
-          try {
-            const { resolveAnomalySwimlaneUserInput } = await import(
-              './anomaly_swimlane_setup_flyout'
-            );
-
-            const result = await resolveAnomalySwimlaneUserInput(
-              { ...coreStartServices, ...pluginsStartServices },
-              parentApi,
-              uuid,
-              {
-                ...titleManager.getLatestState(),
-                ...swimlaneManager.getLatestState(),
-              }
-            );
-
-            swimlaneManager.api.updateUserInput(result);
-          } catch (e) {
-            return Promise.reject();
-          }
+          openLazyFlyout({
+            core: coreStartServices,
+            parentApi,
+            flyoutProps: {
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              return (
+                <AnomalySwimlaneUserInput
+                  coreStart={coreStartServices}
+                  pluginStart={pluginsStartServices}
+                  onConfirm={(result) => {
+                    swimlaneManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={closeFlyout}
+                  input={{ ...titleManager.getLatestState(), ...swimlaneManager.getLatestState() }}
+                />
+              );
+            },
+          });
         },
         ...titleManager.api,
         ...timeRangeManager.api,
@@ -223,7 +225,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
           ? api.parentApi.timeRange$
           : of(null),
-        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
+        apiHasParentApi(api) && apiPublishesTimeslice(api.parentApi)
           ? api.parentApi.timeslice$
           : of(null),
       ]).pipe(
@@ -236,7 +238,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             return parentTimeRange;
           }
           if (parentTimeslice) {
-            return parentTimeRange;
+            return parentTimeslice;
           }
           return undefined;
         })

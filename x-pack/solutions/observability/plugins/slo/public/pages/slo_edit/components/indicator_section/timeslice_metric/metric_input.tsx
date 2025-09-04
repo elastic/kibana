@@ -4,21 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFieldNumber,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-} from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregation_options';
-import { createOptionsFromFields, Option } from '../../../helpers/create_options';
-import { CreateSLOForm } from '../../../types';
+import type { Option } from '../../../helpers/create_options';
+import { createOptionsFromFields } from '../../../helpers/create_options';
+import type { CreateSLOForm } from '../../../types';
 
 const fieldLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.fieldLabel', {
   defaultMessage: 'Field',

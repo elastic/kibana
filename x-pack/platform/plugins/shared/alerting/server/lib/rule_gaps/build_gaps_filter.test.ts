@@ -7,36 +7,36 @@
 import { buildGapsFilter } from './build_gaps_filter';
 import { gapStatus } from '../../../common/constants/gap_status';
 
+const BASE_GAPS_FILTER =
+  'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true';
+
 describe('buildGapsFilter', () => {
   it('should build base filter when no params provided', () => {
-    expect(buildGapsFilter({})).toBe('event.action: gap AND event.provider: alerting');
+    expect(buildGapsFilter({})).toBe(BASE_GAPS_FILTER);
   });
 
   it('should build filter with range', () => {
     expect(buildGapsFilter({ start: '2024-01-01', end: '2024-01-02' })).toBe(
-      'event.action: gap AND event.provider: alerting AND ' +
+      `${BASE_GAPS_FILTER} AND ` +
         'kibana.alert.rule.gap.range <= "2024-01-02" AND kibana.alert.rule.gap.range >= "2024-01-01"'
     );
   });
 
   it('should build filter with only end date', () => {
     expect(buildGapsFilter({ end: '2024-01-02' })).toBe(
-      'event.action: gap AND event.provider: alerting AND ' +
-        'kibana.alert.rule.gap.range <= "2024-01-02"'
+      `${BASE_GAPS_FILTER} AND ` + 'kibana.alert.rule.gap.range <= "2024-01-02"'
     );
   });
 
   it('should build filter with only start date', () => {
     expect(buildGapsFilter({ start: '2024-01-01' })).toBe(
-      'event.action: gap AND event.provider: alerting AND ' +
-        'kibana.alert.rule.gap.range >= "2024-01-01"'
+      `${BASE_GAPS_FILTER} AND ` + 'kibana.alert.rule.gap.range >= "2024-01-01"'
     );
   });
 
   it('should build filter with statuses', () => {
     expect(buildGapsFilter({ statuses: [gapStatus.UNFILLED] })).toBe(
-      'event.action: gap AND event.provider: alerting AND ' +
-        '(kibana.alert.rule.gap.status : unfilled)'
+      `${BASE_GAPS_FILTER} AND ` + '(kibana.alert.rule.gap.status : unfilled)'
     );
   });
 
@@ -48,7 +48,7 @@ describe('buildGapsFilter', () => {
         statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
       })
     ).toBe(
-      'event.action: gap AND event.provider: alerting AND ' +
+      `${BASE_GAPS_FILTER} AND ` +
         'kibana.alert.rule.gap.range <= "2024-01-02" AND kibana.alert.rule.gap.range >= "2024-01-01" AND ' +
         '(kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)'
     );
@@ -57,43 +57,37 @@ describe('buildGapsFilter', () => {
   describe('interval filters', () => {
     it('should build filter with hasUnfilledIntervals = true', () => {
       expect(buildGapsFilter({ hasUnfilledIntervals: true })).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
-          'kibana.alert.rule.gap.unfilled_intervals: *'
+        `${BASE_GAPS_FILTER} AND ` + 'kibana.alert.rule.gap.unfilled_intervals: *'
       );
     });
 
     it('should build filter with hasUnfilledIntervals = false', () => {
       expect(buildGapsFilter({ hasUnfilledIntervals: false })).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
-          'NOT kibana.alert.rule.gap.unfilled_intervals: *'
+        `${BASE_GAPS_FILTER} AND ` + 'NOT kibana.alert.rule.gap.unfilled_intervals: *'
       );
     });
 
     it('should build filter with hasInProgressIntervals = true', () => {
       expect(buildGapsFilter({ hasInProgressIntervals: true })).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
-          'kibana.alert.rule.gap.in_progress_intervals: *'
+        `${BASE_GAPS_FILTER} AND ` + 'kibana.alert.rule.gap.in_progress_intervals: *'
       );
     });
 
     it('should build filter with hasInProgressIntervals = false', () => {
       expect(buildGapsFilter({ hasInProgressIntervals: false })).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
-          'NOT kibana.alert.rule.gap.in_progress_intervals: *'
+        `${BASE_GAPS_FILTER} AND ` + 'NOT kibana.alert.rule.gap.in_progress_intervals: *'
       );
     });
 
     it('should build filter with hasFilledIntervals = true', () => {
       expect(buildGapsFilter({ hasFilledIntervals: true })).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
-          'kibana.alert.rule.gap.filled_intervals: *'
+        `${BASE_GAPS_FILTER} AND ` + 'kibana.alert.rule.gap.filled_intervals: *'
       );
     });
 
     it('should build filter with hasFilledIntervals = false', () => {
       expect(buildGapsFilter({ hasFilledIntervals: false })).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
-          'NOT kibana.alert.rule.gap.filled_intervals: *'
+        `${BASE_GAPS_FILTER} AND ` + 'NOT kibana.alert.rule.gap.filled_intervals: *'
       );
     });
 
@@ -105,7 +99,7 @@ describe('buildGapsFilter', () => {
           hasFilledIntervals: true,
         })
       ).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
+        `${BASE_GAPS_FILTER} AND ` +
           'kibana.alert.rule.gap.unfilled_intervals: * AND ' +
           'NOT kibana.alert.rule.gap.in_progress_intervals: * AND ' +
           'kibana.alert.rule.gap.filled_intervals: *'
@@ -119,7 +113,7 @@ describe('buildGapsFilter', () => {
           hasInProgressIntervals: undefined,
           hasFilledIntervals: undefined,
         })
-      ).toBe('event.action: gap AND event.provider: alerting');
+      ).toBe(BASE_GAPS_FILTER);
     });
 
     it('should build complex filter with all parameters', () => {
@@ -133,7 +127,7 @@ describe('buildGapsFilter', () => {
           hasFilledIntervals: true,
         })
       ).toBe(
-        'event.action: gap AND event.provider: alerting AND ' +
+        `${BASE_GAPS_FILTER} AND ` +
           'kibana.alert.rule.gap.range <= "2024-01-02" AND ' +
           'kibana.alert.rule.gap.range >= "2024-01-01" AND ' +
           '(kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled) AND ' +

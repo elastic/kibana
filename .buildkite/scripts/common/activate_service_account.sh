@@ -13,7 +13,9 @@ if [[ -z "$CALL_ARGUMENT" ]]; then
   exit 1
 elif [[ "$CALL_ARGUMENT" == "--unset-impersonation" ]]; then
   echo "Unsetting impersonation"
-  gcloud config unset auth/impersonate_service_account
+  if [[ -x "$(command -v gcloud)" ]]; then
+    gcloud config unset auth/impersonate_service_account
+  fi
   exit 0
 elif [[ "$CALL_ARGUMENT" == "--logout-gcloud" ]]; then
   echo "Logging out of gcloud"

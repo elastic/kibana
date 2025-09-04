@@ -6,15 +6,16 @@
  */
 
 import React, { useState } from 'react';
-import { CasesPermissions } from '@kbn/cases-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import { ObservabilityAlertsTable } from '../../..';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
+import { CasesAlertsTable } from './cases_alerts_table';
 
 export interface CasesProps {
   permissions: CasesPermissions;
@@ -23,12 +24,8 @@ export interface CasesProps {
 export function Cases({ permissions }: CasesProps) {
   const {
     application: { navigateToUrl },
-    cases: {
-      ui: { getCases: CasesList },
-    },
-    http: {
-      basePath: { prepend },
-    },
+    cases,
+    http,
   } = useKibana().services;
 
   const { observabilityRuleTypeRegistry } = usePluginContext();
@@ -42,6 +39,18 @@ export function Cases({ permissions }: CasesProps) {
   const handleShowAlertDetails = (alertId: string) => {
     setSelectedAlertId(alertId);
   };
+  if (!cases) {
+    return (
+      <>
+        {i18n.translate('xpack.observability.cases.casesPluginIsNotLabel', {
+          defaultMessage:
+            'Cases plugin is not available. Please ensure it is installed and enabled.',
+        })}
+      </>
+    );
+  }
+
+  const CasesList = cases.ui.getCases;
 
   return (
     <>
@@ -54,9 +63,9 @@ export function Cases({ permissions }: CasesProps) {
         owner={[observabilityFeatureId]}
         permissions={permissions}
         ruleDetailsNavigation={{
-          href: (ruleId) => prepend(paths.observability.ruleDetails(ruleId || '')),
+          href: (ruleId) => http.basePath.prepend(paths.observability.ruleDetails(ruleId || '')),
           onClick: (ruleId, ev) => {
-            const ruleLink = prepend(paths.observability.ruleDetails(ruleId || ''));
+            const ruleLink = http.basePath.prepend(paths.observability.ruleDetails(ruleId || ''));
 
             if (ev != null) {
               ev.preventDefault();
@@ -67,7 +76,7 @@ export function Cases({ permissions }: CasesProps) {
         }}
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
-        renderAlertsTable={(props) => <ObservabilityAlertsTable {...props} />}
+        renderAlertsTable={(props) => <CasesAlertsTable {...props} />}
       />
 
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (

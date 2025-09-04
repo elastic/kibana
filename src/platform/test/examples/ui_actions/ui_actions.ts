@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
+import type { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {

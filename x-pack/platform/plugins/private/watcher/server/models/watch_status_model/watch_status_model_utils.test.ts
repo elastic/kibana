@@ -8,7 +8,7 @@
 import moment from 'moment';
 
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
-import { ClientActionStatusModel } from '../../../common/types';
+import type { ClientActionStatusModel } from '../../../common/types';
 import { deriveState, deriveComment, deriveLastExecution } from './watch_status_model_utils';
 
 const mockActionStatus = (opts: Partial<ClientActionStatusModel>): ClientActionStatusModel => ({

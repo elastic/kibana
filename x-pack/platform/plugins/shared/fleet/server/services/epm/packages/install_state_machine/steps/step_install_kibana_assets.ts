@@ -52,6 +52,7 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
         pkgName,
         packageInstallContext,
         spaceId,
+        assetTags: packageInfo?.asset_tags,
       })
   );
 

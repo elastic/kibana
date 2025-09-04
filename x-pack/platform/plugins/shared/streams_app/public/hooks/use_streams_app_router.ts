@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
+import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
 import type { StreamsAppRouter, StreamsAppRoutes } from '../routes/config';
 import { streamsAppRouter } from '../routes/config';

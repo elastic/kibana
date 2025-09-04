@@ -13,7 +13,7 @@ describe('convertTreeToList', () => {
     id: 'a',
     parentId: undefined,
     name: 'A',
-    timestamp: '',
+    timestampUs: 0,
     traceId: 't1',
     duration: 100,
     serviceName: 'svcA',
@@ -21,12 +21,13 @@ describe('convertTreeToList', () => {
     offset: 0,
     skew: 0,
     color: 'red',
+    errorCount: 0,
   };
   const itemB: TraceWaterfallItem = {
     id: 'b',
     parentId: 'a',
     name: 'B',
-    timestamp: '',
+    timestampUs: 0,
     traceId: 't1',
     duration: 50,
     serviceName: 'svcB',
@@ -34,12 +35,13 @@ describe('convertTreeToList', () => {
     offset: 10,
     skew: 0,
     color: 'blue',
+    errorCount: 0,
   };
   const itemC: TraceWaterfallItem = {
     id: 'c',
     parentId: 'a',
     name: 'C',
-    timestamp: '',
+    timestampUs: 0,
     traceId: 't1',
     duration: 30,
     serviceName: 'svcC',
@@ -47,12 +49,13 @@ describe('convertTreeToList', () => {
     offset: 20,
     skew: 0,
     color: 'green',
+    errorCount: 0,
   };
   const itemD: TraceWaterfallItem = {
     id: 'd',
     parentId: 'b',
     name: 'D',
-    timestamp: '',
+    timestampUs: 0,
     traceId: 't1',
     duration: 10,
     serviceName: 'svcD',
@@ -60,6 +63,7 @@ describe('convertTreeToList', () => {
     offset: 30,
     skew: 0,
     color: 'yellow',
+    errorCount: 0,
   };
 
   const treeMap = {

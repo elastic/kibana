@@ -32,7 +32,7 @@ export interface LlmTasksPluginStart {
    * are respected. Can be used to check if the task can be registered
    * as LLM tool for example.
    */
-  retrieveDocumentationAvailable: () => Promise<boolean>;
+  retrieveDocumentationAvailable: (options: { inferenceId: string }) => Promise<boolean>;
   /**
    * Perform the `retrieveDocumentation` task.
    *

@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import { ObservabilityPublicStart } from '../..';
+import type { ObservabilityPublicStart } from '../..';
 import AlertActions from '../alert_actions/alert_actions';
 import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
-import {
+import type {
   GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
@@ -40,18 +40,8 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
   owner: [observabilityFeatureId],
 };
 
-export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTableProps, 'services'>) {
-  const {
-    data,
-    http,
-    notifications,
-    fieldFormats,
-    application,
-    licensing,
-    cases,
-    settings,
-    observability,
-  } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
+export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
+  const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   return (
@@ -66,22 +56,12 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
         config,
       }}
       renderCellValue={AlertsTableCellValue}
-      renderActionsCell={AlertActions}
+      renderActionsCell={props.renderActionsCell ?? AlertActions}
       actionsColumnWidth={120}
       renderFlyoutHeader={AlertsFlyoutHeader}
       renderFlyoutBody={AlertsFlyoutBody}
       renderFlyoutFooter={AlertsFlyoutFooter}
       showAlertStatusWithFlapping
-      services={{
-        data,
-        http,
-        notifications,
-        fieldFormats,
-        application,
-        licensing,
-        cases,
-        settings,
-      }}
       {...props}
     />
   );

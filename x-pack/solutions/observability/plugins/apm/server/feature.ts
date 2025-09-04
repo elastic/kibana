@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   LicensingPluginSetup,

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { BaseMessage, isToolMessage } from '@langchain/core/messages';
-import { isContentResultTransportFormat, ToolContentResult } from '@kbn/wci-server';
+import type { BaseMessage } from '@langchain/core/messages';
+import { isToolMessage } from '@langchain/core/messages';
+import type { ToolContentResult } from '@kbn/wci-server';
+import { isContentResultTransportFormat } from '@kbn/wci-server';
 import { extractTextContent } from '../../../utils/from_langchain_messages';
 
 export interface ToolMessageResult {

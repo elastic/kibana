@@ -10,7 +10,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useTransactionLatencyChart } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 jest.mock('../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { PersistedLog } from '../persisted_log';
 import { UI_SETTINGS } from '../../../common';
 

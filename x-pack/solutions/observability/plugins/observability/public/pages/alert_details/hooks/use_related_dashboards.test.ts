@@ -79,21 +79,19 @@ describe('useRelatedDashboards', () => {
     });
   });
 
-  it('should filter suggested dashboards to only return id, title, description', () => {
+  it('should return suggested and linked dashboards', () => {
     const mockApiResponse = {
       suggestedDashboards: [
         {
           id: TEST_DASHBOARD_1.id,
           title: TEST_DASHBOARD_1.title,
           description: TEST_DASHBOARD_1.description,
-          extraProperty: 'extra value',
           createdAt: '2023-01-01',
         },
         {
           id: TEST_DASHBOARD_2.id,
           title: TEST_DASHBOARD_2.title,
           description: TEST_DASHBOARD_2.description,
-          anotherExtraProperty: 'another extra value',
           updatedAt: '2023-01-02',
         },
       ],
@@ -102,7 +100,6 @@ describe('useRelatedDashboards', () => {
           id: TEST_DASHBOARD_3.id,
           title: TEST_DASHBOARD_3.title,
           description: TEST_DASHBOARD_3.description,
-          extraProperty: 'extra value',
           createdAt: '2023-01-01',
         },
       ],
@@ -121,11 +118,13 @@ describe('useRelatedDashboards', () => {
         id: TEST_DASHBOARD_1.id,
         title: TEST_DASHBOARD_1.title,
         description: TEST_DASHBOARD_1.description,
+        createdAt: '2023-01-01',
       },
       {
         id: TEST_DASHBOARD_2.id,
         title: TEST_DASHBOARD_2.title,
         description: TEST_DASHBOARD_2.description,
+        updatedAt: '2023-01-02',
       },
     ]);
     expect(result.current.linkedDashboards).toEqual([
@@ -133,6 +132,7 @@ describe('useRelatedDashboards', () => {
         id: TEST_DASHBOARD_3.id,
         title: TEST_DASHBOARD_3.title,
         description: TEST_DASHBOARD_3.description,
+        createdAt: '2023-01-01',
       },
     ]);
   });

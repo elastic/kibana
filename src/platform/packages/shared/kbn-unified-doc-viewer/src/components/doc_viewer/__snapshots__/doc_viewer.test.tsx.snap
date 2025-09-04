@@ -1,62 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
-<div
-  className="kbnDocViewer"
-  data-test-subj="kbnDocViewer"
->
-  <EuiTabbedContent
-    autoFocus="initial"
-    onTabClick={[Function]}
-    size="s"
-    tabs={
-      Array [
-        Object {
-          "content": <DocViewerTab
-            id="function"
-            render={[MockFunction]}
-            renderProps={
-              Object {
-                "hit": Object {},
-              }
-            }
-            title="Render function"
-          />,
-          "data-test-subj": "docViewerTab-function",
-          "id": "kbn_doc_viewer_tab_function",
-          "name": "Render function",
-        },
-        Object {
-          "content": <DocViewerTab
-            component={[Function]}
-            id="component"
-            renderProps={
-              Object {
-                "hit": Object {},
-              }
-            }
-            title="React component"
-          />,
-          "data-test-subj": "docViewerTab-component",
-          "id": "kbn_doc_viewer_tab_component",
-          "name": "React component",
-        },
-        Object {
-          "content": <DocViewerTab
-            id="invalid"
-            renderProps={
-              Object {
-                "hit": Object {},
-              }
-            }
-            title="Invalid doc view"
-          />,
-          "data-test-subj": "docViewerTab-invalid",
-          "id": "kbn_doc_viewer_tab_invalid",
-          "name": "Invalid doc view",
-        },
-      ]
-    }
-  />
+<div>
+  <div
+    class="kbnDocViewer"
+    data-test-subj="kbnDocViewer"
+  >
+    <div>
+      <div
+        class="euiTabs emotion-euiTabs-s-bottomBorder"
+        role="tablist"
+      >
+        <button
+          aria-controls="generated-id"
+          aria-selected="true"
+          class="euiTab euiTab-isSelected emotion-euiTab-selected"
+          data-test-subj="docViewerTab-function"
+          id="kbn_doc_viewer_tab_function"
+          role="tab"
+          tabindex="0"
+          type="button"
+        >
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            Render function
+          </span>
+        </button>
+        <button
+          aria-controls="generated-id"
+          aria-selected="false"
+          class="euiTab emotion-euiTab"
+          data-test-subj="docViewerTab-component"
+          id="kbn_doc_viewer_tab_component"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            React component
+          </span>
+        </button>
+        <button
+          aria-controls="generated-id"
+          aria-selected="false"
+          class="euiTab emotion-euiTab"
+          data-test-subj="docViewerTab-invalid"
+          id="kbn_doc_viewer_tab_invalid"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            Invalid doc view
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="kbn_doc_viewer_tab_function"
+        id="generated-id"
+        role="tabpanel"
+      />
+    </div>
+  </div>
 </div>
 `;

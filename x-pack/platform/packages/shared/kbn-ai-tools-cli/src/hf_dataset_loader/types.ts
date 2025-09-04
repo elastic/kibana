@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesPutMappingRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesPutMappingRequest } from '@elastic/elasticsearch/lib/api/types';
 
 /** One dataset to import. */
 export interface HuggingFaceDatasetSpec {

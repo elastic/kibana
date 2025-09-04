@@ -6,7 +6,8 @@
  */
 
 import React, { type ComponentProps, memo } from 'react';
-import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { RELATED_INTEGRATION } from '../../../constants';
 import type { GetTableProp } from './types';
 import { DatetimeSchemaCellRenderer } from './datetime_schema_cell_renderer';
 import { BasicCellRenderer } from './basic_cell_renderer';
@@ -49,7 +50,7 @@ export type CellValueProps = Pick<
 export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueProps) => {
   let component;
 
-  if (columnId === ALERT_RULE_PARAMETERS) {
+  if (columnId === RELATED_INTEGRATION) {
     component = <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />;
   } else if (columnId === ALERT_SEVERITY) {
     component = <KibanaAlertSeverityCellRenderer alert={alert} />;

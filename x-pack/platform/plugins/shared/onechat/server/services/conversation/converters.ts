@@ -6,55 +6,86 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
-  type UserIdAndName,
-  type Conversation,
-  toStructuredAgentIdentifier,
-  toSerializedAgentIdentifier,
-} from '@kbn/onechat-common';
+import type { ConversationWithoutRounds, ConversationRound } from '@kbn/onechat-common';
+import { type UserIdAndName, type Conversation } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
 } from '../../../common/conversations';
-import { ConversationProperties } from './storage';
+import type { ConversationProperties } from './storage';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
-export const fromEs = (
+const convertBaseFromEs = (
   document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
-): Conversation => {
+) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
 
   return {
     id: document._id,
-    agentId: toSerializedAgentIdentifier({
-      agentId: document._source.agent_id,
-      providerId: document._source.agent_provider_id,
-    }),
+    agent_id: document._source.agent_id,
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
     },
     title: document._source.title,
-    createdAt: document._source.created_at,
-    updatedAt: document._source.updated_at,
-    rounds: document._source.rounds,
+    created_at: document._source.created_at,
+    updated_at: document._source.updated_at,
   };
 };
 
-export const toEs = (conversation: Conversation): ConversationProperties => {
-  const structuredAgentId = toStructuredAgentIdentifier(conversation.agentId);
+function serializeStepResults(
+  rounds: Array<ConversationRound<ToolResult[]>>
+): Array<ConversationRound<string>> {
+  return rounds.map((round) => ({
+    ...round,
+    steps: round.steps.map((step) => ({
+      ...step,
+      results: 'results' in step ? JSON.stringify(step.results) : '[]',
+    })),
+  }));
+}
+
+function deserializeStepResults(
+  rounds: Array<ConversationRound<string>>
+): Array<ConversationRound<ToolResult[]>> {
+  return rounds.map((round) => ({
+    ...round,
+    steps: round.steps.map((step) => ({
+      ...step,
+      results: 'results' in step ? JSON.parse(step.results) : [],
+    })),
+  }));
+}
+
+export const fromEs = (
+  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
+): Conversation => {
+  const base = convertBaseFromEs(document);
   return {
-    agent_id: structuredAgentId.agentId,
-    agent_provider_id: structuredAgentId.providerId,
+    ...base,
+    rounds: deserializeStepResults(document._source!.rounds),
+  };
+};
+
+export const fromEsWithoutRounds = (
+  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
+): ConversationWithoutRounds => {
+  return convertBaseFromEs(document);
+};
+
+export const toEs = (conversation: Conversation): ConversationProperties => {
+  return {
+    agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
     title: conversation.title,
-    created_at: conversation.createdAt,
-    updated_at: conversation.updatedAt,
-    rounds: conversation.rounds,
+    created_at: conversation.created_at,
+    updated_at: conversation.updated_at,
+    rounds: serializeStepResults(conversation.rounds),
   };
 };
 
@@ -85,15 +116,13 @@ export const createRequestToEs = ({
   currentUser: UserIdAndName;
   creationDate: Date;
 }): ConversationProperties => {
-  const structuredAgentId = toStructuredAgentIdentifier(conversation.agentId);
   return {
-    agent_id: structuredAgentId.agentId,
-    agent_provider_id: structuredAgentId.providerId,
+    agent_id: conversation.agent_id,
     user_id: currentUser.id,
     user_name: currentUser.username,
     title: conversation.title,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
-    rounds: conversation.rounds,
+    rounds: serializeStepResults(conversation.rounds),
   };
 };

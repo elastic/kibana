@@ -21,7 +21,6 @@ describe('usePluginConfig()', () => {
     const config: Partial<InfraConfig> = {
       featureFlags: {
         customThresholdAlertsEnabled: true,
-        logsUIEnabled: false,
         metricsExplorerEnabled: false,
         osqueryEnabled: false,
         inventoryThresholdAlertRuleEnabled: true,

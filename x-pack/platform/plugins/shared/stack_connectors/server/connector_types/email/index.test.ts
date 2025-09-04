@@ -315,7 +315,9 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [from]: stub for actual message"`
     );
-    expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail']);
+    expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail'], {
+      isSender: true,
+    });
   });
 });
 

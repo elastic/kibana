@@ -9,22 +9,16 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiIcon,
-  UseEuiTheme,
-  euiFontSize,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiIcon, euiFontSize } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import classNames from 'classnames';
-import { DEFAULT_CONTROL_GROW } from '../../../common';
-import { DefaultControlApi } from '../../controls/types';
+import { DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
+import type { DefaultControlApi } from '../../controls/types';
 import { controlWidthStyles } from './control_panel.styles';
 
 /**

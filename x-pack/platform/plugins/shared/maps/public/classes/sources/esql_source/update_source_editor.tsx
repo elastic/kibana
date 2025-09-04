@@ -6,27 +6,27 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import { getFields } from './esql_utils';
+import type { NormalizedESQLSourceDescriptor } from './esql_source';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;
-  sourceDescriptor: ESQLSourceDescriptor;
+  sourceDescriptor: NormalizedESQLSourceDescriptor;
 }
 
 export function UpdateSourceEditor(props: Props) {

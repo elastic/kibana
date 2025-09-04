@@ -154,6 +154,9 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should NOT use space ID in creating SO client when feature is disabled', async () => {
+    // @ts-expect-error
+    apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+      false;
     ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
       'foo'
     );

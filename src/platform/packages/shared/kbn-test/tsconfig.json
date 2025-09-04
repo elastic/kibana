@@ -41,5 +41,6 @@
     "@kbn/scout-info",
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/babel-preset",
+    "@kbn/dot-text",
   ]
 }
