@@ -74,12 +74,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
-  const rootTransaction = useTraceRootSpanContext(); // start of the trace
   const traceRootSpan = useTraceRootSpanContext();
-
-  if (isSpan && !flattenedHit[TRANSACTION_DURATION]) {
-    flattenedHit[TRANSACTION_DURATION] = traceRootSpan.span?.duration;
-  }
 
   const aboutFieldConfigurations = {
     ...getSharedFieldConfigurations(flattenedHit),
@@ -88,21 +83,21 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
       : getTransactionFieldConfigurations(flattenedHit)),
   };
 
-  if (!isSpan) {
-    aboutFieldConfigurations[TRANSACTION_DURATION] = {
-      ...aboutFieldConfigurations[TRANSACTION_DURATION],
-      formatter: (value: unknown) => (
-        <Duration
-          duration={value as number}
-          size="xs"
-          parent={{
-            duration: rootTransaction?.transaction?.duration,
-            type: 'trace',
-          }}
-        />
-      ),
-    };
-  }
+  const durationField = isSpan ? SPAN_DURATION : TRANSACTION_DURATION;
+
+  aboutFieldConfigurations[durationField] = {
+    ...aboutFieldConfigurations[durationField],
+    formatter: (value: unknown) => (
+      <Duration
+        duration={value as number}
+        size="xs"
+        parent={{
+          duration: traceRootSpan?.span?.duration,
+          type: 'trace',
+        }}
+      />
+    ),
+  };
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">

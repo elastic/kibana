@@ -28,7 +28,7 @@ import {
   USER_AGENT_VERSION,
 } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
-import { Duration, HttpStatusCode, Timestamp } from '@kbn/apm-ui-shared';
+import { HttpStatusCode, Timestamp } from '@kbn/apm-ui-shared';
 import { EuiBadge } from '@elastic/eui';
 import type { TraceDocumentOverview } from '@kbn/discover-utils';
 import type { ContentFrameworkTableProps } from '../../../../content_framework';
@@ -135,16 +135,6 @@ export const getSpanFieldConfigurations = (
       title: i18n.translate('unifiedDocViewer.observability.traces.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
-      formatter: (value: unknown) => (
-        <Duration
-          duration={value as number}
-          size="xs"
-          parent={{
-            duration: flattenedHit[TRANSACTION_DURATION],
-            type: 'transaction',
-          }}
-        />
-      ),
     },
     [SPAN_TYPE]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.spanType.title', {
@@ -193,7 +183,6 @@ export const getTransactionFieldConfigurations = (
       title: i18n.translate('unifiedDocViewer.observability.traces.transactionDuration.title', {
         defaultMessage: 'Duration',
       }),
-      formatter: (value: unknown) => <Duration duration={value as number} size="xs" />,
     },
     [USER_AGENT_NAME]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.userAgent.title', {

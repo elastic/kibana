@@ -9,13 +9,7 @@
 
 import React from 'react';
 import { lastValueFrom } from 'rxjs';
-import {
-  SERVICE_NAME,
-  SPAN_ID,
-  TRANSACTION_DURATION,
-  TRANSACTION_ID,
-  TRANSACTION_NAME,
-} from '@kbn/apm-types';
+import { DURATION, TRANSACTION_DURATION } from '@kbn/apm-types';
 import { waitFor } from '@testing-library/dom';
 import { renderHook } from '@testing-library/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -77,23 +71,15 @@ describe('useTraceRootSpan hook', () => {
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should update span when data is fetched successfully', async () => {
-    const transactionName = 'Test Transaction';
+  it('should update span when data is fetched successfully APM', async () => {
     const transactionDuration = 1;
-    const spanId = 'spanId';
-    const transactionId = 'transactionId';
-    const serviceName = 'serviceName';
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
           hits: [
             {
               fields: {
-                [TRANSACTION_NAME]: transactionName,
                 [TRANSACTION_DURATION]: transactionDuration,
-                [SPAN_ID]: spanId,
-                [TRANSACTION_ID]: transactionId,
-                [SERVICE_NAME]: serviceName,
               },
             },
           ],
@@ -107,9 +93,31 @@ describe('useTraceRootSpan hook', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.span?.duration).toBe(transactionDuration);
-    expect(result.current.span?.[SPAN_ID]).toBe(spanId);
-    expect(result.current.span?.[TRANSACTION_ID]).toBe(transactionId);
-    expect(result.current.span?.[SERVICE_NAME]).toBe(serviceName);
+    expect(lastValueFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('should update span when data is fetched successfully OTel', async () => {
+    const spanDuration = 1;
+    lastValueFromMock.mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [
+            {
+              fields: {
+                [DURATION]: spanDuration,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useTraceRootSpanContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.span?.duration).toBe(spanDuration);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
@@ -126,7 +134,7 @@ describe('useTraceRootSpan hook', () => {
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'An error occurred while fetching the transaction',
+        title: 'An error occurred while fetching the root span of the trace',
         text: errorMessage,
       })
     );

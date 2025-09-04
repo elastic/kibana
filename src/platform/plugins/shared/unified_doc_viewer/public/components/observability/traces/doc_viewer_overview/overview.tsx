@@ -27,7 +27,6 @@ import {
 } from '@kbn/apm-types';
 import { SpanLinks } from '../components/span_links';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
-import { RootSpanProvider } from './hooks/use_root_span';
 import { Trace } from '../components/trace';
 import {
   getTabContentAvailableHeight,
@@ -80,68 +79,66 @@ export function Overview({
   return (
     <DataSourcesProvider indexes={indexes}>
       <TraceRootSpanProvider traceId={traceId}>
-        <RootSpanProvider traceId={traceId} transactionId={transactionId}>
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="m"
-            ref={setContainerRef}
-            css={
-              containerHeight
-                ? css`
-                    max-height: ${containerHeight}px;
-                    overflow: auto;
-                  `
-                : undefined
-            }
-          >
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          ref={setContainerRef}
+          css={
+            containerHeight
+              ? css`
+                  max-height: ${containerHeight}px;
+                  overflow: auto;
+                `
+              : undefined
+          }
+        >
+          <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <About
+              hit={hit}
+              dataView={dataView}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <SimilarSpans
+              spanName={flattenedHit[SPAN_NAME]}
+              serviceName={serviceName}
+              transactionName={flattenedHit[TRANSACTION_NAME]}
+              transactionType={flattenedHit[TRANSACTION_TYPE]}
+              isOtelSpan={isOtelSpan}
+              duration={duration || 0}
+            />
+          </EuiFlexItem>
+
+          {showWaterfall && docId ? (
             <EuiFlexItem>
               <EuiSpacer size="m" />
-              <About
-                hit={hit}
+              <Trace
                 dataView={dataView}
-                filter={filter}
-                onAddColumn={onAddColumn}
-                onRemoveColumn={onRemoveColumn}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <SimilarSpans
-                spanName={flattenedHit[SPAN_NAME]}
-                serviceName={serviceName}
-                transactionName={flattenedHit[TRANSACTION_NAME]}
-                transactionType={flattenedHit[TRANSACTION_TYPE]}
-                isOtelSpan={isOtelSpan}
-                duration={duration || 0}
-              />
-            </EuiFlexItem>
-
-            {showWaterfall && docId ? (
-              <EuiFlexItem>
-                <EuiSpacer size="m" />
-                <Trace
-                  dataView={dataView}
-                  traceId={traceId}
-                  serviceName={serviceName || ''}
-                  docId={docId}
-                />
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <SpanLinks traceId={traceId} docId={docId || ''} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <TraceContextLogEvents
                 traceId={traceId}
-                spanId={spanId}
-                transactionId={transactionId}
+                serviceName={serviceName || ''}
+                docId={docId}
               />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </RootSpanProvider>
+          ) : null}
+          <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <SpanLinks traceId={traceId} docId={docId || ''} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <TraceContextLogEvents
+              traceId={traceId}
+              spanId={spanId}
+              transactionId={transactionId}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </TraceRootSpanProvider>
     </DataSourcesProvider>
   );

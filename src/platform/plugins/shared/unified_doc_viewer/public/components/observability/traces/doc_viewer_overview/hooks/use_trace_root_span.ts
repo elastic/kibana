@@ -10,14 +10,7 @@
 import createContainer from 'constate';
 import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  PARENT_ID,
-  SERVICE_NAME,
-  SPAN_ID,
-  TRACE_ID,
-  TRANSACTION_DURATION,
-  TRANSACTION_ID,
-} from '@kbn/apm-types';
+import { DURATION, PARENT_ID, TRACE_ID, TRANSACTION_DURATION } from '@kbn/apm-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -43,7 +36,7 @@ async function getTraceRootSpan({ data, signal, traceId, indexPattern }: GetRoot
           size: 1,
           body: {
             timeout: '20s',
-            fields: [TRANSACTION_DURATION, SPAN_ID, SERVICE_NAME, TRANSACTION_ID],
+            fields: [TRANSACTION_DURATION, DURATION],
             query: {
               bool: {
                 should: [
@@ -70,9 +63,6 @@ async function getTraceRootSpan({ data, signal, traceId, indexPattern }: GetRoot
 
 export interface Span {
   duration: number;
-  [SPAN_ID]: string;
-  [TRANSACTION_ID]: string;
-  [SERVICE_NAME]: string;
 }
 
 const useTraceRootSpan = ({ traceId }: UseRootTransactionParams) => {
@@ -100,23 +90,17 @@ const useTraceRootSpan = ({ traceId }: UseRootTransactionParams) => {
           : undefined;
 
         const fields = result?.rawResponse.hits.hits[0]?.fields;
-        const transactionDuration = fields?.[TRANSACTION_DURATION]; // TODO: make it OTEL compatible?
-        const spanId = fields?.[SPAN_ID];
-        const transactionId = fields?.[TRANSACTION_ID];
-        const serviceName = fields?.[SERVICE_NAME];
+        const transactionDuration = fields?.[TRANSACTION_DURATION] || fields?.[DURATION];
 
         setSpan({
           duration: transactionDuration,
-          [SPAN_ID]: spanId,
-          [TRANSACTION_ID]: transactionId,
-          [SERVICE_NAME]: serviceName,
         });
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
             title: i18n.translate('unifiedDocViewer.docViewerSpanOverview.useTraceRootSpan.error', {
-              defaultMessage: 'An error occurred while fetching the root span of the trace.',
+              defaultMessage: 'An error occurred while fetching the root span of the trace',
             }),
             text: error.message,
           });
