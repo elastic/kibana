@@ -72,7 +72,7 @@ export function DatasetsQualityIndicators() {
           />
           <VerticalRule />
           <QualityIndicator
-            value={datasetsQuality.warning}
+            value={datasetsQuality.degraded}
             quality="warning"
             description={summaryPanelQualityDegradedText}
             isLoading={isDatasetsQualityLoading}

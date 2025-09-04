@@ -15,7 +15,10 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 
-import { UninstallTokenError } from '../../common/errors';
+import {
+  AgentlessAgentCreateFleetUnreachableError,
+  UninstallTokenError,
+} from '../../common/errors';
 
 import { appContextService } from '../services';
 
@@ -173,6 +176,8 @@ function shouldRespondWithErrorType(error: FleetError) {
   if (error instanceof OutputInvalidError) {
     return true;
   } else if (error instanceof AgentlessAgentCreateOverProvisionnedError) {
+    return true;
+  } else if (error instanceof AgentlessAgentCreateFleetUnreachableError) {
     return true;
   }
   return false;
