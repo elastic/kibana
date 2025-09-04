@@ -58,7 +58,6 @@ export const registerSiemDashboardMigrationsInstallRoute = (
               const ctx = await context.resolve(['core', 'contentManagement', 'securitySolution']);
 
               const securitySolutionContext = ctx.securitySolution;
-              const savedObjectsClient = ctx.core.savedObjects.client;
               const contentManagement = ctx.contentManagement;
 
               await siemMigrationAuditLogger.logInstallDashboards({ ids, migrationId });
@@ -68,7 +67,6 @@ export const registerSiemDashboardMigrationsInstallRoute = (
                 ids,
                 securitySolutionContext,
                 contentManagement,
-                savedObjectsClient,
                 request: req,
                 context: ctx as unknown as RequestHandlerContext,
               });

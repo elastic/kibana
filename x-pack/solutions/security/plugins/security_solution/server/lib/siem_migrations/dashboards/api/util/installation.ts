@@ -6,17 +6,13 @@
  */
 
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type {
-  SavedObjectsClientContract,
-  KibanaRequest,
-  SavedObject,
-  RequestHandlerContext,
-} from '@kbn/core/server';
+import type { KibanaRequest, SavedObject, RequestHandlerContext } from '@kbn/core/server';
 import { CONTENT_ID, LATEST_VERSION } from '@kbn/dashboard-plugin/common/content_management';
 import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
+import { getVendorTag } from '../../../rules/api/util/tags';
 
 const MAX_DASHBOARDS_TO_CREATE_IN_PARALLEL = 10;
 
@@ -41,11 +37,6 @@ interface InstallTranslatedProps {
    * The content management setup
    */
   contentManagement: ContentManagementServerSetup;
-
-  /**
-   * The saved objects client
-   */
-  savedObjectsClient: SavedObjectsClientContract;
 
   /**
    * The request object for content management client
@@ -99,8 +90,7 @@ const installDashboards = async (
   dashboardsToInstall: DashboardMigrationDashboard[],
   contentManagement: ContentManagementServerSetup,
   request: KibanaRequest,
-  context: RequestHandlerContext,
-  tags?: string[]
+  context: RequestHandlerContext
 ): Promise<{
   dashboardsToUpdate: Array<DashboardMigrationDashboard>;
   errors: Error[];
@@ -124,6 +114,7 @@ const installDashboards = async (
           })
           .for<SavedObject>(CONTENT_ID, LATEST_VERSION);
 
+        const tags = [getVendorTag(dashboard.original_dashboard)];
         const { result } = await client.create(
           {
             title: dashboard.original_dashboard.title,
@@ -148,8 +139,10 @@ const installDashboards = async (
         dashboardsToUpdate.push({
           ...dashboard,
           elastic_dashboard: {
-            ...dashboard.original_dashboard,
             id: result.item?.id || '',
+            title: dashboard.original_dashboard.title,
+            description: dashboard.original_dashboard.description,
+            data: dashboard.original_dashboard.data,
           },
         });
       } catch (error) {
