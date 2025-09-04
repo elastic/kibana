@@ -7,7 +7,7 @@
 
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
@@ -18,7 +18,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const ecsMappings = mappingFromFieldMap(ecsFieldMap, 'strict');
 
   describe('install alerts as data resources', () => {
-    it('testtest should install common alerts as data resources on startup', async () => {
+    it('should install common alerts as data resources on startup', async () => {
       const ilmPolicyName = '.alerts-ilm-policy';
       const frameworkComponentTemplateName = '.alerts-framework-mappings';
       const legacyComponentTemplateName = '.alerts-legacy-alert-mappings';
