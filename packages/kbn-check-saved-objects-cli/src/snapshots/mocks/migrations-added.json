@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "timestamp": 1756914281687,
+    "date": "2025-09-03T15:44:41.687Z",
+    "kibanaCommitHash": "20b1ec4d471768b45fab2c61f781bbc5ce776452",
+    "buildUrl": "https://buildkite.com/elastic/kibana-on-merge/builds/76489",
+    "pullRequestUrl": "https://github.com/elastic/kibana/pulls/233325"
+  },
+  "typeDefinitions": {
+    "config": {
+      "name": "config",
+      "migrationVersions": [
+        "7.9.0",
+        "7.12.0",
+        "7.13.0",
+        "8.0.0",
+        "8.1.0",
+        "8.5.0",
+        "8.7.0",
+        "8.9.0",
+        "9.1.0"
+      ],
+      "hash": "01265f01c36c7776d6a573262a6ede109633e302",
+      "modelVersions": [
+        {
+          "version": "1",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": false
+          }
+        },
+        {
+          "version": "2",
+          "changeTypes": [
+            "data_removal"
+          ],
+          "hasTransformation": true,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": false
+          }
+        }
+      ],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.buildNum.type": "keyword"
+      }
+    }
+  }
+}
