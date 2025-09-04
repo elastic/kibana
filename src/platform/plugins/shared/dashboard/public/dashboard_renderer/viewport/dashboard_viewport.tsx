@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPortal } from '@elastic/eui';
@@ -31,6 +31,7 @@ export const DashboardViewport = ({
   dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
 }) => {
   const dashboardApi = useDashboardApi();
+
   const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
   const [
@@ -38,35 +39,25 @@ export const DashboardViewport = ({
     dashboardTitle,
     description,
     expandedPanelId,
-    layout,
     viewMode,
     useMargins,
     fullScreenMode,
+    panelCounters,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
-    dashboardInternalApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
-    dashboardApi.fullScreenMode$
+    dashboardApi.fullScreenMode$,
+    dashboardInternalApi.panelCounters$
   );
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
 
-  const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
-    const panels = Object.values(layout.panels);
-    const visiblePanels = panels.filter(({ gridData }) => {
-      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
-    });
-    return {
-      panelCount: panels.length,
-      visiblePanelCount: visiblePanels.length,
-      sectionCount: Object.keys(layout.sections).length,
-    };
-  }, [layout, dashboardInternalApi]);
+  const { panelCount, sectionCount, visiblePanelsCount } = panelCounters;
 
   const classes = classNames('dshDashboardViewport', {
     'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
@@ -143,7 +134,7 @@ export const DashboardViewport = ({
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        data-shared-items-count={visiblePanelCount}
+        data-shared-items-count={visiblePanelsCount}
         data-test-subj={'dshDashboardViewport'}
       >
         {panelCount === 0 && sectionCount === 0 ? (

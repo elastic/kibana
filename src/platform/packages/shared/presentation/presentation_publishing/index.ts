@@ -39,6 +39,8 @@ export type { FetchContext } from './interfaces/fetch/fetch_context';
 export {
   type FetchSetting,
   type PublishesFetchSetting,
+  type PublishesIsVisible,
+  apiPublishesIsVisible,
   apiPublishesFetchSetting,
   onVisibilityChange,
   initializeVisibility,

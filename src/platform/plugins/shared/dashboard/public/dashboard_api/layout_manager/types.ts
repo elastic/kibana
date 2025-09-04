@@ -20,6 +20,12 @@ export interface DashboardLayoutPanel {
   type: DashboardPanel['type'];
 }
 
+export interface PanelCounts {
+  panelCount: number;
+  visiblePanelsCount: number;
+  sectionCount: number;
+}
+
 export interface DashboardLayout {
   panels: {
     [uuid: string]: DashboardLayoutPanel;

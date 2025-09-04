@@ -18,7 +18,9 @@ import {
   map,
   merge,
   mergeMap,
+  of,
   startWith,
+  switchMap,
   tap,
   type Observable,
 } from 'rxjs';
@@ -31,10 +33,15 @@ import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import type { PanelPackage } from '@kbn/presentation-containers';
-import type { SerializedPanelState, SerializedTitles } from '@kbn/presentation-publishing';
+import type {
+  FetchSetting,
+  SerializedPanelState,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import {
   apiHasLibraryTransforms,
   apiHasSerializableState,
+  apiPublishesIsVisible,
   apiPublishesTitle,
   apiPublishesUnsavedChanges,
   getTitle,
@@ -58,13 +65,19 @@ import type { initializeTrackPanel } from '../track_panel';
 import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
-import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import type {
+  DashboardChildren,
+  DashboardLayout,
+  DashboardLayoutPanel,
+  PanelCounts,
+} from './types';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardState['panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>,
-  getReferences: (id: string) => Reference[]
+  getReferences: (id: string) => Reference[],
+  fetchSetting$: BehaviorSubject<FetchSetting>
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -361,12 +374,57 @@ export function initializeLayoutManager(
     return Boolean(sectionId && sections[sectionId].collapsed);
   }
 
+  const getPanelCounts = (): PanelCounts => {
+    const layout = layout$.value;
+    const panels = Object.values(layout.panels);
+    const uncollapsedPanels = panels.filter(({ gridData }) => {
+      return !isSectionCollapsed(gridData.sectionId);
+    });
+    const panelsInViewport = Object.values(children$.value).filter(
+      (api) => apiPublishesIsVisible(api) && api.isVisible$.value
+    );
+    return {
+      panelCount: panels.length,
+      visiblePanelsCount:
+        fetchSetting$.value === 'always' ? uncollapsedPanels.length : panelsInViewport.length,
+      sectionCount: Object.keys(layout.sections).length,
+    };
+  };
+  const panelCounters$ = new BehaviorSubject<PanelCounts>(getPanelCounts());
+  const anyChildVisibilityChange$ = children$.pipe(
+    startWith({}),
+    switchMap((children) => {
+      const childrenWhoPublishVisibility = Object.values(children)
+        .map((child) => (apiPublishesIsVisible(child) ? child.isVisible$ : null))
+        .filter((entry) => entry !== null) as BehaviorSubject<boolean>[];
+      return childrenWhoPublishVisibility.length > 0
+        ? combineLatest(childrenWhoPublishVisibility)
+        : of([]);
+    })
+  );
+  const panelCounterSubscription = combineLatest([
+    layout$,
+    anyChildVisibilityChange$,
+    fetchSetting$,
+  ])
+    .pipe(
+      map(() => getPanelCounts()),
+      distinctUntilChanged(
+        (a, b) =>
+          a.panelCount === b.panelCount &&
+          a.visiblePanelsCount === b.visiblePanelsCount &&
+          a.sectionCount === b.sectionCount
+      )
+    )
+    .subscribe((counts) => panelCounters$.next(counts));
+
   return {
     internalApi: {
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       layout$,
       gridLayout$,
+      panelCounters$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
       startComparing$: (
@@ -447,6 +505,7 @@ export function initializeLayoutManager(
     },
     cleanup: () => {
       gridLayoutSubscription.unsubscribe();
+      panelCounterSubscription.unsubscribe();
     },
   };
 }

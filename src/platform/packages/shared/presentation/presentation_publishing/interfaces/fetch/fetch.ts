@@ -149,14 +149,11 @@ export function fetch$(api: unknown): Observable<FetchContext> {
     return merge(immediateChange$, batchedChanges$).pipe(startWith(getReloadTimeFetchContext(api)));
   })();
 
-  const isFetchPaused$ = apiPublishesPauseFetch(api)
-    ? api.isFetchPaused$.pipe(tap((pause) => console.log('TEST', pause)))
-    : of(false);
+  const isFetchPaused$ = apiPublishesPauseFetch(api) ? api.isFetchPaused$ : of(false);
 
   return fetchContext$.pipe(
     combineLatestWith(isFetchPaused$),
     filter(([, isFetchPaused]) => !isFetchPaused),
-    tap(() => console.log('passed filter')),
     map(([fetchContext]) => fetchContext),
     distinctUntilChanged((prevContext, nextContext) =>
       isReloadTimeFetchContextEqual(prevContext, nextContext)
@@ -168,8 +165,7 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       timeRange: reloadTimeFetchContext.timeRange,
       timeslice: reloadTimeFetchContext.timeslice,
       searchSessionId: reloadTimeFetchContext.searchSessionId,
-    })),
-    tap(() => console.log('passed map'))
+    }))
   );
 }
 

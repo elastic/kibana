@@ -13,6 +13,7 @@ import {
   diffComparators,
   initializeTitleManager,
   titleComparators,
+  type FetchSetting,
 } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
@@ -70,15 +71,15 @@ export function initializeSettingsManager(
   }
 
   const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
-  const fetchSetting$ = fetchOnlyVisible$.pipe(
-    combineLatestWith(viewMode$),
-    map(([onlyVisible, viewMode]) => {
-      if (viewMode === 'print') return 'always';
-      // TODO - when Background searching, load all panels
-      if (deferBelowFold) return 'onlyVisible';
-      return onlyVisible ? 'onlyVisible' : 'always';
-    })
-  );
+  const getFetchSetting = (): FetchSetting => {
+    if (viewMode$.value === 'print') return 'always';
+    if (deferBelowFold) return 'onlyVisible';
+    return fetchOnlyVisible$.value ? 'onlyVisible' : 'always';
+  };
+  const fetchSetting$ = new BehaviorSubject<FetchSetting>(getFetchSetting());
+  const fetchSettingSubscription = combineLatest([fetchOnlyVisible$, viewMode$])
+    .pipe(map(() => getFetchSetting()))
+    .subscribe((nextSetting) => fetchSetting$.next(nextSetting));
 
   function getSettings(): DashboardSettings {
     const titleState = titleManager.getLatestState();
@@ -161,6 +162,9 @@ export function initializeSettingsManager(
       reset: (lastSavedState: DashboardState) => {
         setSettings(lastSavedState);
       },
+    },
+    cleanup: () => {
+      fetchSettingSubscription.unsubscribe();
     },
   };
 }
