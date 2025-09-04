@@ -34,7 +34,7 @@ export interface FullScreenWaterfallProps {
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
-  serviceName: string;
+  serviceName?: string;
   onExitFullScreen: () => void;
 }
 
