@@ -54,7 +54,7 @@ export const runSearchTool = async ({
       if (ToolResultType.error) {
         const allErrorDetails = [];
         for (const msg of outState.messages) {
-          if (msg.getType() == 'tool' && msg.name) {
+          if (msg.getType() === 'tool' && msg.name) {
             allErrorDetails.push({
               innerTool: msg.name,
               errorMessage: msg.content,
