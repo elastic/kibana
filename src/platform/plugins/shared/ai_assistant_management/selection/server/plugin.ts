@@ -21,6 +21,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { schema } from '@kbn/config-schema';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -34,7 +35,6 @@ import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { schema } from '@kbn/config-schema';
 
 export class AIAssistantManagementSelectionPlugin
   implements

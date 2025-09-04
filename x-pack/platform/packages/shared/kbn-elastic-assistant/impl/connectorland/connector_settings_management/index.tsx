@@ -119,7 +119,7 @@ export const BottomBarActionsHoc = () => {
       await saveAll();
     } catch (e) {
       const error = e as Error;
-      
+
       toasts?.addDanger({
         title: i18n.BOTTOM_BAR_ACTIONS_SAVE_ERROR,
         text: error.message,
