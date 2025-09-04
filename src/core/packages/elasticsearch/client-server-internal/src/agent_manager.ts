@@ -76,29 +76,53 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private registerMetrics() {
     const meter = metrics.getMeter('kibana.elasticsearch.client');
 
-    const totalActiveSocketsObservable = meter.createObservableGauge(
-      'elasticsearch.client.total_active_sockets',
+    const totalActiveSocketsObservable = meter.createObservableUpDownCounter(
+      'elasticsearch.client.sockets.active',
       {
         description:
-          'Elasticsearch Clients: Total number of active sockets (all nodes, all connections)',
+          'Elasticsearch Clients: Total number of active sockets (sum for all agents, all nodes, all connections)',
         unit: '1',
         valueType: ValueType.INT,
       }
     );
-    const totalIdleSocketsObservable = meter.createObservableGauge(
-      'elasticsearch.client.total_idle_sockets',
+    const totalIdleSocketsObservable = meter.createObservableUpDownCounter(
+      'elasticsearch.client.sockets.idle',
       {
         description:
-          'Elasticsearch Clients: Total number of available sockets (alive but idle, all nodes, all connections)',
+          'Elasticsearch Clients: Total number of available idle sockets (sum for all agents, all nodes, all connections)',
         unit: '1',
         valueType: ValueType.INT,
       }
     );
-    const totalQueuedRequestsObservable = meter.createObservableGauge(
-      'elasticsearch.client.total_queued_requests',
+    const totalQueuedRequestsObservable = meter.createObservableUpDownCounter(
+      'elasticsearch.client.requests.queued',
       {
         description:
-          'Elasticsearch Clients: Total number of queued requests (all nodes, all connections)',
+          'Elasticsearch Clients: Total number of queued requests (sum for all agents, all nodes, all connections)',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+    const maxTotalSocketsObservable = meter.createObservableUpDownCounter(
+      'elasticsearch.client.sockets.max_total',
+      {
+        description: 'Elasticsearch Clients: Maximum number of sockets allowed to each client.',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+    const maxIdleSocketsObservable = meter.createObservableUpDownCounter(
+      'elasticsearch.client.sockets.max_idle',
+      {
+        description: 'Elasticsearch Clients: Maximum number of sockets allowed to each client.',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+    const numberOfAgentsObservable = meter.createObservableUpDownCounter(
+      'elasticsearch.client.agents.count',
+      {
+        description: 'Elasticsearch Clients: Number of agents (HTTP/HTTPS) in use.',
         unit: '1',
         valueType: ValueType.INT,
       }
@@ -109,16 +133,32 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         let totalActiveSockets = 0;
         let totalIdleSockets = 0;
         let totalQueuedRequests = 0;
-        this.agents.forEach(({ requests = {}, sockets = {}, freeSockets = {} }) => {
-          totalQueuedRequests += Object.values(requests).flat().length;
-          totalActiveSockets += Object.values(sockets).flat().length;
-          totalIdleSockets += Object.values(freeSockets).flat().length;
-        });
+        let maxMaxSockets = 0;
+        let maxMaxIdleSockets = 0;
+        this.agents.forEach(
+          ({ requests = {}, sockets = {}, freeSockets = {}, maxTotalSockets, maxFreeSockets }) => {
+            totalQueuedRequests += Object.values(requests).flat().length;
+            totalActiveSockets += Object.values(sockets).flat().length;
+            totalIdleSockets += Object.values(freeSockets).flat().length;
+            maxMaxSockets = Math.max(maxMaxSockets, maxTotalSockets);
+            maxMaxIdleSockets = Math.max(maxMaxIdleSockets, maxFreeSockets);
+          }
+        );
         result.observe(totalActiveSocketsObservable, totalActiveSockets);
         result.observe(totalIdleSocketsObservable, totalIdleSockets);
         result.observe(totalQueuedRequestsObservable, totalQueuedRequests);
+        result.observe(maxTotalSocketsObservable, maxMaxSockets);
+        result.observe(maxIdleSocketsObservable, maxMaxIdleSockets);
+        result.observe(numberOfAgentsObservable, this.agents.size);
       },
-      [totalActiveSocketsObservable, totalIdleSocketsObservable, totalQueuedRequestsObservable]
+      [
+        totalActiveSocketsObservable,
+        totalIdleSocketsObservable,
+        totalQueuedRequestsObservable,
+        maxTotalSocketsObservable,
+        maxIdleSocketsObservable,
+        numberOfAgentsObservable,
+      ]
     );
   }
 
