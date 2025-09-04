@@ -73,23 +73,27 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
       />
       <EuiHorizontalRule />
       {hasAttackDiscoveries && (
-        <AlertProcessing
-          attackAlertIds={attackAlertIds}
-          valueMetrics={valueMetrics}
-          from={from}
-          to={to}
-        />
+        <>
+          <AlertProcessing
+            attackAlertIds={attackAlertIds}
+            valueMetrics={valueMetrics}
+            from={from}
+            to={to}
+          />
+          <EuiHorizontalRule />
+        </>
       )}
-      <EuiHorizontalRule />
       {hasAttackDiscoveries && (
-        <CostSavingsTrend
-          analystHourlyRate={analystHourlyRate}
-          minutesPerAlert={minutesPerAlert}
-          from={from}
-          to={to}
-        />
+        <>
+          <CostSavingsTrend
+            analystHourlyRate={analystHourlyRate}
+            minutesPerAlert={minutesPerAlert}
+            from={from}
+            to={to}
+          />
+          <EuiHorizontalRule />
+        </>
       )}
-      <EuiHorizontalRule />
       <ValueReportSettings
         analystHourlyRate={analystHourlyRate}
         minutesPerAlert={minutesPerAlert}
