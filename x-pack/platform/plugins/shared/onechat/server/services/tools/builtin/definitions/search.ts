@@ -44,6 +44,7 @@ Note:
     `,
     schema: searchSchema,
     handler: async ({ query: nlQuery, index = '*' }, { esClient, modelProvider, logger }) => {
+      logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const results = await runSearchTool({
         nlQuery,
         index,

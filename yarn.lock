@@ -6385,6 +6385,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inspect-component-plugin@link:src/platform/plugins/private/inspect_component":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inspector-plugin@link:src/platform/plugins/shared/inspector":
   version "0.0.0"
   uid ""
@@ -15272,10 +15276,10 @@ babel-preset-jest@^29.6.3:
     babel-plugin-jest-hoist "^29.6.3"
     babel-preset-current-node-syntax "^1.0.0"
 
-backport@^10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-10.0.1.tgz#d8e52622f8a4813ebf2ae48abbea8dbf62f84f05"
-  integrity sha512-w4jQs8uvDBSycwwbD81v7ynDuaxGNm0c+w8IgmoO0g/xFM82v/8bRN2V1MltsnYWEFUd1hb7mDLo8mMes25zTA==
+backport@^10.0.2:
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-10.0.2.tgz#5f51cde270a1716dce91d9fb4f040d3f35930dc3"
+  integrity sha512-/o+D96xQOWG/ZYgeGOEhM3I+wIeTq4NP/lulmVMOzYiH7XW7QoA5sp915V6r19pXPmAfE54WnKI5U7ygNdZsPw==
   dependencies:
     "@octokit/rest" "^20.1.2"
     "@urql/core" "^5.1.1"
@@ -15287,7 +15291,7 @@ backport@^10.0.1:
     graphql "^16.11.0"
     graphql-tag "^2.12.6"
     handlebars "^4.7.8"
-    inquirer "^8.2.5"
+    inquirer "^8.2.7"
     lodash "^4.17.21"
     make-dir "^3.1.0"
     ora "^5.4.1"
@@ -22091,7 +22095,7 @@ inquirer@^7.0.0:
     strip-ansi "^6.0.0"
     through "^2.3.6"
 
-inquirer@^8.2.5, inquirer@^8.2.7:
+inquirer@^8.2.7:
   version "8.2.7"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-8.2.7.tgz#62f6b931a9b7f8735dc42db927316d8fb6f71de8"
   integrity sha512-UjOaSel/iddGZJ5xP/Eixh6dY1XghiBw4XK13rCCIJcJfyhhoul/7KhLLUGtebEj6GDYM6Vnx/mVsjx2L/mFIA==
