@@ -33,7 +33,7 @@ export const createOpenTelemetryAgentInstructions = (
 ): EuiStepProps[] => {
   const {
     apmServerUrl,
-    otlpManagedServiceUrl,
+    managedOtlpServiceUrl,
     apiKeyDetails,
     checkAgentStatus,
     agentStatus,
@@ -86,7 +86,7 @@ export const createOpenTelemetryAgentInstructions = (
       children: (
         <ConfigureSDKInstructions
           apmServerUrl={apmServerUrl}
-          otlpManagedServiceUrl={otlpManagedServiceUrl}
+          managedOtlpServiceUrl={managedOtlpServiceUrl}
           apiKeyDetails={apiKeyDetails}
         />
       ),
@@ -151,11 +151,11 @@ function ConfigurationValueColumn({
 }
 
 function ConfigureSDKInstructions({
-  otlpManagedServiceUrl,
+  managedOtlpServiceUrl,
   apmServerUrl,
   apiKeyDetails,
 }: {
-  otlpManagedServiceUrl: string;
+  managedOtlpServiceUrl: string;
   apmServerUrl: string;
   apiKeyDetails?: AgentApiDetails;
 }) {
@@ -179,7 +179,7 @@ function ConfigureSDKInstructions({
         <ClassicAPMEndpointInstructions apmServerUrl={apmServerUrl} apiKeyDetails={apiKeyDetails} />
       ) : (
         <ManagedOTLPEndpointInstructions
-          otlpManagedServiceUrl={otlpManagedServiceUrl}
+          managedOtlpServiceUrl={managedOtlpServiceUrl}
           apiKeyDetails={apiKeyDetails}
         />
       )}
@@ -282,10 +282,10 @@ function ClassicAPMEndpointInstructions({
 }
 
 function ManagedOTLPEndpointInstructions({
-  otlpManagedServiceUrl,
+  managedOtlpServiceUrl,
   apiKeyDetails,
 }: {
-  otlpManagedServiceUrl: string;
+  managedOtlpServiceUrl: string;
   apiKeyDetails?: AgentApiDetails;
 }) {
   const authHeaderValue = `Authorization=ApiKey ${apiKeyDetails?.apiKey}`;
@@ -293,7 +293,7 @@ function ManagedOTLPEndpointInstructions({
   const items = [
     {
       setting: 'OTEL_EXPORTER_OTLP_ENDPOINT',
-      value: otlpManagedServiceUrl ? otlpManagedServiceUrl : '<otlp-managed-service-url>',
+      value: managedOtlpServiceUrl ? managedOtlpServiceUrl : '<otlp-managed-service-url>',
     },
     {
       setting: 'OTEL_EXPORTER_OTLP_HEADERS',
