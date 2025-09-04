@@ -14,13 +14,14 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 const mockHttpGet = jest.fn();
+const mockAddDanger = jest.fn();
 
 jest.mock('../../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: { http: { get: mockHttpGet } },
   }),
   useToasts: () => ({
-    addDanger: jest.fn(),
+    addDanger: mockAddDanger,
   }),
 }));
 
@@ -209,6 +210,205 @@ describe('useFetchLatestScan', () => {
 
       expect(mockOnSuccess).toHaveBeenCalledWith(0);
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle partial failures in multi-type queries gracefully', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockHttpGet
+        .mockResolvedValueOnce({
+          data: [
+            {
+              id: 'test-insight-1',
+              status: DefendInsightStatusEnum.succeeded,
+              insights: [{ group: 'test', events: [{}, {}] }],
+            },
+          ],
+        })
+        .mockRejectedValueOnce(new Error('Second query failed'));
+
+      renderHook(() =>
+        useFetchLatestScan({
+          isPolling: false,
+          endpointId: 'endpoint-1',
+          onSuccess: mockOnSuccess,
+          onInsightGenerationFailure: mockOnInsightGenerationFailure,
+        })
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockHttpGet).toHaveBeenCalledTimes(2);
+      expect(mockOnSuccess).toHaveBeenCalledWith(2);
+      expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
+    });
+
+    it('should handle all queries failing in multi-type mode', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockHttpGet
+        .mockRejectedValueOnce(new Error('Query 1 failed'))
+        .mockRejectedValueOnce(new Error('Query 2 failed'));
+
+      renderHook(() =>
+        useFetchLatestScan({
+          isPolling: false,
+          endpointId: 'endpoint-1',
+          onSuccess: mockOnSuccess,
+          onInsightGenerationFailure: mockOnInsightGenerationFailure,
+        })
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockHttpGet).toHaveBeenCalledTimes(2);
+      expect(mockOnSuccess).toHaveBeenCalledWith(0);
+      expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Event Count Calculation Edge Cases', () => {
+    it('should handle insights without events properly', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockHttpGet.mockResolvedValue({
+        data: [
+          {
+            id: 'test-insight',
+            status: DefendInsightStatusEnum.succeeded,
+            insights: [
+              { group: 'test', events: null },
+              { group: 'test2' },
+              { group: 'test3', events: [] },
+              { group: 'test4', events: [{}, {}] },
+            ],
+          },
+        ],
+      });
+
+      renderHook(() =>
+        useFetchLatestScan({
+          isPolling: false,
+          endpointId: 'endpoint-1',
+          onSuccess: mockOnSuccess,
+          onInsightGenerationFailure: mockOnInsightGenerationFailure,
+        })
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockOnSuccess).toHaveBeenCalledWith(2);
+      expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
+    });
+
+    it('should correctly sum events across multiple insights', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockHttpGet.mockResolvedValue({
+        data: [
+          {
+            id: 'insight-1',
+            status: DefendInsightStatusEnum.succeeded,
+            insights: [
+              { group: 'test1', events: [{}, {}, {}] },
+              { group: 'test2', events: [{}] },
+            ],
+          },
+          {
+            id: 'insight-2',
+            status: DefendInsightStatusEnum.succeeded,
+            insights: [{ group: 'test3', events: [{}, {}] }],
+          },
+        ],
+      });
+
+      renderHook(() =>
+        useFetchLatestScan({
+          isPolling: false,
+          endpointId: 'endpoint-1',
+          onSuccess: mockOnSuccess,
+          onInsightGenerationFailure: mockOnInsightGenerationFailure,
+        })
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockOnSuccess).toHaveBeenCalledWith(6);
+    });
+  });
+
+  describe('Mixed Status Scenarios', () => {
+    it('should handle mixed insight statuses correctly - running takes precedence', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockHttpGet
+        .mockResolvedValueOnce({
+          data: [
+            {
+              id: 'running-insight',
+              status: DefendInsightStatusEnum.running,
+              insights: [{ group: 'test', events: [{}] }],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          data: [
+            {
+              id: 'succeeded-insight',
+              status: DefendInsightStatusEnum.succeeded,
+              insights: [{ group: 'test', events: [{}] }],
+            },
+          ],
+        });
+
+      renderHook(() =>
+        useFetchLatestScan({
+          isPolling: false,
+          endpointId: 'endpoint-1',
+          onSuccess: mockOnSuccess,
+          onInsightGenerationFailure: mockOnInsightGenerationFailure,
+        })
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+      expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
+    });
+
+    it('should handle failed status with running status - failed takes precedence', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockHttpGet
+        .mockResolvedValueOnce({
+          data: [
+            {
+              id: 'failed-insight',
+              status: DefendInsightStatusEnum.failed,
+              failureReason: 'Test failure',
+              insights: [],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          data: [
+            {
+              id: 'running-insight',
+              status: DefendInsightStatusEnum.running,
+              insights: [],
+            },
+          ],
+        });
+
+      renderHook(() =>
+        useFetchLatestScan({
+          isPolling: false,
+          endpointId: 'endpoint-1',
+          onSuccess: mockOnSuccess,
+          onInsightGenerationFailure: mockOnInsightGenerationFailure,
+        })
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockOnInsightGenerationFailure).toHaveBeenCalled();
+      expect(mockOnSuccess).not.toHaveBeenCalled();
     });
   });
 });

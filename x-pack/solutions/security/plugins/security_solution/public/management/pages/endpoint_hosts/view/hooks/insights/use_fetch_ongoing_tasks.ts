@@ -34,11 +34,7 @@ export const useFetchLatestScan = ({
     'defendInsightsPolicyResponseFailure'
   );
 
-  return useQuery<
-    DefendInsightsResponse | undefined,
-    { body?: { error: string } },
-    DefendInsightsResponse | undefined
-  >(
+  return useQuery<{ hasRunning: boolean }, { body?: { error: string } }, { hasRunning: boolean }>(
     [`fetchOngoingTasks-${endpointId}`, defendInsightsPolicyResponseFailureEnabled],
     async () => {
       try {
@@ -87,7 +83,7 @@ export const useFetchLatestScan = ({
           if (!insightResults.length) {
             // no previous scan record - treat as 0 expected insights
             onSuccess(0);
-            return undefined;
+            return { hasRunning: false };
           }
 
           const expectedCount = insightResults.reduce(
@@ -125,7 +121,7 @@ export const useFetchLatestScan = ({
             onSuccess(expectedCount);
           }
 
-          return insightResults[0];
+          return { hasRunning: hasRunningInsight };
         };
 
         return processQueryResults(insights);
@@ -134,7 +130,7 @@ export const useFetchLatestScan = ({
           title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
           text: error?.body?.error,
         });
-        return undefined;
+        return { hasRunning: false };
       }
     },
     {
