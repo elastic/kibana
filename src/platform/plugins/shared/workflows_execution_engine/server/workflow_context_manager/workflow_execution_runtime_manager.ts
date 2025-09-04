@@ -9,17 +9,17 @@
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { graphlib } from '@dagrejs/dagre';
 import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
 import type { RunStepResult } from '../step/step_base';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { WorkflowGraph } from './workflow_graph';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: graphlib.Graph;
+  workflowExecutionGraph: WorkflowGraph;
   workflowLogger: IWorkflowEventLogger;
 }
 
@@ -44,21 +44,28 @@ interface WorkflowExecutionRuntimeManagerInit {
  */
 export class WorkflowExecutionRuntimeManager {
   private currentStepIndex: number = -1;
-  private topologicalOrder: string[];
+  // private topologicalOrder: string[];
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
   private entryTransactionId?: string;
   private workflowTransaction?: any; // APM transaction instance
-  private workflowExecutionGraph: graphlib.Graph;
+  private workflowGraph: WorkflowGraph;
+
+  private get topologicalOrder(): string[] {
+    return this.workflowGraph.topologicalOrder;
+  }
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
-    this.workflowExecutionGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
-    this.topologicalOrder = graphlib.alg.topsort(this.workflowExecutionGraph);
+    this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
 
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
+  }
+
+  public get workflowExecution() {
+    return this.workflowExecutionState.getWorkflowExecution();
   }
 
   /**
@@ -83,24 +90,6 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
-  public getNodeSuccessors(nodeId: string): any[] {
-    const successors = this.workflowExecutionGraph.successors(nodeId);
-
-    if (!successors) {
-      return [];
-    }
-
-    return successors.map((successorId) => this.workflowExecutionGraph.node(successorId)) as any[];
-  }
-
-  public getTopologicalOrder(): string[] {
-    return this.topologicalOrder;
-  }
-
-  public getNode(nodeId: string): any {
-    return this.workflowExecutionGraph.node(nodeId);
-  }
-
   // TODO: To rename to getCurrentNode and use proper type
   public getCurrentStep(): any {
     // must be a proper type
@@ -108,7 +97,7 @@ export class WorkflowExecutionRuntimeManager {
       return null; // No current step
     }
     const currentStepId = this.topologicalOrder[this.currentStepIndex];
-    return this.workflowExecutionGraph.node(currentStepId);
+    return this.workflowGraph.getNode(currentStepId);
   }
 
   // TODO: To rename to goToNode
@@ -361,9 +350,8 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async start(): Promise<void> {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     this.workflowLogger?.logInfo('Starting workflow execution with APM tracing', {
-      workflow: { execution_id: workflowExecution.id },
+      workflow: { execution_id: this.workflowExecution.id },
     });
 
     const existingTransaction = agent.currentTransaction;
@@ -390,7 +378,7 @@ export class WorkflowExecutionRuntimeManager {
         );
 
         const workflowTransaction = agent.startTransaction(
-          `workflow.execution.${workflowExecution.workflowId}`,
+          `workflow.execution.${this.workflowExecution.workflowId}`,
           'workflow_execution'
         );
 
@@ -398,8 +386,8 @@ export class WorkflowExecutionRuntimeManager {
 
         // Add workflow-specific labels
         workflowTransaction.addLabels({
-          workflow_execution_id: workflowExecution.id,
-          workflow_id: workflowExecution.workflowId,
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
           transaction_hierarchy: 'alerting->workflow->steps',
           triggered_by: 'alerting',
@@ -449,8 +437,8 @@ export class WorkflowExecutionRuntimeManager {
 
         // Add workflow-specific labels to the existing transaction
         existingTransaction.addLabels({
-          workflow_execution_id: workflowExecution.id,
-          workflow_id: workflowExecution.workflowId,
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
           transaction_hierarchy: 'task->steps',
           triggered_by: 'task_manager',
@@ -501,6 +489,11 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     this.currentStepIndex = 0;
+
+    if (this.currentStepIndex >= this.topologicalOrder.length) {
+      throw new Error('Workflow has no steps to execute');
+    }
+
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       stack: [],
       status: ExecutionStatus.RUNNING,
@@ -600,7 +593,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private logStepStart(stepId: string): void {
-    const node = this.workflowExecutionGraph.node(stepId) as any;
+    const node = this.workflowGraph.getNode(stepId) as any;
     const stepName = node?.name || stepId;
     this.workflowLogger?.logInfo(`Step '${stepName}' started`, {
       workflow: { step_id: stepId },
@@ -610,7 +603,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private logStepComplete(step: Partial<EsWorkflowStepExecution>): void {
-    const node = this.workflowExecutionGraph.node(step.stepId as string) as any;
+    const node = this.workflowGraph.getNode(step.stepId as string) as any;
     const stepName = node?.name || step.stepId;
     const isSuccess = step?.status === ExecutionStatus.COMPLETED;
     this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
@@ -625,7 +618,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   private logStepFail(stepId: string, error: Error | string): void {
-    const node = this.workflowExecutionGraph.node(stepId) as any;
+    const node = this.workflowGraph.getNode(stepId) as any;
     const stepName = node?.name || stepId;
     const _error = typeof error === 'string' ? Error(error) : error;
     this.workflowLogger?.logError(`Step '${stepName}' failed`, _error, {

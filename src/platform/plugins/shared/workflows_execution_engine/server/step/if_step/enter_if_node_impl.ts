@@ -14,11 +14,13 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import { evaluateKql } from './eval_kql';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowGraph } from '../../workflow_context_manager/workflow_graph';
 
 export class EnterIfNodeImpl implements StepImplementation {
   constructor(
     private step: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private workflowGraph: WorkflowGraph,
     private workflowContextManager: WorkflowContextManager,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}
@@ -26,7 +28,7 @@ export class EnterIfNodeImpl implements StepImplementation {
   public async run(): Promise<void> {
     this.wfExecutionRuntimeManager.enterScope();
     await this.wfExecutionRuntimeManager.startStep(this.step.id);
-    const successors: any[] = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
+    const successors: any[] = this.workflowGraph.getNodeSuccessors(this.step.id);
 
     if (successors.some((node) => node.type !== 'enter-condition-branch')) {
       throw new Error(

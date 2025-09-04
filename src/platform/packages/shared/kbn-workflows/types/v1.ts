@@ -36,6 +36,9 @@ export interface EsWorkflowExecution {
   yaml: string;
   currentNodeId?: string; // The node currently being executed
   stack: string[];
+
+  /** If specified, the only this step and its children will be executed */
+  stepId?: string;
   createdAt: string;
   error: string | null;
   createdBy: string;

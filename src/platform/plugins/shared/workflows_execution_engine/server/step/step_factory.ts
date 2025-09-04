@@ -36,6 +36,7 @@ import {
   ExitFallbackPathNodeImpl,
 } from './on_failure/fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { WorkflowGraph } from '../workflow_context_manager/workflow_graph';
 
 export class StepFactory {
   constructor(
@@ -44,7 +45,8 @@ export class StepFactory {
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowTaskManager: WorkflowTaskManager,
-    private urlValidator: UrlValidator
+    private urlValidator: UrlValidator,
+    private workflowGraph: WorkflowGraph
   ) {}
 
   public create<TStep extends BaseStep>(

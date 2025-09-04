@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { graphlib } from '@dagrejs/dagre';
 import type { StepContext, WorkflowContext } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { WorkflowGraph } from './workflow_graph';
 
 export interface ContextManagerInit {
   // New properties for logging
-  workflowExecutionGraph: graphlib.Graph;
+  workflowExecutionGraph: WorkflowGraph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 }
 
 export class WorkflowContextManager {
-  private workflowExecutionGraph: graphlib.Graph;
+  private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(init: ContextManagerInit) {
@@ -32,11 +32,12 @@ export class WorkflowContextManager {
       steps: {},
     };
 
-    const visited = new Set<string>();
-    const collectPredecessors = (nodeId: string) => {
-      if (visited.has(nodeId)) return;
-      visited.add(nodeId);
+    const currentNode = this.workflowExecutionRuntime.getCurrentStep();
+    const currentNodeId = currentNode?.id ?? currentNode?.name;
 
+    const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
+    allPredecessors.forEach((node) => {
+      const nodeId = node.id;
       stepContext.steps[nodeId] = {};
       const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
       if (stepResult) {
@@ -53,15 +54,7 @@ export class WorkflowContextManager {
           ...stepState,
         };
       }
-
-      const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];
-      preds.forEach((predId) => collectPredecessors(predId));
-    };
-
-    const currentNode = this.workflowExecutionRuntime.getCurrentStep();
-    const currentNodeId = currentNode?.id ?? currentNode?.name;
-    const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
-    directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
+    });
 
     return this.enrichStepContextAccordingToStepScope(stepContext);
   }
@@ -103,7 +96,7 @@ export class WorkflowContextManager {
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): StepContext {
     for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
-      const node = this.workflowExecutionGraph.node(nodeId) as any;
+      const node = this.workflowExecutionGraph.getNode(nodeId);
       const nodeType = node?.type;
       switch (nodeType) {
         case 'enter-foreach':

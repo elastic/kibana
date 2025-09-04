@@ -14,7 +14,11 @@ import type {
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
-interface ExecuteWorkflowResponse {
+export interface ExecuteWorkflowResponse {
+  workflowExecutionId: string;
+}
+
+export interface ExecuteWorkflowStepResponse {
   workflowExecutionId: string;
 }
 
@@ -25,6 +29,12 @@ export interface WorkflowsExecutionEnginePluginStart {
     workflow: WorkflowExecutionEngineModel,
     context: Record<string, any>
   ): Promise<ExecuteWorkflowResponse>;
+
+  executeWorkflowStep(
+    workflow: WorkflowExecutionEngineModel,
+    stepId: string,
+    stepInputs: Record<string, any>
+  ): Promise<ExecuteWorkflowStepResponse>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
