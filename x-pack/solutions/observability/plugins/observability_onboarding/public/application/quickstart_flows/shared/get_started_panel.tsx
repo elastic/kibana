@@ -53,6 +53,10 @@ export function GetStartedPanel({
   } = useKibana<ObservabilityOnboardingContextValue>();
 
   useEffect(() => {
+    if (!onboardingId) {
+      return;
+    }
+
     analytics?.reportEvent(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT.eventType,
       {
