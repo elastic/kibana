@@ -16,10 +16,10 @@ export const internalNamespaces = {
 /**
  * List of protected namespaces which can only be used by internal tools.
  */
-export const protectedNamespaces = [internalNamespaces.platformCore] as const;
+export const protectedNamespaces: string[] = [internalNamespaces.platformCore];
 
 /**
- * Checks if the provided tool name belongs to a reserved namespace.
+ * Checks if the provided tool name belongs to a protected namespace.
  */
 export const isInProtectedNamespace = (toolName: string) => {
   for (const namespace of protectedNamespaces) {
@@ -28,4 +28,11 @@ export const isInProtectedNamespace = (toolName: string) => {
     }
   }
   return false;
+};
+
+/**
+ * Checks if the provided tool name belongs to a protected namespace.
+ */
+export const hasProtectedNamespaceName = (toolName: string) => {
+  return protectedNamespaces.includes(toolName);
 };

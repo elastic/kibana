@@ -6,7 +6,7 @@
  */
 
 export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
-export { isReservedToolId, toolIdRegexp } from './tool_ids';
+export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
   activeToolsCountWarningThreshold,
@@ -47,4 +47,9 @@ export {
   type TabularDataResult,
   type OtherResult,
 } from './tool_result';
-export { internalNamespaces, protectedNamespaces, isInProtectedNamespace } from './namespaces';
+export {
+  internalNamespaces,
+  protectedNamespaces,
+  isInProtectedNamespace,
+  hasProtectedNamespaceName,
+} from './namespaces';

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { hasProtectedNamespaceName, isInProtectedNamespace } from './namespaces';
+
 export const toolIdRegexp =
   /^(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?))*$/;
+export const toolIdMaxLength = 64;
 
 const reservedKeywords = ['new'];
 
@@ -16,4 +19,35 @@ const reservedKeywords = ['new'];
  */
 export const isReservedToolId = (id: string) => {
   return reservedKeywords.includes(id);
+};
+
+/**
+ * Validate that a tool id has the right format,
+ * returning an error message if it fails the validation,
+ * and undefined otherwise.
+ *
+ * @param toolId: the toolId to validate
+ * @param builtIn: set to true if we're validating a built-in (internal) tool id.
+ */
+export const validateToolId = ({
+  toolId,
+  builtIn,
+}: {
+  toolId: string;
+  builtIn: boolean;
+}): string | undefined => {
+  if (!toolIdRegexp.test(toolId)) {
+    return `Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores`;
+  }
+  if (toolId.length > toolIdMaxLength) {
+    return `Tool ids are limited to ${toolIdMaxLength} characters.`;
+  }
+  if (hasProtectedNamespaceName(toolId)) {
+    return `Tool id cannot have the same name as a reserved namespaces`;
+  }
+  if (!builtIn) {
+    if (isInProtectedNamespace(toolId)) {
+      return `Tool id is using a protected namespaces.`;
+    }
+  }
 };

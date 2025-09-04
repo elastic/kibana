@@ -11,9 +11,11 @@ import { i18n } from '@kbn/i18n';
 import {
   EsqlToolFieldType,
   toolIdRegexp,
+  toolIdMaxLength,
   isReservedToolId,
   isInProtectedNamespace,
-} from '@kbn/onechat-common';
+  hasProtectedNamespaceName,
+} from '@kbn/onechat-common/tools';
 import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod';
 import { get } from 'lodash';
@@ -29,6 +31,10 @@ const i18nMessages = {
     formatError: i18n.translate('xpack.onechat.tools.newTool.validation.name.formatError', {
       defaultMessage:
         'Name must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, and underscores.',
+    }),
+    tooLongError: i18n.translate('xpack.onechat.tools.newTool.validation.name.tooLongError', {
+      defaultMessage: 'Name must be at most {max} characters',
+      values: { max: toolIdMaxLength },
     }),
     reservedError: (name: string) =>
       i18n.translate('xpack.onechat.tools.newTool.validation.name.reservedError', {
@@ -126,6 +132,7 @@ export const esqlFormValidationSchema = z
     name: z
       .string()
       .min(1, { message: i18nMessages.name.requiredError })
+      .max(toolIdMaxLength, { message: i18nMessages.name.tooLongError })
       .regex(toolIdRegexp, { message: i18nMessages.name.formatError })
       .refine(
         (name) => !isReservedToolId(name),
@@ -134,7 +141,7 @@ export const esqlFormValidationSchema = z
         })
       )
       .refine(
-        (name) => !isInProtectedNamespace(name),
+        (name) => !isInProtectedNamespace(name) && !hasProtectedNamespaceName(name),
         (name) => ({
           message: i18nMessages.name.protectedNamespaceError(name),
         })
