@@ -671,7 +671,7 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           id: 'endpoint_exceptions_all',
-          includeIn: 'all',
+          includeIn: 'none',
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -682,7 +682,7 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
         },
         {
           id: 'endpoint_exceptions_read',
-          includeIn: 'read',
+          includeIn: 'none',
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],

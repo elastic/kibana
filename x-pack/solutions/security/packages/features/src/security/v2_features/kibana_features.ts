@@ -89,14 +89,10 @@ export const getSecurityV2BaseKibanaFeature = ({
   privileges: {
     all: {
       replacedBy: {
-        default: [
-          // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
-        ],
-        minimal: [
-          // note: overriden by product feature endpointArtifactManagement when enabled
-          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] },
-        ],
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+        default: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] }],
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+        minimal: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] }],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
@@ -116,7 +112,9 @@ export const getSecurityV2BaseKibanaFeature = ({
     },
     read: {
       replacedBy: {
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
         default: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] }],
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
         minimal: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] }],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

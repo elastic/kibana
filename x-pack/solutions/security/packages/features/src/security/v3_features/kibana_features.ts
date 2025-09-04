@@ -89,7 +89,9 @@ export const getSecurityV3BaseKibanaFeature = ({
   privileges: {
     all: {
       replacedBy: {
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
         default: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] }],
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
         minimal: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] }],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
@@ -110,7 +112,9 @@ export const getSecurityV3BaseKibanaFeature = ({
     },
     read: {
       replacedBy: {
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
         default: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] }],
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
         minimal: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] }],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

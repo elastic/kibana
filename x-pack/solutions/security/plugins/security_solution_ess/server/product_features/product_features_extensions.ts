@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { APP_ID, SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type {
   MutableKibanaFeatureConfig,
@@ -13,29 +13,47 @@ import type {
 
 export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = {
   security: {
-    allVersions: {
-      [ProductFeatureSecurityKey.endpointExceptions]: {
-        privileges: {
-          all: {
-            ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
-            api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
-          },
-          read: {
-            ui: ['showEndpointExceptions'],
-            api: [`${APP_ID}-showEndpointExceptions`],
-          },
-        },
-      },
-    },
+    allVersions: {},
     version: {
       siem: {
         [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-          featureConfigModifiers: [updateGlobalArtifactManageReplacements],
+          featureConfigModifiers: [
+            enableSecuritySubfeaturesToggle,
+            addGlobalArtifactManagementToMinimalAll,
+            addGlobalArtifactManagementToAll,
+          ],
+        },
+        [ProductFeatureSecurityKey.endpointExceptions]: {
+          featureConfigModifiers: [
+            enableSecuritySubfeaturesToggle,
+            addEndpointExceptionsToMinimalReadAndMinimalAll,
+            addEndpointExceptionsToReadAndAll,
+          ],
         },
       },
       siemV2: {
         [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-          featureConfigModifiers: [updateGlobalArtifactManageReplacements],
+          featureConfigModifiers: [
+            enableSecuritySubfeaturesToggle,
+            addGlobalArtifactManagementToMinimalAll,
+            addGlobalArtifactManagementToAll,
+          ],
+        },
+        [ProductFeatureSecurityKey.endpointExceptions]: {
+          featureConfigModifiers: [
+            enableSecuritySubfeaturesToggle,
+            addEndpointExceptionsToMinimalReadAndMinimalAll,
+            addEndpointExceptionsToReadAndAll,
+          ],
+        },
+      },
+      siemV3: {
+        [ProductFeatureSecurityKey.endpointExceptions]: {
+          featureConfigModifiers: [
+            enableSecuritySubfeaturesToggle,
+            addEndpointExceptionsToMinimalReadAndMinimalAll,
+            addEndpointExceptionsToReadAndAll,
+          ],
         },
       },
     },
@@ -44,36 +62,97 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
 
 // When endpointArtifactManagement PLI is enabled, the replacedBy to the SIEM feature needs to
 // account for the privileges of the additional sub-features that it introduces, migrating them correctly.
-// This needs to be done here because the replacements of serverless and ESS are different.
-export function updateGlobalArtifactManageReplacements(
+// This needs to be done here because some the replacements of serverless and ESS are different, other
+// replacements are tied to endpointArtifactManagement PLI - hence PLI related privileges cannot be added to
+// the shared base config in `kibana_features.ts`.
+export function addGlobalArtifactManagementToMinimalAll(
   featureConfig: MutableKibanaFeatureConfig
 ): void {
-  const replacedBy = featureConfig.privileges?.all?.replacedBy;
-  if (!replacedBy) {
-    return;
+  const allReplacedBy = featureConfig.privileges?.all?.replacedBy;
+
+  if (allReplacedBy && 'minimal' in allReplacedBy) {
+    const siemMinimalAll = allReplacedBy.minimal.find(
+      ({ feature }) => feature === SECURITY_FEATURE_ID
+    );
+
+    // on ESS, Endpoint Exception ALL is included in siem:MINIMAL_ALL, hence we're adding global artifact management to preserve behaviour
+    siemMinimalAll?.privileges.push('global_artifact_management_all');
+  }
+}
+
+export function addGlobalArtifactManagementToAll(featureConfig: MutableKibanaFeatureConfig): void {
+  const allReplacedBy = featureConfig.privileges?.all?.replacedBy;
+
+  if (allReplacedBy && 'default' in allReplacedBy) {
+    const siemAll = allReplacedBy.default.find(({ feature }) => feature === SECURITY_FEATURE_ID);
+
+    // on ESS, Endpoint Exception ALL is included in siem:ALL, hence we're adding global artifact management to preserve behaviour
+    siemAll?.privileges.push('global_artifact_management_all');
+  }
+}
+
+// When Endpoint Exceptions sub-feature privilege is harmonized between ESS and Serverless (from siemV4),
+// the privileges needed to be added to users with specific security privileges.
+// On ESS, Endpoint exceptions were included in siem:MINIMAL_READ and siem:MINIMAL_ALL.
+export function addEndpointExceptionsToMinimalReadAndMinimalAll(
+  featureConfig: MutableKibanaFeatureConfig
+): void {
+  const allReplacedBy = featureConfig.privileges?.all?.replacedBy;
+  if (allReplacedBy && 'minimal' in allReplacedBy) {
+    const siemMinimalAll = allReplacedBy.minimal.find(
+      ({ feature }) => feature === SECURITY_FEATURE_ID
+    );
+
+    siemMinimalAll?.privileges.push('endpoint_exceptions_all');
   }
 
-  if ('default' in replacedBy) {
-    const siemDefault = replacedBy.default.find(
-      ({ feature }) => feature === SECURITY_FEATURE_ID // Only for SIEM feature replacements
+  const readReplacedBy = featureConfig.privileges?.read?.replacedBy;
+  if (readReplacedBy && 'minimal' in readReplacedBy) {
+    const siemMinimalRead = readReplacedBy.minimal.find(
+      ({ feature }) => feature === SECURITY_FEATURE_ID
     );
-    if (siemDefault) {
-      // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
-      siemDefault.privileges = [
-        'minimal_all',
-        'global_artifact_management_all', // Enabling sub-features toggle to show that Global Artifact Management is now provided to the user.
-      ];
+
+    siemMinimalRead?.privileges.push('endpoint_exceptions_read');
+  }
+}
+
+// On ESS, Endpoint exceptions were included in siem:READ and siem:ALL.
+export function addEndpointExceptionsToReadAndAll(featureConfig: MutableKibanaFeatureConfig): void {
+  const readReplacedBy = featureConfig.privileges?.read?.replacedBy;
+  if (readReplacedBy && 'default' in readReplacedBy) {
+    const siemRead = readReplacedBy.default.find(({ feature }) => feature === SECURITY_FEATURE_ID);
+
+    siemRead?.privileges.push('endpoint_exceptions_read');
+  }
+
+  const allReplacedBy = featureConfig.privileges?.all?.replacedBy;
+  if (allReplacedBy && 'default' in allReplacedBy) {
+    const siemAll = allReplacedBy.default.find(({ feature }) => feature === SECURITY_FEATURE_ID);
+
+    siemAll?.privileges.push('endpoint_exceptions_all');
+  }
+}
+
+export function enableSecuritySubfeaturesToggle(featureConfig: MutableKibanaFeatureConfig): void {
+  const readReplacedBy = featureConfig.privileges?.read?.replacedBy;
+  if (readReplacedBy && 'default' in readReplacedBy) {
+    const siemRead = readReplacedBy.default.find(({ feature }) => feature === SECURITY_FEATURE_ID);
+
+    if (siemRead) {
+      siemRead.privileges = siemRead.privileges.map((privilege) =>
+        privilege === 'read' ? 'minimal_read' : privilege
+      );
     }
   }
 
-  if ('minimal' in replacedBy) {
-    const siemMinimal = replacedBy.minimal.find(({ feature }) => feature === SECURITY_FEATURE_ID); // only for SIEM feature replacements
-    if (siemMinimal) {
-      // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
-      siemMinimal.privileges = [
-        'minimal_all',
-        'global_artifact_management_all', // on ESS, Endpoint Exception ALL is included in siem:MINIMAL_ALL
-      ];
+  const allReplacedBy = featureConfig.privileges?.all?.replacedBy;
+  if (allReplacedBy && 'default' in allReplacedBy) {
+    const siemAll = allReplacedBy.default.find(({ feature }) => feature === SECURITY_FEATURE_ID);
+
+    if (siemAll) {
+      siemAll.privileges = siemAll.privileges.map((privilege) =>
+        privilege === 'all' ? 'minimal_all' : privilege
+      );
     }
   }
 }

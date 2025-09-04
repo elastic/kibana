@@ -93,13 +93,13 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          // note: overriden by product feature endpointArtifactManagement when enabled
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
           { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          // note: overriden by product feature endpointArtifactManagement when enabled
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
           { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] },
         ],
       },
@@ -143,11 +143,13 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
           { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+          // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
           { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] },
         ],
       },
