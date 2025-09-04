@@ -9,9 +9,9 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFlattenedTraceDocumentOverview, type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
+import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID, TRANSACTION_NAME } from '@kbn/apm-types';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -53,10 +53,10 @@ export const Trace = ({
   const { euiTheme } = useEuiTheme();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const isSpan = !isTransaction(hit);
-
-  const traceId = hit.flattened[TRACE_ID] as string;
-  const docId = hit.flattened[isSpan ? SPAN_ID : TRANSACTION_ID] as string;
-  const serviceName = hit.flattened[SERVICE_NAME] as string;
+  const flattenedHit = getFlattenedTraceDocumentOverview(hit);
+  const traceId = flattenedHit[TRACE_ID];
+  const docId = flattenedHit[isSpan ? SPAN_ID : TRANSACTION_ID];
+  const serviceName = flattenedHit[SERVICE_NAME];
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
@@ -74,7 +74,7 @@ export const Trace = ({
     [docId, rangeFrom, rangeTo, traceId]
   );
 
-  const fieldNames = useMemo(() => [TRACE_ID, ...(isSpan ? [TRANSACTION_ID] : [])], [isSpan]);
+  const fieldNames = useMemo(() => [TRACE_ID, ...(isSpan ? [TRANSACTION_NAME] : [])], [isSpan]);
 
   const sectionActions = useMemo(
     () =>
