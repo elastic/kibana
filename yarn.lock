@@ -14645,10 +14645,10 @@ babel-runtime@6.x:
     core-js "^2.4.0"
     regenerator-runtime "^0.11.0"
 
-backport@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-10.0.0.tgz#5e8417d54f26aa217db801424084824ac34e2495"
-  integrity sha512-8GOADwnXHeFYgJy7dh5t9y9ZheADNkvRWFZ9Q4qVRNiMSYpYeGNyl0AWlFOH2zCLA/Sm2s/WKEdTk1oZkM1Cig==
+backport@^10.0.2:
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-10.0.2.tgz#5f51cde270a1716dce91d9fb4f040d3f35930dc3"
+  integrity sha512-/o+D96xQOWG/ZYgeGOEhM3I+wIeTq4NP/lulmVMOzYiH7XW7QoA5sp915V6r19pXPmAfE54WnKI5U7ygNdZsPw==
   dependencies:
     "@octokit/rest" "^20.1.2"
     "@urql/core" "^5.1.1"
@@ -14660,7 +14660,7 @@ backport@^10.0.0:
     graphql "^16.11.0"
     graphql-tag "^2.12.6"
     handlebars "^4.7.8"
-    inquirer "^8.2.5"
+    inquirer "^8.2.7"
     lodash "^4.17.21"
     make-dir "^3.1.0"
     ora "^5.4.1"
@@ -21356,7 +21356,7 @@ inquirer@^7.0.0:
     strip-ansi "^6.0.0"
     through "^2.3.6"
 
-inquirer@^8.2.5, inquirer@^8.2.7:
+inquirer@^8.2.7:
   version "8.2.7"
   resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-8.2.7.tgz#62f6b931a9b7f8735dc42db927316d8fb6f71de8"
   integrity sha512-UjOaSel/iddGZJ5xP/Eixh6dY1XghiBw4XK13rCCIJcJfyhhoul/7KhLLUGtebEj6GDYM6Vnx/mVsjx2L/mFIA==
