@@ -196,10 +196,10 @@ export const useTopNavLinks = ({
     );
 
     // Separate built-in Discover items from custom/outside app items
-    const builtInItems = allEntries.filter(item => 
-      !['dataset-quality-link'].includes(item.id || '')
+    const builtInItems = allEntries.filter(
+      (item) => !['dataset-quality-link'].includes(item.id || '')
     );
-    const customItems = allEntries.filter(item => 
+    const customItems = allEntries.filter((item) =>
       ['dataset-quality-link'].includes(item.id || '')
     );
 
@@ -207,54 +207,60 @@ export const useTopNavLinks = ({
     const entries = [...builtInItems, ...customItems];
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
-      /**
-       * Switches from ES|QL to classic mode and vice versa
-       */
-      const esqLDataViewTransitionToggle = {
-        id: 'esql',
-        label: isEsqlMode
-          ? i18n.translate('discover.localMenu.switchToClassicTitle', {
-              defaultMessage: 'Switch to classic',
-            })
-          : i18n.translate('discover.localMenu.tryESQLTitle', {
-              defaultMessage: 'Try ES|QL',
-            }),
-        emphasize: true,
-        fill: false,
-        color: 'success',
-        tooltip: isEsqlMode
-          ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
-              defaultMessage: 'Switch to KQL or Lucene syntax.',
-            })
-          : i18n.translate('discover.localMenu.esqlTooltipLabel', {
-              defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
-            }),
-        run: () => {
-          if (dataView) {
-            if (isEsqlMode) {
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-              /**
-               * Display the transition modal if:
-               * - the user has not dismissed the modal
-               * - the user has opened and applied changes to the saved search
-               */
-              if (
-                shouldShowESQLToDataViewTransitionModal &&
-                !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-              ) {
-                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-              } else {
-                state.actions.transitionFromESQLToDataView(dataView.id ?? '');
-              }
-            } else {
+      // Primary button: show "Try ES|QL" only when NOT already in ES|QL mode
+      if (!isEsqlMode) {
+        const tryEsqlButton = {
+          id: 'esql',
+          label: i18n.translate('discover.localMenu.tryESQLTitle', {
+            defaultMessage: 'Try ES|QL',
+          }),
+          emphasize: true,
+          fill: false,
+          color: 'success',
+          tooltip: i18n.translate('discover.localMenu.esqlTooltipLabel', {
+            defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
+          }),
+          run: () => {
+            if (dataView) {
               state.actions.transitionFromDataViewToESQL(dataView);
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
             }
-          }
-        },
-        testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
-      };
-      entries.unshift(esqLDataViewTransitionToggle);
+          },
+          testId: 'select-text-based-language-btn',
+        } as TopNavMenuData;
+        entries.unshift(tryEsqlButton);
+      }
+
+      // Secondary button: show "Switch to classic" only when in ES|QL mode
+      if (isEsqlMode) {
+        const switchToClassicButton = {
+          id: 'switch-to-classic',
+          label: i18n.translate('discover.localMenu.switchToClassicTitle', {
+            defaultMessage: 'Switch to classic',
+          }),
+          emphasize: false,
+          fill: false,
+          color: 'text',
+          tooltip: i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
+            defaultMessage: 'Switch to KQL or Lucene syntax.',
+          }),
+          run: () => {
+            if (!dataView) return;
+            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+            if (
+              shouldShowESQLToDataViewTransitionModal &&
+              !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+            ) {
+              dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
+            } else {
+              state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+            }
+          },
+          testId: 'switch-to-dataviews',
+        } as TopNavMenuData;
+        // Place with other secondary items so it can overflow into "More"
+        entries.push(switchToClassicButton);
+      }
     }
 
     if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
