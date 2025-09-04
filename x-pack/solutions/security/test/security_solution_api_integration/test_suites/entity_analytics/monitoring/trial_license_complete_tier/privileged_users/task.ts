@@ -11,7 +11,7 @@ import type {
   CreateEntitySourceResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { PrivMonUtils } from './utils';
+import { PrivMonUtils } from '../utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
