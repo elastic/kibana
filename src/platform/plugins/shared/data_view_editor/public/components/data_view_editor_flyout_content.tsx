@@ -337,10 +337,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiCallOut
               title={i18n.translate('indexPatternEditor.managedDataViewCalloutMessage', {
                 defaultMessage:
-                  'Managed data views cannot be edited. Duplicate the data view in order to make changes.',
+                  "You can't edit managed data views. Instead, you can duplicate the data view and make changes to your newly created copy.",
               })}
-              color="warning"
-              iconType="warning"
+              color="primary"
+              iconType="info"
               size="s"
               style={{ marginTop: '10px' }}
             />

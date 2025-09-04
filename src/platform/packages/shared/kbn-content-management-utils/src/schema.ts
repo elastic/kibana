@@ -81,6 +81,7 @@ export const createOptionsSchemas = {
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.boolean()),
   initialNamespaces: schema.maybe(schema.arrayOf(schema.string())),
+  managed: schema.maybe(schema.boolean()),
 };
 
 export const schemaAndOr = schema.oneOf([schema.literal('AND'), schema.literal('OR')]);
