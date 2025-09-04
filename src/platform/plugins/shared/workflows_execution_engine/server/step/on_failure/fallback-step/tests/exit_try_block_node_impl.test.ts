@@ -8,7 +8,7 @@
  */
 
 import type { ExitTryBlockNode } from '@kbn/workflows';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitTryBlockNodeImpl } from '../exit_try_block_node_impl';
 
 describe('ExitTryBlockNodeImpl', () => {
