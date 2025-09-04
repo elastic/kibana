@@ -38,7 +38,7 @@ export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
       <EuiButtonIcon
         iconType="documentEdit"
         onClick={() => {
-          editTool(tool.id);
+          editTool(tool.id, tool.type);
         }}
         aria-label={labels.tools.editToolButtonLabel}
       />

@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
+import { ToolType } from '@kbn/onechat-common';
+import { useParams } from 'react-router-dom';
 import { CreateEsqlTool } from '../components/tools/esql/create_esql_tool';
+import { CreateIndexSearchTool } from '../components/tools/index_search/create_index_search_tool';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
 export const OnechatToolCreatePage = () => {
+  const { toolType } = useParams<{ toolType: ToolType }>();
   useBreadcrumb([
     {
       text: labels.tools.title,
@@ -19,8 +23,15 @@ export const OnechatToolCreatePage = () => {
     },
     {
       text: labels.tools.newEsqlToolTitle,
-      path: appPaths.tools.new,
+      path: appPaths.tools.new({ toolType }),
     },
   ]);
-  return <CreateEsqlTool />;
+  switch (toolType) {
+    case ToolType.index_search:
+      return <CreateIndexSearchTool />;
+    case ToolType.esql:
+      return <CreateEsqlTool />;
+    default:
+      return null;
+  }
 };

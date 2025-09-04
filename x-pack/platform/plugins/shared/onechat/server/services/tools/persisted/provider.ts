@@ -16,7 +16,7 @@ import type { ToolTypeClient, ToolSource } from '../tool_provider';
 import type { ToolPersistedDefinition } from './client';
 import { createClient } from './client';
 import { createEsqlToolType, createIndexSearchToolType } from './tool_types';
-import type { PersistedToolTypeDefinition, ToolTypeValidatorContext } from './tool_types/types';
+import type { ToolTypeDefinition, ToolTypeValidatorContext } from './tool_types/types';
 
 export const createPersistedToolSource = ({
   logger,
@@ -25,7 +25,7 @@ export const createPersistedToolSource = ({
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
 }): ToolSource => {
-  const toolDefinitions: PersistedToolTypeDefinition<any>[] = [
+  const toolDefinitions: ToolTypeDefinition<any>[] = [
     createEsqlToolType(),
     createIndexSearchToolType(),
   ];
@@ -53,7 +53,7 @@ export const createPersistedToolClient = ({
   logger,
   esClient,
 }: {
-  definitions: PersistedToolTypeDefinition[];
+  definitions: ToolTypeDefinition[];
   logger: Logger;
   esClient: ElasticsearchClient;
 }): ToolTypeClient<any> => {
@@ -61,7 +61,7 @@ export const createPersistedToolClient = ({
   const definitionMap = definitions.reduce((map, def) => {
     map[def.toolType] = def;
     return map;
-  }, {} as Record<ToolType, PersistedToolTypeDefinition>);
+  }, {} as Record<ToolType, ToolTypeDefinition>);
 
   const createContext = (): ToolTypeValidatorContext => {
     return {

@@ -60,14 +60,9 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
           name: labels.tools.typeFilter,
           multiSelect: 'or',
           options: Object.entries(toolTypeDisplays).map(([type, display]) => ({
-            value: type as ToolType,
+            value: type,
             name: display.label,
-            view: (
-              <ToolFilterOption
-                name={display.label}
-                matches={matchesByType[type as ToolType] ?? 0}
-              />
-            ),
+            view: <ToolFilterOption name={display.label} matches={matchesByType[type] ?? 0} />,
           })),
         },
         {

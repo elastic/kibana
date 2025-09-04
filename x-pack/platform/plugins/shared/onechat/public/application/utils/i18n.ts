@@ -28,6 +28,12 @@ export const labels = {
     editEsqlToolTitle: i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
       defaultMessage: 'Edit ES|QL tool',
     }),
+    newIndexSearchToolTitle: i18n.translate('xpack.onechat.tools.newIndexSearchTool.title', {
+      defaultMessage: 'New index search tool',
+    }),
+    editIndexSearchToolTitle: i18n.translate('xpack.onechat.tools.editIndexSearchTool.title', {
+      defaultMessage: 'Edit index search tool',
+    }),
 
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
@@ -49,6 +55,15 @@ export const labels = {
     esqlLabel: i18n.translate('xpack.onechat.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
     builtinLabel: i18n.translate('xpack.onechat.tools.builtinLabel', { defaultMessage: 'System' }),
     searchLabel: i18n.translate('xpack.onechat.tools.searchLabel', { defaultMessage: 'Search' }),
+    indexTypeLabel: i18n.translate('xpack.onechat.tools.indexTypeLabel', {
+      defaultMessage: 'Index',
+    }),
+    aliasTypeLabel: i18n.translate('xpack.onechat.tools.aliasTypeLabel', {
+      defaultMessage: 'Alias',
+    }),
+    dataStreamTypeLabel: i18n.translate('xpack.onechat.tools.dataStreamTypeLabel', {
+      defaultMessage: 'Data stream',
+    }),
 
     // Actions
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
@@ -122,6 +137,16 @@ export const labels = {
       }),
     editEsqlToolSuccessToast: (toolId: string) =>
       i18n.translate('xpack.onechat.tools.editEsqlToolSuccessToast', {
+        defaultMessage: 'Tool "{toolId}" updated',
+        values: { toolId },
+      }),
+    createIndexSearchToolSuccessToast: (toolId: string) =>
+      i18n.translate('xpack.onechat.tools.createIndexSearchToolSuccessToast', {
+        defaultMessage: 'Tool "{toolId}" created',
+        values: { toolId },
+      }),
+    editIndexSearchToolSuccessToast: (toolId: string) =>
+      i18n.translate('xpack.onechat.tools.editIndexSearchToolSuccessToast', {
         defaultMessage: 'Tool "{toolId}" updated',
         values: { toolId },
       }),

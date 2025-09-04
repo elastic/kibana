@@ -7,12 +7,12 @@
 
 import { ToolType } from '@kbn/onechat-common';
 import type { EsqlToolConfig } from '@kbn/onechat-common';
-import type { PersistedToolTypeDefinition } from '../types';
+import type { ToolTypeDefinition } from '../types';
 import { toToolDefinition } from './to_tool_definition';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
-export const createEsqlToolType = (): PersistedToolTypeDefinition<EsqlToolConfig> => {
+export const createEsqlToolType = (): ToolTypeDefinition<EsqlToolConfig> => {
   return {
     toolType: ToolType.esql,
     toToolDefinition,

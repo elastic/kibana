@@ -34,11 +34,11 @@ export const OnechatRoutes: React.FC<{}> = () => {
         <OnechatAgentsPage />
       </Route>
 
-      <Route path="/tools/new">
+      <Route path="/tools/:toolType/new">
         <OnechatToolCreatePage />
       </Route>
 
-      <Route path="/tools/:toolId">
+      <Route path="/tools/:toolType/:toolId">
         <OnechatToolEditPage />
       </Route>
 

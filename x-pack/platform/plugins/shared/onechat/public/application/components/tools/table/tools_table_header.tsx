@@ -16,7 +16,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import { isPersistedTool } from '@kbn/onechat-common/tools';
 import React, { useCallback } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';
 import { useToolsActions } from '../../../context/tools_table_provider';
@@ -44,7 +44,7 @@ export const ToolsTableHeader = ({
   const { bulkDeleteTools } = useToolsActions();
 
   const selectAll = useCallback(() => {
-    setSelectedTools(tools.filter(isEsqlTool));
+    setSelectedTools(tools.filter(isPersistedTool));
   }, [setSelectedTools, tools]);
 
   const clearSelection = useCallback(() => {

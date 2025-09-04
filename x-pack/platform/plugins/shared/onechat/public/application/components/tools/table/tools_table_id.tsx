@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import { isPersistedTool } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { useToolsActions } from '../../../context/tools_table_provider';
@@ -27,8 +27,8 @@ export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {isEsqlTool(tool) ? (
-        <EuiLink href={getEditToolUrl(tool.id)}>
+      {isPersistedTool(tool) ? (
+        <EuiLink href={getEditToolUrl(tool.id, tool.type)}>
           <EuiText size="s" css={toolIdStyle}>
             {tool.id}
           </EuiText>

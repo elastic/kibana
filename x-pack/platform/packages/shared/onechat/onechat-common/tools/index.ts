@@ -49,3 +49,4 @@ export {
   type TabularDataResult,
   type OtherResult,
 } from './tool_result';
+export { isPersistedTool } from './common';

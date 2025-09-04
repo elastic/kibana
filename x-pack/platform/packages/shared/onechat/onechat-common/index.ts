@@ -40,6 +40,8 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
+  type IndexSearchToolDefinitionWithSchema,
+  isPersistedTool,
 } from './tools';
 export {
   OnechatErrorCode,

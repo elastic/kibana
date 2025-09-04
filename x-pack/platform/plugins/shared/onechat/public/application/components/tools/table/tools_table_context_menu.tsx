@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import { isPersistedTool } from '@kbn/onechat-common/tools';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_table_provider';
@@ -34,7 +34,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       key="edit"
       size="s"
       onClick={() => {
-        editTool(tool.id);
+        editTool(tool.id, tool.type);
         setIsOpen(false);
       }}
     >
@@ -80,7 +80,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       key="clone"
       size="s"
       onClick={() => {
-        cloneTool(tool.id);
+        cloneTool(tool.id, tool.type);
         setIsOpen(false);
       }}
     >
@@ -88,7 +88,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     </EuiContextMenuItem>
   );
 
-  const menuItems = isEsqlTool(tool)
+  const menuItems = isPersistedTool(tool)
     ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
     : [testMenuItem];
 

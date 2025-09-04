@@ -55,3 +55,20 @@ export interface BulkDeleteToolResponse {
 export interface ExecuteToolResponse {
   result: ToolResult[];
 }
+
+// Index pattern resolve API
+export interface ResolveSearchSourcesRequest {
+  pattern: string;
+  page?: number;
+  per_page?: number;
+}
+
+export interface ResolveSearchSourceItem {
+  type: 'index' | 'alias' | 'data_stream';
+  name: string;
+}
+
+export interface ResolveSearchSourcesResponse {
+  results: ResolveSearchSourceItem[];
+  total: number;
+}

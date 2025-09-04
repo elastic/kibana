@@ -8,7 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common/tools';
-import { ToolType, isEsqlTool } from '@kbn/onechat-common/tools';
+import { ToolType, isPersistedTool } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../tags/tool_tags';
@@ -29,12 +29,18 @@ export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
       field: 'type',
       name: labels.tools.typeLabel,
       width: '80px',
-      render: (type: string) =>
-        type === ToolType.esql ? (
-          <EuiText size="s">{labels.tools.esqlLabel}</EuiText>
-        ) : type === ToolType.builtin ? (
-          <EuiText size="s">{labels.tools.builtinLabel}</EuiText>
-        ) : null,
+      render: (type: string) => {
+        switch (type) {
+          case ToolType.esql:
+            return <EuiText size="s">{labels.tools.esqlLabel}</EuiText>;
+          case ToolType.index_search:
+            return <EuiText size="s">{labels.tools.searchLabel}</EuiText>;
+          case ToolType.builtin:
+            return <EuiText size="s">{labels.tools.builtinLabel}</EuiText>;
+          default:
+            return null;
+        }
+      },
     },
     {
       field: 'tags',
@@ -46,7 +52,7 @@ export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
       align: 'right',
       render: (tool: ToolDefinitionWithSchema) => (
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-          {isEsqlTool(tool) && <ToolQuickActions tool={tool} />}
+          {isPersistedTool(tool) && <ToolQuickActions tool={tool} />}
           <ToolContextMenu tool={tool} />
         </EuiFlexGroup>
       ),

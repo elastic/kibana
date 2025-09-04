@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React, { createContext, useCallback, useContext } from 'react';
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { noop } from 'lodash';
-import React, { createContext, useCallback, useContext } from 'react';
+import type { ToolType } from '@kbn/onechat-common';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
 import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
@@ -15,15 +16,15 @@ import { labels } from '../utils/i18n';
 import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/esql/create_esql_tool';
 
 export interface ToolsActionsContextType {
-  createTool: () => void;
-  editTool: (toolId: string) => void;
+  createTool: (toolType: ToolType) => void;
+  editTool: (toolId: string, toolType: ToolType) => void;
   deleteTool: (toolId: string) => void;
   bulkDeleteTools: (toolIds: string[]) => void;
-  cloneTool: (toolId: string) => void;
+  cloneTool: (toolId: string, toolType: ToolType) => void;
   testTool: (toolId: string) => void;
-  getCreateToolUrl: () => string;
-  getEditToolUrl: (toolId: string) => string;
-  getCloneToolUrl: (toolId: string) => string;
+  getCreateToolUrl: (toolType: ToolType) => string;
+  getEditToolUrl: (toolId: string, toolType: ToolType) => string;
+  getCloneToolUrl: (toolId: string, toolType: ToolType) => string;
 }
 
 export const ToolsTableActionsContext = createContext<ToolsActionsContextType | undefined>(
@@ -33,38 +34,46 @@ export const ToolsTableActionsContext = createContext<ToolsActionsContextType | 
 export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) => {
   const { navigateToOnechatUrl, createOnechatUrl } = useNavigation();
 
-  const createTool = useCallback(() => {
-    navigateToOnechatUrl(appPaths.tools.new);
-  }, [navigateToOnechatUrl]);
+  const createTool = useCallback(
+    (toolType: ToolType) => {
+      navigateToOnechatUrl(appPaths.tools.new({ toolType }));
+    },
+    [navigateToOnechatUrl]
+  );
 
-  const getCreateToolUrl = useCallback(() => {
-    return createOnechatUrl(appPaths.tools.new);
-  }, [createOnechatUrl]);
+  const getCreateToolUrl = useCallback(
+    (toolType: ToolType) => {
+      return createOnechatUrl(appPaths.tools.new({ toolType }));
+    },
+    [createOnechatUrl]
+  );
 
   const editTool = useCallback(
-    (toolId: string) => {
-      navigateToOnechatUrl(appPaths.tools.edit({ toolId }));
+    (toolId: string, toolType: ToolType) => {
+      navigateToOnechatUrl(appPaths.tools.edit({ toolId, toolType }));
     },
     [navigateToOnechatUrl]
   );
 
   const getEditToolUrl = useCallback(
-    (toolId: string) => {
-      return createOnechatUrl(appPaths.tools.edit({ toolId }));
+    (toolId: string, toolType: ToolType) => {
+      return createOnechatUrl(appPaths.tools.edit({ toolId, toolType }));
     },
     [createOnechatUrl]
   );
 
   const cloneTool = useCallback(
-    (toolId: string) => {
-      navigateToOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+    (toolId: string, toolType: ToolType) => {
+      navigateToOnechatUrl(appPaths.tools.new({ toolType }), { [TOOL_SOURCE_QUERY_PARAM]: toolId });
     },
     [navigateToOnechatUrl]
   );
 
   const getCloneToolUrl = useCallback(
-    (toolId: string) => {
-      return createOnechatUrl(appPaths.tools.new, { [TOOL_SOURCE_QUERY_PARAM]: toolId });
+    (toolId: string, toolType: ToolType) => {
+      return createOnechatUrl(appPaths.tools.new({ toolType }), {
+        [TOOL_SOURCE_QUERY_PARAM]: toolId,
+      });
     },
     [createOnechatUrl]
   );
