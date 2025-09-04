@@ -181,7 +181,7 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   };
   const enterThenBranchNode: EnterConditionBranchNode = {
     id: `enterThen(${enterConditionNodeId})`,
-    type: 'enter-condition-branch',
+    type: 'enter-then-branch',
     condition: ifElseStep.condition,
   };
 
@@ -196,7 +196,7 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   });
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen(${enterConditionNodeId})`,
-    type: 'exit-condition-branch',
+    type: 'exit-then-branch',
     startNodeId: enterThenBranchNode.id,
   };
   graph.setNode(exitThenBranchNode.id, exitThenBranchNode);
@@ -206,7 +206,7 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   if (falseSteps?.length > 0) {
     const enterElseBranchNode: EnterConditionBranchNode = {
       id: `enterElse(${enterConditionNodeId})`,
-      type: 'enter-condition-branch',
+      type: 'enter-else-branch',
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
@@ -219,7 +219,7 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
     });
     const exitElseBranchNode: ExitConditionBranchNode = {
       id: `exitElse(${enterConditionNodeId})`,
-      type: 'exit-condition-branch',
+      type: 'exit-else-branch',
       startNodeId: enterElseBranchNode.id,
     };
     graph.setNode(exitElseBranchNode.id, exitElseBranchNode);

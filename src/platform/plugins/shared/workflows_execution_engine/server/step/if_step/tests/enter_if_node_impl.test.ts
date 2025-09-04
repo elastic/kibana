@@ -76,7 +76,17 @@ describe('EnterIfNodeImpl', () => {
 
   it('should enter scope', async () => {
     await impl.run();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledWith();
     expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be called after startStep', async () => {
+    await impl.run();
+    expect(startStep).toHaveBeenCalled();
+    expect(enterScope).toHaveBeenCalled();
+    expect(startStep.mock.invocationCallOrder[0]).toBeLessThan(
+      enterScope.mock.invocationCallOrder[0]
+    );
   });
 
   describe('then branch', () => {

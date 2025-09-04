@@ -24,8 +24,8 @@ export class EnterIfNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.enterScope();
     await this.wfExecutionRuntimeManager.startStep(this.step.id);
+    this.wfExecutionRuntimeManager.enterScope();
     const successors: any[] = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
 
     if (successors.some((node) => node.type !== 'enter-condition-branch')) {
