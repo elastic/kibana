@@ -33,7 +33,7 @@ export const relevanceSearch = async ({
   );
 
   if (selectedFields.length === 0) {
-    throw new Error('No text or semantic_text fields found, aborting search.')
+    throw new Error('No text or semantic_text fields found, aborting search.');
   }
 
   return performMatchSearch({
