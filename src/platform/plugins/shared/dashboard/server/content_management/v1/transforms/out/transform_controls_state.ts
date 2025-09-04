@@ -7,21 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { flow, omit } from 'lodash';
+
+import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { flow, omit } from 'lodash';
+
+import { embeddableService, logger } from '../../../../kibana_services';
 
 /**
  * Transform functions for serialized controls state.
  */
 export const transformControlsState: (
-  serializedControlState: string
-) => ControlsGroupState['controls'] = flow(
-  JSON.parse,
-  transformControlObjectToArray,
-  dropControlDisplayProperties,
-  transformControlProperties
-);
+  serializedControlState: string,
+  references: Reference[]
+) => ControlsGroupState['controls'] = (serializedControlState, references) => {
+  const result = flow(
+    JSON.parse,
+    transformControlObjectToArray,
+    dropControlDisplayProperties,
+    transformControlProperties
+  )(serializedControlState);
+  return injectControlReferences(result, references);
+};
 
 export function transformControlObjectToArray(controls: Record<string, SerializableRecord>) {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
@@ -36,11 +44,43 @@ export function dropControlDisplayProperties(controls: SerializableRecord[]) {
   });
 }
 
-export function transformControlProperties(controls: SerializableRecord[]): SerializableRecord[] {
-  return controls.map(({ explicitInput, id, type, order }) => ({
-    id,
-    order,
-    type,
-    ...(explicitInput as SerializableRecord),
-  }));
+export function transformControlProperties(
+  controls: Array<SerializableRecord & { order?: number }>
+): ControlsGroupState['controls'] {
+  return controls
+    .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
+    .map(({ explicitInput, id, type }) => {
+      return {
+        id,
+        type,
+        ...(explicitInput as SerializableRecord),
+      };
+    }) as ControlsGroupState['controls'];
+}
+
+function injectControlReferences(
+  controls: ControlsGroupState['controls'],
+  references: Reference[]
+): ControlsGroupState['controls'] {
+  const transformedControls: ControlsGroupState['controls'] = [];
+
+  controls.forEach((control) => {
+    const transforms = embeddableService.getTransforms(control.type);
+    try {
+      if (transforms?.transformOut) {
+        transformedControls.push(
+          transforms.transformOut(control, references) as ControlsGroupState['controls'][number]
+        );
+      } else {
+        transformedControls.push(control);
+      }
+    } catch (transformOutError) {
+      // do not prevent read on transformOutError
+      logger.warn(
+        `Unable to transform "${control.type}" embeddable state on read. Error: ${transformOutError.message}`
+      );
+    }
+  });
+
+  return transformedControls;
 }

@@ -7,37 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow, omit } from 'lodash';
+import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 
-export function transformControlGroupIn(
-  controlGroupInput?: ControlsGroupState
-): DashboardSavedObjectAttributes['controlGroupInput'] | undefined {
-  if (!controlGroupInput) {
-    return;
-  }
-  return flow(transformPanelsJSON)(controlGroupInput);
-}
+import { embeddableService, logger } from '../../../../kibana_services';
 
-function transformPanelsJSON(controlGroupInput: ControlsGroupState) {
-  const { controls, ...restControlGroupInput } = controlGroupInput;
+export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) {
+  if (!controlGroupInput) return { references: [] };
+
+  const { controls } = controlGroupInput;
+
+  let references: Reference[] = [];
   const updatedControls = Object.fromEntries(
-    controls.map(({ id = uuidv4(), ...restOfControl }, index) => {
+    controls.map((controlState, index) => {
+      const { id = uuidv4(), type } = controlState;
+      const transforms = embeddableService.getTransforms(type);
+
+      let transformedControlState;
+      try {
+        if (transforms?.transformIn) {
+          const transformed = transforms.transformIn(controlState);
+          transformedControlState = transformed.state;
+          references = [...references, ...(transformed.references ?? [])];
+        }
+      } catch (transformInError) {
+        // do not prevent save if transformIn throws
+        logger.warn(
+          `Unable to transform "${type}" embeddable state on save. Error: ${transformInError.message}`
+        );
+      }
+
       return [
         id,
         {
           order: index,
-          type: restOfControl.type,
-          explicitInput: { ...omit(restOfControl, ['order', 'type', 'dataViewId']) },
+          type,
+          explicitInput: { id, ...omit(transformedControlState, ['order', 'type', 'dataViewId']) },
         },
       ];
     })
   );
   return {
-    ...restControlGroupInput,
-    panelsJSON: JSON.stringify(updatedControls),
+    controlsJSON: JSON.stringify(updatedControls),
+    references,
   };
 }
