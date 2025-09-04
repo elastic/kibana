@@ -64,7 +64,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+            id="xpack.dataVisualizer.file.uploadView.indexSelectionTitle"
             defaultMessage="Index"
           />
         </h3>

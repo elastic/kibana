@@ -65,7 +65,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
             <EuiTitle size="s">
               <h3>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                  id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
                   defaultMessage="Upload files"
                 />
               </h3>
