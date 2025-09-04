@@ -43,7 +43,7 @@ describe('assertValidUpdates', () => {
 
   it('should pass when snapshots are compatible', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('compatible-updates.json');
+    const to = loadSnapshot('compatible_updates.json');
 
     expect(() => assertValidUpdates({ log, from, to })).not.toThrow();
     expect(log.info).toHaveBeenCalledWith(
@@ -53,7 +53,7 @@ describe('assertValidUpdates', () => {
 
   it('should throw if migrations are deleted', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('migrations-deleted.json');
+    const to = loadSnapshot('migrations_deleted.json');
 
     expect(() => assertValidUpdates({ log, from, to })).toThrow(
       `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
@@ -62,7 +62,7 @@ describe('assertValidUpdates', () => {
 
   it('should throw if new migrations are added', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('migrations-added.json');
+    const to = loadSnapshot('migrations_added.json');
 
     expect(() => assertValidUpdates({ log, from, to })).toThrow(
       `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
@@ -71,7 +71,7 @@ describe('assertValidUpdates', () => {
 
   it('should throw if modelVersions are deleted', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('model-versions-deleted.json');
+    const to = loadSnapshot('model_versions_deleted.json');
 
     expect(() => assertValidUpdates({ log, from, to })).toThrow(
       `❌ Some model versions have been deleted for SO type 'task'.`
@@ -80,7 +80,7 @@ describe('assertValidUpdates', () => {
 
   it('should throw if more than one new model version is defined', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('two-new-model-versions.json');
+    const to = loadSnapshot('two_new_model_versions.json');
     expect(() => assertValidUpdates({ log, from, to })).toThrow(
       `❌ The SO type 'task' is defining two (or more) new model versions.`
     );
@@ -88,7 +88,7 @@ describe('assertValidUpdates', () => {
 
   it('should throw if existing model versions are mutated', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('mutated-model-versions.json');
+    const to = loadSnapshot('mutated_model_versions.json');
 
     expect(() => assertValidUpdates({ log, from, to })).toThrow(
       `❌ Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
@@ -97,7 +97,7 @@ describe('assertValidUpdates', () => {
 
   it('should throw if model versions are not consecutive integers starting at 1', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('non-consecutive-model-versions.json');
+    const to = loadSnapshot('non_consecutive_model_versions.json');
 
     expect(() => assertValidUpdates({ log, from, to })).toThrow(
       `❌ The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
@@ -106,7 +106,7 @@ describe('assertValidUpdates', () => {
 
   it('should throw if mappings are updated without a modelVersion bump', () => {
     const from = loadSnapshot('baseline.json');
-    const to = loadSnapshot('mappings-updated-no-bump.json');
+    const to = loadSnapshot('mappings_updated_no_bump.json');
 
     expect(() => assertValidUpdates({ log, from, to })).toThrow(
       `❌ The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
