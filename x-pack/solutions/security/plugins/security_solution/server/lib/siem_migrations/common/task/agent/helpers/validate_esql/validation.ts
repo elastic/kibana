@@ -42,12 +42,9 @@ export const getValidateEsql: NodeHelperCreator<
           error = `Queries that do't use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`;
         }
       }
-      if (error) {
-        logger.debug(`ESQL query validation failed: ${error}`);
-      }
     } catch (err) {
       error = err.message.toString();
-      logger.info(`Error parsing ESQL query: ${error}`);
+      logger.debug(`Error parsing ESQL query: ${error}`);
     }
     return { error };
   };

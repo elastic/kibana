@@ -68,6 +68,7 @@ Go through each step and part of the splunk_query while following the below guid
 - At the end, the summary of the translation process followed in markdown, starting with "## Translation Summary".
   - Inside SPL language code blocks, Please add a line break before each pipe (|) character in the query.
   - Make sure the Markdown is formatted correctly and the values properly escaped.
+- Don't add any other information or explanation before or after these two outputs.
 </output_format>
 
 <example_output>

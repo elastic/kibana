@@ -18,9 +18,6 @@ import { translateRuleState } from './state';
 import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
 import { migrateRuleConfigSchema } from '../../state';
 
-// How many times we will try to self-heal when validation fails, to prevent infinite graph recursions
-const MAX_VALIDATION_ITERATIONS = 3;
-
 export function getTranslateRuleGraph({
   model,
   esqlKnowledgeBase,

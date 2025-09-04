@@ -40,9 +40,9 @@ Go through the current esql query above and translate the current field names th
 - Only use and modify the current ESQL query, do not create a new one or modify any other part of the rule.
 </guidelines>
 
-<expected_output>
+<output_format>
 - First, the updated ES|QL query inside an \`\`\`esql code block.
 - After, the summary of the the field mapping process followed in markdown, starting with "## Field Mapping Summary". This would include the reason, original field names, the target ECS field name and any fields that were left as is.
 - Don't add any other information or explanation before or after these two outputs.
-</expected_output>
+</output_format>
 `);

@@ -145,7 +145,7 @@ The correct replacement would be:
 \`\`\`
 </spl_query>
 
-<expected_output>
+<output_format>
 - First, the modified SPL query inside an \`\`\`spl code block.
 - At the end, a step by step explanation of the replacements made in markdown format:
   - Start with "## Inlining Summary" title
@@ -154,7 +154,8 @@ The correct replacement would be:
   - Finally, the modified SPL query
   - Inside SPL language code blocks, Please add a line break before each pipe (|) character in the query.
   - Make sure the Markdown is formatted correctly and the values properly escaped.
-</expected_output>
+- Don't add any other information or explanation before or after these two outputs.
+</output_format>
 `,
   ],
   ['ai', 'Please find the modified SPL query below:'],
