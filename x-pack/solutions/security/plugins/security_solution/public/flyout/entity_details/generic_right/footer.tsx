@@ -56,11 +56,9 @@ export const GenericEntityFlyoutFooter = ({
         target="_blank"
         data-test-subj={GENERIC_ENTITY_FLYOUT_FOOTER_DETAILS_LINK_TEST_SUBJ}
       >
-        <>
-          {i18n.translate('xpack.securitySolution.flyout.preview.genericEntityFullDetails', {
-            defaultMessage: 'Show full entity details',
-          })}
-        </>
+        {i18n.translate('xpack.securitySolution.flyout.preview.genericEntityFullDetails', {
+          defaultMessage: 'Show full entity details',
+        })}
       </EuiLink>
     ),
     [openDocumentFlyout]

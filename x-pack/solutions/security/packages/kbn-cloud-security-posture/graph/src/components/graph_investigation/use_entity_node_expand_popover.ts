@@ -178,7 +178,7 @@ export const useEntityNodeExpandPopover = (
           onClick: () => {
             onShowEntityDetailsClick?.(node);
           },
-          showToolTip: shouldDisableEntityDetailsListItem ? true : false,
+          showToolTip: shouldDisableEntityDetailsListItem,
           toolTipText: shouldDisableEntityDetailsListItem
             ? i18n.translate(
                 'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
