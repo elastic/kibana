@@ -37,9 +37,5 @@
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/ml-string-hash",
-    "@kbn/core-http-common",
-    "@kbn/openapi-common",
-    "@kbn/security-solution-plugin",
-    "@kbn/spaces-plugin",
   ]
 }

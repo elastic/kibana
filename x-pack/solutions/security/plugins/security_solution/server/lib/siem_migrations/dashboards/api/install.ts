@@ -7,26 +7,18 @@
 
 import type { IKibanaResponse, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
 import { SIEM_DASHBOARD_MIGRATION_INSTALL_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { InstallMigrationDashboardsRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type { InstallMigrationDashboardsResponse } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import {
+  InstallMigrationDashboardsRequestBody,
+  InstallMigrationDashboardsRequestParams,
+} from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { authz } from '../../common/api/util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { installTranslated } from './util/installation';
-
-const InstallMigrationDashboardsRequestBody = z.object({
-  ids: z.array(z.string()),
-});
-
-const InstallMigrationDashboardsResponse = z.object({
-  installed: z.number(),
-});
-
-type InstallMigrationDashboardsRequestBody = z.infer<typeof InstallMigrationDashboardsRequestBody>;
-type InstallMigrationDashboardsResponse = z.infer<typeof InstallMigrationDashboardsResponse>;
 
 export const registerSiemDashboardMigrationsInstallRoute = (
   router: SecuritySolutionPluginRouter,
