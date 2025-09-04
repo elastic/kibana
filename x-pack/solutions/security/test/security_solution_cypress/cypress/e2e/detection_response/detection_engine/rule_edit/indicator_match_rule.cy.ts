@@ -64,7 +64,8 @@ describe(
 
     // https://github.com/elastic/kibana/issues/187621
     // FLAKY: https://github.com/elastic/kibana/issues/196711
-    describe.skip('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
+    // eslint-disable-next-line ban/ban
+    describe.only('without suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       beforeEach(() => {
         createRule(rule);
       });
