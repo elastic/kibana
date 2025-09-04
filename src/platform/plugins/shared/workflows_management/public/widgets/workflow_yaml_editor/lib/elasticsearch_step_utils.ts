@@ -23,9 +23,10 @@ export interface ElasticsearchStepData {
 
 /**
  * Checks if a workflow step type starts with 'elasticsearch'
+ * Accepts undefined or null as input.
  */
-export function isElasticsearchStep(stepType: string): boolean {
-  return stepType.startsWith('elasticsearch');
+export function isElasticsearchStep(stepType: string | undefined | null): boolean {
+  return typeof stepType === 'string' && stepType.startsWith('elasticsearch');
 }
 
 /**

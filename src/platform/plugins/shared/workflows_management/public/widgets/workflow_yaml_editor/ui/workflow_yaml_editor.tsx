@@ -87,12 +87,37 @@ const WorkflowSchemaUri = 'file:///workflow-schema.json';
 const useWorkflowJsonSchema = () => {
   // Generate JSON schema dynamically to include all current connectors
   return useMemo(() => {
-    const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
+    try {
+      console.log(WORKFLOW_ZOD_SCHEMA);
+      console.log(JSON.stringify(WORKFLOW_ZOD_SCHEMA, null, 2));
+      // 🔥 Expose schema to global scope for debugging
+      (window as any).WORKFLOW_ZOD_SCHEMA = WORKFLOW_ZOD_SCHEMA;
+      Object.entries(WORKFLOW_ZOD_SCHEMA.shape).forEach(([key, schema]) => {
+        try {
+          console.log(`Testing field: ${key}`);
+          console.log(`  - Type:`, schema?.constructor?.name);
+          console.log(`  - Has _def:`, !!schema?._def);
+          console.log(`  - TypeName:`, schema?._def?.typeName);
+          
+          // Don't create new schemas, just inspect existing ones
+          if (schema._def.typeName === 'ZodDefault') {
+            console.log(`  - Default value:`, schema._def.defaultValue());
+          }
+          if (schema._def.typeName === 'ZodOptional') {
+            console.log(`  - Inner type:`, schema._def.innerType);
+          }
+        } catch (error) {
+          console.error(`  ✗ ${key} inspection fails:`, error.message);
+        }
+      });
+      const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 
-    // Post-process to improve type field descriptions in Monaco tooltips
-    const improvedSchema = improveTypeFieldDescriptions(jsonSchema);
-
-    return improvedSchema;
+      // Post-process to improve type field descriptions in Monaco tooltips
+      return improveTypeFieldDescriptions(jsonSchema) ?? null;
+    } catch (error) {
+      console.error('Error generating workflow JSON schema', error);
+      return null;
+    }
   }, []);
 };
 

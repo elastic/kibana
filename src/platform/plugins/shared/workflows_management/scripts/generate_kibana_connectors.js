@@ -21,6 +21,7 @@ const { execSync } = require('child_process');
 // Paths
 const KIBANA_OPENAPI_SPEC_PATH = path.resolve(__dirname, '../../../../../../oas_docs/output/kibana.yaml');
 const OUTPUT_PATH = path.resolve(__dirname, '../common/generated_kibana_connectors.ts');
+const SCHEMAS_OUTPUT_PATH = path.resolve(__dirname, '../common/generated_kibana_schemas.ts');
 const TEMP_OUTPUT_PATH = path.resolve(__dirname, '../common/temp_kibana_api.ts');
 
 console.log('🔧 Generating Kibana connectors from OpenAPI spec...');
@@ -161,10 +162,13 @@ function extractEndpointInfo(content) {
             for (const paramMatch of paramMatches) {
               const nameMatch = paramMatch.match(/name:\s*['"]([^'"]+)['"]/);
               const typeMatch = paramMatch.match(/type:\s*['"]([^'"]+)['"]/);
+              const schemaMatch = paramMatch.match(/schema:\s*([^,\s]+)/);
+              
               if (nameMatch && typeMatch) {
                 parameters.push({
                   name: nameMatch[1],
-                  type: typeMatch[1]
+                  type: typeMatch[1],
+                  schema: schemaMatch ? schemaMatch[1] : null
                 });
               }
             }
@@ -259,7 +263,18 @@ function convertToConnectorDefinition(endpoint, index) {
   if (['POST', 'PUT', 'PATCH'].includes(method)) {
     if (bodyParams.length > 0) {
       for (const param of bodyParams) {
-        schemaFields.push(`    ${safeParamName(param)}: z.any().optional().describe('Body parameter: ${param}'),`);
+        // Find the parameter in the parameters array to get its schema
+        const paramInfo = parameters.find(p => p.name === param && p.type === 'Body');
+        if (paramInfo && paramInfo.schema && paramInfo.schema !== 'z.any()') {
+          // Clean the schema name - remove invalid parts like .nullish(), .optional(), etc.
+          const cleanSchemaName = paramInfo.schema.split('.')[0];
+          // Ensure we have a valid schema name, fallback to z.any() if empty
+          const finalSchemaName = cleanSchemaName && cleanSchemaName.trim() ? cleanSchemaName : 'z.any()';
+          // Use the specific schema from openapi-zod-client
+          schemaFields.push(`    ${safeParamName(param)}: ${finalSchemaName}.optional().describe('Body parameter: ${param}'),`);
+        } else {
+          schemaFields.push(`    ${safeParamName(param)}: z.any().optional().describe('Body parameter: ${param}'),`);
+        }
       }
     } else {
       schemaFields.push(`    body: z.any().optional().describe('Request body'),`);
@@ -299,6 +314,135 @@ ${schemaFields.join('\n')}
     }),
     outputSchema: z.any().describe('Response from ${operationId} API'),
   }`;
+}
+
+/**
+ * Copy the entire generated client file as our schemas file
+ */
+function copyClientAsSchemas() {
+  console.log(`📋 Copying generated client as schemas file`);
+  
+  // Read the temp file content
+  const clientContent = fs.readFileSync(TEMP_OUTPUT_PATH, 'utf8');
+  
+  // Replace imports to use @kbn/zod instead of zod
+  const modifiedContent = clientContent
+    .replace(/import { z } from 'zod';/, "import { z } from '@kbn/zod';")
+    .replace(/import { makeApi, Zodios, type ZodiosOptions } from '@zodios\/core';/, '// Zodios imports removed for schemas file');
+  
+  // Extract just the schema definitions, make them all exports, remove the API client parts
+  const lines = modifiedContent.split('\n');
+  const schemaLines = [];
+  let inEndpointsSection = false;
+  
+  for (const line of lines) {
+    // Skip the endpoints and API client sections
+    if (line.includes('const endpoints = makeApi')) {
+      inEndpointsSection = true;
+      continue;
+    }
+    
+    if (inEndpointsSection) {
+      continue; // Skip everything after endpoints definition
+    }
+    
+    // Skip the export objects at the end (schemas, api, createApiClient)
+    if (line.includes('export const schemas =') || 
+        line.includes('export const api =') || 
+        line.includes('export function createApiClient')) {
+      break; // Stop processing once we hit the export section
+    }
+    
+    // Convert all const declarations to export const and apply patches
+    if (line.match(/^const\s+[a-zA-Z0-9_]+\s*=/)) {
+      // This is the start of a const declaration - mark it and continue
+      let processedLine = line.replace(/^const\s+/, 'export const ');
+      processedLine = applyPatches(processedLine);
+      schemaLines.push(processedLine);
+    } else if (line.trim() !== '' && !line.match(/^\/\//) && !line.match(/^\/\*/) && 
+               !line.match(/^export\s+/) && !line.match(/^const\s+/)) {
+      // This is a continuation line (part of a multi-line const declaration or other code)
+      let processedLine = applyPatches(line);
+      schemaLines.push(processedLine);
+    } else if (line.trim() === '' || line.match(/^\/\//) || line.match(/^\/\*/)) {
+      // Keep comments and empty lines as-is
+      schemaLines.push(line);
+    }
+  }
+  
+  function applyPatches(line) {
+    let processedLine = line;
+    
+    // Patch 1: Replace problematic discriminatedUnion calls with regular union
+    if (processedLine.includes('z.discriminatedUnion(\'type\',')) {
+      processedLine = processedLine.replace(/z\.discriminatedUnion\('type',/g, 'z.union(');
+    }
+    
+    // Patch 2: Replace references to browser/Node built-in types that don't exist in zod
+    processedLine = processedLine.replace(/z\.instanceof\(File\)/g, 'z.any()'); // File API
+    
+    // Patch 3: Replace undefined schema references with z.any()
+    const undefinedRefs = ['UNENROLL', 'UPGRADE', 'POLICY_REASSIGN', 'SETTINGS', 'CPU'];
+    undefinedRefs.forEach(ref => {
+      const regex = new RegExp(`\\b${ref}\\b(?!\\s*=)`, 'g');
+      processedLine = processedLine.replace(regex, 'z.any()');
+    });
+    
+    // Patch 4: Fix cases where schema reference is missing/undefined
+    processedLine = processedLine.replace(/\bundefined\.optional\(\)/g, 'z.any().optional()');
+    processedLine = processedLine.replace(/\bundefined\.describe\(/g, 'z.any().describe(');
+    processedLine = processedLine.replace(/:\s*\.optional\(\)/g, ': z.any().optional()');
+    processedLine = processedLine.replace(/:\s*\.describe\(/g, ': z.any().describe(');
+    
+    // Patch 5: Fix bare z.optional() calls that have no arguments (causes TS2554 error)
+    // This happens when openapi-zod-client generates invalid calls like "body: z.optional()"
+    // Replace with z.any().optional() to fix TypeScript compilation errors
+    processedLine = processedLine.replace(/\bz\.optional\(\)/g, 'z.any().optional()');
+    
+    return processedLine;
+  }
+  
+  // Validation: Check for potential undefined schema references
+  const potentialIssues = [];
+  schemaLines.forEach((line, index) => {
+    // Look for common patterns that might cause "_def" errors
+    if (line.includes('.optional()') && line.includes('undefined')) {
+      potentialIssues.push(`Line ${index + 1}: Potential undefined.optional() call`);
+    }
+    if (line.includes('z.union([') && line.includes('undefined')) {
+      potentialIssues.push(`Line ${index + 1}: Potential undefined in union`);
+    }
+  });
+  
+  if (potentialIssues.length > 0) {
+    console.log(`⚠️ Found ${potentialIssues.length} potential schema issues:`);
+    potentialIssues.slice(0, 5).forEach(issue => console.log(`  - ${issue}`));
+    if (potentialIssues.length > 5) {
+      console.log(`  ... and ${potentialIssues.length - 5} more`);
+    }
+  }
+
+  // No safe schema wrapper needed - fix the root cause instead
+
+  const schemaFileContent = `/*
+ * AUTO-GENERATED FILE - DO NOT EDIT
+ * 
+ * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
+ * Generated at: ${new Date().toISOString()}
+ * Source: Kibana OpenAPI spec via openapi-zod-client (complete schemas)
+ * 
+ * To regenerate: npm run generate:kibana-connectors
+ */
+
+import { z } from '@kbn/zod';
+
+${schemaLines.filter(line => !line.includes("import { z } from '@kbn/zod';")).join('\n')}
+`;
+
+  fs.writeFileSync(SCHEMAS_OUTPUT_PATH, schemaFileContent, 'utf8');
+  console.log(`📄 Generated schemas file: ${SCHEMAS_OUTPUT_PATH}`);
+  
+  return true;
 }
 
 /**
@@ -344,8 +488,46 @@ function generateKibanaConnectors() {
       console.log(`⚠️  ${errorCount} endpoints had errors`);
     }
     
+    // Extract unique schemas used in connectors
+    const usedSchemas = new Set();
+    for (const endpoint of endpoints) {
+      for (const param of endpoint.parameters || []) {
+        if (param.schema && param.schema !== 'z.any()' && !param.schema.startsWith('z.')) {
+          // Clean the schema name - remove method calls like .nullish(), .optional()
+          const cleanSchemaName = param.schema.split('.')[0];
+          usedSchemas.add(cleanSchemaName);
+        }
+      }
+    }
+    
+    // Copy the entire generated client as schemas file (simpler approach)
+    copyClientAsSchemas();
+    
+    // Generate schema imports section - only import schemas that actually exist
+    const actualUsedSchemas = Array.from(usedSchemas).filter(s => s !== 'z' && s !== 'ZodType' && s !== 'ZodSchema');
+    
+    // Read the schemas file to verify which schemas actually exist
+    const schemasFileContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
+    const existingSchemas = actualUsedSchemas.filter(schemaName => {
+      return schemasFileContent.includes(`export const ${schemaName} =`);
+    });
+    
+    const missingSchemas = actualUsedSchemas.filter(schemaName => !existingSchemas.includes(schemaName));
+    
+    if (missingSchemas.length > 0) {
+      console.log(`⚠️ Skipping import of ${missingSchemas.length} missing schemas:`);
+      missingSchemas.slice(0, 5).forEach(schema => console.log(`  - ${schema}`));
+      if (missingSchemas.length > 5) {
+        console.log(`  ... and ${missingSchemas.length - 5} more`);
+      }
+    }
+    
+    const schemaImportsSection = existingSchemas.length > 0 
+      ? `\n// Import schemas from generated schemas file\nimport {\n  ${existingSchemas.join(',\n  ')}\n} from './generated_kibana_schemas';\n`
+      : '';
+
     // Generate the TypeScript file
-    const fileContent = `/*
+    let fileContent = `/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
@@ -356,14 +538,18 @@ function generateKibanaConnectors() {
  */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '@kbn/workflows';
-
+import type { InternalConnectorContract } from '@kbn/workflows';${schemaImportsSection}
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}
 ];
 
 export const KIBANA_CONNECTOR_COUNT = ${successCount};
 `;
+    
+    // FINAL PATCH: Fix bare z.optional() calls that cause TypeScript TS2554 errors
+    // This happens when schema names are empty/undefined, resulting in "body: z.optional()"
+    // Replace with "body: z.any().optional()" to fix compilation errors
+    fileContent = fileContent.replace(/:\s*z\.optional\(\)/g, ': z.any().optional()');
     
     fs.writeFileSync(OUTPUT_PATH, fileContent, 'utf8');
     console.log(`📝 Generated ${OUTPUT_PATH}`);
@@ -428,3 +614,4 @@ if (require.main === module) {
 }
 
 module.exports = { generateKibanaConnectorsMain };
+

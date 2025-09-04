@@ -2,7 +2,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-09-04T07:19:30.443Z
+ * Generated at: 2025-09-04T10:48:44.453Z
  * Source: Kibana OpenAPI spec (454 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
@@ -10,6 +10,191 @@
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '@kbn/workflows';
+// Import schemas from generated schemas file
+import {
+  post_actions_connector_id_Body,
+  put_actions_connector_id_Body,
+  post_actions_connector_id_execute_Body,
+  post_alerting_rule_id_Body,
+  put_alerting_rule_id_Body,
+  post_alerting_rule_id_snooze_schedule_Body,
+  APM_UI_agent_keys_object,
+  APM_UI_create_annotation_object,
+  APM_UI_delete_service_object,
+  APM_UI_agent_configuration_intake_object,
+  APM_UI_search_agent_configuration_object,
+  APM_UI_upload_source_map_object,
+  CreateAssetCriticalityRecord_Body,
+  BulkUpsertAssetCriticalityRecords_Body,
+  Cases_update_case_request,
+  Cases_create_case_request,
+  assignees,
+  category,
+  owner,
+  searchFields,
+  Cases_update_case_comment_request,
+  Cases_add_case_comment_request,
+  Cases_add_case_file_request,
+  Cases_set_case_configuration_request,
+  Cases_update_case_configuration_request,
+  Data_views_create_data_view_request_object,
+  Data_views_update_data_view_request_object,
+  createRuntimeFieldDefault_Body,
+  setDefaultDatailViewDefault_Body,
+  Data_views_swap_data_view_request_object,
+  Security_Detections_API_RulePatchProps,
+  Security_Detections_API_RuleCreateProps,
+  Security_Detections_API_RuleUpdateProps,
+  PerformRulesBulkAction_Body,
+  ExportRules_Body,
+  CreateRuleExceptionListItems_Body,
+  RulePreview_Body,
+  SetAlertAssignees_Body,
+  SearchAlerts_Body,
+  SetAlertsStatus_Body,
+  SetAlertTags_Body,
+  CreateEndpointListItem_Body,
+  UpdateEndpointListItem_Body,
+  agentIds,
+  query,
+  Security_Endpoint_Management_API_ExecuteRouteRequestBody,
+  Security_Endpoint_Management_API_GetFileRouteRequestBody,
+  EndpointIsolateAction_Body,
+  Security_Endpoint_Management_API_KillProcessRouteRequestBody,
+  Security_Endpoint_Management_API_GetProcessesRouteRequestBody,
+  Security_Endpoint_Management_API_RunScriptRouteRequestBody,
+  Security_Endpoint_Management_API_ScanRouteRequestBody,
+  Security_Endpoint_Management_API_SuspendProcessRouteRequestBody,
+  Security_Endpoint_Management_API_UploadRouteRequestBody,
+  query__2,
+  Security_Entity_Analytics_API_UserName,
+  Security_Entity_Analytics_API_MonitoredUserDoc,
+  InitEntityStore_Body,
+  InitEntityEngine_Body,
+  CreateExceptionList_Body,
+  UpdateExceptionList_Body,
+  CreateExceptionListItem_Body,
+  UpdateExceptionListItem_Body,
+  CreateSharedExceptionList_Body,
+  post_fleet_agent_download_sources_Body,
+  post_fleet_agent_policies_Body,
+  post_fleet_agent_policies_bulk_get_Body,
+  put_fleet_agent_policies_agentpolicyid_Body,
+  post_fleet_agent_policies_agentpolicyid_copy_Body,
+  post_fleet_agent_policies_delete_Body,
+  post_fleet_agent_policies_outputs_Body,
+  search_fields,
+  agentsIds,
+  post_fleet_agents_Body,
+  put_fleet_agents_agentid_Body,
+  post_fleet_agents_agentid_actions_Body,
+  post_fleet_agents_agentid_request_diagnostics_Body,
+  post_fleet_agents_agentid_unenroll_Body,
+  post_fleet_agents_agentid_upgrade_Body,
+  post_fleet_agents_bulk_reassign_Body,
+  post_fleet_agents_bulk_request_diagnostics_Body,
+  post_fleet_agents_bulk_unenroll_Body,
+  post_fleet_agents_bulk_update_agent_tags_Body,
+  post_fleet_agents_bulk_upgrade_Body,
+  post_fleet_enrollment_api_keys_Body,
+  post_fleet_epm_bulk_assets_Body,
+  post_fleet_epm_custom_integrations_Body,
+  put_fleet_epm_custom_integrations_pkgname_Body,
+  post_fleet_epm_packages_bulk_Body,
+  post_fleet_epm_packages_bulk_uninstall_Body,
+  post_fleet_epm_packages_bulk_upgrade_Body,
+  post_fleet_epm_packages_pkgname_pkgversion_Body,
+  post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_Body,
+  post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body,
+  post_fleet_fleet_server_hosts_Body,
+  put_fleet_fleet_server_hosts_itemid_Body,
+  post_fleet_outputs_Body,
+  put_fleet_outputs_outputid_Body,
+  post_fleet_package_policies_Body,
+  post_fleet_package_policies_bulk_get_Body,
+  put_fleet_package_policies_packagepolicyid_Body,
+  post_fleet_package_policies_delete_Body,
+  post_fleet_package_policies_upgrade_Body,
+  post_fleet_package_policies_upgrade_dryrun_Body,
+  post_fleet_proxies_Body,
+  put_fleet_proxies_itemid_Body,
+  put_fleet_settings_Body,
+  put_fleet_space_settings_Body,
+  PatchList_Body,
+  CreateList_Body,
+  UpdateList_Body,
+  PatchListItem_Body,
+  CreateListItem_Body,
+  UpdateListItem_Body,
+  put_logstash_pipeline_Body,
+  post_maintenance_window_Body,
+  patch_maintenance_window_id_Body,
+  DeleteNote_Body,
+  PersistNoteRoute_Body,
+  observability_ai_assistant_chat_complete_Body,
+  Security_Osquery_API_CreateLiveQueryRequestBody,
+  Security_Osquery_API_CreatePacksRequestBody,
+  Security_Osquery_API_UpdatePacksRequestBody,
+  Security_Osquery_API_CreateSavedQueryRequestBody,
+  Security_Osquery_API_UpdateSavedQueryRequestBody,
+  PersistPinnedEventRoute_Body,
+  ConfigureRiskEngineSavedObject_Body,
+  post_saved_objects_export_Body,
+  resolveImportErrors_Body,
+  PerformAnonymizationFieldsBulkAction_Body,
+  Security_AI_Assistant_API_ChatCompleteProps,
+  DeleteAllConversations_Body,
+  Security_AI_Assistant_API_ConversationCreateProps,
+  Security_AI_Assistant_API_ConversationUpdateProps,
+  Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps,
+  PerformKnowledgeBaseEntryBulkAction_Body,
+  Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps,
+  PerformPromptsBulkAction_Body,
+  post_security_role_query_Body,
+  put_security_role_name_Body,
+  post_security_roles_Body,
+  post_security_session_invalidate_Body,
+  post_url_Body,
+  post_spaces_copy_saved_objects_Body,
+  post_spaces_disable_legacy_url_aliases_Body,
+  post_spaces_get_shareable_references_Body,
+  post_spaces_resolve_copy_saved_objects_errors_Body,
+  post_spaces_update_objects_spaces_Body,
+  post_spaces_space_Body,
+  get_streams_Body,
+  put_streams_name_Body,
+  post_streams_name_fork_Body,
+  put_streams_name_group_Body,
+  put_streams_name_ingest_Body,
+  post_streams_name_content_export_Body,
+  post_streams_name_dashboards_bulk_Body,
+  post_streams_name_queries_bulk_Body,
+  put_streams_name_queries_queryid_Body,
+  post_streams_name_significant_events_preview_Body,
+  locations,
+  monitorTypes,
+  schedules,
+  post_synthetic_monitors_Body,
+  delete_synthetic_monitors_Body,
+  post_parameters_Body,
+  put_parameter_Body,
+  post_private_location_Body,
+  DeleteTimelines_Body,
+  PatchTimeline_Body,
+  CreateTimelines_Body,
+  CopyTimeline_Body,
+  CleanDraftTimelines_Body,
+  ExportTimelines_Body,
+  PersistFavoriteRoute_Body,
+  ImportTimelines_Body,
+  InstallPrepackedTimelines_Body,
+  put_uptime_settings_Body,
+  SLOs_create_slo_request,
+  SLOs_bulk_delete_request,
+  SLOs_bulk_purge_rollup_request,
+  SLOs_delete_slo_instances_request,
+  SLOs_update_slo_request
+} from './generated_kibana_schemas';
 
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   {
@@ -80,7 +265,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_actions_connector_id_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_actions_connector_id API'),
   },
@@ -99,7 +284,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_actions_connector_id_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_actions_connector_id API'),
   },
@@ -118,7 +303,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_actions_connector_id_execute_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_actions_connector_id_execute API'),
   },
@@ -224,7 +409,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_alerting_rule_id_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_alerting_rule_id API'),
   },
@@ -243,7 +428,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_alerting_rule_id_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_alerting_rule_id API'),
   },
@@ -357,7 +542,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_alerting_rule_id_snooze_schedule_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_alerting_rule_id_snooze_schedule API'),
   },
@@ -454,7 +639,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: APM_UI_agent_keys_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createAgentKey API'),
   },
@@ -493,7 +678,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     serviceName: z.string().describe('Path parameter: serviceName (required)'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: APM_UI_create_annotation_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createAnnotation API'),
   },
@@ -570,7 +755,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     overwrite: z.any().optional().describe('Query parameter: overwrite'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: APM_UI_agent_configuration_intake_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createUpdateAgentConfiguration API'),
   },
@@ -625,7 +810,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: APM_UI_search_agent_configuration_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from searchSingleConfiguration API'),
   },
@@ -682,7 +867,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: APM_UI_upload_source_map_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from uploadSourceMap API'),
   },
@@ -752,7 +937,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateAssetCriticalityRecord_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateAssetCriticalityRecord API'),
   },
@@ -769,7 +954,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: BulkUpsertAssetCriticalityRecords_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from BulkUpsertAssetCriticalityRecords API'),
   },
@@ -822,7 +1007,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Cases_update_case_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from updateCaseDefaultSpace API'),
   },
@@ -840,7 +1025,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Cases_create_case_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createCaseDefaultSpace API'),
   },
@@ -939,7 +1124,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Cases_update_case_comment_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from updateCaseCommentDefaultSpace API'),
   },
@@ -958,7 +1143,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Cases_add_case_comment_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from addCaseCommentDefaultSpace API'),
   },
@@ -1054,7 +1239,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Cases_add_case_file_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from addCaseFileDefaultSpace API'),
   },
@@ -1126,7 +1311,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Cases_set_case_configuration_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from setCaseConfigurationDefaultSpace API'),
   },
@@ -1145,7 +1330,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     configurationId: z.string().describe('Path parameter: configurationId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Cases_update_case_configuration_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from updateCaseConfigurationDefaultSpace API'),
   },
@@ -1231,7 +1416,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Data_views_create_data_view_request_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createDataViewDefaultw API'),
   },
@@ -1286,7 +1471,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Data_views_update_data_view_request_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from updateDataViewDefault API'),
   },
@@ -1324,7 +1509,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: createRuntimeFieldDefault_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createRuntimeFieldDefault API'),
   },
@@ -1343,7 +1528,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: createRuntimeFieldDefault_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createUpdateRuntimeFieldDefault API'),
   },
@@ -1434,7 +1619,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: setDefaultDatailViewDefault_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from setDefaultDatailViewDefault API'),
   },
@@ -1452,7 +1637,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Data_views_swap_data_view_request_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from swapDataViewsDefault API'),
   },
@@ -1470,7 +1655,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Data_views_swap_data_view_request_object.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from previewSwapDataViewsDefault API'),
   },
@@ -1591,7 +1776,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Detections_API_RulePatchProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PatchRule API'),
   },
@@ -1608,7 +1793,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Detections_API_RuleCreateProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateRule API'),
   },
@@ -1625,7 +1810,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Detections_API_RuleUpdateProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateRule API'),
   },
@@ -1643,7 +1828,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     dry_run: z.any().optional().describe('Query parameter: dry_run'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PerformRulesBulkAction_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PerformRulesBulkAction API'),
   },
@@ -1662,7 +1847,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     exclude_export_details: z.any().optional().describe('Query parameter: exclude_export_details'),
     file_name: z.any().optional().describe('Query parameter: file_name'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: ExportRules_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from ExportRules API'),
   },
@@ -1719,7 +1904,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateRuleExceptionListItems_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateRuleExceptionListItems API'),
   },
@@ -1771,7 +1956,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     enable_logged_requests: z.any().optional().describe('Query parameter: enable_logged_requests'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: RulePreview_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from RulePreview API'),
   },
@@ -1788,7 +1973,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SetAlertAssignees_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from SetAlertAssignees API'),
   },
@@ -1805,7 +1990,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SearchAlerts_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from SearchAlerts API'),
   },
@@ -1822,7 +2007,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SetAlertsStatus_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from SetAlertsStatus API'),
   },
@@ -1839,7 +2024,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SetAlertTags_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from SetAlertTags API'),
   },
@@ -1945,7 +2130,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateEndpointListItem_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateEndpointListItem API'),
   },
@@ -1962,7 +2147,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: UpdateEndpointListItem_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateEndpointListItem API'),
   },
@@ -2095,7 +2280,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_ExecuteRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointExecuteAction API'),
   },
@@ -2112,7 +2297,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_GetFileRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointGetFileAction API'),
   },
@@ -2129,7 +2314,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: EndpointIsolateAction_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointIsolateAction API'),
   },
@@ -2146,7 +2331,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_KillProcessRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointKillProcessAction API'),
   },
@@ -2163,7 +2348,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_GetProcessesRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointGetProcessesAction API'),
   },
@@ -2180,7 +2365,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_RunScriptRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from RunScriptAction API'),
   },
@@ -2197,7 +2382,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_ScanRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointScanAction API'),
   },
@@ -2231,7 +2416,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_SuspendProcessRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointSuspendProcessAction API'),
   },
@@ -2248,7 +2433,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: EndpointIsolateAction_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointUnisolateAction API'),
   },
@@ -2265,7 +2450,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Endpoint_Management_API_UploadRouteRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from EndpointUploadAction API'),
   },
@@ -2474,7 +2659,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Entity_Analytics_API_UserName.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreatePrivMonUser API'),
   },
@@ -2526,7 +2711,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Entity_Analytics_API_MonitoredUserDoc.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdatePrivMonUser API'),
   },
@@ -2594,7 +2779,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: InitEntityStore_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from InitEntityStore API'),
   },
@@ -2664,7 +2849,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     entityType: z.string().describe('Path parameter: entityType (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: InitEntityEngine_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from InitEntityEngine API'),
   },
@@ -2804,7 +2989,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateExceptionList_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateExceptionList API'),
   },
@@ -2821,7 +3006,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: UpdateExceptionList_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateExceptionList API'),
   },
@@ -2947,7 +3132,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateExceptionListItem_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateExceptionListItem API'),
   },
@@ -2964,7 +3149,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: UpdateExceptionListItem_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateExceptionListItem API'),
   },
@@ -3016,7 +3201,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateSharedExceptionList_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateSharedExceptionList API'),
   },
@@ -3068,7 +3253,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agent_download_sources_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_download_sources API'),
   },
@@ -3123,7 +3308,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     sourceId: z.string().describe('Path parameter: sourceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agent_download_sources_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_agent_download_sources_sourceid API'),
   },
@@ -3161,7 +3346,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     sys_monitoring: z.any().optional().describe('Query parameter: sys_monitoring'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agent_policies_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies API'),
   },
@@ -3179,7 +3364,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agent_policies_bulk_get_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_bulk_get API'),
   },
@@ -3216,7 +3401,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_agent_policies_agentpolicyid_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_agent_policies_agentpolicyid API'),
   },
@@ -3253,7 +3438,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agent_policies_agentpolicyid_copy_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_agentpolicyid_copy API'),
   },
@@ -3329,7 +3514,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agent_policies_delete_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_delete API'),
   },
@@ -3347,7 +3532,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agent_policies_outputs_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_outputs API'),
   },
@@ -3429,7 +3614,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents API'),
   },
@@ -3484,7 +3669,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_agents_agentid_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_agents_agentid API'),
   },
@@ -3503,7 +3688,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_agentid_actions_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_actions API'),
   },
@@ -3541,7 +3726,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_agentid_request_diagnostics_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_request_diagnostics API'),
   },
@@ -3560,7 +3745,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_agentid_unenroll_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_unenroll API'),
   },
@@ -3579,7 +3764,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_agentid_upgrade_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_upgrade API'),
   },
@@ -3672,7 +3857,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_bulk_reassign_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_reassign API'),
   },
@@ -3690,7 +3875,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_bulk_request_diagnostics_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_request_diagnostics API'),
   },
@@ -3708,7 +3893,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_bulk_unenroll_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_unenroll API'),
   },
@@ -3726,7 +3911,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_bulk_update_agent_tags_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_update_agent_tags API'),
   },
@@ -3744,7 +3929,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_agents_bulk_upgrade_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_upgrade API'),
   },
@@ -3905,7 +4090,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_enrollment_api_keys_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_enrollment_api_keys API'),
   },
@@ -3959,7 +4144,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_bulk_assets_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_bulk_assets API'),
   },
@@ -3995,7 +4180,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_custom_integrations_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_custom_integrations API'),
   },
@@ -4014,7 +4199,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_epm_custom_integrations_pkgname_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_epm_custom_integrations_pkgname API'),
   },
@@ -4090,7 +4275,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_packages_bulk_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk API'),
   },
@@ -4108,7 +4293,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_packages_bulk_uninstall_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk_uninstall API'),
   },
@@ -4144,7 +4329,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_packages_bulk_upgrade_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk_upgrade API'),
   },
@@ -4227,7 +4412,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     ignoreMappingUpdateErrors: z.any().optional().describe('Query parameter: ignoreMappingUpdateErrors'),
     skipDataStreamRollover: z.any().optional().describe('Query parameter: skipDataStreamRollover'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_packages_pkgname_pkgversion_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion API'),
   },
@@ -4326,7 +4511,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion_kibana_assets API'),
   },
@@ -4347,7 +4532,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize API'),
   },
@@ -4470,7 +4655,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_fleet_server_hosts_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_fleet_server_hosts API'),
   },
@@ -4525,7 +4710,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_fleet_server_hosts_itemid_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_fleet_server_hosts_itemid API'),
   },
@@ -4653,7 +4838,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_outputs_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_outputs API'),
   },
@@ -4708,7 +4893,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     outputId: z.string().describe('Path parameter: outputId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_outputs_outputid_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_outputs_outputid API'),
   },
@@ -4763,7 +4948,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_package_policies_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies API'),
   },
@@ -4781,7 +4966,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_package_policies_bulk_get_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_bulk_get API'),
   },
@@ -4837,7 +5022,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     packagePolicyId: z.string().describe('Path parameter: packagePolicyId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_package_policies_packagepolicyid_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_package_policies_packagepolicyid API'),
   },
@@ -4855,7 +5040,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_package_policies_delete_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_delete API'),
   },
@@ -4873,7 +5058,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_package_policies_upgrade_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_upgrade API'),
   },
@@ -4891,7 +5076,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_package_policies_upgrade_dryrun_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_upgrade_dryrun API'),
   },
@@ -4926,7 +5111,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_fleet_proxies_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_proxies API'),
   },
@@ -4981,7 +5166,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_proxies_itemid_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_proxies_itemid API'),
   },
@@ -5069,7 +5254,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_settings_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_settings API'),
   },
@@ -5122,7 +5307,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_fleet_space_settings_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_space_settings API'),
   },
@@ -5213,7 +5398,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PatchList_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PatchList API'),
   },
@@ -5230,7 +5415,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateList_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateList API'),
   },
@@ -5247,7 +5432,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: UpdateList_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateList API'),
   },
@@ -5372,7 +5557,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PatchListItem_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PatchListItem API'),
   },
@@ -5389,7 +5574,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateListItem_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateListItem API'),
   },
@@ -5406,7 +5591,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: UpdateListItem_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateListItem API'),
   },
@@ -5532,7 +5717,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_logstash_pipeline_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_logstash_pipeline API'),
   },
@@ -5567,7 +5752,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_maintenance_window_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_maintenance_window API'),
   },
@@ -5622,7 +5807,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: patch_maintenance_window_id_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from patch_maintenance_window_id API'),
   },
@@ -5736,7 +5921,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PersistNoteRoute_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PersistNoteRoute API'),
   },
@@ -5753,7 +5938,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: observability_ai_assistant_chat_complete_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from observability_ai_assistant_chat_complete API'),
   },
@@ -5790,7 +5975,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Osquery_API_CreateLiveQueryRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from OsqueryCreateLiveQuery API'),
   },
@@ -5866,7 +6051,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Osquery_API_CreatePacksRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from OsqueryCreatePacks API'),
   },
@@ -5919,7 +6104,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Osquery_API_UpdatePacksRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from OsqueryUpdatePacks API'),
   },
@@ -5955,7 +6140,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Osquery_API_CreateSavedQueryRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from OsqueryCreateSavedQuery API'),
   },
@@ -6008,7 +6193,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_Osquery_API_UpdateSavedQueryRequestBody.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from OsqueryUpdateSavedQuery API'),
   },
@@ -6025,7 +6210,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PersistPinnedEventRoute_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PersistPinnedEventRoute API'),
   },
@@ -6059,7 +6244,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: ConfigureRiskEngineSavedObject_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from ConfigureRiskEngineSavedObject API'),
   },
@@ -6094,7 +6279,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_saved_objects_export_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_saved_objects_export API'),
   },
@@ -6135,7 +6320,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     compatibilityMode: z.any().optional().describe('Query parameter: compatibilityMode'),
     createNewCopies: z.any().optional().describe('Query parameter: createNewCopies'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: resolveImportErrors_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from resolveImportErrors API'),
   },
@@ -6152,7 +6337,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PerformAnonymizationFieldsBulkAction_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PerformAnonymizationFieldsBulkAction API'),
   },
@@ -6188,7 +6373,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     content_references_disabled: z.any().optional().describe('Query parameter: content_references_disabled'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_AI_Assistant_API_ChatCompleteProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from ChatComplete API'),
   },
@@ -6222,7 +6407,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_AI_Assistant_API_ConversationCreateProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateConversation API'),
   },
@@ -6293,7 +6478,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_AI_Assistant_API_ConversationUpdateProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateConversation API'),
   },
@@ -6348,7 +6533,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateKnowledgeBaseEntry API'),
   },
@@ -6365,7 +6550,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PerformKnowledgeBaseEntryBulkAction_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PerformKnowledgeBaseEntryBulkAction API'),
   },
@@ -6436,7 +6621,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from UpdateKnowledgeBaseEntry API'),
   },
@@ -6453,7 +6638,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PerformPromptsBulkAction_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PerformPromptsBulkAction API'),
   },
@@ -6506,7 +6691,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_security_role_query_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_security_role_query API'),
   },
@@ -6562,7 +6747,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     name: z.string().describe('Path parameter: name (required)'),
     createOnly: z.any().optional().describe('Query parameter: createOnly'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_security_role_name_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_security_role_name API'),
   },
@@ -6580,7 +6765,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_security_roles_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_security_roles API'),
   },
@@ -6598,7 +6783,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_security_session_invalidate_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_security_session_invalidate API'),
   },
@@ -6615,7 +6800,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_url_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_url API'),
   },
@@ -6686,7 +6871,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_spaces_copy_saved_objects_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_copy_saved_objects API'),
   },
@@ -6704,7 +6889,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_spaces_disable_legacy_url_aliases_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_disable_legacy_url_aliases API'),
   },
@@ -6722,7 +6907,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_spaces_get_shareable_references_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_get_shareable_references API'),
   },
@@ -6740,7 +6925,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_spaces_resolve_copy_saved_objects_errors_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_resolve_copy_saved_objects_errors API'),
   },
@@ -6758,7 +6943,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_spaces_update_objects_spaces_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_update_objects_spaces API'),
   },
@@ -6793,7 +6978,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_spaces_space_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_space API'),
   },
@@ -6848,7 +7033,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_spaces_space_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_spaces_space_id API'),
   },
@@ -6901,7 +7086,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: get_streams_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_disable API'),
   },
@@ -6919,7 +7104,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: get_streams_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_enable API'),
   },
@@ -6937,7 +7122,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: get_streams_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_resync API'),
   },
@@ -6992,7 +7177,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_streams_name_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name API'),
   },
@@ -7011,7 +7196,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_streams_name_fork_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_fork API'),
   },
@@ -7048,7 +7233,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_streams_name_group_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_group API'),
   },
@@ -7085,7 +7270,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_streams_name_ingest_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_ingest API'),
   },
@@ -7104,7 +7289,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_streams_name_content_export_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_content_export API'),
   },
@@ -7160,7 +7345,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_streams_name_dashboards_bulk_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_dashboards_bulk API'),
   },
@@ -7199,7 +7384,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     name: z.string().describe('Path parameter: name (required)'),
     dashboardId: z.string().describe('Path parameter: dashboardId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: get_streams_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_dashboards_dashboardid API'),
   },
@@ -7236,7 +7421,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_streams_name_queries_bulk_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_queries_bulk API'),
   },
@@ -7275,7 +7460,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     name: z.string().describe('Path parameter: name (required)'),
     queryId: z.string().describe('Path parameter: queryId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_streams_name_queries_queryid_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_queries_queryid API'),
   },
@@ -7332,7 +7517,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     name: z.string().describe('Path parameter: name (required)'),
     ruleId: z.string().describe('Path parameter: ruleId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: get_streams_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_rules_ruleid API'),
   },
@@ -7395,7 +7580,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     to: z.any().optional().describe('Query parameter: to'),
     bucketSize: z.any().optional().describe('Query parameter: bucketSize'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_streams_name_significant_events_preview_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_significant_events_preview API'),
   },
@@ -7454,7 +7639,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_synthetic_monitors_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_synthetic_monitors API'),
   },
@@ -7471,7 +7656,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: delete_synthetic_monitors_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from delete_synthetic_monitors API'),
   },
@@ -7524,7 +7709,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_synthetic_monitors_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_synthetic_monitor API'),
   },
@@ -7558,7 +7743,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_parameters_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_parameters API'),
   },
@@ -7628,7 +7813,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_parameter_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_parameter API'),
   },
@@ -7662,7 +7847,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: post_private_location_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from post_private_location API'),
   },
@@ -7784,7 +7969,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PatchTimeline_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PatchTimeline API'),
   },
@@ -7801,7 +7986,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CreateTimelines_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CreateTimelines API'),
   },
@@ -7852,7 +8037,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: CleanDraftTimelines_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from CleanDraftTimelines API'),
   },
@@ -7870,7 +8055,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     file_name: z.any().optional().describe('Query parameter: file_name'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: ExportTimelines_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from ExportTimelines API'),
   },
@@ -7887,7 +8072,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: PersistFavoriteRoute_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from PersistFavoriteRoute API'),
   },
@@ -7904,7 +8089,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: ImportTimelines_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from ImportTimelines API'),
   },
@@ -7921,7 +8106,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: InstallPrepackedTimelines_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from InstallPrepackedTimelines API'),
   },
@@ -8007,7 +8192,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: put_uptime_settings_Body.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from put_uptime_settings API'),
   },
@@ -8049,7 +8234,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SLOs_create_slo_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from createSloOp API'),
   },
@@ -8068,7 +8253,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SLOs_bulk_delete_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from bulkDeleteOp API'),
   },
@@ -8107,7 +8292,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SLOs_bulk_purge_rollup_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from deleteRollupDataOp API'),
   },
@@ -8126,7 +8311,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SLOs_delete_slo_instances_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from deleteSloInstancesOp API'),
   },
@@ -8185,7 +8370,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     sloId: z.string().describe('Path parameter: sloId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: SLOs_update_slo_request.optional().describe('Body parameter: body'),
     }),
     outputSchema: z.any().describe('Response from updateSloOp API'),
   },
