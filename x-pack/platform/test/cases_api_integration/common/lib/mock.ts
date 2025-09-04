@@ -177,6 +177,7 @@ export const postCaseResp = (
   duration: null,
   severity: req.severity ?? CaseSeverity.LOW,
   totalAlerts: 0,
+  totalEvents: 0,
   totalComment: 0,
   closed_by: null,
   created_by: defaultUser,
