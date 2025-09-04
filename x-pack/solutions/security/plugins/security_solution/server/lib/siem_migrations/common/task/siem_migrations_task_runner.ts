@@ -62,9 +62,8 @@ export type SiemTaskRunnerConstructor<
   P extends object = {},
   C extends object = {},
   O extends object = {}
-> = new (
-  ...params: ConstructorParameters<typeof SiemMigrationTaskRunner<M, I, P, C, O>>
-) => SiemMigrationTaskRunner<M, I, P, C, O>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+> = new (...params: any[]) => SiemMigrationTaskRunner<M, I, P, C, O>;
 
 export abstract class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
