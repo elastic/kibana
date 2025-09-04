@@ -62,6 +62,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
   useEffect(() => {
     if (description && !definition.stream.description) {
       updateStream({
+        rules: definition.rules,
         dashboards: definition.dashboards,
         queries: definition.queries,
         stream: {

@@ -31,7 +31,7 @@ interface Dependencies {
 
 const SystemIdentificationPrompt = createPrompt({
   name: 'system_identification',
-  description: 'Identify the system/application that generated a set of logs',
+  description: 'Identify all systems/applications that generated a set of logs',
   input: z.object({
     name: z.string(),
     categorizationField: z.string().optional(),
@@ -42,7 +42,7 @@ const SystemIdentificationPrompt = createPrompt({
   .version({
     template: {
       mustache: {
-        template: `You are an expert log analysis system. Your task is to identify the system that generated these logs.
+        template: `You are an expert log analysis system. Your task is to identify all systems or applications that generated these logs.
 
 ## Context
 - Index Name: {{name}}
@@ -58,11 +58,11 @@ Following is the list of fields found in the dataset with their types, count and
 ## Task: System Identification
 
 Based on the log samples above, the dataset analysis and the context, identify:
-1. **Primary System/Application**: What system generated these logs? (e.g., Nginx, Apache, Kubernetes, AWS CloudTrail, Spring Boot application, etc.)
-2. **System Version** (if detectable): Can you identify the specific version or variant?
-3. **Confidence Level**: Rate your confidence in this identification (High/Medium/Low) and explain why.
+1. **Systems/Applications**: List all distinct systems or applications that generated these logs (e.g., Nginx, Apache, Kubernetes, AWS CloudTrail, Spring Boot application, etc.). If multiple systems are present, list each one separately.
+2. **System Version** (if detectable): For each identified system, specify the version or variant if possible.
+3. **Confidence Level**: For each identified system, rate your confidence in this identification (High/Medium/Low) and explain why.
 
-Please structure your response as plain text for usage in another LLM prompt`,
+Please structure your response as plain text, listing each identified system separately for usage in another LLM prompt`,
       },
     },
     temperature: 0.2,
