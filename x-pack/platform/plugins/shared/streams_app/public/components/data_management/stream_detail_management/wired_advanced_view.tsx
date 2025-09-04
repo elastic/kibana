@@ -6,18 +6,28 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Streams } from '@kbn/streams-schema';
 import {
+  copyToClipboard,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -191,46 +201,126 @@ function SettingRow({
 }
 
 function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetResponse }) {
+  const [showModal, setShowModal] = useState(false);
+  const [streamName, setStreamName] = useState('');
+
   return (
-    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-      <EuiPanel hasShadow={false} color="subdued">
-        <EuiText size="s" color="danger">
-          <h3>
-            {i18n.translate('xpack.streams.streamDetailView.indexConfiguration', {
-              defaultMessage: 'Delete stream',
-            })}
-          </h3>
-        </EuiText>
-      </EuiPanel>
+    <>
+      {showModal ? (
+        <EuiModal onClose={() => setShowModal(false)}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.title', {
+                defaultMessage: 'Delete {stream} ?',
+                values: { stream: definition.stream.name },
+              })}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-      <EuiPanel hasShadow={false} hasBorder={false}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={2}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiText size="s">
-                  {i18n.translate('xpack.streams.streamDetailView.deleteStreamText', {
-                    defaultMessage:
-                      'Permanently delete your stream and all its contents from Elastic. This action is not reversible, so please proceed with caution.',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <EuiModalBody>
+            <EuiCallOut
+              color="warning"
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
+                  defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents."
+                  values={{
+                    stream: (
+                      <EuiLink
+                        onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                          e.currentTarget.blur();
+                          copyToClipboard(definition.stream.name);
+                        }}
+                      >
+                        {definition.stream.name} <EuiIcon type="copy" />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+            />
 
-          <EuiFlexItem grow={5}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton color="danger" onClick={() => {}}>
-                  {i18n.translate('xpack.streams.streamDetailView.deleteStreamButton', {
-                    defaultMessage: 'Delete stream',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiSpacer size="s" />
+
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel',
+                {
+                  defaultMessage: 'Type the stream name to confirm',
+                }
+              )}
+            >
+              <EuiFieldText
+                onChange={(e) => setStreamName(e.target.value)}
+                fullWidth
+                name={'stream-name-deletion'}
+              />
+            </EuiFormRow>
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={() => setShowModal(false)}>
+              {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+
+            <EuiButton
+              isDisabled={streamName !== definition.stream.name}
+              color="danger"
+              onClick={() => setShowModal(false)}
+              fill
+            >
+              {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
+                defaultMessage: 'Delete',
+              })}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      ) : null}
+
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+        <EuiPanel hasShadow={false} color="subdued">
+          <EuiText size="s" color="danger">
+            <h3>
+              {i18n.translate('xpack.streams.streamDetailView.indexConfiguration', {
+                defaultMessage: 'Delete stream',
+              })}
+            </h3>
+          </EuiText>
+        </EuiPanel>
+
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    {i18n.translate('xpack.streams.streamDetailView.deleteStreamText', {
+                      defaultMessage:
+                        'Permanently delete your stream and all its contents from Elastic. This action is not reversible, so please proceed with caution.',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={5}>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="danger" fill onClick={() => setShowModal((prev) => !prev)}>
+                    {i18n.translate('xpack.streams.streamDetailView.deleteStreamButton', {
+                      defaultMessage: 'Delete stream',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiPanel>
-    </EuiPanel>
+    </>
   );
 }
