@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getFlattenedTraceDocumentOverview, type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
-import { isTransaction } from '../../helpers';
 
 const fullScreenButtonLabel = i18n.translate(
   'unifiedDocViewer.observability.traces.trace.fullScreen.button',
@@ -28,25 +25,20 @@ const fullScreenButtonLabel = i18n.translate(
 );
 
 const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.description', {
-  defaultMessage:
-    'Trace attributes and a timeline of all spans in the trace, including their duration and hierarchy.',
+  defaultMessage: 'Timeline of all spans in the trace, including their duration and hierarchy.',
 });
 
 export interface TraceProps {
-  hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
-  showWaterfall?: boolean;
+  traceId: string;
+  serviceName: string;
+  docId: string;
 }
 
-export const Trace = ({ hit, dataView, showWaterfall = true }: TraceProps) => {
+export const Trace = ({ traceId, serviceName, docId, dataView }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
-  const isSpan = !isTransaction(hit);
-  const flattenedHit = getFlattenedTraceDocumentOverview(hit);
-  const traceId = flattenedHit[TRACE_ID];
-  const docId = flattenedHit[isSpan ? SPAN_ID : TRANSACTION_ID];
-  const serviceName = flattenedHit[SERVICE_NAME];
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
@@ -64,23 +56,17 @@ export const Trace = ({ hit, dataView, showWaterfall = true }: TraceProps) => {
     [docId, rangeFrom, rangeTo, traceId]
   );
 
-  const sectionActions = useMemo(
-    () =>
-      showWaterfall
-        ? [
-            {
-              label: fullScreenButtonLabel,
-              icon: 'fullScreen',
-              ariaLabel: fullScreenButtonLabel,
-              dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
-              onClick: () => {
-                setShowFullScreenWaterfall(true);
-              },
-            },
-          ]
-        : [],
-    [showWaterfall]
-  );
+  const sectionActions = [
+    {
+      label: fullScreenButtonLabel,
+      icon: 'fullScreen',
+      ariaLabel: fullScreenButtonLabel,
+      dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
+      onClick: () => {
+        setShowFullScreenWaterfall(true);
+      },
+    },
+  ];
 
   return (
     <>
@@ -89,22 +75,20 @@ export const Trace = ({ hit, dataView, showWaterfall = true }: TraceProps) => {
         title={i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
           defaultMessage: 'Trace',
         })}
-        description={showWaterfall ? sectionTip : undefined}
+        description={sectionTip}
         actions={sectionActions}
       >
-        {showWaterfall && (
-          <div
-            css={css`
-              padding-inline: ${euiTheme.size.base};
-            `}
-          >
-            <EmbeddableRenderer
-              type="APM_TRACE_WATERFALL_EMBEDDABLE"
-              getParentApi={getParentApi}
-              hidePanelChrome
-            />
-          </div>
-        )}
+        <div
+          css={css`
+            padding-inline: ${euiTheme.size.base};
+          `}
+        >
+          <EmbeddableRenderer
+            type="APM_TRACE_WATERFALL_EMBEDDABLE"
+            getParentApi={getParentApi}
+            hidePanelChrome
+          />
+        </div>
       </ContentFrameworkSection>
 
       {showFullScreenWaterfall && (

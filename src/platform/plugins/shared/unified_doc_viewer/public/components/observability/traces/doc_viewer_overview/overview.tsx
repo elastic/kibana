@@ -70,6 +70,7 @@ export function Overview({
   const traceId = flattenedHit[TRACE_ID];
   const transactionId = flattenedHit[TRANSACTION_ID];
   const spanId = flattenedHit[SPAN_ID];
+  const serviceName = flattenedHit[SERVICE_NAME];
   const docId = isSpan ? spanId : transactionId;
 
   const containerHeight = containerRef
@@ -108,7 +109,7 @@ export function Overview({
               <EuiSpacer size="m" />
               <SimilarSpans
                 spanName={flattenedHit[SPAN_NAME]}
-                serviceName={flattenedHit[SERVICE_NAME]}
+                serviceName={serviceName}
                 transactionName={flattenedHit[TRANSACTION_NAME]}
                 transactionType={flattenedHit[TRANSACTION_TYPE]}
                 isOtelSpan={isOtelSpan}
@@ -116,17 +117,17 @@ export function Overview({
               />
             </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <Trace
-                hit={hit}
-                showWaterfall={showWaterfall}
-                dataView={dataView}
-                filter={filter}
-                onAddColumn={onAddColumn}
-                onRemoveColumn={onRemoveColumn}
-              />
-            </EuiFlexItem>
+            {showWaterfall && docId ? (
+              <EuiFlexItem>
+                <EuiSpacer size="m" />
+                <Trace
+                  dataView={dataView}
+                  traceId={traceId}
+                  serviceName={serviceName || ''}
+                  docId={docId}
+                />
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem>
               <EuiSpacer size="m" />
               <SpanLinks traceId={traceId} docId={docId || ''} />
