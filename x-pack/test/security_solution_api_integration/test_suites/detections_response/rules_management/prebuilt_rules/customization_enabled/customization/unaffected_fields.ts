@@ -32,17 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    const testUnaffectedFieldsNonCustomized = ({ hasBaseVersion }: { hasBaseVersion: boolean }) => {
-      beforeEach(async () => {
-        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
-        await installPrebuiltRules(es, supertest);
-
-        if (!hasBaseVersion) {
-          // Remove the prebuilt rule asset so that the base version is no longer available
-          await deleteAllPrebuiltRuleAssets(es, log);
-        }
-      });
-
+    const testUnaffectedFieldsNonCustomized = () => {
       describe('"is_customized" calculation is not affected by', () => {
         const testFieldDoesNotAffectCustomizationState = async ({
           fieldName,
@@ -192,11 +182,24 @@ export default ({ getService }: FtrProviderContext): void => {
     };
 
     describe('when base version is available', () => {
-      testUnaffectedFieldsNonCustomized({ hasBaseVersion: true });
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
+        await installPrebuiltRules(es, supertest);
+      });
+
+      testUnaffectedFieldsNonCustomized();
     });
 
     describe('when base version is missing', () => {
-      testUnaffectedFieldsNonCustomized({ hasBaseVersion: false });
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
+        await installPrebuiltRules(es, supertest);
+
+        // Remove the prebuilt rule asset so that the base version is no longer available
+        await deleteAllPrebuiltRuleAssets(es, log);
+      });
+
+      testUnaffectedFieldsNonCustomized();
     });
   });
 };
