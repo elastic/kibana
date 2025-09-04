@@ -8269,10 +8269,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-xpack@link:x-pack/test":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test@link:src/platform/packages/shared/kbn-test":
   version "0.0.0"
   uid ""
