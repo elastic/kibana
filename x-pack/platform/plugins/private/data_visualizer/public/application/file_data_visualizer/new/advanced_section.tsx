@@ -54,6 +54,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
         />
       }
       paddingSize="m"
+      data-test-subj="dataVisualizerPageAdvancedSettings"
     >
       <SectionTitle>
         <FormattedMessage id="xpack.dataVisualizer.file.mappingsTitle" defaultMessage="Mappings" />

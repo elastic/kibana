@@ -309,11 +309,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
           await a11y.testAppSnapshot();
         });
-
-        it('file data visualizer import data page', async () => {
-          await ml.dataVisualizerFileBased.navigateToFileImport();
-          await a11y.testAppSnapshot();
-        });
       });
     });
   });
