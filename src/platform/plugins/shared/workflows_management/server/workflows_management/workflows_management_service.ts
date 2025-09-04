@@ -347,10 +347,71 @@ export class WorkflowsService {
 
     if (query) {
       must.push({
-        multi_match: {
-          query,
-          fields: ['name^2', 'description', 'tags'],
-          type: 'best_fields',
+        bool: {
+          should: [
+            // Exact phrase matching with boost (text fields only)
+            {
+              multi_match: {
+                query,
+                fields: ['name^3', 'description^2'],
+                type: 'phrase',
+                boost: 3,
+              },
+            },
+            // Word-level matching (all fields)
+            {
+              multi_match: {
+                query,
+                fields: ['name^2', 'description', 'tags'],
+                type: 'best_fields',
+                boost: 2,
+              },
+            },
+            // Prefix matching for partial word matches (text fields only)
+            {
+              multi_match: {
+                query,
+                fields: ['name^2', 'description'],
+                type: 'phrase_prefix',
+                boost: 1.5,
+              },
+            },
+            // Wildcard matching for more flexible partial matches
+            {
+              bool: {
+                should: [
+                  {
+                    wildcard: {
+                      'name.keyword': {
+                        value: `*${query}*`,
+                        case_insensitive: true,
+                        boost: 1,
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'description.keyword': {
+                        value: `*${query}*`,
+                        case_insensitive: true,
+                        boost: 0.5,
+                      },
+                    },
+                  },
+                  {
+                    wildcard: {
+                      tags: {
+                        value: `*${query}*`,
+                        case_insensitive: true,
+                        boost: 0.5,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       });
     }
