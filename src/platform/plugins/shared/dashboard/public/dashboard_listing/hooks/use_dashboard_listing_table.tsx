@@ -16,8 +16,6 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import { contentManagementFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
-import { getBulkAuthorNames } from '../../dashboard_app/access_control/get_bulk_author_names';
 import { checkUserAccessControl } from '../../dashboard_app/access_control/check_user_access_control';
 import { checkGlobalManageControlPrivilege } from '../../dashboard_app/access_control/check_global_manage_control_privilege';
 import type { DashboardSearchOut } from '../../../server/content_management';
@@ -49,8 +47,7 @@ const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 const toTableListViewSavedObject = (
   hit: DashboardSearchOut['hits'][number],
-  canManageAccessControl: boolean,
-  authorName?: string
+  canManageAccessControl: boolean
 ): DashboardSavedObjectUserContent => {
   const { title, description, timeRestore } = hit.attributes;
   return {
@@ -69,7 +66,6 @@ const toTableListViewSavedObject = (
     },
     canManageAccessControl,
     accessMode: hit?.accessControl?.accessMode,
-    authorName,
   };
 };
 
@@ -228,16 +224,14 @@ export const useDashboardListingTable = ({
         },
       });
 
-      const [userRes, globalAuthRes, authorRes] = await Promise.allSettled([
+      const [userRes, globalAuthRes] = await Promise.allSettled([
         coreServices.security.authc.getCurrentUser(),
         checkGlobalManageControlPrivilege(),
-        getBulkAuthorNames(hits.map((hit) => hit.accessControl?.owner || hit.createdBy)),
       ]);
 
       const user = userRes.status === 'fulfilled' ? userRes.value : undefined;
       const isGloballyAuthorized =
         globalAuthRes.status === 'fulfilled' ? globalAuthRes.value : false;
-      const authorNames = authorRes.status === 'fulfilled' ? authorRes.value : [];
 
       const searchEndTime = window.performance.now();
       const searchDuration = searchEndTime - searchStartTime;
@@ -260,11 +254,7 @@ export const useDashboardListingTable = ({
             })) ||
           false;
 
-        const authorName = authorNames.find(
-          (author) => hit.accessControl?.owner === author.id || hit.createdBy === author.id
-        );
-
-        return toTableListViewSavedObject(hit, canManageAccessControl, authorName?.username);
+        return toTableListViewSavedObject(hit, canManageAccessControl);
       });
 
       return { total, hits: results };
@@ -359,15 +349,13 @@ export const useDashboardListingTable = ({
 
         const getReason = () => {
           if (!showWriteControls) {
-            return contentManagementFlyoutStrings.contentEditor.readonlyReason.noPrivilege;
+            return 'missing_privileges';
           }
           if (item?.managed) {
-            return contentManagementFlyoutStrings.contentEditor.readonlyReason.managed;
+            return 'managed_entity';
           }
           if (item?.canManageAccessControl === false) {
-            return contentManagementFlyoutStrings.contentEditor.readonlyReason.accessControl(
-              item.authorName
-            );
+            return 'access_control';
           }
         };
 

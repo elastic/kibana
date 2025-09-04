@@ -31,5 +31,4 @@ export interface DashboardSavedObjectUserContent extends UserContentCommonSchema
   };
   canManageAccessControl?: boolean;
   accessMode?: SavedObjectAccessControl['accessMode'];
-  authorName?: string;
 }

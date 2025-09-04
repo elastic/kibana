@@ -314,26 +314,3 @@ export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
     defaultMessage: 'Add time slider control',
   });
-
-export const contentManagementFlyoutStrings = {
-  contentEditor: {
-    readonlyReason: {
-      managed: i18n.translate('dashboard.contentManagement.contentEditor.readonlyReason.managed', {
-        defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
-      }),
-      accessControl: (authorName?: string) =>
-        i18n.translate('dashboard.contentManagement.contentEditor.readonlyReason.accessControl', {
-          defaultMessage:
-            "You don't have permissions to edit this dashboard. Contact {authorName} or an admin to change it.",
-          values: { authorName: authorName || 'the author' },
-        }),
-      noPrivilege: i18n.translate(
-        'dashboard.contentManagement.contentEditor.readonlyReason.noPrivilege',
-        {
-          defaultMessage:
-            "You don't have permissions to edit this dashboard. Contact your admin to change your role.",
-        }
-      ),
-    },
-  },
-};

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiTitle, EuiButton } from '@elastic/eui';
 
+import { useUserProfile } from '@kbn/content-management-user-profiles';
 import type { Services } from '../services';
 import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
@@ -58,8 +59,56 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [authorName, setAuthorName] = useState('');
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
+  const authorId = item?.accessControl?.owner || item.createdBy;
+  const query = useUserProfile(authorId as string);
+
+  useEffect(() => {
+    if (query.isSuccess && query.data) {
+      setAuthorName(query.data.user.username);
+    }
+  }, [query.isSuccess, query.data]);
+
+  const defaultReadonlyReasons = new Map<string, string>([
+    [
+      'missing_privileges',
+      i18n.translate('contentManagement.contentEditor.metadataForm.missingPrivilegesTooltip', {
+        defaultMessage:
+          "You don't have permissions to edit this dashboard. Contact your admin to change your role.",
+      }),
+    ],
+    [
+      'managed_entity',
+      i18n.translate('contentManagement.contentEditor.metadataForm.notFoundTooltip', {
+        defaultMessage: 'This {entityName} is managed by Elastic. Duplicate it to make changes.',
+        values: { entityName },
+      }),
+    ],
+    [
+      'access_control',
+      i18n.translate('contentManagement.contentEditor.metadataForm.accessControlTooltip', {
+        defaultMessage:
+          "You don't have permissions to edit this {entityName}. Contact {authorName} or an admin to change it.",
+        values: { authorName: authorName || 'the author', entityName },
+      }),
+    ],
+  ]);
+
+  const getReadonlyReason = (reason: string | undefined) => {
+    if (reason && defaultReadonlyReasons.has(reason)) {
+      return defaultReadonlyReasons.get(reason)!;
+    }
+
+    if (reason) {
+      return reason;
+    }
+
+    return i18n.translate('contentManagement.contentEditor.metadataForm.readOnlyToolTip', {
+      defaultMessage: 'To edit these details, contact your administrator for access.',
+    });
+  };
 
   const hasNoChanges = () => {
     const itemTags = item.tags.map((obj) => obj.id).sort();
@@ -130,12 +179,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
         <MetadataForm
           form={{ ...form, isSubmitted }}
           isReadonly={isReadonly}
-          readonlyReason={
-            readonlyReason ||
-            i18n.translate('contentManagement.contentEditor.metadataForm.readOnlyToolTip', {
-              defaultMessage: 'To edit these details, contact your administrator for access.',
-            })
-          }
+          readonlyReason={getReadonlyReason(readonlyReason)}
           tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}
