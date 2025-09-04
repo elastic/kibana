@@ -30,15 +30,10 @@ import {
   isDangerousStatus,
   type EsWorkflowStepExecution,
   type WorkflowExecutionDto,
-  type WorkflowYaml,
+  type StepExecutionTreeItem,
 } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import {
-  convertToWorkflowGraph,
-  getNestedStepsFromGraph,
-  type StepListTreeItem,
-} from '@kbn/workflows/graph';
 import { i18n } from '@kbn/i18n';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getStepIconType } from '../../../shared/ui/get_step_icon_type';
@@ -76,102 +71,62 @@ function StepIcon({
   );
 }
 
-function transformWorkflowDefinitionToStepListTree(
-  workflowDefinition: WorkflowYaml
-): StepListTreeItem[] {
-  const workflowExecutionGraph = convertToWorkflowGraph(workflowDefinition);
-  return getNestedStepsFromGraph(workflowExecutionGraph);
-}
-
 function convertTreeToEuiTreeViewItems(
+  treeItems: StepExecutionTreeItem[],
+  stepExecutionMap: Map<string, EsWorkflowStepExecution>,
   euiTheme: EuiThemeComputed,
-  executionStatus: ExecutionStatus,
-  treeItems: StepListTreeItem[],
-  stepExecutionMap: Map<string, EsWorkflowStepExecution[]>,
   selectedId: string | null,
   onClickHandler: (stepExecutionId: string) => void
 ): EuiTreeViewProps['items'] {
   const onClickFn = onClickHandler;
-  return treeItems
-    .map((item) => {
-      const stepExecutions = stepExecutionMap.get(item.stepId);
-      if (!stepExecutions) {
-        const mockStatus =
-          executionStatus === ExecutionStatus.PENDING ||
-          executionStatus === ExecutionStatus.WAITING ||
-          executionStatus === ExecutionStatus.RUNNING
-            ? ExecutionStatus.PENDING
-            : ExecutionStatus.SKIPPED;
-        return [
-          {
-            id: item.stepId,
-            sortIndex: item.executionIndex,
-            icon: <StepIcon stepType={item.stepType} executionStatus={mockStatus} />,
-            label: (
-              <StepExecutionTreeItemLabel
-                stepId={item.stepId}
-                status={mockStatus}
-                executionIndex={item.executionIndex}
-                executionTimeMs={null}
-                stepType={item.stepType}
-                selected={selectedId === item.stepId}
-              />
-            ),
-          },
-        ];
-      }
-      return stepExecutions.map((stepExecution) => ({
-        id: stepExecution.id,
-        sortIndex: stepExecution.executionIndex,
-        icon: <StepIcon stepType={item.stepType} executionStatus={stepExecution.status} />,
-        css: isDangerousStatus(stepExecution.status)
-          ? css`
-              &,
-              &:active,
-              &:focus {
-                background-color: ${getExecutionStatusColors(euiTheme, stepExecution.status)
-                  .backgroundColor};
-              }
+  return treeItems.map((item) => {
+    const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
+    return {
+      ...item,
+      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
+      icon: <StepIcon stepType={item.stepType} executionStatus={item.status} />,
+      css: isDangerousStatus(item.status)
+        ? css`
+            &,
+            &:active,
+            &:focus {
+              background-color: ${getExecutionStatusColors(euiTheme, item.status).backgroundColor};
+            }
 
-              &:hover {
-                background-color: ${euiTheme.colors.backgroundLightDanger};
-              }
-            `
+            &:hover {
+              background-color: ${euiTheme.colors.backgroundLightDanger};
+            }
+          `
+        : undefined,
+      label: (
+        <StepExecutionTreeItemLabel
+          stepId={item.stepId}
+          status={item.status}
+          executionIndex={item.executionIndex}
+          executionTimeMs={stepExecution?.executionTimeMs ?? null}
+          stepType={item.stepType}
+          selected={selectedId === stepExecution?.id}
+        />
+      ),
+      children:
+        item.children.length > 0
+          ? convertTreeToEuiTreeViewItems(
+              item.children,
+              stepExecutionMap,
+              euiTheme,
+              selectedId,
+              onClickFn
+            )
           : undefined,
-        label: (
-          <StepExecutionTreeItemLabel
-            stepId={stepExecution.stepId}
-            status={stepExecution.status}
-            executionIndex={stepExecution.executionIndex}
-            executionTimeMs={stepExecution.executionTimeMs ?? null}
-            stepType={item.stepType}
-            selected={selectedId === stepExecution.id}
-          />
-        ),
-        children:
-          item.children.length > 0
-            ? convertTreeToEuiTreeViewItems(
-                euiTheme,
-                executionStatus,
-                item.children,
-                stepExecutionMap,
-                selectedId,
-                onClickFn
-              )
-            : undefined,
-        callback:
-          // for nodes with children, we don't want other onClick behavior besides expanding/collapsing
-          item.children && item.children.length > 0
-            ? undefined
-            : () => {
-                onClickFn(stepExecution.id);
-                // string is expected by EuiTreeView for some reason
-                return stepExecution.id;
-              },
-      }));
-    })
-    .flat()
-    .sort((a, b) => a.sortIndex - b.sortIndex);
+      callback:
+        // TODO: for nodes with children, we don't want other onClick behavior besides expanding/collapsing
+        () => {
+          onClickFn(item.stepExecutionId ?? '');
+          // string is expected by EuiTreeView for some reason
+          return item.stepExecutionId ?? '';
+        },
+    };
+  });
 }
 
 export interface WorkflowStepExecutionListProps {
@@ -245,20 +200,14 @@ export const WorkflowStepExecutionList = ({
       />
     );
   } else if (execution.workflowDefinition) {
-    const stepExecutionMap = new Map<string, EsWorkflowStepExecution[]>();
+    const stepExecutionMap = new Map<string, EsWorkflowStepExecution>();
     for (const stepExecution of execution.stepExecutions) {
-      if (stepExecutionMap.has(stepExecution.stepId)) {
-        stepExecutionMap.get(stepExecution.stepId)?.push(stepExecution);
-      } else {
-        stepExecutionMap.set(stepExecution.stepId, [stepExecution]);
-      }
+      stepExecutionMap.set(stepExecution.id, stepExecution);
     }
-    const stepListTree = transformWorkflowDefinitionToStepListTree(execution.workflowDefinition);
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
-      euiTheme,
-      execution.status,
-      stepListTree,
+      execution.stepExecutionsTree,
       stepExecutionMap,
+      euiTheme,
       selectedId,
       onStepExecutionClick
     );

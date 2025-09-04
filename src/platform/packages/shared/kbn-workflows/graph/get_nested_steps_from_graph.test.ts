@@ -33,8 +33,30 @@ describe('getNestedStepsFromGraph', () => {
         foreach: '["item1", "item2", "item3"]',
         steps: [
           {
-            name: 'http-2',
+            name: 'inner-http-1',
             type: 'http',
+          },
+          {
+            name: 'inner-if-1',
+            type: 'if',
+            condition: 'a:b',
+            steps: [
+              {
+                name: 'inner-foreach-1',
+                type: 'foreach',
+                foreach: '["item1", "item2", "item3"]',
+                steps: [
+                  {
+                    name: 'inner-inner-http-2',
+                    type: 'http',
+                  },
+                ],
+              },
+              {
+                name: 'inner-http-2',
+                type: 'http',
+              },
+            ],
           },
         ],
       },
@@ -56,29 +78,51 @@ describe('getNestedStepsFromGraph', () => {
       {
         stepId: 'http-1',
         stepType: 'http',
-        topologicalIndex: 0,
         executionIndex: 0,
         children: [],
       },
       {
         stepId: 'foreach-1',
         stepType: 'enter-foreach',
-        topologicalIndex: 1,
         executionIndex: 0,
         children: [
           {
-            stepId: 'http-2',
+            stepId: 'inner-http-1',
             stepType: 'http',
-            topologicalIndex: 1,
             executionIndex: 0,
             children: [],
+          },
+          {
+            stepId: 'inner-if-1',
+            stepType: 'enter-if',
+            executionIndex: 1,
+            children: [
+              {
+                stepId: 'inner-foreach-1',
+                stepType: 'enter-foreach',
+                executionIndex: 0,
+                children: [
+                  {
+                    stepId: 'inner-inner-http-2',
+                    stepType: 'http',
+                    executionIndex: 0,
+                    children: [],
+                  },
+                ],
+              },
+              {
+                stepId: 'inner-http-2',
+                stepType: 'http',
+                executionIndex: 1,
+                children: [],
+              },
+            ],
           },
         ],
       },
       {
         stepId: 'http-3',
         stepType: 'http',
-        topologicalIndex: 2,
         executionIndex: 0,
         children: [],
       },

@@ -80,6 +80,7 @@ export interface EsWorkflowStepExecution {
   executionTimeMs?: number;
   topologicalIndex: number;
   executionIndex: number;
+  parentId?: string;
   error?: string | null;
   output?: Record<string, any> | null;
   input?: Record<string, any> | null;
@@ -103,6 +104,22 @@ export interface WorkflowExecutionLogModel {
   level: string;
 }
 
+/**
+ * Interface for representing a step in a nested tree structure
+ */
+export interface StepListTreeItem {
+  stepId: string;
+  stepType: string;
+  executionIndex: number;
+  children: StepListTreeItem[];
+}
+
+export interface StepExecutionTreeItem extends StepListTreeItem {
+  status: ExecutionStatus;
+  stepExecutionId: string | null;
+  children: StepExecutionTreeItem[];
+}
+
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
@@ -113,6 +130,7 @@ export interface WorkflowExecutionDto {
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
   stepExecutions: EsWorkflowStepExecution[];
+  stepExecutionsTree: StepExecutionTreeItem[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;

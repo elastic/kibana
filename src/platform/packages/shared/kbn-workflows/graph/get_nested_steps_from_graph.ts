@@ -15,17 +15,7 @@ import type {
   WaitGraphNode,
   UnionExecutionGraphNode,
 } from '../types/execution';
-
-/**
- * Interface for representing a step in a nested tree structure
- */
-export interface StepListTreeItem {
-  stepId: string;
-  stepType: string;
-  topologicalIndex: number;
-  executionIndex: number;
-  children: StepListTreeItem[];
-}
+import type { StepListTreeItem } from '../types/v1';
 
 /**
  * Extracts nested steps from a workflow graph and returns them in a tree structure.
@@ -117,7 +107,6 @@ function buildTreeFromNode(
   if (isExecutableStep(node)) {
     return {
       stepId: node.id,
-      topologicalIndex,
       executionIndex,
       stepType:
         (node as AtomicGraphNode | HttpGraphNode | WaitGraphNode).configuration?.type || node.type,
@@ -203,7 +192,6 @@ function buildTreeFromNode(
     if (children.length > 0) {
       return {
         stepId: node.id,
-        topologicalIndex,
         executionIndex,
         stepType: node.type,
         children,

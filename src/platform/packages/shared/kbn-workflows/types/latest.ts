@@ -33,6 +33,9 @@ export type {
   WorkflowListItemDto,
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // tree
+  StepExecutionTreeItem,
+  StepListTreeItem,
 } from './v1';
 
 // exported full to use enum as values
