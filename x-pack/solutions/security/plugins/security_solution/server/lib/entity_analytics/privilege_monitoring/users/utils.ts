@@ -44,26 +44,6 @@ export const findUserByUsername = async (
 };
 
 /**
- * Helper function: Check if user count limit is reached
- */
-export const isUserLimitReached = async (
-  esClient: ElasticsearchClient,
-  index: string,
-  maxUsersAllowed: number
-): Promise<boolean> => {
-  const currentUserCount = await esClient.count({
-    index,
-    query: {
-      term: {
-        'user.is_privileged': true,
-      },
-    },
-  });
-
-  return currentUserCount.count >= maxUsersAllowed;
-};
-
-/**
  * Helper function: Merge sources without duplicates
  */
 export const mergeSources = (

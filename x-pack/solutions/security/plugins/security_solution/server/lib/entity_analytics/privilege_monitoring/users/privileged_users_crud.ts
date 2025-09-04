@@ -14,12 +14,7 @@ import type {
 } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { PrivMonUserSource } from '../types';
-import {
-  findUserByUsername,
-  isUserLimitReached,
-  createUserDocument,
-  updateUserWithSource,
-} from './utils';
+import { findUserByUsername, createUserDocument, updateUserWithSource } from './utils';
 
 export const createPrivilegedUsersCrudService = ({
   deps,
@@ -30,7 +25,6 @@ export const createPrivilegedUsersCrudService = ({
   const create = async (
     userInput: CreatePrivMonUserRequestBody,
     source: PrivMonUserSource,
-    maxPrivilegedUsersAllowed: number,
     opts?: {
       refresh?: boolean;
     }
@@ -47,15 +41,6 @@ export const createPrivilegedUsersCrudService = ({
     if (existingUser) {
       // User exists, update with new source
       return updateUserWithSource(esClient, index, existingUser, source, userInput, get);
-    }
-
-    // Check user limit before creating new user
-    const limitReached = await isUserLimitReached(esClient, index, maxPrivilegedUsersAllowed);
-
-    if (limitReached) {
-      throw new Error(
-        `Cannot add user: maximum limit of ${maxPrivilegedUsersAllowed} privileged users reached`
-      );
     }
 
     // Create new user document

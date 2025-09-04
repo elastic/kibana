@@ -21,17 +21,11 @@ import type { PrivMonUserSource } from '../types';
 // Mock the helper functions
 jest.mock('./utils', () => ({
   findUserByUsername: jest.fn(),
-  isUserLimitReached: jest.fn(),
   createUserDocument: jest.fn(),
   updateUserWithSource: jest.fn(),
 }));
 
-import {
-  findUserByUsername,
-  isUserLimitReached,
-  createUserDocument,
-  updateUserWithSource,
-} from './utils';
+import { findUserByUsername, createUserDocument, updateUserWithSource } from './utils';
 
 describe('createPrivilegedUsersCrudService', () => {
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
@@ -93,9 +87,9 @@ describe('createPrivilegedUsersCrudService', () => {
     it('should throw error when username is missing', async () => {
       const invalidUserInput = { user: {} };
 
-      await expect(
-        crudService.create(invalidUserInput, mockSource, maxPrivilegedUsersAllowed)
-      ).rejects.toThrow('Username is required');
+      await expect(crudService.create(invalidUserInput, mockSource)).rejects.toThrow(
+        'Username is required'
+      );
     });
 
     it('should update existing user with new source when user already exists', async () => {
@@ -107,7 +101,7 @@ describe('createPrivilegedUsersCrudService', () => {
       (findUserByUsername as jest.Mock).mockResolvedValue(mockExistingUser);
       (updateUserWithSource as jest.Mock).mockResolvedValue(mockUpdateResponse);
 
-      const result = await crudService.create(mockUserInput, mockSource, maxPrivilegedUsersAllowed);
+      const result = await crudService.create(mockUserInput, mockSource);
 
       expect(findUserByUsername).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
@@ -125,50 +119,21 @@ describe('createPrivilegedUsersCrudService', () => {
       expect(result).toEqual(mockUpdateResponse);
     });
 
-    it('should throw error when user limit is reached and trying to create new user', async () => {
-      (findUserByUsername as jest.Mock).mockResolvedValue(undefined);
-      (isUserLimitReached as jest.Mock).mockResolvedValue(true);
-
-      await expect(
-        crudService.create(mockUserInput, mockSource, maxPrivilegedUsersAllowed)
-      ).rejects.toThrow(
-        `Cannot add user: maximum limit of ${maxPrivilegedUsersAllowed} privileged users reached`
-      );
-
-      expect(findUserByUsername).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        'test-user'
-      );
-      expect(isUserLimitReached).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        maxPrivilegedUsersAllowed
-      );
-      expect(createUserDocument).not.toHaveBeenCalled();
-    });
-
-    it('should create new user when user does not exist and limit not reached', async () => {
+    it('should create new user when user does not exist', async () => {
       const mockCreateResponse = {
         created: true,
         user: mockNewUser,
       };
 
       (findUserByUsername as jest.Mock).mockResolvedValue(undefined);
-      (isUserLimitReached as jest.Mock).mockResolvedValue(false);
       (createUserDocument as jest.Mock).mockResolvedValue(mockCreateResponse);
 
-      const result = await crudService.create(mockUserInput, mockSource, maxPrivilegedUsersAllowed);
+      const result = await crudService.create(mockUserInput, mockSource);
 
       expect(findUserByUsername).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
         TEST_INDEX,
         'test-user'
-      );
-      expect(isUserLimitReached).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        maxPrivilegedUsersAllowed
       );
       expect(createUserDocument).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
@@ -184,18 +149,12 @@ describe('createPrivilegedUsersCrudService', () => {
       const refreshOptions = { refresh: true };
 
       (findUserByUsername as jest.Mock).mockResolvedValue(undefined);
-      (isUserLimitReached as jest.Mock).mockResolvedValue(false);
       (createUserDocument as jest.Mock).mockResolvedValue({
         created: true,
         user: mockNewUser,
       });
 
-      await crudService.create(
-        mockUserInput,
-        mockSource,
-        maxPrivilegedUsersAllowed,
-        refreshOptions
-      );
+      await crudService.create(mockUserInput, mockSource, refreshOptions);
 
       expect(createUserDocument).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
@@ -413,9 +372,9 @@ describe('createPrivilegedUsersCrudService', () => {
       const esError = new Error('Elasticsearch connection failed');
       (findUserByUsername as jest.Mock).mockRejectedValue(esError);
 
-      await expect(
-        crudService.create(mockUserInput, mockSource, maxPrivilegedUsersAllowed)
-      ).rejects.toThrow('Elasticsearch connection failed');
+      await expect(crudService.create(mockUserInput, mockSource)).rejects.toThrow(
+        'Elasticsearch connection failed'
+      );
     });
 
     it('should propagate elasticsearch errors on get', async () => {
@@ -452,24 +411,18 @@ describe('createPrivilegedUsersCrudService', () => {
   describe('integration with helper functions', () => {
     it('should call helper functions with correct parameters for user creation flow', async () => {
       (findUserByUsername as jest.Mock).mockResolvedValue(undefined);
-      (isUserLimitReached as jest.Mock).mockResolvedValue(false);
       (createUserDocument as jest.Mock).mockResolvedValue({
         created: true,
         user: mockNewUser,
       });
 
-      await crudService.create(mockUserInput, mockSource, maxPrivilegedUsersAllowed);
+      await crudService.create(mockUserInput, mockSource);
 
       // Verify all helper functions called with correct parameters
       expect(findUserByUsername).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
         TEST_INDEX,
         'test-user'
-      );
-      expect(isUserLimitReached).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        maxPrivilegedUsersAllowed
       );
       expect(createUserDocument).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
@@ -489,7 +442,7 @@ describe('createPrivilegedUsersCrudService', () => {
       (findUserByUsername as jest.Mock).mockResolvedValue(mockExistingUser);
       (updateUserWithSource as jest.Mock).mockResolvedValue(mockUpdateResponse);
 
-      await crudService.create(mockUserInput, mockSource, maxPrivilegedUsersAllowed);
+      await crudService.create(mockUserInput, mockSource);
 
       expect(findUserByUsername).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
@@ -505,7 +458,6 @@ describe('createPrivilegedUsersCrudService', () => {
         expect.any(Function)
       );
       // These should not be called in update flow
-      expect(isUserLimitReached).not.toHaveBeenCalled();
       expect(createUserDocument).not.toHaveBeenCalled();
     });
   });
