@@ -45,8 +45,7 @@ export const DescriptionListColumns = () => {
         description={i18n.translate(
           'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.abTest.description',
           {
-            defaultMessage:
-              'Playground allows you to A/B test different LLMs from model providers',
+            defaultMessage: 'Playground allows you to A/B test different LLMs from model providers',
           }
         )}
       />
