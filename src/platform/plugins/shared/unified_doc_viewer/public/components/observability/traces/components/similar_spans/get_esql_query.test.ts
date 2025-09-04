@@ -9,10 +9,13 @@
 
 import { from } from '@kbn/esql-composer';
 import { getEsqlQuery } from './get_esql_query';
+import type { QueryOperator } from '@kbn/esql-composer/src/types';
 
 const source = from('index');
 
 describe('getEsqlQuery', () => {
+  const emptyQueryOperator: QueryOperator = (sourceQuery) => sourceQuery;
+
   it('returns a transaction query if transactionType, serviceName and transactionName are present', () => {
     const result = source
       .pipe(
@@ -21,7 +24,7 @@ describe('getEsqlQuery', () => {
           transactionName: 'GET /api/orders',
           transactionType: 'request',
           spanName: 'span-1',
-        })
+        }) || emptyQueryOperator
       )
       .toString();
 
@@ -38,7 +41,7 @@ describe('getEsqlQuery', () => {
           spanName: 'span-1',
           transactionName: undefined,
           transactionType: undefined,
-        })
+        }) || emptyQueryOperator
       )
       .toString();
 
@@ -47,7 +50,7 @@ describe('getEsqlQuery', () => {
     );
   });
 
-  it('returns a service name query if only serviceName', () => {
+  it('returns empty query if only serviceName', () => {
     const result = source
       .pipe(
         getEsqlQuery({
@@ -55,10 +58,25 @@ describe('getEsqlQuery', () => {
           spanName: undefined,
           transactionName: undefined,
           transactionType: undefined,
-        })
+        }) || emptyQueryOperator
       )
       .toString();
 
-    expect(result).toEqual('FROM index\n  | WHERE service.name == "orders-service"');
+    expect(result).toEqual(source.toString());
+  });
+
+  it('returns empty query if everything is undefined', () => {
+    const result = source
+      .pipe(
+        getEsqlQuery({
+          serviceName: undefined,
+          spanName: undefined,
+          transactionName: undefined,
+          transactionType: undefined,
+        }) || emptyQueryOperator
+      )
+      .toString();
+
+    expect(result).toEqual(source.toString());
   });
 });

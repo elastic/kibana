@@ -40,7 +40,7 @@ const discoverBtnAria = i18n.translate(
 export interface SimilarSpansProps {
   duration: number;
   spanName?: string;
-  serviceName: string;
+  serviceName?: string;
   transactionName?: string;
   transactionType?: string;
   isOtelSpan?: boolean;
