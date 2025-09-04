@@ -119,7 +119,7 @@ describe('ToolbarSelector', () => {
     expect(getByTestId('toolbarSelectorSearchSelectorSearch')).toBeInTheDocument();
   });
 
-  it('renders with optional props: popoverTitle, clearAllSection, hasArrow', () => {
+  it('renders with optional props: popoverTitle, popoverContentBelowSearch, hasArrow', () => {
     const { getByTestId, getAllByLabelText, getByText } = render(
       <ToolbarSelector
         data-test-subj="toolbarSelectorOptionalProps"
@@ -128,7 +128,7 @@ describe('ToolbarSelector', () => {
         searchable={true}
         singleSelection={true}
         popoverTitle="My Popover Title"
-        clearAllSection={<span>Custom Section</span>}
+        popoverContentBelowSearch={<span>Custom Section</span>}
         hasArrow={false}
       />
     );

@@ -33,7 +33,7 @@ export interface BaseToolbarProps {
   'data-test-subj': string;
   'data-selected-value'?: string | string[];
   buttonLabel: ReactElement | string;
-  clearAllSection?: ReactElement;
+  popoverContentBelowSearch?: ReactElement;
   popoverTitle?: string;
   options: SelectableEntry[];
   searchable: boolean;
@@ -59,7 +59,7 @@ export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
   'data-selected-value': dataSelectedValue,
   buttonLabel,
-  clearAllSection,
+  popoverContentBelowSearch,
   popoverTitle,
   options,
   searchable,
@@ -246,7 +246,7 @@ export const ToolbarSelector = ({
                 css={{ paddingBottom: 0 }}
               >
                 {search}
-                {clearAllSection && <>{clearAllSection}</>}
+                {popoverContentBelowSearch && <>{popoverContentBelowSearch}</>}
               </EuiPanel>
             )}
             {list}

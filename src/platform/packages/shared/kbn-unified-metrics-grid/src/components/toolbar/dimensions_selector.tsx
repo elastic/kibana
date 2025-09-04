@@ -128,7 +128,7 @@ export const DimensionsSelector = ({
     );
   }, [selectedDimensions]);
 
-  const clearAllSection = useMemo(() => {
+  const popoverContentBelowSearch = useMemo(() => {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -181,7 +181,7 @@ export const DimensionsSelector = ({
       popoverTitle={i18n.translate('metricsExperience.dimensionsSelector.label', {
         defaultMessage: 'Select dimensions',
       })}
-      clearAllSection={clearAllSection}
+      popoverContentBelowSearch={popoverContentBelowSearch}
     />
   );
 };
