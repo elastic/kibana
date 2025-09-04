@@ -326,6 +326,50 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+    router.post(
+      {
+        path: '/read_only_objects/bulk_update',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          body: schema.object({
+            objects: schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                type: schema.oneOf([
+                  schema.literal(READ_ONLY_TYPE),
+                  schema.literal(NON_READ_ONLY_TYPE),
+                ]),
+              })
+            ),
+            force: schema.maybe(schema.boolean({ defaultValue: false })),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        try {
+          const updateObjects = request.body.objects.map((obj) => ({
+            ...obj,
+            attributes: {
+              description: 'updated description',
+            },
+          }));
+          const result = await soClient.bulkUpdate(updateObjects);
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          return response.forbidden({
+            body: error.message,
+          });
+        }
+      }
+    );
   }
   public start() {}
 }

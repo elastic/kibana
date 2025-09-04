@@ -301,6 +301,7 @@ export const executeUpdate = async <T>(
       attributes: updatedAttributes,
       updated_at: time,
       updated_by: updatedBy,
+      ...(accessControl ? { accessControl } : {}),
       ...(Array.isArray(references) && { references }),
     });
 

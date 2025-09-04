@@ -149,6 +149,145 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('bulk update read only objects', () => {
+      it('allow owner to bulk update objects marked as read only', async () => {
+        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+          await loginAsObjectOwner('test_user', 'changeme');
+        const firstObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
+
+        const secondObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
+
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
+
+        const res = await supertestWithoutAuth
+          .post('/read_only_objects/bulk_update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(200);
+        for (const { id, attributes, accessControl } of res.body.saved_objects) {
+          const object = objects.find((obj) => obj.id === id);
+          expect(object).to.not.be(undefined);
+          expect(attributes).to.have.property('description', 'updated description');
+          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+          expect(accessControl).to.have.property('accessMode', 'read_only');
+        }
+      });
+
+      it('allow admin to bulk update objects marked as read only', async () => {
+        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+          await loginAsObjectOwner('test_user', 'changeme');
+        const firstObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
+
+        const secondObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
+
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
+        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+        const res = await supertestWithoutAuth
+          .post('/read_only_objects/bulk_update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(200);
+        for (const { id, attributes, accessControl } of res.body.saved_objects) {
+          const object = objects.find((obj) => obj.id === id);
+          expect(object).to.not.be(undefined);
+          expect(attributes).to.have.property('description', 'updated description');
+          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+          expect(accessControl).to.have.property('accessMode', 'read_only');
+        }
+      });
+
+      it('does not allow non-owner to bulk update objects marked as read only', async () => {
+        await activateSimpleUserProfile();
+        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+          await loginAsObjectOwner('test_user', 'changeme');
+        const firstObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
+
+        const secondObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
+
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
+        const { cookie: nonOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
+        const res = await supertestWithoutAuth
+          .post('/read_only_objects/bulk_update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', nonOwnerCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(403);
+        expect(res.body).to.have.property('message');
+        expect(res.body.message).to.contain('Unable to bulk_update read_only_type');
+      });
+    });
+
     describe('delete read only objects', () => {
       it('allow owner to delete object marked as read only', async () => {
         const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
@@ -663,6 +802,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.body.message).to.equal('Unable to bulk_delete read_only_type');
       });
     });
+
     describe('force bulk delete ownable objects', () => {
       it('allow owner to bulk delete objects marked as read only', async () => {
         const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
