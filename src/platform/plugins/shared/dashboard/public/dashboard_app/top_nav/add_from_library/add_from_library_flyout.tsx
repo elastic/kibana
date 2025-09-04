@@ -79,7 +79,9 @@ export const AddFromLibraryFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={modalTitleId}>
-            {i18n.translate('dashboard.addFromLibrary.title', { defaultMessage: 'Add from library' })}
+            {i18n.translate('dashboard.addFromLibrary.title', {
+              defaultMessage: 'Add from library',
+            })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
