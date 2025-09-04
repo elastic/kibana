@@ -766,8 +766,8 @@ export class StreamsClient {
 
     await this.dependencies.assetClient.syncAssetList(
       name,
-      slos.map((slow) => ({
-        [ASSET_ID]: slow,
+      slos.map((slo) => ({
+        [ASSET_ID]: slo,
         [ASSET_TYPE]: 'slo' as const,
       })),
       'slo'

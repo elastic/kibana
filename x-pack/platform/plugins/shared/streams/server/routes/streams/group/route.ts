@@ -124,14 +124,14 @@ const upsertGroupRoute = createServerRoute({
     const { name: _name, ...stream } = definition;
 
     const upsertRequest: Streams.GroupStream.UpsertRequest = {
-      dashboards,
       stream: {
         ...stream,
         group,
       },
-      queries,
+      dashboards,
       rules,
       slos,
+      queries,
     };
 
     return await streamsClient.upsertStream({

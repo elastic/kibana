@@ -49,7 +49,6 @@ async function getAssets({
     rules,
     slos,
     queries,
-    rules,
   };
 }
 
@@ -78,14 +77,14 @@ async function updateWiredIngest({
   const { name: _name, ...stream } = definition;
 
   const upsertRequest: Streams.WiredStream.UpsertRequest = {
-    dashboards,
-    queries,
     stream: {
       ...stream,
       ingest,
     },
+    dashboards,
     rules,
     slos,
+    queries,
   };
 
   return await streamsClient.upsertStream({
@@ -119,14 +118,14 @@ async function updateClassicIngest({
   const { name: _name, ...stream } = definition;
 
   const upsertRequest: Streams.ClassicStream.UpsertRequest = {
-    dashboards,
-    queries,
     stream: {
       ...stream,
       ingest,
     },
+    dashboards,
     rules,
     slos,
+    queries,
   };
 
   return await streamsClient.upsertStream({

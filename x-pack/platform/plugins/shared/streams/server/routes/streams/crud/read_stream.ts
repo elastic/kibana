@@ -37,7 +37,6 @@ export async function readStream({
     assetClient.getAssetLinks([name], ['dashboard', 'rule', 'slo', 'query']),
   ]);
 
-  // This should be a shared helper
   const assetsByType = assets.reduce(
     (acc, asset) => {
       const assetType = asset[ASSET_TYPE];
