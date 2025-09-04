@@ -28,14 +28,14 @@ describe('Top Values Transforms', () => {
       },
       id: 'metricCol1',
     },
-    { 
-      column: { 
-        id: 'metricCol2', 
-        operationType: 'average' as const, 
+    {
+      column: {
+        id: 'metricCol2',
+        operationType: 'average' as const,
         sourceField: 'score',
         label: 'Average of score',
-        dataType: 'number' as const,   
-        isBucketed: false,    
+        dataType: 'number' as const,
+        isBucketed: false,
       },
       id: 'metricCol2',
     },
