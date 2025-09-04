@@ -135,8 +135,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     const checkTimeRangeVisibility = async () => {
       const results = await Promise.all(
         customUrls.map(async (customUrl) => {
+          // Show time range field by default for Dashboards
           if (customUrl.url_value.includes('dashboards')) return true;
 
+          // Get the dataViewId from the URL state
           const urlState = parseUrlState(customUrl.url_value);
           const dataViewId = urlState._a?.index;
 
@@ -145,6 +147,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
           try {
             const dataView = await dataViews.get(dataViewId);
+            // For Discover URLs, check if the data view has a time field
             return dataView?.timeFieldName !== undefined && dataView?.timeFieldName !== '';
           } catch {
             return false;
