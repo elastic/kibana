@@ -447,14 +447,19 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/231824
-    describe.skip('navigation', () => {
+    describe('navigation', () => {
       it('should go to discover page when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
         });
 
         const discoverButton = await PageObjects.datasetQuality.getOpenInDiscoverButton();
+
+        // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
+        // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
+        await testSubjects.moveMouseTo(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
 
         await discoverButton.click();
 
@@ -469,6 +474,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
+
+        // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
+        // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
+        await testSubjects.moveMouseTo(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
 
         await testSubjects.click(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover

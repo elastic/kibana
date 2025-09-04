@@ -9,80 +9,229 @@
 
 import { SearchStatus } from './types';
 import { getSearchStatus } from './get_search_status';
+import type { SearchSessionRequestInfo } from '../../../common';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+
+const getEsClientMock = (asyncQueryGet = jest.fn(), status = jest.fn()) => {
+  const client = elasticsearchClientMock.createElasticsearchClient();
+  return {
+    ...client,
+    esql: { ...client.esql, asyncQueryGet },
+    asyncSearch: { ...client.asyncSearch, status },
+  };
+};
+
+const getSession = ({
+  strategy = 'some-strategy',
+}: {
+  strategy?: string;
+} = {}): SearchSessionRequestInfo => ({
+  id: '1234',
+  strategy,
+});
 
 describe('getSearchStatus', () => {
-  let mockClient: any;
-  beforeEach(() => {
-    mockClient = {
-      asyncSearch: {
-        status: jest.fn(),
-      },
-    };
-  });
-
-  test('returns a complete status if search is partial and not running', async () => {
-    mockClient.asyncSearch.status.mockResolvedValue({
-      body: {
-        is_partial: true,
-        is_running: false,
-        completion_status: 200,
-      },
-    });
-    const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.COMPLETE);
-  });
-
-  test('returns an error status if completion_status is an error', async () => {
-    mockClient.asyncSearch.status.mockResolvedValue({
-      body: {
-        is_partial: false,
-        is_running: false,
-        completion_status: 500,
-      },
-    });
-    const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.ERROR);
-  });
-
-  test('returns an error status if gets an ES error', async () => {
-    mockClient.asyncSearch.status.mockResolvedValue({
-      error: {
-        root_cause: {
-          reason: 'not found',
+  describe.each([
+    { strategy: 'esql_async', expectedFunctionCall: 'asyncQueryGet' },
+    {
+      strategy: 'default',
+      expectedFunctionCall: 'status',
+    },
+  ])('when the strategy is $strategy', ({ strategy, expectedFunctionCall }) => {
+    it('returns a complete status if search is partial and not running', async () => {
+      // Given
+      const response = {
+        body: {
+          is_partial: true,
+          is_running: false,
+          completion_status: 200,
         },
-      },
-    });
-    const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.ERROR);
-  });
+      };
 
-  test('returns an error status throws', async () => {
-    mockClient.asyncSearch.status.mockRejectedValue(new Error('O_o'));
-    const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.ERROR);
-  });
+      const status = jest.fn().mockResolvedValue(response);
+      const asyncQueryGet = jest.fn().mockResolvedValue(response);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
 
-  test('returns a complete status', async () => {
-    mockClient.asyncSearch.status.mockResolvedValue({
-      body: {
-        is_partial: false,
-        is_running: false,
-        completion_status: 200,
-      },
-    });
-    const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.COMPLETE);
-  });
+      const mockFunctions: Record<string, jest.Mock> = {
+        asyncQueryGet,
+        status,
+      };
 
-  test('returns a running status otherwise', async () => {
-    mockClient.asyncSearch.status.mockResolvedValue({
-      body: {
-        is_partial: false,
-        is_running: true,
-        completion_status: undefined,
-      },
+      // When
+      const res = await getSearchStatus({
+        esClient: mockEsClient,
+        asyncId: '123',
+        session: getSession({ strategy }),
+      });
+
+      // Then
+      expect(res.status).toBe(SearchStatus.COMPLETE);
+      expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
+        { id: '123' },
+        { meta: true }
+      );
     });
-    const res = await getSearchStatus(mockClient, '123');
-    expect(res.status).toBe(SearchStatus.IN_PROGRESS);
+
+    it('returns an error status if completion_status is an error', async () => {
+      // Given
+      const response = {
+        body: {
+          is_partial: false,
+          is_running: false,
+          completion_status: 500,
+        },
+      };
+
+      const status = jest.fn().mockResolvedValue(response);
+      const asyncQueryGet = jest.fn().mockResolvedValue(response);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
+
+      const mockFunctions: Record<string, jest.Mock> = {
+        asyncQueryGet,
+        status,
+      };
+
+      // When
+      const res = await getSearchStatus({
+        esClient: mockEsClient,
+        asyncId: '123',
+        session: getSession({ strategy }),
+      });
+
+      // Then
+      expect(res.status).toBe(SearchStatus.ERROR);
+      expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
+        { id: '123' },
+        { meta: true }
+      );
+    });
+
+    it('returns an error status if gets an ES error', async () => {
+      // Given
+      const response = {
+        error: {
+          root_cause: {
+            reason: 'not found',
+          },
+        },
+      };
+
+      const status = jest.fn().mockResolvedValue(response);
+      const asyncQueryGet = jest.fn().mockResolvedValue(response);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
+
+      const mockFunctions: Record<string, jest.Mock> = {
+        asyncQueryGet,
+        status,
+      };
+
+      // When
+      const res = await getSearchStatus({
+        esClient: mockEsClient,
+        asyncId: '123',
+        session: getSession({ strategy }),
+      });
+
+      // Then
+      expect(res.status).toBe(SearchStatus.ERROR);
+      expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
+        { id: '123' },
+        { meta: true }
+      );
+    });
+
+    it('returns an error status throws', async () => {
+      // Given
+      const status = jest.fn().mockRejectedValue(new Error('O_o'));
+      const asyncQueryGet = jest.fn().mockRejectedValue(new Error('O_o'));
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
+
+      const mockFunctions: Record<string, jest.Mock> = {
+        asyncQueryGet,
+        status,
+      };
+
+      // When
+      const res = await getSearchStatus({
+        esClient: mockEsClient,
+        asyncId: '123',
+        session: getSession({ strategy }),
+      });
+
+      // Then
+      expect(res.status).toBe(SearchStatus.ERROR);
+      expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
+        { id: '123' },
+        { meta: true }
+      );
+    });
+
+    it('returns a complete status', async () => {
+      // Given
+      const response = {
+        body: {
+          is_partial: false,
+          is_running: false,
+          completion_status: 200,
+        },
+      };
+
+      const status = jest.fn().mockResolvedValue(response);
+      const asyncQueryGet = jest.fn().mockResolvedValue(response);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
+
+      const mockFunctions: Record<string, jest.Mock> = {
+        asyncQueryGet,
+        status,
+      };
+
+      // When
+      const res = await getSearchStatus({
+        esClient: mockEsClient,
+        asyncId: '123',
+        session: getSession({ strategy }),
+      });
+
+      // Then
+      expect(res.status).toBe(SearchStatus.COMPLETE);
+      expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
+        { id: '123' },
+        { meta: true }
+      );
+    });
+
+    it('returns a running status otherwise', async () => {
+      // Given
+      const response = {
+        body: {
+          is_partial: false,
+          is_running: true,
+          completion_status: undefined,
+        },
+      };
+
+      const status = jest.fn().mockResolvedValue(response);
+      const asyncQueryGet = jest.fn().mockResolvedValue(response);
+      const mockEsClient = getEsClientMock(asyncQueryGet, status);
+
+      const mockFunctions: Record<string, jest.Mock> = {
+        asyncQueryGet,
+        status,
+      };
+
+      // When
+      const res = await getSearchStatus({
+        esClient: mockEsClient,
+        asyncId: '123',
+        session: getSession({ strategy }),
+      });
+
+      // Then
+      expect(res.status).toBe(SearchStatus.IN_PROGRESS);
+      expect(mockFunctions[expectedFunctionCall]).toHaveBeenCalledWith(
+        { id: '123' },
+        { meta: true }
+      );
+    });
   });
 });

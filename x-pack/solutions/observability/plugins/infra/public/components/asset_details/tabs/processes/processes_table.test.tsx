@@ -108,7 +108,6 @@ const renderSemConvProcessesTable = ({
         clearSearchBar={() => {}}
         setSortBy={(s: SortBy) => {}}
         schema="semconv"
-        isHostOtelEnabled={true}
       />
     </IntlProvider>
   );

@@ -17,6 +17,10 @@ import type {
   WaitStep,
   WorkflowYaml,
   WorkflowRetry,
+  StepWithOnFailure,
+  StepWithIfCondition,
+  StepWithForeach,
+  WorkflowOnFailure,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -32,6 +36,12 @@ import type {
   ExitRetryNode,
   EnterContinueNode,
   ExitContinueNode,
+  EnterTryBlockNode,
+  ExitTryBlockNode,
+  EnterNormalPathNode,
+  ExitNormalPathNode,
+  EnterFallbackPathNode,
+  ExitFallbackPathNode,
 } from '../../types/execution';
 
 /**
@@ -49,6 +59,13 @@ interface ContinueStep extends BaseStep {
   name: string;
   type: 'continue';
   steps: BaseStep[];
+}
+
+interface FallbackStep extends BaseStep {
+  name: string;
+  type: 'fallback';
+  normalPathSteps: BaseStep[];
+  fallbackPathSteps: BaseStep[];
 }
 
 function getNodeId(node: BaseStep): string {
@@ -82,6 +99,10 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
   if ((modifiedCurrentStep as RetryStep).type === 'retry') {
     // Retry steps are treated as atomic steps for graph purposes
     return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
+  }
+
+  if ((modifiedCurrentStep as FallbackStep).type === 'fallback') {
+    return visitFallbackStep(graph, previousStep, modifiedCurrentStep as FallbackStep);
   }
 
   return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
@@ -216,6 +237,89 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   return exitConditionNode;
 }
 
+export function visitFallbackStep(
+  graph: graphlib.Graph,
+  previousStep: any,
+  currentStep: FallbackStep
+): any {
+  const enterTryBlockNodeId = getNodeId(currentStep);
+  const exitTryBlockNodeId = `exitTryBlock(${enterTryBlockNodeId})`;
+  const normalPathSteps: BaseStep[] = currentStep.normalPathSteps || [];
+  const fallbackPathSteps: BaseStep[] = currentStep.fallbackPathSteps || [];
+  const enterNormalPathNodeId = `normalPath_${enterTryBlockNodeId}`;
+  const exitNormalPathNodeId = `exit_${enterNormalPathNodeId}`;
+  const enterFallbackPathNodeId = `fallbackPath_${enterTryBlockNodeId}`;
+  const exitFallbackPathNodeId = `exit_${enterFallbackPathNodeId}`;
+
+  const enterTryBlockNode: EnterTryBlockNode = {
+    id: enterTryBlockNodeId,
+    exitNodeId: exitTryBlockNodeId,
+    type: 'enter-try-block',
+    enterNormalPathNodeId,
+  };
+  const exitTryBlockNode: ExitTryBlockNode = {
+    type: 'exit-try-block',
+    id: exitTryBlockNodeId,
+    enterNodeId: enterTryBlockNodeId,
+  };
+  const enterNormalPathNode: EnterNormalPathNode = {
+    id: enterTryBlockNode.enterNormalPathNodeId,
+    type: 'enter-normal-path',
+    enterZoneNodeId: enterTryBlockNode.id,
+    enterFailurePathNodeId: enterFallbackPathNodeId,
+  };
+
+  graph.setNode(enterNormalPathNode.id, enterNormalPathNode);
+  graph.setEdge(enterTryBlockNodeId, enterNormalPathNode.id);
+  let thenPreviousStep: any = enterNormalPathNode;
+  normalPathSteps.forEach(
+    (ifTrueCurrentStep: any) =>
+      (thenPreviousStep = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep))
+  );
+  const exitNormalPathNode: ExitNormalPathNode = {
+    id: exitNormalPathNodeId,
+    type: 'exit-normal-path',
+    enterNodeId: enterTryBlockNode.enterNormalPathNodeId,
+    exitOnFailureZoneNodeId: exitTryBlockNode.id,
+  };
+  graph.setNode(exitNormalPathNode.id, exitNormalPathNode);
+  graph.setEdge(getNodeId(thenPreviousStep), exitNormalPathNode.id);
+  graph.setEdge(exitNormalPathNode.id, exitTryBlockNode.id);
+
+  if (fallbackPathSteps?.length > 0) {
+    const enterFallbackPathNode: EnterFallbackPathNode = {
+      id: enterFallbackPathNodeId,
+      type: 'enter-fallback-path',
+      enterZoneNodeId: enterTryBlockNode.id,
+    };
+    graph.setNode(enterFallbackPathNode.id, enterFallbackPathNode);
+    graph.setEdge(enterTryBlockNodeId, enterFallbackPathNode.id);
+    let elsePreviousStep: any = enterFallbackPathNode;
+    fallbackPathSteps.forEach(
+      (ifFalseCurrentStep: any) =>
+        (elsePreviousStep = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep))
+    );
+    const exitFallbackPathNode: ExitFallbackPathNode = {
+      id: exitFallbackPathNodeId,
+      type: 'exit-fallback-path',
+      enterNodeId: enterFallbackPathNodeId,
+      exitOnFailureZoneNodeId: exitTryBlockNode.id,
+    };
+    graph.setNode(exitFallbackPathNode.id, exitFallbackPathNode);
+    graph.setEdge(getNodeId(elsePreviousStep), exitFallbackPathNode.id);
+    graph.setEdge(exitFallbackPathNode.id, exitTryBlockNode.id);
+  }
+
+  graph.setNode(exitTryBlockNode.id, exitTryBlockNode);
+  graph.setNode(enterTryBlockNodeId, enterTryBlockNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), enterTryBlockNodeId);
+  }
+
+  return exitTryBlockNode;
+}
+
 function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: RetryStep): any {
   const enterRetryNodeId = getNodeId(currentStep);
   const retryNestedSteps: BaseStep[] = currentStep.steps || [];
@@ -339,61 +443,85 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
    * The order affects what context will be available in the step if/foreach/etc operation.
    */
 
-  if ((currentStep as BaseStep)?.['on-failure']?.continue) {
-    // Wrap the current step in a continue step
-    // and remove the continue from the current step's on-failure to avoid infinite nesting
-    // The continue logic will be handled by the outer continue step
-    // We keep other on-failure properties (like fallback-step, retry) on the inner step
-    // so they can be handled if needed
-    return {
-      name: `continue_${getNodeId(currentStep)}`,
-      type: 'continue',
-      steps: [
-        handleStepLevelOperations({
-          ...currentStep,
-          'on-failure': omit(currentStep['on-failure'], ['continue']) as any,
-        }),
-      ],
-    } as ContinueStep;
+  if ((currentStep as StepWithOnFailure)?.['on-failure']) {
+    const stepWithOnFailure = currentStep as StepWithOnFailure;
+    const onFailureConfig = stepWithOnFailure['on-failure']!;
+
+    if (onFailureConfig?.continue) {
+      // Wrap the current step in a continue step
+      // and remove the continue from the current step's on-failure to avoid infinite nesting
+      // The continue logic will be handled by the outer continue step
+      // We keep other on-failure properties (like fallback-step, retry) on the inner step
+      // so they can be handled if needed
+      return {
+        name: `continue_${getNodeId(currentStep)}`,
+        type: 'continue',
+        steps: [
+          handleStepLevelOperations({
+            ...currentStep,
+            'on-failure': omit(onFailureConfig, ['continue']) as WorkflowOnFailure,
+          } as BaseStep),
+        ],
+      } as ContinueStep;
+    }
+
+    if (onFailureConfig.fallback) {
+      // Wrap the current step in a fallback step
+      // and remove the fallback-step from the current step's on-failure to avoid infinite nesting
+      const fallbackSteps = onFailureConfig.fallback;
+      return {
+        name: `fallback_${getNodeId(currentStep)}`,
+        type: 'fallback',
+        normalPathSteps: [
+          handleStepLevelOperations({
+            ...currentStep,
+            'on-failure': omit(onFailureConfig, ['fallback']) as WorkflowOnFailure,
+          } as BaseStep),
+        ],
+        fallbackPathSteps: Array.isArray(fallbackSteps) ? fallbackSteps : [fallbackSteps],
+      } as FallbackStep;
+    }
+
+    if (onFailureConfig?.retry) {
+      // Wrap the current step in a retry step
+      // and remove the retry from the current step's on-failure to avoid infinite nesting
+      // The retry logic will be handled by the outer retry step
+      // We keep other on-failure properties (like fallback-step, continue) on the inner step
+      // so they can be handled if the retry attempts are exhausted
+      return {
+        name: `retry_${getNodeId(currentStep)}`,
+        type: 'retry',
+        steps: [
+          handleStepLevelOperations({
+            ...currentStep,
+            'on-failure': omit(onFailureConfig, ['retry']) as WorkflowOnFailure,
+          } as BaseStep),
+        ],
+        retry: onFailureConfig.retry,
+      } as RetryStep;
+    }
   }
 
-  if ((currentStep as BaseStep)?.['on-failure']?.retry) {
-    // Wrap the current step in a retry step
-    // and remove the retry from the current step's on-failure to avoid infinite nesting
-    // The retry logic will be handled by the outer retry step
-    // We keep other on-failure properties (like fallback-step, continue) on the inner step
-    // so they can be handled if the retry attempts are exhausted
-    return {
-      name: `retry_${getNodeId(currentStep)}`,
-      type: 'retry',
-      steps: [
-        handleStepLevelOperations({
-          ...currentStep,
-          'on-failure': omit(currentStep['on-failure'], ['retry']) as any,
-        }),
-      ],
-      retry: (currentStep as BaseStep)['on-failure']?.retry,
-    } as RetryStep;
-  }
-
-  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
-  // when the step is already a foreach step
-  if (currentStep.if) {
-    const modifiedStep = omit(currentStep, ['if']);
+  if ((currentStep as StepWithIfCondition).if) {
+    const stepWithIfCondition = currentStep as StepWithIfCondition;
+    const modifiedStep = omit(stepWithIfCondition, ['if']) as BaseStep;
     return {
       name: `if_${getNodeId(currentStep)}`,
       type: 'if',
-      condition: currentStep.if,
+      condition: stepWithIfCondition.if,
       steps: [handleStepLevelOperations(modifiedStep)],
     } as IfStep;
   }
 
-  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
-    const modifiedStep = omit(currentStep, ['foreach']);
+  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
+  // when the step is already a foreach step
+  if ((currentStep as StepWithForeach).foreach && (currentStep as ForEachStep).type !== 'foreach') {
+    const stepWithForeach = currentStep as StepWithForeach;
+    const modifiedStep = omit(stepWithForeach, ['foreach']) as BaseStep;
     return {
       name: `foreach_${getNodeId(currentStep)}`,
       type: 'foreach',
-      foreach: currentStep.foreach,
+      foreach: stepWithForeach.foreach,
       steps: [handleStepLevelOperations(modifiedStep)],
     } as ForEachStep;
   }

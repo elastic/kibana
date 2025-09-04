@@ -25,5 +25,6 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     enabled: workflowDefinition.enabled,
     definition: workflowDefinition,
     deleted_at: null,
+    valid: true,
   };
 }

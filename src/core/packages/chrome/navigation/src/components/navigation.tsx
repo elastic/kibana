@@ -193,7 +193,13 @@ export const Navigation = ({
               {(closePopover) =>
                 isCollapsed ? (
                   <NestedSecondaryMenu>
-                    <NestedSecondaryMenu.Panel id="main" title="More">
+                    <NestedSecondaryMenu.Panel
+                      id="main"
+                      title={i18n.translate(
+                        'core.ui.chrome.sideNavigation.nestedSecondaryMenuMoreTitle',
+                        { defaultMessage: 'More' }
+                      )}
+                    >
                       <NestedSecondaryMenu.Section hasGap label={null}>
                         {overflowMenuItems.map((item) => {
                           const hasSubItems = getHasSubmenu(item);
@@ -252,7 +258,11 @@ export const Navigation = ({
                     ))}
                   </NestedSecondaryMenu>
                 ) : (
-                  <SecondaryMenu title="More">
+                  <SecondaryMenu
+                    title={i18n.translate('core.ui.chrome.sideNavigation.secondaryMenuMoreTitle', {
+                      defaultMessage: 'More',
+                    })}
+                  >
                     <SecondaryMenu.Section hasGap label={null}>
                       {overflowMenuItems.map((item) => (
                         <SideNav.PrimaryMenuItem

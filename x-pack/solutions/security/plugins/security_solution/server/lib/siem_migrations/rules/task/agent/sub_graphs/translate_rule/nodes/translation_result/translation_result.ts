@@ -8,9 +8,11 @@
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
-  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../../constants';
-import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import {
+  MigrationTranslationResult,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
+} from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
 export const getTranslationResultNode = (): GraphNode => {

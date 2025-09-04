@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { clickRuleUpdatesTab } from '../../../../../tasks/prebuilt_rules';
+import { setUpRuleUpgrades } from '../../../../../tasks/prebuilt_rules/setup_rule_upgrades';
 import {
   clickUpdateScheduleMenuItem,
   openBulkEditAddIndexPatternsForm,
@@ -37,7 +37,7 @@ import {
   MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
   RULE_CUSTOMIZATIONS_DIFF_FLYOUT,
 } from '../../../../../screens/rule_details';
-import { goToRuleEditSettings } from '../../../../../tasks/rule_details';
+import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { getIndexPatterns, getCustomQueryRuleParams } from '../../../../../objects/rule';
 import {
   editFirstRule,
@@ -51,7 +51,7 @@ import {
   filterByElasticRules,
   selectAllRules,
 } from '../../../../../tasks/alerts_detection_rules';
-import { MODIFIED_RULE_BADGE, RULE_NAME } from '../../../../../screens/alerts_detection_rules';
+import { MODIFIED_RULE_BADGE } from '../../../../../screens/alerts_detection_rules';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   deleteAlertsAndRules,
@@ -60,15 +60,17 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   installMockPrebuiltRulesPackage,
-  installPrebuiltRuleAssets,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { createRule, patchRule } from '../../../../../tasks/api_calls/rules';
+import { createRule, patchRule, readRule } from '../../../../../tasks/api_calls/rules';
 
 import { login } from '../../../../../tasks/login';
 
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+import {
+  visitRulesManagementTable,
+  visitRulesUpgradeTable,
+} from '../../../../../tasks/rules_management';
 import { fillDescription, goToAboutStepTab } from '../../../../../tasks/create_new_rule';
-import { saveEditedRule } from '../../../../../tasks/edit_rule';
+import { saveEditedRule, visitRuleEditPage } from '../../../../../tasks/edit_rule';
 
 describe(
   'Detection rules, Prebuilt Rules Customization workflow',
@@ -82,10 +84,19 @@ describe(
     });
 
     const testTags = ['tag 1', 'tag 2'];
-    const PREBUILT_RULE = createRuleAssetSavedObject({
+    const PREBUILT_RULE_ID = 'test-customization-prebuilt-rule';
+    const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
       name: 'Non-customized prebuilt rule',
-      rule_id: 'rule_1',
+      rule_id: PREBUILT_RULE_ID,
       version: 1,
+      index: getIndexPatterns(),
+      tags: testTags,
+      investigation_fields: { field_names: ['source.ip'] },
+    });
+    const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+      name: 'New Non-customized prebuilt rule',
+      rule_id: PREBUILT_RULE_ID,
+      version: 2,
       index: getIndexPatterns(),
       tags: testTags,
       investigation_fields: { field_names: ['source.ip'] },
@@ -95,10 +106,7 @@ describe(
       deleteAlertsAndRules();
       deletePrebuiltRulesAssets();
       /* Create a new rule and install it */
-      createAndInstallMockedPrebuiltRules([PREBUILT_RULE]);
-
-      login();
-      visitRulesManagementTable();
+      createAndInstallMockedPrebuiltRules([PREBUILT_RULE_ASSET]);
       createRule(
         getCustomQueryRuleParams({
           name: 'Custom rule',
@@ -106,61 +114,83 @@ describe(
           tags: testTags,
           enabled: false,
         })
-      );
+      )
+        .then(({ body: createdRule }) => createdRule.id)
+        .as('customRuleId');
+
+      // Read and save just installed prebuilt rule's rule_id
+      readRule({ ruleId: PREBUILT_RULE_ID })
+        .then(({ body: prebuiltRule }) => prebuiltRule.id)
+        .as('prebuiltRuleId');
+
+      login();
     });
 
-    it('user can navigate to rule editing page from the rule details page', function () {
-      cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
+    describe('navigation to the rule editing page', () => {
+      it('navigates from the rule details page', () => {
+        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+          visitRuleDetailsPage(prebuiltRuleId)
+        );
 
-      goToRuleEditSettings();
-      cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
-      cy.get(ABOUT_EDIT_TAB).should('be.enabled');
-      cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
-      cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+        goToRuleEditSettings();
+        cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
+        cy.get(ABOUT_EDIT_TAB).should('be.enabled');
+        cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
+        cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+      });
+
+      it('navigates from the rule management page', () => {
+        visitRulesManagementTable();
+
+        filterByElasticRules();
+        editFirstRule();
+
+        cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
+        cy.get(ABOUT_EDIT_TAB).should('be.enabled');
+        cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
+        cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+      });
     });
 
-    it('user can edit a non-customized prebuilt rule from the rule edit page', function () {
-      const newDescriptionValue = 'New rule description';
-      cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
+    describe('editing a single prebuilt rule on the rule edit page', () => {
+      it('edits a non-customized prebuilt rule', () => {
+        const newDescriptionValue = 'New rule description';
 
-      goToRuleEditSettings();
-      goToAboutStepTab();
-      fillDescription(newDescriptionValue);
-      saveEditedRule();
+        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+          visitRuleEditPage(prebuiltRuleId)
+        );
 
-      expectModifiedRuleBadgeToBeDisplayed();
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
+        goToAboutStepTab();
+        fillDescription(newDescriptionValue);
+        saveEditedRule();
+
+        expectModifiedRuleBadgeToBeDisplayed();
+        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
+      });
+
+      it('edits a customized prebuilt rule', () => {
+        const newDescriptionValue = 'New rule description';
+        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+
+        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+          visitRuleEditPage(prebuiltRuleId)
+        );
+
+        goToAboutStepTab();
+        fillDescription(newDescriptionValue);
+        saveEditedRule();
+
+        expectModifiedRuleBadgeToBeDisplayed();
+        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
+      });
     });
 
-    it('user can edit a customized prebuilt rule from the rule edit page', function () {
-      const newDescriptionValue = 'New rule description';
-      patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
-      visitRulesManagementTable();
+    describe('bulk editing prebuilt rules from the rules management page', () => {
+      beforeEach(() => {
+        visitRulesManagementTable();
+      });
 
-      cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
-      expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to already be displayed
-
-      goToRuleEditSettings();
-      goToAboutStepTab();
-      fillDescription(newDescriptionValue);
-      saveEditedRule();
-
-      expectModifiedRuleBadgeToBeDisplayed();
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
-    });
-
-    it('user can navigate to rule editing page from the rule management page', function () {
-      filterByElasticRules();
-      editFirstRule();
-
-      cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
-      cy.get(ABOUT_EDIT_TAB).should('be.enabled');
-      cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
-      cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
-    });
-
-    describe('user can bulk edit prebuilt rules from rules management page', () => {
-      it('add index patterns', () => {
+      it('adds index patterns', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -175,7 +205,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('delete index patterns', () => {
+      it('deletes index patterns', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -190,7 +220,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('add tags', () => {
+      it('adds tags', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -205,7 +235,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('delete tags', () => {
+      it('deletes tags', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -220,7 +250,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('add custom highlighted fields', () => {
+      it('adds custom highlighted fields', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -235,7 +265,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('delete custom highlighted fields', () => {
+      it('deletes custom highlighted fields', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -250,7 +280,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('modify rule schedules', () => {
+      it('modifies rule schedules', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -275,44 +305,50 @@ describe(
     describe('calculating the Modified badge', () => {
       describe('on the rule details page', () => {
         it('should open the rule diff flyout on click when rule is customized', function () {
-          patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
-          visitRulesManagementTable();
+          patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
 
-          cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+          cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+            visitRuleDetailsPage(prebuiltRuleId)
+          );
+
           expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to be displayed
           cy.get(MODIFIED_PREBUILT_RULE_BADGE).click();
           cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('exist');
         });
 
         it('should not open the rule diff flyout on click when rule is customized but base version does not exist', function () {
-          patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+          patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
           deletePrebuiltRulesAssets();
-          visitRulesManagementTable();
 
-          cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+          cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+            visitRuleDetailsPage(prebuiltRuleId)
+          );
+
           cy.get(MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION).should('exist'); // Expect modified badge to be displayed
           cy.get(MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION).click();
           cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('not.exist');
         });
 
         it("should not be displayed when rule isn't customized", function () {
-          visitRulesManagementTable();
+          cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+            visitRuleDetailsPage(prebuiltRuleId)
+          );
 
-          cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
           expectModifiedRuleBadgeToNotBeDisplayed(); // Expect modified badge to not be displayed
         });
 
         it('should not be displayed when rule is not prebuilt', function () {
-          visitRulesManagementTable();
+          cy.get<string>('@customRuleId').then((customRuleId) =>
+            visitRuleDetailsPage(customRuleId)
+          );
 
-          cy.get(RULE_NAME).contains('Custom rule').click();
           expectModifiedRuleBadgeToNotBeDisplayed(); // Expect modified badge to not be displayed
         });
       });
 
       describe('on the rule management table', () => {
         it('should be displayed in row when prebuilt rule is customized', function () {
-          patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+          patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
           visitRulesManagementTable();
 
           filterByElasticRules();
@@ -336,30 +372,30 @@ describe(
 
       describe('on the rule updates table', () => {
         it('should be displayed when prebuilt rule is customized', function () {
-          // Create a new version of the rule to trigger the rule update logic
-          installPrebuiltRuleAssets([
-            {
-              ...PREBUILT_RULE,
-              'security-rule': { ...PREBUILT_RULE['security-rule'], version: 2 },
-            },
-          ]);
-          patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
-          visitRulesManagementTable();
-          clickRuleUpdatesTab();
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [
+              {
+                rule_id: PREBUILT_RULE_ID,
+                name: 'Customized prebuilt rule',
+              },
+            ],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+
+          visitRulesUpgradeTable();
 
           cy.get(MODIFIED_RULE_BADGE).should('exist');
         });
 
         it("should not be displayed when prebuilt rule isn't customized", function () {
-          // Create a new version of the rule to trigger the rule update logic
-          installPrebuiltRuleAssets([
-            {
-              ...PREBUILT_RULE,
-              'security-rule': { ...PREBUILT_RULE['security-rule'], version: 2 },
-            },
-          ]);
-          visitRulesManagementTable();
-          clickRuleUpdatesTab();
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+
+          visitRulesUpgradeTable();
 
           cy.get(MODIFIED_RULE_BADGE).should('not.exist');
         });
@@ -368,29 +404,35 @@ describe(
 
     describe('calculating the per-field modified badge', () => {
       it('should appear next to fields that have been customized', function () {
-        patchRule('rule_1', { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
-        visitRulesManagementTable();
+        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
 
-        cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+          visitRuleDetailsPage(prebuiltRuleId)
+        );
+
         expectModifiedRulePerFieldBadgeToBeDisplayed('tags'); // Customized fields should have a badge present
         expectModifiedRulePerFieldBadgeToNotBeDisplayed('max_signals'); // Non-customized fields should not have a badge present
       });
 
       it('should open the rule customizations diff flyout on click', function () {
-        patchRule('rule_1', { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
-        visitRulesManagementTable();
+        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
 
-        cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+          visitRuleDetailsPage(prebuiltRuleId)
+        );
+
         cy.get(MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE('tags')).click();
         cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('exist');
       });
 
       it('should not be displayed when the rule base version does not exist', function () {
-        patchRule('rule_1', { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
+        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
         deletePrebuiltRulesAssets();
-        visitRulesManagementTable();
 
-        cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
+          visitRuleDetailsPage(prebuiltRuleId)
+        );
+
         expectModifiedRulePerFieldBadgeToNotBeDisplayed('tags');
       });
     });

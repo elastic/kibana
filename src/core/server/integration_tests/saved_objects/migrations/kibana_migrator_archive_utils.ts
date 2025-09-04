@@ -104,7 +104,11 @@ export const createBaselineArchive = async ({
 };
 
 const compressBaselineArchive = async (esFolder: string, archiveFile: string) => {
-  const dataFolder = join(esFolder, 'es-test-cluster', 'data');
-  const cmd = `ditto -c -k --sequesterRsrc --keepParent ${dataFolder}  ${archiveFile}`;
-  await execPromise(cmd);
+  const baseName = 'data';
+  const dataFolder = join(esFolder, 'es-test-cluster', baseName);
+  const parentDir = join(dataFolder, '..');
+  const cmd = `zip -rq "${archiveFile}" "${baseName}"`;
+  await execPromise(cmd, {
+    cwd: parentDir,
+  });
 };

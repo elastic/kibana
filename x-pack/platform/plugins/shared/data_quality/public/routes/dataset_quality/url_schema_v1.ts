@@ -15,12 +15,7 @@ export const getStateFromUrlValue = (
 ): DatasetQualityPublicStateUpdate =>
   deepCompactObject<DatasetQualityPublicStateUpdate>({
     table: urlValue.table,
-    filters: {
-      ...urlValue.filters,
-      qualities: urlValue.filters?.qualities?.map((quality) =>
-        quality === 'degraded' ? 'warning' : quality
-      ),
-    },
+    filters: urlValue.filters,
   });
 
 export const getUrlValueFromState = (
@@ -28,12 +23,7 @@ export const getUrlValueFromState = (
 ): datasetQualityUrlSchemaV1.UrlSchema =>
   deepCompactObject<datasetQualityUrlSchemaV1.UrlSchema>({
     table: state.table,
-    filters: {
-      ...state.filters,
-      qualities: state.filters?.qualities?.map((quality) =>
-        quality === 'warning' ? 'degraded' : quality
-      ),
-    },
+    filters: state.filters,
     v: 1,
   });
 

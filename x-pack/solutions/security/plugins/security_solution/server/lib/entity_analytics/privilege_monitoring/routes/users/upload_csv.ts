@@ -10,10 +10,13 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
-import { PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../../common/entity_analytics/privileged_user_monitoring/constants';
+import {
+  MONITORING_USERS_CSV_UPLOAD_URL,
+  PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE,
+} from '../../../../../../common/entity_analytics/privileged_user_monitoring/constants';
 import type { HapiReadableStream } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
-import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
@@ -31,7 +34,7 @@ export const uploadUsersCSVRoute = (
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/users/_csv',
+      path: MONITORING_USERS_CSV_UPLOAD_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -85,7 +88,6 @@ export const uploadUsersCSVRoute = (
 
           return response.ok({ body });
         } catch (e) {
-          // TODO TEST THIS ERROR SCENARIO
           const error = transformError(e);
           logger.error(`Error uploading users via CSV: ${error.message}`);
           return siemResponse.error({

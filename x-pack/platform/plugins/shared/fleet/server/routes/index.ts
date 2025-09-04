@@ -55,7 +55,7 @@ export function registerRoutes(
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
-  registerRemoteSyncedIntegrations(fleetAuthzRouter);
+  registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
 
   // Conditional config routes
