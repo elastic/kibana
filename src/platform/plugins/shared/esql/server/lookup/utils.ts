@@ -18,16 +18,26 @@ import type { IndexAutocompleteItem } from '@kbn/esql-types';
  * can be queried across multiple clusters.
  *
  * @param clusters - Array of cluster names to check for common indices
- * @param lookupResources - Array of indices/aliases in "cluster:index" format
+ * @param lookupResources - Array of IndexAutocompleteItem objects. The 'name' property is expected to be in "cluster:index" format.
  * @returns Array of IndexAutocompleteItem objects that exist in all specified clusters
  *
  * @example
- * // Returns IndexAutocompleteItem for 'logs' because it exists in both cluster1 and cluster2
- * getListOfCCSResources(['cluster1', 'cluster2'], ['cluster1:logs', 'cluster2:logs', 'cluster1:metrics'])
+ * // Returns IndexAutocompleteItem for 'logs' with merged aliases ['alias1', 'alias2']
+ * getListOfCCSResources(
+ *   ['cluster1', 'cluster2'],
+ *   [
+ *     { name: 'cluster1:logs', aliases: ['alias1'] },
+ *     { name: 'cluster2:logs', aliases: ['alias2'] },
+ *     { name: 'cluster1:metrics' }
+ *   ]
+ * )
  *
  * @example
  * // Returns IndexAutocompleteItem objects for 'index1', 'index2' because both exist in cluster1
- * getListOfCCSResources(['cluster1'], ['cluster1:index1', 'cluster1:index2', 'cluster2:index3'])
+ * getListOfCCSResources(
+ *   ['cluster1'],
+ *   [{ name: 'cluster1:index1' }, { name: 'cluster1:index2' }, { name: 'cluster2:index3' }]
+ * )
  */
 export function getListOfCCSResources(
   clusters: string[],
@@ -76,10 +86,25 @@ export function getListOfCCSResources(
 
   // Return the IndexAutocompleteItem objects for common indices with cluster prefix removed
   return [...commonIndices].map((index) => {
-    const originalItem = clusterResourcesMaps[0].get(index)!;
+    const allAliases = new Set<string>();
+    let baseItem: IndexAutocompleteItem | undefined;
+
+    for (const clusterMap of clusterResourcesMaps) {
+      const item = clusterMap.get(index);
+      if (item) {
+        if (!baseItem) {
+          baseItem = item;
+        }
+        if (item.aliases) {
+          item.aliases.forEach((alias) => allAliases.add(alias));
+        }
+      }
+    }
+
     return {
-      ...originalItem,
-      name: index, // Remove cluster prefix, just return the index name
+      ...baseItem!,
+      name: index,
+      aliases: [...allAliases],
     };
   });
 }

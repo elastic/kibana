@@ -10,10 +10,10 @@ import { getListOfCCSResources } from './utils';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 
 describe('getListOfCCSResources', () => {
-  const createLookupItem = (name: string): IndexAutocompleteItem => ({
-    name,
+  const createLookupItem = (indexName: string, aliases?: string[]): IndexAutocompleteItem => ({
+    name: indexName,
     mode: 'lookup',
-    aliases: [],
+    aliases: aliases || [],
   });
 
   it('should return empty array when no clusters are provided', () => {
@@ -57,13 +57,13 @@ describe('getListOfCCSResources', () => {
   it('should handle multiple indices in the same cluster', () => {
     const clusters = ['cluster1'];
     const lookupIndices = [
-      createLookupItem('cluster1:index1'),
+      createLookupItem('cluster1:index1', ['alias1']),
       createLookupItem('cluster1:index2'),
       createLookupItem('cluster1:index3'),
     ];
     const result = getListOfCCSResources(clusters, lookupIndices);
     expect(result).toEqual([
-      createLookupItem('index1'),
+      createLookupItem('index1', ['alias1']),
       createLookupItem('index2'),
       createLookupItem('index3'),
     ]);
@@ -83,15 +83,15 @@ describe('getListOfCCSResources', () => {
   it('should find common indices across multiple clusters', () => {
     const clusters = ['cluster1', 'cluster2', 'cluster3'];
     const lookupIndices = [
-      createLookupItem('cluster1:index1'),
+      createLookupItem('cluster1:index1', ['alias1']),
       createLookupItem('cluster1:index2'),
-      createLookupItem('cluster2:index1'),
+      createLookupItem('cluster2:index1', ['alias2']),
       createLookupItem('cluster2:index3'),
-      createLookupItem('cluster3:index1'),
+      createLookupItem('cluster3:index1', ['alias1']), // alias1 is duplicated to test Set uniqueness
       createLookupItem('cluster3:index4'),
     ];
     const result = getListOfCCSResources(clusters, lookupIndices);
-    expect(result).toEqual([createLookupItem('index1')]);
+    expect(result).toEqual([createLookupItem('index1', ['alias1', 'alias2'])]);
   });
 
   it('should handle malformed cluster:index patterns', () => {
