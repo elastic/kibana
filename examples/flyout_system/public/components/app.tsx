@@ -68,6 +68,8 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = (props) => {
           size={mainSize}
           maxWidth={mainMaxWidth}
           type={flyoutType}
+          ownFocus={false}
+          pushAnimation={true}
           session={true}
         >
           <EuiFlyoutMenu title={`${title} - Main`} />
