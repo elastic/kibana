@@ -63,5 +63,6 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
+    "@kbn/scout",
   ]
 }
