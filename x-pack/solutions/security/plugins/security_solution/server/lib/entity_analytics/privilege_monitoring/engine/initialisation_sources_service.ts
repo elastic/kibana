@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { IntegrationType } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
+import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
+import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
+import type { PrivilegeMonitoringDataClient } from './data_client';
+import type { IntegrationType } from '../data_sources';
 import {
-  INTEGRATION_TYPES,
-  defaultMonitoringUsersIndex,
   getMatchersFor,
   getStreamPatternFor,
+  INTEGRATION_TYPES,
   integrationsSourceIndex,
-} from '../../../../../common/entity_analytics/privilege_monitoring/constants';
-import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
-import type { PrivilegeMonitoringDataClient } from './data_client';
+} from '../data_sources';
+import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 
 export type InitialisationSourcesService = ReturnType<typeof createInitialisationSourcesService>;
 
@@ -43,38 +45,33 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
   }
 
   async function upsertSources(client: MonitoringEntitySourceDescriptorClient) {
-    // required sources to initialize privileged monitoring engine
-    const requiredInitSources = buildRequiredSources(deps.namespace, dataClient.index);
-    const existing = await client.findAll({});
-    // create all sources, if none exist already
-    if (existing.length === 0) {
-      await client.bulkCreate(requiredInitSources);
-      dataClient.log('debug', `Created all ${requiredInitSources.length} default sources`);
-      return;
+    try {
+      // required sources to initialize privileged monitoring engine
+      const requiredInitSources = buildRequiredSources(deps.namespace, dataClient.index);
+      const existing = await client.findAll({});
+      // create all sources, if none exist already
+      if (existing.length === 0) {
+        await client.bulkCreate(requiredInitSources);
+        dataClient.log('debug', `Created all ${requiredInitSources.length} default sources`);
+        return;
+      }
+      const { created, updated, results } = await client.bulkUpsert(requiredInitSources);
+      dataClient.log(
+        'debug',
+        `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${results.length}.`
+      );
+    } catch (error) {
+      dataClient.log(
+        'error',
+        `Failed to create default index source for privilege monitoring: ${error.message}`
+      );
+      dataClient.audit(
+        PrivilegeMonitoringEngineActions.INIT,
+        MonitoringEngineComponentResourceEnum.privmon_engine,
+        'Failed to create default index source for privilege monitoring',
+        error
+      );
     }
-    // map existing by name for easy lookup
-    const soNameMap = new Map(existing.map((so) => [so.name, so]));
-    let created = 0;
-    let updated = 0;
-    // update or create sources based on existing sources
-    await Promise.all(
-      requiredInitSources.map(async (attrs) => {
-        const found = soNameMap.get(attrs.name);
-        if (!found) {
-          await client.create(attrs);
-          dataClient.log('debug', `Created source: ${attrs.name}`);
-          created++;
-        } else {
-          await client.update({ id: found.id, ...attrs });
-          dataClient.log('debug', `Updated source: ${attrs.name}`);
-          updated++;
-        }
-      })
-    );
-    dataClient.log(
-      'debug',
-      `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${requiredInitSources.length}.`
-    );
   }
   return { upsertSources };
 };
