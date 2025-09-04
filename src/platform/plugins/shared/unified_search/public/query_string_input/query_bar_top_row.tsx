@@ -630,7 +630,7 @@ export const QueryBarTopRow = React.memo(
                 delay: 'long',
                 position: 'bottom',
               }}
-              css={css({ minInlineSize: 'initial!important' })}
+              css={isXXLarge && { minInlineSize: `${euiTheme.base * 6}px!important` }}
             >
               {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
             </EuiSuperUpdateButton>
