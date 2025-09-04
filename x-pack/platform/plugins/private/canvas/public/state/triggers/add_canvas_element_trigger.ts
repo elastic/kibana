@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 
 export const ADD_CANVAS_ELEMENT_TRIGGER = 'ADD_CANVAS_ELEMENT_TRIGGER';
 export const addCanvasElementTrigger: Trigger = {

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 
 export const IMAGE_CLICK_TRIGGER = 'IMAGE_CLICK_TRIGGER';
 

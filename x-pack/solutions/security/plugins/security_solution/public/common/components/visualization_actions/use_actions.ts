@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';

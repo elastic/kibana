@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger = {

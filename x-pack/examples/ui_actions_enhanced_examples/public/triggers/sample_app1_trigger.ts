@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 
 export const SAMPLE_APP1_CLICK_TRIGGER = 'SAMPLE_APP1_CLICK_TRIGGER';
 
