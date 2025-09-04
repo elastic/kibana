@@ -12,10 +12,9 @@ import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-sh
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { isDslLifecycle, isErrorLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import { timeUnits } from '../../../common/time_units';
 import { useKibana } from '../../hooks/use_kibana';
-import { parseDuration } from '../data_management/stream_detail_lifecycle/helpers';
 import { INFINITE_RETENTION_LABEL, NO_DATA_SHORT_LABEL, NO_RETENTION_LABEL } from './translations';
+import { formatDuration } from '../data_management/stream_detail_lifecycle/helpers';
 
 export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
@@ -71,9 +70,8 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
   }
 
   if (isDslLifecycle(lifecycle)) {
-    const duration = parseDuration(lifecycle.dsl.data_retention);
+    const duration = formatDuration(lifecycle.dsl.data_retention);
     if (duration) {
-      const unit = timeUnits.find((timeUnit) => timeUnit.value === duration.unit);
       return (
         <span
           tabIndex={0}
@@ -82,7 +80,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             values: { retention: lifecycle.dsl.data_retention },
           })}
         >
-          {`${duration.value} ${unit?.name.toLocaleLowerCase()}`}
+          {duration.toLocaleLowerCase()}
         </span>
       );
     }
