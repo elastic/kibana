@@ -22,7 +22,7 @@ describe('RERANK Validation', () => {
 
     test('unsupported field type', () => {
       rerankExpectErrors('FROM index | RERANK col0=2 ON keywordField', [
-        '[RERANK] query must be of type [text]. Found [integer]',
+        'RERANK query must be of type text. Found integer',
       ]);
     });
   });

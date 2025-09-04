@@ -303,6 +303,15 @@ Expected one of:
         }),
         type: 'error',
       };
+
+    case 'unsupportedQueryType':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedQueryType', {
+          defaultMessage: '{command} query must be of type text. Found {expressionType}',
+          values: { command: out.command.toUpperCase(), expressionType: out.expressionType },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }

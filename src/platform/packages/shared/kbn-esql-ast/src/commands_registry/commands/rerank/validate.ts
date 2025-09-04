@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLMessage, ESQLAst, ESQLAstRerankCommand } from '../../../types';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { getExpressionType } from '../../../definitions/utils/expressions';
@@ -33,15 +32,12 @@ export const validate = (
 
   // check for supported query types
   if (!supportedQueryTypes.includes(rerankExpressionType)) {
-    messages.push({
-      location: 'location' in query ? query?.location : location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.rerankUnsupportedFieldType', {
-        defaultMessage: '[RERANK] query must be of type [text]. Found [{rerankExpressionType}]',
-        values: { rerankExpressionType },
-      }),
-      type: 'error',
-      code: 'rerankUnsupportedFieldType',
-    });
+    messages.push(
+      errors.byId('unsupportedQueryType', 'location' in query ? query?.location : location, {
+        command: 'RERANK',
+        expressionType: rerankExpressionType,
+      })
+    );
   }
 
   if (inferenceId?.incomplete) {

@@ -360,6 +360,10 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  unsupportedQueryType: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

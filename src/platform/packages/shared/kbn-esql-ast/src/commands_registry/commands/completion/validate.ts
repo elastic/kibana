@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLAstCompletionCommand, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { getExpressionType } from '../../../definitions/utils/expressions';
@@ -32,16 +31,12 @@ export const validate = (
   );
 
   if (!supportedPromptTypes.includes(promptExpressionType)) {
-    messages.push({
-      location: 'location' in prompt ? prompt?.location : location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.completionUnsupportedFieldType', {
-        defaultMessage:
-          '[COMPLETION] prompt must be of type [text] but is [{promptExpressionType}]',
-        values: { promptExpressionType },
-      }),
-      type: 'error',
-      code: 'completionUnsupportedFieldType',
-    });
+    messages.push(
+      errors.byId('unsupportedQueryType', 'location' in prompt ? prompt?.location : location, {
+        command: 'COMPLETION',
+        expressionType: promptExpressionType,
+      })
+    );
   }
 
   if (inferenceId?.incomplete) {
