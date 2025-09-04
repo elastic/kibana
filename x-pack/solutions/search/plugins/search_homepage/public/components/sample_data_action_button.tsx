@@ -106,7 +106,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
                       icon="dashboardApp"
                     >
                       <FormattedMessage
-                        id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToDashboard"
+                        id="xpack.searchHomepage.createIndex.ingestSampleData.linkToDashboard"
                         defaultMessage="Dashboard"
                       />
                     </EuiContextMenuItem>,
