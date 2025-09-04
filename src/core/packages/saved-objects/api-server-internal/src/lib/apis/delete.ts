@@ -51,20 +51,23 @@ export const performDelete = async <T>(
   if (securityExtension) {
     let name;
 
+    const nameAttribute = registry.getNameAttribute(type);
+
+    const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+      {
+        index: commonHelper.getIndexForType(type),
+        id: serializer.generateRawId(namespace, type, id),
+        _source_includes: [
+          ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+          'accessControl',
+        ],
+      },
+      { ignore: [404], meta: true }
+    );
+    const accessControl = savedObjectResponse.body._source?.accessControl;
+
     if (securityExtension.includeSavedObjectNames()) {
-      const nameAttribute = registry.getNameAttribute(type);
-
-      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
-        {
-          index: commonHelper.getIndexForType(type),
-          id: serializer.generateRawId(namespace, type, id),
-          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
-        },
-        { ignore: [404], meta: true }
-      );
-
       const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
-
       name = SavedObjectsUtils.getName(nameAttribute, saveObject);
     }
 
@@ -72,7 +75,7 @@ export const performDelete = async <T>(
     // the current space. This saves us from performing the preflight check if we're unauthorized
     await securityExtension?.authorizeDelete({
       namespace,
-      object: { type, id, name },
+      object: { type, id, name, accessControl },
     });
   }
 
@@ -86,6 +89,7 @@ export const performDelete = async <T>(
       id,
       namespace,
     });
+
     if (
       preflightResult.checkResult === 'found_outside_namespace' ||
       preflightResult.checkResult === 'not_found'

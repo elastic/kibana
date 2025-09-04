@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/public';
 import { type FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
@@ -34,6 +35,7 @@ export const createRawKibanaPrivileges = (
   { allowSubFeaturePrivileges = true } = {}
 ) => {
   const featuresService = featuresPluginService();
+  const typeRegistryMocked = () => Promise.resolve(typeRegistryMock.create());
   featuresService.getKibanaFeatures.mockReturnValue(features);
 
   const licensingService = {
@@ -42,7 +44,12 @@ export const createRawKibanaPrivileges = (
     hasAtLeast: (licenseType: LicenseType) => licenseType === 'basic',
   };
 
-  return privilegesFactory(new Actions(), featuresService, licensingService).get();
+  return privilegesFactory(
+    new Actions(),
+    featuresService,
+    licensingService,
+    typeRegistryMocked
+  ).get();
 };
 
 export const createKibanaPrivileges = (

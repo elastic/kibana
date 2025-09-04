@@ -52,7 +52,7 @@ export async function registerPrivilegesWithCluster(
     );
   };
 
-  const expectedPrivileges = serializePrivileges(application, privileges.get());
+  const expectedPrivileges = serializePrivileges(application, await privileges.getWithActions());
 
   logger.debug(`Registering Kibana Privileges with Elasticsearch for ${application}`);
 
