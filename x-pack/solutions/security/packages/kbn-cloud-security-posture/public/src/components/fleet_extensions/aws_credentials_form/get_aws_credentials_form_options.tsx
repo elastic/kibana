@@ -175,32 +175,17 @@ export const getAwsCloudConnectorsFormAgentlessOptions = (
     awsInputFieldMapping
   );
 
-const getAwsFieldMappingValues = (awsInputFieldMapping?: AwsInputFieldMapping) => {
-  return {
-    roleArn: awsInputFieldMapping?.['aws.role_arn'] || 'aws.role_arn',
-    accessKeyId: awsInputFieldMapping?.['aws.access_key_id'] || 'aws.access_key_id',
-    secretAccessKey: awsInputFieldMapping?.['aws.secret_access_key'] || 'aws.secret_access_key',
-    sessionToken: awsInputFieldMapping?.['aws.session_token'] || 'aws.session_token',
-    sharedCredentialFile:
-      awsInputFieldMapping?.['aws.shared_credential_file'] || 'aws.shared_credential_file',
-    credentialProfileName:
-      awsInputFieldMapping?.['aws.credential_profile_name'] || 'aws.credential_profile_name',
-    credentialExternalId:
-      awsInputFieldMapping?.['aws.credentials.external_id'] || 'aws.credentials.external_id',
-  };
-};
-
 export const getAwsCredentialsFormOptions = (
   awsInputFieldMapping?: AwsInputFieldMapping
 ): Omit<AwsOptions, 'cloud_connectors'> => {
-  const {
-    roleArn,
-    accessKeyId,
-    secretAccessKey,
-    sessionToken,
-    sharedCredentialFile,
-    credentialProfileName,
-  } = getAwsFieldMappingValues(awsInputFieldMapping);
+  const roleArn = awsInputFieldMapping?.role_arn || 'role_arn';
+  const accessKeyId = awsInputFieldMapping?.access_key_id || 'access_key_id';
+  const secretAccessKey = awsInputFieldMapping?.secret_access_key || 'secret_access_key';
+  const sessionToken = awsInputFieldMapping?.session_token || 'session_token';
+  const sharedCredentialFile =
+    awsInputFieldMapping?.shared_credential_file || 'shared_credential_file';
+  const credentialProfileName =
+    awsInputFieldMapping?.credential_profile_name || 'credential_profile_name';
 
   return {
     [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
@@ -314,8 +299,12 @@ export const getAwsCredentialsFormOptions = (
 export const getAwsCloudConnectorsCredentialsFormOptions = (
   awsInputFieldMapping?: AwsInputFieldMapping
 ): Omit<AwsOptions, 'assume_role' | 'cloud_formation' | 'shared_credentials'> => {
-  const { roleArn, accessKeyId, secretAccessKey, sessionToken, credentialExternalId } =
-    getAwsFieldMappingValues(awsInputFieldMapping);
+  const roleArn = awsInputFieldMapping?.role_arn || 'role_arn';
+  const accessKeyId = awsInputFieldMapping?.access_key_id || 'access_key_id';
+  const secretAccessKey = awsInputFieldMapping?.secret_access_key || 'secret_access_key';
+  const sessionToken = awsInputFieldMapping?.session_token || 'session_token';
+  const credentialExternalId =
+    awsInputFieldMapping?.['aws.credentials.external_id'] || 'aws.credentials.external_id';
 
   return {
     [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
@@ -410,8 +399,9 @@ export const getAwsAgentlessFormOptions = (
   AwsOptions,
   'assume_role' | 'cloud_formation' | 'cloud_connectors' | 'shared_credentials'
 > => {
-  const { accessKeyId, secretAccessKey, sessionToken } =
-    getAwsFieldMappingValues(awsInputFieldMapping);
+  const accessKeyId = awsInputFieldMapping?.access_key_id || 'access_key_id';
+  const secretAccessKey = awsInputFieldMapping?.secret_access_key || 'secret_access_key';
+  const sessionToken = awsInputFieldMapping?.session_token || 'session_token';
 
   return {
     [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
