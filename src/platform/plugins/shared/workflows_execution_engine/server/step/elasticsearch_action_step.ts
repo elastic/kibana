@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildRequestFromConnector } from '@kbn/workflows-management-plugin/common';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { RunStepResult, BaseStep } from './step_base';
 import { StepBase } from './step_base';
-import { buildRequestFromConnector } from '../../../workflows_management/common';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -96,23 +96,28 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
       });
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
-      const { method, path, body, params: queryParams } = buildRequestFromConnector(stepType, params);
-      
+      const {
+        method,
+        path,
+        body,
+        params: queryParams,
+      } = buildRequestFromConnector(stepType, params);
+
       // Build query string manually if needed
       let finalPath = path;
       if (queryParams && Object.keys(queryParams).length > 0) {
         const queryString = new URLSearchParams(queryParams).toString();
         finalPath = `${path}?${queryString}`;
       }
-      
+
       const requestOptions = {
         method,
         path: finalPath,
         body,
       };
-      
+
       console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
-      if(requestOptions.path.endsWith("/_bulk")){
+      if (requestOptions.path.endsWith('/_bulk')) {
         console.log('DEBUG - Bulk request detected:', JSON.stringify(requestOptions.body, null, 2));
         // Further processing for bulk requests can be added here
         // SG: ugly hack cuz _bulk is special
@@ -130,16 +135,16 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         });
 
         const resp = await esClient.bulk({
-          index: pathIndex,     // default index for all actions
-          refresh,              // true | false | 'wait_for'
-          body                  // [ {index:{}}, doc, {index:{}}, doc, ... ]
+          index: pathIndex, // default index for all actions
+          refresh, // true | false | 'wait_for'
+          body, // [ {index:{}}, doc, {index:{}}, doc, ... ]
         });
 
         // Helpful: surface per-item errors if any
         if (resp.errors) {
           const itemsWithErrors = resp.items
             .map((it, idx) => ({ idx, action: Object.keys(it)[0], result: it[Object.keys(it)[0]] }))
-            .filter(x => x.result.error);
+            .filter((x) => x.result.error);
           console.error('Bulk had item errors:', itemsWithErrors);
         }
         return resp;
@@ -147,6 +152,4 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
       return await esClient.transport.request(requestOptions);
     }
   }
-
-
 }

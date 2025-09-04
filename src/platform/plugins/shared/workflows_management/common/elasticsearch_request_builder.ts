@@ -18,21 +18,21 @@ export function buildRequestFromConnector(
   params: any
 ): { method: string; path: string; body?: any; params?: any } {
   console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
-  
+
   // Find the connector definition for this step type
-  const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find(c => c.type === stepType);
-  
+  const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c) => c.type === stepType);
+
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)
     const urlParamKeys = new Set<string>(connector.parameterTypes?.urlParams || []);
     const bodyParamKeys = new Set<string>(connector.parameterTypes?.bodyParams || []);
-    
+
     // Determine method (allow user override)
     const method = params.method || connector.methods[0]; // User can override method
-    
+
     // Choose the best pattern based on available parameters
     let selectedPattern = selectBestPattern(connector.patterns, params);
-    
+
     // Collect path parameters from the selected pattern
     const pathParams = new Set<string>();
     const pathParamMatches = selectedPattern.match(/\{([^}]+)\}/g);
@@ -41,33 +41,37 @@ export function buildRequestFromConnector(
         pathParams.add(match.slice(1, -1)); // Remove { and }
       }
     }
-    
+
     // Debug logging
     console.log('DEBUG - selectedPattern:', selectedPattern);
     console.log('DEBUG - pathParams:', Array.from(pathParams));
     console.log('DEBUG - urlParamKeys:', Array.from(urlParamKeys));
     console.log('DEBUG - bodyParamKeys:', Array.from(bodyParamKeys));
-    
+
     // Replace path parameters in the selected pattern
     for (const [key, value] of Object.entries(params)) {
       if (pathParams.has(key)) {
         selectedPattern = selectedPattern.replace(`{${key}}`, encodeURIComponent(String(value)));
       }
     }
-    
+
     // Build body and query parameters
     const body: any = {};
     const queryParams: any = {};
-    
+
     for (const [key, value] of Object.entries(params)) {
-      console.log(`DEBUG - Processing param: ${key}, isPathParam: ${pathParams.has(key)}, isUrlParam: ${urlParamKeys.has(key)}, isBodyParam: ${bodyParamKeys.has(key)}`);
-      
+      console.log(
+        `DEBUG - Processing param: ${key}, isPathParam: ${pathParams.has(
+          key
+        )}, isUrlParam: ${urlParamKeys.has(key)}, isBodyParam: ${bodyParamKeys.has(key)}`
+      );
+
       // Skip path parameters (they're used in the URL)
       if (pathParams.has(key)) continue;
-      
+
       // Skip meta parameters that control request building
       if (key === 'method') continue;
-      
+
       // Prioritize body parameters over URL parameters when both are available
       // This is important for search APIs where parameters like 'size' can go in either place
       // but should preferably go in the body for consistency with common usage
@@ -79,7 +83,11 @@ export function buildRequestFromConnector(
         // This parameter should go in URL query parameters
         const queryValue = Array.isArray(value) ? value.join(',') : value;
         queryParams[key] = queryValue;
-        console.log(`DEBUG - Added to queryParams: ${key} = ${queryValue} (original: ${JSON.stringify(value)})`);
+        console.log(
+          `DEBUG - Added to queryParams: ${key} = ${queryValue} (original: ${JSON.stringify(
+            value
+          )})`
+        );
       } else if (key === 'body') {
         // Handle explicit body parameter
         if (typeof value === 'object' && value !== null) {
@@ -91,18 +99,18 @@ export function buildRequestFromConnector(
         console.log(`DEBUG - Added to body (fallback): ${key} = ${value}`);
       }
     }
-    
+
     const result = {
       method,
       path: `/${selectedPattern}`,
       body: Object.keys(body).length > 0 ? body : undefined,
       params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
     };
-    
+
     console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
     return result;
   }
-  
+
   // If no connector found, throw an error suggesting raw API format
   throw new Error(
     `No connector definition found for ${stepType}. Use raw API format with 'request' parameter: { request: { method: 'GET', path: '/my-index/_search', body: {...} } }`
@@ -111,19 +119,19 @@ export function buildRequestFromConnector(
 
 function selectBestPattern(patterns: string[], params: any): string {
   // Strategy: Prefer patterns where all path parameters are provided
-  
+
   // Score each pattern based on how well it matches the provided parameters
   let bestPattern = patterns[0];
   let bestScore = -1;
-  
+
   for (const pattern of patterns) {
     let score = 0;
-    
+
     // Extract path parameters from this pattern
     const pathParamMatches = pattern.match(/\{([^}]+)\}/g);
     if (pathParamMatches) {
-      const patternPathParams = pathParamMatches.map(match => match.slice(1, -1));
-      
+      const patternPathParams = pathParamMatches.map((match) => match.slice(1, -1));
+
       // Count how many path parameters are satisfied
       let satisfiedParams = 0;
       for (const pathParam of patternPathParams) {
@@ -131,11 +139,11 @@ function selectBestPattern(patterns: string[], params: any): string {
           satisfiedParams++;
         }
       }
-      
+
       // Score = satisfied params / total params for this pattern
       // Higher score means better match
       score = satisfiedParams / patternPathParams.length;
-      
+
       // If all path params are satisfied, this is a perfect match
       if (satisfiedParams === patternPathParams.length) {
         return pattern;
@@ -144,12 +152,12 @@ function selectBestPattern(patterns: string[], params: any): string {
       // Pattern with no path parameters gets score 1 (always usable)
       score = 1;
     }
-    
+
     if (score > bestScore) {
       bestScore = score;
       bestPattern = pattern;
     }
   }
-  
+
   return bestPattern;
 }

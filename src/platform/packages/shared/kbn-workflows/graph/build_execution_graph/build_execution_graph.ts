@@ -162,7 +162,10 @@ export function visitHttpStep(currentStep: any, context: GraphBuildContext): gra
   return graph;
 }
 
-export function visitElasticsearchStep(currentStep: any, context: GraphBuildContext): graphlib.Graph {
+export function visitElasticsearchStep(
+  currentStep: any,
+  context: GraphBuildContext
+): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   const elasticsearchNode: ElasticsearchGraphNode = {
     id: getNodeId(currentStep, context),

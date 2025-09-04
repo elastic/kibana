@@ -63,7 +63,7 @@ export function createElasticsearchStepHoverProvider(
 
         // Generate the Console format for display
         const consoleFormat = getConsoleFormat(elasticsearchStep);
-        
+
         // Simple markdown hover content
         const hoverContent: monaco.IMarkdownString = {
           value: [
@@ -73,7 +73,7 @@ export function createElasticsearchStepHoverProvider(
             consoleFormat,
             '```',
             '',
-            '_Position cursor on this step and look for floating action buttons →_'
+            '_Position cursor on this step and look for floating action buttons →_',
           ].join('\n'),
         };
 

@@ -8,21 +8,11 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ElasticsearchStepData } from '../lib/elasticsearch_step_utils';
 import type { ElasticsearchStepActionsProvider } from '../lib/elasticsearch_step_actions_provider';
-import { 
-  copyStepAs, 
-  copyAsConsole, 
-  type CopyAsOptions
-} from '../lib/copy_request_utils';
+import { copyAsConsole, type CopyAsOptions } from '../lib/copy_request_utils';
 
 export interface ElasticsearchStepActionsProps {
   actionsProvider: ElasticsearchStepActionsProvider | null;
@@ -40,7 +30,7 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
   kibanaHost,
 }) => {
   const currentStep = actionsProvider?.getCurrentElasticsearchStep();
-  
+
   const copyAsOptions: CopyAsOptions = {
     http,
     notifications,
@@ -53,8 +43,6 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
     await copyAsConsole(currentStep, copyAsOptions);
   }, [currentStep, copyAsOptions]);
 
-
-
   if (!currentStep) {
     return null;
   }
@@ -63,23 +51,27 @@ export const ElasticsearchStepActions: React.FC<ElasticsearchStepActionsProps> =
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={i18n.translate('workflows.workflowDetail.yamlEditor.elasticsearchStep.copyAsConsoleTooltip', {
-            defaultMessage: 'Copy as Console format'
-          })}
+          content={i18n.translate(
+            'workflows.workflowDetail.yamlEditor.elasticsearchStep.copyAsConsoleTooltip',
+            {
+              defaultMessage: 'Copy as Console format',
+            }
+          )}
         >
           <EuiButtonIcon
             iconType="console"
             onClick={handleCopyAsConsole}
             data-test-subj="copyAsConsoleButton"
-            aria-label={i18n.translate('workflows.workflowDetail.yamlEditor.elasticsearchStep.copyAsConsoleAriaLabel', {
-              defaultMessage: 'Copy as Console format'
-            })}
+            aria-label={i18n.translate(
+              'workflows.workflowDetail.yamlEditor.elasticsearchStep.copyAsConsoleAriaLabel',
+              {
+                defaultMessage: 'Copy as Console format',
+              }
+            )}
             size="s"
           />
         </EuiToolTip>
       </EuiFlexItem>
-      
-
     </EuiFlexGroup>
   );
 };

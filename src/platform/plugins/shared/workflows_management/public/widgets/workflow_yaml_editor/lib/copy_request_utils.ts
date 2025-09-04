@@ -32,22 +32,25 @@ export const COPY_AS_LANGUAGES = [
   { value: 'go', label: 'Go' },
 ] as const;
 
-export type CopyAsLanguage = typeof COPY_AS_LANGUAGES[number]['value'];
+export type CopyAsLanguage = (typeof COPY_AS_LANGUAGES)[number]['value'];
 
 /**
  * Converts an Elasticsearch workflow step to cURL command
  */
-export function getCurlCommand(step: ElasticsearchStepData, elasticsearchBaseUrl: string = 'http://localhost:9200'): string {
+export function getCurlCommand(
+  step: ElasticsearchStepData,
+  elasticsearchBaseUrl: string = 'http://localhost:9200'
+): string {
   const request = stepToConsoleRequest(step);
-  
+
   const curlUrl = `${elasticsearchBaseUrl}${request.url}`;
   let curlCommand = `curl -X${request.method} "${curlUrl}"`;
-  
+
   if (request.data && request.data.length > 0) {
     const joinedData = request.data.join('\n');
     curlCommand += ` -H "Content-Type: application/json" -d'${joinedData}'`;
   }
-  
+
   return curlCommand;
 }
 
@@ -56,13 +59,13 @@ export function getCurlCommand(step: ElasticsearchStepData, elasticsearchBaseUrl
  */
 export function getConsoleFormat(step: ElasticsearchStepData): string {
   const request = stepToConsoleRequest(step);
-  
+
   let consoleFormat = `${request.method} ${request.url}`;
-  
+
   if (request.data && request.data.length > 0) {
     consoleFormat += '\n' + request.data.join('\n');
   }
-  
+
   return consoleFormat;
 }
 
@@ -101,29 +104,29 @@ export async function convertStepToLanguage(
   options: CopyAsOptions
 ): Promise<{ data?: string; error?: string }> {
   const { http, esHost = 'http://localhost:9200', kibanaHost = window.location.origin } = options;
-  
+
   const request = stepToConsoleRequest(step);
-  
+
   try {
     const response = await http.post<string>('/api/console/convert_request_to_language', {
-      query: { 
-        language, 
-        esHost, 
-        kibanaHost 
+      query: {
+        language,
+        esHost,
+        kibanaHost,
       },
       body: JSON.stringify([request]),
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    
+
     return { data: response };
   } catch (error) {
-    return { 
+    return {
       error: i18n.translate('workflows.workflowDetail.yamlEditor.copyAs.conversionError', {
         defaultMessage: 'Failed to convert request to {language}',
         values: { language },
-      })
+      }),
     };
   }
 }
@@ -137,10 +140,10 @@ export async function copyStepAs(
   options: CopyAsOptions
 ): Promise<void> {
   const { notifications } = options;
-  
+
   let textToCopy: string;
   let success = false;
-  
+
   try {
     if (language === 'curl') {
       // For cURL, use our local implementation for better performance
@@ -149,22 +152,22 @@ export async function copyStepAs(
     } else {
       // For other languages, use the Console API
       const { data, error } = await convertStepToLanguage(step, language, options);
-      
+
       if (error) {
         notifications.toasts.addDanger({
           title: error,
         });
         return;
       }
-      
+
       if (data) {
         textToCopy = data;
         success = await copyToClipboard(textToCopy);
       }
     }
-    
+
     if (success) {
-      const languageLabel = COPY_AS_LANGUAGES.find(l => l.value === language)?.label || language;
+      const languageLabel = COPY_AS_LANGUAGES.find((l) => l.value === language)?.label || language;
       notifications.toasts.addSuccess({
         title: i18n.translate('workflows.workflowDetail.yamlEditor.copyAs.success', {
           defaultMessage: 'Copied as {language}',
@@ -195,11 +198,11 @@ export async function copyAsConsole(
   options: Pick<CopyAsOptions, 'notifications'>
 ): Promise<void> {
   const { notifications } = options;
-  
+
   try {
     const consoleFormat = getConsoleFormat(step);
     const success = await copyToClipboard(consoleFormat);
-    
+
     if (success) {
       notifications.toasts.addSuccess({
         title: i18n.translate('workflows.workflowDetail.yamlEditor.copyAs.consoleSuccess', {

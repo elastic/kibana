@@ -22,12 +22,12 @@ import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchStepData } from '../lib/elasticsearch_step_utils';
-import { 
-  copyStepAs, 
-  copyAsConsole, 
-  COPY_AS_LANGUAGES, 
+import {
+  copyStepAs,
+  copyAsConsole,
+  COPY_AS_LANGUAGES,
   type CopyAsLanguage,
-  type CopyAsOptions 
+  type CopyAsOptions,
 } from '../lib/copy_request_utils';
 
 export interface ElasticsearchStepHoverMenuProps {
@@ -36,7 +36,19 @@ export interface ElasticsearchStepHoverMenuProps {
   notifications: NotificationsSetup;
   esHost?: string;
   kibanaHost?: string;
-  anchorPosition?: 'upCenter' | 'upLeft' | 'upRight' | 'downCenter' | 'downLeft' | 'downRight' | 'leftCenter' | 'leftUp' | 'leftDown' | 'rightCenter' | 'rightUp' | 'rightDown';
+  anchorPosition?:
+    | 'upCenter'
+    | 'upLeft'
+    | 'upRight'
+    | 'downCenter'
+    | 'downLeft'
+    | 'downRight'
+    | 'leftCenter'
+    | 'leftUp'
+    | 'leftDown'
+    | 'rightCenter'
+    | 'rightUp'
+    | 'rightDown';
 }
 
 export const ElasticsearchStepHoverMenu: React.FC<ElasticsearchStepHoverMenuProps> = ({
@@ -48,7 +60,7 @@ export const ElasticsearchStepHoverMenu: React.FC<ElasticsearchStepHoverMenuProp
   anchorPosition = 'downLeft',
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  
+
   const copyAsOptions: CopyAsOptions = {
     http,
     notifications,
@@ -93,7 +105,7 @@ export const ElasticsearchStepHoverMenu: React.FC<ElasticsearchStepHoverMenuProp
         defaultMessage="Console format"
       />
     </EuiContextMenuItem>,
-    
+
     // Then language formats
     ...COPY_AS_LANGUAGES.map(({ value, label }) => (
       <EuiContextMenuItem
@@ -155,7 +167,7 @@ export const ElasticsearchStepHoverMenuCompact: React.FC<ElasticsearchStepHoverM
   anchorPosition = 'downLeft',
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  
+
   const copyAsOptions: CopyAsOptions = {
     http,
     notifications,
@@ -170,9 +182,12 @@ export const ElasticsearchStepHoverMenuCompact: React.FC<ElasticsearchStepHoverM
       fill={false}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       data-test-subj="elasticsearchStepMenuButton"
-      aria-label={i18n.translate('workflows.workflowDetail.yamlEditor.elasticsearchStep.menuAriaLabel', {
-        defaultMessage: 'Elasticsearch step options'
-      })}
+      aria-label={i18n.translate(
+        'workflows.workflowDetail.yamlEditor.elasticsearchStep.menuAriaLabel',
+        {
+          defaultMessage: 'Elasticsearch step options',
+        }
+      )}
     />
   );
 
@@ -198,7 +213,7 @@ export const ElasticsearchStepHoverMenuCompact: React.FC<ElasticsearchStepHoverM
         defaultMessage="Copy as Console"
       />
     </EuiContextMenuItem>,
-    
+
     <EuiContextMenuItem
       key="curl"
       data-test-subj="copyAsCurl"

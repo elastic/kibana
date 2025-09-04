@@ -17,13 +17,13 @@ import type { InternalConnectorContract } from '@kbn/workflows';
 export interface EnhancedConnectorDefinition {
   /** The connector type to enhance (must match generated connector) */
   type: string;
-  
+
   /** Enhanced parameter schema with examples and better descriptions */
   enhancedParamsSchema?: z.ZodType;
-  
+
   /** Enhanced description with usage examples */
   enhancedDescription?: string;
-  
+
   /** Example usage snippets for autocomplete */
   examples?: {
     /** Example parameter values for autocomplete */
@@ -31,13 +31,16 @@ export interface EnhancedConnectorDefinition {
     /** Full example workflow step */
     snippet?: string;
   };
-  
+
   /** Override specific parameters with better schemas/examples */
-  parameterEnhancements?: Record<string, {
-    schema?: z.ZodType;
-    example?: any;
-    description?: string;
-  }>;
+  parameterEnhancements?: Record<
+    string,
+    {
+      schema?: z.ZodType;
+      example?: any;
+      description?: string;
+    }
+  >;
 }
 
 /**
@@ -46,23 +49,25 @@ export interface EnhancedConnectorDefinition {
 export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = [
   {
     type: 'elasticsearch.esql.query',
-    enhancedDescription: 'Execute ES|QL queries against Elasticsearch with support for various output formats. Parameters are flattened - no body wrapper needed.',
+    enhancedDescription:
+      'Execute ES|QL queries against Elasticsearch with support for various output formats. Parameters are flattened - no body wrapper needed.',
     examples: {
       params: {
         query: 'FROM my-index | LIMIT 10',
-        format: 'json'
+        format: 'json',
       },
       snippet: `- name: run_esql_query
   type: elasticsearch.esql.query
   with:
     format: "json"
-    query: "FROM logs-* | WHERE @timestamp > NOW() - 1h | STATS count() BY host.name"`
+    query: "FROM logs-* | WHERE @timestamp > NOW() - 1h | STATS count() BY host.name"`,
     },
     parameterEnhancements: {
       query: {
         schema: z.string().min(1).describe('ES|QL query string'),
         example: 'FROM my-index | WHERE status = "active" | LIMIT 100',
-        description: 'ES|QL query string. Use the Elasticsearch Query Language to filter, aggregate, and transform data.',
+        description:
+          'ES|QL query string. Use the Elasticsearch Query Language to filter, aggregate, and transform data.',
       },
       format: {
         example: 'json',
@@ -74,19 +79,20 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
       },
     },
   },
-  
+
   {
     type: 'elasticsearch.search',
-    enhancedDescription: 'Search documents with query DSL, aggregations, and advanced options. Parameters are flattened - no body wrapper needed.',
+    enhancedDescription:
+      'Search documents with query DSL, aggregations, and advanced options. Parameters are flattened - no body wrapper needed.',
     examples: {
       params: {
         index: 'logs-*',
         query: {
           match: {
-            message: 'error'
-          }
+            message: 'error',
+          },
         },
-        size: 10
+        size: 10,
       },
       snippet: `- name: search_logs
   type: elasticsearch.search
@@ -96,17 +102,18 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
       range:
         "@timestamp":
           gte: "now-1h"
-    size: 100`
-    }
+    size: 100`,
+    },
   },
 
   {
     type: 'elasticsearch.field_caps',
-    enhancedDescription: 'Get field capabilities across indices to understand field types and mappings',
+    enhancedDescription:
+      'Get field capabilities across indices to understand field types and mappings',
     examples: {
       params: {
         index: 'logs-*',
-        fields: ['@timestamp', 'message', 'host.name']
+        fields: ['@timestamp', 'message', 'host.name'],
       },
       snippet: `- name: get_field_caps
   type: elasticsearch.field_caps
@@ -115,15 +122,15 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
     fields:
       - "@timestamp"
       - "message"
-      - "host.name"`
+      - "host.name"`,
     },
     parameterEnhancements: {
       fields: {
         example: ['@timestamp', 'message', 'host.name'],
-        description: 'List of field names to get capabilities for'
-      }
-    }
-  }
+        description: 'List of field names to get capabilities for',
+      },
+    },
+  },
 ];
 
 /**
@@ -133,23 +140,23 @@ export function mergeEnhancedConnectors(
   generatedConnectors: InternalConnectorContract[],
   enhancedConnectors: EnhancedConnectorDefinition[]
 ): InternalConnectorContract[] {
-  const enhancedMap = new Map(enhancedConnectors.map(e => [e.type, e]));
-  
-  return generatedConnectors.map(connector => {
+  const enhancedMap = new Map(enhancedConnectors.map((e) => [e.type, e]));
+
+  return generatedConnectors.map((connector) => {
     const enhancement = enhancedMap.get(connector.type);
     if (!enhancement) {
       return connector;
     }
-    
+
     // Debug logging removed for performance
-    
+
     // Create enhanced connector
     const enhanced: InternalConnectorContract & { examples?: any } = {
       ...connector,
       description: enhancement.enhancedDescription || connector.description,
       ...(enhancement.examples && { examples: enhancement.examples }),
     };
-    
+
     // Override parameter schema if provided
     if (enhancement.enhancedParamsSchema) {
       // Using enhancedParamsSchema
@@ -162,7 +169,7 @@ export function mergeEnhancedConnectors(
         enhancement.parameterEnhancements
       );
     }
-    
+
     // Enhanced paramsSchema applied
     return enhanced;
   });
@@ -176,15 +183,15 @@ function enhanceParameterSchema(
   enhancements: Record<string, { schema?: z.ZodType; example?: any; description?: string }>
 ): z.ZodType {
   // Enhanced parameter schema processing
-  
+
   if (!(originalSchema instanceof z.ZodObject)) {
     // Not a ZodObject, returning original
     return originalSchema;
   }
-  
+
   const shape = originalSchema.shape;
   const enhancedShape: Record<string, z.ZodType> = {};
-  
+
   for (const [key, fieldSchema] of Object.entries(shape)) {
     const enhancement = enhancements[key];
     if (enhancement?.schema) {
@@ -194,7 +201,7 @@ function enhanceParameterSchema(
       enhancedShape[key] = fieldSchema as z.ZodType;
     }
   }
-  
+
   const result = z.object(enhancedShape);
   // Enhanced schema result created
   return result;

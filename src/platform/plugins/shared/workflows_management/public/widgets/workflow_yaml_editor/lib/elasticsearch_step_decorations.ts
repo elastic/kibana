@@ -21,7 +21,7 @@ export function createElasticsearchStepDecorations(
   yamlDocument: YAML.Document
 ): monaco.editor.IModelDeltaDecoration[] {
   const elasticsearchSteps = getElasticsearchSteps(yamlDocument);
-  
+
   if (elasticsearchSteps.length === 0) {
     return [];
   }
@@ -41,11 +41,7 @@ export function createElasticsearchStepDecorations(
 
       // Find the specific line that contains "type:" and the Elasticsearch type within this step
       let typeLineNumber = stepRange.startLineNumber;
-      for (
-        let lineNum = stepRange.startLineNumber;
-        lineNum <= stepRange.endLineNumber;
-        lineNum++
-      ) {
+      for (let lineNum = stepRange.startLineNumber; lineNum <= stepRange.endLineNumber; lineNum++) {
         const lineContent = model.getLineContent(lineNum);
         if (lineContent.includes('type:') && lineContent.includes(step.type)) {
           typeLineNumber = lineNum;
@@ -75,9 +71,9 @@ export function createElasticsearchStepDecorations(
           value: i18n.translate(
             'workflows.workflowDetail.yamlEditor.elasticsearchStepGlyphTooltip',
             {
-              defaultMessage: 
+              defaultMessage:
                 'Elasticsearch API step: {method} {url}. Right-click or hover for copy options.',
-              values: { 
+              values: {
                 method: step.method,
                 url: step.url,
               },
@@ -123,7 +119,7 @@ export function updateElasticsearchStepDecorations(
   }
 
   const decorations = createElasticsearchStepDecorations(model, yamlDocument);
-  
+
   if (decorationCollection) {
     decorationCollection.set(decorations);
     return decorationCollection;

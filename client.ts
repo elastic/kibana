@@ -1,5 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { makeApi, Zodios, type ZodiosOptions } from '@zodios/core';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 const bedrock_config = z
   .object({
@@ -140,7 +149,7 @@ const verification_mode = z.enum(['certificate', 'full', 'none']);
 const webhook_config = z
   .object({
     authType: auth_type.nullable(),
-    ca: ca,
+    ca,
     certType: cert_type,
     hasAuth: has_auth.default(true),
     headers: z.object({}).partial().passthrough().nullable(),
@@ -224,11 +233,11 @@ const crt = z.string();
 const key = z.string();
 const pfx = z.string();
 const webhook_secrets = z
-  .object({ crt: crt, key: key, pfx: pfx, password: z.string(), user: z.string() })
+  .object({ crt, key, pfx, password: z.string(), user: z.string() })
   .partial()
   .passthrough();
 const cases_webhook_secrets = z
-  .object({ crt: crt, key: key, pfx: pfx, password: z.string(), user: z.string() })
+  .object({ crt, key, pfx, password: z.string(), user: z.string() })
   .partial()
   .passthrough();
 const xmatters_secrets = z
@@ -725,7 +734,7 @@ const params_es_query_dsl_rule = z
     size: size.int().optional(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),
@@ -792,7 +801,7 @@ const params_es_query_kql_rule = z
     size: size.int(),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield.optional(),
     timeWindowSize: timewindowsize.int(),
@@ -808,7 +817,7 @@ const params_index_threshold_rule = z
     index: z.array(z.string()),
     termField: termfield.optional(),
     termSize: termsize.int().optional(),
-    threshold: threshold,
+    threshold,
     thresholdComparator: thresholdcomparator,
     timeField: timefield,
     timeWindowSize: timewindowsize.int(),

@@ -118,33 +118,57 @@ function isUrlParamRequired(paramName, endpointName) {
  */
 function readConsoleBodyDefinitions(endpointName) {
   const bodyParams = new Set();
-  
+
   // Hardcoded body parameters for common ES APIs (within workflows scope)
   const commonBodyParams = {
-    'search': ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'fields', 'track_total_hits', 'timeout'],
-    'msearch': ['query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'post_filter', 'highlight', '_source', 'index'],
-    'index': ['document'],
-    'update': ['doc', 'script', 'upsert', 'doc_as_upsert'],
-    'bulk': ['operations'],
-    'reindex': ['source', 'dest', 'script', 'conflicts'],
-    'update_by_query': ['query', 'script', 'conflicts'],
-    'delete_by_query': ['query', 'conflicts'],
+    search: [
+      'query',
+      'size',
+      'from',
+      'sort',
+      'aggs',
+      'aggregations',
+      'post_filter',
+      'highlight',
+      '_source',
+      'fields',
+      'track_total_hits',
+      'timeout',
+    ],
+    msearch: [
+      'query',
+      'size',
+      'from',
+      'sort',
+      'aggs',
+      'aggregations',
+      'post_filter',
+      'highlight',
+      '_source',
+      'index',
+    ],
+    index: ['document'],
+    update: ['doc', 'script', 'upsert', 'doc_as_upsert'],
+    bulk: ['operations'],
+    reindex: ['source', 'dest', 'script', 'conflicts'],
+    update_by_query: ['query', 'script', 'conflicts'],
+    delete_by_query: ['query', 'conflicts'],
   };
-  
+
   // Check hardcoded definitions first
   if (commonBodyParams[endpointName]) {
     for (const param of commonBodyParams[endpointName]) {
       bodyParams.add(param);
     }
   }
-  
+
   // Look for override files (they have data_autocomplete_rules)
   const overridePath = path.resolve(
     __dirname,
     '../../console/server/lib/spec_definitions/json/overrides',
     `${endpointName}.json`
   );
-  
+
   if (fs.existsSync(overridePath)) {
     try {
       const content = JSON.parse(fs.readFileSync(overridePath, 'utf8'));
@@ -159,7 +183,7 @@ function readConsoleBodyDefinitions(endpointName) {
       // Ignore errors reading override files
     }
   }
-  
+
   return Array.from(bodyParams);
 }
 
@@ -185,7 +209,7 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.boolean()${optionalSuffix}.describe('Enable profiling${requiredMarker}')`;
     case 'filter':
       return `z.object({}).passthrough()${optionalSuffix}.describe('Query filter${requiredMarker}')`;
-    
+
     // Common search parameters
     case 'size':
       return `z.number()${optionalSuffix}.describe('Number of results to return${requiredMarker}')`;
@@ -208,7 +232,7 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.union([z.boolean(), z.number()])${optionalSuffix}.describe('Track total hits${requiredMarker}')`;
     case 'timeout':
       return `z.string()${optionalSuffix}.describe('Query timeout${requiredMarker}')`;
-    
+
     // Document operations
     case 'document':
     case 'doc':
@@ -219,11 +243,11 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.object({}).passthrough()${optionalSuffix}.describe('Upsert document${requiredMarker}')`;
     case 'doc_as_upsert':
       return `z.boolean()${optionalSuffix}.describe('Use doc as upsert${requiredMarker}')`;
-    
+
     // Bulk operations
     case 'operations':
       return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Bulk operations${requiredMarker}')`;
-    
+
     // Reindex operations
     case 'source':
       return `z.object({}).passthrough()${optionalSuffix}.describe('Source configuration${requiredMarker}')`;
@@ -231,7 +255,7 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.object({}).passthrough()${optionalSuffix}.describe('Destination configuration${requiredMarker}')`;
     case 'conflicts':
       return `z.enum(['abort', 'proceed'])${optionalSuffix}.describe('Conflict resolution${requiredMarker}')`;
-    
+
     default:
       return `z.any()${optionalSuffix}.describe('${paramName}${requiredMarker}')`;
   }

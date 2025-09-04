@@ -32,14 +32,17 @@ export function isElasticsearchStep(stepType: string | undefined | null): boolea
 /**
  * Converts an Elasticsearch step type to HTTP method and URL using the EXACT same logic as the execution engine
  */
-export function getElasticsearchRequestInfo(stepType: string, withParams?: Record<string, any>): {
+export function getElasticsearchRequestInfo(
+  stepType: string,
+  withParams?: Record<string, any>
+): {
   method: string;
   url: string;
   data?: string[];
 } {
   // Import and reuse the EXACT same logic as ElasticsearchActionStepImpl
   const { method, path, body } = buildRequestFromConnector(stepType, withParams || {});
-  
+
   return {
     method,
     url: path,
@@ -52,26 +55,26 @@ export function getElasticsearchRequestInfo(stepType: string, withParams?: Recor
  */
 export function getElasticsearchSteps(yamlDocument: YAML.Document): ElasticsearchStepData[] {
   const elasticsearchSteps: ElasticsearchStepData[] = [];
-  
+
   if (!yamlDocument?.contents) {
     console.log('getElasticsearchSteps: No document contents');
     return elasticsearchSteps;
   }
-  
+
   console.log('getElasticsearchSteps: Starting YAML visit');
-  
+
   visit(yamlDocument, {
     Pair(key, pair, ancestors) {
       if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
         return;
       }
-      
+
       console.log('getElasticsearchSteps: Found type pair', pair.value);
-      
+
       // Check if this is a type field within a step
       const path = ancestors.slice();
       let isStepType = false;
-      
+
       // Walk up the ancestors to see if we're in a steps array
       for (let i = path.length - 1; i >= 0; i--) {
         const ancestor = path[i];
@@ -80,18 +83,18 @@ export function getElasticsearchSteps(yamlDocument: YAML.Document): Elasticsearc
           break;
         }
       }
-      
+
       console.log('getElasticsearchSteps: isStepType', isStepType);
-      
+
       if (isStepType && isScalar(pair.value)) {
         const stepType = pair.value.value as string;
         console.log('getElasticsearchSteps: Found step type', stepType);
-        
+
         if (isElasticsearchStep(stepType)) {
           console.log('getElasticsearchSteps: Is Elasticsearch step', stepType);
           // Find the parent step node that contains this type
           const stepNode = ancestors[ancestors.length - 1];
-          
+
           // Extract 'with' parameters from the step
           let withParams: Record<string, any> = {};
           if (stepNode && isMap(stepNode)) {
@@ -116,13 +119,13 @@ export function getElasticsearchSteps(yamlDocument: YAML.Document): Elasticsearc
               }
             }
           }
-          
+
           console.log('getElasticsearchSteps: With params', withParams);
-          
+
           const requestInfo = getElasticsearchRequestInfo(stepType, withParams);
-          
+
           console.log('getElasticsearchSteps: Request info', requestInfo);
-          
+
           elasticsearchSteps.push({
             type: stepType,
             method: requestInfo.method,
@@ -135,7 +138,7 @@ export function getElasticsearchSteps(yamlDocument: YAML.Document): Elasticsearc
       }
     },
   });
-  
+
   console.log('getElasticsearchSteps: Found', elasticsearchSteps.length, 'elasticsearch steps');
   return elasticsearchSteps;
 }
@@ -149,12 +152,16 @@ export function findElasticsearchStepAtPosition(
   yamlDocument: YAML.Document
 ): ElasticsearchStepData | null {
   const elasticsearchSteps = getElasticsearchSteps(yamlDocument);
-  
-  console.log('findElasticsearchStepAtPosition: Found', elasticsearchSteps.length, 'elasticsearch steps');
-  
+
+  console.log(
+    'findElasticsearchStepAtPosition: Found',
+    elasticsearchSteps.length,
+    'elasticsearch steps'
+  );
+
   const offset = model.getOffsetAt(position);
   console.log('findElasticsearchStepAtPosition: Position offset', offset);
-  
+
   for (const step of elasticsearchSteps) {
     // Check if the position is within the step node range
     const stepRange = step.stepNode.range;
@@ -164,7 +171,7 @@ export function findElasticsearchStepAtPosition(
       return step;
     }
   }
-  
+
   console.log('findElasticsearchStepAtPosition: No matching step found');
   return null;
 }
@@ -189,12 +196,12 @@ export function stepToConsoleRequest(step: ElasticsearchStepData): {
  */
 export function getConsoleFormat(step: ElasticsearchStepData): string {
   const request = stepToConsoleRequest(step);
-  
+
   let consoleFormat = `${request.method} ${request.url}`;
-  
+
   if (request.data && request.data.length > 0) {
     consoleFormat += '\n' + request.data.join('\n');
   }
-  
+
   return consoleFormat;
 }

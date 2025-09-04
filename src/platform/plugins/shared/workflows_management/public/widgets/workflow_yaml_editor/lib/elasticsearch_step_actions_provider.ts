@@ -12,15 +12,14 @@ import { debounce } from 'lodash';
 import { monaco } from '@kbn/monaco';
 import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import type YAML from 'yaml';
-import { 
-  findElasticsearchStepAtPosition, 
+import {
+  findElasticsearchStepAtPosition,
   type ElasticsearchStepData,
-  getElasticsearchSteps 
+  getElasticsearchSteps,
 } from './elasticsearch_step_utils';
 import { getMonacoRangeFromYamlNode } from './utils';
 
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 100;
-
 
 export interface ElasticsearchStepActionsProviderOptions {
   http: HttpSetup;
@@ -62,15 +61,15 @@ export class ElasticsearchStepActionsProvider {
     this.editor.onDidChangeCursorPosition(async () => {
       await debouncedHighlightRequests();
     });
-    
+
     this.editor.onDidScrollChange(async () => {
       await debouncedHighlightRequests();
     });
-    
+
     this.editor.onDidChangeCursorSelection(async () => {
       await debouncedHighlightRequests();
     });
-    
+
     this.editor.onDidContentSizeChange(async () => {
       await debouncedHighlightRequests();
     });
@@ -112,7 +111,7 @@ export class ElasticsearchStepActionsProvider {
 
     // Find Elasticsearch step at current position
     const elasticsearchStep = findElasticsearchStepAtPosition(model, position, yamlDocument);
-    
+
     if (!elasticsearchStep) {
       console.log('ElasticsearchStepActionsProvider: No Elasticsearch step found at position');
       this.clearEditorDecorations();
@@ -135,7 +134,7 @@ export class ElasticsearchStepActionsProvider {
 
     // Find the type line for glyph decoration
     const typeRange = getMonacoRangeFromYamlNode(model, elasticsearchStep.typeNode);
-    
+
     const decorations: monaco.editor.IModelDeltaDecoration[] = [
       // Block highlighting for the entire step - each line individually for full-line coverage
     ];
@@ -203,23 +202,23 @@ export class ElasticsearchStepActionsProvider {
     const lineTop = this.editor.getTopForLineNumber(range.startLineNumber);
     const lineHeight = this.editor.getOption(monaco.editor.EditorOption.lineHeight);
     const scrollTop = this.editor.getScrollTop();
-    
+
     // Calculate position relative to editor
     const top = lineTop - scrollTop + lineHeight / 2;
-    
+
     // Get the right edge of the editor content area
     const layoutInfo = this.editor.getLayoutInfo();
     const left = layoutInfo.contentLeft + layoutInfo.contentWidth - 50; // 50px for single button width
-    
+
     console.log('ElasticsearchStepActionsProvider: Positioning buttons', {
       lineTop,
       lineHeight,
       scrollTop,
       top,
       left,
-      layoutInfo
+      layoutInfo,
     });
-    
+
     // Set the CSS to position the action buttons
     this.setEditorActionsCss({
       position: 'absolute',

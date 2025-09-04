@@ -12,7 +12,10 @@ import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { GENERATED_ELASTICSEARCH_CONNECTORS } from './generated_es_connectors';
 import { GENERATED_KIBANA_CONNECTORS } from './generated_kibana_connectors';
-import { ENHANCED_ELASTICSEARCH_CONNECTORS, mergeEnhancedConnectors } from './enhanced_es_connectors';
+import {
+  ENHANCED_ELASTICSEARCH_CONNECTORS,
+  mergeEnhancedConnectors,
+} from './enhanced_es_connectors';
 
 // Static connectors used for schema generation
 const staticConnectors: ConnectorContract[] = [
