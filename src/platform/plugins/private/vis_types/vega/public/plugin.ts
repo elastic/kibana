@@ -36,7 +36,6 @@ import type { IServiceSettings } from './vega_view/vega_map_view/service_setting
 
 import type { ConfigSchema } from '../server/config';
 
-import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 
@@ -91,7 +90,12 @@ export class VegaPlugin implements Plugin<void, void> {
       getServiceSettings: getServiceSettingsLazy,
     };
 
-    inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
+    inspector.registerViewAsync(async () => {
+      const { getVegaInspectorView } = await import('./async_services');
+      return getVegaInspectorView({
+        uiSettings: core.uiSettings,
+      });
+    });
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
     expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));

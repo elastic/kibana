@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { VegaInspectorAdapters } from './types';
-export { createInspectorAdapters } from './create_vega_adapters';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Adapters, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { VegaAdapter } from './vega_adapter';
+
+export interface VegaInspectorViewDependencies {
+  uiSettings: IUiSettingsClient;
+}
+
+export interface VegaInspectorAdapters extends Adapters {
+  requests: RequestAdapter;
+  vega: VegaAdapter;
+}
