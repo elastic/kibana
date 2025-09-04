@@ -12,7 +12,7 @@ import {
   type BaseFlameGraph,
   type ElasticFlameGraph,
 } from '@kbn/profiling-utils';
-import { getRoutePaths } from '../common';
+import { getRoutePaths, type ProfilingSetupStatusResponse } from '../common';
 import type {
   IndexLifecyclePhaseSelectOption,
   IndicesStorageDetailsAPIResponse,
@@ -30,13 +30,8 @@ export interface APMTransactionsPerService {
   };
 }
 
-export interface ProfilingSetupStatus {
-  has_setup: boolean;
-  has_data: boolean;
-  pre_8_9_1_data: boolean;
-  has_required_role: boolean;
-  unauthorized?: boolean;
-}
+// Use the common type for backward compatibility
+export type ProfilingSetupStatus = ProfilingSetupStatusResponse;
 
 export interface Services {
   fetchTopN: (params: {
