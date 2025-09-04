@@ -25,12 +25,7 @@ describe('AttachmentSuggestionRegistry', () => {
         owner: 'observability',
         attachmentTypeId: 'attachment-1',
         handlers: {
-          testHandler: {
-            handler: jest.fn(),
-            tool: {
-              description: 'Handler 1 for test suggestion',
-            },
-          },
+          testHandler: jest.fn(),
         },
       };
 
@@ -94,18 +89,8 @@ describe('AttachmentSuggestionRegistry', () => {
         owner: 'observability',
         attachmentTypeId: 'attachment-1',
         handlers: {
-          handler1: {
-            handler: mockHandler1,
-            tool: {
-              description: 'Handler 1 for test suggestion',
-            },
-          },
-          handler2: {
-            handler: mockHandler2,
-            tool: {
-              description: 'Handler 2 for test suggestion',
-            },
-          },
+          handler1: mockHandler1,
+          handler2: mockHandler2,
         },
       };
 
@@ -157,18 +142,8 @@ describe('AttachmentSuggestionRegistry', () => {
         attachmentTypeId: 'attachment-1',
         owner: 'observability',
         handlers: {
-          handler1: {
-            handler: mockHandler1,
-            tool: {
-              description: 'Handler 1 for test suggestion',
-            },
-          },
-          handler2: {
-            handler: mockHandler2,
-            tool: {
-              description: 'Handler 2 for test suggestion',
-            },
-          },
+          handler1: mockHandler1,
+          handler2: mockHandler2,
         },
       };
 
@@ -225,12 +200,7 @@ describe('AttachmentSuggestionRegistry', () => {
         owner: 'observability',
         attachmentTypeId: 'attachment-1',
         handlers: {
-          handler1: {
-            handler: mockHandler,
-            tool: {
-              description: 'Handler 1 for test suggestion',
-            },
-          },
+          handler1: mockHandler,
         },
       };
 

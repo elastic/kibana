@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ToolDefinition } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type {
@@ -49,14 +48,8 @@ export interface SuggestionType<
   attachmentTypeId: string;
   /* The owner of the suggestion. Dictates which solutions can use this suggestion */
   owner: SuggestionOwner;
-  // Handlers and tools associated with each handler. Can be called programmatically or used with tool calling
-  handlers: Record<
-    string,
-    {
-      handler: SuggestionHandler<TPayload>;
-      tool: ToolDefinition;
-    }
-  >;
+  // Handlers for fetching the suggestion
+  handlers: Record<string, SuggestionHandler<TPayload>>;
 }
 
 export type SuggestionHandler<

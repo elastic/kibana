@@ -39,9 +39,9 @@ export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionT
   ): Promise<SuggestionHandlerResponse> {
     const promises: Array<Promise<SuggestionHandlerResponse>> = [];
     for (const suggestion of this.getAllForOwners(owners)) {
-      for (const handlerDefinition of Object.values(suggestion.handlers)) {
+      for (const handler of Object.values(suggestion.handlers)) {
         promises.push(
-          handlerDefinition.handler({
+          handler({
             request,
             context,
           })
