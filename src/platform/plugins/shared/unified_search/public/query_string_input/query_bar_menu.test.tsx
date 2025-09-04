@@ -156,7 +156,7 @@ describe('Querybar Menu component', () => {
     };
 
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
-
+    expect(screen.getByTestId('queryBarMenuPopover')).toBeInTheDocument();
     if (shouldRender) {
       await waitFor(() => {
         expect(screen.getByTestId('queryBarMenuPanel')).toBeInTheDocument();
