@@ -28,6 +28,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
 import { useAbortController } from '@kbn/react-hooks';
@@ -216,6 +217,7 @@ function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetR
       },
     },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
   const [showModal, setShowModal] = useState(false);
   const [streamName, setStreamName] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -308,7 +310,13 @@ function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetR
         </EuiModal>
       ) : null}
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
+      <EuiPanel
+        style={{ border: `1px solid ${euiTheme.colors.danger}` }}
+        hasBorder={true}
+        hasShadow={false}
+        paddingSize="none"
+        grow={false}
+      >
         <EuiPanel hasShadow={false} color="subdued">
           <EuiText size="s" color="danger">
             <h3>
