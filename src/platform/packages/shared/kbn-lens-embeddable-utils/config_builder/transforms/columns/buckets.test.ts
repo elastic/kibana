@@ -20,8 +20,7 @@ import type {
   LensApiTermsOperation,
 } from '../../schema/bucket_ops';
 import { fromBucketLensApiToLensState, fromBucketLensStateToAPI } from './buckets';
-import type { AnyMetricLensStateColumn } from './types';
-import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type { AnyLensStateColumn, AnyMetricLensStateColumn } from './types';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
 describe('Buckets Transforms', () => {
@@ -104,16 +103,28 @@ describe('Buckets Transforms', () => {
   });
 
   describe('fromBucketLensStateToAPI', () => {
-    const metricColumns: { column: LensApiAllMetricOperations; id: string }[] = [
+    const metricColumns: { column: AnyLensStateColumn; id: string }[] = [
       {
         column: {
-          operation: 'sum',
-          field: 'value',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          operationType: 'sum',
+          sourceField: 'value',
+          isBucketed: false,
+          dataType: 'number',
+          label: 'Sum of value',
+          params: { emptyAsNull: LENS_EMPTY_AS_NULL_DEFAULT_VALUE },
         },
         id: 'metricCol1',
       },
-      { column: { operation: 'average', field: 'score' }, id: 'metricCol2' },
+      {
+        column: {
+          operationType: 'average',
+          sourceField: 'score',
+          isBucketed: false,
+          dataType: 'number',
+          label: 'Average of score',
+        },
+        id: 'metricCol2',
+      },
     ];
     it('should transform filters lens state to API', () => {
       const input: FiltersIndexPatternColumn = {
