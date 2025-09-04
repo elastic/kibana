@@ -22,6 +22,16 @@ import {
 } from '../../../../common/lib/regex';
 import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 
+// Global cache for connectors (they don't change during runtime)
+let allConnectorsCache: any[] | null = null;
+
+function getCachedAllConnectors() {
+  if (allConnectorsCache === null) {
+    allConnectorsCache = getAllConnectors();
+  }
+  return allConnectorsCache;
+}
+
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
@@ -154,9 +164,7 @@ function formatObjectAsYaml(obj: any, indentLevel: number = 0): string {
  */
 function getConnectorTypeFromContext(yamlDocument: any, path: any[], model: any, position: any): string | null {
   try {
-    console.log('🐛 DEBUG getConnectorTypeFromContext: path =', path);
-    console.log('🐛 DEBUG getConnectorTypeFromContext: path.length =', path.length);
-    console.log('🐛 DEBUG getConnectorTypeFromContext: position =', position);
+      // Detecting connector type from context
     
     // First try the existing path-based detection
     const pathBasedType = getConnectorTypeFromWithBlock(yamlDocument, path);
@@ -167,13 +175,13 @@ function getConnectorTypeFromContext(yamlDocument: any, path: any[], model: any,
     // If path is empty or detection failed, try position-based detection
     // This handles cases where cursor is right after "with:" 
     if (path.length === 0 || !path.includes('with')) {
-      console.log('🐛 DEBUG: Path empty or no "with", trying position-based detection');
+      // Path empty or no "with", trying position-based detection
       return getConnectorTypeFromPosition(model, position);
     }
     
     return null;
   } catch (error) {
-    console.warn('🐛 ERROR in getConnectorTypeFromContext:', error);
+    // Error in getConnectorTypeFromContext
     return null;
   }
 }
@@ -186,26 +194,25 @@ function getConnectorTypeFromPosition(model: any, position: any): string | null 
     const currentLineNumber = position.lineNumber;
     const currentLine = model.getLineContent(currentLineNumber);
     
-    console.log('🐛 DEBUG: Position analysis - line', currentLineNumber, 'content:', JSON.stringify(currentLine));
+    // Position analysis
     
     // Check if we're inside a "with" block by analyzing indentation and structure
     const isInWithBlock = detectIfInWithBlock(model, currentLineNumber);
     
     if (isInWithBlock) {
-      console.log('🐛 DEBUG: Detected cursor is inside a "with" block');
+      // Detected cursor is inside a "with" block
       
       // Look backwards to find the type field for this step
       const connectorType = findConnectorTypeInStep(model, currentLineNumber);
       if (connectorType) {
-        console.log('🔍 Found connector type via position:', connectorType);
         return connectorType;
       }
     }
     
-    console.log('🐛 DEBUG: No connector type found via position analysis');
+    // No connector type found via position analysis
     return null;
   } catch (error) {
-    console.warn('🐛 ERROR in getConnectorTypeFromPosition:', error);
+    // Error in getConnectorTypeFromPosition
     return null;
   }
 }
@@ -217,48 +224,48 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
   const currentLine = model.getLineContent(currentLineNumber);
   const currentIndent = getIndentLevel(currentLine);
   
-  console.log('🐛 DEBUG: detectIfInWithBlock - line', currentLineNumber, 'content:', JSON.stringify(currentLine), 'indent:', currentIndent);
+  // Detecting if in with block
   
   // Look backwards to find a "with:" line
   for (let lineNumber = currentLineNumber; lineNumber >= 1; lineNumber--) {
     const line = model.getLineContent(lineNumber);
     const lineIndent = getIndentLevel(line);
     
-    console.log('🐛 DEBUG: Checking line', lineNumber, 'indent:', lineIndent, 'content:', JSON.stringify(line.trim()));
+    // Checking line
     
     // Found a "with:" line
     if (line.trim() === 'with:' || line.trim().endsWith('with:')) {
-      console.log('🐛 DEBUG: Found "with:" at line', lineNumber, 'with indent', lineIndent);
+      // Found "with:" at line
       
       // We're in the with block if:
       // 1. The with: line has LESS indentation than current line (we're inside the block)
       // 2. OR if we're on the with: line itself
       if (lineIndent < currentIndent) {
-        console.log('🐛 DEBUG: We are INSIDE with block (with indent', lineIndent, '< current indent', currentIndent, ')');
+        // We are INSIDE with block
         return true;
       } else if (lineNumber === currentLineNumber) {
-        console.log('🐛 DEBUG: We are ON the with: line itself');
+        // We are ON the with: line itself
         return true;
       } else {
-        console.log('🐛 DEBUG: with: line has same/more indentation, we are NOT inside this with block');
+        // with: line has same/more indentation, we are NOT inside this with block
         return false;
       }
     }
     
     // Stop if we hit a step boundary (this ensures we don't go into other steps)
     if (line.match(/^\s*-\s+name:/) || line.match(/^\s*steps:/)) {
-      console.log('🐛 DEBUG: Hit step/structural boundary at line', lineNumber, 'stopping search');
+      // Hit step/structural boundary
       break;
     }
     
     // Stop if we encounter a line with significantly less indentation (other major structure)
     if (lineIndent < currentIndent && line.trim() !== '' && !line.includes('with:')) {
-      console.log('🐛 DEBUG: Hit major structure boundary at line', lineNumber, 'stopping search');
+      // Hit major structure boundary
       break;
     }
   }
   
-  console.log('🐛 DEBUG: Not inside any with block');
+  // Not inside any with block
   return false;
 }
 
@@ -278,13 +285,13 @@ function findConnectorTypeInStep(model: any, currentLineNumber: number): string 
     const typeMatch = line.match(/^\s*type:\s*(.+)$/);
     if (typeMatch) {
       const connectorType = typeMatch[1].trim().replace(/['"]/g, '');
-      console.log('🔍 Found connector type:', connectorType, 'at line', lineNumber);
+      // Found connector type
       return connectorType;
     }
     
     // Stop if we hit another step or the steps boundary
     if (line.match(/^\s*-\s+name:/) || line.match(/^\s*steps:/)) {
-      console.log('🐛 DEBUG: Hit step boundary, stopping type search at line', lineNumber);
+      // Hit step boundary, stopping type search
       break;
     }
   }
@@ -309,7 +316,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
   const currentLine = model.getLineContent(currentLineNumber);
   const currentIndent = getIndentLevel(currentLine);
   
-  console.log('🔍 getExistingParametersInWithBlock: line', currentLineNumber, 'indent:', currentIndent);
+  // Finding existing parameters in with block
   
   // First, find the start of the with block
   let withLineNumber = -1;
@@ -324,7 +331,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
       if (lineIndent < currentIndent || (lineIndent === currentIndent && lineNumber < currentLineNumber)) {
         withLineNumber = lineNumber;
         withIndent = lineIndent;
-        console.log('🔍 Found with block start at line', lineNumber, 'with indent', lineIndent);
+        // Found with block start
         break;
       }
     }
@@ -336,7 +343,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
   }
   
   if (withLineNumber === -1) {
-    console.log('🔍 No with block found');
+    // No with block found
     return existingParams;
   }
   
@@ -349,7 +356,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
     
     // Stop if we've gone past the with block (less indentation) or hit another major structure
     if (line.trim() !== '' && lineIndent <= withIndent) {
-      console.log('🔍 Exited with block at line', lineNumber, 'due to indentation');
+      // Exited with block due to indentation
       break;
     }
     
@@ -359,13 +366,13 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
       if (paramMatch) {
         const paramName = paramMatch[1];
         existingParams.add(paramName);
-        console.log('🔍 Found existing parameter:', paramName);
+        // Found existing parameter
       }
     }
     
     // Stop if we hit another step
     if (line.match(/^\s*-\s+name:/)) {
-      console.log('🔍 Hit next step at line', lineNumber);
+      // Hit next step
       break;
     }
   }
@@ -375,26 +382,25 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
 
 function getConnectorTypeFromWithBlock(yamlDocument: any, path: any[]): string | null {
   try {
-    console.log('🐛 DEBUG getConnectorTypeFromWithBlock: path =', path);
-    console.log('🐛 DEBUG getConnectorTypeFromWithBlock: path.length =', path.length);
+    // Getting connector type from with block
     
     // Look for a pattern like: steps[n].with.<param> 
     // We need to find the step containing this 'with' block and get its 'type'
     
     if (path.length < 2) {
-      console.log('🐛 DEBUG: Path too short, returning null');
+      // Path too short, returning null
       return null;
     }
     
     // Check if we're in a path that includes 'with'
     const withIndex = path.findIndex(segment => segment === 'with');
-    console.log('🐛 DEBUG: withIndex =', withIndex);
+    // Finding with index in path
     
     // Also handle case where we're directly in a with block (path ends with 'with')
     const isInWithBlock = withIndex !== -1 || path[path.length - 1] === 'with';
     
     if (!isInWithBlock) {
-      console.log('🐛 DEBUG: No "with" in path, returning null');
+      // No "with" in path, returning null
       return null;
     }
     
@@ -407,33 +413,33 @@ function getConnectorTypeFromWithBlock(yamlDocument: any, path: any[]): string |
       stepPath = path.slice(0, -1);
     }
     
-    console.log('🐛 DEBUG: stepPath =', stepPath);
+    // Step path determined
     
     if (stepPath.length < 2 || stepPath[0] !== 'steps') {
-      console.log('🐛 DEBUG: Invalid step path, returning null');
+      // Invalid step path, returning null
       return null;
     }
     
     // Get the step node to find its type
     const stepNode = yamlDocument.getIn(stepPath, true);
-    console.log('🐛 DEBUG: stepNode =', stepNode);
+    // Getting step node
     if (!stepNode || !stepNode.has || typeof stepNode.has !== 'function') {
-      console.log('🐛 DEBUG: Invalid step node, returning null');
+      // Invalid step node, returning null
       return null;
     }
     
     const typeNode = stepNode.has('type') ? stepNode.get('type', true) : null;
-    console.log('🐛 DEBUG: typeNode =', typeNode);
+    // Getting type node
     if (!typeNode || !typeNode.value) {
-      console.log('🐛 DEBUG: No type value, returning null');
+      // No type value, returning null
       return null;
     }
     
     const connectorType = typeNode.value;
-    console.log('🔍 Detected connector type in with block:', connectorType);
+    // Detected connector type in with block
     return connectorType;
   } catch (error) {
-    console.warn('🐛 ERROR detecting connector type from with block:', error);
+    // Error detecting connector type from with block
     return null;
   }
 }
@@ -441,26 +447,44 @@ function getConnectorTypeFromWithBlock(yamlDocument: any, path: any[]): string |
 /**
  * Get the specific connector's parameter schema for autocomplete
  */
+// Cache for connector schemas to avoid repeated processing
+const connectorSchemaCache = new Map<string, Record<string, any> | null>();
+
+// Cache for connector type suggestions to avoid recalculating on every keystroke
+const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
+
+// Cache for existing parameters in with blocks
+const existingParametersCache = new Map<string, Set<string>>();
+
 function getConnectorParamsSchema(connectorType: string): Record<string, any> | null {
+  // Check cache first
+  if (connectorSchemaCache.has(connectorType)) {
+    return connectorSchemaCache.get(connectorType)!;
+  }
+
   try {
-    const allConnectors = getAllConnectors();
+    const allConnectors = getCachedAllConnectors();
     const connector = allConnectors.find((c: any) => c.type === connectorType);
     
     if (!connector || !connector.paramsSchema) {
-      console.log('🚫 No paramsSchema found for connector:', connectorType);
+      // No paramsSchema found for connector
+      connectorSchemaCache.set(connectorType, null);
       return null;
     }
     
     // Extract the shape from the Zod schema
     if (connector.paramsSchema instanceof z.ZodObject) {
-      console.log('✅ Found paramsSchema for connector:', connectorType);
-      console.log('📋 Schema keys:', Object.keys(connector.paramsSchema.shape));
-      return connector.paramsSchema.shape;
+      // Found paramsSchema for connector
+      const result = connector.paramsSchema.shape;
+      connectorSchemaCache.set(connectorType, result);
+      return result;
     }
     
+    connectorSchemaCache.set(connectorType, null);
     return null;
   } catch (error) {
-    console.warn('Error getting connector params schema:', error);
+    // Error getting connector params schema
+    connectorSchemaCache.set(connectorType, null);
     return null;
   }
 }
@@ -593,7 +617,7 @@ function getRequiredParamsForConnector(
   connectorType: string
 ): Array<{ name: string; example?: string; defaultValue?: string }> {
   // Get all connectors (both static and generated)
-  const allConnectors = getAllConnectors();
+  const allConnectors = getCachedAllConnectors();
 
   // Find the connector by type
   const connector = allConnectors.find((c: any) => c.type === connectorType);
@@ -603,26 +627,24 @@ function getRequiredParamsForConnector(
       // Check if this connector has enhanced examples
       const hasEnhancedExamples = (connector as any).examples?.params;
       
-      console.log(`DEBUG getRequiredParamsForConnector - ${connectorType}`);
-      console.log('Has enhanced examples:', hasEnhancedExamples);
-      console.log('Connector examples:', (connector as any).examples);
+      // Processing enhanced examples for connector
       
       if (hasEnhancedExamples) {
         // Use examples directly from enhanced connector
         const exampleParams = (connector as any).examples.params;
-        console.log('Using enhanced examples:', exampleParams);
+        // Using enhanced examples
         const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
         
         for (const [key, value] of Object.entries(exampleParams)) {
           // Include common important parameters for ES APIs
           if (['index', 'id', 'body', 'query', 'size', 'from', 'sort', 'aggs', 'aggregations', 'format'].includes(key)) {
             result.push({ name: key, example: value });
-            console.log(`Added enhanced example: ${key} =`, value);
+            // Added enhanced example
           }
         }
         
         if (result.length > 0) {
-          console.log('Returning enhanced examples:', result);
+          // Returning enhanced examples
           return result;
         }
       }
@@ -701,10 +723,18 @@ function getConnectorTypeSuggestions(
   scalarType: Scalar.Type | null,
   shouldBeQuoted: boolean
 ): monaco.languages.CompletionItem[] {
+  // Create a cache key based on the type prefix and context
+  const cacheKey = `${typePrefix}|${shouldBeQuoted}|${JSON.stringify(range)}`;
+  
+  // Check cache first
+  if (connectorTypeSuggestionsCache.has(cacheKey)) {
+    return connectorTypeSuggestionsCache.get(cacheKey)!;
+  }
+
   const suggestions: monaco.languages.CompletionItem[] = [];
 
   // Get all connectors
-  const allConnectors = getAllConnectors();
+  const allConnectors = getCachedAllConnectors();
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {
@@ -793,6 +823,9 @@ function getConnectorTypeSuggestions(
     });
   }
 
+  // Cache the result before returning
+  connectorTypeSuggestionsCache.set(cacheKey, suggestions);
+  
   return suggestions;
 }
 
@@ -971,14 +1004,11 @@ export function getCompletionItemProvider(
         }
 
         // 🔍 SPECIAL CASE: Check if we're inside a connector's 'with' block
-        console.log('🐛 DEBUG: Current path:', path);
-        console.log('🐛 DEBUG: Line up to cursor:', JSON.stringify(lineUpToCursor));
-        console.log('🐛 DEBUG: Completion trigger kind:', completionContext.triggerKind);
-        console.log('🐛 DEBUG: Is manual trigger (Ctrl+I):', completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke);
+        // Checking if we're inside a connector's 'with' block
         
         // First check if we're in a connector's with block (using enhanced detection)
         const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
-        console.log('🐛 DEBUG: Detected connector type:', connectorType);
+        // Detected connector type
         
         // If we're in a connector with block, prioritize connector-specific suggestions
         if (connectorType) {
@@ -999,17 +1029,16 @@ export function getCompletionItemProvider(
             lineUpToCursor.endsWith(':')
           );
           
-          console.log('🐛 DEBUG: colonIndex:', colonIndex, 'isInValuePosition:', isInValuePosition);
-          console.log('🐛 DEBUG: lineUpToCursor:', JSON.stringify(lineUpToCursor));
+          // Analyzing cursor position
           
           if (isInValuePosition) {
-            console.log('🚫 Typing value after colon, not suggesting parameter names');
+            // Typing value after colon, not suggesting parameter names
             
             // Extract the parameter name more carefully
             // Get everything before the colon, remove leading whitespace and dashes
             const beforeColon = lineUpToCursor.substring(0, colonIndex);
             const paramName = beforeColon.replace(/^\s*-?\s*/, '').trim();
-            console.log('🎯 Parameter name:', paramName);
+            // Parameter name extracted
             
             // Only provide value suggestions if we have a valid parameter name
             if (paramName && !paramName.includes(' ')) {
@@ -1067,7 +1096,7 @@ export function getCompletionItemProvider(
           }
           
           // Continue to show connector parameters for manual triggers or when typing parameter names
-          console.log('🎯 Will show connector parameters for:', connectorType);
+          // Will show connector parameters
         }
         
         // Get connector schema if we detected a connector type
@@ -1075,32 +1104,22 @@ export function getCompletionItemProvider(
         
         if (connectorType) {
           schemaToUse = getConnectorParamsSchema(connectorType);
-          console.log('🐛 DEBUG: Schema found:', !!schemaToUse);
-          console.log('🐛 DEBUG: Searching for connector type:', connectorType);
+          // Schema lookup for connector type
           
-          // Debug: Check if connector exists in the registry
-          const allConnectors = getAllConnectors();
-          const foundConnector = allConnectors.find((c: any) => c.type === connectorType);
-          console.log('🐛 DEBUG: Connector found in registry:', !!foundConnector);
-          if (foundConnector) {
-            console.log('🐛 DEBUG: Connector details:', foundConnector);
-          } else {
-            console.log('🐛 DEBUG: Available connector types:', allConnectors.slice(0, 10).map((c: any) => c.type));
-          }
+          // Connector registry lookup
           
           if (schemaToUse) {
-            console.log('🎯 Using connector-specific schema for:', connectorType);
-            console.log('📋 Available parameters:', Object.keys(schemaToUse));
+            // Using connector-specific schema
             
             // Get existing parameters in the with block to avoid duplicates using Monaco
             const existingParams = getExistingParametersInWithBlock(model, position);
-            console.log('🔍 Existing parameters in with block:', Array.from(existingParams));
+            // Found existing parameters in with block
             
             // Use the connector's specific parameter schema instead of the generic schema
             for (const [key, currentSchema] of Object.entries(schemaToUse) as [string, z.ZodType][]) {
               // Skip if parameter already exists (unless it's an empty value)
               if (existingParams.has(key)) {
-                console.log(`🚫 Skipping existing parameter: ${key}`);
+                // Skipping existing parameter
                 continue;
               }
               
@@ -1155,11 +1174,10 @@ export function getCompletionItemProvider(
               suggestions.push(suggestion);
             }
             
-            console.log('🐛 DEBUG: Returning', suggestions.length, 'connector-specific suggestions');
-            console.log('🐛 DEBUG: Suggestion labels:', suggestions.map(s => s.label));
+            // Returning connector-specific suggestions
             
             // 🎯 CONNECTOR-SPECIFIC MODE: Only return our suggestions, ignore others
-            console.log('🎯 CONNECTOR-SPECIFIC MODE: Returning only connector parameters');
+            // CONNECTOR-SPECIFIC MODE: Returning only connector parameters
             
             // 🎯 SUCCESS: We found connector-specific suggestions and will return only these
             
@@ -1169,16 +1187,10 @@ export function getCompletionItemProvider(
               incomplete: false,
             };
           } else {
-            console.log('🐛 DEBUG: No schema found for connector type:', connectorType);
+            // No schema found for connector type
           }
         } else {
-          console.log('🐛 DEBUG: Not inside a connector with block');
-          console.log('🐛 DEBUG: Path analysis:', {
-            fullPath: path,
-            hasWithInPath: path.includes('with'),
-            pathJoined: path.join('.'),
-            isManualTrigger: completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke
-          });
+          // Not inside a connector with block
         }
 
         // Note: Generic schema completions for 'with' blocks are now prevented 

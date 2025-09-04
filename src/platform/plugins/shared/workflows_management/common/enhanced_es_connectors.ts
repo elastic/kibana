@@ -141,8 +141,7 @@ export function mergeEnhancedConnectors(
       return connector;
     }
     
-    console.log(`DEBUG - Enhancing connector: ${connector.type}`);
-    console.log('Original paramsSchema keys:', Object.keys((connector.paramsSchema as any)._def?.shape?.() || {}));
+    // Debug logging removed for performance
     
     // Create enhanced connector
     const enhanced: InternalConnectorContract & { examples?: any } = {
@@ -153,10 +152,10 @@ export function mergeEnhancedConnectors(
     
     // Override parameter schema if provided
     if (enhancement.enhancedParamsSchema) {
-      console.log('Using enhancedParamsSchema');
+      // Using enhancedParamsSchema
       enhanced.paramsSchema = enhancement.enhancedParamsSchema;
     } else if (enhancement.parameterEnhancements) {
-      console.log('Using parameterEnhancements');
+      // Using parameterEnhancements
       // Enhance individual parameters
       enhanced.paramsSchema = enhanceParameterSchema(
         connector.paramsSchema,
@@ -164,7 +163,7 @@ export function mergeEnhancedConnectors(
       );
     }
     
-    console.log('Enhanced paramsSchema:', enhanced.paramsSchema);
+    // Enhanced paramsSchema applied
     return enhanced;
   });
 }
@@ -176,12 +175,10 @@ function enhanceParameterSchema(
   originalSchema: z.ZodType,
   enhancements: Record<string, { schema?: z.ZodType; example?: any; description?: string }>
 ): z.ZodType {
-  console.log('DEBUG - enhanceParameterSchema called');
-  console.log('Original schema:', originalSchema);
-  console.log('Enhancements:', enhancements);
+  // Enhanced parameter schema processing
   
   if (!(originalSchema instanceof z.ZodObject)) {
-    console.log('Not a ZodObject, returning original');
+    // Not a ZodObject, returning original
     return originalSchema;
   }
   
@@ -191,7 +188,7 @@ function enhanceParameterSchema(
   for (const [key, fieldSchema] of Object.entries(shape)) {
     const enhancement = enhancements[key];
     if (enhancement?.schema) {
-      console.log(`Enhancing field: ${key}`);
+      // Enhancing field
       enhancedShape[key] = enhancement.schema;
     } else {
       enhancedShape[key] = fieldSchema as z.ZodType;
@@ -199,6 +196,6 @@ function enhanceParameterSchema(
   }
   
   const result = z.object(enhancedShape);
-  console.log('Enhanced schema result:', result);
+  // Enhanced schema result created
   return result;
 }
