@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates infrastructure metrics for a large number of AWS RDS instances.
+ */
+
 import type { InfraDocument, ApmFields } from '@kbn/apm-synthtrace-client';
 import { infra } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
