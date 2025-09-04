@@ -23,14 +23,33 @@ export const columnsAfter = (
   let fieldsToAdd = enrichFields;
 
   // the with option scopes down the fields that are added
+  // and potentially renames things
   const withOption = command.args.find((arg) => isOptionNode(arg) && arg.name === 'with') as
     | ESQLCommandOption
     | undefined;
   if (withOption) {
-    const declaredFields = withOption.args
-      .map((arg) => isAssignment(arg) && isColumn(arg.args[0]) && arg.args[0].parts.join('.'))
-      .filter(Boolean) as string[];
-    fieldsToAdd = enrichFields.filter((field) => declaredFields.includes(field.name));
+    const declaredFieldEntries = withOption.args
+      .map((arg) => {
+        if (
+          isAssignment(arg) &&
+          isColumn(arg.args[0]) &&
+          Array.isArray(arg.args[1]) &&
+          isColumn(arg.args[1][0])
+        ) {
+          return [arg.args[1][0].parts.join('.'), arg.args[0].parts.join('.')];
+        }
+        return undefined;
+      })
+      .filter(Boolean) as [string, string][];
+
+    const declaredFields = new Map<string, string>(declaredFieldEntries);
+
+    fieldsToAdd = enrichFields
+      .filter((field) => declaredFields.has(field.name))
+      .map((field) => {
+        const newName = declaredFields.get(field.name)!;
+        return { ...field, name: newName };
+      });
   }
 
   return uniqBy([...fieldsToAdd, ...previousColumns], 'name');
