@@ -15,6 +15,12 @@ import {
   KibanaStepSchema,
 } from '../../../spec/schema';
 
+export const GraphNodeSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+});
+export type GraphNode = z.infer<typeof GraphNodeSchema>;
+
 export const ExecutionGraphNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
