@@ -20,9 +20,6 @@ const QualityIssueFlyout = dynamic(() => import('./quality_issue_flyout'));
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DatasetQualityDetails() {
-  const { datasetDetails } = useDatasetQualityDetailsState();
-  const { rawName } = datasetDetails;
-
   const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen, view } =
     useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
@@ -53,7 +50,7 @@ export default function DatasetQualityDetails() {
           )}
         </EuiFlexItem>
         {ruleType === DEGRADED_DOCS_RULE_TYPE_ID && (
-          <AlertFlyout dataStream={rawName} closeFlyout={() => setRuleType(null)} />
+          <AlertFlyout dataStream={dataStream} closeFlyout={() => setRuleType(null)} />
         )}
       </EuiFlexGroup>
       {isQualityIssueFlyoutOpen && <QualityIssueFlyout />}
