@@ -49,15 +49,10 @@ export interface InternalConnectorContract extends ConnectorContract {
 function generateStepSchemaForConnector(
   connector: ConnectorContract,
   stepSchema: z.ZodType,
-  loose: boolean = false,
-  stripTypeEnum: boolean = false
+  loose: boolean = false
 ) {
-  const typeSchema = stripTypeEnum 
-    ? z.string() // Generic string that accepts any value but doesn't suggest specific types
-    : z.literal(connector.type); // Specific literal for validation
-    
   return BaseConnectorStepSchema.extend({
-    type: typeSchema,
+    type: z.literal(connector.type),
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
@@ -76,9 +71,9 @@ function createRecursiveStepSchema(
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
     
-    // Create connector schemas but strip out type enum values for autocomplete
+    // Create connector schemas with specific types for validation
     const connectorSchemas = connectors.map((c) =>
-      generateStepSchemaForConnector(c, stepSchema, loose, true) // Add stripTypeEnum flag
+      generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
     // Return discriminated union with all step types
