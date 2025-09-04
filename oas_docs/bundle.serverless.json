@@ -6963,6 +6963,9 @@
                               },
                               "agent_logging_to_files": {
                                 "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
+                                "nullable": true
                               }
                             },
                             "type": "object"
@@ -7965,6 +7968,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -8266,6 +8272,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -9294,6 +9303,9 @@
                                 "nullable": true
                               },
                               "agent_logging_to_files": {
+                                "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
                                 "nullable": true
                               }
                             },
@@ -10563,6 +10575,9 @@
                             },
                             "agent_logging_to_files": {
                               "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
+                              "nullable": true
                             }
                           },
                           "type": "object"
@@ -11563,6 +11578,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -11867,6 +11885,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -12989,6 +13010,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -14139,6 +14163,12 @@
                                         }
                                       },
                                       "type": "object"
+                                    },
+                                    "target_directory": {
+                                      "type": "string"
+                                    },
+                                    "timeout": {
+                                      "type": "string"
                                     }
                                   },
                                   "required": [
@@ -14191,6 +14221,15 @@
                                     "level": {
                                       "type": "string"
                                     },
+                                    "metrics": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "period": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "to_files": {
                                       "type": "boolean"
                                     }
@@ -14200,6 +14239,9 @@
                                 "monitoring": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "_runtime_experimental": {
+                                      "type": "string"
+                                    },
                                     "apm": {},
                                     "enabled": {
                                       "type": "boolean"
