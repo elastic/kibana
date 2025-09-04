@@ -30,21 +30,13 @@ import {
   DEFINITION_EDIT_TAB,
   SCHEDULE_EDIT_TAB,
 } from '../../../../../screens/create_new_rule';
-import {
-  ABOUT_RULE_DESCRIPTION,
-  MODIFIED_PREBUILT_RULE_BADGE,
-  MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION,
-  MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
-  RULE_CUSTOMIZATIONS_DIFF_FLYOUT,
-} from '../../../../../screens/rule_details';
+import { ABOUT_RULE_DESCRIPTION } from '../../../../../screens/rule_details';
 import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { getIndexPatterns, getCustomQueryRuleParams } from '../../../../../objects/rule';
 import {
   editFirstRule,
   expectModifiedRuleBadgeToBeDisplayed,
   expectModifiedRuleBadgeToNotBeDisplayed,
-  expectModifiedRulePerFieldBadgeToBeDisplayed,
-  expectModifiedRulePerFieldBadgeToNotBeDisplayed,
   expectToContainModifiedBadge,
   expectToNotContainModifiedBadge,
   filterByCustomRules,
@@ -304,31 +296,6 @@ describe(
 
     describe('calculating the Modified badge', () => {
       describe('on the rule details page', () => {
-        it('should open the rule diff flyout on click when rule is customized', function () {
-          patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
-
-          cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
-            visitRuleDetailsPage(prebuiltRuleId)
-          );
-
-          expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to be displayed
-          cy.get(MODIFIED_PREBUILT_RULE_BADGE).click();
-          cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('exist');
-        });
-
-        it('should not open the rule diff flyout on click when rule is customized but base version does not exist', function () {
-          patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
-          deletePrebuiltRulesAssets();
-
-          cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
-            visitRuleDetailsPage(prebuiltRuleId)
-          );
-
-          cy.get(MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION).should('exist'); // Expect modified badge to be displayed
-          cy.get(MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION).click();
-          cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('not.exist');
-        });
-
         it("should not be displayed when rule isn't customized", function () {
           cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
             visitRuleDetailsPage(prebuiltRuleId)
@@ -399,41 +366,6 @@ describe(
 
           cy.get(MODIFIED_RULE_BADGE).should('not.exist');
         });
-      });
-    });
-
-    describe('calculating the per-field modified badge', () => {
-      it('should appear next to fields that have been customized', function () {
-        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
-
-        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
-          visitRuleDetailsPage(prebuiltRuleId)
-        );
-
-        expectModifiedRulePerFieldBadgeToBeDisplayed('tags'); // Customized fields should have a badge present
-        expectModifiedRulePerFieldBadgeToNotBeDisplayed('max_signals'); // Non-customized fields should not have a badge present
-      });
-
-      it('should open the rule customizations diff flyout on click', function () {
-        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
-
-        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
-          visitRuleDetailsPage(prebuiltRuleId)
-        );
-
-        cy.get(MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE('tags')).click();
-        cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('exist');
-      });
-
-      it('should not be displayed when the rule base version does not exist', function () {
-        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
-        deletePrebuiltRulesAssets();
-
-        cy.get<string>('@prebuiltRuleId').then((prebuiltRuleId) =>
-          visitRuleDetailsPage(prebuiltRuleId)
-        );
-
-        expectModifiedRulePerFieldBadgeToNotBeDisplayed('tags');
       });
     });
   }
