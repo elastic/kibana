@@ -8,7 +8,8 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator/use_ml_href';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { DEFAULT_REFRESH_INTERVAL } from '../../date_picker/apm_date_picker';

@@ -146,6 +146,9 @@
     "@kbn/esql-composer",
     "@kbn/discover-shared-plugin",
     "@kbn/ml-common-types",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-locator",
+    "@kbn/ml-node-checks",
   ],
   "exclude": ["target/**/*"]
 }
