@@ -23,7 +23,6 @@ const testProps = {
   conversation: ownerConvo,
   handleCopyUrl: mockCopyUrl,
   handleDuplicateConversation: mockDuplicate,
-  isAssistantSharingEnabled: true,
   isActiveConversation: false,
   lastConversationId: ownerConvo.id,
   onConversationSelected: mockSelect,
@@ -177,7 +176,7 @@ describe('ConversationListItem', () => {
   });
 
   it('renders extraAction when sharing is disabled', () => {
-    render(<ConversationListItem {...testProps} isAssistantSharingEnabled={false} />);
+    render(<ConversationListItem {...testProps} />);
     // The extraAction is a delete button
     expect(screen.getByTestId('delete-option')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('delete-option'));
