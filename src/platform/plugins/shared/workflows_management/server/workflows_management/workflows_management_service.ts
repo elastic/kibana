@@ -52,6 +52,7 @@ import type {
   GetStepExecutionParams,
   GetStepLogsParams,
   GetWorkflowsParams,
+  SearchWorkflowExecutionsParams,
 } from './workflows_management_api';
 import { searchStepExecutions } from './lib/search_step_executions';
 
@@ -257,7 +258,7 @@ export class WorkflowsService {
       workflowExecutionId: params.executionId,
       additionalQuery: {
         match: {
-          stepId: params.stepId,
+          id: params.id,
         },
       },
       spaceId,
@@ -453,8 +454,8 @@ export class WorkflowsService {
         };
       }
     }
-    if (updateData.definition!.inputs === undefined) {
-      updateData.definition!.inputs = [];
+    if (updateData.definition && updateData.definition.inputs === undefined) {
+      updateData.definition.inputs = [];
     }
     const response = await savedObjectsClient.update<WorkflowSavedObjectAttributes>(
       WORKFLOW_SAVED_OBJECT_TYPE,
@@ -528,13 +529,39 @@ export class WorkflowsService {
   }
 
   public async searchWorkflowExecutions(
-    params: {
-      workflowId: string;
-    },
+    params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
+    }
+
+    const mustQueries: estypes.QueryDslQueryContainer[] = [
+      { term: { workflowId: params.workflowId } },
+      {
+        bool: {
+          should: [
+            { term: { spaceId } },
+            // Backward compatibility for objects without spaceId
+            { bool: { must_not: { exists: { field: 'spaceId' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+    if (params.statuses) {
+      mustQueries.push({
+        terms: {
+          status: params.statuses,
+        },
+      });
+    }
+    if (params.executionTypes) {
+      mustQueries.push({
+        terms: {
+          executionType: params.executionTypes,
+        },
+      });
     }
 
     return await searchWorkflowExecutions({
@@ -543,19 +570,7 @@ export class WorkflowsService {
       workflowExecutionIndex: this.workflowsExecutionIndex,
       query: {
         bool: {
-          must: [
-            { term: { workflowId: params.workflowId } },
-            {
-              bool: {
-                should: [
-                  { term: { spaceId } },
-                  // Backward compatibility for objects without spaceId
-                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          must: mustQueries,
         },
       },
     });
@@ -670,7 +685,7 @@ export class WorkflowsService {
           },
           {
             match: {
-              'workflow.step_id.keyword': params.stepId,
+              'id.keyword': params.stepExecutionId,
             },
           },
           {

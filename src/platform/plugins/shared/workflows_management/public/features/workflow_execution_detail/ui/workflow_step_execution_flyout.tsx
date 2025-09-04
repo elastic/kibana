@@ -22,39 +22,44 @@ import {
   EuiTab,
   useEuiTheme,
   EuiButtonIcon,
-  EuiDescriptionList,
   EuiSkeletonText,
   EuiButtonEmpty,
+  EuiStat,
+  EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui';
-import { useStepExecution } from '../model/use_step_execution';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { formatDuration } from '../../../shared/lib/format_duration';
 
 interface WorkflowStepExecutionFlyoutProps {
   workflowExecutionId: string;
-  stepId: string;
+  stepExecutionId: string;
+  stepExecution: EsWorkflowStepExecution | null;
+  isLoading: boolean;
   closeFlyout: () => void;
   goNext?: () => void;
   goPrevious?: () => void;
+  setSelectedStepId: (stepId: string | null) => void;
 }
 
 export const WorkflowStepExecutionFlyout = ({
   workflowExecutionId,
-  stepId,
+  stepExecutionId,
+  stepExecution,
   closeFlyout,
   goNext,
   goPrevious,
+  setSelectedStepId,
+  isLoading = false,
 }: WorkflowStepExecutionFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
-
-  const { data: stepExecution, isLoading } = useStepExecution(workflowExecutionId, stepId);
-
-  const { setSelectedStep } = useWorkflowUrlState();
+  const getFormattedDateTime = useGetFormattedDateTime();
 
   const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
 
@@ -79,11 +84,11 @@ export const WorkflowStepExecutionFlyout = ({
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
   useEffect(() => {
-    setSelectedStep(stepId);
+    setSelectedStepId(stepExecution?.stepId || null);
     // reset the tab to the default one on step change
     setSelectedTabId(tabs[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepId, tabs[0].id]);
+  }, [stepExecution?.stepId, tabs[0].id]);
 
   const renderInput = () => {
     return (
@@ -115,7 +120,12 @@ export const WorkflowStepExecutionFlyout = ({
   };
 
   const renderTimeline = () => {
-    return <StepExecutionTimelineStateful executionId={workflowExecutionId} stepId={stepId} />;
+    return (
+      <StepExecutionTimelineStateful
+        executionId={workflowExecutionId}
+        stepExecutionId={stepExecutionId}
+      />
+    );
   };
 
   return (
@@ -132,7 +142,7 @@ export const WorkflowStepExecutionFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" css={styles.flyoutHeader}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiButtonEmpty
                 size="xs"
                 iconType="arrowLeft"
@@ -164,32 +174,51 @@ export const WorkflowStepExecutionFlyout = ({
         <div css={styles.titleContainer}>
           {isLoading && <EuiSkeletonText lines={1} />}
           {stepExecution && (
-            <EuiTitle size="m">
-              <h2 id={complicatedFlyoutTitleId} css={styles.title}>
-                {getExecutionStatusIcon(euiTheme, stepExecution.status)}
-                {stepExecution.stepId}
-              </h2>
-            </EuiTitle>
+            <div>
+              <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
+              <EuiTitle size="m">
+                <h2 id={complicatedFlyoutTitleId} css={styles.title}>
+                  {getExecutionStatusIcon(euiTheme, stepExecution.status)}
+                  {stepExecution.stepId}
+                </h2>
+              </EuiTitle>
+            </div>
           )}
           <EuiSpacer size="m" />
           <EuiText size="xs">
             {isLoading && <EuiSkeletonText lines={2} />}
             {stepExecution && (
-              <EuiDescriptionList
-                textStyle="reverse"
-                type="responsiveColumn"
-                compressed
-                listItems={[
-                  {
-                    title: 'Status',
-                    description: <StatusBadge status={stepExecution.status} />,
-                  },
-                  {
-                    title: 'Execution time',
-                    description: `${stepExecution.executionTimeMs}ms`,
-                  },
-                ]}
-              />
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiPanel hasBorder={true} paddingSize="s">
+                    <EuiStat
+                      css={styles.stat}
+                      title={
+                        <StatusBadge
+                          textProps={{ css: styles.statusBadge }}
+                          status={stepExecution.status}
+                        />
+                      }
+                      titleSize="xxs"
+                      textAlign="left"
+                      isLoading={isLoading}
+                      description="Status"
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiPanel hasBorder={true} paddingSize="s">
+                    <EuiStat
+                      css={styles.stat}
+                      title={formatDuration(stepExecution.executionTimeMs ?? 0)}
+                      titleSize="xxs"
+                      textAlign="left"
+                      isLoading={isLoading || stepExecution.executionTimeMs === undefined}
+                      description="Execution time"
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </EuiText>
           <EuiSpacer size="m" />
@@ -233,8 +262,16 @@ const componentStyles = {
     css({
       display: 'flex',
       alignItems: 'center',
-      gap: euiTheme.size.s,
+      gap: euiTheme.size.xs,
     }),
+  stat: css`
+    & .euiStat__title {
+      margin-block-end: 0;
+    }
+  `,
+  statusBadge: css`
+    font-weight: 600;
+  `,
   tabs: css({
     marginBottom: -13,
   }),

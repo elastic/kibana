@@ -12,6 +12,8 @@ import type {
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
+  ExecutionStatus,
+  ExecutionType,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -40,7 +42,7 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
-  stepId?: string;
+  stepExecutionId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -68,7 +70,7 @@ export interface WorkflowExecutionLogsDto {
 
 export interface GetStepExecutionParams {
   executionId: string;
-  stepId: string;
+  id: string;
 }
 
 export interface GetExecutionLogsParams {
@@ -85,7 +87,13 @@ export interface GetStepLogsParams {
   offset?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  stepId: string;
+  stepExecutionId: string;
+}
+
+export interface SearchWorkflowExecutionsParams {
+  workflowId: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
 }
 
 export class WorkflowsManagementApi {
@@ -200,15 +208,10 @@ export class WorkflowsManagementApi {
   }
 
   public async getWorkflowExecutions(
-    workflowId: string,
+    params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions(
-      {
-        workflowId,
-      },
-      spaceId
-    );
+    return await this.workflowsService.searchWorkflowExecutions(params, spaceId);
   }
 
   public async getWorkflowExecution(
@@ -223,11 +226,11 @@ export class WorkflowsManagementApi {
     spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
     let result: LogSearchResult;
-    if (params.stepId) {
+    if (params.stepExecutionId) {
       result = await this.workflowsService.getStepLogs(
         {
           executionId: params.executionId,
-          stepId: params.stepId,
+          stepExecutionId: params.stepExecutionId,
           limit: params.limit,
           offset: params.offset,
           sortField: params.sortField,

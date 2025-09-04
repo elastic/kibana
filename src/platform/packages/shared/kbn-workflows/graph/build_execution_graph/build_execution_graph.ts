@@ -42,6 +42,7 @@ import type {
   ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
+  UnionExecutionGraphNode,
 } from '../../types/execution';
 
 /**
@@ -529,8 +530,10 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
   return currentStep;
 }
 
-export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
-  const graph = new graphlib.Graph({ directed: true });
+export function convertToWorkflowGraph(
+  workflowSchema: WorkflowYaml
+): graphlib.Graph<UnionExecutionGraphNode> {
+  const graph = new graphlib.Graph<UnionExecutionGraphNode>({ directed: true });
   let previousNode: any | null = null;
 
   workflowSchema.steps.forEach((currentStep, index) => {

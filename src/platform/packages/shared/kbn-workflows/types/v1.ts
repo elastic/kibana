@@ -24,6 +24,15 @@ export enum ExecutionStatus {
   CANCELLED = 'cancelled',
   SKIPPED = 'skipped',
 }
+export type ExecutionStatusUnion = `${ExecutionStatus}`;
+export const ExecutionStatusValues = Object.values(ExecutionStatus);
+
+export enum ExecutionType {
+  TEST = 'test',
+  PRODUCTION = 'production',
+}
+export type ExecutionTypeUnion = `${ExecutionType}`;
+export const ExecutionTypeValues = Object.values(ExecutionType);
 
 export interface EsWorkflowExecution {
   spaceId: string;
@@ -71,11 +80,14 @@ export interface EsWorkflowStepExecution {
   executionTimeMs?: number;
   topologicalIndex: number;
   executionIndex: number;
+  parentId?: string | null;
   error?: string | null;
   output?: Record<string, any> | null;
   input?: Record<string, any> | null;
   state?: Record<string, any>;
 }
+
+export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
 
 export interface WorkflowExecutionHistoryModel {
   id: string;
@@ -94,6 +106,22 @@ export interface WorkflowExecutionLogModel {
   level: string;
 }
 
+/**
+ * Interface for representing a step in a nested tree structure
+ */
+export interface StepListTreeItem {
+  stepId: string;
+  stepType: string;
+  executionIndex: number;
+  children: StepListTreeItem[];
+}
+
+export interface StepExecutionTreeItem extends StepListTreeItem {
+  status: ExecutionStatus;
+  stepExecutionId: string | null;
+  children: StepExecutionTreeItem[];
+}
+
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
@@ -102,7 +130,9 @@ export interface WorkflowExecutionDto {
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
+  workflowDefinition: WorkflowYaml;
   stepExecutions: EsWorkflowStepExecution[];
+  stepExecutionsTree: StepExecutionTreeItem[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;

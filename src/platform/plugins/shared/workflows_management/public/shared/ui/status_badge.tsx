@@ -16,6 +16,8 @@ import {
   EuiLoadingSpinner,
   EuiText,
   useEuiTheme,
+  type EuiFlexGroupProps,
+  type EuiTextProps,
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -61,7 +63,7 @@ const getExecutionStatusColorsMap = (
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
     },
     [ExecutionStatus.SKIPPED]: {
-      color: euiTheme.colors.textSubdued,
+      color: euiTheme.colors.textDisabled,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
   };
@@ -99,7 +101,11 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
   );
 };
 
-export function StatusBadge({ status }: { status: ExecutionStatus | undefined }) {
+export function StatusBadge({
+  status,
+  textProps,
+  ...props
+}: { status: ExecutionStatus | undefined; textProps?: EuiTextProps } & EuiFlexGroupProps) {
   const { euiTheme } = useEuiTheme();
   if (!status) {
     return <EuiBadge color="subdued">-</EuiBadge>;
@@ -109,10 +115,12 @@ export function StatusBadge({ status }: { status: ExecutionStatus | undefined })
   const icon = getExecutionStatusIcon(euiTheme, status);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="xs" {...props}>
       <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-hideFor--s">
-        <EuiText size="s">{statusLabel}</EuiText>
+        <EuiText size="s" {...textProps}>
+          {statusLabel}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
