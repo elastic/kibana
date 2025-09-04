@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
-import { EsqlQuery, walk, esqlCommandRegistry, Builder } from '@kbn/esql-ast';
+import type {
+  ESQLAst,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLMessage,
+  ErrorTypes,
+} from '@kbn/esql-ast';
+import { EsqlQuery, walk, esqlCommandRegistry, Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
@@ -141,32 +147,36 @@ async function validateAst(
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
-  for (let i = 0; i < rootCommands.length; i++) {
-    // FIXME we need to expand FORK and EVAL like we do in getQueryForFields
-    // _before_ slicing off the later commands
-    const partialQuery = queryString.slice(0, rootCommands[i].location.max + 1);
 
-    const previousCommands = rootCommands.slice(0, i + 1);
-    const queryForFields = getQueryForFields(
-      partialQuery,
-      Builder.expression.query(previousCommands)
-    );
-
-    const { getColumnMap: getFieldsMap } = getColumnsByTypeHelper(queryForFields, callbacks);
-    const availableFields = await getFieldsMap();
+  /**
+   * Even though we are validating single commands, we work with subqueries.
+   *
+   * The reason is that building the list of columns available in each command requires
+   * the full command subsequence that precedes that command.
+   */
+  const subqueries = getSubqueriesToValidate(rootCommands);
+  for (const subquery of subqueries) {
+    const queryForFields = getQueryForFields(BasicPrettyPrinter.print(subquery), subquery);
+    const { getColumnMap } = getColumnsByTypeHelper(queryForFields, callbacks);
+    const availableColumns = await getColumnMap();
 
     const references: ReferenceMaps = {
       sources,
-      columns: availableFields,
+      columns: availableColumns,
       policies: availablePolicies,
       query: queryString,
       joinIndices: joinIndices?.indices || [],
     };
 
-    const commandMessages = validateCommand(rootCommands[i], references, rootCommands, {
-      ...callbacks,
-      hasMinimumLicenseRequired,
-    });
+    const commandMessages = validateCommand(
+      subquery.commands[subquery.commands.length - 1],
+      references,
+      rootCommands,
+      {
+        ...callbacks,
+        hasMinimumLicenseRequired,
+      }
+    );
     messages.push(...commandMessages);
   }
 
@@ -265,4 +275,83 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata
     }
   }
   return messages;
+}
+
+/**
+ * Returns a list of subqueries to validate
+ * @param rootCommands
+ *
+ * TODO - extract to another module?
+ */
+function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
+  const subsequences = [];
+  const expandedCommands = expandEvals(rootCommands);
+  for (let i = 0; i < expandedCommands.length; i++) {
+    const command = expandedCommands[i];
+
+    // every command within FORK's branches is its own subquery to be validated
+    if (command.name.toLowerCase() === 'fork') {
+      const branchSubqueries = getForkBranchSubqueries(command as ESQLCommand<'fork'>);
+      for (const subquery of branchSubqueries) {
+        subsequences.push([...expandedCommands.slice(0, i), ...subquery]);
+      }
+    }
+
+    subsequences.push(expandedCommands.slice(0, i + 1));
+  }
+
+  return subsequences.map((subsequence) => Builder.expression.query(subsequence));
+}
+
+/**
+ * Expands EVAL commands into separate commands for each expression.
+ *
+ * E.g. `EVAL 1 + 2, 3 + 4` becomes `EVAL 1 + 2 | EVAL 3 + 4`
+ *
+ * This is logically equivalent and makes validation and field existence detection much easier.
+ *
+ * @param commands The list of commands to expand.
+ * @returns The expanded list of commands.
+ */
+function expandEvals(commands: ESQLCommand[]): ESQLCommand[] {
+  const expanded: ESQLCommand[] = [];
+  for (const command of commands) {
+    if (command.name.toLowerCase() === 'eval') {
+      // treat each expression within EVAL as a separate EVAL command
+      for (const arg of command.args) {
+        expanded.push(
+          Builder.command({
+            name: 'eval',
+            args: [arg],
+            location: command.location,
+          })
+        );
+      }
+    } else {
+      expanded.push(command);
+    }
+  }
+  return expanded;
+}
+
+/**
+ * Expands a FORK command into queries for each command in each branch.
+ *
+ * E.g. FORK (EVAL 1 | LIMIT 10) (RENAME foo AS bar | DROP lolz)
+ *
+ * becomes [`EVAL 1`, `EVAL 1 | LIMIT 10`, `RENAME foo AS bar`, `RENAME foo AS bar | DROP lolz`]
+ *
+ * @param command a FORK command
+ * @returns an array of expanded subqueries
+ */
+function getForkBranchSubqueries(command: ESQLCommand<'fork'>): ESQLCommand[][] {
+  const expanded: ESQLCommand[][] = [];
+  const branches = command.args as ESQLAstQueryExpression[];
+  for (let j = 0; j < branches.length; j++) {
+    for (let k = 0; k < branches[j].commands.length; k++) {
+      const partialQuery = branches[j].commands.slice(0, k + 1);
+      expanded.push(partialQuery);
+    }
+  }
+  return expanded;
 }

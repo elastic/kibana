@@ -69,11 +69,13 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
   // fetch fields, hence return an empty string.
   return commands.length === 1 && ['row', 'show'].includes(commands[0].name)
     ? ''
-    : buildQueryUntilPreviousCommand(queryString, commands);
+    : buildQueryUntilPreviousCommand(root);
 }
 
-// TODO consider replacing this with a pretty printer-based solution
-function buildQueryUntilPreviousCommand(queryString: string, commands: ESQLCommand[]) {
-  const prevCommand = commands[Math.max(commands.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
+function buildQueryUntilPreviousCommand(root: ESQLAstQueryExpression) {
+  if (root.commands.length === 1) {
+    return BasicPrettyPrinter.print({ ...root.commands[0] });
+  } else {
+    return BasicPrettyPrinter.print({ ...root, commands: root.commands.slice(0, -1) });
+  }
 }
