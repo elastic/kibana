@@ -175,7 +175,7 @@ function improveTypeFieldDescriptions(schema: any): any {
     return obj;
   };
 
-  const processedSchema =  processSchema(schema);
+  const processedSchema = processSchema(schema);
   return processedSchema;
 }
 
