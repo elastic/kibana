@@ -35,7 +35,6 @@ export function generateIndexTemplate(name: string) {
     },
     data_stream: {
       hidden: false,
-      failure_store: false,
     },
     template: {
       settings: {
