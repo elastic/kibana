@@ -12,3 +12,5 @@ export interface PrivMonBulkUser {
   existingUserId?: string;
   sourceId: string;
 }
+
+export type MonitoringEntitySourceType = 'entity_analytics_integration' | 'index';

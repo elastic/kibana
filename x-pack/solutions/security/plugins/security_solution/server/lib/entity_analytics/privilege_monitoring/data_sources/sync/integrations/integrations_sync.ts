@@ -26,6 +26,32 @@ export const createIntegrationsSyncService = (dataClient: PrivilegeMonitoringDat
       soClient,
       namespace: deps.namespace,
     });
+
+    const integrationSources = await monitoringIndexSourceClient.findBySourceType(
+      'entity_analytics_integration'
+    );
+
+    if (integrationSources.length === 0) {
+      dataClient.log('debug', 'No Integration Sources Found, skipping sync');
+    }
+
+    for (const source of integrationSources) {
+      if (!source.indexPattern) {
+        dataClient.log(
+          'debug',
+          `Integration source ${source.name} is missing an index pattern, skipping`
+        );
+        try {
+          // call update detection service
+          // is here where you want to check for deletion detection?
+        } catch (error) {
+          dataClient.log(
+            'error',
+            `Failed to delete integration source ${source.name}: ${error.message}`
+          );
+        }
+      }
+    }
   };
 
   return { integrationsSync };

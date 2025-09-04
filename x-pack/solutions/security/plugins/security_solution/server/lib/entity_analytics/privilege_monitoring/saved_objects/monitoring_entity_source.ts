@@ -11,13 +11,12 @@ import type {
   MonitoringEntitySource,
 } from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
+import type { MonitoringEntitySourceType } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
 }
-
-export type MonitoringEntitySourceType = 'entity_analytics_integration' | 'index';
 
 type UpsertWithId = CreateMonitoringEntitySource & { id: string };
 type UpsertInput = CreateMonitoringEntitySource | UpsertWithId;
