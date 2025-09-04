@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates APM data with a defined spike in latency and failures for testing ML anomaly detection.
+ */
+
 import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client';
 import { range as _range } from 'lodash';
