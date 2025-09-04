@@ -12,7 +12,6 @@ import type {
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { CreateDashboardsInput } from '../../../../../common/siem_migrations/dashboards/types';
 import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
@@ -20,23 +19,22 @@ import {
   type DashboardMigrationDashboard,
   type DashboardMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
 const BULK_MAX_SIZE = 500 as const;
 
-interface SearchFilters {
-  ids?: string[];
-  installable?: boolean;
-}
-
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataBaseClient {
   /** Indexes an array of dashboards to be processed as a part of single migration */
-  async create(migrationId: string, dashboardsInput: CreateDashboardsInput[]): Promise<void> {
+  async create(
+    migrationId: string,
+    dashboardsInput: CreateMigrationItemInput<DashboardMigrationDashboard>[]
+  ): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let originalDashboardsMaxBatch: CreateDashboardsInput[];
+    let originalDashboardsMaxBatch: CreateMigrationItemInput<DashboardMigrationDashboard>[];
     const createdAt = new Date().toISOString();
     const dashboardsToBeAdded = structuredClone(dashboardsInput);
     while ((originalDashboardsMaxBatch = dashboardsToBeAdded.splice(0, BULK_MAX_SIZE)).length) {
@@ -64,31 +62,10 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
     }
   }
 
-  /** Returns functions to iterate over all the search results in batches */
-  async searchBatches(migrationId: string, filters: SearchFilters = {}) {
-    const index = await this.getIndexName();
-    const query: QueryDslQueryContainer = {
-      bool: {
-        filter: [
-          { term: { migration_id: migrationId } },
-          ...(filters.ids ? [{ terms: { _id: filters.ids } }] : []),
-          ...(filters.installable ? [{ term: { status: SiemMigrationStatus.COMPLETED } }] : []),
-        ],
-      },
-    };
-
-    const search = {
-      index,
-      query,
-      sort: [{ '@timestamp': 'asc' }],
-      size: 100,
-    };
-
-    return this.getSearchBatches<DashboardMigrationDashboard>(search);
-  }
-
   /** Updates dashboard migration documents */
-  async update(updates: Array<{ id: string; elastic_dashboard: { id: string } }>): Promise<void> {
+  async update(
+    updates: Array<UpdateMigrationItemInput<DashboardMigrationDashboard>>
+  ): Promise<void> {
     if (updates.length === 0) {
       return;
     }
@@ -144,7 +121,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
 
     return {
       id: migrationId,
-      dashboards: {
+      items: {
         total: this.getTotalHits(result),
         ...this.statusAggCounts(aggs.status as AggregationsStringTermsAggregate),
       },

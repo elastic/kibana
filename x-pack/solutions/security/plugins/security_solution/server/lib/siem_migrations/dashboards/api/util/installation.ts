@@ -13,10 +13,10 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { CONTENT_ID, LATEST_VERSION } from '@kbn/dashboard-plugin/common/content_management';
+import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
-import type { StoredDashboardMigration } from '../../types';
 
 const MAX_DASHBOARDS_TO_CREATE_IN_PARALLEL = 10;
 
@@ -58,9 +58,8 @@ interface InstallTranslatedProps {
 export const installTranslated = async ({
   migrationId,
   ids,
-  securitySolutionContext,
   contentManagement,
-  savedObjectsClient,
+  securitySolutionContext,
   request,
   context,
 }: InstallTranslatedProps): Promise<number> => {
@@ -70,24 +69,21 @@ export const installTranslated = async ({
   const installationErrors: Error[] = [];
 
   // Get installable dashboard migrations
-  const dashboardBatches = await dashboardMigrationsClient.data.dashboards.searchBatches(
-    migrationId,
-    { ids, installable: true }
-  );
+  const dashboardBatches = dashboardMigrationsClient.data.items.searchBatches(migrationId, {
+    filters: { ids, installable: true },
+  });
 
   let dashboardsToInstall = await dashboardBatches.next();
   while (dashboardsToInstall.length) {
     const { dashboardsToUpdate, errors } = await installDashboards(
       dashboardsToInstall,
-      securitySolutionContext,
       contentManagement,
-      savedObjectsClient,
       request,
       context
     );
     installedCount += dashboardsToUpdate.length;
     installationErrors.push(...errors);
-    await dashboardMigrationsClient.data.dashboards.update(dashboardsToUpdate);
+    await dashboardMigrationsClient.data.items.update(dashboardsToUpdate);
     dashboardsToInstall = await dashboardBatches.next();
   }
 
@@ -100,10 +96,8 @@ export const installTranslated = async ({
 };
 
 const installDashboards = async (
-  dashboardsToInstall: StoredDashboardMigration[],
-  securitySolutionContext: SecuritySolutionApiRequestHandlerContext,
+  dashboardsToInstall: DashboardMigrationDashboard[],
   contentManagement: ContentManagementServerSetup,
-  savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest,
   context: RequestHandlerContext
 ): Promise<{

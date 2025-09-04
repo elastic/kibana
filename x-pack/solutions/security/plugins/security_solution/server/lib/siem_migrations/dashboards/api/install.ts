@@ -10,16 +10,12 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { SIEM_DASHBOARD_MIGRATION_INSTALL_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
-import { installTranslated } from './utils/installation';
-import { authz } from '../../common/utils/authz';
-import { withLicense } from '../../common/utils/with_license';
-import { withExistingDashboardMigration } from './utils/use_existing_dashboard_migration';
-
-// Define the request/response types manually since we can't regenerate them
-const InstallMigrationDashboardsRequestParams = z.object({
-  migration_id: z.string(),
-});
+import { InstallMigrationDashboardsRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
+import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { installTranslated } from './util/installation';
 
 const InstallMigrationDashboardsRequestBody = z.object({
   ids: z.array(z.string()),
