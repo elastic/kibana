@@ -7,6 +7,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
@@ -41,25 +42,31 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   await otelKubernetesFlowPage.copyInstallStackSnippetToClipboard();
   const installStackSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
-  /**
-   * Getting the snippets and replacing placeholder
-   * with the values used by Ensemble
-   */
-  await otelKubernetesFlowPage.switchInstrumentationInstructions('java');
-  const annotateAllResourceSnippet = (
-    await otelKubernetesFlowPage.getAnnotateAllResourceSnippet()
-  )?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
-  const restartDeploymentSnippet = (await otelKubernetesFlowPage.getRestartDeploymentSnippet())
-    ?.split('\n')[0]
-    ?.replace('myapp', INSTRUMENTED_APP_NAME)
-    ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
-  /**
-   * Adding timeout so Ensemble waits for the
-   * pods to be created before instrumenting the app
-   */
-  const sleepSnippet = `sleep 120`;
+  let codeSnippet: string;
+  
+  if (!isLogsEssentialsMode) {
+    /**
+     * Getting the snippets and replacing placeholder
+     * with the values used by Ensemble
+     */
+    await otelKubernetesFlowPage.switchInstrumentationInstructions('java');
+    const annotateAllResourceSnippet = (
+      await otelKubernetesFlowPage.getAnnotateAllResourceSnippet()
+    )?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
+    const restartDeploymentSnippet = (await otelKubernetesFlowPage.getRestartDeploymentSnippet())
+      ?.split('\n')[0]
+      ?.replace('myapp', INSTRUMENTED_APP_NAME)
+      ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
+    /**
+     * Adding timeout so Ensemble waits for the
+     * pods to be created before instrumenting the app
+     */
+    const sleepSnippet = `sleep 120`;
 
-  const codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
+    codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
+  } else {
+    codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}`;
+  }
 
   /**
    * Ensemble story watches for the code snippet file
@@ -76,7 +83,6 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   await page.waitForTimeout(5 * 60000);
 
   if (!isLogsEssentialsMode) {
-    // Skip metrics and APM validation in logs essentials tier
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
     );
@@ -92,5 +98,10 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
 
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
+  } else {
+    await page.waitForTimeout(5000); // Give the UI time to render
+    
+    const logsExploreButton = page.getByText('Explore logs');
+    await expect(logsExploreButton).toBeVisible({ timeout: 10000 });
   }
 });

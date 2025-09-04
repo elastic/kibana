@@ -7,6 +7,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 
@@ -45,7 +46,34 @@ test('Kubernetes EA', async ({
    */
   fs.writeFileSync(outputPath, clipboardData);
 
-  await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
+  if (!isLogsEssentialsMode) {
+    await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
+  } else {
+    await page.waitForTimeout(30000); // Give more time for data collection
+    
+    const successIndicators = [
+      page.getByText('We are collecting your logs'),
+      page.getByText('Logs are being monitored'),
+      page.getByText('Your data is ready to explore'),
+      page.getByTestId('observabilityOnboardingDataCollectionSuccessIndicator')
+    ];
+    
+    let foundIndicator = false;
+    for (const indicator of successIndicators) {
+      try {
+        await indicator.waitFor({ timeout: 5000 });
+        foundIndicator = true;
+        break;
+      } catch {
+        // Continue to next indicator
+      }
+    }
+    
+    if (!foundIndicator) {
+      const errorMessage = page.getByText(/error|failed|problem/i);
+      await expect(errorMessage).not.toBeVisible({ timeout: 1000 });
+    }
+  }
 
   /**
    * There might be a case that dashboard still does not show

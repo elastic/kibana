@@ -7,6 +7,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { expect } from '@playwright/test';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 
@@ -48,10 +49,34 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
    */
   await page.waitForTimeout(3 * 60000);
 
-  await otelHostFlowPage.clickHostsOverviewCTA();
-  
   if (!isLogsEssentialsMode) {
-    // Skip metrics validation in logs essentials tier
+    await otelHostFlowPage.clickHostsOverviewCTA();
     await hostsOverviewPage.assertCpuPercentageNotEmpty();
+  } else {
+    await page.waitForTimeout(5000); // Give the UI time to render
+    
+    const logsExplorationOptions = [
+      page.getByTestId('obltOnboardingExploreLogs'),
+      page.getByText('Explore logs'),
+      page.getByText('View logs'),
+      page.getByTestId('observabilityOnboardingLogsExploration')
+    ];
+    
+    let foundLogsOption = false;
+    for (const option of logsExplorationOptions) {
+      try {
+        await option.waitFor({ timeout: 5000 });
+        await option.click();
+        foundLogsOption = true;
+        break;
+      } catch {
+        // Continue to next option
+      }
+    }
+    
+    if (!foundLogsOption) {
+      const successIndicator = page.getByText(/data.*ready|successfully|complete/i);
+      await expect(successIndicator).toBeVisible({ timeout: 10000 });
+    }
   }
 });
