@@ -78,9 +78,13 @@ export const AgentsList: React.FC = () => {
       render: (name: string, agent: AgentDefinition) => (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
-              {name}
-            </EuiLink>
+            {agent.id === oneChatDefaultAgentId ? (
+              <EuiText size="s">{name}</EuiText>
+            ) : (
+              <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
+                {name}
+              </EuiLink>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{agent.description}</EuiText>
@@ -134,6 +138,8 @@ export const AgentsList: React.FC = () => {
           showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
+          // Don't display clone action for default agent
+          available: (agent) => agent.id !== oneChatDefaultAgentId,
         },
         {
           // Have to use a custom action to display the danger color
