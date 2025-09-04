@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiLink } from '@elastic/eui';
 
+import { useMlManagementHref } from '@kbn/ml-locator/use_ml_management_href';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlManagementHref } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const StyledJobEuiLInk = styled(EuiLink)`

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
+import type { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-common-constants/states';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import type { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
 import type { Environment } from '../../../common/environment_rt';

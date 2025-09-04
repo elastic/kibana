@@ -753,6 +753,7 @@
     "@kbn/ml-local-storage": "link:x-pack/platform/packages/private/ml/local_storage",
     "@kbn/ml-locator": "link:x-pack/platform/packages/shared/ml/locator",
     "@kbn/ml-nested-property": "link:x-pack/platform/packages/private/ml/nested_property",
+    "@kbn/ml-node-checks": "link:x-pack/platform/packages/shared/ml/node_checks",
     "@kbn/ml-number-utils": "link:x-pack/platform/packages/private/ml/number_utils",
     "@kbn/ml-parse-interval": "link:x-pack/platform/packages/private/ml/parse_interval",
     "@kbn/ml-plugin": "link:x-pack/platform/plugins/shared/ml",

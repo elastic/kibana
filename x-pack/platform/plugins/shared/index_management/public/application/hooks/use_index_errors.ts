@@ -35,7 +35,8 @@ export const useIndexErrors = (
       (field) => field.source.type === 'semantic_text'
     );
     const fetchErrors = async () => {
-      const trainedModelStats = await ml.mlApi?.trainedModels.getTrainedModelStats();
+      const mlApi = await ml.getMlApi();
+      const trainedModelStats = await mlApi.trainedModels.getTrainedModelStats();
 
       const semanticTextFieldsWithErrors = semanticTextFields
         .map((field) => {
@@ -91,6 +92,6 @@ export const useIndexErrors = (
     if (semanticTextFields.length) {
       fetchErrors();
     }
-  }, [data, canGetTrainedModels, endpoints, ml, ml?.mlApi?.trainedModels]);
+  }, [data, canGetTrainedModels, endpoints, ml]);
   return errors;
 };

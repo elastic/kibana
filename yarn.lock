@@ -7407,6 +7407,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-node-checks@link:x-pack/platform/packages/shared/ml/node_checks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-number-utils@link:x-pack/platform/packages/private/ml/number_utils":
   version "0.0.0"
   uid ""

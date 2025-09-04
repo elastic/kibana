@@ -1454,6 +1454,8 @@
       "@kbn/ml-locator/*": ["x-pack/platform/packages/shared/ml/locator/*"],
       "@kbn/ml-nested-property": ["x-pack/platform/packages/private/ml/nested_property"],
       "@kbn/ml-nested-property/*": ["x-pack/platform/packages/private/ml/nested_property/*"],
+      "@kbn/ml-node-checks": ["x-pack/platform/packages/shared/ml/node_checks"],
+      "@kbn/ml-node-checks/*": ["x-pack/platform/packages/shared/ml/node_checks/*"],
       "@kbn/ml-number-utils": ["x-pack/platform/packages/private/ml/number_utils"],
       "@kbn/ml-number-utils/*": ["x-pack/platform/packages/private/ml/number_utils/*"],
       "@kbn/ml-parse-interval": ["x-pack/platform/packages/private/ml/parse_interval"],

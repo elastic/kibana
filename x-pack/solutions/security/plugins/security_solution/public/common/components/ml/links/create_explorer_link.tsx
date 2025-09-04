@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
-import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { useMlHref } from '@kbn/ml-locator/use_ml_href';
 import type { Anomaly } from '../types';
 import { useKibana } from '../../../lib/kibana';
 
@@ -26,14 +25,13 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
   linkName,
 }) => {
   const {
-    services: { share },
+    services: { ml, http },
   } = useKibana();
 
-  const explorerUrl = useMemo(() => {
-    const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
-    if (!mlLocator) return null;
-
-    const locatorParams: MlLocatorParams = {
+  const explorerUrl = useMlHref(
+    ml,
+    http.basePath.get(),
+    {
       page: 'explorer',
       pageState: {
         jobIds: [score.jobId],
@@ -47,10 +45,9 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
           value: 0,
         },
       },
-    };
-
-    return mlLocator.getRedirectUrl(locatorParams);
-  }, [share.url.locators, score.jobId, startDate, endDate]);
+    },
+    [score.jobId]
+  );
 
   if (!explorerUrl) return null;
 

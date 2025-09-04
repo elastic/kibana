@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
+import { MlNodeAvailableWarningShared } from '@kbn/ml-node-checks/node_available_warning';
 import { i18n } from '@kbn/i18n';
 import dashboardEnableImg from '../../../../images/entity_store_dashboard.png';
 

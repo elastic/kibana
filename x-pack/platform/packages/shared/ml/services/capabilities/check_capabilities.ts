@@ -17,7 +17,7 @@ import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { getDefaultCapabilities, type MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { getDefaultMlCapabilities, type MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { hasLicenseExpired } from '@kbn/ml-license';
 
 import type { MlGlobalServices } from '../get_services';
@@ -25,7 +25,7 @@ import type { MlApi } from '../ml_api_service';
 
 import { getCapabilities } from './get_capabilities';
 
-let _capabilities: MlCapabilities = getDefaultCapabilities();
+let _capabilities: MlCapabilities = getDefaultMlCapabilities();
 
 const CAPABILITIES_REFRESH_INTERVAL = 5 * 60 * 1000; // 5min;
 

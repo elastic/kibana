@@ -9,7 +9,7 @@ import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import {
   adminMlCapabilities,
   userMlCapabilities,
-  getDefaultCapabilities,
+  getDefaultMlCapabilities,
 } from '@kbn/ml-common-types/capabilities';
 
 export function getAdminCapabilities() {
@@ -26,5 +26,5 @@ export function getUserCapabilities() {
     caps[k] = true;
   });
 
-  return { ...getDefaultCapabilities(), ...caps } as MlCapabilities;
+  return { ...getDefaultMlCapabilities(), ...caps } as MlCapabilities;
 }

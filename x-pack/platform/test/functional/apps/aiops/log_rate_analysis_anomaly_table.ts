@@ -10,7 +10,8 @@ import expect from '@kbn/expect';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
-import type { Datafeed, Job } from '@kbn/ml-plugin/server/shared';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 
 import { isDefaultSearchQuery } from '@kbn/aiops-plugin/public/application/url_state/common';
 

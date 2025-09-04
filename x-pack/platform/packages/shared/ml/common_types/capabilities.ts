@@ -108,7 +108,7 @@ export const basicLicenseMlCapabilities: MlCapabilitiesKey[] = [
   'canGetMlInfo',
 ];
 
-export function getDefaultCapabilities(): MlCapabilities {
+export function getDefaultMlCapabilities(): MlCapabilities {
   return {
     ...featureMlCapabilities,
     ...userMlCapabilities,
