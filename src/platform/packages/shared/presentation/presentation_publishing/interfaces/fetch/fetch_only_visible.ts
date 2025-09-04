@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject, skip, type Observable } from 'rxjs';
-import { combineLatestWith, map, of } from 'rxjs';
+import { combineLatestWith, map } from 'rxjs';
 import type { PublishesPauseFetch } from '../..';
 
 export type FetchSetting = 'onlyVisible' | 'always';
