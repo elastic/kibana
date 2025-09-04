@@ -18,5 +18,15 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/management-settings-types",
+    "@kbn/core-ui-settings-common",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-application-browser",
+    "@kbn/core-doc-links-browser",
+    "@kbn/management-settings-ids",
+    "@kbn/core",
+    "@kbn/i18n",
+  ]
 }
