@@ -6,18 +6,18 @@
  */
 
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
-import { getExceptionFilterFromExceptions } from '@kbn/securitysolution-list-api';
+import type { DataViewBase, EsQueryConfig, Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { getExceptionFilterFromExceptions } from '@kbn/securitysolution-list-api';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { KibanaServices } from '../../../../common/lib/kibana';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
+} from '../../../../common/api/detection_engine/model/rule_schema';
+import type { ESBoolQuery } from '../../../../common/typed_json';
 
 export const getEsQueryFilter = async (
   query: RuleQuery,
