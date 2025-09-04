@@ -120,6 +120,7 @@ export const toolToLangchain = ({
         return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e}`);
+        logger.debug(e.stack);
 
         const errorToolReturn: RunToolReturn = {
           results: [

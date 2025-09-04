@@ -127,6 +127,22 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           />
           <EuiSpacer size="s" />
           <UseField
+            path="config.enableNativeFunctionCalling"
+            component={ToggleField}
+            config={{
+              label: i18n.USE_NATIVE_FUNCTION_CALLING_LABEL,
+              helpText: i18n.USE_NATIVE_FUNCTION_CALLING_DESC,
+              defaultValue: false,
+            }}
+            componentProps={{
+              euiFieldProps: {
+                disabled: readOnly,
+                'data-test-subj': 'config.enableNativeFunctionCallingSwitch',
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
+          <UseField
             path="__internal__.hasPKI"
             component={ToggleField}
             config={{
