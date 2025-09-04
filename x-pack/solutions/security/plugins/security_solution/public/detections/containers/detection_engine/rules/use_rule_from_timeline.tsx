@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
+import { useSelectDataView } from '../../../../data_view_manager/hooks/use_select_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -47,6 +48,15 @@ export type SetRuleQuery = ({
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
+
+  const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
+  const timelineIdFromUrl = useMemo(getInitialUrlParamValue, [getInitialUrlParamValue]);
+  const getInitialUrlParamValueEql = useGetInitialUrlParamValue<string>(RULE_FROM_EQL_URL_PARAM);
+  const timelineIdFromUrlEql = useMemo(getInitialUrlParamValueEql, [getInitialUrlParamValueEql]);
+
+  const queryTimelineById = useQueryTimelineById();
+  const [urlStateInitialized, setUrlStateInitialized] = useState(false);
+
   const {
     browserFields: oldBrowserFields,
     dataViewId: oldDataViewId,
@@ -58,6 +68,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const selectDataView = useSelectDataView();
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -66,34 +77,8 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId;
 
   const isEql = useRef(false);
-
-  // selectedTimeline = timeline to set rule from
-  const [selectedTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
-
+  const [selectedTimeline, setSelectedTimeline] = useState<TimelineModel | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const onOpenTimeline = useCallback(
-    (timeline: TimelineModel) => {
-      // will already be true if timeline set from url
-      setLoading(true);
-      setRuleFromTimeline(timeline);
-
-      if (timeline.dataViewId !== dataViewId && !isEmpty(timeline.indexNames)) {
-        // let sourcerer manage the selected browser fields by setting timeline scope to the selected timeline data view
-        // sourcerer handles the logic of if the fields have been fetched or need to be fetched
-        dispatch(
-          sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.timeline,
-            selectedDataViewId: timeline.dataViewId,
-            selectedPatterns: timeline.indexNames,
-          })
-        );
-      }
-    },
-    [dataViewId, dispatch]
-  );
-
-  // start browser field management
   const [originalDataView] = useState({ dataViewId, selectedPatterns });
 
   const selectedDataViewBrowserFields = useMemo(
@@ -107,12 +92,47 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         : browserFields,
     [browserFields, dataViewId, selectedTimeline]
   );
-  // end browser field management
 
-  const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
-  const timelineIdFromUrl = useMemo(getInitialUrlParamValue, [getInitialUrlParamValue]);
-  const getInitialUrlParamValueEql = useGetInitialUrlParamValue<string>(RULE_FROM_EQL_URL_PARAM);
-  const timelineIdFromUrlEql = useMemo(getInitialUrlParamValueEql, [getInitialUrlParamValueEql]);
+  const onOpenTimeline = useCallback(
+    (timeline: TimelineModel) => {
+      // will already be true if timeline set from url
+      setLoading(true);
+      setSelectedTimeline(timeline);
+
+      if (timeline.dataViewId !== dataViewId && !isEmpty(timeline.indexNames)) {
+        // let sourcerer manage the selected browser fields by setting timeline scope to the selected timeline data view
+        // sourcerer handles the logic of if the fields have been fetched or need to be fetched
+        dispatch(
+          sourcererActions.setSelectedDataView({
+            id: SourcererScopeName.timeline,
+            selectedDataViewId: timeline.dataViewId,
+            selectedPatterns: timeline.indexNames,
+          })
+        );
+
+        if (newDataViewPickerEnabled) {
+          selectDataView({
+            scope: SourcererScopeName.timeline,
+            id: timeline.dataViewId,
+            fallbackPatterns: timeline.indexNames,
+          });
+        }
+      }
+    },
+    [dataViewId, dispatch, newDataViewPickerEnabled, selectDataView]
+  );
+
+  const getTimelineById = useCallback(
+    (timelineId: string) => {
+      if (selectedTimeline == null || timelineId !== selectedTimeline.id) {
+        queryTimelineById({
+          timelineId,
+          onOpenTimeline,
+        });
+      }
+    },
+    [onOpenTimeline, queryTimelineById, selectedTimeline]
+  );
 
   // start set rule
   const handleSetRuleFromTimeline = useCallback(() => {
@@ -184,13 +204,23 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
           selectedPatterns: originalDataView.selectedPatterns,
         })
       );
+
+      if (newDataViewPickerEnabled) {
+        selectDataView({
+          scope: SourcererScopeName.timeline,
+          id: originalDataView.dataViewId,
+          fallbackPatterns: originalDataView.selectedPatterns,
+        });
+      }
     }
   }, [
     addError,
     dataViewId,
     dispatch,
+    newDataViewPickerEnabled,
     originalDataView.dataViewId,
     originalDataView.selectedPatterns,
+    selectDataView,
     selectedDataViewBrowserFields,
     selectedPatterns,
     selectedTimeline,
@@ -204,22 +234,6 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     }
   }, [handleSetRuleFromTimeline, selectedDataViewBrowserFields]);
   // end set rule
-
-  const queryTimelineById = useQueryTimelineById();
-
-  const getTimelineById = useCallback(
-    (timelineId: string) => {
-      if (selectedTimeline == null || timelineId !== selectedTimeline.id) {
-        queryTimelineById({
-          timelineId,
-          onOpenTimeline,
-        });
-      }
-    },
-    [onOpenTimeline, queryTimelineById, selectedTimeline]
-  );
-
-  const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
   useEffect(() => {
     if (!urlStateInitialized) {
