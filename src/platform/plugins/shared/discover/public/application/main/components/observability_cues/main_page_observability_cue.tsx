@@ -292,7 +292,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="primary"
