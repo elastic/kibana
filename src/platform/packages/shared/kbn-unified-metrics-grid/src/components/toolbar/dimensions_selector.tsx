@@ -151,9 +151,6 @@ export const DimensionsSelector = ({
       options={options}
       singleSelection={false}
       onChange={handleChange}
-      popoverTitle={i18n.translate('metricsExperience.dimensionsSelector.label', {
-        defaultMessage: 'Select dimensions',
-      })}
       popoverContentBelowSearch={popoverContentBelowSearch}
     />
   );
