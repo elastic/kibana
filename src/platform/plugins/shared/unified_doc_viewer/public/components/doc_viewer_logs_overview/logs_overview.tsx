@@ -15,7 +15,7 @@ import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import type { LogDocument } from '@kbn/discover-utils/src';
+import type { LogDocument, TraceIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import { LogsOverviewHeader } from './logs_overview_header';
@@ -29,11 +29,14 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
+import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
+import { DataSourcesProvider } from '../observability/traces/hooks/use_data_sources';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
   renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+  indexes: TraceIndexes;
 };
 
 export interface LogsOverviewApi {
@@ -53,6 +56,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderAIAssistant,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
+      indexes,
     },
     ref
   ) => {
@@ -84,46 +88,56 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     );
 
     return (
-      <FieldActionsProvider
-        columns={columns}
-        filter={filter}
-        onAddColumn={onAddColumn}
-        onRemoveColumn={onRemoveColumn}
-      >
-        <div
-          ref={setContainerRef}
-          css={
-            containerHeight
-              ? css`
-                  height: ${containerHeight}px;
-                  overflow: auto;
-                `
-              : undefined
-          }
+      <DataSourcesProvider indexes={indexes}>
+        <FieldActionsProvider
+          columns={columns}
+          filter={filter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
         >
-          <EuiSpacer size="m" />
-          <LogsOverviewHeader
-            formattedDoc={parsedDoc}
-            doc={hit}
-            renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-          />
-          <EuiHorizontalRule margin="xs" />
-          <LogsOverviewHighlights
-            formattedDoc={parsedDoc}
-            doc={hit}
-            renderFlyoutStreamField={renderFlyoutStreamField}
-          />
-          <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
-          {isStacktraceAvailable && (
-            <LogsOverviewStacktraceSection
-              ref={stackTraceSectionRef}
-              hit={hit}
-              dataView={dataView}
+          <div
+            ref={setContainerRef}
+            css={
+              containerHeight
+                ? css`
+                    height: ${containerHeight}px;
+                    overflow: auto;
+                  `
+                : undefined
+            }
+          >
+            <EuiSpacer size="m" />
+            <LogsOverviewHeader
+              formattedDoc={parsedDoc}
+              doc={hit}
+              renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
             />
-          )}
-          {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
-        </div>
-      </FieldActionsProvider>
+            <EuiHorizontalRule margin="xs" />
+            <LogsOverviewHighlights
+              formattedDoc={parsedDoc}
+              doc={hit}
+              renderFlyoutStreamField={renderFlyoutStreamField}
+            />
+            <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
+            {isStacktraceAvailable && (
+              <LogsOverviewStacktraceSection
+                ref={stackTraceSectionRef}
+                hit={hit}
+                dataView={dataView}
+              />
+            )}
+            {parsedDoc['trace.id'] ? (
+              <TraceWaterfall
+                traceId={parsedDoc['trace.id']}
+                docId={parsedDoc['transaction.id'] || parsedDoc['span.id']}
+                serviceName={parsedDoc['service.name']}
+                dataView={dataView}
+              />
+            ) : null}
+            {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
+          </div>
+        </FieldActionsProvider>
+      </DataSourcesProvider>
     );
   }
 );

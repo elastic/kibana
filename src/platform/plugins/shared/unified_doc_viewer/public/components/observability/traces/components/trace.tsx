@@ -64,6 +64,7 @@ export const Trace = ({
           rangeFrom,
           rangeTo,
           docId,
+          mode: 'summary',
         },
       }),
     }),
