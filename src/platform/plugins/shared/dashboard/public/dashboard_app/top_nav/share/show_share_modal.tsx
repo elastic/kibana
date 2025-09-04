@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService, coreServices } from '../../../services/kibana_services';

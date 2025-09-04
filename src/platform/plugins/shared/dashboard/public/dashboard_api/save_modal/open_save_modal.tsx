@@ -13,7 +13,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import type { DashboardSaveOptions } from './types';
 

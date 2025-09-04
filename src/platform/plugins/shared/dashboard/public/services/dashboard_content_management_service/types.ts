@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import type { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import type {
