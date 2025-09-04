@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a messy variety of logs from different sources like Nginx, Java, and Kubernetes.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { generateShortId, log } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
