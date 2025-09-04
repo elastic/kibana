@@ -27,7 +27,7 @@ export function fieldWildcardMatcher(globs: string[] = [], metaFields: unknown[]
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e.toString());
-      return [];
+      return globs;
     }
   };
 }
