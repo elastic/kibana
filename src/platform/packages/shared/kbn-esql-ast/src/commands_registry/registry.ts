@@ -8,7 +8,12 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLMessage, ESQLCommand, ESQLAst } from '../types';
-import type { ISuggestionItem, ICommandCallbacks, ESQLColumnData } from './types';
+import type {
+  ISuggestionItem,
+  ICommandCallbacks,
+  ESQLColumnData,
+  ESQLFieldWithMetadata,
+} from './types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -60,7 +65,8 @@ export interface ICommandMethods<TContext = any> {
   columnsAfter?: (
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
-    query: string
+    query: string,
+    newFields: IAdditionalFields
   ) => ESQLColumnData[];
 }
 
@@ -112,6 +118,11 @@ export interface ICommandRegistry {
    * @returns The ICommand object if found, otherwise undefined.
    */
   getCommandByName(commandName: string): ICommand | undefined;
+}
+
+export interface IAdditionalFields {
+  fromJoin?: ESQLFieldWithMetadata[];
+  fromEnrich?: ESQLFieldWithMetadata[];
 }
 
 /**

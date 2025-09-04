@@ -11,6 +11,7 @@ import { parse } from '@kbn/esql-ast';
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
+  ESQLPolicy,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from './types';
 import { getFieldsFromES, getCurrentQueryAvailableColumns } from './helpers';
@@ -47,7 +48,8 @@ function getValueInsensitive(keyToCheck: string) {
  */
 async function cacheColumnsForQuery(
   queryText: string,
-  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  policies: Map<string, ESQLPolicy>
 ) {
   const existsInCache = checkCacheInsensitive(queryText);
   if (existsInCache) {
@@ -63,7 +65,8 @@ async function cacheColumnsForQuery(
       queryText,
       root.commands,
       fieldsAvailableAfterPreviousCommand,
-      fetchFields
+      fetchFields,
+      policies
     );
     cache.set(queryText, availableFields);
   }
@@ -89,9 +92,12 @@ export function getColumnsByTypeHelper(queryText: string, resourceRetriever?: ES
     const [sourceCommand, ...partialQueries] = processPipes(queryText);
     getFields(sourceCommand);
 
+    const policies = (await resourceRetriever?.getPolicies?.()) ?? [];
+    const policyMap = new Map(policies.map((p) => [p.name, p]));
+
     // build fields cache for every partial query
     for (const query of partialQueries) {
-      await cacheColumnsForQuery(query, getFields);
+      await cacheColumnsForQuery(query, getFields, policyMap);
     }
   };
 

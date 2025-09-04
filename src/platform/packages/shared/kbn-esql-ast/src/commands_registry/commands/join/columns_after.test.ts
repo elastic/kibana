@@ -11,12 +11,12 @@ import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('JOIN columnsAfter', () => {
-  it('returns previousColumns when joinColumns is undefined', () => {
+  it('returns previousColumns when no join columns', () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
     ];
-    const result = columnsAfter({} as any, previousColumns, 'JOIN');
+    const result = columnsAfter({} as any, previousColumns, '', { fromJoin: undefined });
     expect(result).toEqual(previousColumns);
   });
 
@@ -29,7 +29,7 @@ describe('JOIN columnsAfter', () => {
       { name: 'joinField1', type: 'keyword', userDefined: false },
       { name: 'joinField2', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter({} as any, previousColumns, 'JOIN', joinColumns);
+    const result = columnsAfter({} as any, previousColumns, '', { fromJoin: joinColumns });
     expect(result).toEqual([...joinColumns, ...previousColumns]);
   });
 
@@ -42,7 +42,7 @@ describe('JOIN columnsAfter', () => {
       { name: 'fieldA', type: 'text', userDefined: false },
       { name: 'fieldC', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter({} as any, previousColumns, 'JOIN', joinColumns);
+    const result = columnsAfter({} as any, previousColumns, '', { fromJoin: joinColumns });
     expect(result).toEqual([
       { name: 'fieldA', type: 'text', userDefined: false },
       { name: 'fieldC', type: 'double', userDefined: false },

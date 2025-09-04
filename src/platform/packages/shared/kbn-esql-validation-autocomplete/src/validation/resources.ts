@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isSource, type ESQLCommand } from '@kbn/esql-ast';
-import type { ESQLFieldWithMetadata, ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
-import { createMapFromList, nonNullable } from '../shared/helpers';
-import {
-  getColumnsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from '../shared/resources_helpers';
+import { type ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import { createMapFromList } from '../shared/helpers';
+import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
-import { buildQueryForFieldsInPolicies, getEnrichCommands } from './helpers';
+import { getEnrichCommands } from './helpers';
 
 export async function retrievePolicies(
   commands: ESQLCommand[],
@@ -43,29 +39,4 @@ export async function retrieveSources(
   }
   const sources = await getSourcesHelper(callbacks)();
   return new Set(sources.map(({ name }) => name));
-}
-
-export async function retrievePoliciesFields(
-  commands: ESQLCommand[],
-  policies: Map<string, ESQLPolicy>,
-  callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLFieldWithMetadata>> {
-  if (!callbacks) {
-    return new Map();
-  }
-  const enrichCommands = getEnrichCommands(commands);
-  if (!enrichCommands.length) {
-    return new Map();
-  }
-  const policyNames = enrichCommands
-    .map(({ args }) => (isSource(args[0]) ? args[0].name : undefined))
-    .filter(nonNullable);
-  if (!policyNames.every((name) => policies.has(name))) {
-    return new Map();
-  }
-
-  const customQuery = buildQueryForFieldsInPolicies(
-    policyNames.map((name) => policies.get(name)) as ESQLPolicy[]
-  );
-  return await getColumnsByTypeHelper(customQuery, callbacks).getColumnMap();
 }

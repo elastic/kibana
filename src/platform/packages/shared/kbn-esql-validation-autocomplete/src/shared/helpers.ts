@@ -8,6 +8,7 @@
  */
 import {
   esqlCommandRegistry,
+  isSource,
   mutate,
   synth,
   type ESQLAstCommand,
@@ -16,9 +17,11 @@ import {
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
+  ESQLPolicy,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLAstQueryExpression, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 
+import type { IAdditionalFields } from '@kbn/esql-ast/src/commands_registry/registry';
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 import type { ESQLCallbacks } from './types';
 
@@ -106,35 +109,40 @@ export async function getCurrentQueryAvailableColumns(
   query: string,
   commands: ESQLAstCommand[],
   previousPipeFields: ESQLColumnData[],
-  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  policies: Map<string, ESQLPolicy>
 ) {
-  const cacheCopy = new Map<string, ESQLColumnData>();
-  previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
-  const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
+  const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
+  const extraFields: IAdditionalFields = {};
 
-  let joinFields;
-  // fetch fields for JOIN here
+  // Handle JOIN command: fetch fields from joined indices
   if (lastCommand.name === 'join') {
     const joinSummary = mutate.commands.join.summarize({
       type: 'query',
       commands,
     } as ESQLAstQueryExpression);
     const joinIndices = joinSummary.map(({ target: { index } }) => index);
-    if (joinIndices.length) {
+    if (joinIndices.length > 0) {
       const joinFieldQuery = synth.cmd`FROM ${joinIndices}`.toString();
-      joinFields = await fetchFields(joinFieldQuery);
+      extraFields.fromJoin = await fetchFields(joinFieldQuery);
     }
   }
 
-  if (commandDefinition?.methods.columnsAfter) {
-    return commandDefinition.methods.columnsAfter(
-      lastCommand,
-      previousPipeFields,
-      query,
-      joinFields
-    );
-  } else {
-    return previousPipeFields;
+  // Handle ENRICH command: fetch fields from enrich policy
+  if (lastCommand.name === 'enrich' && isSource(lastCommand.args[0])) {
+    const policyName = lastCommand.args[0].name;
+    const policy = policies.get(policyName);
+    if (policy) {
+      const fieldsQuery = `FROM ${policy.sourceIndices.join(
+        ', '
+      )} | KEEP ${policy.enrichFields.join(', ')}`;
+      extraFields.fromEnrich = await fetchFields(fieldsQuery);
+    }
   }
+
+  if (commandDef?.methods.columnsAfter) {
+    return commandDef.methods.columnsAfter(lastCommand, previousPipeFields, query, extraFields);
+  }
+  return previousPipeFields;
 }

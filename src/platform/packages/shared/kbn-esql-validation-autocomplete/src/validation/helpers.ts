@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ESQLAst, type ESQLCommand, type FunctionDefinition, Walker } from '@kbn/esql-ast';
-import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
-
-export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {
-  return `from ${policies
-    .flatMap(({ sourceIndices }) => sourceIndices)
-    .join(', ')} | keep ${policies.flatMap(({ enrichFields }) => enrichFields).join(', ')}`;
-}
+import { type ESQLCommand, type FunctionDefinition, Walker } from '@kbn/esql-ast';
 
 /**
  * Returns the maximum and minimum number of parameters allowed by a function

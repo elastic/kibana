@@ -23,11 +23,7 @@ import type {
 import type { LicenseType } from '@kbn/licensing-types';
 
 import type { ESQLCallbacks } from '../shared/types';
-import {
-  retrievePolicies,
-  // retrievePoliciesFields,
-  retrieveSources,
-} from './resources';
+import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getQueryForFields } from '../autocomplete/helper';
 import { getColumnsByTypeHelper } from '../shared/resources_helpers';
@@ -123,15 +119,6 @@ async function validateAst(
     // retrieve indices for join command
     callbacks?.getJoinIndices?.(),
   ]);
-
-  // if (availablePolicies.size) {
-  //   const fieldsFromPoliciesMap = await retrievePoliciesFields(
-  //     rootCommands,
-  //     availablePolicies,
-  //     callbacks
-  //   );
-  //   fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
-  // }
 
   const sourceFields = await getColumnsByTypeHelper(
     queryString.split('|')[0],
