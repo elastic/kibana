@@ -44,8 +44,8 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    describe('CIS_AWS pasting direct and secret access keys enables the save button', async () => {
-      it('CIS_AWS pasting direct and secret access keys enables the save button', async () => {
+    describe('CIS_AWS pasting inputs enables the save button', async () => {
+      it('when using the direct access keys', async () => {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
 
