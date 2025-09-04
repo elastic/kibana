@@ -41,6 +41,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
@@ -71,6 +72,7 @@ export const useTopNavLinks = ({
   hasShareIntegration: boolean;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
+  const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
   const currentDataView = useCurrentDataView();
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
@@ -142,6 +144,12 @@ export const useTopNavLinks = ({
                 ? createDataViewDataSource({ dataViewId: currentDataView.id })
                 : undefined,
             };
+            // Reset control group state to undefined when starting a new session
+            dispatch(
+              setControlGroupState({
+                controlGroupState: undefined,
+              })
+            );
             services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
           },
         });
@@ -168,6 +176,8 @@ export const useTopNavLinks = ({
       return items;
     }, [
       defaultMenu,
+      dispatch,
+      setControlGroupState,
       services,
       onOpenInspector,
       discoverParams,

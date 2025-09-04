@@ -164,6 +164,7 @@ export const getSearchEmbeddableFactory = ({
             savedObjectId: 'skip',
             timeRestore: 'skip',
             usesAdHocDataView: 'skip',
+            controlGroupJson: 'skip',
             visContext: 'skip',
             tabs: 'skip',
           };
