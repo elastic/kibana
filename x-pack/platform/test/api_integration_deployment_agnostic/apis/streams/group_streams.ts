@@ -320,6 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     },
                   },
                   dashboards: [],
+                  rules: [],
                   queries: [],
                 },
               },
