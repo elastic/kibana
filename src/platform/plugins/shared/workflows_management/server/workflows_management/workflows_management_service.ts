@@ -50,8 +50,6 @@ import type {
   GetWorkflowsParams,
 } from './workflows_management_api';
 
-const WORKFLOW_EXECUTION_STATUS_STATS_BUCKET = 50;
-
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
   private workflowStorage: WorkflowStorage | null = null;
@@ -60,7 +58,6 @@ export class WorkflowsService {
   private readonly workflowsExecutionIndex: string;
   private readonly stepsExecutionIndex: string;
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
-  private workflowExecutionLogsIndex: string;
   private security?: SecurityServiceStart;
 
   constructor(
@@ -74,7 +71,6 @@ export class WorkflowsService {
     this.logger = logger;
     this.stepsExecutionIndex = stepsExecutionIndex;
     this.workflowsExecutionIndex = workflowsExecutionIndex;
-    this.workflowExecutionLogsIndex = workflowExecutionLogsIndex;
     void this.initialize(esClientPromise, workflowExecutionLogsIndex, enableConsoleLogging);
   }
 
@@ -130,7 +126,7 @@ export class WorkflowsService {
       const response = await this.workflowStorage.getClient().search({
         query: {
           bool: {
-            must: [{ term: { _id: id } }, { term: { spaceId } }],
+            must: [{ ids: { values: [id] } }, { term: { spaceId } }],
           },
         },
         size: 1,
@@ -167,7 +163,7 @@ export class WorkflowsService {
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
-    const now = new Date().toISOString();
+    const now = new Date();
 
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
@@ -181,8 +177,8 @@ export class WorkflowsService {
       spaceId,
       valid: true,
       deleted_at: null,
-      created_at: now,
-      updated_at: now,
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
     };
 
     const id = this.generateWorkflowId();
@@ -219,7 +215,7 @@ export class WorkflowsService {
       const searchResponse = await this.workflowStorage.getClient().search({
         query: {
           bool: {
-            must: [{ term: { _id: id } }, { term: { spaceId } }],
+            must: [{ ids: { values: [id] } }, { term: { spaceId } }],
           },
         },
         size: 1,
@@ -236,12 +232,12 @@ export class WorkflowsService {
       }
 
       const authenticatedUser = getAuthenticatedUser(request, this.security);
-      const now = new Date().toISOString();
+      const now = new Date();
 
       const updatedData: Partial<WorkflowProperties> = {
         ...workflow,
         lastUpdatedBy: authenticatedUser,
-        updated_at: now,
+        updated_at: now.toISOString(),
       };
 
       // If yaml is being updated, validate and update definition
@@ -281,7 +277,7 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const now = new Date().toISOString();
+    const now = new Date();
 
     // Soft delete by setting deleted_at timestamp
     for (const id of ids) {
@@ -290,7 +286,7 @@ export class WorkflowsService {
         const searchResponse = await this.workflowStorage.getClient().search({
           query: {
             bool: {
-              must: [{ term: { _id: id } }, { term: { spaceId } }],
+              must: [{ ids: { values: [id] } }, { term: { spaceId } }],
             },
           },
           size: 1,
@@ -418,7 +414,6 @@ export class WorkflowsService {
         },
       },
       aggs: {
-        total_count: { value_count: { field: '_id' } },
         enabled_count: {
           filter: { term: { enabled: true } },
         },
@@ -578,7 +573,11 @@ export class WorkflowsService {
       esClient: this.esClient!,
       logger: this.logger,
       workflowExecutionIndex: this.workflowsExecutionIndex,
-      query: { term: { workflowId } },
+      query: {
+        bool: {
+          must: [{ term: { workflowId } }, { term: { spaceId } }],
+        },
+      },
     });
   }
 
@@ -596,16 +595,7 @@ export class WorkflowsService {
                 executionId,
               },
             },
-            {
-              bool: {
-                should: [
-                  { term: { spaceId } },
-                  // Backward compatibility for objects without spaceId
-                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
+            { term: { spaceId } },
           ],
         },
       },

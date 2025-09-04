@@ -51,6 +51,7 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface WorkflowProperties {
+  // TODO: we can remove this name, since we use the WorkflowYaml object to get the nam``e
   name: string;
   description?: string;
   enabled: boolean;
@@ -68,6 +69,7 @@ export interface WorkflowProperties {
 
 export type WorkflowStorageSettings = typeof storageSettings;
 
+// @ts-expect-error type mismatch for tags type
 export type WorkflowStorage = StorageIndexAdapter<WorkflowStorageSettings, WorkflowProperties>;
 
 export const createStorage = ({
@@ -77,6 +79,7 @@ export const createStorage = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): WorkflowStorage => {
+  // @ts-expect-error type mismatch for tags type
   return new StorageIndexAdapter<WorkflowStorageSettings, WorkflowProperties>(
     esClient,
     logger,

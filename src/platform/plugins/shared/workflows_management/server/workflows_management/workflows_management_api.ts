@@ -133,13 +133,7 @@ export class WorkflowsManagementApi {
     if (!originalWorkflow) {
       throw new Error(`Workflow with id ${id} not found`);
     }
-    return await this.workflowsService.updateWorkflow(
-      id,
-      workflow,
-      originalWorkflow,
-      spaceId,
-      request
-    );
+    return await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
   }
 
   public async deleteWorkflows(
@@ -203,12 +197,7 @@ export class WorkflowsManagementApi {
     workflowId: string,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions(
-      {
-        workflowId,
-      },
-      spaceId
-    );
+    return await this.workflowsService.getWorkflowExecutions(workflowId, spaceId);
   }
 
   public async getWorkflowExecution(
