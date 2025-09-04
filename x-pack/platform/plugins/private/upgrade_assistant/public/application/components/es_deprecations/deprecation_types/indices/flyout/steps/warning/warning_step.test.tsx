@@ -13,9 +13,9 @@ import SemVer from 'semver/classes/semver';
 import { idForWarning, WarningFlyoutStep } from './warning_step';
 import type {
   EnrichedDeprecationInfo,
-  IndexWarning,
   ReindexAction,
 } from '../../../../../../../../../common/types';
+import type { IndexWarning } from '@kbn/reindex-service-plugin/common';
 import type { ReindexState } from '../../../use_reindex';
 import { LoadingState } from '../../../../../../types';
 

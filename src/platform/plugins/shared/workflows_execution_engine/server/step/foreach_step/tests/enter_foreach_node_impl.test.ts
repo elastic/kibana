@@ -39,7 +39,6 @@ describe('EnterForeachNodeImpl', () => {
       id: 'testStep',
       type: 'enter-foreach',
       exitNodeId: 'exitNode',
-      itemNodeIds: ['foreachItemNode'],
       configuration: {
         foreach: JSON.stringify(['item1', 'item2', 'item3']),
       } as ForEachStep,
