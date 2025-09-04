@@ -46,18 +46,34 @@ export default function searchSolutionNavigation({
 
     it('renders expected side nav items', async () => {
       // Verify all expected top-level links exist
+      const isV2 = await solutionNavigation.sidenav.isV2();
+
+      // Items in both v1 & v2 navigation
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Stack Monitoring' });
+
+      if (isV2) {
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Graph' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Visualize library' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
+      } else {
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
+      }
     });
 
     it('has expected navigation', async () => {
+      const isV2 = await solutionNavigation.sidenav.isV2();
+
       const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
       // check side nav links
@@ -73,48 +89,96 @@ export default function searchSolutionNavigation({
         deepLinkId: AppDeepLinkId;
         breadcrumbs: string[];
         pageTestSubject: string;
-      }> = [
-        {
-          deepLinkId: 'discover',
-          breadcrumbs: ['Discover'],
-          pageTestSubject: 'kbnNoDataPage',
-        },
-        {
-          deepLinkId: 'dashboards',
-          breadcrumbs: ['Dashboards'],
-          pageTestSubject: 'kbnNoDataPage',
-        },
-        {
-          deepLinkId: 'elasticsearchIndexManagement',
-          breadcrumbs: ['Build', 'Index Management', 'Indices'],
-          pageTestSubject: 'elasticsearchIndexManagement',
-        },
-        {
-          deepLinkId: 'searchPlayground',
-          breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'playgroundsListPage',
-        },
-        {
-          deepLinkId: 'enterpriseSearchApplications:searchApplications',
-          breadcrumbs: ['Build', 'Search applications'],
-          pageTestSubject: 'searchApplicationsListPage',
-        },
-        {
-          deepLinkId: 'searchSynonyms:synonyms',
-          breadcrumbs: ['Relevance', 'Synonyms'],
-          pageTestSubject: 'searchSynonymsOverviewPage',
-        },
-        {
-          deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference endpoints'],
-          pageTestSubject: 'inferenceEndpointsPage',
-        },
-        {
-          deepLinkId: 'dev_tools',
-          breadcrumbs: ['Dev Tools'],
-          pageTestSubject: 'console',
-        },
-      ];
+      }> = isV2
+        ? [
+            {
+              deepLinkId: 'discover',
+              breadcrumbs: ['Discover'],
+              pageTestSubject: 'kbnNoDataPage',
+            },
+            {
+              deepLinkId: 'dashboards',
+              breadcrumbs: ['Dashboards'],
+              pageTestSubject: 'kbnNoDataPage',
+            },
+            {
+              deepLinkId: 'searchPlayground',
+              breadcrumbs: ['Build', 'Playground'],
+              pageTestSubject: 'playgroundsListPage',
+            },
+            {
+              deepLinkId: 'searchSynonyms:synonyms',
+              breadcrumbs: ['Relevance', 'Synonyms'],
+              pageTestSubject: 'searchSynonymsOverviewPage',
+            },
+            {
+              deepLinkId: 'searchQueryRules',
+              breadcrumbs: ['Relevance', 'Query rules'],
+              pageTestSubject: 'queryRulesBasePage',
+            },
+            {
+              deepLinkId: 'graph',
+              breadcrumbs: ['Graph'],
+              pageTestSubject: 'graphCreateGraphPromptButton',
+            },
+            {
+              deepLinkId: 'visualize',
+              breadcrumbs: ['Visualize library'],
+              pageTestSubject: 'kbnNoDataPage',
+            },
+            {
+              deepLinkId: 'dev_tools',
+              breadcrumbs: ['Developer Tools'],
+              pageTestSubject: 'console',
+            },
+          ]
+        : [
+            {
+              deepLinkId: 'discover',
+              breadcrumbs: ['Discover'],
+              pageTestSubject: 'kbnNoDataPage',
+            },
+            {
+              deepLinkId: 'dashboards',
+              breadcrumbs: ['Dashboards'],
+              pageTestSubject: 'kbnNoDataPage',
+            },
+            {
+              deepLinkId: 'elasticsearchIndexManagement',
+              breadcrumbs: ['Build', 'Index Management', 'Indices'],
+              pageTestSubject: 'elasticsearchIndexManagement',
+            },
+            {
+              deepLinkId: 'searchPlayground',
+              breadcrumbs: ['Build', 'Playground'],
+              pageTestSubject: 'playgroundsListPage',
+            },
+            {
+              deepLinkId: 'enterpriseSearchApplications:searchApplications',
+              breadcrumbs: ['Build', 'Search applications'],
+              pageTestSubject: 'searchApplicationsListPage',
+            },
+            {
+              deepLinkId: 'searchSynonyms:synonyms',
+              breadcrumbs: ['Relevance', 'Synonyms'],
+              pageTestSubject: 'searchSynonymsOverviewPage',
+            },
+            {
+              deepLinkId: 'searchQueryRules',
+              breadcrumbs: ['Relevance', 'Query rules'],
+              pageTestSubject: 'queryRulesBasePage',
+            },
+            {
+              deepLinkId: 'searchInferenceEndpoints:inferenceEndpoints',
+              breadcrumbs: ['Relevance', 'Inference endpoints'],
+              pageTestSubject: 'inferenceEndpointsPage',
+            },
+            {
+              deepLinkId: 'dev_tools',
+              breadcrumbs: ['Developer Tools'],
+              pageTestSubject: 'console',
+            },
+          ];
 
       for (const testCase of sideNavTestCases) {
         await solutionNavigation.sidenav.clickLink({
@@ -151,20 +215,21 @@ export default function searchSolutionNavigation({
             // main;
             'discover',
             'dashboards',
-            'elasticsearchIndexManagement',
             'searchPlayground',
-            'enterpriseSearchApplications:searchApplications',
-
-            // more:
             'searchSynonyms:synonyms',
             'searchQueryRules',
-            'searchInferenceEndpoints:inferenceEndpoints',
+
+            // more:
+            'machine_learning',
+            'maps',
+            'graph',
+            'visualize',
 
             // footer:
             'dev_tools',
-            'management:trained_models',
-            'stack_management',
+            'ingest_and_data',
             'monitoring',
+            'stack_management',
           ],
           {
             // don't check order because of "more" menu
@@ -187,10 +252,10 @@ export default function searchSolutionNavigation({
           'searchInferenceEndpoints:inferenceEndpoints',
           'search_project_nav_footer',
           'dev_tools',
+          'monitoring',
           'project_settings_project_nav',
           'management:trained_models',
           'stack_management',
-          'monitoring',
         ]);
       }
     });
