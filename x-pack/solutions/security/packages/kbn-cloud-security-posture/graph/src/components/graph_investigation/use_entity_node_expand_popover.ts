@@ -17,6 +17,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
 } from '../test_ids';
 import type {
   ItemExpandPopoverListItemProps,
@@ -177,6 +178,21 @@ export const useEntityNodeExpandPopover = (
           onClick: () => {
             onShowEntityDetailsClick?.(node);
           },
+          showToolTip: shouldDisableEntityDetailsListItem ? true : false,
+          toolTipText: shouldDisableEntityDetailsListItem
+            ? i18n.translate(
+                'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+                {
+                  defaultMessage: 'Details not available',
+                }
+              )
+            : undefined,
+          toolTipProps: shouldDisableEntityDetailsListItem
+            ? {
+                position: 'bottom',
+                'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+              }
+            : undefined,
         },
       ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
     },
