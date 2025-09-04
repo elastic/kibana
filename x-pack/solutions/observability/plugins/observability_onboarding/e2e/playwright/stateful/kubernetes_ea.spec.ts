@@ -75,21 +75,19 @@ test('Kubernetes EA', async ({
     }
   }
 
-  /**
-   * There might be a case that dashboard still does not show
-   * the data even though it was ingested already. This usually
-   * happens during the test when navigation from the onboarding
-   * flow to the dashboard happens almost immediately.
-   * Having a timeout before going to the dashboard "solves"
-   * the issue. 2 minutes is generous and should be more then enough
-   * for the data to propagate everywhere.
-   */
-  await page.waitForTimeout(2 * 60000);
-
-  await kubernetesEAFlowPage.clickKubernetesAgentCTA();
-
   if (!isLogsEssentialsMode) {
-    // Skip metrics validation in logs essentials tier 
+    /**
+     * There might be a case that dashboard still does not show
+     * the data even though it was ingested already. This usually
+     * happens during the test when navigation from the onboarding
+     * flow to the dashboard happens almost immediately.
+     * Having a timeout before going to the dashboard "solves"
+     * the issue. 2 minutes is generous and should be more then enough
+     * for the data to propagate everywhere.
+     */
+    await page.waitForTimeout(2 * 60000);
+
+    await kubernetesEAFlowPage.clickKubernetesAgentCTA();
     await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
-  }
+  } 
 });
