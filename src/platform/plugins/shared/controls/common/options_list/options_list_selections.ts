@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OptionsListSelection } from '@kbn/controls-schemas';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-
-export type OptionsListSelection = string | number;
 
 export const getSelectionAsFieldType = (field: FieldSpec, key: string): OptionsListSelection => {
   const storeAsNumber = field.type === 'number' || field.type === 'date';

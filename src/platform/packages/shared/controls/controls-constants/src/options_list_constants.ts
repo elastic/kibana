@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { controlsGroupSchema } from './src/controls_group_schema';
+export const OPTIONS_LIST_DEFAULT_SORT = {
+  by: '_count',
+  direction: 'desc',
+} as const;
 
-export type {
-  ControlState,
-  ControlsGroupState,
-  DataControlState,
-  OptionsListControlState,
-  OptionsListDisplaySettings,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
-  OptionsListSortingType,
-} from './src/types';
+export const DEFAULT_SEARCH_TECHNIQUE = 'prefix';

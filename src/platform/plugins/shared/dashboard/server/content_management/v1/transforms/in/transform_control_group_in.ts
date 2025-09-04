@@ -20,36 +20,36 @@ export function transformControlGroupIn(
     return;
   }
   return flow(
-    transformControlStyle,
-    transformShowApplySelections,
-    transformIgnoreParentSettings,
+    // transformControlStyle,
+    // transformShowApplySelections,
+    // transformIgnoreParentSettings,
     transformPanelsJSON
   )(controlGroupInput);
 }
 
-function transformControlStyle(controlGroupInput: ControlsGroupState) {
-  const { labelPosition, ...restControlGroupInput } = controlGroupInput;
-  return {
-    ...restControlGroupInput,
-    controlStyle: labelPosition,
-  };
-}
+// function transformControlStyle(controlGroupInput: ControlsGroupState) {
+//   const { labelPosition, ...restControlGroupInput } = controlGroupInput;
+//   return {
+//     ...restControlGroupInput,
+//     controlStyle: labelPosition,
+//   };
+// }
 
-function transformShowApplySelections(controlGroupInput: ControlsGroupState) {
-  const { autoApplySelections, ...restControlGroupInput } = controlGroupInput;
-  return {
-    ...restControlGroupInput,
-    showApplySelections: !autoApplySelections,
-  };
-}
+// function transformShowApplySelections(controlGroupInput: ControlsGroupState) {
+//   const { autoApplySelections, ...restControlGroupInput } = controlGroupInput;
+//   return {
+//     ...restControlGroupInput,
+//     showApplySelections: !autoApplySelections,
+//   };
+// }
 
-function transformIgnoreParentSettings(controlGroupInput: ControlsGroupState) {
-  const { ignoreParentSettings, ...restControlGroupInput } = controlGroupInput;
-  return {
-    ...restControlGroupInput,
-    ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings),
-  };
-}
+// function transformIgnoreParentSettings(controlGroupInput: ControlsGroupState) {
+//   const { ignoreParentSettings, ...restControlGroupInput } = controlGroupInput;
+//   return {
+//     ...restControlGroupInput,
+//     ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings),
+//   };
+// }
 
 function transformPanelsJSON(controlGroupInput: ControlsGroupState) {
   const { controls, ...restControlGroupInput } = controlGroupInput;

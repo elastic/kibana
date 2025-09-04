@@ -10,10 +10,6 @@
 /** Controls group state */
 export const CONTROLS_GROUP_TYPE = 'control_group';
 
-export const CONTROLS_LABEL_POSITION_ONE_LINE = 'oneLine';
-export const CONTROLS_LABEL_POSITION_TWO_LINE = 'twoLine';
-
-export const DEFAULT_CONTROLS_LABEL_POSITION = CONTROLS_LABEL_POSITION_ONE_LINE;
 export const DEFAULT_IGNORE_PARENT_SETTINGS = {
   ignoreFilters: false,
   ignoreQuery: false,

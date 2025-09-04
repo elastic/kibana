@@ -8,65 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  CONTROLS_LABEL_POSITION_ONE_LINE,
-  CONTROLS_LABEL_POSITION_TWO_LINE,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_LABEL_POSITION,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '@kbn/controls-constants';
-import { controlSchema } from './control_schema';
-
-export const labelPositionSchema = schema.oneOf(
-  [
-    schema.literal(CONTROLS_LABEL_POSITION_ONE_LINE),
-    schema.literal(CONTROLS_LABEL_POSITION_TWO_LINE),
-  ],
-  {
-    defaultValue: DEFAULT_CONTROLS_LABEL_POSITION,
-    meta: {
-      description: 'Position of the labels for controls. For example, "oneLine", "twoLine".',
-    },
-  }
-);
-
-export const ignoreParentSettingsSchema = schema.object({
-  ignoreFilters: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore global filters in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
-    })
-  ),
-  ignoreQuery: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore the global query bar in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
-    })
-  ),
-  ignoreTimerange: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore the global time range in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
-    })
-  ),
-  ignoreValidations: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore validations in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
-    })
-  ),
-});
+import { pinnedControlSchema } from './control_schema';
 
 export const controlsGroupSchema = schema.object({
-  controls: schema.arrayOf(controlSchema, {
+  controls: schema.arrayOf(pinnedControlSchema, {
     defaultValue: [],
     meta: { description: 'An array of control panels and their state in the control group.' },
-  }),
-  labelPosition: labelPositionSchema,
-  enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  ignoreParentSettings: schema.maybe(ignoreParentSettingsSchema),
-  autoApplySelections: schema.boolean({
-    meta: { description: 'Show apply selections button in controls.' },
-    defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
   }),
 });

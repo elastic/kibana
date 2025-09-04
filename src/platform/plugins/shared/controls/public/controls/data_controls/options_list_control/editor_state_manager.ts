@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_SEARCH_TECHNIQUE } from '@kbn/controls-constants';
+import type { OptionsListControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import type { OptionsListControlState } from '../../../../common/options_list';
-import { DEFAULT_SEARCH_TECHNIQUE } from './constants';
 
 export type EditorState = Pick<
   OptionsListControlState,
@@ -24,7 +24,7 @@ export const editorComparators: StateComparators<EditorState> = {
 };
 
 const defaultEditorState = {
-  searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+  searchTechnique: DEFAULT_SEARCH_TECHNIQUE as OptionsListSearchTechnique,
   singleSelect: undefined,
   runPastTimeout: undefined,
 };

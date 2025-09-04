@@ -19,10 +19,6 @@ import type { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import type { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
-import {
-  defaultControlComparators,
-  initializeDefaultControlManager,
-} from '../default_control_manager';
 import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
