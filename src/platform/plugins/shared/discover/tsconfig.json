@@ -113,6 +113,7 @@
     "@kbn/discover-plugin",
     "@kbn/esql-editor"
     "@kbn/core-application-browser",
+    "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
     "@kbn/unified-metrics-grid"
   ],

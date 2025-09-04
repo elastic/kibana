@@ -79,8 +79,9 @@ export const convertToSavedSearch = async <
   { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies,
   serialized?: Serialized
 ): Promise<ReturnType> => {
+  const [tab] = attributes.tabs;
   const parsedSearchSourceJSON = parseSearchSourceJSON(
-    attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+    tab.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
