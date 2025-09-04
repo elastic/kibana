@@ -109,10 +109,7 @@ export function useStreamDetail() {
 }
 
 export function useStreamDetailAsIngestStream() {
-  const ctx = React.useContext(StreamDetailContext);
-  if (!ctx) {
-    throw new Error('useStreamDetail must be used within a StreamDetailContextProvider');
-  }
+  const ctx = useStreamDetail();
   if (
     !Streams.WiredStream.GetResponse.is(ctx.definition) &&
     !Streams.ClassicStream.GetResponse.is(ctx.definition)

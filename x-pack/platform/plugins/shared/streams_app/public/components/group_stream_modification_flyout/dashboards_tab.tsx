@@ -18,27 +18,15 @@ export function DashboardsTab({ formData, setFormData }: TabProps) {
     },
   } = useKibana();
 
-  useEffect(() => {
-    setSelectedItems(formData.dashboards);
-  }, [formData.dashboards]);
-  const [selectedItems, setSelectedItems] = useState<{ id: string; title: string }[]>(
-    formData.dashboards
-  );
-  const onSelectionChange = (newSelectedItems: { id: string; title: string }[]) => {
-    setFormData({
-      ...formData,
-      dashboards: newSelectedItems,
-    });
-  };
-
   const [query, setQuery] = useState('');
   const [foundDashboards, setFoundDashboards] = useState<Array<{ title: string; id: string }>>([]);
-  useEffect(() => {
-    const fetchDashboards = async () => {
+
+  const fetchDashboards = React.useCallback(
+    async (search: string = '') => {
       const findDashboardsService = await dashboardStart.findDashboardsService();
       const searchResults = await findDashboardsService.search({
         size: 10000,
-        search: query,
+        search,
       });
 
       setFoundDashboards(
@@ -47,16 +35,32 @@ export function DashboardsTab({ formData, setFormData }: TabProps) {
           id: hit.id,
         }))
       );
-    };
-
-    fetchDashboards();
-  }, [dashboardStart, query]);
-
-  const availableDashboards = foundDashboards.filter(
-    (dashboard) =>
-      (query === '' || dashboard.title.toLowerCase().includes(query.toLowerCase())) &&
-      !selectedItems.some((item) => item.id === dashboard.id)
+    },
+    [dashboardStart]
   );
+
+  useEffect(() => {
+    fetchDashboards();
+  }, [fetchDashboards]);
+
+  const handleQueryChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
+    fetchDashboards(event.target.value);
+  };
+
+  const onSelectionChange = (newSelectedItems: { id: string; title: string }[]) => {
+    setFormData({
+      ...formData,
+      dashboards: newSelectedItems,
+    });
+  };
+
+  const availableDashboards = foundDashboards.filter((dashboard) => {
+    const matchesQuery =
+      query === '' || dashboard.title.toLowerCase().includes(query.toLowerCase());
+    const alreadySelected = formData.dashboards.some((item) => item.id === dashboard.id);
+    return matchesQuery && !alreadySelected;
+  });
 
   return (
     <>
@@ -66,14 +70,14 @@ export function DashboardsTab({ formData, setFormData }: TabProps) {
             defaultMessage: 'Selected',
           })}
           <EuiSpacer size="m" />
-          {selectedItems.length === 0
+          {formData.dashboards.length === 0
             ? i18n.translate(
                 'xpack.streams.groupStreamModificationFlyout.noSelectedDashboardsLabel',
                 {
                   defaultMessage: 'No dashboards selected',
                 }
               )
-            : selectedItems.map((dashboard) => (
+            : formData.dashboards.map((dashboard) => (
                 <EuiFlexGroup key={dashboard.id} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
@@ -84,7 +88,9 @@ export function DashboardsTab({ formData, setFormData }: TabProps) {
                         { defaultMessage: 'Remove' }
                       )}
                       onClick={() => {
-                        const newSelected = selectedItems.filter((d) => d.id !== dashboard.id);
+                        const newSelected = formData.dashboards.filter(
+                          (d) => d.id !== dashboard.id
+                        );
                         onSelectionChange(newSelected);
                       }}
                     />
@@ -105,7 +111,7 @@ export function DashboardsTab({ formData, setFormData }: TabProps) {
               { defaultMessage: 'Filter by title...' }
             )}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleQueryChange}
           />
           <EuiSpacer size="m" />
           {availableDashboards.length === 0
@@ -133,7 +139,7 @@ export function DashboardsTab({ formData, setFormData }: TabProps) {
                           { defaultMessage: 'Add' }
                         )}
                         onClick={() => {
-                          onSelectionChange([...selectedItems, dashboard]);
+                          onSelectionChange([...formData.dashboards, dashboard]);
                         }}
                       />
                     </EuiFlexItem>

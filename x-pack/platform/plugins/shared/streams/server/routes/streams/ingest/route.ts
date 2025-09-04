@@ -49,6 +49,7 @@ async function getAssets({
     rules,
     slos,
     queries,
+    rules,
   };
 }
 

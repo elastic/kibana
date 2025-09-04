@@ -76,6 +76,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           ...emptyAssets,
           queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -116,6 +117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -155,6 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -173,6 +176,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 

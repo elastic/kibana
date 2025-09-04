@@ -49,11 +49,13 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
             selectedDashboard={selectedDashboard}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton href={dashboardsLocator?.getRedirectUrl({ dashboardId: selectedDashboard })}>
-            Open in Dashboards
-          </EuiButton>
-        </EuiFlexItem>
+        {dashboardsLocator && (
+          <EuiFlexItem grow={false}>
+            <EuiButton href={dashboardsLocator.getRedirectUrl({ dashboardId: selectedDashboard })}>
+              Open in Dashboards
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
       {selectedDashboard && (

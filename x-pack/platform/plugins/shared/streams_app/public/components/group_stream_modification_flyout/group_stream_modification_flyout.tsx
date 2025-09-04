@@ -90,15 +90,26 @@ export function GroupStreamModificationFlyout({
   }, [existingDashboards, dashboardStart]);
 
   async function modifyGroupStream() {
+    let streamBaseData: any = {};
+    if (existingStream) {
+      streamBaseData = await client.fetch('GET /api/streams/{name} 2023-10-31', {
+        params: {
+          path: { name: formData.name },
+        },
+        signal,
+      });
+    }
+
     client
       .fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: formData.name },
           body: {
+            rules: [],
+            slos: [],
             queries: [],
+            ...streamBaseData,
             dashboards: formData.dashboards.map((dashboard) => dashboard.id),
-            rules: [], // Need to read original rules
-            slos: [], // Need to read original SLOs
             stream: {
               description: formData.description,
               group: {

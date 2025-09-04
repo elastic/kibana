@@ -16,6 +16,7 @@ type StreamPutItem = Streams.WiredStream.UpsertRequest & {
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
+    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -110,6 +111,7 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test',
+    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -131,6 +133,7 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test2',
+    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -159,6 +162,7 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.deeply.nested.streamname',
+    rules: [],
     stream: {
       description: '',
       ingest: {
