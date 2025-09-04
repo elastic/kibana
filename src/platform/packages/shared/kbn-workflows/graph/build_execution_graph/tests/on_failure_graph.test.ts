@@ -374,7 +374,7 @@ describe('on_failure graph', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         const topsort = graphlib.alg.topsort(executionGraph);
         expect(topsort).toEqual([
-          'outer_foreach',
+          'enterForeach_outer_foreach',
           'enterContinue_testRetryConnectorStep',
           'enterTryBlock_testRetryConnectorStep',
           'enterNormalPath_testRetryConnectorStep',
@@ -387,7 +387,7 @@ describe('on_failure graph', () => {
           'exitFallbackPath_testRetryConnectorStep',
           'exitTryBlock_testRetryConnectorStep',
           'exitContinue_testRetryConnectorStep',
-          'exitForeach(outer_foreach)',
+          'exitForeach_outer_foreach',
         ]);
       });
 
@@ -439,8 +439,8 @@ describe('on_failure graph', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         expect(executionGraph.nodes()).toEqual(
           expect.arrayContaining([
-            'ifStep',
-            'enterThen(ifStep)',
+            'enterCondition_ifStep',
+            'enterThen_ifStep',
             'enterContinue_trueConnectorStep',
             'enterTryBlock_trueConnectorStep',
             'enterNormalPath_trueConnectorStep',
@@ -453,8 +453,8 @@ describe('on_failure graph', () => {
             'exitFallbackPath_trueConnectorStep',
             'exitTryBlock_trueConnectorStep',
             'exitContinue_trueConnectorStep',
-            'exitThen(ifStep)',
-            'enterElse(ifStep)',
+            'exitThen_ifStep',
+            'enterElse_ifStep',
             'enterContinue_falseConnectorStep',
             'enterTryBlock_falseConnectorStep',
             'enterNormalPath_falseConnectorStep',
@@ -467,8 +467,8 @@ describe('on_failure graph', () => {
             'exitFallbackPath_falseConnectorStep',
             'exitTryBlock_falseConnectorStep',
             'exitContinue_falseConnectorStep',
-            'exitElse(ifStep)',
-            'exitCondition(ifStep)',
+            'exitElse_ifStep',
+            'exitCondition_ifStep',
           ])
         );
       });
@@ -502,7 +502,7 @@ describe('on_failure graph', () => {
         const executionGraph = convertToWorkflowGraph(workflow as any);
         expect(executionGraph.nodes()).toEqual(
           expect.arrayContaining([
-            'foreachStep',
+            'enterForeach_foreachStep',
             'enterContinue_foreachChild',
             'enterTryBlock_foreachChild',
             'enterNormalPath_foreachChild',
@@ -515,7 +515,7 @@ describe('on_failure graph', () => {
             'exitFallbackPath_foreachChild',
             'exitTryBlock_foreachChild',
             'exitContinue_foreachChild',
-            'exitForeach(foreachStep)',
+            'exitForeach_foreachStep',
           ])
         );
       });
