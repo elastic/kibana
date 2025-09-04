@@ -27,16 +27,17 @@ export const getAggregateDashboardNode = (): GraphNode => {
       throw new Error(`Error loading dashboard template: ${error}`); // The dashboard migration status will be set to 'failed' and the error stored in the document
     }
 
+    // Recover original order (the translated_panels is built asynchronously so the panels are in the order they complete the translation, not the original order)
     const panels = state.translated_panels.sort((a, b) => a.index - b.index);
 
     dashboardData.attributes.title = state.original_dashboard.title;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
 
     let translationResult;
-    if (state.translated_panels.length > 0) {
-      if (state.translated_panels.length === state.parsed_original_dashboard.panels.length) {
+    if (panels.length > 0) {
+      if (panels.length === state.parsed_original_dashboard.panels.length) {
         // Set to FULL only if all panels are fully translated
-        const allFull = state.translated_panels.every(
+        const allFull = panels.every(
           (panel) => panel.translation_result === MigrationTranslationResult.FULL
         );
         translationResult = allFull
@@ -49,9 +50,10 @@ export const getAggregateDashboardNode = (): GraphNode => {
       translationResult = MigrationTranslationResult.UNTRANSLATABLE;
     }
 
-    const comments = state.translated_panels.flatMap((panel) => {
+    // Aggregate all comments from the individual panel translations, with a header for each panel
+    const comments = panels.flatMap((panel) => {
       if (panel.comments?.length) {
-        return [generateAssistantComment(`# Panel: ${panel.title}`), ...panel.comments];
+        return [generateAssistantComment(`# Panel "${panel.title}"`), ...panel.comments];
       }
       return [];
     });
