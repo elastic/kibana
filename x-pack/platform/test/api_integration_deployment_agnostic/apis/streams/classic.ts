@@ -66,6 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               dashboards: [],
               queries: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -191,6 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               queries: [],
               dashboards: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -235,6 +237,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               queries: [],
               dashboards: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -265,6 +268,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               queries: [],
               dashboards: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
@@ -402,6 +406,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, FIRST_STREAM_NAME, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -465,6 +470,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, SECOND_STREAM_NAME, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -500,6 +506,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, FIRST_STREAM_NAME, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -523,6 +530,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, SECOND_STREAM_NAME, {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -567,6 +575,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               dashboards: [],
               queries: [],
+              rules: [],
               stream: {
                 description: '',
                 ingest: {
