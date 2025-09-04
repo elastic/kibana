@@ -124,17 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
       return bulkEditResponse;
     };
 
-    const testCustomizationViaBulkEditing = ({ hasBaseVersion }: { hasBaseVersion: boolean }) => {
-      beforeEach(async () => {
-        await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-        await installPrebuiltRules(es, supertest);
-
-        if (!hasBaseVersion) {
-          // Remove the prebuilt rule asset so that the base version is no longer available
-          await deleteAllPrebuiltRuleAssets(es, log);
-        }
-      });
-
+    const testCustomizationViaBulkEditing = () => {
       it(`applies "${BulkActionEditTypeEnum.add_tags}" bulk edit action to prebuilt rules`, async () => {
         const bulkResponse = await performBulkEditOnPrebuiltRules({
           type: BulkActionEditTypeEnum.add_tags,
@@ -338,11 +328,24 @@ export default ({ getService }: FtrProviderContext): void => {
     };
 
     describe('when base version is available', () => {
-      testCustomizationViaBulkEditing({ hasBaseVersion: false });
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
+        await installPrebuiltRules(es, supertest);
+      });
+
+      testCustomizationViaBulkEditing();
     });
 
     describe('when base version is missing', () => {
-      testCustomizationViaBulkEditing({ hasBaseVersion: false });
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
+        await installPrebuiltRules(es, supertest);
+
+        // Remove the prebuilt rule asset so that the base version is no longer available
+        await deleteAllPrebuiltRuleAssets(es, log);
+      });
+
+      testCustomizationViaBulkEditing();
     });
   });
 };
