@@ -648,7 +648,7 @@ export class EncryptedSavedObjectsService {
     }
 
     // Always add the descriptor to the AAD.
-    return `${stringify([...descriptorToArray(descriptor), attributesAAD])}`;
+    return stringify([...descriptorToArray(descriptor), attributesAAD]) as string;
   }
 
   /**
