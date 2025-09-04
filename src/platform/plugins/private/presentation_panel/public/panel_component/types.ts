@@ -18,7 +18,7 @@ import type {
   PublishesTitle,
   CanOverrideHoverActions,
 } from '@kbn/presentation-publishing';
-import type { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { MaybePromise } from '@kbn/utility-types';
 
 /** ------------------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ export interface PresentationPanelInternalProps<
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
-  getActions?: UiActionsService['getTriggerCompatibleActions'];
+  getActions?: UiActionsStart['getTriggerCompatibleActions'];
 
   /**
    * Ordinal number of the embeddable in the container, used as a

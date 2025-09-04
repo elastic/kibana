@@ -96,4 +96,35 @@ describe('Read conversation route', () => {
       });
     });
   });
+
+  describe('telemetry', () => {
+    beforeEach(() => {
+      context.elasticAssistant.telemetry.reportEvent = jest.fn();
+    });
+
+    test('does NOT call telemetry.reportEvent when user is the owner', async () => {
+      const response = await server.inject(
+        getConversationReadRequest('conv1'),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(200);
+      expect(context.elasticAssistant.telemetry.reportEvent).not.toHaveBeenCalled();
+    });
+
+    test('calls telemetry.reportEvent when user is NOT the owner', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+        {
+          ...getConversationMock(getQueryConversationParams()),
+          id: 'conv2',
+          createdBy: { name: 'not you' },
+        }
+      );
+      const response = await server.inject(
+        getConversationReadRequest('conv2'),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(200);
+      expect(context.elasticAssistant.telemetry.reportEvent).toHaveBeenCalled();
+    });
+  });
 });
