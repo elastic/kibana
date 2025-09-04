@@ -30,7 +30,7 @@ export const ReservedRoleBadge = (props: Props) => {
             defaultMessage="Reserved roles are built-in and cannot be removed or modified."
           />
         }
-        type={'lock'}
+        type="lock"
       />
     );
   }

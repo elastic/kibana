@@ -25,7 +25,9 @@ export const EmptyPolicyNameHint = () => (
       type="question"
       color="subdued"
       aria-label={EMPTY_POLICY_NAME_HINT}
-      data-test-subj="emptyPolicyNameHint"
+      iconProps={{
+        'data-test-subj': 'emptyPolicyNameHint',
+      }}
     />
   </>
 );
