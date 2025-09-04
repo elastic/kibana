@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { ErrorCause, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { apiTest } from '@kbn/scout';
 
@@ -28,6 +29,13 @@ export interface TestBedFixture {
      * @returns An array of documents.
      */
     getDocs: (indexName: string) => Promise<Array<Record<string, any>>>;
+
+    /**
+     * Serializes documents with each nested field represented in dot notation.
+     * Helpful to compare documents returned by ES|QL queries.
+     * @param indexName
+     */
+    getFlattenedDocs: (indexName: string) => Promise<Array<Record<string, any>>>;
     /**
      * Deletes an index.
      * @param indexName The name of the index to delete.
@@ -52,29 +60,6 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
         return pipelineId;
       };
 
-      const createIndex = async (indexName: string) => {
-        if (createdIndexes.has(indexName)) return;
-        await esClient.indices.create({
-          index: indexName,
-          mappings: {
-            dynamic: 'true',
-            dynamic_templates: [
-              {
-                all_strings_as_is: {
-                  match: '*',
-                  match_mapping_type: 'string', // Do not ingest keywords for string fields
-                  mapping: {
-                    type: 'text',
-                    index: false,
-                  },
-                },
-              },
-            ],
-          },
-        });
-        createdIndexes.add(indexName);
-      };
-
       const ingest = async (
         indexName: string,
         documents: Array<Record<string, any>>,
@@ -85,7 +70,8 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
           pipelineId = await createPipeline(processors);
         }
 
-        await createIndex(indexName);
+        await ensureIndexCreated(indexName, esClient);
+        createdIndexes.add(indexName);
 
         if (!documents || documents.length === 0) {
           return { docs: 0, errors: [] };
@@ -126,6 +112,30 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
         return response.hits.hits.map((hit) => hit._source as Record<string, any>);
       };
 
+      const getFlattenedDocs = async (indexName: string) => {
+        const docs = await getDocs(indexName);
+
+        const docsWithDottedNames = docs.map((doc) => {
+          const result: Record<string, any> = {};
+
+          const flatten = (obj: Record<string, any>, prefix = '') => {
+            for (const [key, value] of Object.entries(obj)) {
+              const prefixedKey = prefix ? `${prefix}.${key}` : key;
+              if (value && typeof value === 'object' && !Array.isArray(value)) {
+                flatten(value, prefixedKey);
+              } else {
+                result[prefixedKey] = value;
+              }
+            }
+          };
+
+          flatten(doc);
+          return result;
+        });
+
+        return docsWithDottedNames;
+      };
+
       const clean = async (indexName: string) => {
         if (await esClient.indices.exists({ index: indexName })) {
           await esClient.indices.delete({
@@ -137,7 +147,7 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
       };
 
       // Test execution phase
-      await use({ ingest, getDocs, clean });
+      await use({ ingest, getDocs, getFlattenedDocs, clean });
 
       // Cleanup phase
       await Promise.all([...createdIndexes].map((indexName) => clean(indexName)));
@@ -150,3 +160,28 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
     { scope: 'test' },
   ],
 });
+
+async function ensureIndexCreated(indexName: string, esClient: Client) {
+  if (await esClient.indices.exists({ index: indexName })) {
+    return;
+  }
+
+  return esClient.indices.create({
+    index: indexName,
+    mappings: {
+      dynamic: 'true',
+      dynamic_templates: [
+        {
+          all_strings_as_is: {
+            match: '*',
+            match_mapping_type: 'string', // Do not ingest keywords for string fields
+            mapping: {
+              type: 'text',
+              index: false,
+            },
+          },
+        },
+      ],
+    },
+  });
+}
