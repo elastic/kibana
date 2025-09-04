@@ -31,7 +31,7 @@ class SlowTestReporter extends DefaultReporter {
     // Collect slow tests for end summary
     for (let i = 0; i < testResult.testResults.length; i++) {
       const result = testResult.testResults[i];
-      
+
       if (this._options.warnOnSlowerThan && result.duration > this._options.warnOnSlowerThan) {
         this._slowTests.push({
           duration: result.duration,
@@ -57,20 +57,22 @@ class SlowTestReporter extends DefaultReporter {
     this._slowTests.sort((a, b) => b.duration - a.duration);
 
     const rootPathRegex = new RegExp(`^${process.cwd()}`);
-    const warningTitle = `⚠️  Found ${this._slowTests.length} slow test${this._slowTests.length > 1 ? 's' : ''} (>${this._options.warnOnSlowerThan}ms):`;
-    const coloredWarningTitle = this._options.color 
+    const warningTitle = `⚠️  Found ${this._slowTests.length} slow test${
+      this._slowTests.length > 1 ? 's' : ''
+    } (>${this._options.warnOnSlowerThan}ms):`;
+    const coloredWarningTitle = this._options.color
       ? `\x1b[33m${warningTitle}\x1b[0m`
       : warningTitle;
-    
+
     this.log(coloredWarningTitle);
 
     this._slowTests.forEach((test) => {
       const duration = test.duration;
       const filePath = test.filePath.replace(rootPathRegex, '.');
-      
+
       const testInfo = `  • ${test.fullName}`;
       const timeInfo = `    ${duration}ms ${filePath}`;
-      
+
       if (this._options.color) {
         this.log(`\x1b[37m${testInfo}\x1b[0m`);
         this.log(`\x1b[90m${timeInfo}\x1b[0m`);
@@ -82,7 +84,6 @@ class SlowTestReporter extends DefaultReporter {
 
     this.log(''); // Empty line for spacing
   }
-
 }
 
 module.exports = SlowTestReporter;
