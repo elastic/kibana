@@ -9,9 +9,9 @@
 
 import type { Trigger } from '@kbn/ui-actions-triggers';
 import { asyncMap } from '@kbn/std';
+import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '@kbn/ui-actions';
 import type { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
-import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
-import { ActionInternal } from '../actions';
+import { ActionInternal } from '../actions/action_internal';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import type { TriggerContract } from '../triggers/trigger_contract';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
