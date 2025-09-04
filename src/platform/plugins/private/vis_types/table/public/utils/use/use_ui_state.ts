@@ -111,6 +111,10 @@ export const useUiState = (uiState: PersistedState): TableVisUseUiStateProps => 
       }
 
       if (!isEqual(vis?.params.sort, uiStateValues.current.sort)) {
+        // prevent clearing a valid current sort
+        if (vis?.params.sort === undefined && uiStateValues.current.sort?.columnIndex !== null) {
+          return;
+        }
         uiStateValues.current.sort = vis?.params.sort;
         setSortState(vis?.params.sort || defaultSort);
       }
