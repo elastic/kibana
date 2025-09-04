@@ -39,7 +39,7 @@ Examples of queries:
 Note:
 - The 'index' parameter can be used to specify which index to search against.
  If not provided, the tool will decide itself which is the best index to use.
-- It is perfectly fine not to not specify the 'index' parameter. It should only be specified when you already
+- It is perfectly fine not to specify the 'index' parameter. It should only be specified when you already
  know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
     schema: searchSchema,
