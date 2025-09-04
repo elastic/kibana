@@ -44,11 +44,13 @@ export const spaceTest = securityParallelFixtures.extend<
         kbnClient,
         log,
         scoutSpace,
+        esClient,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityParallelWorkerFixtures['kbnClient'];
         log: SecurityParallelWorkerFixtures['log'];
         scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
+        esClient: SecurityParallelWorkerFixtures['esClient'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
@@ -57,6 +59,7 @@ export const spaceTest = securityParallelFixtures.extend<
         kbnClient,
         log,
         scoutSpace,
+        esClient,
       });
 
       await use(extendedApiServices);

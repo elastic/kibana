@@ -9,10 +9,12 @@ import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { AlertsTablePage } from './alerts_table';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
+import { SecurityNavigation } from './security_navigation';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
+  securityNavigation: SecurityNavigation;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SecurityPageObjects {
@@ -20,5 +22,6 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Se
     ...pageObjects,
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
+    securityNavigation: createLazyPageObject(SecurityNavigation, page),
   };
 }

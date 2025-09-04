@@ -34,10 +34,12 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         apiServices,
         kbnClient,
         log,
+        esClient,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityWorkerFixtures['kbnClient'];
         log: SecurityWorkerFixtures['log'];
+        esClient: SecurityWorkerFixtures['esClient'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
@@ -45,6 +47,7 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
       extendedApiServices.detectionRule = getDetectionRuleApiService({
         kbnClient,
         log,
+        esClient,
       });
 
       await use(extendedApiServices);
