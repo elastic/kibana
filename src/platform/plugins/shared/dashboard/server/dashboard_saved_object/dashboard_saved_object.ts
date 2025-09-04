@@ -78,17 +78,6 @@ export const createDashboardSavedObjectType = ({
             sections: { properties: {}, dynamic: false },
           },
         },
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            accessControl: {
-              properties: {
-                accessMode: { type: 'keyword', index: false, doc_values: false },
-                owner: { type: 'keyword', index: false, doc_values: false },
-              },
-            },
-          },
-        },
       ],
       schemas: {
         forwardCompatibility: dashboardAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
@@ -99,13 +88,6 @@ export const createDashboardSavedObjectType = ({
   mappings: {
     dynamic: false,
     properties: {
-      accessControl: {
-        dynamic: false,
-        properties: {
-          accessMode: { type: 'keyword', index: false, doc_values: false },
-          owner: { type: 'keyword', index: false, doc_values: false },
-        },
-      },
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {

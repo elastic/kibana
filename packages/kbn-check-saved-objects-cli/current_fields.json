@@ -274,9 +274,6 @@
     "metadata.version"
   ],
   "dashboard": [
-    "accessControl",
-    "accessControl.accessMode",
-    "accessControl.owner",
     "controlGroupInput",
     "controlGroupInput.chainingSystem",
     "controlGroupInput.controlStyle",
