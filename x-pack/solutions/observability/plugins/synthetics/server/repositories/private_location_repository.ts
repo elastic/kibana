@@ -54,7 +54,18 @@ export class PrivateLocationRepository {
     );
   }
 
-  async validatePrivateLocation() {
+  getLocationSpaces({
+    locationSpaces,
+    agentPolicySpaces,
+  }: {
+    locationSpaces?: string[];
+    agentPolicySpaces: string[];
+  }): string[] {
+    if (locationSpaces?.length) return locationSpaces;
+    return agentPolicySpaces;
+  }
+
+  async validatePrivateLocation({ agentPolicySpaces }: { agentPolicySpaces: string[] }) {
     const { response, request, server } = this.routeContext;
 
     let errorMessages = '';
@@ -67,7 +78,7 @@ export class PrivateLocationRepository {
       this.internalSOClient.find<PrivateLocationAttributes>({
         type: privateLocationSavedObjectName,
         perPage: 10000,
-        namespaces: spaces,
+        namespaces: this.getLocationSpaces({ locationSpaces: spaces, agentPolicySpaces }),
       }),
       await getAgentPoliciesAsInternalUser({ server }),
     ]);

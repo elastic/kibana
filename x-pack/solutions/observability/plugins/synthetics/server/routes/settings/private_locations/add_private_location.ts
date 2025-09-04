@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -27,11 +28,7 @@ export const PrivateLocationSchema = schema.object({
       lon: schema.number(),
     })
   ),
-  spaces: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      minSize: 1,
-    })
-  ),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;
@@ -63,34 +60,33 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       });
     }
 
-    const policySpaces =
+    const agentPolicySpaces =
       agentPolicy.space_ids && agentPolicy.space_ids.length > 0
         ? agentPolicy.space_ids
-        : [agentPolicy.namespace];
+        : [DEFAULT_SPACE_ID];
 
     const newId = uuidV4();
+    const repo = new PrivateLocationRepository(routeContext);
     const formattedLocation = toSavedObjectContract({
       ...location,
       id: newId,
-      spaces: location.spaces || policySpaces,
+      spaces: repo.getLocationSpaces({ agentPolicySpaces, locationSpaces: location.spaces }),
     });
 
-    if (!formattedLocation.spaces!.every((s) => policySpaces.includes(s))) {
+    if (!formattedLocation.spaces!.every((s) => agentPolicySpaces.includes(s))) {
       return response.badRequest({
         body: {
           message: `Invalid spaces. Private location spaces [${location.spaces?.join(
             ', '
           )}] must be fully contained within agent policy ${
             location.agentPolicyId
-          } spaces [${policySpaces.join(', ')}].`,
+          } spaces [${agentPolicySpaces.join(', ')}].`,
         },
       });
     }
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const repo = new PrivateLocationRepository(routeContext);
-
-    const invalidError = await repo.validatePrivateLocation();
+    const invalidError = await repo.validatePrivateLocation({ agentPolicySpaces });
     if (invalidError) {
       return invalidError;
     }

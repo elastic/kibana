@@ -32,13 +32,7 @@ export const SpaceSelector = <T extends FieldValues>({
   const AGENT_POLICY_FIELD_NAME = 'agentPolicyId' as Path<T>;
   const { data: agentPolicies } = useSelector(selectAgentPolicies);
 
-  const {
-    control,
-    formState: { isSubmitted },
-    trigger,
-    setValue,
-  } = useFormContext<T>();
-  const { isTouched, error } = control.getFieldState(NAMESPACES_NAME);
+  const { control, trigger, setValue } = useFormContext<T>();
 
   const selectedAgentPolicyId: string = useWatch({
     control,
@@ -46,8 +40,6 @@ export const SpaceSelector = <T extends FieldValues>({
   });
 
   const prevAgentPolicyId = usePrevious(selectedAgentPolicyId);
-
-  const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 
   useEffect(() => {
     if (
@@ -87,24 +79,16 @@ export const SpaceSelector = <T extends FieldValues>({
   ]);
 
   return (
-    <EuiFormRow
-      fullWidth
-      label={SPACES_LABEL}
-      helpText={helpText}
-      isInvalid={showFieldInvalid}
-      error={showFieldInvalid ? NAMESPACES_NAME : undefined}
-    >
+    <EuiFormRow fullWidth label={SPACES_LABEL} helpText={helpText}>
       <Controller
         name={NAMESPACES_NAME}
         control={control}
-        rules={{ required: true }}
         render={({ field }) => (
           <EuiComboBox
             isDisabled={isDisabled}
             fullWidth
             aria-label={SPACES_LABEL}
             placeholder={SPACES_LABEL}
-            isInvalid={showFieldInvalid}
             {...field}
             onBlur={async () => {
               await trigger();
