@@ -22,7 +22,7 @@ export interface DeleteToolResponse {
   success: boolean;
 }
 
-export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags'> &
+export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
 export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {

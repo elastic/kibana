@@ -28,6 +28,7 @@ export function toToolDefinition(
     description,
     tags,
     configuration,
+    readonly: false,
     schema: searchSchema,
     handler: async ({ nlQuery }, { esClient, modelProvider, logger }) => {
       const { pattern } = configuration;

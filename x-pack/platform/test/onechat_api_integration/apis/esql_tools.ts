@@ -69,9 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(response.body).to.have.property('message');
-        expect(response.body.message).to.eql(
-          'Invalid tool id: invalid tool id!: Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, and underscores'
-        );
+        expect(response.body.message).to.contain('Invalid tool id: "invalid tool id!"');
       });
 
       it('should require required fields', async () => {

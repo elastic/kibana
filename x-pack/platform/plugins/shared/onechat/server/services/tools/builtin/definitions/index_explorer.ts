@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common';
 import { indexExplorer } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -27,7 +27,7 @@ const indexExplorerSchema = z.object({
 
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
-    id: builtinToolIds.indexExplorer,
+    id: platformCoreTools.indexExplorer,
     description: `List relevant indices, aliases and datastreams based on a natural language query.
 
 The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
@@ -71,6 +71,6 @@ Tool result: [{ type: "index", name: '.alerts' }]
         ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };
