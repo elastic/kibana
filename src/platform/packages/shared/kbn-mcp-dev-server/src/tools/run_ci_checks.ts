@@ -68,10 +68,10 @@ const CI_CHECKS = {
     command: 'node --no-experimental-require-module scripts/quick_checks',
     description: 'Run quick validation checks',
   },
-  checks: {
-    name: 'Checks',
+  linting: {
+    name: 'Linting',
     command: 'yarn lint',
-    description: 'Run general linting checks',
+    description: 'Run all linting checks (ESLint and Stylelint)',
   },
   type_check: {
     name: 'Type Check',
@@ -82,11 +82,6 @@ const CI_CHECKS = {
     name: 'Linting (with types)',
     command: 'node --no-experimental-require-module scripts/eslint_with_types',
     description: 'Run ESLint with type checking',
-  },
-  linting: {
-    name: 'Linting',
-    command: 'node --no-experimental-require-module scripts/eslint',
-    description: 'Run ESLint',
   },
   oas_snapshot: {
     name: 'OAS Snapshot',
@@ -151,7 +146,20 @@ async function runCiChecks(input: z.infer<typeof runCiChecksInputSchema>): Promi
   if (parallel) {
     // Run all checks in parallel
     const checkPromises = checksToRun.map((check) => runSingleCheck(check));
-    results = await Promise.all(checkPromises);
+    const settledResults = await Promise.allSettled(checkPromises);
+    results = settledResults.map((result, index) => {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      } else {
+        // This shouldn't happen since runSingleCheck never rejects, but handle it just in case
+        return {
+          check: checksToRun[index],
+          status: 'failed' as const,
+          error: result.reason?.message || 'Unknown error',
+          duration: 0,
+        };
+      }
+    });
   } else {
     // Run checks sequentially
     results = [];
