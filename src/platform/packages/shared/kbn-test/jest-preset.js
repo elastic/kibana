@@ -47,7 +47,13 @@ module.exports = {
 
   // Use this configuration option to add custom reporters to Jest
   reporters: [
-    'default',
+    [
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/slow_test_reporter.js',
+      {
+        warnOnSlowerThan: 300,
+        color: true,
+      },
+    ],
     [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
       {
