@@ -4,4 +4,8 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
     timeout_in_minutes: 10
