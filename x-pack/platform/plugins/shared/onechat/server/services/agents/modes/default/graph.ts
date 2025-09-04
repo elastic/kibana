@@ -6,7 +6,7 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import { AIMessage, type BaseMessage, type BaseMessageLike, type AIMessage as AIMessageType } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
@@ -19,6 +19,14 @@ const StateAnnotation = Annotation.Root({
   initialMessages: Annotation<BaseMessageLike[]>({
     reducer: messagesStateReducer,
     default: () => [],
+  }),
+  maxToolCalls: Annotation<number>({
+    value: (_prev, next) => next,
+    default: () => 3,
+  }),
+  toolCallCount: Annotation<number>({
+    value: (prev, next) => (typeof next === 'number' ? next : prev),
+    default: () => 0,
   }),
   // outputs
   addedMessages: Annotation<BaseMessage[]>({
@@ -64,31 +72,54 @@ export const createAgentGraph = ({
 
   const shouldContinue = async (state: StateType) => {
     const messages = state.addedMessages;
-    const lastMessage: AIMessage = messages[messages.length - 1];
+    const lastMessage: AIMessageType = messages[messages.length - 1] as AIMessageType;
     if (lastMessage && lastMessage.tool_calls?.length) {
+      if (state.toolCallCount >= state.maxToolCalls) {
+        // Instead of ending abruptly, route to guidance node.
+        return 'ask_user';
+      }
       return 'tools';
     }
     return '__end__';
   };
 
   const toolHandler = async (state: StateType) => {
+    const lastAI = state.addedMessages[state.addedMessages.length - 1] as AIMessage | undefined;
+    const plannedCalls = lastAI?.tool_calls?.length ?? 0;
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
-
     return {
       addedMessages: [...toolNodeResult],
+      toolCallCount: state.toolCallCount + plannedCalls,
     };
   };
 
-  // note: the node names are used in the event convertion logic, they should *not* be changed
+  const askUserForGuidance = async (state: StateType) => {
+    // Provide a synthesized assistant message requesting user guidance after exhausting tool calls.
+    const guidance = `I wasn’t able to find a clear answer.  
+Could you refine your request with more details (e.g. timeframe, key terms, specific tool / index names, or fields)?`;
+
+    return {
+      addedMessages: [
+        new AIMessage({
+          content: guidance,
+        }),
+      ],
+    };
+  };
+
+  // note: the node names 'agent', 'tools', and 'ask_user' are referenced in event conversion logic; they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)
+    .addNode('ask_user', askUserForGuidance)
     .addEdge('__start__', 'agent')
     .addEdge('tools', 'agent')
     .addConditionalEdges('agent', shouldContinue, {
       tools: 'tools',
+      ask_user: 'ask_user',
       __end__: '__end__',
     })
+    .addEdge('ask_user', '__end__')
     .compile();
 
   return graph;

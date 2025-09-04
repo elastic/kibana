@@ -68,8 +68,9 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit tool calls or full message on each agent step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+  // emit tool calls or full message on each agent step
+  // also handle the guidance fallback node 'ask_user' which behaves like an agent message without tool calls
+  if (matchEvent(event, 'on_chain_end') && (matchName(event, 'agent') || matchName(event, 'ask_user'))) {
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 

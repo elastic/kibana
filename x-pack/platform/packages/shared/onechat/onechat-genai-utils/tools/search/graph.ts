@@ -6,7 +6,7 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
@@ -24,11 +24,24 @@ const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   targetPattern: Annotation<string | undefined>(),
+  maxAttempts: Annotation<number>({
+    // numeric fields need a value reducer; keep last provided value
+    value: (_prev, next) => next,
+    default: () => 4,
+  }),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
+    default: () => [],
+  }),
+  attempt: Annotation<number>({
+    value: (_prev, next) => next,
+    default: () => 0,
+  }),
+  attemptSummaries: Annotation<string[]>({
+    reducer: (a, b) => [...a, ...b],
     default: () => [],
   }),
   // outputs
@@ -85,13 +98,17 @@ export const createSearchToolGraph = ({
     return state.indexIsValid ? 'agent' : '__end__';
   };
 
-  const searchModel = model.chatModel.bindTools(tools).withConfig({
-    tags: ['onechat-search-tool'],
-  });
+  const searchModel = model.chatModel.bindTools(tools).withConfig({ tags: ['onechat-search-tool'] });
 
   const callSearchAgent = async (state: StateType) => {
     const response = await searchModel.invoke(
-      getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
+      getSearchPrompt({
+        nlQuery: state.nlQuery,
+        searchTarget: state.searchTarget,
+        attempt: state.attempt,
+        previousAttemptSummaries: state.attemptSummaries,
+        maxAttempts: state.maxAttempts,
+      })
     );
     return {
       messages: [response],
@@ -99,17 +116,72 @@ export const createSearchToolGraph = ({
   };
 
   const decideContinueOrEnd = async (state: StateType) => {
-    // only one call for now
-    return '__end__';
+    // If we have results that are not errors, end.
+    const hasNonError = state.results.some((r) => r.type !== ToolResultType.error);
+    if (hasNonError) {
+      return '__end__';
+    }
+    const nextAttempt = state.attempt + 1;
+    if (nextAttempt >= state.maxAttempts) {
+      return 'finalize';
+    }
+    return 'agent';
   };
 
   const executeTool = async (state: StateType) => {
+    // Guard: the model might return a response without any tool_calls.
+    const lastMessage = state.messages[state.messages.length - 1] as AIMessage | undefined;
+    const plannedToolCalls = lastMessage?.tool_calls?.length ?? 0;
+    if (plannedToolCalls === 0) {
+      const summary = `Attempt ${state.attempt + 1}: model response had no tool call`;
+      return {
+        // no new messages added (we didn't run a tool)
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: 'Search sub-agent produced a response without a tool call.' },
+          },
+        ],
+        attemptSummaries: [summary],
+        attempt: state.attempt + 1,
+      };
+    }
+
     const toolNodeResult = await toolNode.invoke(state.messages);
-    const toolResults = extractToolResults(toolNodeResult[toolNodeResult.length - 1]);
+    const lastToolMessage = toolNodeResult[toolNodeResult.length - 1];
+    const toolResults = extractToolResults(lastToolMessage);
+
+    // create a short attempt summary (error or tool call details)
+    let summary: string;
+    const errorResult = toolResults.find((r) => r.type === ToolResultType.error);
+    if (errorResult) {
+      summary = `Attempt ${state.attempt + 1}: error - ${(errorResult.data as any).message}`;
+    } else if (toolResults.length === 0) {
+      summary = `Attempt ${state.attempt + 1}: no results`;
+    } else {
+      summary = `Attempt ${state.attempt + 1}: returned ${toolResults.length} result$${
+        toolResults.length === 1 ? '' : 's'
+      } (types: ${[...new Set(toolResults.map((r) => r.type))].join(', ')})`;
+    }
 
     return {
       messages: [...toolNodeResult],
       results: [...toolResults],
+      attemptSummaries: [summary],
+      attempt: state.attempt + 1,
+    };
+  };
+
+  const finalizeNoResults = async (state: StateType) => {
+    // If we ended up here without non-error results, provide guidance to outer agent.
+    const hasNonError = state.results.some((r) => r.type !== ToolResultType.error);
+    if (hasNonError) {
+      return {};
+    }
+    const guidance =
+      'Search attempts exhausted with only errors or empty results. Consider refining the query (be more specific, include key terms, specify timeframe or fields) or check if the target index actually contains relevant data.';
+    return {
+      error: guidance,
     };
   };
 
@@ -118,6 +190,7 @@ export const createSearchToolGraph = ({
     .addNode('check_index', selectAndValidateIndex)
     .addNode('agent', callSearchAgent)
     .addNode('execute_tool', executeTool)
+    .addNode('finalize', finalizeNoResults)
     // edges
     .addEdge('__start__', 'check_index')
     .addConditionalEdges('check_index', terminateIfInvalidIndex, {
@@ -127,8 +200,10 @@ export const createSearchToolGraph = ({
     .addEdge('agent', 'execute_tool')
     .addConditionalEdges('execute_tool', decideContinueOrEnd, {
       agent: 'agent',
+      finalize: 'finalize',
       __end__: '__end__',
     })
+    .addEdge('finalize', '__end__')
     .compile();
 
   return graph;
