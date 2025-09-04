@@ -56,7 +56,7 @@ const EXECUTOR_SLEEP = {
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
-export class SiemMigrationTaskRunner<
+export abstract class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type
   P extends object = {}, // The migration task input parameters schema
@@ -84,19 +84,13 @@ export class SiemMigrationTaskRunner<
   }
 
   /** Receives the connectorId and creates the `this.task` and `this.telemetry` attributes */
-  public async setup(connectorId: string): Promise<void> {
-    throw new Error('setup method must be implemented in the subclass');
-  }
+  public abstract setup(connectorId: string): Promise<void>;
 
   /** Prepares the migration item for the task execution */
-  protected async prepareTaskInput(item: Stored<I>): Promise<P> {
-    throw new Error('prepareTaskInput method must be implemented in the subclass');
-  }
+  protected abstract prepareTaskInput(item: Stored<I>): Promise<P>;
 
   /** Processes the output of the migration task and returns the item to save */
-  protected processTaskOutput(item: Stored<I>, output: O): Stored<I> {
-    throw new Error('processTaskOutput method must be implemented in the subclass');
-  }
+  protected abstract processTaskOutput(item: Stored<I>, output: O): Stored<I>;
 
   /** Optional initialization logic */
   public async initialize() {}

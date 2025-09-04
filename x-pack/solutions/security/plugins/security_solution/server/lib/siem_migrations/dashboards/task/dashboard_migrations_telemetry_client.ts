@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import {
   SIEM_MIGRATIONS_MIGRATION_ABORTED,
@@ -16,26 +15,9 @@ import {
 } from '../../../telemetry/event_based/events';
 import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
 import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
-import type { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
+import { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
 
-export class DashboardMigrationTelemetryClient
-  implements SiemMigrationTelemetryClient<DashboardMigrationDashboard>
-{
-  constructor(
-    private readonly telemetry: AnalyticsServiceSetup,
-    private readonly logger: Logger,
-    private readonly migrationId: string,
-    private readonly modelName: string = ''
-  ) {}
-
-  private reportEvent<T extends object>(eventTypeOpts: EventTypeOpts<T>, data: T): void {
-    try {
-      this.telemetry.reportEvent(eventTypeOpts.eventType, data);
-    } catch (e) {
-      this.logger.error(`Error reporting event ${eventTypeOpts.eventType}: ${e.message}`);
-    }
-  }
-
+export class DashboardMigrationTelemetryClient extends SiemMigrationTelemetryClient<DashboardMigrationDashboard> {
   public startSiemMigrationTask() {
     const startTime = Date.now();
     const stats = { completed: 0, failed: 0 };

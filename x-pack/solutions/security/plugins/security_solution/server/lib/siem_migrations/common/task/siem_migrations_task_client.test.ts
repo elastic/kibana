@@ -36,7 +36,7 @@ const mockRunnerInstance = {
 } as unknown as SiemMigrationTaskRunner;
 
 const MockTaskRunnerClass = SiemMigrationTaskRunner as unknown as jest.MockedClass<
-  typeof SiemMigrationTaskRunner
+  new (...args: ConstructorParameters<typeof SiemMigrationTaskRunner>) => SiemMigrationTaskRunner
 >;
 
 MockTaskRunnerClass.mockImplementation(() => mockRunnerInstance);
