@@ -622,8 +622,7 @@
       },
       "incremental_id": {
         "fields": {
-          "raw": {
-            "ignore_above": 256,
+          "keyword": {
             "type": "keyword"
           }
         },

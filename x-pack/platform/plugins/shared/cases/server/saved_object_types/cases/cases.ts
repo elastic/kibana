@@ -243,9 +243,8 @@ export const createCaseSavedObjectType = (
       incremental_id: {
         type: 'unsigned_long',
         fields: {
-          raw: {
+          keyword: {
             type: 'keyword',
-            ignore_above: 256,
           },
         },
       },

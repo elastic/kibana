@@ -14,7 +14,7 @@ export const casesSchema = casesSchemaV4.extends({
       schema.oneOf([
         schema.number(),
         schema.object({
-          raw: schema.maybe(schema.string()),
+          keyword: schema.maybe(schema.string()),
         }),
       ])
     )
