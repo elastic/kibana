@@ -92,7 +92,7 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description:
-            'The name of the event that is tracked in the metrics i.e. kqlQueryUpdate, esqlQueryUpdate',
+            'The name of the event that is tracked in the metrics i.e. kqlQuery, esqlQuery',
         },
       },
       [QUERY_FIELDS_USAGE_FIELD_NAMES]: {

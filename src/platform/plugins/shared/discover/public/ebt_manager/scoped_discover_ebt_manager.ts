@@ -10,11 +10,7 @@
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import {
-  getKqlFieldNamesFromExpression,
-  isOfAggregateQueryType,
-  isOfQueryType,
-} from '@kbn/es-query';
+import { getKqlFieldNamesFromExpression, isOfAggregateQueryType } from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery, getSearchQueries } from '@kbn/esql-utils';
 import {
   CONTEXTUAL_PROFILE_ID,
@@ -46,7 +42,7 @@ enum FieldUsageEventName {
   filterAddition = 'filterAddition',
 }
 
-enum FieldUsageInQueryEventName {
+enum QueryFieldsUsageEventName {
   kqlQuery = 'kqlQuery',
   luceneQuery = 'luceneQuery',
   esqlQuery = 'esqlQuery',
@@ -57,8 +53,8 @@ interface FieldUsageEventData {
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
 }
 
-interface FieldUsageInQueryEventData {
-  [FIELD_USAGE_EVENT_NAME]: FieldUsageInQueryEventName;
+interface QueryFieldsUsageEventData {
+  [FIELD_USAGE_EVENT_NAME]: QueryFieldsUsageEventName;
   [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
 }
 
@@ -186,12 +182,12 @@ export class ScopedDiscoverEBTManager {
     });
   }
 
-  private async trackFieldUsageInQueryEvent({
+  private async trackQueryFieldsUsageEvent({
     eventName,
     fieldNames,
     fieldsMetadata,
   }: {
-    eventName: FieldUsageInQueryEventName;
+    eventName: QueryFieldsUsageEventName;
     fieldNames: string[];
     fieldsMetadata: FieldsMetadataPublicStart | undefined;
   }) {
@@ -201,7 +197,7 @@ export class ScopedDiscoverEBTManager {
 
     const isOnlyFullTextSearch = fieldNames.length === 1 && fieldNames[0] === FREE_TEXT;
 
-    const eventData: FieldUsageInQueryEventData = {
+    const eventData: QueryFieldsUsageEventData = {
       [FIELD_USAGE_EVENT_NAME]: eventName,
     };
 
@@ -259,12 +255,12 @@ export class ScopedDiscoverEBTManager {
         return;
       }
 
-      await this.trackFieldUsageInQueryEvent({
-        eventName: FieldUsageInQueryEventName.esqlQuery,
+      await this.trackQueryFieldsUsageEvent({
+        eventName: QueryFieldsUsageEventName.esqlQuery,
         fieldNames,
         fieldsMetadata,
       });
-    } else if (isOfQueryType(query)) {
+    } else {
       // KQL or Lucene query
 
       if (typeof query.query !== 'string' || query.query.trim() === '') {
@@ -276,11 +272,11 @@ export class ScopedDiscoverEBTManager {
       // we discarded an empty query earlier, so if we're getting an empty array here it's a full text search
       const fieldNames = extractedFieldNames.length === 0 ? [FREE_TEXT] : extractedFieldNames;
 
-      await this.trackFieldUsageInQueryEvent({
+      await this.trackQueryFieldsUsageEvent({
         eventName:
           query.language === 'lucene'
-            ? FieldUsageInQueryEventName.luceneQuery
-            : FieldUsageInQueryEventName.kqlQuery,
+            ? QueryFieldsUsageEventName.luceneQuery
+            : QueryFieldsUsageEventName.kqlQuery,
         fieldNames,
         fieldsMetadata,
       });
