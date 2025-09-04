@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { DashboardItem } from './types';
 
 import { savedObjectToItem } from './transform_utils';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 
 describe('savedObjectToItem', () => {
   const commonSavedObject: SavedObject = {
