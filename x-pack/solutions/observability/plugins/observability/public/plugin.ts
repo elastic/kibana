@@ -249,7 +249,7 @@ export class Plugin
         })
       );
     }
-    const { observability: category } = DEFAULT_APP_CATEGORIES;
+    const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
@@ -282,8 +282,7 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-      const { triggersActionsUi } = pluginsStart;
-      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
+      const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
       return renderApp({
         appMountParameters: params,
