@@ -62,7 +62,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = (props) => {
       </EuiText>
       {isFlyoutVisible && (
         <EuiFlyout
-          id="mainFlyout"
+          id={`mainFlyout-${title}`}
           onClose={handleCloseMainFlyout}
           aria-labelledby="flyoutTitle"
           size={mainSize}
@@ -100,7 +100,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = (props) => {
           </EuiFlyoutFooter>
           {isChildFlyoutVisible && (
             <EuiFlyout
-              id="childFlyout"
+              id={`childFlyout-${title}`}
               onClose={() => setIsChildFlyoutVisible(false)}
               aria-labelledby="childFlyoutTitle"
               size={childSize}
