@@ -30,7 +30,8 @@ export const columnsAfter = (
         columnsFromBranch = commandDef.methods?.columnsAfter?.(
           branchCommand,
           columnsFromBranch,
-          query
+          query,
+          {} // TODO support nested JOIN commands :scared-hedgie:
         );
       }
     }

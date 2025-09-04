@@ -156,22 +156,27 @@ describe('autocomplete', () => {
             {
               name: 'round(doubleField) + 1',
               type: 'double',
+              userDefined: false,
             },
             {
               name: '`round(doubleField) + 1` + 1',
               type: 'double',
+              userDefined: false,
             },
             {
               name: '```round(doubleField) + 1`` + 1` + 1',
               type: 'double',
+              userDefined: false,
             },
             {
               name: '```````round(doubleField) + 1```` + 1`` + 1` + 1',
               type: 'double',
+              userDefined: false,
             },
             {
               name: '```````````````round(doubleField) + 1```````` + 1```` + 1`` + 1` + 1',
               type: 'double',
+              userDefined: false,
             },
           ],
         ]
@@ -184,12 +189,22 @@ describe('autocomplete', () => {
 
         expect(
           await getSuggestions('from a_index | EVAL foo = 1 | KEEP /', {
-            callbacks: { getColumnsFor: () => [...fields, { name: 'foo', type: 'integer' }] },
+            callbacks: {
+              getColumnsFor: () => [
+                ...fields,
+                { name: 'foo', type: 'integer', userDefined: false },
+              ],
+            },
           })
         ).toContain('foo');
         expect(
           await getSuggestions('from a_index | EVAL foo = 1 | KEEP foo, /', {
-            callbacks: { getColumnsFor: () => [...fields, { name: 'foo', type: 'integer' }] },
+            callbacks: {
+              getColumnsFor: () => [
+                ...fields,
+                { name: 'foo', type: 'integer', userDefined: false },
+              ],
+            },
           })
         ).not.toContain('foo');
 
@@ -1091,21 +1106,21 @@ describe('autocomplete', () => {
         'FROM index_a | KEEP field.nam/',
         [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
-        [[{ name: 'field.name', type: 'double' }]]
+        [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
       // multi-line
       testSuggestions(
         'FROM index_a\n| KEEP field.nam/',
         [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
-        [[{ name: 'field.name', type: 'double' }]]
+        [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
       // triple separator
       testSuggestions(
         'FROM index_c\n| KEEP field.name.f/',
         [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
-        [[{ name: 'field.name.foo', type: 'double' }]]
+        [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
       );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(
@@ -1113,7 +1128,7 @@ describe('autocomplete', () => {
         'FROM index_a | KEEP field . n/',
         [{ text: 'field . name', rangeToReplace: { start: 14, end: 22 } }],
         undefined,
-        [[{ name: 'field.name', type: 'double' }]]
+        [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
     });
   });

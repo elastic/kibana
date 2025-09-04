@@ -251,7 +251,7 @@ async function getSuggestionsWithinCommandExpression(
 
     const augmentedColumnsMap = new Map(columnMap);
     extraColumnNames.forEach((name) => {
-      augmentedColumnsMap.set(name, { name, type: 'double' });
+      augmentedColumnsMap.set(name, { name, type: 'double', userDefined: false });
     });
     return findNewUserDefinedColumn(augmentedColumnsMap);
   };
