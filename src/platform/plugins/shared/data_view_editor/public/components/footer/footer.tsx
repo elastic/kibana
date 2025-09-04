@@ -108,6 +108,14 @@ export const Footer = ({
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
+            {showDuplicateButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButton color="primary" onClick={onDuplicate} data-test-subj="duplicateButton">
+                  {duplicateButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -143,13 +151,6 @@ export const Footer = ({
                       ? editButtonLabel
                       : editUnpersistedButtonLabel
                     : saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            {showDuplicateButton && (
-              <EuiFlexItem grow={false}>
-                <EuiButton color="primary" onClick={onDuplicate} data-test-subj="duplicateButton">
-                  {duplicateButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             )}
