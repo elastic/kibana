@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,17 +59,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [authorName, setAuthorName] = useState('');
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
   const authorId = item?.accessControl?.owner || item.createdBy;
   const query = useUserProfile(authorId as string);
-
-  useEffect(() => {
-    if (query.isSuccess && query.data) {
-      setAuthorName(query.data.user.username);
-    }
-  }, [query.isSuccess, query.data]);
+  const authorName = query.data?.user.username;
 
   const defaultReadonlyReasons = new Map<string, string>([
     [
