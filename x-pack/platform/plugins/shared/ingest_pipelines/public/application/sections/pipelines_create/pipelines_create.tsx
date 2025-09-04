@@ -32,8 +32,11 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
   const history = useHistory<LocationState>();
 
   const locationSearchParams = useMemo(() => {
+    // A note: do not double encode the 'name' param when passing it in the URL
+    // because URLSearchParams.get('name') will automatically decode pipeline name
+    // so a single encode is enough.
     return new URLSearchParams(history.location.search);
-  }, [history.location.search]);
+  }, [history.location]);
 
   const formDefaultValue = useMemo(() => {
     if (sourcePipeline) {
