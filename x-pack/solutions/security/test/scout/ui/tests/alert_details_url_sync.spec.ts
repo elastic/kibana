@@ -14,7 +14,28 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
   let ruleName: string;
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
-    await apiServices.detectionRule.createCustomQueryRule({ ...CUSTOM_QUERY_RULE, name: ruleName });
+
+    // Create the rule with a more recent 'from' time to catch new data
+    const ruleWithRecentFromTime = {
+      ...CUSTOM_QUERY_RULE,
+      name: ruleName,
+      from: 'now-1m', // Look for data from the last minute
+    };
+    await apiServices.detectionRule.createCustomQueryRule(ruleWithRecentFromTime);
+
+    // Generate test data that will trigger the rule
+    await apiServices.detectionRule.indexTestDocument('logs-test', {
+      'event.category': 'security',
+      'event.type': 'alert',
+      message: 'Test security event for detection rule',
+      'host.name': 'test-host',
+      'user.name': 'test-user',
+    });
+
+    // Wait for the rule to execute (detection rules typically run every 1-5 minutes)
+    // In test environments, this might be faster
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds
+
     await browserAuth.loginAsPlatformEngineer();
   });
 
