@@ -8,12 +8,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import type { EuiBetaBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { LEGACY_LABEL, TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import {
+  DEPRECATED_LABEL,
+  DEPRECATED_DESCRIPTION,
+  TECH_PREVIEW_DESCRIPTION,
+  TECH_PREVIEW_LABEL,
+} from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
@@ -134,18 +140,25 @@ export const ActionTypeMenu = ({
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
+      const betaBadgeProps =
+        item.isExperimental || item.isDeprecated
+          ? ({
+              label: item.isExperimental ? TECH_PREVIEW_LABEL : DEPRECATED_LABEL,
+              tooltipContent: item.isExperimental
+                ? TECH_PREVIEW_DESCRIPTION
+                : DEPRECATED_DESCRIPTION,
+              color: item.isDeprecated ? 'subdued' : undefined,
+            } as EuiBetaBadgeProps)
+          : undefined;
+
       const card = (
         <EuiCard
-          betaBadgeProps={
-            item.isExperimental
-              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
-              : undefined
-          }
+          betaBadgeProps={betaBadgeProps}
           role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
-          title={`${item.name}${item.isDeprecated ? ` ${LEGACY_LABEL}` : ''}`}
+          title={item.name}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => {
