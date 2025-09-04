@@ -174,7 +174,7 @@ export const DiscoverTopNav = ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
-      gutterSize: 'xs' as EuiHeaderLinksProps['gutterSize'],
+      gutterSize: 'xxs' as EuiHeaderLinksProps['gutterSize'],
     }),
     [setHeaderActionMenu, topNavBadges, topNavMenu]
   );
