@@ -70,6 +70,5 @@
     "@kbn/openapi-common",
     "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/cloud-security-posture"
   ]
 }
