@@ -65,7 +65,7 @@ const CI_CHECKS = {
   },
   quick_checks: {
     name: 'Quick Checks',
-    command: 'node --no-experimental-require-module scripts/quick_checks',
+    command: 'yarn quick-checks',
     description: 'Run quick validation checks',
   },
   linting: {
@@ -75,7 +75,7 @@ const CI_CHECKS = {
   },
   type_check: {
     name: 'Type Check',
-    command: 'node --no-experimental-require-module scripts/type_check',
+    command: 'yarn test:type_check',
     description: 'Run TypeScript type checking',
   },
   linting_with_types: {
