@@ -18,7 +18,7 @@ import type {
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { IRouter, StartServicesAccessor, Logger } from '@kbn/core/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -49,7 +49,7 @@ export interface SearchConnectorsPluginSetupDependencies {
   cloud: CloudSetup;
   licensing?: LicensingPluginStart;
   log: Logger;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   router: IRouter;
   getStartServices: StartServicesAccessor<SearchConnectorsPluginStartDependencies, unknown>;
 }

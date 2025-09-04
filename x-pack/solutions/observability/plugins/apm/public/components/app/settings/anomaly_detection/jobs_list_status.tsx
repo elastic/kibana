@@ -7,7 +7,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-common-constants/states';
 import { MLManageJobsLink } from '../../../shared/links/machine_learning_links/mlmanage_jobs_link';
 
 export function JobsListStatus({

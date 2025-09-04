@@ -6,7 +6,7 @@
  */
 
 import { processFilters } from './process_filters';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-ui-actions';
 
 describe('processFilters', () => {
   test('should format kql embeddable input to es query', () => {

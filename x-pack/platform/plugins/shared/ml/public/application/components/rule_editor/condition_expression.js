@@ -25,7 +25,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_DETECTOR_RULE_APPLIES_TO, ML_DETECTOR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
+import {
+  ML_DETECTOR_RULE_APPLIES_TO,
+  ML_DETECTOR_RULE_OPERATOR,
+} from '@kbn/ml-anomaly-utils/detector_rule';
 
 import { appliesToText, operatorToText } from './utils';
 

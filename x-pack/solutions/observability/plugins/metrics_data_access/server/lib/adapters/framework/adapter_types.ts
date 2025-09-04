@@ -20,7 +20,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { VersionedRouteConfig, RouteSecurity } from '@kbn/core-http-server';
@@ -36,7 +36,7 @@ export interface InfraServerPluginSetupDeps {
   share: SharePluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
 }
 

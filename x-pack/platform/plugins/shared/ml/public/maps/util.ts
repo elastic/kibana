@@ -22,7 +22,7 @@ import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common
 import { type MLAnomalyDoc, getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import type { MlApi } from '../application/services/ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { tabColor } from '../../common/util/group_color_utils';
 import { AnomalySource } from './anomaly_source';
 import type { ExplorerJob } from '../application/explorer/explorer_utils';

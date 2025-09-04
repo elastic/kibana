@@ -9,6 +9,7 @@ import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 import { cloneDeep, isEqual } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -20,8 +21,10 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { DeepReadonly } from '../../../../../../../common/types/common';
-import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
+import type { DeepReadonly } from '@kbn/ml-common-types/common';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
+import { useMlManagementLocator } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
 import type { State } from '../../hooks/use_create_analytics_form/state';
 import type { DataFrameAnalyticsListRow } from '../analytics_list/common';

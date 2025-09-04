@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { MlDatafeedStats, MlJob, MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlDatafeedStats, MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { MlJobMetric, MlJobUsageMetric } from './types';
 
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
@@ -16,7 +17,7 @@ import { updateMlJobUsage } from './update_usage';
 import { getJobCorrelations } from './transform_utils/get_job_correlations';
 
 export interface GetMlJobMetricsOptions {
-  mlClient: MlPluginSetup | undefined;
+  mlClient: MlServerPluginSetup | undefined;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
 }

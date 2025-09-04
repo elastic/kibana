@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { GeoJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { GeoMapExamples } from './geo_map_examples';
 
 export const GeoDetectorsSummary: FC = () => {

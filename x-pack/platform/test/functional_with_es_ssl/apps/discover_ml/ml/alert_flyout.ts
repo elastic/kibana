@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
+import { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 function createTestJobAndDatafeed() {

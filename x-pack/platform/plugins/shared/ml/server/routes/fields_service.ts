@@ -6,15 +6,15 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import {
   getCardinalityOfFieldsResponse,
   getCardinalityOfFieldsSchema,
   getTimeFieldRangeResponse,
   getTimeFieldRangeSchema,
-} from './schemas/fields_service_schema';
+} from '@kbn/ml-server-api-schemas/fields_service_schema';
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
 import { fieldsServiceProvider } from '../models/fields_service';
 
 function getCardinalityOfFields(client: IScopedClusterClient, payload: any) {

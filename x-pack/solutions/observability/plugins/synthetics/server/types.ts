@@ -25,7 +25,7 @@ import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,

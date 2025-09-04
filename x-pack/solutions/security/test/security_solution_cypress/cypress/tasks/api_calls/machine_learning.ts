@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-plugin/common/constants/app';
-import type { Module } from '@kbn/ml-plugin/common/types/modules';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { rootRequest } from './common';
 
 export const fetchMachineLearningModules = () => {
