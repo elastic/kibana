@@ -24,7 +24,7 @@ import {
   staticOperationDefinitionSchema,
   uniqueCountMetricOperationSchema,
   sumMetricOperationSchema,
-  esqlValueSchema,
+  esqlColumnSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
@@ -169,7 +169,7 @@ const metricStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
-export const metricStateSchema = schema.object({
+export const metricStateSchemaNoESQL = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -242,33 +242,31 @@ export const metricStateSchema = schema.object({
   ),
 });
 
-const esqlMetricState = schema.allOf([
-  sharedPanelInfoSchema,
-  layerSettingsSchema,
-  schema.object({
-    type: schema.literal('metric'),
-    ...datasetEsqlTableSchema,
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metric: schema.allOf([metricStatePrimaryMetricOptionsSchema, esqlValueSchema]),
-    /**
-     * Secondary value configuration, must define operation.
-     */
-    secondary_metric: schema.maybe(
-      schema.allOf([metricStateSecondaryMetricOptionsSchema, esqlValueSchema]),
-    ),
-    /**
-     * Configure how to break down the metric (e.g. show one metric per term).
-     */
-    breakdown_by: schema.maybe(
-      schema.allOf([metricStateBreakdownByOptionsSchema, esqlValueSchema])
-    ),
-  }),
-]);
+const esqlMetricState = schema.object({
+  type: schema.literal('metric'),
+  ...sharedPanelInfoSchema,
+  ...layerSettingsSchema,
+  ...datasetEsqlTableSchema,
+  /**
+   * Primary value configuration, must define operation.
+   */
+  metric: schema.allOf([metricStatePrimaryMetricOptionsSchema, esqlColumnSchema]),
+  /**
+   * Secondary value configuration, must define operation.
+   */
+  secondary_metric: schema.maybe(
+    schema.allOf([metricStateSecondaryMetricOptionsSchema,  esqlColumnSchema]),
+  ),
+  /**
+   * Configure how to break down the metric (e.g. show one metric per term).
+   */
+  breakdown_by: schema.maybe(
+    schema.allOf([metricStateBreakdownByOptionsSchema, esqlColumnSchema])
+  ),
+});
 
-export const metricStateWithEsqlSupportSchema = schema.oneOf(
-  [metricStateSchema, esqlMetricState]
+export const metricStateSchema = schema.oneOf(
+  [metricStateSchemaNoESQL, esqlMetricState]
 );
 
-export type MetricState = TypeOf<typeof metricStateWithEsqlSupportSchema>;
+export type MetricState = TypeOf<typeof metricStateSchema>;

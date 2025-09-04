@@ -60,7 +60,7 @@ export const formulaOperationDefinitionSchema = schema.object({
   }),
 });
 
-export const esqlValueSchema = schema.object({
+export const esqlColumnSchema = schema.object({
   /**
    * Value
    */

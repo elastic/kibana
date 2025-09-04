@@ -8,7 +8,7 @@
  */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { metricStateSchema, metricStateWithEsqlSupportSchema } from './metric';
+import { metricStateSchema } from './metric';
 
 describe('Metric Schema', () => {
   const baseMetricConfig = {
@@ -337,7 +337,7 @@ describe('Metric Schema', () => {
         },
       };
 
-      const validated = metricStateWithEsqlSupportSchema.validate(input);
+      const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });

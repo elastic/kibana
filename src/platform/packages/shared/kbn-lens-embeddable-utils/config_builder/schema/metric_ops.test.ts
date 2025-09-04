@@ -28,7 +28,7 @@ import {
   movingAverageOperationSchema,
   cumulativeSumOperationSchema,
   counterRateOperationSchema,
-  esqlValueSchema,
+  esqlColumnSchema,
 } from './metric_ops';
 
 describe('Metric Operations Schemas', () => {
@@ -38,7 +38,7 @@ describe('Metric Operations Schemas', () => {
         column: 'sum' as const,
       };
 
-      const validated = esqlValueSchema.validate(input);
+      const validated = esqlColumnSchema.validate(input);
       expect(validated).toEqual(input);
     });
   });
