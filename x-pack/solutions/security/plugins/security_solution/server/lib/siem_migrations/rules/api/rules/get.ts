@@ -64,6 +64,7 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
                   partiallyTranslated: req.query.is_partially_translated,
                   untranslatable: req.query.is_untranslatable,
                   failed: req.query.is_failed,
+                  missingIndex: req.query.is_missing_index,
                 },
                 sort: { sortField: req.query.sort_field, sortDirection: req.query.sort_direction },
                 size,
