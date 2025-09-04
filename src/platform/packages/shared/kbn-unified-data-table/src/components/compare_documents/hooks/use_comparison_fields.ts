@@ -9,7 +9,6 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
@@ -22,7 +21,6 @@ export interface UseComparisonFieldsProps {
   showAllFields: boolean;
   showMatchingValues: boolean;
   getDocById: (id: string) => DataTableRecord | undefined;
-  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 export const useComparisonFields = ({
@@ -32,7 +30,6 @@ export const useComparisonFields = ({
   showAllFields,
   showMatchingValues,
   getDocById,
-  additionalFieldGroups,
 }: UseComparisonFieldsProps) => {
   const { baseDoc, comparisonDocs } = useMemo(() => {
     const [baseDocId, ...comparisonDocIds] = selectedDocIds;
@@ -83,13 +80,5 @@ export const useComparisonFields = ({
     }
 
     return { comparisonFields, totalFields };
-  }, [
-    additionalFieldGroups,
-    baseDoc,
-    comparisonDocs,
-    dataView,
-    selectedFieldNames,
-    showAllFields,
-    showMatchingValues,
-  ]);
+  }, [baseDoc, comparisonDocs, dataView, selectedFieldNames, showAllFields, showMatchingValues]);
 };
