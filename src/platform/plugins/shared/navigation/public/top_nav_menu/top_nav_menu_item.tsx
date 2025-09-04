@@ -91,7 +91,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
     className: props.className,
-    color: (props.color ?? 'primary') as EuiButtonColor,
+    color: (props.color ?? 'text') as EuiButtonColor,
     ...routerLinkProps,
   };
 

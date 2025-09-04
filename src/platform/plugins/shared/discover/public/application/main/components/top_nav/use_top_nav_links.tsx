@@ -206,7 +206,7 @@ export const useTopNavLinks = ({
             }),
         emphasize: true,
         fill: false,
-        color: 'text',
+        color: 'success',
         tooltip: isEsqlMode
           ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
               defaultMessage: 'Switch to KQL or Lucene syntax.',
@@ -252,7 +252,9 @@ export const useTopNavLinks = ({
           defaultMessage: 'Save session',
         }),
         testId: 'discoverSaveButton',
-        iconType: 'save',
+        fill: false,
+        color: 'text',
+        emphasize: true,
         run: (anchorElement: HTMLElement) => {
           onSaveSearch({
             savedSearch: state.savedSearchState.getState(),

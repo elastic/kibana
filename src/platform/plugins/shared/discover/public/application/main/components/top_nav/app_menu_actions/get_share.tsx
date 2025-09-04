@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import type { AppMenuActionPrimary } from '@kbn/discover-utils';
+import type { AppMenuActionSecondary } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -28,7 +28,7 @@ export const getShareAppMenuItem = ({
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-}): AppMenuActionPrimary[] => {
+}): AppMenuActionSecondary[] => {
   if (!services.share) {
     return [];
   }
@@ -152,10 +152,10 @@ export const getShareAppMenuItem = ({
     });
   };
 
-  const menuItems: AppMenuActionPrimary[] = [
+  const menuItems: AppMenuActionSecondary[] = [
     {
       id: AppMenuActionId.share,
-      type: AppMenuActionType.primary,
+      type: AppMenuActionType.secondary,
       controlProps: {
         label: i18n.translate('discover.localMenu.shareTitle', {
           defaultMessage: 'Share',
@@ -163,7 +163,6 @@ export const getShareAppMenuItem = ({
         description: i18n.translate('discover.localMenu.shareSearchDescription', {
           defaultMessage: 'Share Discover session',
         }),
-        iconType: 'share',
         testId: 'shareTopNavButton',
         onClick: ({ anchorElement }) => shareExecutor({ anchorElement }),
       },
@@ -173,7 +172,7 @@ export const getShareAppMenuItem = ({
   if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
     menuItems.unshift({
       id: AppMenuActionId.export,
-      type: AppMenuActionType.primary,
+      type: AppMenuActionType.secondary,
       controlProps: {
         label: i18n.translate('discover.localMenu.exportTitle', {
           defaultMessage: 'Export',
@@ -181,7 +180,6 @@ export const getShareAppMenuItem = ({
         description: i18n.translate('discover.localMenu.shareSearchDescription', {
           defaultMessage: 'Export Discover session',
         }),
-        iconType: 'download',
         testId: 'exportTopNavButton',
         onClick: ({ anchorElement }) => shareExecutor({ anchorElement, asExport: true }),
       },
