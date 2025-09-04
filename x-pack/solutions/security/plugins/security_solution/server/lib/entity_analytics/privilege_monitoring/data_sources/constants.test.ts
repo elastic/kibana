@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { IntegrationType } from './constants';
 import {
   AD_ADMIN_ROLES,
-  defaultMonitoringUsersIndex,
   getMatchersFor,
   getStreamPatternFor,
   INTEGRATION_MATCHERS_DETAILED,
