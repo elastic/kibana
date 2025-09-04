@@ -132,7 +132,7 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
-    stack.push(scopeId!);
+    stack.push(scopeId as string);
     this.workflowExecutionState.updateWorkflowExecution({
       stack,
     });

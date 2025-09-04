@@ -71,7 +71,7 @@ export class EnterForeachNodeImpl implements StepImplementation, StepErrorCatche
     // Enter a new scope for the whole foreach
     this.wfExecutionRuntimeManager.enterScope();
 
-    // Enter a new scope fore the first iteration
+    // Enter a new scope for the first iteration
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
     this.wfExecutionRuntimeManager.goToNextStep();
