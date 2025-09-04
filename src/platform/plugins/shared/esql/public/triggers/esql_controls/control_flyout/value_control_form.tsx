@@ -23,11 +23,7 @@ import {
   type ESQLControlState,
   type ControlWidthOptions,
 } from '@kbn/esql-types';
-import {
-  getIndexPatternFromESQLQuery,
-  getESQLResults,
-  appendStatsByToQuery,
-} from '@kbn/esql-utils';
+import { getESQLResults, appendStatsByToQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -194,11 +190,7 @@ export function ValueControlForm({
       controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
       valuesRetrieval
     ) {
-      const queryForValues =
-        variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
-          : '';
-      onValuesQuerySubmit(queryForValues);
+      onValuesQuerySubmit(queryString);
     }
   }, [
     controlFlyoutType,

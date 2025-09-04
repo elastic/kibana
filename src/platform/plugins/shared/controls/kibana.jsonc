@@ -16,7 +16,8 @@
       "dataViews",
       "data",
       "unifiedSearch",
-      "uiActions"
+      "uiActions",
+      "esql"
     ],
     "extraPublicDirs": ["common"]
   }

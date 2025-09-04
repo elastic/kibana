@@ -13,12 +13,13 @@ import { BehaviorSubject, merge } from 'rxjs';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { initializeStateManager } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { openESQLControlFlyout } from '@kbn/esql/public';
 import type { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
-import { uiActionsService } from '../../services/kibana_services';
+import { coreServices, dataService } from '../../services/kibana_services';
 import {
   defaultControlComparators,
   initializeDefaultControlManager,
@@ -80,34 +81,26 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getTypeDisplayName: () => displayName,
         onEdit: async () => {
           const nextState = {
+            ...state,
             ...defaultControlManager.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
-          const onSaveControl = (updatedState: ESQLControlState) => {
-            if (apiIsPresentationContainer(parentApi)) {
-              parentApi.replacePanel(uuid, {
-                panelType: 'esqlControl',
-                serializedState: {
-                  rawState: updatedState,
-                },
-              });
-            }
+          const onSaveControl = async (updatedState: ESQLControlState) => {
+            defaultControlManager.reinitializeState(updatedState);
+            selections.reinitializeState(updatedState);
           };
-          try {
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-              queryString: state.esqlQuery,
-              variableType: state.variableType,
-              controlType: state.controlType,
-              esqlVariables: variablesInParent,
-              onSaveControl,
-              initialState: nextState,
-            });
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error('Error getting ESQL control trigger', e);
-          }
+          openESQLControlFlyout({
+            core: coreServices,
+            search: dataService.search.search,
+            timefilter: dataService.query.timefilter.timefilter,
+            queryString: nextState.esqlQuery,
+            variableType: nextState.variableType,
+            esqlVariables: variablesInParent,
+            onSaveControl,
+            initialState: nextState,
+          });
         },
         serializeState,
       });

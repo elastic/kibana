@@ -21,9 +21,9 @@ import {
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
+import { openESQLControlFlyout } from './esql_control_helpers';
 
 function isESQLVariableType(value: string): value is ESQLVariableType {
   return Object.values(ESQLVariableType).includes(value as ESQLVariableType);
@@ -75,42 +75,6 @@ export class CreateESQLControlAction implements Action<Context> {
   }
 
   public async execute(context: Context) {
-    const getOpenLazyFlyoutParams = ({
-      queryString,
-      variableType,
-      esqlVariables,
-      onSaveControl,
-      onCancelControl,
-      cursorPosition,
-      initialState,
-    }: ESQLControlTriggerContext): Parameters<typeof openLazyFlyout>[0] => ({
-      core: this.core,
-      parentApi: this.search,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const { loadESQLControlFlyout } = await import('./esql_control_helpers');
-        return await loadESQLControlFlyout({
-          queryString,
-          core: this.core,
-          search: this.search,
-          timefilter: this.timefilter,
-          variableType,
-          esqlVariables,
-          ariaLabelledBy,
-          onSaveControl,
-          onCancelControl,
-          cursorPosition,
-          initialState,
-          closeFlyout,
-        });
-      },
-      flyoutProps: {
-        'data-test-subj': 'create_esql_control_flyout',
-        isResizable: true,
-        maxWidth: 800,
-        triggerId: 'dashboard-controls-menu-button',
-      },
-    });
-
     if (isESQLControlTriggerContext(context)) {
       const { variableType } = context;
 
@@ -118,7 +82,12 @@ export class CreateESQLControlAction implements Action<Context> {
         throw new IncompatibleActionError();
       }
 
-      openLazyFlyout(getOpenLazyFlyoutParams(context));
+      openESQLControlFlyout({
+        ...context,
+        core: this.core,
+        search: this.search,
+        timefilter: this.timefilter,
+      });
     } else {
       const embeddable = apiIsPresentationContainer(context.embeddable) ? context.embeddable : null;
       if (!embeddable) throw new Error('Embeddable API unable to add new panel');
@@ -127,23 +96,24 @@ export class CreateESQLControlAction implements Action<Context> {
         ? embeddable.esqlVariables$.value
         : [];
 
-      openLazyFlyout(
-        getOpenLazyFlyoutParams({
-          queryString: '',
-          variableType: ESQLVariableType.VALUES,
-          esqlVariables: variablesInParent,
-          onSaveControl: async (controlState: ESQLControlState) => {
-            embeddable.addNewPanel({
-              panelType: 'esqlControl',
-              serializedState: {
-                rawState: {
-                  ...controlState,
-                },
+      openESQLControlFlyout({
+        core: this.core,
+        search: this.search,
+        timefilter: this.timefilter,
+        queryString: '',
+        variableType: ESQLVariableType.VALUES,
+        esqlVariables: variablesInParent,
+        onSaveControl: async (controlState: ESQLControlState) => {
+          embeddable.addNewPanel({
+            panelType: 'esqlControl',
+            serializedState: {
+              rawState: {
+                ...controlState,
               },
-            });
-          },
-        })
-      );
+            },
+          });
+        },
+      });
     }
   }
 }
