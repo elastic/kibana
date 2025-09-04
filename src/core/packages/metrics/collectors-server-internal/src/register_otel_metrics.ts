@@ -74,7 +74,7 @@ function registerOtelMemoryMetrics(meter: Meter) {
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    heapTotal: meter.createObservableUpDownCounter('process.memory.heap.total', {
+    heapTotal: meter.createObservableUpDownCounter('process.memory.heap.allocated', {
       description: 'Process Memory: Total heap size pre-allocated.',
       unit: 'By',
       valueType: ValueType.INT,
