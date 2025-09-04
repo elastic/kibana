@@ -482,3 +482,12 @@ export function useLoadInferenceEndpoints() {
     method: 'get',
   });
 }
+
+export const convertToLookupIndex = async (sourceIndexName: string, lookupIndexName: string) => {
+  // Placeholder until reindex API is ready
+  return sendRequest({
+    path: `${API_BASE_PATH}/reindex`,
+    method: 'post',
+    body: JSON.stringify({ sourceIndexName, lookupIndexName }),
+  });
+};

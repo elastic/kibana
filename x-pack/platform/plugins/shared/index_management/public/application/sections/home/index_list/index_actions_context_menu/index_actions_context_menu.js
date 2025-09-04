@@ -20,12 +20,19 @@ import {
   EuiSpacer,
   EuiConfirmModal,
   htmlIdGenerator,
+  EuiText,
 } from '@elastic/eui';
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
-import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
+import {
+  INDEX_OPEN,
+  IndexDetailsSection,
+  MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX,
+  MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX,
+} from '../../../../../../common/constants';
 import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { AppContext } from '../../../../app_context';
+import { ConvertToLookupIndexModal } from '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;
@@ -243,6 +250,37 @@ export class IndexActionsContextMenu extends Component {
         }
       }
     });
+    if (selectedIndexCount === 1) {
+      const indexName = indexNames[0];
+      const isConvertable = this.isConvertableToLookupIndex(indexName);
+
+      items.push({
+        'data-test-subj': 'convertToLookupIndexButton',
+        name: (
+          <>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton"
+                defaultMessage="Convert to lookup index"
+              />
+            </EuiText>
+            {!isConvertable && (
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
+                  defaultMessage="Index too large to be converted."
+                />
+              </EuiText>
+            )}
+          </>
+        ),
+        disabled: !isConvertable,
+        onClick: () => {
+          this.closePopover();
+          this.setState({ renderConfirmModal: this.renderConvertToLookupIndexModal });
+        },
+      });
+    }
     const panelTree = {
       id: 0,
       title: i18n.translate('xpack.idxMgmt.indexActionsMenu.panelTitle', {
@@ -260,12 +298,12 @@ export class IndexActionsContextMenu extends Component {
     }));
   };
 
-  closePopoverAndExecute = (func) => {
+  closePopoverAndExecute = (func, param) => {
     this.setState({
       isPopoverOpen: false,
       renderConfirmModal: false,
     });
-    func();
+    func(param);
     this.props.resetSelection && this.props.resetSelection();
   };
 
@@ -460,6 +498,37 @@ export class IndexActionsContextMenu extends Component {
         {standardIndexModalBody}
       </EuiConfirmModal>
     );
+  };
+
+  renderConvertToLookupIndexModal = () => {
+    const { convertToLookupIndex, indexNames } = this.props;
+
+    return (
+      <ConvertToLookupIndexModal
+        onCloseModal={() => this.closeConfirmModal()}
+        onConvert={(lookupIndexName) =>
+          this.closePopoverAndExecute(convertToLookupIndex, lookupIndexName)
+        }
+        sourceIndexName={indexNames[0]}
+      />
+    );
+  };
+
+  isConvertableToLookupIndex = (indexName) => {
+    const index = this.props.indices.find((index) => index.name === indexName);
+
+    if (!index || !index.documents || !index.primary) {
+      return false;
+    }
+
+    if (
+      index.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
+      Number(index.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX
+    ) {
+      return true;
+    }
+
+    return false;
   };
 
   render() {

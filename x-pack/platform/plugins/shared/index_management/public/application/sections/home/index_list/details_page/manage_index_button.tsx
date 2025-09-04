@@ -19,6 +19,7 @@ import {
   forcemergeIndices as forcemergeIndicesRequest,
   openIndices as openIndicesRequest,
   refreshIndices as refreshIndicesRequest,
+  convertToLookupIndex as convertToLookupIndexRequest,
 } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
 import { httpService } from '../../../../services/http';
@@ -218,6 +219,31 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
     [reloadIndices, indexNames]
   );
 
+  const convertToLookupIndex = useCallback(
+    async (lookupIndexName: string) => {
+      setIsLoading(true);
+      const sourceIndexName = index.name;
+
+      try {
+        await convertToLookupIndexRequest(sourceIndexName, lookupIndexName);
+        setIsLoading(false);
+        notificationService.showSuccessToast(
+          i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastTitle', {
+            defaultMessage: 'Lookup index created',
+          }),
+          i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastMessage', {
+            defaultMessage: 'The {lookupIndexName} has been created.',
+            values: { lookupIndexName },
+          })
+        );
+      } catch (error) {
+        setIsLoading(false);
+        notificationService.showDangerToast(error.message);
+      }
+    },
+    [index.name]
+  );
+
   return (
     <IndexActionsContextMenu
       indexNames={indexNames}
@@ -235,6 +261,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       deleteIndices={deleteIndices}
       performExtensionAction={performExtensionAction}
       reloadIndices={reloadIndices}
+      convertToLookupIndex={convertToLookupIndex}
     />
   );
 };
