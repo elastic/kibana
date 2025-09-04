@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      ml.testResources.setKibanaTimeZoneToUTC();
+      await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.api.createAndRunAnomalyDetectionLookbackJob(testJobConfig, testDatafeedConfig);
     });
 
