@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { resultsServiceProvider } from './results_service';
-export { getTopInfluencers } from './top_influencers';
-export { getScoresByBucket, getInfluencerValueMaxScoreByTime } from './view_by';
+/**
+ * Hard limitation for the size of terms
+ * aggregations on influencers values.
+ */
+export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;
