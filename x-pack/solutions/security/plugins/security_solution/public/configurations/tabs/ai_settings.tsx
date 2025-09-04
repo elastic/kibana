@@ -20,14 +20,17 @@ import { useSpaceId } from '../../common/hooks/use_space_id';
 export const AISettings: React.FC = () => {
   const { navigateTo } = useNavigation();
   const {
-    application: {
-      navigateToApp,
-      capabilities: {
-        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
-      },
-    },
+    application,
     data: { dataViews },
+    settings,
   } = useKibana().services;
+
+  const {
+    navigateToApp,
+    capabilities: {
+      securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+    },
+  } = application;
   const spaceId = useSpaceId();
   const onTabChange = useCallback(
     (tab: string) => {
@@ -53,6 +56,8 @@ export const AISettings: React.FC = () => {
         dataViews={dataViews}
         onTabChange={onTabChange}
         currentTab={currentTab}
+        settings={settings}
+        application={application}
       />
     </AssistantSpaceIdProvider>
   ) : null;

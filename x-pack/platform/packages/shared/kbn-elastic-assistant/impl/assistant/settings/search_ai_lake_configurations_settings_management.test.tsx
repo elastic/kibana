@@ -24,6 +24,9 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import { ApplicationStart } from '@kbn/core/public';
+import { AIConnector } from '../../connectorland/connector_selector';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -46,6 +49,9 @@ const testProps = {
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONNECTORS_TAB,
+  settings: {} as SettingsStart,
+  application: {} as ApplicationStart,
+  connectors: [] as AIConnector[],
 };
 jest.mock('../../assistant_context');
 
