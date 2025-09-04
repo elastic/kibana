@@ -336,7 +336,9 @@ const ButtonContent: React.FC<{
             type="warning"
             color="danger"
             size="m"
-            data-test-subj="action-group-error-icon"
+            iconProps={{
+              'data-test-subj': 'action-group-error-icon',
+            }}
           />
         </EuiFlexItem>
       ) : (

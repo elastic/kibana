@@ -98,7 +98,9 @@ export const MetricItemIcon = ({
           )}
           type="pause"
           color="warning"
-          data-test-subj="syntheticsMetricItemIconButton"
+          iconProps={{
+            'data-test-subj': 'syntheticsMetricItemIconButton',
+          }}
         />
       </Container>
     );

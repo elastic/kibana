@@ -562,7 +562,9 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
             type="warning"
             color="danger"
             size="l"
-            data-test-subj="action-group-error-icon"
+            iconProps={{
+              'data-test-subj': 'action-group-error-icon',
+            }}
           />
         </EuiFlexItem>
       );

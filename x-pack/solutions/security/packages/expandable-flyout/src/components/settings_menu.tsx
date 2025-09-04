@@ -201,8 +201,11 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   <EuiIconTip
                     content={flyoutCustomProps?.pushVsOverlay?.tooltip}
                     type="info"
-                    data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID}
+                    iconProps={{
+                      'data-test-subj': SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID,
+                    }}
                     position="top"
+
                   />
                 )}
               </h3>
@@ -226,6 +229,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                     type="info"
                     data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
                     position="top"
+                    iconProps={{
+                      'data-test-subj': SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID,
+                    }}
                   />
                 )}
               </h3>

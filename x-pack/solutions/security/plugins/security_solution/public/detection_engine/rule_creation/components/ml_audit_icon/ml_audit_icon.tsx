@@ -38,7 +38,14 @@ const MlAuditIconComponent: FC<MlAuditIconProps> = ({ message }) => {
   }
 
   return (
-    <EuiIconTip content={message.text} type={icon} color={color} data-test-subj="mlJobAuditIcon" />
+    <EuiIconTip
+      content={message.text}
+      type={icon}
+      color={color}
+      iconProps={{
+        'data-test-subj': 'mlJobAuditIcon',
+      }}
+    />
   );
 };
 

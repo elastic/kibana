@@ -122,7 +122,9 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
                 position="top"
                 type="warning"
                 color="warning"
-                data-test-subj="preview-warning"
+                iconProps={{
+                  'data-test-subj': 'preview-warning',
+                }}
               />
             )}
           </EuiFlexItem>

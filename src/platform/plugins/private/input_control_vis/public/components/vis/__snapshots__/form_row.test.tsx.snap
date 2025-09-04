@@ -6,17 +6,11 @@ exports[`renders control with warning 1`] = `
   id="controlId"
   label={
     <React.Fragment>
-      <EuiToolTip
+      <EuiIconTip
         content="This is a warning"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
-      >
-        <EuiIcon
-          type="warning"
-        />
-      </EuiToolTip>
+        type="warning"
+      />
       test control
     </React.Fragment>
   }

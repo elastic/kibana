@@ -44,7 +44,9 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(
         <EuiIconTip
           position="top"
           content={errorMessage}
-          data-test-subj="firstLastSeenErrorToolTip"
+          iconProps={{
+            'data-test-subj': 'firstLastSeenErrorToolTip',
+          }}
           aria-label={`firstLastSeenError-${type}`}
           id={`firstLastSeenError-${field}-${type}`}
           type="warning"

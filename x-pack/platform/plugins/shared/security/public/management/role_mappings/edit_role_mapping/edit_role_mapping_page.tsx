@@ -206,14 +206,16 @@ export class EditRoleMappingPage extends Component<Props, State> {
           &nbsp;
           {this.isReadOnlyRoleMapping() && (
             <EuiIconTip
-              data-test-subj="readOnlyRoleMappingTooltip"
+              iconProps={{
+                'data-test-subj': 'readOnlyRoleMappingTooltip',
+              }}
               content={
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.readOnlyRoleMappingBadge.readOnlyRoleMappingCanNotBeModifiedTooltip"
                   defaultMessage="Read only role mappings are built-in and cannot be removed or modified."
                 />
               }
-              type={'lock'}
+              type="lock"
             />
           )}
         </>

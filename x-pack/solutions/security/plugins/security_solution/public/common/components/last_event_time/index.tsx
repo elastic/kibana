@@ -39,10 +39,12 @@ export const LastEventTime = memo<LastEventTimeProps>(
         <EuiIconTip
           position="top"
           content={errorMessage}
-          data-test-subj="last_event_time_error"
           aria-label="last_event_time_error"
           id={`last_event_time_error-${indexKey}`}
           type="warning"
+          iconProps={{
+            'data-test-subj': 'last_event_time_error',
+          }}
         />
       );
     }
