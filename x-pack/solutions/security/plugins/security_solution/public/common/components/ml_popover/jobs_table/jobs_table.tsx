@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { useMlManagementHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { useMlManagementHref } from '@kbn/ml-locator/use_ml_management_href';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { PopoverItems } from '../../popover_items';
 import { useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';

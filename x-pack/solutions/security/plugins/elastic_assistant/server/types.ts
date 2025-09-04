@@ -24,7 +24,7 @@ import type {
   UserProfileServiceStart,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import { type MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
@@ -130,7 +130,7 @@ export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   alerting: AlertingServerSetup;
   eventLog: IEventLogService; // for writing to the event log
-  ml: MlPluginSetup;
+  ml: MlServerPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;

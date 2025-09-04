@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { DetectionMetrics } from './types';
 
 import { getMlJobMetrics } from './ml_jobs/get_metrics';
@@ -29,7 +29,7 @@ export interface GetDetectionsMetricsOptions {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  mlClient: MlPluginSetup | undefined;
+  mlClient: MlServerPluginSetup | undefined;
   eventLogIndex: string;
   legacySignalsIndex: string;
 }

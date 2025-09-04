@@ -14,7 +14,7 @@ import {
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import pRetry from 'p-retry';
@@ -49,7 +49,7 @@ const telemetry = coreMock.createSetup().analytics;
 
 describe('AIAssistantKnowledgeBaseDataClient', () => {
   let mockOptions: KnowledgeBaseDataClientParams;
-  let ml: MlPluginSetup;
+  let ml: MlServerPluginSetup;
   const getElserId = jest.fn();
   const mockLoadSecurityLabs = loadSecurityLabs as jest.Mock;
   const mockGetSecurityLabsDocsCount = getSecurityLabsDocsCount as jest.Mock;
@@ -60,7 +60,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
     jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     mockLoadSecurityLabs.mockClear();
-    ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
+    ml = mlPluginMock.createSetupContract() as unknown as MlServerPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
     mockOptions = {
       logger,
       elasticsearchClientPromise: Promise.resolve(esClientMock),

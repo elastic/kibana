@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-node-checks/ml_jobs_awaiting_node_warning';
 import { FeatureFeedbackButton, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
 import {
@@ -342,6 +342,10 @@ const CreateJobTab = (props: CreateJobTab) => {
               <>
                 {props.hasHostJobs && (
                   <EuiButtonEmpty
+                    aria-label={i18n.translate(
+                      'xpack.infra.createJobTab.recreatejobsButton.ariaLabel',
+                      { defaultMessage: 'Recreate jobs' }
+                    )}
                     data-test-subj="infraCreateJobTabRecreateJobsButton"
                     onClick={props.createHosts}
                   >
@@ -388,6 +392,10 @@ const CreateJobTab = (props: CreateJobTab) => {
                 <>
                   {props.hasK8sJobs && (
                     <EuiButtonEmpty
+                      aria-label={i18n.translate(
+                        'xpack.infra.createJobTab.recreatejobsButton.ariaLabel',
+                        { defaultMessage: 'Recreate jobs' }
+                      )}
                       data-test-subj="infraCreateJobTabRecreateJobsButton"
                       onClick={props.createK8s}
                     >

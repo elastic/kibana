@@ -18,7 +18,8 @@ import {
   type DataFrameTaskStateType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { Datafeed, Job } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { setupModuleBodySchema } from '@kbn/ml-server-api-schemas/modules';
 import {

@@ -160,5 +160,6 @@
     "@kbn/ml-saved-objects",
     "@kbn/ml-locator",
     "@kbn/ml-plugin-contracts",
+    "@kbn/ml-node-checks",
   ]
 }
