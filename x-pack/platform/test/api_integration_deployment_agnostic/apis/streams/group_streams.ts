@@ -43,12 +43,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'A Group stream',
                   group: {
+                    metadata: {},
                     tags: [],
                     members: ['logs'],
                   },
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
           })
@@ -62,6 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 group: {
+                  metadata: {},
                   tags: [],
                   members: ['logs'],
                 },
@@ -96,12 +99,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -122,12 +127,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'test-group',
               description: 'A Group stream',
               group: {
+                metadata: {},
                 tags: [],
                 members: ['logs'],
               },
             },
             dashboards: [],
             queries: [],
+            rules: [],
           });
         });
 
@@ -140,12 +147,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs.test'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -164,12 +173,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'test-group',
               description: 'A Group stream',
               group: {
+                metadata: {},
                 tags: [],
                 members: ['logs.test'],
               },
             },
             dashboards: [],
             queries: [],
+            rules: [],
           });
         });
 
@@ -194,12 +205,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs', 'logs.test'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -213,12 +226,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['test-group'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -258,12 +273,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['test-group'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -279,12 +296,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['non-existent-stream'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -300,12 +319,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs', 'logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -325,12 +346,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -346,12 +369,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: ['logs'],
                     },
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             })
@@ -367,6 +392,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 path: { name: 'test-group' },
                 body: {
                   group: {
+                    metadata: {},
                     tags: [],
                     members: ['logs.test2'],
                   },
@@ -387,6 +413,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(response.body).to.eql({
             group: {
+              metadata: {},
               tags: [],
               members: ['logs.test2'],
             },
