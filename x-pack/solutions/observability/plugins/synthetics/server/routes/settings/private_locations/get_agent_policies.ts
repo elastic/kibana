@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -46,6 +47,6 @@ export const getAgentPoliciesAsInternalUser = async ({
     status: agentPolicy.status,
     description: agentPolicy.description,
     namespace: agentPolicy.namespace,
-    spaceIds: agentPolicy.space_ids || [agentPolicy.namespace],
+    spaceIds: agentPolicy.space_ids || [DEFAULT_SPACE_ID],
   }));
 };
