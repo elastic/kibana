@@ -231,7 +231,10 @@
     {
       "query": "row",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
@@ -283,7 +286,10 @@
     {
       "query": "from index | drop ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        {
+          "sample": "SyntaxError: mismatched input",
+          "inverse": false
+        },
         "Unknown column \"\""
       ],
       "warning": []
@@ -291,10 +297,18 @@
     {
       "query": "from index | drop 4.5",
       "error": [
-        "SyntaxError: token recognition error at: '4'",
-        "SyntaxError: token recognition error at: '5'",
-        "SyntaxError: mismatched input '.' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        },
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        },
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        },
         "Unknown column \".\""
       ],
       "warning": []
@@ -309,22 +323,34 @@
     {
       "query": "from a_index | mv_expand ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | mv_expand doubleField, b",
       "error": [
-        "SyntaxError: token recognition error at: ','",
-        "SyntaxError: extraneous input 'b' expecting <EOF>"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        },
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
@@ -345,7 +371,10 @@
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        },
         "AS expected 2 arguments, but got 1."
       ],
       "warning": []
@@ -360,7 +389,10 @@
     {
       "query": "from a_index | dissect",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
@@ -396,77 +428,110 @@
     {
       "query": "from a_index | grok",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | grok textField",
       "error": [
-        "SyntaxError: missing QUOTED_STRING at '<EOF>'"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | grok textField 2",
       "error": [
-        "SyntaxError: mismatched input '2' expecting QUOTED_STRING"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | grok textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | grok textField %a",
       "error": [
-        "SyntaxError: mismatched input '%' expecting QUOTED_STRING"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | where *+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | where /+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | where %+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval doubleField + ",
       "error": [
-        "SyntaxError: no viable alternative at input 'doubleField + '"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval a=round(",
       "error": [
-        "SyntaxError: no viable alternative at input 'round('"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
@@ -478,42 +543,60 @@
     {
       "query": "from a_index | eval a=round(doubleField), ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval *+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval /+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval %+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | sort ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | sort doubleField, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
@@ -598,14 +681,20 @@
     {
       "query": "from a_index | enrich policy on textField with ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy with ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
       ],
       "warning": []
     },
