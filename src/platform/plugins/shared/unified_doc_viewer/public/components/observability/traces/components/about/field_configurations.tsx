@@ -32,9 +32,9 @@ import { EuiBadge } from '@elastic/eui';
 import type { TraceDocumentOverview } from '@kbn/discover-utils';
 import type { ContentFrameworkTableProps } from '../../../../content_framework';
 import { ServiceNameLink } from '../service_name_link';
-import { DependencyNameLink } from '../../doc_viewer_span_overview/sub_components/dependency_name_link';
 import { TransactionNameLink } from '../transaction_name_link';
 import { HighlightField } from '../highlight_field';
+import { DependencyNameLink } from '../dependency_name_link';
 
 export const getSharedFieldConfigurations = (
   flattenedHit: TraceDocumentOverview
