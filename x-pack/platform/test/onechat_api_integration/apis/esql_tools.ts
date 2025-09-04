@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(response.body).to.have.property('message');
-        expect(response.body.message).to.contain('Invalid tool id: invalid tool id!');
+        expect(response.body.message).to.contain('Invalid tool id: "invalid tool id!"');
       });
 
       it('should require required fields', async () => {
