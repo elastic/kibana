@@ -1759,7 +1759,7 @@
     "file-loader": "^4.2.0",
     "find-cypress-specs": "^1.41.4",
     "form-data": "^4.0.4",
-    "geckodriver": "^5.0.0",
+    "geckodriver": "^6.0.1",
     "gulp-brotli": "^3.0.0",
     "gulp-postcss": "^9.0.1",
     "gulp-terser": "^2.1.0",
