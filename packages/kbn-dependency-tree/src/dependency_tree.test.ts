@@ -10,6 +10,26 @@
 import * as fs from 'fs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { buildDependencyTree, printTree, printJson } from './dependency_tree';
+import {
+  createMockLogger,
+  setupFileSystemMocks,
+  rootPackageJsonStandard,
+  rootPackageJsonCircular,
+  rootPackageJsonExternal,
+  rootPackageJsonFiltered,
+  rootPackageJsonNoTsconfig,
+  rootPackageJsonDepth,
+  tsconfigStandard,
+  tsconfigCircular,
+  tsconfigExternal,
+  tsconfigFiltered,
+  tsconfigDepth,
+  simpleTreeWithChild,
+  treeWithPaths,
+  circularTree,
+  externalTree,
+  noTsconfigTree,
+} from './fixtures';
 
 // Mock fs module
 jest.mock('fs');
@@ -27,44 +47,15 @@ describe('dependency_tree', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warning: jest.fn(),
-      write: jest.fn(),
-    } as any;
+    mockLogger = createMockLogger();
   });
 
   describe('buildDependencyTree', () => {
     beforeEach(() => {
-      // Mock root package.json
-      mockFs.readFileSync.mockImplementation((filePath) => {
-        if (filePath === 'package.json') {
-          return JSON.stringify({
-            dependencies: {
-              '@kbn/test-package': 'link:packages/kbn-test-package',
-              '@kbn/another-package': 'link:packages/kbn-another-package',
-            },
-            devDependencies: {
-              '@kbn/dev-package': 'link:packages/kbn-dev-package',
-            },
-          });
-        }
-        if (typeof filePath === 'string' && filePath.includes('tsconfig.json')) {
-          if (filePath.includes('kbn-test-package')) {
-            return '{"kbn_references": ["@kbn/another-package"]}';
-          }
-          if (filePath.includes('kbn-another-package')) {
-            return '{"kbn_references": []}';
-          }
-          if (filePath.includes('kbn-dev-package')) {
-            return '{"kbn_references": []}';
-          }
-        }
-        return '{}';
+      setupFileSystemMocks({
+        rootPackageJson: rootPackageJsonStandard,
+        tsconfigFiles: tsconfigStandard,
       });
-
-      mockFs.existsSync.mockReturnValue(true);
     });
 
     it('should build a simple dependency tree', () => {
@@ -85,25 +76,9 @@ describe('dependency_tree', () => {
     it('should handle circular dependencies', () => {
       const tsconfigPath = 'packages/kbn-test-package/tsconfig.json';
 
-      // Override the default mock to simulate circular dependency
-      mockFs.readFileSync.mockImplementation((filePath) => {
-        if (filePath === 'package.json') {
-          return JSON.stringify({
-            dependencies: {
-              '@kbn/test-package': 'link:packages/kbn-test-package',
-              '@kbn/another-package': 'link:packages/kbn-another-package',
-            },
-          });
-        }
-        if (typeof filePath === 'string' && filePath.includes('tsconfig.json')) {
-          if (filePath.includes('kbn-test-package')) {
-            return '{"kbn_references": ["@kbn/another-package"]}';
-          }
-          if (filePath.includes('kbn-another-package')) {
-            return '{"kbn_references": ["@kbn/test-package"]}';
-          }
-        }
-        return '{}';
+      setupFileSystemMocks({
+        rootPackageJson: rootPackageJsonCircular,
+        tsconfigFiles: tsconfigCircular,
       });
 
       mockParseJsonc.mockImplementation((content) => {
@@ -123,20 +98,9 @@ describe('dependency_tree', () => {
     it('should handle external dependencies', () => {
       const tsconfigPath = 'packages/kbn-test-package/tsconfig.json';
 
-      // Override the default mock to include external package reference
-      mockFs.readFileSync.mockImplementation((filePath) => {
-        if (filePath === 'package.json') {
-          return JSON.stringify({
-            dependencies: {
-              '@kbn/test-package': 'link:packages/kbn-test-package',
-              // Note: @kbn/external-package is NOT included here, making it external
-            },
-          });
-        }
-        if (typeof filePath === 'string' && filePath.includes('kbn-test-package/tsconfig.json')) {
-          return '{"kbn_references": ["@kbn/external-package"]}';
-        }
-        return '{}';
+      setupFileSystemMocks({
+        rootPackageJson: rootPackageJsonExternal,
+        tsconfigFiles: tsconfigExternal,
       });
 
       mockParseJsonc.mockImplementation((content) => {
@@ -154,29 +118,10 @@ describe('dependency_tree', () => {
     it('should handle packages with no tsconfig', () => {
       const tsconfigPath = 'packages/kbn-test-package/tsconfig.json';
 
-      mockFs.readFileSync.mockImplementation((filePath) => {
-        if (filePath === 'package.json') {
-          return JSON.stringify({
-            dependencies: {
-              '@kbn/test-package': 'link:packages/kbn-test-package',
-              '@kbn/another-package': 'link:packages/kbn-another-package',
-            },
-          });
-        }
-        if (typeof filePath === 'string' && filePath.includes('kbn-test-package/tsconfig.json')) {
-          return '{"kbn_references": ["@kbn/another-package"]}';
-        }
-        return '{}';
-      });
-
-      mockFs.existsSync.mockImplementation((filePath) => {
-        if (
-          typeof filePath === 'string' &&
-          filePath.includes('kbn-another-package/tsconfig.json')
-        ) {
-          return false;
-        }
-        return true;
+      setupFileSystemMocks({
+        rootPackageJson: rootPackageJsonNoTsconfig,
+        tsconfigFiles: { 'kbn-test-package': '{"kbn_references": ["@kbn/another-package"]}' },
+        existingFiles: ['kbn-test-package'],
       });
 
       mockParseJsonc.mockImplementation((content) => {
@@ -194,28 +139,9 @@ describe('dependency_tree', () => {
     it('should respect maxDepth option', () => {
       const tsconfigPath = 'packages/kbn-test-package/tsconfig.json';
 
-      mockFs.readFileSync.mockImplementation((filePath) => {
-        if (filePath === 'package.json') {
-          return JSON.stringify({
-            dependencies: {
-              '@kbn/test-package': 'link:packages/kbn-test-package',
-              '@kbn/another-package': 'link:packages/kbn-another-package',
-              '@kbn/dev-package': 'link:packages/kbn-dev-package',
-            },
-          });
-        }
-        if (typeof filePath === 'string' && filePath.includes('tsconfig.json')) {
-          if (filePath.includes('kbn-test-package')) {
-            return '{"kbn_references": ["@kbn/another-package"]}';
-          }
-          if (filePath.includes('kbn-another-package')) {
-            return '{"kbn_references": ["@kbn/dev-package"]}';
-          }
-          if (filePath.includes('kbn-dev-package')) {
-            return '{"kbn_references": []}';
-          }
-        }
-        return '{}';
+      setupFileSystemMocks({
+        rootPackageJson: rootPackageJsonDepth,
+        tsconfigFiles: tsconfigDepth,
       });
 
       mockParseJsonc.mockImplementation((content) => {
@@ -238,21 +164,9 @@ describe('dependency_tree', () => {
     it('should apply filter option', () => {
       const tsconfigPath = 'packages/kbn-test-package/tsconfig.json';
 
-      mockFs.readFileSync.mockImplementation((filePath) => {
-        if (filePath === 'package.json') {
-          return JSON.stringify({
-            dependencies: {
-              '@kbn/test-package': 'link:packages/kbn-test-package',
-              '@kbn/another-package': 'link:packages/kbn-another-package',
-              '@kbn/dev-package': 'link:packages/kbn-dev-package',
-              '@kbn/filtered-out': 'link:packages/kbn-filtered-out',
-            },
-          });
-        }
-        if (typeof filePath === 'string' && filePath.includes('kbn-test-package/tsconfig.json')) {
-          return '{"kbn_references": ["@kbn/another-package", "@kbn/dev-package", "@kbn/filtered-out"]}';
-        }
-        return '{}';
+      setupFileSystemMocks({
+        rootPackageJson: rootPackageJsonFiltered,
+        tsconfigFiles: tsconfigFiltered,
       });
 
       mockParseJsonc.mockImplementation((content) => {
@@ -293,30 +207,14 @@ describe('dependency_tree', () => {
 
   describe('printTree', () => {
     it('should print simple tree structure', () => {
-      const node = {
-        id: '@kbn/test-package',
-        dependencies: [{ id: '@kbn/child-package' }],
-      };
-
-      printTree(node, '', true, false, mockLogger);
+      printTree(simpleTreeWithChild, '', true, false, mockLogger);
 
       expect(mockLogger.write).toHaveBeenCalledWith('└─ @kbn/test-package');
       expect(mockLogger.write).toHaveBeenCalledWith('   └─ @kbn/child-package');
     });
 
     it('should print tree with paths when showPaths is true', () => {
-      const node = {
-        id: '@kbn/test-package',
-        packagePath: 'packages/kbn-test-package',
-        dependencies: [
-          {
-            id: '@kbn/child-package',
-            packagePath: 'packages/kbn-child-package',
-          },
-        ],
-      };
-
-      printTree(node, '', true, true, mockLogger);
+      printTree(treeWithPaths, '', true, true, mockLogger);
 
       expect(mockLogger.write).toHaveBeenCalledWith(
         '└─ @kbn/test-package (packages/kbn-test-package)'
@@ -327,34 +225,19 @@ describe('dependency_tree', () => {
     });
 
     it('should print circular dependencies', () => {
-      const node = {
-        id: '@kbn/test-package',
-        dependencies: [{ id: '@kbn/circular-package', circular: true }],
-      };
-
-      printTree(node, '', true, false, mockLogger);
+      printTree(circularTree, '', true, false, mockLogger);
 
       expect(mockLogger.write).toHaveBeenCalledWith('   └─ @kbn/circular-package [CIRCULAR]');
     });
 
     it('should print external dependencies', () => {
-      const node = {
-        id: '@kbn/test-package',
-        dependencies: [{ id: '@kbn/external-package', external: true }],
-      };
-
-      printTree(node, '', true, false, mockLogger);
+      printTree(externalTree, '', true, false, mockLogger);
 
       expect(mockLogger.write).toHaveBeenCalledWith('   └─ @kbn/external-package [EXTERNAL]');
     });
 
     it('should print packages with no tsconfig', () => {
-      const node = {
-        id: '@kbn/test-package',
-        dependencies: [{ id: '@kbn/no-tsconfig-package', noTsconfig: true }],
-      };
-
-      printTree(node, '', true, false, mockLogger);
+      printTree(noTsconfigTree, '', true, false, mockLogger);
 
       expect(mockLogger.write).toHaveBeenCalledWith('   └─ @kbn/no-tsconfig-package [NO-TSCONFIG]');
     });

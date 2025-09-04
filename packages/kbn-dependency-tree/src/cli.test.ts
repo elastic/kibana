@@ -8,6 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createMockLogger, simpleTestTree } from './fixtures';
 
 // Mock the dependencies first
 jest.mock('@kbn/dev-cli-runner', () => ({
@@ -40,12 +41,7 @@ describe('cli', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warning: jest.fn(),
-      write: jest.fn(),
-    } as any;
+    mockLogger = createMockLogger();
   });
 
   describe('runCli', () => {
@@ -112,8 +108,7 @@ describe('cli', () => {
     });
 
     it('should build dependency tree with default options', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
@@ -127,12 +122,11 @@ describe('cli', () => {
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith('@kbn dependency tree for test/tsconfig.json');
-      expect(mockPrintTree).toHaveBeenCalledWith(mockTree, '', true, false, mockLogger);
+      expect(mockPrintTree).toHaveBeenCalledWith(simpleTestTree, '', true, false, mockLogger);
     });
 
     it('should use custom depth when provided', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
@@ -147,8 +141,7 @@ describe('cli', () => {
     });
 
     it('should use filter when provided', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
@@ -165,35 +158,32 @@ describe('cli', () => {
     });
 
     it('should show paths when paths flag is true', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
         flags: { _: ['test/tsconfig.json'], paths: true },
       });
 
-      expect(mockPrintTree).toHaveBeenCalledWith(mockTree, '', true, true, mockLogger);
+      expect(mockPrintTree).toHaveBeenCalledWith(simpleTestTree, '', true, true, mockLogger);
     });
 
     it('should output JSON when json flag is true', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
         flags: { _: ['test/tsconfig.json'], json: true },
       });
 
-      expect(mockPrintJson).toHaveBeenCalledWith(mockTree, mockLogger);
+      expect(mockPrintJson).toHaveBeenCalledWith(simpleTestTree, mockLogger);
       expect(mockLogger.info).not.toHaveBeenCalledWith(
         '@kbn dependency tree for test/tsconfig.json'
       );
     });
 
     it('should not show legend in JSON mode', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
@@ -204,8 +194,7 @@ describe('cli', () => {
     });
 
     it('should show legend in normal mode', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
@@ -239,8 +228,7 @@ describe('cli', () => {
     });
 
     it('should show filter info in legend when filter is applied', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
@@ -251,8 +239,7 @@ describe('cli', () => {
     });
 
     it('should handle combination of flags', async () => {
-      const mockTree = { id: '@kbn/test-package', dependencies: [] };
-      mockBuildDependencyTree.mockReturnValue(mockTree);
+      mockBuildDependencyTree.mockReturnValue(simpleTestTree);
 
       await cliHandler({
         log: mockLogger,
@@ -270,7 +257,7 @@ describe('cli', () => {
         logger: mockLogger,
       });
 
-      expect(mockPrintTree).toHaveBeenCalledWith(mockTree, '', true, true, mockLogger);
+      expect(mockPrintTree).toHaveBeenCalledWith(simpleTestTree, '', true, true, mockLogger);
       expect(mockLogger.info).toHaveBeenCalledWith(
         '(filtered to packages containing: "@kbn/test")'
       );
