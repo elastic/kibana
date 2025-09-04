@@ -14,6 +14,7 @@ import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/setting
 import type { ManagementSettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 
 import { AssistantSpaceIdProvider } from '@kbn/elastic-assistant/impl/assistant/use_space_aware_context';
+import { DefaultAiConnectorSettingsContextProvider } from '@kbn/ai-assistant-default-llm-setting/src/context/default_ai_connector_context';
 import { useKibana } from '../../common/lib/kibana';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 
@@ -25,6 +26,8 @@ export const ManagementSettings = React.memo(() => {
     serverless,
     settings,
     docLinks,
+    featureFlags,
+    notifications,
   } = useKibana().services;
   const {
     navigateToApp,
@@ -101,14 +104,19 @@ export const ManagementSettings = React.memo(() => {
 
   return spaceId ? (
     <AssistantSpaceIdProvider spaceId={spaceId}>
-      <AssistantSettingsManagement
-        settings={settings}
-        dataViews={dataViews}
-        onTabChange={handleTabChange}
-        currentTab={currentTab}
+      <DefaultAiConnectorSettingsContextProvider
+        toast={notifications.toasts}
         application={application}
         docLinks={docLinks}
-      />
+        featureFlags={featureFlags}
+      >
+        <AssistantSettingsManagement
+          settings={settings}
+          dataViews={dataViews}
+          onTabChange={handleTabChange}
+          currentTab={currentTab}
+        />
+      </DefaultAiConnectorSettingsContextProvider>
     </AssistantSpaceIdProvider>
   ) : null;
 });

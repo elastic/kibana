@@ -24,13 +24,14 @@ import {
 } from '@kbn/management-settings-ids';
 import { DefaultAIConnector } from '@kbn/ai-assistant-default-llm-setting';
 import { useGenAIConnectors } from '@kbn/ai-assistant/src/hooks';
+import { DefaultAiConnectorSettingsContextProvider } from '@kbn/ai-assistant-default-llm-setting/src/context/default_ai_connector_context';
 import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
 
 export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
-  const { docLinks, settings, notifications, application } = useKibana().services;
+  const { docLinks, settings, notifications, application, featureFlags } = useKibana().services;
   const { capabilities, getUrlForApp } = application;
   const { config } = useAppContext();
   const connectors = useGenAIConnectors();
@@ -97,13 +98,17 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
           </FieldRowProvider>
         );
       })}
-      <DefaultAIConnector
+      <DefaultAiConnectorSettingsContextProvider
         toast={notifications.toasts}
-        uiSetting={{ fields, handleFieldChange, unsavedChanges }}
-        connectors={connectors}
         application={application}
         docLinks={docLinks}
-      />
+        featureFlags={featureFlags}
+      >
+        <DefaultAIConnector
+          settings={{ fields, handleFieldChange, unsavedChanges }}
+          connectors={connectors}
+        />
+      </DefaultAiConnectorSettingsContextProvider>
 
       {config.logSourcesEnabled && (
         <LogSourcesSettingSynchronisationInfo

@@ -16,7 +16,6 @@ import {
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { ApplicationStart } from '@kbn/core/public';
 import { AIForSOCConnectorSettingsManagement } from '../../connectorland/ai_for_soc_connector_settings_management';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -45,7 +44,6 @@ interface Props {
   onTabChange?: (tabId: string) => void;
   currentTab: ManagementSettingsTabs;
   settings: SettingsStart;
-  application: ApplicationStart;
 }
 
 /**
@@ -53,7 +51,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab, settings, application }) => {
+  ({ dataViews, onTabChange, currentTab, settings }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -127,11 +125,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
       switch (currentTab) {
         case CONNECTORS_TAB:
           return (
-            <AIForSOCConnectorSettingsManagement
-              settings={settings}
-              application={application}
-              connectors={connectors}
-            />
+            <AIForSOCConnectorSettingsManagement connectors={connectors} settings={settings} />
           );
         case SYSTEM_PROMPTS_TAB:
           return (
@@ -164,15 +158,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
             />
           );
       }
-    }, [
-      connectors,
-      currentTab,
-      dataViews,
-      defaultConnector,
-      modelEvaluatorEnabled,
-      settings,
-      application,
-    ]);
+    }, [connectors, currentTab, dataViews, defaultConnector, modelEvaluatorEnabled, settings]);
     return (
       <EuiFlexGroup
         data-test-subj="SearchAILakeConfigurationsSettingsManagement"

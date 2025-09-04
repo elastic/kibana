@@ -8,33 +8,19 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { ApplicationStart } from '@kbn/core/public';
 import { SearchConnectorSettingsManagement } from './search_connector_settings_management';
 import { ConnectorsSettingsManagement } from '../connector_settings_management';
-import { useAssistantContext } from '../../assistant_context';
 import { AIConnector } from '../connector_selector';
 
 interface Props {
-  settings: SettingsStart;
-  application: ApplicationStart;
   connectors: AIConnector[] | undefined;
+  settings: SettingsStart;
 }
 
-export const AIForSOCConnectorSettingsManagement = ({
-  settings,
-  application,
-  connectors,
-}: Props) => {
-  const { docLinks } = useAssistantContext();
-
+export const AIForSOCConnectorSettingsManagement = ({ connectors, settings }: Props) => {
   return (
     <>
-      <ConnectorsSettingsManagement
-        docLinks={docLinks}
-        settings={settings}
-        application={application}
-        connectors={connectors}
-      />
+      <ConnectorsSettingsManagement connectors={connectors} settings={settings} />
       <EuiSpacer size="m" />
       <SearchConnectorSettingsManagement />
     </>

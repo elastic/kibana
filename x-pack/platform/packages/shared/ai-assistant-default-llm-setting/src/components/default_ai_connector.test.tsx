@@ -6,7 +6,10 @@
  */
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
-import { DefaultAIConnector } from './default_ai_connector';
+import {
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  DefaultAIConnector,
+} from './default_ai_connector';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
@@ -16,6 +19,8 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import React from 'react';
+import { DefaultAiConnectorSettingsContextProvider } from '../context/default_ai_connector_context';
+import { FeatureFlagsStart } from '@kbn/core/public';
 
 const mockConnectors = {
   loading: false,
@@ -45,6 +50,7 @@ const mockConnectors = {
 function setupTest({
   fields,
   unsavedChanges,
+  enabled = true,
 }: {
   fields: Record<
     string,
@@ -54,6 +60,7 @@ function setupTest({
     >
   >;
   unsavedChanges: Record<string, UnsavedFieldChange<UiSettingsType>>;
+  enabled?: boolean;
 }) {
   const queryClient = new QueryClient();
   const handleFieldChange = jest.fn();
@@ -66,22 +73,34 @@ function setupTest({
 
   const utils = render(
     <>
-      <DefaultAIConnector
-        connectors={mockConnectors}
-        uiSetting={settings}
-        toast={{} as IToasts}
-        application={
-          {
-            getUrlForApp: jest.fn(),
-          } as unknown as ApplicationStart
-        }
-        docLinks={{} as DocLinksStart}
-      />
+      <DefaultAIConnector connectors={mockConnectors} settings={settings} />
     </>,
     {
       wrapper: ({ children }) => (
         <I18nProvider>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          <QueryClientProvider client={queryClient}>
+            <DefaultAiConnectorSettingsContextProvider
+              application={
+                {
+                  getUrlForApp: jest.fn(),
+                } as unknown as ApplicationStart
+              }
+              docLinks={{} as DocLinksStart}
+              featureFlags={
+                {
+                  getBooleanValue: jest.fn().mockImplementation((flag) => {
+                    if (flag === AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED && enabled) {
+                      return true;
+                    }
+                    return false;
+                  }),
+                } as unknown as FeatureFlagsStart
+              }
+              toast={{} as IToasts}
+            >
+              {children}
+            </DefaultAiConnectorSettingsContextProvider>
+          </QueryClientProvider>
         </I18nProvider>
       ),
     }
@@ -111,6 +130,19 @@ describe('DefaultAIConnector', () => {
         'No default connector'
       );
       expect(container.querySelector('[class$="square-unselected"]')).not.toBeNull();
+    });
+
+    it('does not render when feature flag is off', () => {
+      setupTest({
+        fields: {},
+        unsavedChanges: {},
+        enabled: false,
+      });
+
+      expect(screen.queryByText('genAiSettings:defaultAIConnector')).not.toBeInTheDocument();
+      expect(screen.queryByText('Disallow all other connectors')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('defaultAiConnectorComboBox')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('defaultAiConnectorCheckbox')).not.toBeInTheDocument();
     });
   });
 

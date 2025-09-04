@@ -16,9 +16,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { DefaultAIConnector } from '@kbn/ai-assistant-default-llm-setting';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { isEmpty } from 'lodash';
-import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { useAssistantContext } from '../../assistant_context';
 import * as i18n from './translations';
 import { SettingsContextProvider, useSettingsContext } from './context/settings_context';
@@ -26,18 +25,11 @@ import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIConnector } from '../connector_selector';
 
 interface Props {
-  settings: SettingsStart;
   connectors: AIConnector[] | undefined;
-  docLinks: DocLinksStart;
-  application: ApplicationStart;
+  settings: SettingsStart;
 }
 
-const ConnectorsSettingsManagementComponent: React.FC<Props> = ({
-  settings,
-  connectors,
-  docLinks,
-  application,
-}) => {
+const ConnectorsSettingsManagementComponent: React.FC<Props> = ({ connectors, settings }) => {
   const { navigateToApp } = useAssistantContext();
 
   const onClick = useCallback(
@@ -76,33 +68,23 @@ const ConnectorsSettingsManagementComponent: React.FC<Props> = ({
           </EuiFormRow>
         </EuiDescribedFormGroup>
 
-        <DefaultAIConnectorHoc
-          connectors={connectors}
-          docLinks={docLinks}
-          application={application}
-        />
+        <DefaultAIConnectorHoc connectors={connectors} />
         <BottomBarActionsHoc />
       </EuiPanel>
     </SettingsContextProvider>
   );
 };
 
-export const DefaultAIConnectorHoc: React.FC<
-  Pick<Props, 'connectors' | 'docLinks' | 'application'>
-> = ({ connectors, docLinks, application }) => {
-  const { toasts } = useAssistantContext();
+export const DefaultAIConnectorHoc: React.FC<Pick<Props, 'connectors'>> = ({ connectors }) => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
 
   return (
     <DefaultAIConnector
-      toast={toasts}
-      uiSetting={{ fields, handleFieldChange, unsavedChanges }}
+      settings={{ fields, handleFieldChange, unsavedChanges }}
       connectors={{
         loading: false,
         connectors,
       }}
-      docLinks={docLinks}
-      application={application}
     />
   );
 };

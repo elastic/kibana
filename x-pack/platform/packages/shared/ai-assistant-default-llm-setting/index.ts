@@ -6,3 +6,7 @@
  */
 
 export { DefaultAIConnector } from './src/components/default_ai_connector';
+export {
+  DefaultAiConnectorSettingsContextProvider,
+  useDefaultAiConnectorSettingContext,
+} from './src/context/default_ai_connector_context';

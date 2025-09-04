@@ -28,9 +28,13 @@ import type {
   OnFieldChangeFn,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
-import type { ApplicationStart, DocLinksStart, IToasts, UiSettingsType } from '@kbn/core/public';
+import type { UiSettingsType } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_CONNECTOR } from '../lib/constants';
+import { useDefaultAiConnectorSettingContext } from '../context/default_ai_connector_context';
+
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
+  'aiAssistant.defaultLlmSettingEnabled' as const;
 
 interface ConnectorData {
   connectors?: Array<{
@@ -57,10 +61,7 @@ const hasElasticManagedLlm = (connectors: ConnectorData['connectors'] | undefine
 };
 
 interface Props {
-  toast: IToasts | undefined;
-  application: ApplicationStart;
-  docLinks: DocLinksStart;
-  uiSetting: {
+  settings: {
     unsavedChanges: Record<string, UnsavedFieldChange<UiSettingsType>>;
     handleFieldChange: OnFieldChangeFn;
     fields: Record<
@@ -140,15 +141,10 @@ const getOptionsByValues = (
   return options.flatMap(getOptionsByValuesHelper);
 };
 
-export const DefaultAIConnector: React.FC<Props> = ({
-  toast,
-  uiSetting,
-  connectors,
-  application,
-  docLinks,
-}) => {
+export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) => {
+  const { toast, application, docLinks, featureFlags } = useDefaultAiConnectorSettingContext();
   const options = useMemo(() => getOptions(connectors), [connectors]);
-  const { handleFieldChange, fields, unsavedChanges } = uiSetting;
+  const { handleFieldChange, fields, unsavedChanges } = settings;
 
   const onChangeDefaultLlm = (selectedOptions: EuiComboBoxOptionOption<string>[]) => {
     const values = selectedOptions.map((option) => option.value);
@@ -275,6 +271,10 @@ export const DefaultAIConnector: React.FC<Props> = ({
       </p>
     );
   }, [elasticManagedLlmExists, application, docLinks]);
+
+  if (!featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, false)) {
+    return null
+  }
 
   return (
     <>
