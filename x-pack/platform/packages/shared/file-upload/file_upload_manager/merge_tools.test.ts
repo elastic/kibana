@@ -13,7 +13,7 @@ import {
   CLASH_ERROR_TYPE,
 } from './merge_tools';
 import type { FileWrapper, FileAnalysis } from './file_wrapper';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 
 describe('merge_tools', () => {
   describe('createMergedMappings', () => {

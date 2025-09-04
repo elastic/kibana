@@ -14,24 +14,26 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { MB } from '@kbn/file-upload-common/src/constants';
-import { getHttp } from '../kibana_services';
-
 import type {
+  MessageReader,
+  TikaReader,
+  NdjsonReader,
   ImportDoc,
   ImportFailure,
   ImportResponse,
   IngestPipeline,
   IngestPipelineWrapper,
-} from '../../common/types';
-import type { CreateDocsResponse, IImporter, ImportResults } from './types';
+  ImportResults,
+} from '@kbn/file-upload-common';
+import { getHttp } from '../kibana_services';
+
+import type { IImporter } from './types';
 import { callImportRoute, callInitializeImportRoute } from './routes';
 
 const CHUNK_SIZE = 5000;
 const REDUCED_CHUNK_SIZE = 100;
 export const MAX_CHUNK_CHAR_COUNT = 1000000;
 export const IMPORT_RETRIES = 5;
-const STRING_CHUNKS_MB = 100;
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 export abstract class Importer implements IImporter {
@@ -41,6 +43,7 @@ export abstract class Importer implements IImporter {
   private _pipelines: IngestPipelineWrapper[] = [];
   private _timeFieldName: string | undefined;
   private _initialized = false;
+  protected abstract _reader: MessageReader | TikaReader | NdjsonReader;
 
   public initialized() {
     return this._initialized;
@@ -55,34 +58,10 @@ export abstract class Importer implements IImporter {
   }
 
   public read(data: ArrayBuffer) {
-    const decoder = new TextDecoder();
-    const size = STRING_CHUNKS_MB * MB;
-
-    // chop the data up into 100MB chunks for processing.
-    // if the chop produces a partial line at the end, a character "remainder" count
-    // is returned which is used to roll the next chunk back that many chars so
-    // it is included in the next chunk.
-    const parts = Math.ceil(data.byteLength / size);
-    let remainder = 0;
-    for (let i = 0; i < parts; i++) {
-      const byteArray = decoder.decode(data.slice(i * size - remainder, (i + 1) * size));
-      const {
-        success,
-        docs,
-        remainder: tempRemainder,
-      } = this._createDocs(byteArray, i === parts - 1);
-      if (success) {
-        this._docArray = this._docArray.concat(docs);
-        remainder = tempRemainder;
-      } else {
-        return { success: false };
-      }
-    }
+    this._docArray = this._reader.read(data);
 
     return { success: true };
   }
-
-  protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
 
   private _initialize(
     index: string,

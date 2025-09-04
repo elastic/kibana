@@ -668,8 +668,10 @@ describe('STATS Autocomplete', () => {
             ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'double', 'long'], {
               scalar: true,
             }),
-            // categorize is not compatible here
-            ...allGroupingFunctions.filter((f) => !f.includes('CATEGORIZE')),
+            // Filter out functions that are not compatible with this context
+            ...allGroupingFunctions.filter(
+              (f) => !['CATEGORIZE', 'TBUCKET'].some((incompatible) => f.includes(incompatible))
+            ),
           ],
           mockCallbacks
         );
