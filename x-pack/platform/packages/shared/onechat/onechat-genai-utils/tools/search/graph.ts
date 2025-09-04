@@ -54,7 +54,7 @@ export const createSearchToolGraph = ({
   events?: ToolEventEmitter;
 }) => {
   const tools = [
-    createRelevanceSearchTool({ model, esClient,events }),
+    createRelevanceSearchTool({ model, esClient, events }),
     createNaturalLanguageSearchTool({ model, esClient, events }),
   ];
 
