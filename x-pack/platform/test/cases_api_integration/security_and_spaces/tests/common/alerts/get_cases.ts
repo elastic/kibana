@@ -60,9 +60,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseIDsWithAlert.length).to.eql(3);
       validateCasesFromAlertIDResponse(caseIDsWithAlert, [
-        { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
-        { caseInfo: case2, totals: { alerts: 1, userComments: 0 } },
-        { caseInfo: case3, totals: { alerts: 1, userComments: 0 } },
+        { caseInfo: case1, totals: { alerts: 1, userComments: 0, events: 0 } },
+        { caseInfo: case2, totals: { alerts: 1, userComments: 0, events: 0 } },
+        { caseInfo: case3, totals: { alerts: 1, userComments: 0, events: 0 } },
       ]);
     });
 
@@ -95,6 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
         totals: {
           alerts: 1,
           userComments: 0,
+          events: 0,
         },
       }));
 
@@ -165,8 +166,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(caseIDsWithAlert.length).to.eql(2);
         validateCasesFromAlertIDResponse(caseIDsWithAlert, [
-          { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
-          { caseInfo: case2, totals: { alerts: 1, userComments: 0 } },
+          { caseInfo: case1, totals: { alerts: 1, userComments: 0, events: 0 } },
+          { caseInfo: case2, totals: { alerts: 1, userComments: 0, events: 0 } },
         ]);
       });
 
@@ -189,8 +190,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(caseIDsWithAlert.length).to.eql(2);
         validateCasesFromAlertIDResponse(caseIDsWithAlert, [
-          { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
-          { caseInfo: case2, totals: { alerts: 1, userComments: 2 } },
+          { caseInfo: case1, totals: { alerts: 1, userComments: 0, events: 0 } },
+          { caseInfo: case2, totals: { alerts: 1, userComments: 2, events: 0 } },
         ]);
       });
     });
@@ -266,6 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totals: {
               alerts: 1,
               userComments: 0,
+              events: 0,
             },
           }));
 
@@ -345,6 +347,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totals: {
               userComments: 0,
               alerts: 1,
+              events: 0,
             },
           },
         ]);
@@ -395,6 +398,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totals: {
               userComments: 0,
               alerts: 1,
+              events: 0,
             },
           },
         ]);
