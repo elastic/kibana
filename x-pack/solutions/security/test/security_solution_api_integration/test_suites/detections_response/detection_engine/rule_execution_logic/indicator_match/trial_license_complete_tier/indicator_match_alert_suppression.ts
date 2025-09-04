@@ -143,11 +143,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   // cases to cover 2 execution paths of IM
   const cases = [
-    {
-      eventsCount: 10,
-      threatsCount: 0,
-      title: `events count is greater than threats count`,
-    },
+    // {
+    //   eventsCount: 10,
+    //   threatsCount: 0,
+    //   title: `events count is greater than threats count`,
+    // },
 
     {
       eventsCount: 0,
@@ -171,7 +171,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     cases.forEach(({ eventsCount, threatsCount, title }) => {
-      // FLAKY: https://github.com/elastic/kibana/issues/197765
       describe(`Code execution path: ${title}`, () => {
         it('should suppress an alert on real rule executions', async () => {
           const id = uuidv4();
@@ -1240,7 +1239,7 @@ export default ({ getService }: FtrProviderContext) => {
         // rule should correctly go through them and suppress
         // that can be an issue when search results returning in desc order
         // this test is added to verify suppression works fine for this cases
-        it('should suppress alerts on large number of documents, more than 9,000', async () => {
+        it.only('should suppress alerts on large number of documents, more than 9,000', async () => {
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:10:00.000Z';

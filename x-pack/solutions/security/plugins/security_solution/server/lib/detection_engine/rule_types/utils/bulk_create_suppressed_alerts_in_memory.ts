@@ -223,6 +223,7 @@ export const executeBulkCreateAlerts = async <
     addToSearchAfterReturn({ current: toReturn, next: unsuppressedResult });
   }
 
+  console.log('suppressibleWrappedDocs', JSON.stringify(suppressibleWrappedDocs, null, 2));
   const bulkCreateResult = await bulkCreateWithSuppression({
     sharedParams,
     wrappedDocs: suppressibleWrappedDocs,
