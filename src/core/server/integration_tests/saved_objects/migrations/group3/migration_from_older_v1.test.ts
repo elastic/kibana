@@ -169,7 +169,19 @@ describeIf('migrating from 7.3.0-xpack which used v1 migrations', () => {
     expectedVersions: Record<string, string | undefined>
   ) => {
     const type = doc._source.type;
-    expect(doc._source.typeMigrationVersion).toEqual(expectedVersions[type]);
+    if (doc._source.typeMigrationVersion !== expectedVersions[type]) {
+      throw new Error(
+        [
+          `A document of type ${type} has typeMigrationVersion: '${doc._source.typeMigrationVersion}, and the expected version was ${expectedVersions[type]}'.`,
+          'Document Id:',
+          doc._id,
+          'Expected versions:',
+          JSON.stringify(expectedVersions, null, 2),
+          'Document:',
+          JSON.stringify(doc._source, null, 2),
+        ].join('\n')
+      );
+    }
   };
 
   const stopServers = async () => {
