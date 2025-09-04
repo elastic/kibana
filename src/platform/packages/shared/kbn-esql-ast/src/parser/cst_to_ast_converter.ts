@@ -1079,7 +1079,21 @@ export class CstToAstConverter {
   }
 
   private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
-    return this.toSource(ctx._index);
+    if (ctx._index) {
+      return this.toSource(ctx._index);
+    } else {
+      return Builder.expression.source.node(
+        {
+          sourceType: 'index',
+          name: '',
+        },
+        {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: true,
+          text: ctx?.getText(),
+        }
+      );
+    }
   }
 
   // ------------------------------------------------------------- CHANGE_POINT
