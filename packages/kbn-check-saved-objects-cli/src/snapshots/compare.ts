@@ -21,7 +21,11 @@ export function assertValidUpdates({
   to: MigrationSnapshot;
 }) {
   log.info(`Checking SO type updates between base branch and current branch`);
-  Object.entries(to.typeDefinitions).forEach(([name, infoAfter]) => {
+  for (const name in to.typeDefinitions) {
+    if (!Object.prototype.hasOwnProperty.call(to.typeDefinitions, name)) {
+      continue;
+    }
+    const infoAfter = to.typeDefinitions[name];
     const infoBefore = from.typeDefinitions[name];
     if (!infoBefore) {
       log.debug(`New type defined: ${name}`);
@@ -34,8 +38,21 @@ export function assertValidUpdates({
         // the type has changed
         log.info(`The type '${name}' has been updated.`);
 
+        // check that no migrations have been removed
+        if (
+          (infoBefore.migrationVersions && !infoAfter.migrationVersions) ||
+          !equal(infoAfter.migrationVersions, infoBefore.migrationVersions)
+        ) {
+          throw new Error(
+            `❌ Modifications have been detected in the '${name}.migrations'. This property is deprected and no modifications are allowed.`
+          );
+        }
+
         // check that no model versions have been removed
-        if (infoAfter.modelVersions.length < infoBefore.modelVersions.length) {
+        if (
+          (infoBefore.modelVersions && !infoAfter.modelVersions) ||
+          infoAfter.modelVersions.length < infoBefore.modelVersions.length
+        ) {
           throw new Error(`❌ Some model versions have been deleted for SO type '${name}'.`);
         }
 
@@ -54,7 +71,15 @@ export function assertValidUpdates({
 
         // check that defined modelVersions are consecutive integer numbers, starting at 1
         infoAfter.modelVersions
-          .map<number>(({ version }) => parseInt(version, 10))
+          .map<number>(({ version }) => {
+            const parsed = parseInt(version, 10);
+            if (isNaN(parsed)) {
+              throw new Error(
+                `❌ Invalid model version '${version}' for SO type '${name}'. Model versions must be consecutive integer numbers starting at 1.`
+              );
+            }
+            return parsed;
+          })
           .sort((a, b) => a - b)
           .forEach((versionNumber, index, list) => {
             if (versionNumber !== index + 1) {
@@ -77,7 +102,7 @@ export function assertValidUpdates({
         }
       }
     }
-  });
+  }
   log.info('✅ Current SO type definitions are compatible with the baseline');
 }
 
