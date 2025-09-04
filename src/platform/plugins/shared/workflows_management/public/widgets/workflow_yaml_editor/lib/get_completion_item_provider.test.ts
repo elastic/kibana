@@ -131,6 +131,7 @@ steps:
         'workflow',
         'steps',
         'execution',
+        'inputs',
       ]);
     });
 
@@ -188,6 +189,7 @@ steps:
         'workflow',
         'steps',
         'execution',
+        'inputs',
       ]);
       testCompletion(completionProvider, yamlContent, (suggestion) => {
         return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');

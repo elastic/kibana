@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FILE_FORMATS } from '@kbn/file-upload-common';

@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';

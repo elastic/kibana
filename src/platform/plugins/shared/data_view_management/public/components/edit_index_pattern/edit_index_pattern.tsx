@@ -32,8 +32,6 @@ import { RollupDeprecationTooltip } from '@kbn/rollup';
 import type { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
-import type { RemoveDataViewProps } from './remove_data_view';
-import { removeDataView } from './remove_data_view';
 
 import { useStateSelector } from '../../management_app/state_utils';
 
@@ -78,21 +76,15 @@ import {
   defaultIndexSelector,
   fieldsSelector,
 } from '../../management_app/data_view_mgmt_selectors';
-import { deleteModalMsg } from '../index_pattern_table/delete_modal_msg';
+import {
+  DeleteDataViewFlyout,
+  type RemoveDataViewProps,
+} from '../delete_data_view_flyout/delete_data_view_flyout';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      overlays,
-      chrome,
-      dataViews,
-      IndexPatternEditor,
-      savedObjectsManagement,
-      application,
-      dataViewMgmtService,
-      ...startServices
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { chrome, dataViews, IndexPatternEditor, dataViewMgmtService } =
+      useKibana<IndexPatternManagmentContext>().services;
     const dataView = useStateSelector(dataViewMgmtService.state$, dataViewSelector);
     const allowedTypes = useStateSelector(dataViewMgmtService.state$, allowedTypesSelector);
     const relationships = useStateSelector(dataViewMgmtService.state$, relationshipsSelector);
@@ -114,6 +106,7 @@ export const EditIndexPattern = withRouter(
     >(() => getCompositeRuntimeFields(indexPattern));
 
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
+    const [flyoutOpen, setFlyoutOpen] = React.useState(false);
 
     // subscribe and unsubscribe to hash change events
     useEffect(() => {
@@ -127,16 +120,6 @@ export const EditIndexPattern = withRouter(
         unlistenParentHistory();
       };
     }, [history]);
-
-    const removeHandler = removeDataView({
-      dataViews,
-      uiSettings,
-      overlays,
-      onDelete: () => {
-        history.push('');
-      },
-      startServices,
-    });
 
     const isRollup =
       new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
@@ -196,12 +179,9 @@ export const EditIndexPattern = withRouter(
             indexPattern={dataView}
             setDefault={() => dataViewMgmtService.setDefaultDataView()}
             editIndexPatternClick={editPattern}
-            deleteIndexPatternClick={() =>
-              removeHandler(
-                [dataView as RemoveDataViewProps],
-                deleteModalMsg([dataView as RemoveDataViewProps], Boolean(dataView.namespaces))
-              )
-            }
+            deleteIndexPatternClick={() => {
+              setFlyoutOpen(true);
+            }}
             defaultIndex={defaultIndex}
             canSave={userEditPermission}
           >
@@ -280,6 +260,7 @@ export const EditIndexPattern = withRouter(
           </IndexHeader>
         )}
         <EuiSpacer size="xl" />
+
         {dataView && (
           <Tabs
             indexPattern={dataView}
@@ -296,6 +277,22 @@ export const EditIndexPattern = withRouter(
             }}
             refreshIndexPatternClick={() => dataViewMgmtService.refreshFields()}
             isRefreshing={isRefreshing}
+          />
+        )}
+        {flyoutOpen && dataView && (
+          <DeleteDataViewFlyout
+            dataViews={dataViews}
+            dataViewArray={[dataView as RemoveDataViewProps]}
+            selectedRelationships={{
+              [dataView.id as RemoveDataViewProps['id']]: relationships,
+            }}
+            hasSpaces={Boolean(dataView.namespaces)}
+            onDelete={() => {
+              history.push('');
+            }}
+            onClose={() => {
+              setFlyoutOpen(false);
+            }}
           />
         )}
         {displayIndexPatternEditor}

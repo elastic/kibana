@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { MONITORING_ENGINE_DELETE_URL } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 import { rootRequest } from './api_calls/common';
 
 export const deletePrivMonEngine = () => {
   return rootRequest({
     method: 'DELETE',
-    url: `/api/entity_analytics/monitoring/engine/delete`,
+    url: MONITORING_ENGINE_DELETE_URL,
     failOnStatusCode: false,
     timeout: 300000,
   });

@@ -14,7 +14,7 @@ import { SiemMigrationStatus } from '../../../../../common/siem_migrations/const
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { COLUMN_EMPTY_VALUE, type TableColumn } from './constants';
 import * as i18n from './translations';
-import { TableHeader } from './header';
+import { TableHeader } from '../../../common/components';
 
 export const createSeverityColumn = (): TableColumn => {
   return {

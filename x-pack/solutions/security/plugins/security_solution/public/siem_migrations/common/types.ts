@@ -16,3 +16,20 @@ export interface GetMigrationStatsParams {
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
+
+export enum StatusFilter {
+  INSTALLED = 'installed',
+  TRANSLATED = 'translated',
+  PARTIALLY_TRANSLATED = 'partially_translated',
+  UNTRANSLATABLE = 'untranslatable',
+  FAILED = 'failed',
+  INDEX_PATTERN_MISSING = 'index_pattern_missing',
+}
+
+export interface FilterOptionsBase {
+  status?: StatusFilter;
+}
+
+export interface MigrationSettingsBase {
+  connectorId: string;
+}

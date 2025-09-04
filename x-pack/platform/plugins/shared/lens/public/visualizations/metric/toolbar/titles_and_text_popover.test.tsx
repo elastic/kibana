@@ -21,43 +21,58 @@ describe('TitlesAndTextPopover', () => {
     },
   };
 
-  const fullState: Required<MetricVisualizationState> = {
-    layerId: 'first',
-    layerType: 'data',
-    metricAccessor: 'metric-col-id',
-    secondaryMetricAccessor: 'secondary-metric-col-id',
-    maxAccessor: 'max-metric-col-id',
-    breakdownByAccessor: 'breakdown-col-id',
-    collapseFn: 'sum',
-    subtitle: 'subtitle',
-    secondaryPrefix: 'extra-text',
-    progressDirection: 'vertical',
-    maxCols: 5,
-    color: 'static-color',
-    icon: 'compute',
-    palette,
-    showBar: true,
-    trendlineLayerId: 'second',
-    trendlineLayerType: 'metricTrendline',
-    trendlineMetricAccessor: 'trendline-metric-col-id',
-    trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-col-id',
-    trendlineTimeAccessor: 'trendline-time-col-id',
-    trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-    titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
-    iconAlign: 'left',
-    valueFontMode: 'default',
-    secondaryTrend: { type: 'none' },
-  };
+  const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign'>> =
+    {
+      layerId: 'first',
+      layerType: 'data',
+      metricAccessor: 'metric-col-id',
+      secondaryMetricAccessor: 'secondary-metric-col-id',
+      maxAccessor: 'max-metric-col-id',
+      breakdownByAccessor: 'breakdown-col-id',
+      collapseFn: 'sum',
+      subtitle: 'subtitle',
+      secondaryLabel: 'extra-text',
+      progressDirection: 'vertical',
+      maxCols: 5,
+      color: 'static-color',
+      icon: 'compute',
+      palette,
+      showBar: true,
+      trendlineLayerId: 'second',
+      trendlineLayerType: 'metricTrendline',
+      trendlineMetricAccessor: 'trendline-metric-col-id',
+      trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-col-id',
+      trendlineTimeAccessor: 'trendline-time-col-id',
+      trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      secondaryAlign: 'right',
+      primaryPosition: 'bottom',
+      titleWeight: 'bold',
+      iconAlign: 'left',
+      valueFontMode: 'default',
+      secondaryTrend: { type: 'none' },
+      secondaryLabelPosition: 'before',
+      applyColorTo: 'background',
+    };
 
   const mockSetState = jest.fn();
 
   const renderToolbarOptions = (state: MetricVisualizationState) => {
-    return {
-      ...render(<TitlesAndTextPopover state={state} setState={mockSetState} />, {
+    const { rerender, ...rtlRest } = render(
+      <TitlesAndTextPopover state={state} setState={mockSetState} />,
+      {
         // fails in concurrent mode
         legacyRoot: true,
-      }),
+      }
+    );
+    return {
+      ...rtlRest,
+      rerender: (stateOverrides: Partial<MetricVisualizationState>) => {
+        return rerender(
+          <TitlesAndTextPopover state={{ ...state, ...stateOverrides }} setState={mockSetState} />
+        );
+      },
     };
   };
 
@@ -128,22 +143,46 @@ describe('TitlesAndTextPopover', () => {
     ]);
   });
 
-  it('should set valuesTextAlign', async () => {
+  it('should set primaryAlign', async () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
-    const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-values-alignment-btn');
+    const primaryAlignBtnGroup = new EuiButtonGroupTestHarness('lens-primary-metric-alignment-btn');
 
-    valueAlignBtnGroup.select('Center');
-    valueAlignBtnGroup.select('Left');
-    valueAlignBtnGroup.select('Right');
+    primaryAlignBtnGroup.select('Center');
+    primaryAlignBtnGroup.select('Left');
+    primaryAlignBtnGroup.select('Right');
 
-    expect(mockSetState.mock.calls.map(([s]) => s.valuesTextAlign)).toEqual([
+    expect(mockSetState.mock.calls.map(([s]) => s.primaryAlign)).toEqual([
       'center',
       'left',
       'right',
     ]);
+  });
+
+  it('should set secondaryAlign and hide secondaryAlign option when no secondary metric', async () => {
+    const { rerender } = renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const secondaryAlignBtnGroup = new EuiButtonGroupTestHarness(
+      'lens-secondary-metric-alignment-btn'
+    );
+
+    secondaryAlignBtnGroup.select('Center');
+    secondaryAlignBtnGroup.select('Left');
+    secondaryAlignBtnGroup.select('Right');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.secondaryAlign)).toEqual([
+      'center',
+      'left',
+      'right',
+    ]);
+
+    rerender({ secondaryMetricAccessor: undefined });
+
+    expect(screen.queryByTestId('lens-secondary-metric-alignment-btn')).not.toBeInTheDocument();
   });
 
   it('should set valueFontMode', async () => {
@@ -162,7 +201,7 @@ describe('TitlesAndTextPopover', () => {
   });
 
   it('should set iconAlign', async () => {
-    renderToolbarOptions({ ...fullState, icon: 'sortUp' });
+    const { rerender } = renderToolbarOptions({ ...fullState, icon: 'sortUp' });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
@@ -170,10 +209,32 @@ describe('TitlesAndTextPopover', () => {
 
     expect(iconAlignBtnGroup.selected.textContent).toBe('Left');
 
+    // Don't call setState if the option is already selected
+    iconAlignBtnGroup.select('Left');
+    iconAlignBtnGroup.select('Right');
+
+    rerender({ iconAlign: 'right' });
+
+    // Don't call setState if the option is already selected
     iconAlignBtnGroup.select('Right');
     iconAlignBtnGroup.select('Left');
 
     expect(mockSetState.mock.calls.map(([s]) => s.iconAlign)).toEqual(['right', 'left']);
+  });
+
+  it('should set titleWeight', async () => {
+    renderToolbarOptions({ ...fullState, icon: 'sortUp' });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const buttonGroup = new EuiButtonGroupTestHarness('lens-title-weight-btn');
+
+    expect(buttonGroup.selected.textContent).toBe('Bold');
+
+    buttonGroup.select('Normal');
+    buttonGroup.select('Bold');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.titleWeight)).toEqual(['normal', 'bold']);
   });
 
   it.each([undefined, 'empty'])('should hide iconAlign option when icon is %j', async (icon) => {
@@ -182,5 +243,47 @@ describe('TitlesAndTextPopover', () => {
     textOptionsButton.click();
 
     expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
+  });
+
+  it('should set deafault config when primary metric postion is selected to bottom', () => {
+    renderToolbarOptions({ ...fullState, primaryPosition: 'top' });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
+
+    positionBtnGroup.select('Bottom');
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'bottom',
+        titlesTextAlign: 'left',
+        titleWeight: 'bold',
+        primaryAlign: 'right',
+        iconAlign: 'right',
+        secondaryAlign: 'right',
+      })
+    );
+  });
+
+  it('should set default config when primary metric postion is selected to top', () => {
+    renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
+
+    positionBtnGroup.select('Top');
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'top',
+        titlesTextAlign: 'left',
+        titleWeight: 'normal',
+        primaryAlign: 'left',
+        iconAlign: 'right',
+        secondaryAlign: 'left',
+      })
+    );
   });
 });

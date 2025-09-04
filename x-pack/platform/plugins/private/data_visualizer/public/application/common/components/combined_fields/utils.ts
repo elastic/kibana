@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
 import type { CombinedField } from './types';
 
 const COMMON_LAT_NAMES = ['latitude', 'lat'];

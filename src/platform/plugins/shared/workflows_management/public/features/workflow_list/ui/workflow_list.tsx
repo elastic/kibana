@@ -34,6 +34,7 @@ import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_ut
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
+import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -47,6 +48,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
+  const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application?.capabilities.workflowsManagement.executeWorkflow;
@@ -68,9 +70,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   };
 
   const handleRunWorkflow = useCallback(
-    (item: WorkflowListItemDto) => {
+    (id: string, event: Record<string, any>) => {
       runWorkflow.mutate(
-        { id: item.id, inputs: {} },
+        { id, inputs: event },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
@@ -78,7 +80,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             });
             application!.navigateToUrl(
               application!.getUrlForApp('workflows', {
-                path: `/${item.id}?tab=executions&executionId=${workflowExecutionId}`,
+                path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
               })
             );
           },
@@ -245,7 +247,21 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
               i18n.translate('workflows.workflowList.run', {
                 defaultMessage: 'Run',
               }),
-            onClick: (item: WorkflowListItemDto) => handleRunWorkflow(item),
+            onClick: (item: WorkflowListItemDto) => {
+              let needInput: boolean | undefined = false;
+              if (item.definition?.triggers) {
+                needInput =
+                  item.definition.triggers.some((trigger) => trigger.type === 'alert') ||
+                  (item.definition.triggers.some((trigger) => trigger.type === 'manual') &&
+                    item.definition.inputs &&
+                    Object.keys(item.definition.inputs).length > 0);
+              }
+              if (needInput) {
+                setExecuteWorkflow(item);
+              } else {
+                handleRunWorkflow(item.id, {});
+              }
+            },
           },
           {
             enabled: () => !!canUpdateWorkflow,
@@ -312,6 +328,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       handleCloneWorkflow,
       handleDeleteWorkflow,
       handleRunWorkflow,
+      setExecuteWorkflow,
       handleToggleWorkflow,
     ]
   );
@@ -401,6 +418,13 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           pageIndex: search.page - 1,
         }}
       />
+      {executeWorkflow && (
+        <WorkflowExecuteModal
+          workflow={executeWorkflow}
+          onClose={() => setExecuteWorkflow(null)}
+          onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
+        />
+      )}
     </>
   );
 }

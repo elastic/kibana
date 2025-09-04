@@ -19,7 +19,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { type FindFileStructureResponse } from '@kbn/file-upload-common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 
