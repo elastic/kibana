@@ -406,11 +406,9 @@ export const RuleDetailsPage = connector(
       [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
     );
 
-    const isBuildingBlockTypeNotNull = rule?.building_block_type != null;
     // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
-    useEffect(() => {
-      setShowBuildingBlockAlerts(isBuildingBlockTypeNotNull);
-    }, [isBuildingBlockTypeNotNull, setShowBuildingBlockAlerts]);
+    const isBuildingBlockTypeNotNull = rule?.building_block_type != null;
+    setShowBuildingBlockAlerts(isBuildingBlockTypeNotNull);
 
     const ruleRuleId = rule?.rule_id ?? '';
     const alertDefaultFilters = useMemo(
