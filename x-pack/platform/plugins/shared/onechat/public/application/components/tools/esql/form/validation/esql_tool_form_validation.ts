@@ -38,7 +38,7 @@ const i18nMessages = {
     protectedNamespaceError: (name: string) =>
       i18n.translate('xpack.onechat.tools.newTool.validation.name.protectedNamespaceError', {
         defaultMessage:
-          'Name "{name}" is using a reserved namespace. Please choose a different name.',
+          'Name "{name}" is using a protected namespace. Please choose a different name.',
         values: { name },
       }),
   },
