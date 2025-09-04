@@ -38,6 +38,7 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
+import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { SpanLinks } from '../components/span_links';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
@@ -156,13 +157,16 @@ export function TransactionOverview({
                 </>
               )}
             </EuiFlexItem>
+            <EuiSpacer size="m" />
+            <SpanLinks
+              traceId={traceId}
+              docId={transactionId}
+              processorEvent={ProcessorEvent.transaction}
+            />
+            <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer size="m" />
-              <SpanLinks
-                traceId={traceId}
-                docId={transactionId}
-                processorEvent={ProcessorEvent.transaction}
-              />
+              <TraceContextLogEvents traceId={traceId} transactionId={transactionId} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </FieldActionsProvider>
