@@ -201,7 +201,7 @@ export async function executor(
     logger.error(
       `ConnectorId "${actionId}": error "${axiosConfigError?.message ?? 'unknown error'}"`
     );
-    return errorResultUnexpectedError(actionId);
+    return errorResultRequestFailed(actionId, axiosConfigError?.message ?? 'unknown error');
   }
 
   const { axiosInstance, headers, sslOverrides } = axiosConfig;
