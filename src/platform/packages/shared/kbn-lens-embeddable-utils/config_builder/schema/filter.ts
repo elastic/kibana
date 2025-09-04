@@ -37,3 +37,5 @@ export const filterWithLabelSchema = schema.object({
     })
   ),
 });
+
+export type LensApiFilterType = typeof filterSchema.type;
