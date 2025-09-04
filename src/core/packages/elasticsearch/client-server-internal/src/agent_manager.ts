@@ -73,6 +73,48 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
     this.registerMetrics();
   }
 
+  public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
+    // a given agent factory always provides the same Agent instances (for the same protocol)
+    // we keep references to the instances at factory level, to be able to reuse them
+    let httpAgent: HttpAgent;
+    let httpsAgent: HttpsAgent;
+
+    return (connectionOpts: ConnectionOptions): NetworkAgent => {
+      if (connectionOpts.url.protocol === HTTPS) {
+        if (!httpsAgent) {
+          const config = Object.assign({}, agentOptions, connectionOpts.tls);
+          httpsAgent = new HttpsAgent(config);
+          this.agents.add(httpsAgent);
+          dereferenceOnDestroy(this.agents, httpsAgent);
+          this.cacheableLookup?.install(httpsAgent);
+        }
+
+        return httpsAgent;
+      }
+
+      if (!httpAgent) {
+        httpAgent = new HttpAgent(agentOptions);
+        this.agents.add(httpAgent);
+        dereferenceOnDestroy(this.agents, httpAgent);
+        this.cacheableLookup?.install(httpAgent);
+      }
+
+      return httpAgent;
+    };
+  }
+
+  public getAgentsStats(): ElasticsearchClientsMetrics {
+    const stats = getAgentsSocketsStats(this.agents);
+
+    if (stats.totalQueuedRequests > 0) {
+      this.logger.warn(
+        `There are ${stats.totalQueuedRequests} queued requests. If this number is constantly high, consider scaling Kibana horizontally or increasing "elasticsearch.maxSockets" in the config.`
+      );
+    }
+
+    return stats;
+  }
+
   private registerMetrics() {
     const meter = metrics.getMeter('kibana.elasticsearch.client');
 
@@ -190,48 +232,6 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         numberOfAgentsObservable,
       ]
     );
-  }
-
-  public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
-    // a given agent factory always provides the same Agent instances (for the same protocol)
-    // we keep references to the instances at factory level, to be able to reuse them
-    let httpAgent: HttpAgent;
-    let httpsAgent: HttpsAgent;
-
-    return (connectionOpts: ConnectionOptions): NetworkAgent => {
-      if (connectionOpts.url.protocol === HTTPS) {
-        if (!httpsAgent) {
-          const config = Object.assign({}, agentOptions, connectionOpts.tls);
-          httpsAgent = new HttpsAgent(config);
-          this.agents.add(httpsAgent);
-          dereferenceOnDestroy(this.agents, httpsAgent);
-          this.cacheableLookup?.install(httpsAgent);
-        }
-
-        return httpsAgent;
-      }
-
-      if (!httpAgent) {
-        httpAgent = new HttpAgent(agentOptions);
-        this.agents.add(httpAgent);
-        dereferenceOnDestroy(this.agents, httpAgent);
-        this.cacheableLookup?.install(httpAgent);
-      }
-
-      return httpAgent;
-    };
-  }
-
-  public getAgentsStats(): ElasticsearchClientsMetrics {
-    const stats = getAgentsSocketsStats(this.agents);
-
-    if (stats.totalQueuedRequests > 0) {
-      this.logger.warn(
-        `There are ${stats.totalQueuedRequests} queued requests. If this number is constantly high, consider scaling Kibana horizontally or increasing "elasticsearch.maxSockets" in the config.`
-      );
-    }
-
-    return stats;
   }
 }
 
