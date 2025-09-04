@@ -38,7 +38,6 @@ describe('createPrivilegedUsersCrudService', () => {
     },
   };
   const mockSource: PrivMonUserSource = 'api';
-  const maxPrivilegedUsersAllowed = 100;
 
   const mockExistingUser = {
     id: 'existing-user-id',
@@ -98,11 +97,22 @@ describe('createPrivilegedUsersCrudService', () => {
         user: { ...mockExistingUser, labels: { sources: ['csv', 'api'] } },
       };
 
+      // Mock createUserDocument to throw 409 conflict (document already exists)
+      const conflictError = { statusCode: 409, message: 'Document already exists' };
+      (createUserDocument as jest.Mock).mockRejectedValue(conflictError);
       (findUserByUsername as jest.Mock).mockResolvedValue(mockExistingUser);
       (updateUserWithSource as jest.Mock).mockResolvedValue(mockUpdateResponse);
 
       const result = await crudService.create(mockUserInput, mockSource);
 
+      // Should try to create first, then fall back to find and update on conflict
+      expect(createUserDocument).toHaveBeenCalledWith(
+        mockEsClient.asCurrentUser,
+        TEST_INDEX,
+        mockUserInput,
+        mockSource,
+        expect.any(Function)
+      );
       expect(findUserByUsername).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
         TEST_INDEX,
@@ -125,16 +135,12 @@ describe('createPrivilegedUsersCrudService', () => {
         user: mockNewUser,
       };
 
-      (findUserByUsername as jest.Mock).mockResolvedValue(undefined);
+      // Mock successful creation (no conflict)
       (createUserDocument as jest.Mock).mockResolvedValue(mockCreateResponse);
 
       const result = await crudService.create(mockUserInput, mockSource);
 
-      expect(findUserByUsername).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        'test-user'
-      );
+      // Should only call createUserDocument (optimistic create)
       expect(createUserDocument).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
         TEST_INDEX,
@@ -142,6 +148,9 @@ describe('createPrivilegedUsersCrudService', () => {
         mockSource,
         expect.any(Function)
       );
+      // Should NOT call findUserByUsername since create succeeded
+      expect(findUserByUsername).not.toHaveBeenCalled();
+      expect(updateUserWithSource).not.toHaveBeenCalled();
       expect(result).toEqual(mockCreateResponse);
     });
 
@@ -370,7 +379,8 @@ describe('createPrivilegedUsersCrudService', () => {
   describe('error handling', () => {
     it('should propagate elasticsearch errors on create', async () => {
       const esError = new Error('Elasticsearch connection failed');
-      (findUserByUsername as jest.Mock).mockRejectedValue(esError);
+      // Mock createUserDocument to throw non-409 error (should be propagated)
+      (createUserDocument as jest.Mock).mockRejectedValue(esError);
 
       await expect(crudService.create(mockUserInput, mockSource)).rejects.toThrow(
         'Elasticsearch connection failed'
@@ -410,7 +420,7 @@ describe('createPrivilegedUsersCrudService', () => {
 
   describe('integration with helper functions', () => {
     it('should call helper functions with correct parameters for user creation flow', async () => {
-      (findUserByUsername as jest.Mock).mockResolvedValue(undefined);
+      // Mock successful creation (no conflict)
       (createUserDocument as jest.Mock).mockResolvedValue({
         created: true,
         user: mockNewUser,
@@ -418,12 +428,7 @@ describe('createPrivilegedUsersCrudService', () => {
 
       await crudService.create(mockUserInput, mockSource);
 
-      // Verify all helper functions called with correct parameters
-      expect(findUserByUsername).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        TEST_INDEX,
-        'test-user'
-      );
+      // Verify createUserDocument called with correct parameters (optimistic create)
       expect(createUserDocument).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
         TEST_INDEX,
@@ -431,6 +436,9 @@ describe('createPrivilegedUsersCrudService', () => {
         mockSource,
         expect.any(Function)
       );
+      // findUserByUsername should NOT be called for successful creation
+      expect(findUserByUsername).not.toHaveBeenCalled();
+      expect(updateUserWithSource).not.toHaveBeenCalled();
     });
 
     it('should call helper functions with correct parameters for user update flow', async () => {
@@ -439,11 +447,22 @@ describe('createPrivilegedUsersCrudService', () => {
         user: { ...mockExistingUser, labels: { sources: ['csv', 'api'] } },
       };
 
+      // Mock 409 conflict then successful find and update
+      const conflictError = { statusCode: 409, message: 'Document already exists' };
+      (createUserDocument as jest.Mock).mockRejectedValue(conflictError);
       (findUserByUsername as jest.Mock).mockResolvedValue(mockExistingUser);
       (updateUserWithSource as jest.Mock).mockResolvedValue(mockUpdateResponse);
 
       await crudService.create(mockUserInput, mockSource);
 
+      // Should try to create first, then fall back to find and update on conflict
+      expect(createUserDocument).toHaveBeenCalledWith(
+        mockEsClient.asCurrentUser,
+        TEST_INDEX,
+        mockUserInput,
+        mockSource,
+        expect.any(Function)
+      );
       expect(findUserByUsername).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
         TEST_INDEX,
@@ -457,8 +476,6 @@ describe('createPrivilegedUsersCrudService', () => {
         mockUserInput,
         expect.any(Function)
       );
-      // These should not be called in update flow
-      expect(createUserDocument).not.toHaveBeenCalled();
     });
   });
 });

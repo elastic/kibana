@@ -35,16 +35,19 @@ export const createPrivilegedUsersCrudService = ({
       throw new Error('Username is required');
     }
 
-    // Check if user already exists
-    const existingUser = await findUserByUsername(esClient, index, username);
-
-    if (existingUser) {
-      // User exists, update with new source
-      return updateUserWithSource(esClient, index, existingUser, source, userInput, get);
+    // Try to create user with deterministic ID first (atomic operation)
+    try {
+      return await createUserDocument(esClient, index, userInput, source, get);
+    } catch (error) {
+      // If document already exists (conflict), try to update it
+      if (error.statusCode === 409) {
+        const existingUser = await findUserByUsername(esClient, index, username);
+        if (existingUser) {
+          return updateUserWithSource(esClient, index, existingUser, source, userInput, get);
+        }
+      }
+      throw error; // Re-throw other errors
     }
-
-    // Create new user document
-    return createUserDocument(esClient, index, userInput, source, get);
   };
 
   const get = async (id: string): Promise<MonitoredUserDoc | undefined> => {

@@ -15,13 +15,41 @@ import type {
 import type { PrivMonUserSource } from '../types';
 
 /**
+ * Generate deterministic user ID from username
+ */
+export const generateUserIdFromUsername = (username: string): string => {
+  // Use a deterministic ID based on username
+  // Sanitize username to ensure valid ES document ID
+  return `privmon-user-${username.toLowerCase().replace(/[^a-z0-9_-]/g, '_')}`;
+};
+
+/**
  * Helper function: Find existing user by username
+ * First tries direct ID lookup (faster), falls back to search if not found
  */
 export const findUserByUsername = async (
   esClient: ElasticsearchClient,
   index: string,
   username: string
 ): Promise<MonitoredUserDoc | undefined> => {
+  // Try direct ID lookup first (O(1) operation)
+  const docId = generateUserIdFromUsername(username);
+  try {
+    const response = await esClient.get({ index, id: docId });
+    if (response.found) {
+      return {
+        id: response._id,
+        ...(response._source as Omit<MonitoredUserDoc, 'id'>),
+      } as MonitoredUserDoc;
+    }
+  } catch (error) {
+    // Document not found with deterministic ID, fall back to search
+    if (error.statusCode !== 404) {
+      throw error; // Re-throw non-404 errors
+    }
+  }
+
+  // Fallback to search for legacy documents without deterministic IDs
   const response = await esClient.search({
     index,
     query: {
@@ -64,6 +92,12 @@ export const createUserDocument = async (
   source: PrivMonUserSource,
   getUser: (id: string) => Promise<MonitoredUserDoc | undefined>
 ): Promise<CreatePrivMonUserResponse> => {
+  const username = user.user?.name;
+  if (!username) {
+    throw new Error('Username is required for document creation');
+  }
+
+  const docId = generateUserIdFromUsername(username);
   const doc = merge(user, {
     user: {
       is_privileged: true,
@@ -76,8 +110,10 @@ export const createUserDocument = async (
 
   const res = await esClient.index({
     index,
+    id: docId, // Use deterministic ID instead of auto-generated
     refresh: 'wait_for',
     document: doc,
+    op_type: 'create', // Fail if document already exists
   });
 
   const newUser = await getUser(res._id);
