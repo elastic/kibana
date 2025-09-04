@@ -1208,6 +1208,8 @@
       "@kbn/ingest-pipelines-shared/*": ["x-pack/platform/packages/shared/ingest-pipelines/*"],
       "@kbn/input-control-vis-plugin": ["src/platform/plugins/private/input_control_vis"],
       "@kbn/input-control-vis-plugin/*": ["src/platform/plugins/private/input_control_vis/*"],
+      "@kbn/inspect-component-plugin": ["src/platform/plugins/private/inspect_component"],
+      "@kbn/inspect-component-plugin/*": ["src/platform/plugins/private/inspect_component/*"],
       "@kbn/inspector-plugin": ["src/platform/plugins/shared/inspector"],
       "@kbn/inspector-plugin/*": ["src/platform/plugins/shared/inspector/*"],
       "@kbn/interactive-setup-plugin": ["src/platform/plugins/private/interactive_setup"],
