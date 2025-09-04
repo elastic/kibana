@@ -18,7 +18,7 @@ export function registerOtelMetrics() {
 
   // opentelemetry.io/docs/specs/semconv/system/process-metrics/#metric-processuptime
   meter
-    .createObservableCounter('process.uptime', {
+    .createObservableGauge('process.uptime', {
       description: 'Process Uptime: The time the process has been running.',
       unit: 's',
       valueType: ValueType.DOUBLE,
@@ -34,52 +34,52 @@ export function registerOtelMetrics() {
 
 function registerOtelMemoryMetrics(meter: Meter) {
   const memoryMetrics = {
-    // opentelemetry.io/docs/specs/semconv/runtime/v8js-metrics/
-    limit: meter.createObservableGauge('v8js.memory.heap.limit', {
+    // https://opentelemetry.io/docs/specs/semconv/runtime/v8js-metrics/
+    limit: meter.createObservableUpDownCounter('v8js.memory.heap.limit', {
       description: 'Process Memory: Total heap available.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    used: meter.createObservableGauge('v8js.memory.heap.used', {
+    used: meter.createObservableUpDownCounter('v8js.memory.heap.used', {
       description: 'Process Memory: Used heap size.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    available: meter.createObservableGauge('v8js.memory.heap.available_size', {
+    available: meter.createObservableUpDownCounter('v8js.memory.heap.available_size', {
       description: 'Process Memory: Available heap size.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    physical: meter.createObservableGauge('v8js.memory.heap.physical_size', {
+    physical: meter.createObservableUpDownCounter('v8js.memory.heap.physical_size', {
       description: 'Process Memory: Committed size of a heap space.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
     // Following this convention: https://opentelemetry.io/docs/specs/semconv/system/process-metrics/#metric-processmemoryusage
-    rss: meter.createObservableGauge('process.memory.rss', {
+    rss: meter.createObservableUpDownCounter('process.memory.rss', {
       description:
         'Process Memory: Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the process, including all C++ and JavaScript objects and code.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    external: meter.createObservableGauge('process.memory.external', {
+    external: meter.createObservableUpDownCounter('process.memory.external', {
       description:
         'Process Memory: memory usage of C++ objects bound to JavaScript objects managed by V8.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    arrayBuffers: meter.createObservableGauge('process.memory.array_buffers', {
+    arrayBuffers: meter.createObservableUpDownCounter('process.memory.array_buffers', {
       description:
         'Process Memory: Refers to memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s, including all Node.js Buffers. This is also included in the external value.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    heapTotal: meter.createObservableGauge('process.memory.heap.total', {
+    heapTotal: meter.createObservableUpDownCounter('process.memory.heap.total', {
       description: 'Process Memory: Total heap size pre-allocated.',
       unit: 'By',
       valueType: ValueType.INT,
     }),
-    heapUsed: meter.createObservableGauge('process.memory.heap.used', {
+    heapUsed: meter.createObservableUpDownCounter('process.memory.heap.used', {
       description: 'Process Memory: Used heap size.',
       unit: 'By',
       valueType: ValueType.INT,
@@ -202,12 +202,14 @@ function registerOtelEventLoopDelayMetrics(meter: Meter) {
 function registerOtelEventLoopUtilizationMetrics(meter: Meter) {
   // Event Loop metrics as defined in https://opentelemetry.io/docs/specs/semconv/runtime/nodejs-metrics/
   const eventLoopUtilizationMetrics = {
+    // https://opentelemetry.io/docs/specs/semconv/runtime/nodejs-metrics/#metric-nodejseventlooputilization
     utilization: meter.createObservableGauge('nodejs.eventloop.utilization', {
       description: 'Process Event Loop Utilization: The utilization of the event loop.',
       unit: '1',
       valueType: ValueType.DOUBLE,
     }),
-    time: meter.createObservableGauge('nodejs.eventloop.time', {
+    // https://opentelemetry.io/docs/specs/semconv/runtime/nodejs-metrics/#metric-nodejseventlooptime
+    time: meter.createObservableCounter('nodejs.eventloop.time', {
       description:
         'Process Event Loop Utilization: Cumulative duration of time the event loop has been in each state.',
       unit: '1',
