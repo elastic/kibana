@@ -241,7 +241,6 @@
     "@kbn/inference-common",
     "@kbn/esql-ast",
     "@kbn/inference-langchain",
-    "@kbn/scout-security",
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
