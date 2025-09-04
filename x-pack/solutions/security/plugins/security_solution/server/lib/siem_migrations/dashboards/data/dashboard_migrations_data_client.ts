@@ -14,11 +14,13 @@ import type { DashboardMigrationIndexNameProviders } from '../types';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data_client';
 import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
+import { RuleMigrationsDataLookupsClient } from '../../rules/data/rule_migrations_data_lookups_client';
 
 export class DashboardMigrationsDataClient extends SiemMigrationsDataClient {
   public readonly migrations: SiemMigrationsDataMigrationClient<DashboardMigration>;
   public readonly items: DashboardMigrationsDataDashboardsClient;
   public readonly resources: SiemMigrationsDataResourcesClient;
+  public readonly lookups: RuleMigrationsDataLookupsClient;
 
   constructor(
     indexNameProviders: DashboardMigrationIndexNameProviders,
@@ -50,6 +52,12 @@ export class DashboardMigrationsDataClient extends SiemMigrationsDataClient {
       esScopedClient,
       logger,
       dependencies
+    );
+    this.lookups = new RuleMigrationsDataLookupsClient(
+      currentUser,
+      esScopedClient,
+      logger,
+      spaceId
     );
   }
 }
