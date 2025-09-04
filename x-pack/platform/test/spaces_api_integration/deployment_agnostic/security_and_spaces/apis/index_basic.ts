@@ -25,5 +25,12 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
+
+    loadTestFile(require.resolve('./superuser/resolve_copy_to_space_conflicts'));
+    loadTestFile(require.resolve('./superuser/create'));
+    loadTestFile(require.resolve('./superuser/delete'));
+    loadTestFile(require.resolve('./superuser/get_all'));
+    loadTestFile(require.resolve('./superuser/get'));
+    loadTestFile(require.resolve('./superuser/update'));
   });
 }
