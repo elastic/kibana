@@ -84,6 +84,7 @@
       "src/platform/packages/shared/kbn-management",
       "packages/kbn-management"
     ],
+    "metricsExperience": "src/platform/packages/shared/kbn-unified-metrics-grid/src",
     "monaco": "src/platform/packages/shared/kbn-monaco/src",
     "navigation": ["src/platform/plugins/shared/navigation", "packages/solution-nav"],
     "links": "src/platform/plugins/private/links",
