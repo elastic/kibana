@@ -341,6 +341,37 @@ function getRequiredParamsForConnector(
 }
 
 /**
+ * Get appropriate Monaco completion kind for different connector types
+ */
+function getConnectorCompletionKind(connectorType: string): monaco.languages.CompletionItemKind {
+  // Map specific connector types to appropriate icons
+  if (connectorType === 'slack') {
+    return monaco.languages.CompletionItemKind.Event; // Will use custom Slack logo
+  }
+  if (connectorType.startsWith('elasticsearch')) {
+    return monaco.languages.CompletionItemKind.Struct; // Will use custom Elasticsearch logo  
+  }
+  if (connectorType.startsWith('kibana')) {
+    return monaco.languages.CompletionItemKind.Module; // Will use custom Kibana logo
+  }
+
+  if (connectorType.startsWith('inference')) {
+    return monaco.languages.CompletionItemKind.Snippet; // Will use custom HTTP icon
+  }
+
+  if (connectorType === 'http') {
+    return monaco.languages.CompletionItemKind.Reference; // Will use custom HTTP icon
+  }
+
+  if (connectorType === 'console') {
+    return monaco.languages.CompletionItemKind.Variable; // Will use custom console icon
+  }
+  
+  // Default fallback
+  return monaco.languages.CompletionItemKind.Function;
+}
+
+/**
  * Get connector type suggestions with better grouping and filtering
  */
 function getConnectorTypeSuggestions(
@@ -372,7 +403,7 @@ function getConnectorTypeSuggestions(
 
     return {
       label: connectorType,
-      kind: monaco.languages.CompletionItemKind.Function, // Use Function kind
+      kind: getConnectorCompletionKind(connectorType), // Use custom icon mapping
       insertText: simpleText,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: extendedRange,
@@ -440,12 +471,12 @@ function getConnectorTypeSuggestions(
     matchingConnectors.forEach((connectorType) => {
       suggestions.push(createSnippetSuggestion(connectorType));
     });
-    /*
+    
     // Add namespace hints only if needed
     if (typePrefix.length === 0 || 'elasticsearch'.startsWith(typePrefix.toLowerCase())) {
       suggestions.push({
         label: 'elasticsearch.*',
-        kind: monaco.languages.CompletionItemKind.Module,
+        kind: monaco.languages.CompletionItemKind.Struct,
         insertText: shouldBeQuoted ? '"elasticsearch."' : 'elasticsearch.',
         range,
         documentation: `Elasticsearch APIs (${allConnectors.filter((c: any) => c.type.startsWith('elasticsearch.')).length} available)`,
@@ -453,7 +484,7 @@ function getConnectorTypeSuggestions(
         command: { id: 'editor.action.triggerSuggest', title: 'Trigger Suggest' },
       });
     }
-      */
+      
 
     if (typePrefix.length === 0 || 'kibana'.startsWith(typePrefix.toLowerCase())) {
       suggestions.push({

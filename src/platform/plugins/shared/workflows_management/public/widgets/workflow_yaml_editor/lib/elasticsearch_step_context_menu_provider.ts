@@ -38,7 +38,7 @@ export function enhanceEditorWithElasticsearchStepContextMenu(
     label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyAsConsole', {
       defaultMessage: 'Copy Elasticsearch step as Console format',
     }),
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyC],
+    keybindings: [monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyC)],
     run: async () => {
       const model = editor.getModel();
       const position = editor.getPosition();
@@ -73,7 +73,7 @@ export function enhanceEditorWithElasticsearchStepContextMenu(
     label: i18n.translate('workflows.workflowDetail.yamlEditor.action.copyAsCurl', {
       defaultMessage: 'Copy Elasticsearch step as cURL',
     }),
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyU],
+    keybindings: [monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, monaco.KeyCode.KeyU)],
     run: async () => {
       const model = editor.getModel();
       const position = editor.getPosition();
