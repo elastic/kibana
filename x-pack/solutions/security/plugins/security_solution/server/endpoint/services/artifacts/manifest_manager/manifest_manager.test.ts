@@ -392,6 +392,8 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_BLOCKLISTS_MACOS,
       ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
       ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
@@ -424,7 +426,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       for (const artifact of artifacts) {
@@ -479,7 +481,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -568,7 +570,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(artifacts[0]).toStrictEqual(oldManifest.getAllArtifacts()[0]);
@@ -671,7 +673,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(16);
+      expect(artifacts.length).toBe(18);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -783,7 +785,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(16);
+      expect(artifacts.length).toBe(18);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -838,6 +840,8 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_BLOCKLISTS_MACOS,
       ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
       ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
@@ -889,7 +893,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -970,7 +974,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
@@ -1054,7 +1058,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({ entries: [] });
@@ -1082,7 +1086,7 @@ describe('ManifestManager', () => {
     });
   });
 
-  describe('buildNewManifest with trustedDevices experimental feature', () => {
+  describe('buildNewManifest with trustedDevices', () => {
     const SUPPORTED_ARTIFACT_NAMES_WITH_TRUSTED_DEVICES = [
       ARTIFACT_NAME_EXCEPTIONS_MACOS,
       ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
@@ -1090,45 +1094,25 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_TRUSTED_APPS_MACOS,
       ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
       ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_BLOCKLISTS_MACOS,
+      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
+      ARTIFACT_NAME_BLOCKLISTS_LINUX,
       ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
       ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
-      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
-      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
-      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
-      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
-      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
-      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
-      ARTIFACT_NAME_BLOCKLISTS_MACOS,
-      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
-      ARTIFACT_NAME_BLOCKLISTS_LINUX,
-    ];
-
-    const SUPPORTED_ARTIFACT_NAMES_WITHOUT_TRUSTED_DEVICES = [
-      ARTIFACT_NAME_EXCEPTIONS_MACOS,
-      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
-      ARTIFACT_NAME_EXCEPTIONS_LINUX,
-      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
-      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
-      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
-      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
-      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
-      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
-      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
-      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
-      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
-      ARTIFACT_NAME_BLOCKLISTS_MACOS,
-      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
-      ARTIFACT_NAME_BLOCKLISTS_LINUX,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
       ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
     ];
 
-    test('builds manifest with trusted devices when feature flag enabled', async () => {
-      const context = buildManifestManagerContextMock({
-        experimentalFeatures: ['trustedDevices'],
-      });
+    test('builds manifest with trusted devices', async () => {
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
@@ -1172,58 +1156,13 @@ describe('ManifestManager', () => {
       }
     });
 
-    test('builds manifest without trusted devices when feature flag disabled', async () => {
-      const context = buildManifestManagerContextMock({
-        experimentalFeatures: [], // No trustedDevices feature
-      });
-      const manifestManager = new ManifestManager(context);
-
-      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
-      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
-        TEST_POLICY_ID_1,
-      ]);
-
-      const manifest = await manifestManager.buildNewManifest();
-
-      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
-      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
-      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
-
-      const artifacts = manifest.getAllArtifacts();
-
-      expect(artifacts.length).toBe(15); // Standard artifacts only
-      expect(getArtifactIds(artifacts)).toStrictEqual(
-        SUPPORTED_ARTIFACT_NAMES_WITHOUT_TRUSTED_DEVICES
-      );
-
-      // Verify trusted devices artifacts are NOT present
-      const trustedDevicesMacosArtifact = artifacts.find(
-        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_MACOS
-      );
-      const trustedDevicesWindowsArtifact = artifacts.find(
-        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS
-      );
-
-      expect(trustedDevicesMacosArtifact).toBeUndefined();
-      expect(trustedDevicesWindowsArtifact).toBeUndefined();
-
-      for (const artifact of artifacts) {
-        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
-        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
-          new Set([TEST_POLICY_ID_1])
-        );
-      }
-    });
-
-    test('builds manifest with trusted devices entries when feature flag enabled and trusted devices data present', async () => {
+    test('builds manifest with trusted devices entries when trusted devices data present', async () => {
       const trustedDeviceListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
         tags: ['policy:all'],
       });
 
-      const context = buildManifestManagerContextMock({
-        experimentalFeatures: ['trustedDevices'],
-      });
+      const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
@@ -1296,7 +1235,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
         entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1', defaultFeatures),
@@ -1336,7 +1275,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(artifacts.length).toBe(15);
+      expect(artifacts.length).toBe(17);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
         entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1', defaultFeatures),
