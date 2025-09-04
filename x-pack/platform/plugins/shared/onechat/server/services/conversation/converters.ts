@@ -7,11 +7,11 @@
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  ConversationRound,
-  ConversationWithoutRounds,
   Conversation,
+  ConversationRound,
+  ConversationRoundStep,
+  ConversationWithoutRounds,
   UserIdAndName,
-  ToolResult,
 } from '@kbn/onechat-common';
 import { ConversationRoundStepType } from '@kbn/onechat-common';
 import type {
@@ -19,13 +19,11 @@ import type {
   ConversationUpdateRequest,
 } from '../../../common/conversations';
 import type { ConversationProperties } from './storage';
-import type { PersistentConversationRound } from './types';
+import type { PersistentConversationRound, PersistentConversationRoundStep } from './types';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
-const convertBaseFromEs = (
-  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
-) => {
+const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -44,39 +42,39 @@ const convertBaseFromEs = (
 };
 
 function serializeStepResults(rounds: ConversationRound[]): PersistentConversationRound[] {
-  return rounds.map((round) => ({
+  return rounds.map<PersistentConversationRound>((round) => ({
     ...round,
-    steps: round.steps.map((step) => ({
-      ...step,
-      results: 'results' in step ? JSON.stringify(step.results) : '[]',
-    })),
+    steps: round.steps.map<PersistentConversationRoundStep>((step) => {
+      if (step.type === ConversationRoundStepType.toolCall) {
+        return {
+          ...step,
+          results: JSON.stringify(step.results),
+        };
+      } else {
+        return step;
+      }
+    }),
   }));
 }
 
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
-  return rounds.map((round) => ({
+  return rounds.map<ConversationRound>((round) => ({
     ...round,
-    steps: round.steps.map((step) => ({
-      ...step,
-      results:
-        'results' in step
-          ? JSON.parse(step.results).map((result: ToolResult) => {
-              if (step.type === ConversationRoundStepType.toolCall) {
-                return {
-                  ...step,
-                  progression: step.progression ?? [],
-                };
-              }
-              return step;
-            })
-          : [],
-    })),
+    steps: round.steps.map<ConversationRoundStep>((step) => {
+      if (step.type === ConversationRoundStepType.toolCall) {
+        return {
+          ...step,
+          results: JSON.parse(step.results),
+          progression: step.progression ?? [],
+        };
+      } else {
+        return step;
+      }
+    }),
   }));
 }
 
-export const fromEs = (
-  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
-): Conversation => {
+export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
   return {
     ...base,
@@ -84,9 +82,7 @@ export const fromEs = (
   };
 };
 
-export const fromEsWithoutRounds = (
-  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
-): ConversationWithoutRounds => {
+export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
   return convertBaseFromEs(document);
 };
 
