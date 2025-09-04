@@ -28,6 +28,7 @@ const isServerless = process.env.CLUSTER_ENVIRONMENT === 'serverless';
 test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
+  const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
   const fileName = 'code_snippet_otel_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -74,19 +75,22 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
    */
   await page.waitForTimeout(5 * 60000);
 
-  const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
-    await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
-  );
-  await otelKubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
+  if (!isLogsEssentialsMode) {
+    // Skip metrics and APM validation in logs essentials tier
+    const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
+      await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
+    );
+    await otelKubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
 
-  const apmServiceInventoryPage = new ApmServiceInventoryPage(
-    await otelKubernetesFlowPage.openServiceInventoryInNewTab()
-  );
+    const apmServiceInventoryPage = new ApmServiceInventoryPage(
+      await otelKubernetesFlowPage.openServiceInventoryInNewTab()
+    );
 
-  const serviceTestId = isServerless
-    ? 'serviceLink_java'
-    : 'serviceLink_opentelemetry/java/elastic';
+    const serviceTestId = isServerless
+      ? 'serviceLink_java'
+      : 'serviceLink_opentelemetry/java/elastic';
 
-  await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
-  await apmServiceInventoryPage.assertTransactionExists();
+    await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
+    await apmServiceInventoryPage.assertTransactionExists();
+  }
 });

@@ -22,6 +22,7 @@ test('Kubernetes EA', async ({
 }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
+  const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
   const fileName = 'code_snippet_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -59,5 +60,8 @@ test('Kubernetes EA', async ({
 
   await kubernetesEAFlowPage.clickKubernetesAgentCTA();
 
-  await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
+  if (!isLogsEssentialsMode) {
+    // Skip metrics validation in logs essentials tier 
+    await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
+  }
 });

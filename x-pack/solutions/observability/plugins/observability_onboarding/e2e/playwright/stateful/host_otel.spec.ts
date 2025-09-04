@@ -17,6 +17,7 @@ test.beforeEach(async ({ page }) => {
 test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOverviewPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
+  const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
   const fileName = 'code_snippet_otel_host.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -48,5 +49,9 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
   await page.waitForTimeout(3 * 60000);
 
   await otelHostFlowPage.clickHostsOverviewCTA();
-  await hostsOverviewPage.assertCpuPercentageNotEmpty();
+  
+  if (!isLogsEssentialsMode) {
+    // Skip metrics validation in logs essentials tier
+    await hostsOverviewPage.assertCpuPercentageNotEmpty();
+  }
 });
