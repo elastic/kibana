@@ -143,6 +143,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         deselectAll: () => {},
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
+        allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
       };
 
       return {
