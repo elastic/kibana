@@ -14,7 +14,7 @@ import {
   CAI_COMMENTS_INDEX_ALIAS,
   CAI_COMMENTS_INDEX_VERSION,
   CAI_COMMENTS_SOURCE_INDEX,
-  CAI_COMMENTS_SOURCE_QUERY,
+  getCommentsSourceQuery,
   CAI_COMMENTS_BACKFILL_TASK_ID,
   CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
 } from './constants';
@@ -50,7 +50,7 @@ export const createCommentsAnalyticsIndex = ({
     painlessScript: CAI_COMMENTS_INDEX_SCRIPT,
     taskId: CAI_COMMENTS_BACKFILL_TASK_ID,
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-    sourceQuery: CAI_COMMENTS_SOURCE_QUERY,
+    sourceQuery: getCommentsSourceQuery(spaceId, owner),
   });
 
 export const scheduleCommentsAnalyticsSyncTask = ({

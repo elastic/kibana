@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { Owner } from '../../../common/constants/types';
 
 export const CAI_ATTACHMENTS_INDEX_NAME = '.internal.cases-attachments';
 
@@ -15,14 +16,29 @@ export const CAI_ATTACHMENTS_INDEX_ALIAS = '.cases-attachments';
 
 export const CAI_ATTACHMENTS_INDEX_VERSION = 1;
 
-export const CAI_ATTACHMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
+export const getAttachmentsSourceQuery = (
+  spaceId: string,
+  owner: Owner
+): QueryDslQueryContainer => ({
   bool: {
-    must: [
+    filter: [
       {
         term: {
           type: 'cases-comments',
         },
       },
+      {
+        term: {
+          namespaces: spaceId,
+        },
+      },
+      {
+        term: {
+          'cases-comments.owner': owner,
+        },
+      },
+    ],
+    must: [
       {
         bool: {
           should: [
@@ -42,7 +58,7 @@ export const CAI_ATTACHMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
       },
     ],
   },
-};
+});
 
 export const CAI_ATTACHMENTS_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 

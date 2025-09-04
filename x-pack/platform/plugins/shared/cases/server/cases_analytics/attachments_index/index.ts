@@ -14,7 +14,7 @@ import {
   CAI_ATTACHMENTS_INDEX_ALIAS,
   CAI_ATTACHMENTS_INDEX_VERSION,
   CAI_ATTACHMENTS_SOURCE_INDEX,
-  CAI_ATTACHMENTS_SOURCE_QUERY,
+  getAttachmentsSourceQuery,
   CAI_ATTACHMENTS_BACKFILL_TASK_ID,
   CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
 } from './constants';
@@ -50,7 +50,7 @@ export const createAttachmentsAnalyticsIndex = ({
     painlessScript: CAI_ATTACHMENTS_INDEX_SCRIPT,
     taskId: CAI_ATTACHMENTS_BACKFILL_TASK_ID,
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-    sourceQuery: CAI_ATTACHMENTS_SOURCE_QUERY,
+    sourceQuery: getAttachmentsSourceQuery(spaceId, owner),
   });
 
 export const scheduleAttachmentsAnalyticsSyncTask = ({

@@ -14,7 +14,7 @@ import {
   CAI_ACTIVITY_INDEX_ALIAS,
   CAI_ACTIVITY_INDEX_VERSION,
   CAI_ACTIVITY_SOURCE_INDEX,
-  CAI_ACTIVITY_SOURCE_QUERY,
+  getActivitySourceQuery,
   CAI_ACTIVITY_BACKFILL_TASK_ID,
   CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID,
 } from './constants';
@@ -50,7 +50,7 @@ export const createActivityAnalyticsIndex = ({
     painlessScript: CAI_ACTIVITY_INDEX_SCRIPT,
     taskId: CAI_ACTIVITY_BACKFILL_TASK_ID,
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
-    sourceQuery: CAI_ACTIVITY_SOURCE_QUERY,
+    sourceQuery: getActivitySourceQuery(spaceId, owner),
   });
 
 export const scheduleActivityAnalyticsSyncTask = ({

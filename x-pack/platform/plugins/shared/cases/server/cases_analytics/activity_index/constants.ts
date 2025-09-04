@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { Owner } from '../../../common/constants/types';
 
 export const CAI_ACTIVITY_INDEX_NAME = '.internal.cases-activity';
 
@@ -15,14 +16,26 @@ export const CAI_ACTIVITY_INDEX_ALIAS = '.cases-activity';
 
 export const CAI_ACTIVITY_INDEX_VERSION = 1;
 
-export const CAI_ACTIVITY_SOURCE_QUERY: QueryDslQueryContainer = {
+export const getActivitySourceQuery = (spaceId: string, owner: Owner): QueryDslQueryContainer => ({
   bool: {
-    must: [
+    filter: [
       {
         term: {
           type: 'cases-user-actions',
         },
       },
+      {
+        term: {
+          namespaces: spaceId,
+        },
+      },
+      {
+        term: {
+          'cases-user-actions.owner': owner,
+        },
+      },
+    ],
+    must: [
       {
         bool: {
           should: [
@@ -57,7 +70,7 @@ export const CAI_ACTIVITY_SOURCE_QUERY: QueryDslQueryContainer = {
       },
     ],
   },
-};
+});
 
 export const CAI_ACTIVITY_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 

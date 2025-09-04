@@ -14,7 +14,7 @@ import {
   CAI_CASES_INDEX_ALIAS,
   CAI_CASES_INDEX_VERSION,
   CAI_CASES_SOURCE_INDEX,
-  CAI_CASES_SOURCE_QUERY,
+  getCasesSourceQuery,
   CAI_CASES_BACKFILL_TASK_ID,
   CAI_CASES_SYNCHRONIZATION_TASK_ID,
 } from './constants';
@@ -50,7 +50,7 @@ export const createCasesAnalyticsIndex = ({
     painlessScript: CAI_CASES_INDEX_SCRIPT,
     taskId: CAI_CASES_BACKFILL_TASK_ID,
     sourceIndex: CAI_CASES_SOURCE_INDEX,
-    sourceQuery: CAI_CASES_SOURCE_QUERY,
+    sourceQuery: getCasesSourceQuery(spaceId, owner),
   });
 
 export const scheduleCasesAnalyticsSyncTask = ({

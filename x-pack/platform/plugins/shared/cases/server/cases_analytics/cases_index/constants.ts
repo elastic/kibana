@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { Owner } from '../../../common/constants/types';
 
 export const CAI_CASES_INDEX_NAME = '.internal.cases';
 
@@ -15,11 +16,27 @@ export const CAI_CASES_INDEX_ALIAS = '.cases';
 
 export const CAI_CASES_INDEX_VERSION = 1;
 
-export const CAI_CASES_SOURCE_QUERY: QueryDslQueryContainer = {
-  term: {
-    type: 'cases',
+export const getCasesSourceQuery = (spaceId: string, owner: Owner): QueryDslQueryContainer => ({
+  bool: {
+    filter: [
+      {
+        term: {
+          type: 'cases',
+        },
+      },
+      {
+        term: {
+          namespaces: spaceId,
+        },
+      },
+      {
+        term: {
+          'cases.owner': owner,
+        },
+      },
+    ],
   },
-};
+});
 
 export const CAI_CASES_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
