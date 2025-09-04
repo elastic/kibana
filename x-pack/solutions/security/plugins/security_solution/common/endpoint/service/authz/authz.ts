@@ -13,12 +13,14 @@ import type { ProductFeaturesService } from '../../../../server/lib/product_feat
 import {
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  NO_SPECIFIC_PRIVILEGE_REQUIRED,
 } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
 import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
-import type { ResponseActionsApiCommandNames } from '../response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  NO_SPECIFIC_PRIVILEGE_REQUIRED,
+} from '../response_actions/constants';
 
 /**
  * Checks to see if a given Kibana privilege was granted.
