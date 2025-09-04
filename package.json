@@ -1062,6 +1062,7 @@
     "@kbn/ui-actions-examples-plugin": "link:examples/ui_action_examples",
     "@kbn/ui-actions-explorer-plugin": "link:examples/ui_actions_explorer",
     "@kbn/ui-actions-plugin": "link:src/platform/plugins/shared/ui_actions",
+    "@kbn/ui-actions-triggers": "link:src/platform/packages/shared/ui-actions/triggers",
     "@kbn/ui-settings-plugin": "link:src/platform/test/plugin_functional/plugins/ui_settings_plugin",
     "@kbn/ui-shared-deps-npm": "link:src/platform/packages/private/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:src/platform/packages/private/kbn-ui-shared-deps-src",
