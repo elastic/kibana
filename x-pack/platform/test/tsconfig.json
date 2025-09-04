@@ -155,5 +155,6 @@
     "@kbn/response-ops-rule-params",
     "@kbn/remote-clusters-plugin",
     "@kbn/product-intercept-plugin",
+    "@kbn/intercepts-plugin",
   ]
 }
