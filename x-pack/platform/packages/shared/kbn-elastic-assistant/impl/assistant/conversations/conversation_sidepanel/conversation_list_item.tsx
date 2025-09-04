@@ -67,17 +67,15 @@ export const ConversationListItem: React.FC<Props> = ({
     () => isAssistantSharingEnabled && conversationSharedState !== ConversationSharedState.PRIVATE,
     [isAssistantSharingEnabled, conversationSharedState]
   );
-  const { iconType, iconColor, iconTitle } = useMemo(
+  const { iconType, iconTitle } = useMemo(
     () =>
       conversation.isConversationOwner
         ? {
             iconType: shouldShowIcon ? getSharedIcon(conversationSharedState) : undefined,
-            iconColor: 'accent',
             iconTitle: i18n.SHARED_BY_YOU,
           }
         : {
             iconType: shouldShowIcon ? getSharedIcon(conversationSharedState) : undefined,
-            iconColor: 'default',
             iconTitle: i18n.SHARED_WITH_YOU,
           },
     [conversation.isConversationOwner, shouldShowIcon, conversationSharedState]
@@ -151,7 +149,6 @@ export const ConversationListItem: React.FC<Props> = ({
               margin-inline-start: 12px;
               margin-inline-end: 0px;
             `,
-            color: iconColor,
           }}
           data-test-subj={`conversation-select-${conversation.title}`}
           isActive={isActiveConversation}
