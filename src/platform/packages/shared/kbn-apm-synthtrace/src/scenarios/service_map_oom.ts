@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a trace with an extremely high number of services (500) to test service map performance.
+ */
+
 import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { httpExitSpan } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';

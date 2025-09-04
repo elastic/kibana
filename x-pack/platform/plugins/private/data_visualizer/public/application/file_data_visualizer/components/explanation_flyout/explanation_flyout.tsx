@@ -22,7 +22,7 @@ import {
   EuiSubSteps,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 
 interface Props {
   results: FindFileStructureResponse;

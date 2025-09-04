@@ -64,6 +64,7 @@ export async function getMenuItemGroups(
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(addPanelContext),
         order: action.order ?? 0,
+        MenuItem: action.MenuItem ? action.MenuItem({ context: addPanelContext }) : undefined,
       });
     });
   });

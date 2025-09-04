@@ -7,41 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SEARCH_MIGRATION_RULES = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.searchAriaLabel',
-  {
-    defaultMessage: 'Search migration rules',
-  }
-);
-
-export const SEARCH_MIGRATION_RULES_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.searchBarPlaceholder',
-  {
-    defaultMessage: 'Search by migration rule name',
-  }
-);
-
-export const NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.noRulesTitle',
-  {
-    defaultMessage: 'Empty migration',
-  }
-);
-
-export const NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.noRulesBodyTitle',
-  {
-    defaultMessage: 'There are no translations available for installation',
-  }
-);
-
-export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.goToAutomaticMigrationsPageButton',
-  {
-    defaultMessage: 'Go back to Automatic Migrations',
-  }
-);
-
 export const ALREADY_TRANSLATED_RULE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.alreadyTranslatedTooltip',
   {
