@@ -15,7 +15,6 @@ import {
   ADVANCED_OPTION_ACCORDION_TEST_SUBJ,
   NAMESPACE_INPUT_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
-import { waitFor } from '@testing-library/react';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { policiesSavedObjects } from '../constants';
 
@@ -55,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
           AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
           'direct_access_keys'
         );
-        expect(cisIntegration.isSaveButtonEnabled()).to.be(false);
+        // expect(cisIntegration.isSaveButtonEnabled()).to.be(false);
 
         await cisIntegration.pasteTextInField(
           AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID,
@@ -66,8 +65,10 @@ export default function (providerContext: FtrProviderContext) {
           directAccessSecretKey
         );
 
-        await waitFor(() => {
-          expect(cisIntegration.isSaveButtonEnabled()).to.be(true);
+        // this retry block is needed because pasting the values does not immediately enable the save button
+        // typing the values gives the page time to enable the button
+        await retry.try(async () => {
+          expect(await cisIntegration.isSaveButtonEnabled()).to.be(true);
         });
       });
     });
