@@ -96,5 +96,3 @@ export {
   type UnifiedFieldListSidebarContainerApi,
   type UnifiedFieldListSidebarContainerProps,
 } from './src/containers/unified_field_list_sidebar';
-
-export * from './src/utils/fallback_fields';
