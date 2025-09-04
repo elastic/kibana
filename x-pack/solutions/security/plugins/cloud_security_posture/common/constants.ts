@@ -161,6 +161,10 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
     'azure.credentials.client_username',
     'azure.credentials.client_password',
   ],
+  cloud_connectors: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+  ],
   managed_identity: [],
   manual: [],
 };

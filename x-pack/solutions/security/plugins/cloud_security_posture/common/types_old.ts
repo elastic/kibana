@@ -45,6 +45,7 @@ export type AzureCredentialsType =
   | 'service_principal_with_client_secret'
   | 'service_principal_with_client_certificate'
   | 'service_principal_with_client_username_and_password'
+  | 'cloud_connectors'
   | 'managed_identity';
 
 export type Evaluation = MisconfigurationEvaluationStatus;

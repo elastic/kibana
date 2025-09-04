@@ -22,5 +22,6 @@ export const AZURE_CREDENTIALS_TYPE = {
   SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE: 'service_principal_with_client_certificate',
   SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD:
     'service_principal_with_client_username_and_password',
+  CLOUD_CONNECTORS: 'cloud_connectors',
   MANAGED_IDENTITY: 'managed_identity',
 } as const;
