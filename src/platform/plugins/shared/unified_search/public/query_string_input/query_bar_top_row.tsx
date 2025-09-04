@@ -289,6 +289,7 @@ export const QueryBarTopRow = React.memo(
 
     const backgroundSearchState = useObservable(data.search.session.state$);
     const canSendToBackground =
+      props.isDirty ||
       backgroundSearchState === SearchSessionState.Loading ||
       backgroundSearchState === SearchSessionState.Completed;
 
