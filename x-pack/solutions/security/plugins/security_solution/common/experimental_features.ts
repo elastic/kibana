@@ -238,11 +238,6 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
 
   /**
-   * Enables Privilege Monitoring
-   */
-  privilegedUserMonitoringDisabled: false,
-
-  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
