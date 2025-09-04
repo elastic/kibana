@@ -85,7 +85,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose),
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
     steps: z.array(recursiveStepSchema),
   });
 }
