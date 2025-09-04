@@ -8,11 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
-import { ONECHAT_FEATURE_SETTING_ID } from '../common/constants';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
-    [ONECHAT_FEATURE_SETTING_ID]: {
+    [AGENT_BUILDER_ENABLED_SETTING_ID]: {
       description: i18n.translate('xpack.onechat.uiSettings.feature.description', {
         defaultMessage: 'Enables Elastic Agent Builder.',
       }),
