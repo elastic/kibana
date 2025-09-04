@@ -35,6 +35,7 @@ const upsertRequest = ({
   queries?: StreamQuery[];
 }) => ({
   dashboards: [],
+  rules: [],
   queries,
   stream: {
     description: 'Test stream',
@@ -299,6 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
             {
@@ -317,6 +319,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
           ]
@@ -479,6 +482,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                   dashboards: [],
                   queries: [],
+                  rules: [],
                 },
               },
             ]
@@ -579,6 +583,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
             {
@@ -597,6 +602,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 dashboards: [],
                 queries: [],
+                rules: [],
               },
             },
           ]
@@ -647,6 +653,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 queries: [
                   { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
                 ],
+                rules: [],
               },
             },
           ]
