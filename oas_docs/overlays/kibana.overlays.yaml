@@ -102,6 +102,18 @@ actions:
         externalDocs:
           description: Synthetic monitoring
           url: https://www.elastic.co/docs/solutions/observability/synthetics
+  - target: '$.tags[?(@.name=="Fleet remote synced integrations")]'
+    description: Change tag description and add external docs link
+    update:
+      description: >
+        Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
+
+        * Use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint on the management cluster to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
+        
+        * Use the `/api/fleet/remote_synced_integrations/status` endpoint on the remote cluster to query the synchronization status of the installed integrations.
+      externalDocs:
+        description: Automatic integrations synchronization documentation
+        url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
