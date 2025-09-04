@@ -120,11 +120,24 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
+    // Parse and update the YAML to change the name
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    if (parsedYaml.error) {
+      throw parsedYaml.error;
+    }
+
+    const updatedYaml = {
+      ...parsedYaml.data,
       name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
         defaultMessage: 'Copy',
       })}`,
-    });
+    };
+
+    // Convert back to YAML string
+    const clonedYaml = `name: ${updatedYaml.name}\n${workflow.yaml
+      .split('\n')
+      .slice(1)
+      .join('\n')}`;
     return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
@@ -146,7 +159,7 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
-    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId, request);
+    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId);
   }
 
   public async runWorkflow(

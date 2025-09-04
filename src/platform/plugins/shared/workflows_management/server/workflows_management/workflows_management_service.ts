@@ -443,7 +443,7 @@ export class WorkflowsService {
           history: [], // History is loaded separately when needed for performance
         };
       })
-      .filter((workflow) => workflow !== null);
+      .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
 
     return {
       _pagination: {
