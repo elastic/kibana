@@ -30,6 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: 'This is a test stream',
           ingest: {
@@ -54,6 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: 'Updated test stream description',
           ingest: {
