@@ -124,18 +124,3 @@ export function IlmField({ getIlmPolicies, definition, setLifecycle }: ModalOpti
     </EuiPanel>
   );
 }
-
-{
-  /* <ModalFooter
-  definition={definition}
-  confirmationLabel="Attach policy"
-  closeModal={closeModal}
-  onConfirm={() => {
-    if (selectedPolicy) {
-      updateLifecycle({ ilm: { policy: selectedPolicy } });
-    }
-  }}
-  confirmationIsDisabled={!selectedPolicy}
-  updateInProgress={updateInProgress}
-/> */
-}

@@ -53,7 +53,7 @@ export function EditLifecycleModal({
   const modalTitleId = useGeneratedHtmlId();
 
   const [isInherit, setIsInherit] = useState<boolean>(
-    isInheritLifecycle(definition.effective_lifecycle)
+    isInheritLifecycle(definition.stream.ingest.lifecycle)
   );
   const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(
     isIlmLifecycle(definition.effective_lifecycle)
@@ -128,7 +128,10 @@ export function EditLifecycleModal({
                     defaultMessage: "Use the retention configuration from this stream's parent",
                   })}
                   checked={isInherit}
-                  onChange={() => setIsInherit(!isInherit)}
+                  onChange={() => {
+                    setLifecycle({ inherit: {} });
+                    setIsInherit(!isInherit);
+                  }}
                 />
               </EuiFlexItem>
             </>
@@ -166,7 +169,7 @@ export function EditLifecycleModal({
             />
           </EuiFlexItem>
 
-          {selectedAction === 'ilm' && (
+          {selectedAction === 'ilm' && !isInherit && (
             <EuiFlexItem>
               <IlmField
                 getIlmPolicies={getIlmPolicies}
@@ -176,7 +179,7 @@ export function EditLifecycleModal({
             </EuiFlexItem>
           )}
 
-          {selectedAction === 'custom' && (
+          {selectedAction === 'custom' && !isInherit && (
             <EuiFlexItem>
               <DslField
                 definition={definition}

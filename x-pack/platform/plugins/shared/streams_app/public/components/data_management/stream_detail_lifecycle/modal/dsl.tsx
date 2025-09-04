@@ -126,22 +126,3 @@ export function DslField({ definition, isDisabled, value, setLifecycle }: Props)
     </>
   );
 }
-
-{
-  /* <ModalFooter
-  definition={definition}
-  confirmationLabel="Save"
-  closeModal={closeModal}
-  confirmationIsDisabled={invalidRetention}
-  onConfirm={() => {
-    updateLifecycle({
-      dsl: {
-        data_retention: noRetention
-          ? undefined
-          : `${Number(retentionValue)}${selectedUnit.value}`,
-      },
-    });
-  }}
-  updateInProgress={updateInProgress}
-/> */
-}
