@@ -9,7 +9,11 @@ import { renderHook } from '@testing-library/react';
 import moment from 'moment';
 import { useDiscoverUrl } from './use_discover_url';
 import { useKibana } from '../../../utils/kibana_react';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../typings/alerts';
 
@@ -86,6 +90,87 @@ describe('useDiscoverUrl', () => {
       ],
     });
     expect(result.current.discoverUrl).toBe('discover-url');
+  });
+
+  describe('synthetics monitor status rule', () => {
+    it('builds Discover url for synthetics monitor status rule', () => {
+      const rule = {
+        ruleTypeId: SYNTHETICS_STATUS_RULE,
+        params: {
+          monitorTypes: ['browser'],
+          monitorIds: ['monitor-1'],
+          locations: ['us-east-1'],
+          tags: ['tag1'],
+          condition: {
+            groupBy: 'locationId',
+            downThreshold: 3,
+            window: { time: { size: 5, unit: 'm' } },
+          },
+        },
+      } as unknown as Rule;
+
+      const expectedTimeRange = {
+        from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+        to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+      };
+
+      mockGetRedirectUrl.mockReturnValue('synthetics-monitor-status-url');
+
+      const { result } = renderHook(() => useDiscoverUrl({ alert: MOCK_ALERT, rule }));
+
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+        timeRange: expectedTimeRange,
+        query: {
+          language: 'kuery',
+          query:
+            '(tags: tag1 AND observer.name: us-east-1 AND monitor.id: monitor-1 AND monitor.type: browser AND monitor.status: down)',
+        },
+        dataViewSpec: {
+          title: 'synthetics-*',
+          timeFieldName: '@timestamp',
+        },
+      });
+      expect(result.current.discoverUrl).toBe('synthetics-monitor-status-url');
+    });
+  });
+
+  describe('synthetics tls rule', () => {
+    it('builds Discover url for synthetics tls rule', () => {
+      const rule = {
+        ruleTypeId: SYNTHETICS_TLS_RULE,
+        params: {
+          certAgeThreshold: 5,
+          certExpirationThreshold: 10,
+          monitorIds: ['monitor-1'],
+          locations: ['us-east-1'],
+          tags: ['tag1'],
+        },
+      } as unknown as Rule;
+
+      const expectedTimeRange = {
+        from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+        to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+      };
+
+      mockGetRedirectUrl.mockReturnValue('synthetics-tls-url');
+
+      const { result } = renderHook(() => useDiscoverUrl({ alert: MOCK_ALERT, rule }));
+
+      // The query string is generated dynamically, so we check for key substrings
+      const calledWith = mockGetRedirectUrl.mock.calls[0][0];
+      expect(calledWith.timeRange).toEqual(expectedTimeRange);
+      expect(calledWith.query.language).toBe('kuery');
+      expect(calledWith.query.query).toContain('tls.server.x509.not_after');
+      expect(calledWith.query.query).toContain('tls.server.x509.not_before');
+      expect(calledWith.query.query).toContain('monitor.id: monitor-1');
+      expect(calledWith.query.query).toContain('observer.name: us-east-1');
+      expect(calledWith.query.query).toContain('tags: tag1');
+      expect(calledWith.dataViewSpec).toEqual({
+        title: 'synthetics-*',
+        timeFieldName: '@timestamp',
+      });
+      expect(result.current.discoverUrl).toBe('synthetics-tls-url');
+    });
   });
 
   it('ignores unsupported rule types', () => {
