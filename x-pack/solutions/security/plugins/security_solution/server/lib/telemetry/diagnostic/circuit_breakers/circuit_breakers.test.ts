@@ -290,6 +290,7 @@ describe('Security Solution - Health Diagnostic Queries - Circuit Breakers', () 
           percentiles: {
             50: 2,
             75: 3,
+            90: 4,
             95: 4,
             99: 4.5,
           },
