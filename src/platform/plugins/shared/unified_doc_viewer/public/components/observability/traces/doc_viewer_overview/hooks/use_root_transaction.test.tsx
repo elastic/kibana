@@ -10,8 +10,8 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
-import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { RootTransactionProvider, useRootTransactionContext } from '.';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { RootTransactionProvider, useRootTransactionContext } from './use_root_transaction';
 import {
   SERVICE_NAME_FIELD,
   SPAN_ID_FIELD,
@@ -20,7 +20,7 @@ import {
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 
-jest.mock('../../../../../../plugin', () => ({
+jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
@@ -32,7 +32,7 @@ jest.mock('rxjs', () => {
   };
 });
 
-jest.mock('../../../hooks/use_data_sources', () => ({
+jest.mock('../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'test-index' } },
   }),

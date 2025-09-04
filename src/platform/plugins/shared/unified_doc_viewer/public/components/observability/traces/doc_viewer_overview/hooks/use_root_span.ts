@@ -23,8 +23,8 @@ import {
   TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
-import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { useDataSourcesContext } from '../../../hooks/use_data_sources';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { useDataSourcesContext } from '../../hooks/use_data_sources';
 
 interface UseTransactionPrams {
   traceId?: string;

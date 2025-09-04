@@ -20,8 +20,8 @@ import {
 } from '@kbn/discover-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
-import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { useDataSourcesContext } from '../../../hooks/use_data_sources';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { useDataSourcesContext } from '../../hooks/use_data_sources';
 
 interface UseRootTransactionParams {
   traceId: string;

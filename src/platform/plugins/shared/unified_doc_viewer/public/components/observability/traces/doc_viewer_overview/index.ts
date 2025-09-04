@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
-import { dynamic } from '@kbn/shared-ux-utility';
+import { Overview } from './overview';
 
-export const UnifiedDocViewerObservabilityTracesSpanOverview = dynamic(() => import('.'), {
-  fallback: (
-    <EuiDelayRender delay={300}>
-      <EuiSkeletonText />
-    </EuiDelayRender>
-  ),
-});
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default Overview;

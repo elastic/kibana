@@ -23,6 +23,7 @@ interface GetTransactionDistributionChartDataParams {
   transactionHistogram?: HistogramItem[];
 }
 
+// Taken from a PR that needs to be merged https://github.com/elastic/kibana/pull/233716
 export function getTransactionDistributionChartData({
   euiTheme,
   transactionHistogram,

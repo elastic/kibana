@@ -10,15 +10,15 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
-import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { RootSpanProvider, useRootSpanContext } from '.';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { RootSpanProvider, useRootSpanContext } from './use_root_span';
 import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
-jest.mock('../../../../../../plugin', () => ({
+jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_data_sources', () => ({
+jest.mock('../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'test-index' } },
   }),

@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createGetDocViewer } from './doc_viewer';
+import React from 'react';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const UnifiedDocViewerObservabilityTracesOverview = dynamic(() => import('.'), {
+  fallback: (
+    <EuiDelayRender delay={300}>
+      <EuiSkeletonText />
+    </EuiDelayRender>
+  ),
+});
