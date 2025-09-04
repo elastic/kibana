@@ -43,17 +43,9 @@ describe('getPosturePolicy', () => {
   }
 });
 
-describe('getCspmCloudShellDefaultValue', () => {
+describe('getCloudShellDefaultValue', () => {
   it('should return empty string when policy_templates is missing', () => {
     const packagePolicy = { name: 'test' } as PackageInfo;
-
-    const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
-
-    expect(result).toBe('');
-  });
-
-  it('should return empty string when policy_templates.name is not cspm', () => {
-    const packagePolicy = { name: 'test', policy_templates: [{ name: 'kspm' }] } as PackageInfo;
 
     const result = getCloudShellDefaultValue(packagePolicy, TEMPLATE_NAME);
 
