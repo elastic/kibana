@@ -25,6 +25,7 @@ const createSetupContract = (): Setup => {
 
   const setupContract: Setup = {
     registerView: jest.fn(views.register.bind(views)),
+    registerViewAsync: jest.fn(views.registerAsync.bind(views)),
   };
   return setupContract;
 };
