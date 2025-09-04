@@ -15,7 +15,7 @@ import {
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
 import { SpanIcon } from '@kbn/apm-ui-shared';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 interface DependencyNameLinkProps {
   dependencyName: string;
