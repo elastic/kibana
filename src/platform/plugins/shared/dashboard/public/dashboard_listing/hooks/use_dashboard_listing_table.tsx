@@ -223,11 +223,9 @@ export const useDashboardListingTable = ({
         },
       });
 
-      const accessControlClient = getAccessControlClient();
+      const accessControlClient = await getAccessControlClient();
 
-      const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(
-        DASHBOARD_CONTENT_ID
-      );
+      const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege();
 
       const searchEndTime = window.performance.now();
       const searchDuration = searchEndTime - searchStartTime;

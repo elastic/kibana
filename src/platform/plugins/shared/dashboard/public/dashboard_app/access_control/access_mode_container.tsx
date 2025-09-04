@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { useAccessControl } from '../hooks/use_access_control';
+import { getAccessControlClient } from './get_access_control_client';
 import { spacesService } from '../../services/kibana_services';
 
 const selectOptions = [
@@ -53,18 +53,33 @@ interface Props {
 }
 
 export const AccessModeContainer = ({ onChangeAccessMode, accessControl, createdBy }: Props) => {
-  const { canManageAccessControl, isInEditAccessMode } = useAccessControl({
-    accessControl,
-    createdBy,
-  });
   const [spaceName, setSpaceName] = useState('');
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
+  const [canManageAccessControl, setCanManageAccessControl] = useState(false);
+  const [isInEditAccessMode, setIsInEditAccessMode] = useState(false);
 
   useEffect(() => {
     spacesService?.getActiveSpace().then((activeSpace) => {
       setSpaceName(activeSpace.name);
     });
   }, []);
+
+  useEffect(() => {
+    const getAcccessControl = async () => {
+      const accessControlClient = await getAccessControlClient();
+
+      const isDashboardInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
+      setIsInEditAccessMode(isDashboardInEditAccessMode);
+
+      const canManage = await accessControlClient.canManageAccessControl({
+        accessControl,
+        createdBy,
+      });
+      setCanManageAccessControl(canManage);
+    };
+
+    getAcccessControl();
+  }, [accessControl, createdBy]);
 
   const selectId = useGeneratedHtmlId({ prefix: 'accessControlSelect' });
 

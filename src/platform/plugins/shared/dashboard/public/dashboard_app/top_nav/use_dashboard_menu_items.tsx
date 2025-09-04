@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { useAccessControl } from '../hooks/use_access_control';
+import { getAccessControlClient } from '../access_control/get_access_control_client';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
@@ -38,6 +38,8 @@ export const useDashboardMenuItems = ({
   const isMounted = useMountedState();
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
+  const [canManageAccessControl, setCanManageAccessControl] = useState(false);
+  const [isInEditAccessMode, setIsInEditAccessMode] = useState(false);
 
   const dashboardApi = useDashboardApi();
 
@@ -52,17 +54,23 @@ export const useDashboardMenuItems = ({
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
-  const { canManageAccessControl, isInEditAccessMode } = useAccessControl({
-    accessControl,
-    createdBy: dashboardApi.createdBy,
-  });
 
   useEffect(() => {
-    // If we are in edit mode but the user doesn't have edit permissions and the dashboard is not new, switch to view mode.
-    if (viewMode === 'edit' && lastSavedId && !isInEditAccessMode && !canManageAccessControl) {
-      dashboardApi.setViewMode('view');
-    }
-  }, [canManageAccessControl, isInEditAccessMode, dashboardApi, viewMode, lastSavedId]);
+    const getAcccessControl = async () => {
+      const accessControlClient = await getAccessControlClient();
+
+      const isDashboardInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
+      setIsInEditAccessMode(isDashboardInEditAccessMode);
+
+      const canManage = await accessControlClient.canManageAccessControl({
+        accessControl,
+        createdBy: dashboardApi.createdBy,
+      });
+      setCanManageAccessControl(canManage);
+    };
+
+    getAcccessControl();
+  }, [accessControl, dashboardApi.createdBy]);
 
   const isEditButtonDisabled = useMemo(() => {
     if (disableTopNav) return true;

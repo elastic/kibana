@@ -8,7 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { AuthenticatedUser, CoreAuthenticationService } from '@kbn/core/public';
+import type { AuthenticatedUser } from '@kbn/core/public';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type {
   ChangeAccesModeParameters,
@@ -28,19 +28,19 @@ export interface AccessControlClientPublic {
 }
 
 export class AccessControlClient implements AccessControlClientPublic {
-  private user: AuthenticatedUser | null = null;
+  constructor(
+    private readonly deps: {
+      http: HttpStart;
+      user: AuthenticatedUser | null;
+      contentTypeId: string;
+    }
+  ) {}
 
-  constructor(private readonly deps: { http: HttpStart; coreAuth: CoreAuthenticationService }) {
-    this.deps.coreAuth.getCurrentUser()?.then((user) => {
-      this.user = user;
-    });
-  }
-
-  async checkGlobalPrivilege(contentTypeId: string): Promise<CheckGlobalPrivilegeResponse> {
+  async checkGlobalPrivilege(): Promise<CheckGlobalPrivilegeResponse> {
     const response = await this.deps.http.get<CheckGlobalPrivilegeResponse>(
       `/internal/access_control/check_global_access_control_privilege`,
       {
-        query: { contentTypeId },
+        query: { contentTypeId: this.deps.contentTypeId },
       }
     );
 
@@ -66,7 +66,7 @@ export class AccessControlClient implements AccessControlClientPublic {
   }
 
   checkUserAccessControl({ accessControl, createdBy }: CheckUserAccessControlParameters): boolean {
-    const userId = this.user?.profile_uid;
+    const userId = this.deps.user?.profile_uid;
 
     if (!userId) {
       return false;
@@ -89,5 +89,14 @@ export class AccessControlClient implements AccessControlClientPublic {
       accessControl.accessMode === undefined ||
       accessControl.accessMode === 'default'
     );
+  }
+
+  async canManageAccessControl({ accessControl, createdBy }: CheckUserAccessControlParameters) {
+    const { isGloballyAuthorized } = await this.checkGlobalPrivilege();
+    const canManage = this.checkUserAccessControl({
+      accessControl,
+      createdBy,
+    });
+    return isGloballyAuthorized || canManage;
   }
 }
