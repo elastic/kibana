@@ -2,7 +2,6 @@
 
 exports[`transpile (Streamlang DSL to ingest pipeline) should handle manual_ingest_pipeline with nested and top-level if 1`] = `
 Object {
-  "field_access_pattern": "flexible",
   "processors": Array [
     Object {
       "set": Object {
@@ -70,7 +69,6 @@ Object {
 
 exports[`transpile (Streamlang DSL to ingest pipeline) should handle not conditions 1`] = `
 Object {
-  "field_access_pattern": "flexible",
   "processors": Array [
     Object {
       "set": Object {
@@ -110,7 +108,6 @@ Object {
 
 exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variety of processor steps and where blocks 1`] = `
 Object {
-  "field_access_pattern": "flexible",
   "processors": Array [
     Object {
       "rename": Object {
