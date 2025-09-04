@@ -9,8 +9,7 @@
 
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useStableCallback } from '@kbn/unified-histogram';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject, merge, withLatestFrom } from 'rxjs';
+import { useCallback, useEffect, useState } from 'react';
 
 export const usePaginatedFields = ({
   fields,
@@ -23,95 +22,39 @@ export const usePaginatedFields = ({
   pageSize: number;
   currentPage: number;
 }) => {
-  const { fields$, dimensions$, currentPage$ } = useFieldsSubjects({
-    fields,
-    dimensions,
-    currentPage,
-  });
-
   const buildPaginatedFields = useCallback(() => {
-    const allFields = fields$.value.filter(
+    const allFields = fields.filter(
       (field) =>
         !field.noData &&
-        (dimensions$.value.length === 0 ||
-          dimensions$.value.every((sel) => field.dimensions.some((d) => d.name === sel)))
+        (dimensions.length === 0 ||
+          dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
     );
 
     const totalPages = Math.ceil(allFields.length / pageSize);
 
     const currentPageFields = allFields.slice(
-      currentPage$.value * pageSize,
-      currentPage$.value * pageSize + pageSize
+      currentPage * pageSize,
+      currentPage * pageSize + pageSize
     );
 
     return {
       allFields,
       currentPageFields,
       totalPages,
-      dimensions: dimensions$.value,
+      dimensions,
     };
-  }, [currentPage$.value, dimensions$.value, fields$.value, pageSize]);
+  }, [currentPage, dimensions, fields, pageSize]);
 
   const [paginatedFieldsContext, setPaginatedFieldsContext] =
     useState<ReturnType<typeof buildPaginatedFields>>();
 
-  const updateLensPropsContext = useStableCallback(() =>
-    setPaginatedFieldsContext(buildPaginatedFields())
+  const updateLensPropsContext = useStableCallback(
+    (fn: () => ReturnType<typeof buildPaginatedFields>) => setPaginatedFieldsContext(fn())
   );
 
   useEffect(() => {
-    const subscription = merge(fields$, dimensions$, currentPage$)
-      .pipe(withLatestFrom([fields$, dimensions$, currentPage$]))
-      .subscribe(() => updateLensPropsContext());
+    updateLensPropsContext(buildPaginatedFields);
+  }, [buildPaginatedFields, updateLensPropsContext]);
 
-    return () => subscription.unsubscribe();
-  }, [fields$, dimensions$, currentPage$, updateLensPropsContext]);
-
-  return useMemo(() => paginatedFieldsContext, [paginatedFieldsContext]);
+  return paginatedFieldsContext;
 };
-
-function useFieldsSubjects({
-  fields,
-  dimensions,
-  currentPage,
-}: {
-  fields: MetricField[];
-  dimensions: string[];
-  currentPage: number;
-}) {
-  const fields$ = useRef(new BehaviorSubject(fields));
-  const dimensions$ = useRef(new BehaviorSubject(dimensions));
-  const currentPage$ = useRef(new BehaviorSubject(currentPage));
-
-  useEffect(() => {
-    fields$.current.next(fields);
-  }, [fields]);
-
-  useEffect(() => {
-    dimensions$.current.next(dimensions);
-  }, [dimensions]);
-
-  useEffect(() => {
-    currentPage$.current.next(currentPage);
-  }, [currentPage]);
-
-  useEffect(() => {
-    const fieldsCurrent = fields$.current;
-    const dimensionsCurrent = dimensions$.current;
-    const currentPageCurrent = currentPage$.current;
-    return () => {
-      fieldsCurrent.complete();
-      dimensionsCurrent.complete();
-      currentPageCurrent.complete();
-    };
-  }, []);
-
-  return useMemo(
-    () => ({
-      fields$: fields$.current,
-      dimensions$: dimensions$.current,
-      currentPage$: currentPage$.current,
-    }),
-    []
-  );
-}
