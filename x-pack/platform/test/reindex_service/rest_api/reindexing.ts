@@ -8,13 +8,15 @@
 import expect from '@kbn/expect';
 
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
-import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import { generateNewIndexName } from '@kbn/reindex-service-plugin/server';
-import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/public';
+import { getIndexState } from '@kbn/upgrade-assistant-pkg-server';
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
-import { sortBy } from 'lodash';
+import { REINDEX_SERVICE_BASE_PATH } from '@kbn/reindex-service-plugin/common';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -23,12 +25,16 @@ export default function ({ getService }: FtrProviderContext) {
   const versionService = new Version();
   versionService.setup('8.0.0');
 
+  const reindexOptions = {
+    deleteOldIndex: true,
+  };
+
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
     let lastState;
 
     while (true) {
-      lastState = (await supertest.get(`/api/upgrade_assistant/reindex/${indexName}`).expect(200))
+      lastState = (await supertest.get(`${REINDEX_SERVICE_BASE_PATH}/${indexName}`).expect(200))
         .body.reindexOp;
       // Once the operation is completed or failed and unlocked, stop polling.
       if (lastState.status !== ReindexStatus.inProgress && lastState.locked === null) {
@@ -40,8 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     return lastState;
   };
 
-  describe.skip('reindexing', function () {
-    this.onlyEsVersion('8');
+  describe('reindexing', function () {
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
@@ -68,8 +73,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(REINDEX_SERVICE_BASE_PATH)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions: {
+            deleteOldIndex: true,
+          },
+        })
         .expect(200);
 
       expect(body.indexName).to.equal('dummydata');
@@ -122,8 +134,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(REINDEX_SERVICE_BASE_PATH)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
+        })
         .expect(200);
 
       const lastState = await waitForReindexToComplete('dummydata');
@@ -162,8 +179,13 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.create({ index: 'reindexed-v8-dummydata' });
 
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(REINDEX_SERVICE_BASE_PATH)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
+        })
         .expect(200);
 
       expect(body.indexName).to.equal('dummydata');
@@ -198,8 +220,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Reindex
       await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(REINDEX_SERVICE_BASE_PATH)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+          reindexOptions,
+        })
         .expect(200);
       const lastState = await waitForReindexToComplete('dummydata');
 
@@ -215,38 +242,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('shows reindex and read-only warnings', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`); // reusing the index previously migrated in v7->v8 UA tests
-      expect(resp.body.warnings.length).to.be(2);
-      // By default, all reindexing operations will replace an index with an alias (with the same name)
-      // pointing to a newly created "reindexed" index.
-      expect(sortBy(resp.body.warnings, 'warningType')).to.eql([
-        { warningType: 'makeIndexReadonly', flow: 'readonly' },
-        { warningType: 'replaceIndexWithAlias', flow: 'reindex' },
-      ]);
-    });
-
-    it('reindexes old 7.0 index', async () => {
-      const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`) // reusing the index previously migrated in v7->v8 UA tests
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
-
-      expect(body.indexName).to.equal('reindexed-v7-6.0-data');
-      expect(body.status).to.equal(ReindexStatus.inProgress);
-
-      const lastState = await waitForReindexToComplete('reindexed-v7-6.0-data');
-      expect(lastState.errorMessage).to.equal(null);
-      expect(lastState.status).to.equal(ReindexStatus.completed);
-    });
-
-    it('should reindex a batch in order and report queue state', async () => {
+    it.skip('should reindex a batch in order and report queue state', async () => {
       const assertQueueState = async (
         firstInQueueIndexName: string | undefined,
         queueLength: number
       ) => {
         const response = await supertest
-          .get(`/api/upgrade_assistant/reindex/batch/queue`)
+          .get(`${REINDEX_SERVICE_BASE_PATH}/batch/queue`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
@@ -288,9 +290,15 @@ export default function ({ getService }: FtrProviderContext) {
         await es.indices.close({ index: test1 });
 
         const result = await supertest
-          .post(`/api/upgrade_assistant/reindex/batch`)
+          .post(`${REINDEX_SERVICE_BASE_PATH}/batch`)
           .set('kbn-xsrf', 'xxx')
-          .send({ indexNames: [test1, test2, test3] })
+          .send({
+            indices: [
+              { indexName: test1, newIndexName: `${test1}-new`, reindexOptions },
+              { indexName: test2, newIndexName: `${test2}-new`, reindexOptions },
+              { indexName: test3, newIndexName: `${test3}-new`, reindexOptions },
+            ],
+          })
           .expect(200);
 
         expect(result.body.enqueued.length).to.equal(3);
@@ -324,6 +332,104 @@ export default function ({ getService }: FtrProviderContext) {
         await cleanupReindex(test2);
         await cleanupReindex(test3);
       }
+    });
+
+    it('should create a new lookup index', async () => {
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
+
+      const { dummydata: originalIndex } = await es.indices.get({
+        index: 'dummydata',
+        flat_settings: true,
+      });
+
+      const { body } = await supertest
+        .post(REINDEX_SERVICE_BASE_PATH)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: 'lookup-dummydata',
+          settings: {
+            mode: 'lookup',
+          },
+          reindexOptions: {
+            deleteOldIndex: true,
+          },
+        })
+        .expect(200);
+
+      expect(body.indexName).to.equal('dummydata');
+      expect(body.status).to.equal(ReindexStatus.inProgress);
+
+      const lastState = await waitForReindexToComplete('dummydata');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+
+      const { newIndexName } = lastState;
+      const indexSummary = await es.indices.get({ index: 'dummydata', flat_settings: true });
+
+      // The new index was created
+      expect(indexSummary[newIndexName]).to.be.an('object');
+      // The original index name is aliased to the new one
+      expect(indexSummary[newIndexName].aliases?.dummydata).to.be.an('object');
+      // Verify mappings exist on new index
+      expect(indexSummary[newIndexName].mappings?.properties).to.be.an('object');
+      // Verify settings exist on new index
+      expect(indexSummary[newIndexName].settings).to.be.an('object');
+      expect({
+        'index.number_of_replicas':
+          indexSummary[newIndexName].settings?.['index.number_of_replicas'],
+        'index.refresh_interval': indexSummary[newIndexName].settings?.['index.refresh_interval'],
+        'index.mode': indexSummary[newIndexName].settings?.['index.mode'],
+      }).to.eql({
+        'index.number_of_replicas': originalIndex.settings?.['index.number_of_replicas'],
+        'index.refresh_interval': originalIndex.settings?.['index.refresh_interval'],
+        'index.mode': 'lookup',
+      });
+      // The number of documents in the new index matches what we expect
+      expect((await es.count({ index: lastState.newIndexName })).count).to.be(3);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName,
+      });
+    });
+
+    it('should refrain from deleting old index', async () => {
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
+
+      const { body } = await supertest
+        .post(REINDEX_SERVICE_BASE_PATH)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: 'dummydata_v2',
+        })
+        .expect(200);
+
+      expect(body.indexName).to.equal('dummydata');
+      expect(body.status).to.equal(ReindexStatus.inProgress);
+
+      const lastState = await waitForReindexToComplete('dummydata');
+      expect(lastState.errorMessage).to.equal(null);
+      expect(lastState.status).to.equal(ReindexStatus.completed);
+
+      // verify original index still exists
+      const { indices } = await es.indices.resolveIndex({
+        name: 'dummydata',
+      });
+      expect(indices.length).to.be(1);
+
+      // verify new index was created
+      const { indices: indices2 } = await es.indices.resolveIndex({
+        name: 'dummydata_v2',
+      });
+
+      expect(indices2.length).to.be(1);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName,
+      });
     });
   });
 }

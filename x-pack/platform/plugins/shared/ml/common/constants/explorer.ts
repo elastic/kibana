@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-//
-export const API_BASE_PATH_UPRGRADE_ASSISTANT = '/api/upgrade_assistant';
+/**
+ * Hard limitation for the size of terms
+ * aggregations on influencers values.
+ */
+export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;

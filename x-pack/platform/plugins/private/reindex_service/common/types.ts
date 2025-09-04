@@ -61,12 +61,14 @@ export interface ReindexOptions {
    * batch to be run in series.
    */
   queueSettings?: QueueSettings;
+
+  deleteOldIndex?: boolean;
 }
 
 export interface ReindexStatusResponse {
   meta: {
     indexName: string;
-    reindexName: string;
+    reindexName?: string;
     // Array of aliases pointing to the index being reindexed
     aliases: string[];
     isReadonly: boolean;
@@ -110,6 +112,7 @@ export interface ReindexOperation {
    * be able to handle older ReindexOperation objects.
    */
   reindexOptions?: ReindexOptions;
+  settings?: string; // serialized JSON of index settings to be applied
 }
 
 export interface ReindexOperationCancelResponse {
