@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
-import { useForm, FormProvider, Controller, Control } from 'react-hook-form';
+import { useForm, FormProvider, Controller, type Control } from 'react-hook-form';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
@@ -136,10 +136,12 @@ const renderFormField = (
       return (
         <Controller
           {...commonProps}
+          defaultValue={false}
+          rules={{ required: false }}
           render={({ field: { onChange, value, name } }) => (
             <EuiSwitch
               name={name}
-              checked={!!value}
+              checked={Boolean(value)}
               onChange={(e) => onChange(e.target.checked)}
               label={field.label}
             />
