@@ -63,8 +63,7 @@ describe('ToolbarSelector', () => {
     );
     fireEvent.click(getByTestId('toolbarSelectorTestButton'));
     fireEvent.click(getByText('Option 2'));
-    expect(onChange).toHaveBeenCalled();
-    expect(onChange.mock.calls[0][0].label).toBe('Option 2');
+    expect(onChange).toHaveBeenCalledWith({ label: 'Option 2', value: '2', checked: 'on' });
   });
 
   it('calls onChange for multi selection', () => {
@@ -86,9 +85,10 @@ describe('ToolbarSelector', () => {
     fireEvent.click(getByTestId('toolbarSelectorMultiTestButton'));
     fireEvent.click(getByText('A'));
     fireEvent.click(getByText('B'));
-    expect(onChange).toHaveBeenCalled();
-    // Should be called with array of selected options
-    expect(Array.isArray(onChange.mock.calls[0][0])).toBe(true);
+
+    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange).toHaveBeenNthCalledWith(1, [{ label: 'A', value: 'a', checked: 'on' }]);
+    expect(onChange).toHaveBeenNthCalledWith(2, [{ label: 'B', value: 'b', checked: 'on' }]);
   });
 
   it('renders with disabled state', () => {
