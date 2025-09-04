@@ -53,7 +53,7 @@ interface BuildOptions {
 }
 
 /**
- * Loads and caches the package map from the root package.json dependencies
+ * Loads and caches the package map from the root package.json dependencies and devDependencies
  */
 function loadPackageMap(): Map<string, string> {
   if (state.packageMap) return state.packageMap;
@@ -65,9 +65,11 @@ function loadPackageMap(): Map<string, string> {
     state.packageMap = new Map();
     state.reversePackageMap = new Map();
 
-    // Parse dependencies for @kbn packages with "link:" prefix
-    if (packageJson.dependencies) {
-      Object.entries(packageJson.dependencies).forEach(([packageName, packageSpec]) => {
+    // Helper function to process dependencies
+    const processDependencies = (deps: Record<string, string> | undefined, depType: string) => {
+      if (!deps) return;
+
+      Object.entries(deps).forEach(([packageName, packageSpec]) => {
         if (
           packageName.startsWith('@kbn/') &&
           typeof packageSpec === 'string' &&
@@ -78,7 +80,11 @@ function loadPackageMap(): Map<string, string> {
           state.reversePackageMap!.set(packagePath, packageName);
         }
       });
-    }
+    };
+
+    // Parse both dependencies and devDependencies for @kbn packages with "link:" prefix
+    processDependencies(packageJson.dependencies, 'dependencies');
+    processDependencies(packageJson.devDependencies, 'devDependencies');
 
     return state.packageMap;
   } catch (error) {
