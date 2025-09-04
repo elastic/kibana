@@ -88,7 +88,17 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
         </EuiTitle>
         <EuiSpacer size="xl" />
       </header>
-      <div className="interactiveSetup__content">
+      <div
+        css={css`
+          position: relative;
+          z-index: 10;
+          margin: auto;
+          margin-bottom: ${euiTheme.size.xl};
+          max-width: calc(${euiTheme.breakpoint.s}px - ${euiTheme.size.xl});
+          padding-left: ${euiTheme.size.xl};
+          padding-right: ${euiTheme.size.xl};
+        `}
+      >
         <EuiPanel paddingSize="l">
           <div hidden={page !== 'token'}>
             <EnrollmentTokenForm
