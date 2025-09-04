@@ -15,6 +15,10 @@ import { Type } from './type';
 import { ValidationError } from '../errors';
 import { Reference } from '../references';
 
+export type ObjectDefaultValue<T extends ObjectProps<Props>> = DefaultValue<
+  ObjectResultTypeInput<T>
+>;
+
 export type Props = Record<string, Type<any, DefaultValue<any>>>;
 export type NullableProps = Record<string, Type<any> | undefined | null>;
 
@@ -24,7 +28,7 @@ export type TypeOrLazyType<T = any, D extends DefaultValue<T> = never> =
 
 export type ObjectTypeOrLazyType<
   P extends ObjectProps<Props> = any,
-  D extends DefaultValue<ObjectResultTypeInput<P>> = any
+  D extends ObjectDefaultValue<P> = any
 > = ObjectType<P, D> | (() => ObjectType<P, D>);
 
 /**
@@ -130,10 +134,7 @@ type ExtendedObjectType<P extends ObjectProps<Props>, NP extends NullableProps> 
 type ExtendedObjectTypeOptions<
   P extends ObjectProps<Props>,
   NP extends NullableProps
-> = ObjectTypeOptions<
-  ExtendedProps<P, NP>,
-  DefaultValue<ObjectResultTypeInput<ExtendedProps<P, NP>>>
->;
+> = ObjectTypeOptions<ExtendedProps<P, NP>, ObjectDefaultValue<ExtendedProps<P, NP>>>;
 
 interface ObjectTypeOptionsMeta {
   /**
@@ -145,7 +146,7 @@ interface ObjectTypeOptionsMeta {
 
 export type ObjectTypeOptions<
   P extends ObjectProps<Props>,
-  D extends DefaultValue<ObjectResultTypeInput<P>>
+  D extends ObjectDefaultValue<P>
 > = TypeOptions<
   ObjectResultType<P>,
   // @ts-expect-error - The object type allows partial properties based on the defaultValue
@@ -156,7 +157,7 @@ export type ObjectTypeOptions<
 
 export class ObjectType<
   P extends ObjectProps<Props>,
-  D extends DefaultValue<ObjectResultTypeInput<P>> = never
+  D extends ObjectDefaultValue<P> = never
 > extends Type<
   ObjectResultType<P>,
   // @ts-expect-error - The object type allows partial properties based on the defaultValue
@@ -168,7 +169,7 @@ export class ObjectType<
 
   constructor(props: P, options: ObjectTypeOptions<P, D> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
-    const { unknowns, ...typeOptions } = options;
+    const { unknowns, defaultValue, ...typeOptions } = options;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
     }

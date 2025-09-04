@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Props, ObjectTypeOptions } from './object_type';
+import type { Props, ObjectTypeOptions, ObjectResultTypeInput, ObjectProps } from './object_type';
 import { ObjectType } from './object_type';
+import type { DefaultValue } from './type';
 
-export type IntersectionTypeOptions<T extends Props = any> = ObjectTypeOptions<T>;
+export type IntersectionTypeOptions<
+  T extends ObjectProps<Props>,
+  D extends DefaultValue<ObjectResultTypeInput<T>>
+> = ObjectTypeOptions<T, D>;
 
 export class IntersectionType<
   RTS extends Array<ObjectType<any>>,
-  T extends Props
-> extends ObjectType<T> {
-  constructor(types: RTS, options?: IntersectionTypeOptions<T>) {
+  T extends ObjectProps<Props>,
+  D extends DefaultValue<ObjectResultTypeInput<T>>
+> extends ObjectType<T, D> {
+  constructor(types: RTS, options?: IntersectionTypeOptions<T, D>) {
     const props = types.reduce((mergedProps, type) => {
       Object.entries(type.getPropSchemas() as Record<string, any>).forEach(([key, value]) => {
         if (mergedProps[key] !== undefined) {
