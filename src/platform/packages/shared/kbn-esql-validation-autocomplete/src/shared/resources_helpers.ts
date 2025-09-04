@@ -8,7 +8,10 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
+import type {
+  ESQLColumnData,
+  ESQLFieldWithMetadata,
+} from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from './types';
 import { getFieldsFromES, getCurrentQueryAvailableColumns } from './helpers';
 import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
@@ -42,7 +45,10 @@ function getValueInsensitive(keyToCheck: string) {
  * for the next time the same query is used.
  * @param queryText
  */
-async function cacheColumnsForQuery(queryText: string) {
+async function cacheColumnsForQuery(
+  queryText: string,
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>
+) {
   const existsInCache = checkCacheInsensitive(queryText);
   if (existsInCache) {
     // this is already in the cache
@@ -56,7 +62,8 @@ async function cacheColumnsForQuery(queryText: string) {
     const availableFields = await getCurrentQueryAvailableColumns(
       queryText,
       root.commands,
-      fieldsAvailableAfterPreviousCommand
+      fieldsAvailableAfterPreviousCommand,
+      fetchFields
     );
     cache.set(queryText, availableFields);
   }
@@ -69,18 +76,22 @@ export function getColumnsByTypeHelper(queryText: string, resourceRetriever?: ES
       return;
     }
 
-    const [sourceCommand, ...partialQueries] = processPipes(queryText);
+    const getFields = async (query: string) => {
+      const cached = getValueInsensitive(query);
+      if (cached) {
+        return cached as ESQLFieldWithMetadata[];
+      }
+      const fields = await getFieldsFromES(query, resourceRetriever);
+      cache.set(query, fields);
+      return fields;
+    };
 
-    // retrieve the index fields from ES ONLY if the source command is not in the cache
-    const existsInCache = getValueInsensitive(sourceCommand);
-    if (!existsInCache) {
-      const fieldsWithMetadata = await getFieldsFromES(sourceCommand, resourceRetriever);
-      cache.set(sourceCommand, fieldsWithMetadata);
-    }
+    const [sourceCommand, ...partialQueries] = processPipes(queryText);
+    getFields(sourceCommand);
 
     // build fields cache for every partial query
     for (const query of partialQueries) {
-      await cacheColumnsForQuery(query);
+      await cacheColumnsForQuery(query, getFields);
     }
   };
 

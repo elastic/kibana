@@ -6,9 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { esqlCommandRegistry, type ESQLAstCommand, type FunctionDefinition } from '@kbn/esql-ast';
-import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLParamLiteral } from '@kbn/esql-ast/src/types';
+import {
+  esqlCommandRegistry,
+  mutate,
+  synth,
+  type ESQLAstCommand,
+  type FunctionDefinition,
+} from '@kbn/esql-ast';
+import type {
+  ESQLColumnData,
+  ESQLFieldWithMetadata,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLAstQueryExpression, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 import type { ESQLCallbacks } from './types';
@@ -96,15 +105,35 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
 export async function getCurrentQueryAvailableColumns(
   query: string,
   commands: ESQLAstCommand[],
-  previousPipeFields: ESQLColumnData[]
+  previousPipeFields: ESQLColumnData[],
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>
 ) {
   const cacheCopy = new Map<string, ESQLColumnData>();
   previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
   const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
 
+  let joinFields;
+  // fetch fields for JOIN here
+  if (lastCommand.name === 'join') {
+    const joinSummary = mutate.commands.join.summarize({
+      type: 'query',
+      commands,
+    } as ESQLAstQueryExpression);
+    const joinIndices = joinSummary.map(({ target: { index } }) => index);
+    if (joinIndices.length) {
+      const joinFieldQuery = synth.cmd`FROM ${joinIndices}`.toString();
+      joinFields = await fetchFields(joinFieldQuery);
+    }
+  }
+
   if (commandDefinition?.methods.columnsAfter) {
-    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, query);
+    return commandDefinition.methods.columnsAfter(
+      lastCommand,
+      previousPipeFields,
+      query,
+      joinFields
+    );
   } else {
     return previousPipeFields;
   }
