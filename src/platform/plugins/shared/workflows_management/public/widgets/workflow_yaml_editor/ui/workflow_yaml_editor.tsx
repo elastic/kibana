@@ -112,6 +112,55 @@ const useWorkflowJsonSchema = () => {
       });
       const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 
+      // DEBUG: Auto-download the JSON schema for debugging $ref issues
+      try {
+        const schemaStr = JSON.stringify(jsonSchema, null, 2);
+        const schemaBlob = new Blob([schemaStr], { type: 'application/json' });
+        const url = URL.createObjectURL(schemaBlob);
+        
+        // Create download link
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'workflow-schema-debug.json';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        
+        // Auto-download to help debug the $ref issue
+        console.log('📥 Auto-downloading schema for $ref debugging:', url);
+        a.click();
+        
+        // Also expose for manual download and debugging helpers
+        (window as any).downloadWorkflowSchema = () => a.click();
+        (window as any).debugSchemaPath = (path) => {
+          try {
+            const parts = path.split('/').filter(p => p !== '#' && p !== '');
+            let current = jsonSchema;
+            console.log('🔍 Debugging path:', path);
+            console.log('Starting from:', current);
+            
+            for (const part of parts) {
+              console.log(`  -> ${part}:`, current[part]);
+              current = current[part];
+              if (!current) {
+                console.error(`❌ Path broken at: ${part}`);
+                return null;
+              }
+            }
+            return current;
+          } catch (error) {
+            console.error('❌ Error debugging path:', error);
+            return null;
+          }
+        };
+        
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 5000);
+      } catch (debugError) {
+        console.warn('⚠️ Could not create debug download:', debugError);
+      }
+
       // Post-process to improve type field descriptions in Monaco tooltips
       return improveTypeFieldDescriptions(jsonSchema) ?? null;
     } catch (error) {
@@ -129,6 +178,18 @@ function improveTypeFieldDescriptions(schema: any): any {
   const processSchema = (obj: any, path: string[] = []): any => {
     if (!obj || typeof obj !== 'object') return obj;
 
+
+    // Check if we're processing a step definition with a 'with' property
+    if (obj.properties?.type && obj.properties?.with) {
+      // Replace the 'with' schema with a generic one that has NO properties
+      obj.properties.with = {
+        type: 'object',
+        description: 'Connector parameters - use autocomplete for available options',
+        additionalProperties: true
+        // NO properties defined here - this prevents monaco-yaml from suggesting anything
+      };
+    }
+    
     // Look for the type field in steps
     if (obj.properties?.type && path.includes('steps')) {
       // Remove enum/const values to prevent Monaco from suggesting them
@@ -157,7 +218,7 @@ function improveTypeFieldDescriptions(schema: any): any {
           },
           with: {
             type: 'object',
-            description: 'Parameters for the connector',
+            description: 'Parameters for the connector - press Ctrl+Space (Ctrl+I on Mac) to see all available options',
             additionalProperties: true,
           },
           name: {

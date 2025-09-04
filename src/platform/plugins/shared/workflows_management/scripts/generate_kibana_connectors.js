@@ -18,6 +18,17 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+/**
+ * Helper function to safely quote parameter names if needed
+ */
+function safeParamName(param) {
+  // If parameter name contains special characters, quote it
+  if (/[^a-zA-Z0-9_$]/.test(param)) {
+    return `'${param}'`;
+  }
+  return param;
+}
+
 // Paths
 const KIBANA_OPENAPI_SPEC_PATH = path.resolve(__dirname, '../../../../../../oas_docs/output/kibana.yaml');
 const OUTPUT_PATH = path.resolve(__dirname, '../common/generated_kibana_connectors.ts');
@@ -193,6 +204,160 @@ function extractEndpointInfo(content) {
 }
 
 /**
+ * Parse balanced brackets/parentheses to extract complete field definitions
+ */
+function extractFieldDefinition(content, startIndex) {
+  let depth = 0;
+  let inString = false;
+  let stringChar = '';
+  let i = startIndex;
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  let braceDepth = 0;
+  
+  while (i < content.length) {
+    const char = content[i];
+    
+    if (inString) {
+      if (char === stringChar && content[i-1] !== '\\') {
+        inString = false;
+      }
+    } else {
+      if (char === '"' || char === "'" || char === '`') {
+        inString = true;
+        stringChar = char;
+      } else if (char === '(') {
+        parenDepth++;
+      } else if (char === ')') {
+        parenDepth--;
+      } else if (char === '[') {
+        bracketDepth++;
+      } else if (char === ']') {
+        bracketDepth--;
+      } else if (char === '{') {
+        braceDepth++;
+      } else if (char === '}') {
+        braceDepth--;
+      } else if (char === ',' && parenDepth === 0 && bracketDepth === 0 && braceDepth === 0) {
+        return content.substring(startIndex, i).trim();
+      }
+    }
+    i++;
+  }
+  
+  return content.substring(startIndex).trim();
+}
+
+/**
+ * Dynamically extract field names AND their types from a Zod schema definition
+ * This "explodes" the schema to get all top-level fields with their actual Zod schemas
+ */
+function extractFieldsFromSchema(schemaDefinition) {
+  const fields = new Map(); // Map<fieldName, zodSchema>
+  
+  try {
+    // Find the main .object({ ... }) pattern
+    const objectMatch = schemaDefinition.match(/\.object\(\s*\{([\s\S]*)\}\s*\)/);
+    if (!objectMatch) {
+      return fields;
+    }
+    
+    const objectContent = objectMatch[1];
+    
+    // Find field definitions using a more robust approach
+    const fieldRegex = /(?:(\w+)|["']([^"']+)["'])\s*:\s*/g;
+    let match;
+    
+    while ((match = fieldRegex.exec(objectContent)) !== null) {
+      const fieldName = match[1] || match[2];
+      const fieldStartIndex = fieldRegex.lastIndex;
+      
+      if (fieldName && !['object', 'string', 'number', 'boolean', 'array', 'union', 'enum', 'any', 'optional', 'describe', 'passthrough', 'min', 'max', 'int', 'gte'].includes(fieldName)) {
+        // Extract the complete field definition using balanced bracket parsing
+        const fieldDef = extractFieldDefinition(objectContent, fieldStartIndex);
+        
+        if (fieldDef) {
+          // Clean up the field definition
+          const cleanFieldDef = fieldDef.replace(/,\s*$/, '').trim();
+          if (cleanFieldDef) {
+            fields.set(fieldName, cleanFieldDef);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Error extracting fields from schema:', error.message);
+  }
+  
+  return fields;
+}
+
+/**
+ * Read Kibana API body parameter definitions by extracting from schemas dynamically
+ * This "explodes" any body schema to get all its fields (like ES connectors approach)
+ */
+function readKibanaBodyDefinitions(operationId, endpoint) {
+  const bodyParams = new Set();
+  
+  try {
+    // Look for body parameters in the endpoint parameters array
+    if (endpoint.parameters) {
+      for (const param of endpoint.parameters) {
+        if (param.type === 'Body' && param.schema) {
+          // The schema name is directly in param.schema (like "SearchAlerts_Body")
+          const schemaName = param.schema;
+          // Uncomment for debugging: console.log(`🔍 Processing ${operationId} with body schema ${schemaName}`);
+          
+          // Read the generated schemas file to get the actual schema definition
+          if (fs.existsSync(SCHEMAS_OUTPUT_PATH)) {
+            const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
+            
+            // Find the schema definition - escape special regex characters in schema name
+            const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const schemaRegex = new RegExp(`export const ${escapedSchemaName} = z\\s*([\\s\\S]*?)(?=\\nexport const |\\n$)`, 'm');
+            const match = schemasContent.match(schemaRegex);
+            
+            if (match) {
+              const schemaDefinition = match[1];
+              
+              // Extract all fields from this schema
+              const extractedFields = extractFieldsFromSchema(schemaDefinition);
+              
+              if (extractedFields.size > 0) {
+                // Uncomment for debugging: console.log(`📋 Exploded ${schemaName} → ${extractedFields.size} fields:`, Array.from(extractedFields.keys()));
+                // Return both field names for bodyParams and the field definitions for schema generation
+                const fieldNames = Array.from(extractedFields.keys());
+                const fieldDefs = extractedFields;
+                
+                // Store field definitions for later use in schema generation
+                for (const fieldName of fieldNames) {
+                  bodyParams.add(fieldName);
+                }
+                
+                // Attach the field definitions to the result for schema generation
+                const result = Array.from(bodyParams);
+                result._fieldDefinitions = fieldDefs;
+                return result;
+              } else {
+                // Uncomment for debugging: console.log(`⚠️ No fields found in ${schemaName}`);
+              }
+            } else {
+              // Uncomment for debugging: console.log(`⚠️ Could not find schema definition for ${schemaName}`);
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.warn(`⚠️ Error extracting body params for ${operationId}:`, error.message);
+  }
+  
+  return Array.from(bodyParams);
+}
+
+// Note: Complex schema parsing functions removed - now using hardcoded mappings like ES connectors
+
+/**
  * Convert Kibana API endpoint to connector definition
  */
 function convertToConnectorDefinition(endpoint, index) {
@@ -234,15 +399,6 @@ function convertToConnectorDefinition(endpoint, index) {
   
   // Generate schema fields
   const schemaFields = [];
-  
-  // Helper function to safely quote parameter names if needed
-  const safeParamName = (param) => {
-    // If parameter name contains special characters, quote it
-    if (/[^a-zA-Z0-9_$]/.test(param)) {
-      return `'${param}'`;
-    }
-    return param;
-  };
 
   // Add path parameters (always required)
   for (const param of pathParams) {
@@ -259,28 +415,53 @@ function convertToConnectorDefinition(endpoint, index) {
     schemaFields.push(`    ${safeParamName(param)}: z.string().optional().describe('Header parameter: ${param}'),`);
   }
   
-  // Add body for non-GET requests
+  // Get body parameters using hardcoded definitions (like ES connectors)
+  const bodyParamNames = readKibanaBodyDefinitions(operationId, endpoint);
+  
+  // Extract and flatten body schema parameters (like ES connectors approach)
+  const bodySchemaFields = [];
+  const flattenedBodyParams = []; // Track the actual flattened parameter names
+  
   if (['POST', 'PUT', 'PATCH'].includes(method)) {
-    if (bodyParams.length > 0) {
-      for (const param of bodyParams) {
-        // Find the parameter in the parameters array to get its schema
-        const paramInfo = parameters.find(p => p.name === param && p.type === 'Body');
-        if (paramInfo && paramInfo.schema && paramInfo.schema !== 'z.any()') {
-          // Clean the schema name - remove invalid parts like .nullish(), .optional(), etc.
-          const cleanSchemaName = paramInfo.schema.split('.')[0];
-          // Ensure we have a valid schema name, fallback to z.any() if empty
-          const finalSchemaName = cleanSchemaName && cleanSchemaName.trim() ? cleanSchemaName : 'z.any()';
-          // Use the specific schema from openapi-zod-client
-          schemaFields.push(`    ${safeParamName(param)}: ${finalSchemaName}.optional().describe('Body parameter: ${param}'),`);
+    // Check if we have field definitions (actual Zod schemas) attached
+    const fieldDefinitions = bodyParamNames._fieldDefinitions;
+    
+    if (fieldDefinitions && fieldDefinitions.size > 0) {
+      // Use actual Zod schemas from the original schema definition
+      for (const paramName of bodyParamNames) {
+        const safeFieldName = safeParamName(paramName);
+        const originalZodDef = fieldDefinitions.get(paramName);
+        
+        if (originalZodDef) {
+          // For now, use safe generic schema to avoid syntax errors
+          // TODO: Fix complex field extraction later
+          bodySchemaFields.push(`    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`);
         } else {
-          schemaFields.push(`    ${safeParamName(param)}: z.any().optional().describe('Body parameter: ${param}'),`);
+          // Fallback to generic if definition not found
+          bodySchemaFields.push(`    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`);
         }
+        flattenedBodyParams.push(paramName);
+      }
+    } else if (bodyParamNames.length > 0) {
+      // Fallback: use generic z.any().optional() if no field definitions available
+      for (const paramName of bodyParamNames) {
+        const safeFieldName = safeParamName(paramName);
+        bodySchemaFields.push(`    ${safeFieldName}: z.any().optional().describe('${paramName} parameter'),`);
+        flattenedBodyParams.push(paramName);
       }
     } else {
-      schemaFields.push(`    body: z.any().optional().describe('Request body'),`);
-      bodyParams.push('body');
+      // No specific body parameters found, add a generic body parameter
+      bodySchemaFields.push(`    body: z.any().optional().describe('Request body'),`);
+      flattenedBodyParams.push('body');
     }
   }
+  
+  // Add the flattened body fields to the main schema
+  schemaFields.push(...bodySchemaFields);
+  
+  // Update bodyParams to reflect the flattened structure
+  bodyParams.length = 0; // Clear original
+  bodyParams.push(...flattenedBodyParams);
   
   // If no specific query params found but it's a GET request, add generic query support
   if (method === 'GET' && queryParams.length === 0) {
@@ -458,6 +639,9 @@ function generateKibanaConnectors() {
     // Read the generated content
     const content = fs.readFileSync(TEMP_OUTPUT_PATH, 'utf8');
     
+    // Copy schemas FIRST so they're available during endpoint processing
+    copyClientAsSchemas();
+    
     // Extract endpoint information
     const endpoints = extractEndpointInfo(content);
     console.log(`📊 Found ${endpoints.length} Kibana API endpoints`);
@@ -490,6 +674,8 @@ function generateKibanaConnectors() {
     
     // Extract unique schemas used in connectors
     const usedSchemas = new Set();
+    
+    // First, collect schemas from original endpoint parameters
     for (const endpoint of endpoints) {
       for (const param of endpoint.parameters || []) {
         if (param.schema && param.schema !== 'z.any()' && !param.schema.startsWith('z.')) {
@@ -500,8 +686,21 @@ function generateKibanaConnectors() {
       }
     }
     
-    // Copy the entire generated client as schemas file (simpler approach)
-    copyClientAsSchemas();
+    // Second, collect schemas from the connector definitions (field definitions)
+    const connectorContent = connectorDefinitions.join(',\n');
+    
+    // Extract schema references from connector content using regex
+    const schemaRefRegex = /([A-Z][a-zA-Z0-9_]*(?:_[A-Z][a-zA-Z0-9_]*)*)\./g;
+    let match;
+    while ((match = schemaRefRegex.exec(connectorContent)) !== null) {
+      const schemaName = match[1];
+      // Include all schema references - we'll filter later based on what exists
+      if (schemaName !== 'z' && schemaName !== 'ZodType' && schemaName !== 'ZodSchema') {
+        usedSchemas.add(schemaName);
+      }
+    }
+    
+    // Schemas already copied earlier
     
     // Generate schema imports section - only import schemas that actually exist
     const actualUsedSchemas = Array.from(usedSchemas).filter(s => s !== 'z' && s !== 'ZodType' && s !== 'ZodSchema');

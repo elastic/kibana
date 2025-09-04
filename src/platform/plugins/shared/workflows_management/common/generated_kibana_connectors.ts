@@ -2,7 +2,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-09-04T10:48:44.453Z
+ * Generated at: 2025-09-04T12:01:58.157Z
  * Source: Kibana OpenAPI spec (454 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
@@ -260,12 +260,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["connector_type_id","name","config","secrets"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_actions_connector_id_Body.optional().describe('Body parameter: body'),
+    connector_type_id: z.any().optional().describe('connector_type_id parameter'),
+    name: z.any().optional().describe('name parameter'),
+    config: z.any().optional().describe('config parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
     }),
     outputSchema: z.any().describe('Response from post_actions_connector_id API'),
   },
@@ -279,12 +282,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["name","config","secrets"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_actions_connector_id_Body.optional().describe('Body parameter: body'),
+    name: z.any().optional().describe('name parameter'),
+    config: z.any().optional().describe('config parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
     }),
     outputSchema: z.any().describe('Response from put_actions_connector_id API'),
   },
@@ -298,12 +303,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["params"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_actions_connector_id_execute_Body.optional().describe('Body parameter: body'),
+    params: z.any().optional().describe('params parameter'),
     }),
     outputSchema: z.any().describe('Response from post_actions_connector_id_execute API'),
   },
@@ -404,12 +409,51 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["actions","alerts_filter","query","dsl","filters","state","store","meta","kql","timeframe","days","hours","end","start","timezone","frequency","notify_when","summary","throttle","group","id","params","use_alert_data_for_template","uuid","alert_delay","active","artifacts","dashboards","investigation_guide","blob","consumer","enabled","flapping","look_back_window","status_change_threshold","name","rule_type_id","schedule","interval","tags"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_alerting_rule_id_Body.optional().describe('Body parameter: body'),
+    actions: z.any().optional().describe('actions parameter'),
+    alerts_filter: z.any().optional().describe('alerts_filter parameter'),
+    query: z.any().optional().describe('query parameter'),
+    dsl: z.any().optional().describe('dsl parameter'),
+    filters: z.any().optional().describe('filters parameter'),
+    state: z.any().optional().describe('state parameter'),
+    store: z.any().optional().describe('store parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    kql: z.any().optional().describe('kql parameter'),
+    timeframe: z.any().optional().describe('timeframe parameter'),
+    days: z.any().optional().describe('days parameter'),
+    hours: z.any().optional().describe('hours parameter'),
+    end: z.any().optional().describe('end parameter'),
+    start: z.any().optional().describe('start parameter'),
+    timezone: z.any().optional().describe('timezone parameter'),
+    frequency: z.any().optional().describe('frequency parameter'),
+    notify_when: z.any().optional().describe('notify_when parameter'),
+    summary: z.any().optional().describe('summary parameter'),
+    throttle: z.any().optional().describe('throttle parameter'),
+    group: z.any().optional().describe('group parameter'),
+    id: z.any().optional().describe('id parameter'),
+    params: z.any().optional().describe('params parameter'),
+    use_alert_data_for_template: z.any().optional().describe('use_alert_data_for_template parameter'),
+    uuid: z.any().optional().describe('uuid parameter'),
+    alert_delay: z.any().optional().describe('alert_delay parameter'),
+    active: z.any().optional().describe('active parameter'),
+    artifacts: z.any().optional().describe('artifacts parameter'),
+    dashboards: z.any().optional().describe('dashboards parameter'),
+    investigation_guide: z.any().optional().describe('investigation_guide parameter'),
+    blob: z.any().optional().describe('blob parameter'),
+    consumer: z.any().optional().describe('consumer parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    flapping: z.any().optional().describe('flapping parameter'),
+    look_back_window: z.any().optional().describe('look_back_window parameter'),
+    status_change_threshold: z.any().optional().describe('status_change_threshold parameter'),
+    name: z.any().optional().describe('name parameter'),
+    rule_type_id: z.any().optional().describe('rule_type_id parameter'),
+    schedule: z.any().optional().describe('schedule parameter'),
+    interval: z.any().optional().describe('interval parameter'),
+    tags: z.any().optional().describe('tags parameter'),
     }),
     outputSchema: z.any().describe('Response from post_alerting_rule_id API'),
   },
@@ -423,12 +467,48 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["actions","alerts_filter","query","dsl","filters","state","store","meta","kql","timeframe","days","hours","end","start","timezone","frequency","notify_when","summary","throttle","group","id","params","use_alert_data_for_template","uuid","alert_delay","active","artifacts","dashboards","investigation_guide","blob","flapping","look_back_window","status_change_threshold","name","schedule","interval","tags"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_alerting_rule_id_Body.optional().describe('Body parameter: body'),
+    actions: z.any().optional().describe('actions parameter'),
+    alerts_filter: z.any().optional().describe('alerts_filter parameter'),
+    query: z.any().optional().describe('query parameter'),
+    dsl: z.any().optional().describe('dsl parameter'),
+    filters: z.any().optional().describe('filters parameter'),
+    state: z.any().optional().describe('state parameter'),
+    store: z.any().optional().describe('store parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    kql: z.any().optional().describe('kql parameter'),
+    timeframe: z.any().optional().describe('timeframe parameter'),
+    days: z.any().optional().describe('days parameter'),
+    hours: z.any().optional().describe('hours parameter'),
+    end: z.any().optional().describe('end parameter'),
+    start: z.any().optional().describe('start parameter'),
+    timezone: z.any().optional().describe('timezone parameter'),
+    frequency: z.any().optional().describe('frequency parameter'),
+    notify_when: z.any().optional().describe('notify_when parameter'),
+    summary: z.any().optional().describe('summary parameter'),
+    throttle: z.any().optional().describe('throttle parameter'),
+    group: z.any().optional().describe('group parameter'),
+    id: z.any().optional().describe('id parameter'),
+    params: z.any().optional().describe('params parameter'),
+    use_alert_data_for_template: z.any().optional().describe('use_alert_data_for_template parameter'),
+    uuid: z.any().optional().describe('uuid parameter'),
+    alert_delay: z.any().optional().describe('alert_delay parameter'),
+    active: z.any().optional().describe('active parameter'),
+    artifacts: z.any().optional().describe('artifacts parameter'),
+    dashboards: z.any().optional().describe('dashboards parameter'),
+    investigation_guide: z.any().optional().describe('investigation_guide parameter'),
+    blob: z.any().optional().describe('blob parameter'),
+    flapping: z.any().optional().describe('flapping parameter'),
+    look_back_window: z.any().optional().describe('look_back_window parameter'),
+    status_change_threshold: z.any().optional().describe('status_change_threshold parameter'),
+    name: z.any().optional().describe('name parameter'),
+    schedule: z.any().optional().describe('schedule parameter'),
+    interval: z.any().optional().describe('interval parameter'),
+    tags: z.any().optional().describe('tags parameter'),
     }),
     outputSchema: z.any().describe('Response from put_alerting_rule_id API'),
   },
@@ -447,7 +527,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_alerting_rule_id_disable API'),
   },
@@ -537,12 +617,23 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["schedule","custom","duration","recurring","end","every","occurrences","onMonth","onMonthDay","onWeekDay","start","timezone"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_alerting_rule_id_snooze_schedule_Body.optional().describe('Body parameter: body'),
+    schedule: z.any().optional().describe('schedule parameter'),
+    custom: z.any().optional().describe('custom parameter'),
+    duration: z.any().optional().describe('duration parameter'),
+    recurring: z.any().optional().describe('recurring parameter'),
+    end: z.any().optional().describe('end parameter'),
+    every: z.any().optional().describe('every parameter'),
+    occurrences: z.any().optional().describe('occurrences parameter'),
+    onMonth: z.any().optional().describe('onMonth parameter'),
+    onMonthDay: z.any().optional().describe('onMonthDay parameter'),
+    onWeekDay: z.any().optional().describe('onWeekDay parameter'),
+    start: z.any().optional().describe('start parameter'),
+    timezone: z.any().optional().describe('timezone parameter'),
     }),
     outputSchema: z.any().describe('Response from post_alerting_rule_id_snooze_schedule API'),
   },
@@ -634,12 +725,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["elastic-api-version","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["name","privileges","event","config_agent"]
     },
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: APM_UI_agent_keys_object.optional().describe('Body parameter: body'),
+    name: z.any().optional().describe('name parameter'),
+    privileges: z.any().optional().describe('privileges parameter'),
+    event: z.any().optional().describe('event parameter'),
+    config_agent: z.any().optional().describe('config_agent parameter'),
     }),
     outputSchema: z.any().describe('Response from createAgentKey API'),
   },
@@ -658,7 +752,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from saveApmServerSchema API'),
   },
@@ -672,13 +766,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["serviceName"],
       urlParams: ["elastic-api-version","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["@timestamp","message","service","environment","version","tags"]
     },
     paramsSchema: z.object({
     serviceName: z.string().describe('Path parameter: serviceName (required)'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: APM_UI_create_annotation_object.optional().describe('Body parameter: body'),
+    '@timestamp': z.any().optional().describe('@timestamp parameter'),
+    message: z.any().optional().describe('message parameter'),
+    service: z.any().optional().describe('service parameter'),
+    environment: z.any().optional().describe('environment parameter'),
+    version: z.any().optional().describe('version parameter'),
+    tags: z.any().optional().describe('tags parameter'),
     }),
     outputSchema: z.any().describe('Response from createAnnotation API'),
   },
@@ -713,7 +812,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["elastic-api-version","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
@@ -749,13 +848,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["overwrite","elastic-api-version","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["agent_name","service","settings"]
     },
     paramsSchema: z.object({
     overwrite: z.any().optional().describe('Query parameter: overwrite'),
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: APM_UI_agent_configuration_intake_object.optional().describe('Body parameter: body'),
+    agent_name: z.any().optional().describe('agent_name parameter'),
+    service: z.any().optional().describe('service parameter'),
+    settings: z.any().optional().describe('settings parameter'),
     }),
     outputSchema: z.any().describe('Response from createUpdateAgentConfiguration API'),
   },
@@ -805,12 +906,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["elastic-api-version","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["etag","mark_as_applied_by_agent","service"]
     },
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: APM_UI_search_agent_configuration_object.optional().describe('Body parameter: body'),
+    etag: z.any().optional().describe('etag parameter'),
+    mark_as_applied_by_agent: z.any().optional().describe('mark_as_applied_by_agent parameter'),
+    service: z.any().optional().describe('service parameter'),
     }),
     outputSchema: z.any().describe('Response from searchSingleConfiguration API'),
   },
@@ -862,12 +965,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["elastic-api-version","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["bundle_filepath","service_name","service_version","sourcemap"]
     },
     paramsSchema: z.object({
     'elastic-api-version': z.string().optional().describe('Header parameter: elastic-api-version'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: APM_UI_upload_source_map_object.optional().describe('Body parameter: body'),
+    bundle_filepath: z.any().optional().describe('bundle_filepath parameter'),
+    service_name: z.any().optional().describe('service_name parameter'),
+    service_version: z.any().optional().describe('service_version parameter'),
+    sourcemap: z.any().optional().describe('sourcemap parameter'),
     }),
     outputSchema: z.any().describe('Response from uploadSourceMap API'),
   },
@@ -937,7 +1043,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: CreateAssetCriticalityRecord_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from CreateAssetCriticalityRecord API'),
   },
@@ -951,10 +1057,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["records","criticality_level"]
     },
     paramsSchema: z.object({
-    body: BulkUpsertAssetCriticalityRecords_Body.optional().describe('Body parameter: body'),
+    records: z.any().optional().describe('records parameter'),
+    criticality_level: z.any().optional().describe('criticality_level parameter'),
     }),
     outputSchema: z.any().describe('Response from BulkUpsertAssetCriticalityRecords API'),
   },
@@ -1003,11 +1110,26 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["cases","assignees","category","connector","customFields","key","type","value","description","id","settings","severity","status","tags","title","version"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Cases_update_case_request.optional().describe('Body parameter: body'),
+    cases: z.any().optional().describe('cases parameter'),
+    assignees: z.any().optional().describe('assignees parameter'),
+    category: z.any().optional().describe('category parameter'),
+    connector: z.any().optional().describe('connector parameter'),
+    customFields: z.any().optional().describe('customFields parameter'),
+    key: z.any().optional().describe('key parameter'),
+    type: z.any().optional().describe('type parameter'),
+    value: z.any().optional().describe('value parameter'),
+    description: z.any().optional().describe('description parameter'),
+    id: z.any().optional().describe('id parameter'),
+    settings: z.any().optional().describe('settings parameter'),
+    severity: z.any().optional().describe('severity parameter'),
+    status: z.any().optional().describe('status parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    title: z.any().optional().describe('title parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from updateCaseDefaultSpace API'),
   },
@@ -1021,11 +1143,23 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["assignees","category","connector","customFields","key","type","value","description","owner","settings","severity","tags","title"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Cases_create_case_request.optional().describe('Body parameter: body'),
+    assignees: z.any().optional().describe('assignees parameter'),
+    category: z.any().optional().describe('category parameter'),
+    connector: z.any().optional().describe('connector parameter'),
+    customFields: z.any().optional().describe('customFields parameter'),
+    key: z.any().optional().describe('key parameter'),
+    type: z.any().optional().describe('type parameter'),
+    value: z.any().optional().describe('value parameter'),
+    description: z.any().optional().describe('description parameter'),
+    owner: z.any().optional().describe('owner parameter'),
+    settings: z.any().optional().describe('settings parameter'),
+    severity: z.any().optional().describe('severity parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    title: z.any().optional().describe('title parameter'),
     }),
     outputSchema: z.any().describe('Response from createCaseDefaultSpace API'),
   },
@@ -1124,7 +1258,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Cases_update_case_comment_request.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from updateCaseCommentDefaultSpace API'),
   },
@@ -1143,7 +1277,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Cases_add_case_comment_request.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from addCaseCommentDefaultSpace API'),
   },
@@ -1220,7 +1354,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     caseId: z.string().describe('Path parameter: caseId (required)'),
     connectorId: z.string().describe('Path parameter: connectorId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from pushCaseDefaultSpace API'),
   },
@@ -1234,12 +1368,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["caseId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["file","filename"]
     },
     paramsSchema: z.object({
     caseId: z.string().describe('Path parameter: caseId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Cases_add_case_file_request.optional().describe('Body parameter: body'),
+    file: z.any().optional().describe('file parameter'),
+    filename: z.any().optional().describe('filename parameter'),
     }),
     outputSchema: z.any().describe('Response from addCaseFileDefaultSpace API'),
   },
@@ -1307,11 +1442,23 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["closure_type","connector","fields","id","name","type","customFields","defaultValue","key","label","required","owner","templates"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Cases_set_case_configuration_request.optional().describe('Body parameter: body'),
+    closure_type: z.any().optional().describe('closure_type parameter'),
+    connector: z.any().optional().describe('connector parameter'),
+    fields: z.any().optional().describe('fields parameter'),
+    id: z.any().optional().describe('id parameter'),
+    name: z.any().optional().describe('name parameter'),
+    type: z.any().optional().describe('type parameter'),
+    customFields: z.any().optional().describe('customFields parameter'),
+    defaultValue: z.any().optional().describe('defaultValue parameter'),
+    key: z.any().optional().describe('key parameter'),
+    label: z.any().optional().describe('label parameter'),
+    required: z.any().optional().describe('required parameter'),
+    owner: z.any().optional().describe('owner parameter'),
+    templates: z.any().optional().describe('templates parameter'),
     }),
     outputSchema: z.any().describe('Response from setCaseConfigurationDefaultSpace API'),
   },
@@ -1325,12 +1472,24 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["configurationId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["closure_type","connector","fields","id","name","type","customFields","defaultValue","key","label","required","templates","version"]
     },
     paramsSchema: z.object({
     configurationId: z.string().describe('Path parameter: configurationId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Cases_update_case_configuration_request.optional().describe('Body parameter: body'),
+    closure_type: z.any().optional().describe('closure_type parameter'),
+    connector: z.any().optional().describe('connector parameter'),
+    fields: z.any().optional().describe('fields parameter'),
+    id: z.any().optional().describe('id parameter'),
+    name: z.any().optional().describe('name parameter'),
+    type: z.any().optional().describe('type parameter'),
+    customFields: z.any().optional().describe('customFields parameter'),
+    defaultValue: z.any().optional().describe('defaultValue parameter'),
+    key: z.any().optional().describe('key parameter'),
+    label: z.any().optional().describe('label parameter'),
+    required: z.any().optional().describe('required parameter'),
+    templates: z.any().optional().describe('templates parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from updateCaseConfigurationDefaultSpace API'),
   },
@@ -1412,11 +1571,26 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["data_view","allowNoIndex","fieldAttrs","fieldFormats","fields","id","name","namespaces","runtimeFieldMap","sourceFilters","timeFieldName","title","type","typeMeta","version","override"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Data_views_create_data_view_request_object.optional().describe('Body parameter: body'),
+    data_view: z.any().optional().describe('data_view parameter'),
+    allowNoIndex: z.any().optional().describe('allowNoIndex parameter'),
+    fieldAttrs: z.any().optional().describe('fieldAttrs parameter'),
+    fieldFormats: z.any().optional().describe('fieldFormats parameter'),
+    fields: z.any().optional().describe('fields parameter'),
+    id: z.any().optional().describe('id parameter'),
+    name: z.any().optional().describe('name parameter'),
+    namespaces: z.any().optional().describe('namespaces parameter'),
+    runtimeFieldMap: z.any().optional().describe('runtimeFieldMap parameter'),
+    sourceFilters: z.any().optional().describe('sourceFilters parameter'),
+    timeFieldName: z.any().optional().describe('timeFieldName parameter'),
+    title: z.any().optional().describe('title parameter'),
+    type: z.any().optional().describe('type parameter'),
+    typeMeta: z.any().optional().describe('typeMeta parameter'),
+    version: z.any().optional().describe('version parameter'),
+    override: z.any().optional().describe('override parameter'),
     }),
     outputSchema: z.any().describe('Response from createDataViewDefaultw API'),
   },
@@ -1466,12 +1640,23 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["viewId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["data_view","allowNoIndex","fieldFormats","fields","name","runtimeFieldMap","sourceFilters","timeFieldName","title","type","typeMeta","refresh_fields"]
     },
     paramsSchema: z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Data_views_update_data_view_request_object.optional().describe('Body parameter: body'),
+    data_view: z.any().optional().describe('data_view parameter'),
+    allowNoIndex: z.any().optional().describe('allowNoIndex parameter'),
+    fieldFormats: z.any().optional().describe('fieldFormats parameter'),
+    fields: z.any().optional().describe('fields parameter'),
+    name: z.any().optional().describe('name parameter'),
+    runtimeFieldMap: z.any().optional().describe('runtimeFieldMap parameter'),
+    sourceFilters: z.any().optional().describe('sourceFilters parameter'),
+    timeFieldName: z.any().optional().describe('timeFieldName parameter'),
+    title: z.any().optional().describe('title parameter'),
+    type: z.any().optional().describe('type parameter'),
+    typeMeta: z.any().optional().describe('typeMeta parameter'),
+    refresh_fields: z.any().optional().describe('refresh_fields parameter'),
     }),
     outputSchema: z.any().describe('Response from updateDataViewDefault API'),
   },
@@ -1490,7 +1675,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from updateFieldsMetadataDefault API'),
   },
@@ -1504,12 +1689,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["viewId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["name","runtimeField"]
     },
     paramsSchema: z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: createRuntimeFieldDefault_Body.optional().describe('Body parameter: body'),
+    name: z.any().optional().describe('name parameter'),
+    runtimeField: z.any().optional().describe('runtimeField parameter'),
     }),
     outputSchema: z.any().describe('Response from createRuntimeFieldDefault API'),
   },
@@ -1523,12 +1709,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["viewId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["name","runtimeField"]
     },
     paramsSchema: z.object({
     viewId: z.string().describe('Path parameter: viewId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: createRuntimeFieldDefault_Body.optional().describe('Body parameter: body'),
+    name: z.any().optional().describe('name parameter'),
+    runtimeField: z.any().optional().describe('runtimeField parameter'),
     }),
     outputSchema: z.any().describe('Response from createUpdateRuntimeFieldDefault API'),
   },
@@ -1584,7 +1771,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     fieldName: z.string().describe('Path parameter: fieldName (required)'),
     viewId: z.string().describe('Path parameter: viewId (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from updateRuntimeFieldDefault API'),
   },
@@ -1615,11 +1802,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["data_view_id","force"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: setDefaultDatailViewDefault_Body.optional().describe('Body parameter: body'),
+    data_view_id: z.any().optional().describe('data_view_id parameter'),
+    force: z.any().optional().describe('force parameter'),
     }),
     outputSchema: z.any().describe('Response from setDefaultDatailViewDefault API'),
   },
@@ -1633,11 +1821,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["delete","forId","forType","fromId","fromType","toId"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Data_views_swap_data_view_request_object.optional().describe('Body parameter: body'),
+    delete: z.any().optional().describe('delete parameter'),
+    forId: z.any().optional().describe('forId parameter'),
+    forType: z.any().optional().describe('forType parameter'),
+    fromId: z.any().optional().describe('fromId parameter'),
+    fromType: z.any().optional().describe('fromType parameter'),
+    toId: z.any().optional().describe('toId parameter'),
     }),
     outputSchema: z.any().describe('Response from swapDataViewsDefault API'),
   },
@@ -1651,11 +1844,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["delete","forId","forType","fromId","fromType","toId"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: Data_views_swap_data_view_request_object.optional().describe('Body parameter: body'),
+    delete: z.any().optional().describe('delete parameter'),
+    forId: z.any().optional().describe('forId parameter'),
+    forType: z.any().optional().describe('forType parameter'),
+    fromId: z.any().optional().describe('fromId parameter'),
+    fromType: z.any().optional().describe('fromType parameter'),
+    toId: z.any().optional().describe('toId parameter'),
     }),
     outputSchema: z.any().describe('Response from previewSwapDataViewsDefault API'),
   },
@@ -1776,7 +1974,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: Security_Detections_API_RulePatchProps.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from PatchRule API'),
   },
@@ -1793,7 +1991,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: Security_Detections_API_RuleCreateProps.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from CreateRule API'),
   },
@@ -1810,7 +2008,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: Security_Detections_API_RuleUpdateProps.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from UpdateRule API'),
   },
@@ -1828,7 +2026,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     dry_run: z.any().optional().describe('Query parameter: dry_run'),
-    body: PerformRulesBulkAction_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from PerformRulesBulkAction API'),
   },
@@ -1847,7 +2045,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     exclude_export_details: z.any().optional().describe('Query parameter: exclude_export_details'),
     file_name: z.any().optional().describe('Query parameter: file_name'),
-    body: ExportRules_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ExportRules API'),
   },
@@ -1886,7 +2084,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     overwrite_exceptions: z.any().optional().describe('Query parameter: overwrite_exceptions'),
     overwrite_action_connectors: z.any().optional().describe('Query parameter: overwrite_action_connectors'),
     as_new_list: z.any().optional().describe('Query parameter: as_new_list'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ImportRules API'),
   },
@@ -1900,11 +2098,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["items"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: CreateRuleExceptionListItems_Body.optional().describe('Body parameter: body'),
+    items: z.any().optional().describe('items parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateRuleExceptionListItems API'),
   },
@@ -1956,7 +2154,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     enable_logged_requests: z.any().optional().describe('Query parameter: enable_logged_requests'),
-    body: RulePreview_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from RulePreview API'),
   },
@@ -1970,10 +2168,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["assignees","ids"]
     },
     paramsSchema: z.object({
-    body: SetAlertAssignees_Body.optional().describe('Body parameter: body'),
+    assignees: z.any().optional().describe('assignees parameter'),
+    ids: z.any().optional().describe('ids parameter'),
     }),
     outputSchema: z.any().describe('Response from SetAlertAssignees API'),
   },
@@ -1987,10 +2186,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_source","aggs","fields","query","runtime_mappings","size","sort","track_total_hits"]
     },
     paramsSchema: z.object({
-    body: SearchAlerts_Body.optional().describe('Body parameter: body'),
+    _source: z.any().optional().describe('_source parameter'),
+    aggs: z.any().optional().describe('aggs parameter'),
+    fields: z.any().optional().describe('fields parameter'),
+    query: z.any().optional().describe('query parameter'),
+    runtime_mappings: z.any().optional().describe('runtime_mappings parameter'),
+    size: z.any().optional().describe('size parameter'),
+    sort: z.any().optional().describe('sort parameter'),
+    track_total_hits: z.any().optional().describe('track_total_hits parameter'),
     }),
     outputSchema: z.any().describe('Response from SearchAlerts API'),
   },
@@ -2007,7 +2213,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: SetAlertsStatus_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from SetAlertsStatus API'),
   },
@@ -2021,10 +2227,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["ids","tags"]
     },
     paramsSchema: z.object({
-    body: SetAlertTags_Body.optional().describe('Body parameter: body'),
+    ids: z.any().optional().describe('ids parameter'),
+    tags: z.any().optional().describe('tags parameter'),
     }),
     outputSchema: z.any().describe('Response from SetAlertTags API'),
   },
@@ -2127,10 +2334,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["comments","description","entries","item_id","meta","name","os_types","tags","type"]
     },
     paramsSchema: z.object({
-    body: CreateEndpointListItem_Body.optional().describe('Body parameter: body'),
+    comments: z.any().optional().describe('comments parameter'),
+    description: z.any().optional().describe('description parameter'),
+    entries: z.any().optional().describe('entries parameter'),
+    item_id: z.any().optional().describe('item_id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    os_types: z.any().optional().describe('os_types parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    type: z.any().optional().describe('type parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateEndpointListItem API'),
   },
@@ -2144,10 +2359,20 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_version","comments","description","entries","id","item_id","meta","name","os_types","tags","type"]
     },
     paramsSchema: z.object({
-    body: UpdateEndpointListItem_Body.optional().describe('Body parameter: body'),
+    _version: z.any().optional().describe('_version parameter'),
+    comments: z.any().optional().describe('comments parameter'),
+    description: z.any().optional().describe('description parameter'),
+    entries: z.any().optional().describe('entries parameter'),
+    id: z.any().optional().describe('id parameter'),
+    item_id: z.any().optional().describe('item_id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    os_types: z.any().optional().describe('os_types parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    type: z.any().optional().describe('type parameter'),
     }),
     outputSchema: z.any().describe('Response from UpdateEndpointListItem API'),
   },
@@ -2277,10 +2502,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters","command","timeout"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_ExecuteRouteRequestBody.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
+    command: z.any().optional().describe('command parameter'),
+    timeout: z.any().optional().describe('timeout parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointExecuteAction API'),
   },
@@ -2294,10 +2526,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters","path"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_GetFileRouteRequestBody.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
+    path: z.any().optional().describe('path parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointGetFileAction API'),
   },
@@ -2311,10 +2549,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters"]
     },
     paramsSchema: z.object({
-    body: EndpointIsolateAction_Body.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointIsolateAction API'),
   },
@@ -2328,10 +2571,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters","pid","entity_id","process_name"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_KillProcessRouteRequestBody.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
+    pid: z.any().optional().describe('pid parameter'),
+    entity_id: z.any().optional().describe('entity_id parameter'),
+    process_name: z.any().optional().describe('process_name parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointKillProcessAction API'),
   },
@@ -2345,10 +2596,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_GetProcessesRouteRequestBody.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointGetProcessesAction API'),
   },
@@ -2362,10 +2618,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["parameters"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_RunScriptRouteRequestBody.optional().describe('Body parameter: body'),
+    parameters: z.any().optional().describe('parameters parameter'),
     }),
     outputSchema: z.any().describe('Response from RunScriptAction API'),
   },
@@ -2379,10 +2635,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters","path"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_ScanRouteRequestBody.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
+    path: z.any().optional().describe('path parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointScanAction API'),
   },
@@ -2413,10 +2675,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters","pid","entity_id"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_SuspendProcessRouteRequestBody.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
+    pid: z.any().optional().describe('pid parameter'),
+    entity_id: z.any().optional().describe('entity_id parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointSuspendProcessAction API'),
   },
@@ -2430,10 +2699,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters"]
     },
     paramsSchema: z.object({
-    body: EndpointIsolateAction_Body.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointUnisolateAction API'),
   },
@@ -2447,10 +2721,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_type","alert_ids","case_ids","comment","endpoint_ids","parameters","file","overwrite"]
     },
     paramsSchema: z.object({
-    body: Security_Endpoint_Management_API_UploadRouteRequestBody.optional().describe('Body parameter: body'),
+    agent_type: z.any().optional().describe('agent_type parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    comment: z.any().optional().describe('comment parameter'),
+    endpoint_ids: z.any().optional().describe('endpoint_ids parameter'),
+    parameters: z.any().optional().describe('parameters parameter'),
+    file: z.any().optional().describe('file parameter'),
+    overwrite: z.any().optional().describe('overwrite parameter'),
     }),
     outputSchema: z.any().describe('Response from EndpointUploadAction API'),
   },
@@ -2540,7 +2821,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     package_policy_id: z.string().describe('Path parameter: package_policy_id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from CreateUpdateProtectionUpdatesNote API'),
   },
@@ -2656,10 +2937,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["user","name"]
     },
     paramsSchema: z.object({
-    body: Security_Entity_Analytics_API_UserName.optional().describe('Body parameter: body'),
+    user: z.any().optional().describe('user parameter'),
+    name: z.any().optional().describe('name parameter'),
     }),
     outputSchema: z.any().describe('Response from CreatePrivMonUser API'),
   },
@@ -2676,7 +2958,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from PrivmonBulkUploadUsersCSV API'),
   },
@@ -2707,11 +2989,26 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["@timestamp","offset","entity_analytics_monitoring","labels","field","source","value","event","ingested","id","source_ids","source_integrations","sources","user","is_privileged","name"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: Security_Entity_Analytics_API_MonitoredUserDoc.optional().describe('Body parameter: body'),
+    '@timestamp': z.any().optional().describe('@timestamp parameter'),
+    offset: z.any().optional().describe('offset parameter'),
+    entity_analytics_monitoring: z.any().optional().describe('entity_analytics_monitoring parameter'),
+    labels: z.any().optional().describe('labels parameter'),
+    field: z.any().optional().describe('field parameter'),
+    source: z.any().optional().describe('source parameter'),
+    value: z.any().optional().describe('value parameter'),
+    event: z.any().optional().describe('event parameter'),
+    ingested: z.any().optional().describe('ingested parameter'),
+    id: z.any().optional().describe('id parameter'),
+    source_ids: z.any().optional().describe('source_ids parameter'),
+    source_integrations: z.any().optional().describe('source_integrations parameter'),
+    sources: z.any().optional().describe('sources parameter'),
+    user: z.any().optional().describe('user parameter'),
+    is_privileged: z.any().optional().describe('is_privileged parameter'),
+    name: z.any().optional().describe('name parameter'),
     }),
     outputSchema: z.any().describe('Response from UpdatePrivMonUser API'),
   },
@@ -2776,10 +3073,21 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["delay","docsPerSecond","enrichPolicyExecutionInterval","entityTypes","fieldHistoryLength","filter","frequency","indexPattern","lookbackPeriod","maxPageSearchSize","timeout","timestampField"]
     },
     paramsSchema: z.object({
-    body: InitEntityStore_Body.optional().describe('Body parameter: body'),
+    delay: z.any().optional().describe('delay parameter'),
+    docsPerSecond: z.any().optional().describe('docsPerSecond parameter'),
+    enrichPolicyExecutionInterval: z.any().optional().describe('enrichPolicyExecutionInterval parameter'),
+    entityTypes: z.any().optional().describe('entityTypes parameter'),
+    fieldHistoryLength: z.any().optional().describe('fieldHistoryLength parameter'),
+    filter: z.any().optional().describe('filter parameter'),
+    frequency: z.any().optional().describe('frequency parameter'),
+    indexPattern: z.any().optional().describe('indexPattern parameter'),
+    lookbackPeriod: z.any().optional().describe('lookbackPeriod parameter'),
+    maxPageSearchSize: z.any().optional().describe('maxPageSearchSize parameter'),
+    timeout: z.any().optional().describe('timeout parameter'),
+    timestampField: z.any().optional().describe('timestampField parameter'),
     }),
     outputSchema: z.any().describe('Response from InitEntityStore API'),
   },
@@ -2845,11 +3153,21 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["entityType"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["delay","docsPerSecond","enrichPolicyExecutionInterval","fieldHistoryLength","filter","frequency","indexPattern","lookbackPeriod","maxPageSearchSize","timeout","timestampField"]
     },
     paramsSchema: z.object({
     entityType: z.string().describe('Path parameter: entityType (required)'),
-    body: InitEntityEngine_Body.optional().describe('Body parameter: body'),
+    delay: z.any().optional().describe('delay parameter'),
+    docsPerSecond: z.any().optional().describe('docsPerSecond parameter'),
+    enrichPolicyExecutionInterval: z.any().optional().describe('enrichPolicyExecutionInterval parameter'),
+    fieldHistoryLength: z.any().optional().describe('fieldHistoryLength parameter'),
+    filter: z.any().optional().describe('filter parameter'),
+    frequency: z.any().optional().describe('frequency parameter'),
+    indexPattern: z.any().optional().describe('indexPattern parameter'),
+    lookbackPeriod: z.any().optional().describe('lookbackPeriod parameter'),
+    maxPageSearchSize: z.any().optional().describe('maxPageSearchSize parameter'),
+    timeout: z.any().optional().describe('timeout parameter'),
+    timestampField: z.any().optional().describe('timestampField parameter'),
     }),
     outputSchema: z.any().describe('Response from InitEntityEngine API'),
   },
@@ -2986,10 +3304,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","list_id","meta","name","namespace_type","os_types","tags","type","version"]
     },
     paramsSchema: z.object({
-    body: CreateExceptionList_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    list_id: z.any().optional().describe('list_id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    namespace_type: z.any().optional().describe('namespace_type parameter'),
+    os_types: z.any().optional().describe('os_types parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    type: z.any().optional().describe('type parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateExceptionList API'),
   },
@@ -3003,10 +3329,20 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_version","description","id","list_id","meta","name","namespace_type","os_types","tags","type","version"]
     },
     paramsSchema: z.object({
-    body: UpdateExceptionList_Body.optional().describe('Body parameter: body'),
+    _version: z.any().optional().describe('_version parameter'),
+    description: z.any().optional().describe('description parameter'),
+    id: z.any().optional().describe('id parameter'),
+    list_id: z.any().optional().describe('list_id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    namespace_type: z.any().optional().describe('namespace_type parameter'),
+    os_types: z.any().optional().describe('os_types parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    type: z.any().optional().describe('type parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from UpdateExceptionList API'),
   },
@@ -3079,7 +3415,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     overwrite: z.any().optional().describe('Query parameter: overwrite'),
     as_new_list: z.any().optional().describe('Query parameter: as_new_list'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ImportExceptionList API'),
   },
@@ -3129,10 +3465,22 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["comments","description","entries","expire_time","offset","item_id","list_id","meta","name","namespace_type","os_types","tags","type"]
     },
     paramsSchema: z.object({
-    body: CreateExceptionListItem_Body.optional().describe('Body parameter: body'),
+    comments: z.any().optional().describe('comments parameter'),
+    description: z.any().optional().describe('description parameter'),
+    entries: z.any().optional().describe('entries parameter'),
+    expire_time: z.any().optional().describe('expire_time parameter'),
+    offset: z.any().optional().describe('offset parameter'),
+    item_id: z.any().optional().describe('item_id parameter'),
+    list_id: z.any().optional().describe('list_id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    namespace_type: z.any().optional().describe('namespace_type parameter'),
+    os_types: z.any().optional().describe('os_types parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    type: z.any().optional().describe('type parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateExceptionListItem API'),
   },
@@ -3146,10 +3494,24 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_version","comments","description","entries","expire_time","offset","id","item_id","list_id","meta","name","namespace_type","os_types","tags","type"]
     },
     paramsSchema: z.object({
-    body: UpdateExceptionListItem_Body.optional().describe('Body parameter: body'),
+    _version: z.any().optional().describe('_version parameter'),
+    comments: z.any().optional().describe('comments parameter'),
+    description: z.any().optional().describe('description parameter'),
+    entries: z.any().optional().describe('entries parameter'),
+    expire_time: z.any().optional().describe('expire_time parameter'),
+    offset: z.any().optional().describe('offset parameter'),
+    id: z.any().optional().describe('id parameter'),
+    item_id: z.any().optional().describe('item_id parameter'),
+    list_id: z.any().optional().describe('list_id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    namespace_type: z.any().optional().describe('namespace_type parameter'),
+    os_types: z.any().optional().describe('os_types parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    type: z.any().optional().describe('type parameter'),
     }),
     outputSchema: z.any().describe('Response from UpdateExceptionListItem API'),
   },
@@ -3198,10 +3560,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","name"]
     },
     paramsSchema: z.object({
-    body: CreateSharedExceptionList_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    name: z.any().optional().describe('name parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateSharedExceptionList API'),
   },
@@ -3249,11 +3612,20 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["host","id","is_default","name","proxy_id","secrets","ssl","key","certificate","certificate_authorities"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agent_download_sources_Body.optional().describe('Body parameter: body'),
+    host: z.any().optional().describe('host parameter'),
+    id: z.any().optional().describe('id parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    name: z.any().optional().describe('name parameter'),
+    proxy_id: z.any().optional().describe('proxy_id parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
+    ssl: z.any().optional().describe('ssl parameter'),
+    key: z.any().optional().describe('key parameter'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_download_sources API'),
   },
@@ -3303,12 +3675,21 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["sourceId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["host","id","is_default","name","proxy_id","secrets","ssl","key","certificate","certificate_authorities"]
     },
     paramsSchema: z.object({
     sourceId: z.string().describe('Path parameter: sourceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agent_download_sources_Body.optional().describe('Body parameter: body'),
+    host: z.any().optional().describe('host parameter'),
+    id: z.any().optional().describe('id parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    name: z.any().optional().describe('name parameter'),
+    proxy_id: z.any().optional().describe('proxy_id parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
+    ssl: z.any().optional().describe('ssl parameter'),
+    key: z.any().optional().describe('key parameter'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_agent_download_sources_sourceid API'),
   },
@@ -3341,12 +3722,70 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["sys_monitoring","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["advanced_settings","agent_download_target_directory","agent_download_timeout","agent_limits_go_max_procs","agent_logging_files_interval","agent_logging_files_keepfiles","agent_logging_files_rotateeverybytes","agent_logging_level","agent_logging_metrics_period","agent_logging_to_files","agent_monitoring_runtime_experimental","agent_features","enabled","name","agentless","cloud_connectors","target_csp","resources","requests","cpu","memory","data_output_id","description","download_source_id","fleet_server_host_id","force","global_data_tags","value","has_fleet_server","id","inactivity_timeout","is_default","is_default_fleet_server","is_managed","is_protected","keep_monitoring_alive","monitoring_diagnostics","limit","burst","interval","uploader","init_dur","max_dur","max_retries","monitoring_enabled","monitoring_http","buffer","host","port","monitoring_output_id","monitoring_pprof_enabled","namespace","overrides","required_versions","percentage","version","space_ids","supports_agentless","unenroll_timeout"]
     },
     paramsSchema: z.object({
     sys_monitoring: z.any().optional().describe('Query parameter: sys_monitoring'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agent_policies_Body.optional().describe('Body parameter: body'),
+    advanced_settings: z.any().optional().describe('advanced_settings parameter'),
+    agent_download_target_directory: z.any().optional().describe('agent_download_target_directory parameter'),
+    agent_download_timeout: z.any().optional().describe('agent_download_timeout parameter'),
+    agent_limits_go_max_procs: z.any().optional().describe('agent_limits_go_max_procs parameter'),
+    agent_logging_files_interval: z.any().optional().describe('agent_logging_files_interval parameter'),
+    agent_logging_files_keepfiles: z.any().optional().describe('agent_logging_files_keepfiles parameter'),
+    agent_logging_files_rotateeverybytes: z.any().optional().describe('agent_logging_files_rotateeverybytes parameter'),
+    agent_logging_level: z.any().optional().describe('agent_logging_level parameter'),
+    agent_logging_metrics_period: z.any().optional().describe('agent_logging_metrics_period parameter'),
+    agent_logging_to_files: z.any().optional().describe('agent_logging_to_files parameter'),
+    agent_monitoring_runtime_experimental: z.any().optional().describe('agent_monitoring_runtime_experimental parameter'),
+    agent_features: z.any().optional().describe('agent_features parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    name: z.any().optional().describe('name parameter'),
+    agentless: z.any().optional().describe('agentless parameter'),
+    cloud_connectors: z.any().optional().describe('cloud_connectors parameter'),
+    target_csp: z.any().optional().describe('target_csp parameter'),
+    resources: z.any().optional().describe('resources parameter'),
+    requests: z.any().optional().describe('requests parameter'),
+    cpu: z.any().optional().describe('cpu parameter'),
+    memory: z.any().optional().describe('memory parameter'),
+    data_output_id: z.any().optional().describe('data_output_id parameter'),
+    description: z.any().optional().describe('description parameter'),
+    download_source_id: z.any().optional().describe('download_source_id parameter'),
+    fleet_server_host_id: z.any().optional().describe('fleet_server_host_id parameter'),
+    force: z.any().optional().describe('force parameter'),
+    global_data_tags: z.any().optional().describe('global_data_tags parameter'),
+    value: z.any().optional().describe('value parameter'),
+    has_fleet_server: z.any().optional().describe('has_fleet_server parameter'),
+    id: z.any().optional().describe('id parameter'),
+    inactivity_timeout: z.any().optional().describe('inactivity_timeout parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    is_default_fleet_server: z.any().optional().describe('is_default_fleet_server parameter'),
+    is_managed: z.any().optional().describe('is_managed parameter'),
+    is_protected: z.any().optional().describe('is_protected parameter'),
+    keep_monitoring_alive: z.any().optional().describe('keep_monitoring_alive parameter'),
+    monitoring_diagnostics: z.any().optional().describe('monitoring_diagnostics parameter'),
+    limit: z.any().optional().describe('limit parameter'),
+    burst: z.any().optional().describe('burst parameter'),
+    interval: z.any().optional().describe('interval parameter'),
+    uploader: z.any().optional().describe('uploader parameter'),
+    init_dur: z.any().optional().describe('init_dur parameter'),
+    max_dur: z.any().optional().describe('max_dur parameter'),
+    max_retries: z.any().optional().describe('max_retries parameter'),
+    monitoring_enabled: z.any().optional().describe('monitoring_enabled parameter'),
+    monitoring_http: z.any().optional().describe('monitoring_http parameter'),
+    buffer: z.any().optional().describe('buffer parameter'),
+    host: z.any().optional().describe('host parameter'),
+    port: z.any().optional().describe('port parameter'),
+    monitoring_output_id: z.any().optional().describe('monitoring_output_id parameter'),
+    monitoring_pprof_enabled: z.any().optional().describe('monitoring_pprof_enabled parameter'),
+    namespace: z.any().optional().describe('namespace parameter'),
+    overrides: z.any().optional().describe('overrides parameter'),
+    required_versions: z.any().optional().describe('required_versions parameter'),
+    percentage: z.any().optional().describe('percentage parameter'),
+    version: z.any().optional().describe('version parameter'),
+    space_ids: z.any().optional().describe('space_ids parameter'),
+    supports_agentless: z.any().optional().describe('supports_agentless parameter'),
+    unenroll_timeout: z.any().optional().describe('unenroll_timeout parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies API'),
   },
@@ -3360,11 +3799,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["full","ids","ignoreMissing"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agent_policies_bulk_get_Body.optional().describe('Body parameter: body'),
+    full: z.any().optional().describe('full parameter'),
+    ids: z.any().optional().describe('ids parameter'),
+    ignoreMissing: z.any().optional().describe('ignoreMissing parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_bulk_get API'),
   },
@@ -3396,12 +3837,71 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["agentPolicyId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["advanced_settings","agent_download_target_directory","agent_download_timeout","agent_limits_go_max_procs","agent_logging_files_interval","agent_logging_files_keepfiles","agent_logging_files_rotateeverybytes","agent_logging_level","agent_logging_metrics_period","agent_logging_to_files","agent_monitoring_runtime_experimental","agent_features","enabled","name","agentless","cloud_connectors","target_csp","resources","requests","cpu","memory","bumpRevision","data_output_id","description","download_source_id","fleet_server_host_id","force","global_data_tags","value","has_fleet_server","id","inactivity_timeout","is_default","is_default_fleet_server","is_managed","is_protected","keep_monitoring_alive","monitoring_diagnostics","limit","burst","interval","uploader","init_dur","max_dur","max_retries","monitoring_enabled","monitoring_http","buffer","host","port","monitoring_output_id","monitoring_pprof_enabled","namespace","overrides","required_versions","percentage","version","space_ids","supports_agentless","unenroll_timeout"]
     },
     paramsSchema: z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_agent_policies_agentpolicyid_Body.optional().describe('Body parameter: body'),
+    advanced_settings: z.any().optional().describe('advanced_settings parameter'),
+    agent_download_target_directory: z.any().optional().describe('agent_download_target_directory parameter'),
+    agent_download_timeout: z.any().optional().describe('agent_download_timeout parameter'),
+    agent_limits_go_max_procs: z.any().optional().describe('agent_limits_go_max_procs parameter'),
+    agent_logging_files_interval: z.any().optional().describe('agent_logging_files_interval parameter'),
+    agent_logging_files_keepfiles: z.any().optional().describe('agent_logging_files_keepfiles parameter'),
+    agent_logging_files_rotateeverybytes: z.any().optional().describe('agent_logging_files_rotateeverybytes parameter'),
+    agent_logging_level: z.any().optional().describe('agent_logging_level parameter'),
+    agent_logging_metrics_period: z.any().optional().describe('agent_logging_metrics_period parameter'),
+    agent_logging_to_files: z.any().optional().describe('agent_logging_to_files parameter'),
+    agent_monitoring_runtime_experimental: z.any().optional().describe('agent_monitoring_runtime_experimental parameter'),
+    agent_features: z.any().optional().describe('agent_features parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    name: z.any().optional().describe('name parameter'),
+    agentless: z.any().optional().describe('agentless parameter'),
+    cloud_connectors: z.any().optional().describe('cloud_connectors parameter'),
+    target_csp: z.any().optional().describe('target_csp parameter'),
+    resources: z.any().optional().describe('resources parameter'),
+    requests: z.any().optional().describe('requests parameter'),
+    cpu: z.any().optional().describe('cpu parameter'),
+    memory: z.any().optional().describe('memory parameter'),
+    bumpRevision: z.any().optional().describe('bumpRevision parameter'),
+    data_output_id: z.any().optional().describe('data_output_id parameter'),
+    description: z.any().optional().describe('description parameter'),
+    download_source_id: z.any().optional().describe('download_source_id parameter'),
+    fleet_server_host_id: z.any().optional().describe('fleet_server_host_id parameter'),
+    force: z.any().optional().describe('force parameter'),
+    global_data_tags: z.any().optional().describe('global_data_tags parameter'),
+    value: z.any().optional().describe('value parameter'),
+    has_fleet_server: z.any().optional().describe('has_fleet_server parameter'),
+    id: z.any().optional().describe('id parameter'),
+    inactivity_timeout: z.any().optional().describe('inactivity_timeout parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    is_default_fleet_server: z.any().optional().describe('is_default_fleet_server parameter'),
+    is_managed: z.any().optional().describe('is_managed parameter'),
+    is_protected: z.any().optional().describe('is_protected parameter'),
+    keep_monitoring_alive: z.any().optional().describe('keep_monitoring_alive parameter'),
+    monitoring_diagnostics: z.any().optional().describe('monitoring_diagnostics parameter'),
+    limit: z.any().optional().describe('limit parameter'),
+    burst: z.any().optional().describe('burst parameter'),
+    interval: z.any().optional().describe('interval parameter'),
+    uploader: z.any().optional().describe('uploader parameter'),
+    init_dur: z.any().optional().describe('init_dur parameter'),
+    max_dur: z.any().optional().describe('max_dur parameter'),
+    max_retries: z.any().optional().describe('max_retries parameter'),
+    monitoring_enabled: z.any().optional().describe('monitoring_enabled parameter'),
+    monitoring_http: z.any().optional().describe('monitoring_http parameter'),
+    buffer: z.any().optional().describe('buffer parameter'),
+    host: z.any().optional().describe('host parameter'),
+    port: z.any().optional().describe('port parameter'),
+    monitoring_output_id: z.any().optional().describe('monitoring_output_id parameter'),
+    monitoring_pprof_enabled: z.any().optional().describe('monitoring_pprof_enabled parameter'),
+    namespace: z.any().optional().describe('namespace parameter'),
+    overrides: z.any().optional().describe('overrides parameter'),
+    required_versions: z.any().optional().describe('required_versions parameter'),
+    percentage: z.any().optional().describe('percentage parameter'),
+    version: z.any().optional().describe('version parameter'),
+    space_ids: z.any().optional().describe('space_ids parameter'),
+    supports_agentless: z.any().optional().describe('supports_agentless parameter'),
+    unenroll_timeout: z.any().optional().describe('unenroll_timeout parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_agent_policies_agentpolicyid API'),
   },
@@ -3433,12 +3933,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["agentPolicyId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["description","name"]
     },
     paramsSchema: z.object({
     agentPolicyId: z.string().describe('Path parameter: agentPolicyId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agent_policies_agentpolicyid_copy_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    name: z.any().optional().describe('name parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_agentpolicyid_copy API'),
   },
@@ -3510,11 +4011,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["agentPolicyId","force"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agent_policies_delete_Body.optional().describe('Body parameter: body'),
+    agentPolicyId: z.any().optional().describe('agentPolicyId parameter'),
+    force: z.any().optional().describe('force parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_delete API'),
   },
@@ -3528,11 +4030,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["ids"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agent_policies_outputs_Body.optional().describe('Body parameter: body'),
+    ids: z.any().optional().describe('ids parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agent_policies_outputs API'),
   },
@@ -3610,11 +4112,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["actionIds"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_Body.optional().describe('Body parameter: body'),
+    actionIds: z.any().optional().describe('actionIds parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents API'),
   },
@@ -3664,12 +4166,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["agentId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["tags","user_provided_metadata"]
     },
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_agents_agentid_Body.optional().describe('Body parameter: body'),
+    tags: z.any().optional().describe('tags parameter'),
+    user_provided_metadata: z.any().optional().describe('user_provided_metadata parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_agents_agentid API'),
   },
@@ -3683,12 +4186,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["agentId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["action","ack_data","data","type","log_level"]
     },
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_agentid_actions_Body.optional().describe('Body parameter: body'),
+    action: z.any().optional().describe('action parameter'),
+    ack_data: z.any().optional().describe('ack_data parameter'),
+    data: z.any().optional().describe('data parameter'),
+    type: z.any().optional().describe('type parameter'),
+    log_level: z.any().optional().describe('log_level parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_actions API'),
   },
@@ -3707,7 +4214,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_reassign API'),
   },
@@ -3726,7 +4233,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_agentid_request_diagnostics_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_request_diagnostics API'),
   },
@@ -3745,7 +4252,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_agentid_unenroll_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_unenroll API'),
   },
@@ -3759,12 +4266,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["agentId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["force","skipRateLimitCheck","source_uri","version"]
     },
     paramsSchema: z.object({
     agentId: z.string().describe('Path parameter: agentId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_agentid_upgrade_Body.optional().describe('Body parameter: body'),
+    force: z.any().optional().describe('force parameter'),
+    skipRateLimitCheck: z.any().optional().describe('skipRateLimitCheck parameter'),
+    source_uri: z.any().optional().describe('source_uri parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_agentid_upgrade API'),
   },
@@ -3853,11 +4363,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["agents","batchSize","includeInactive","policy_id"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_bulk_reassign_Body.optional().describe('Body parameter: body'),
+    agents: z.any().optional().describe('agents parameter'),
+    batchSize: z.any().optional().describe('batchSize parameter'),
+    includeInactive: z.any().optional().describe('includeInactive parameter'),
+    policy_id: z.any().optional().describe('policy_id parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_reassign API'),
   },
@@ -3871,11 +4384,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["additional_metrics","agents","batchSize"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_bulk_request_diagnostics_Body.optional().describe('Body parameter: body'),
+    additional_metrics: z.any().optional().describe('additional_metrics parameter'),
+    agents: z.any().optional().describe('agents parameter'),
+    batchSize: z.any().optional().describe('batchSize parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_request_diagnostics API'),
   },
@@ -3889,11 +4404,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["agents","batchSize","force","includeInactive","revoke"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_bulk_unenroll_Body.optional().describe('Body parameter: body'),
+    agents: z.any().optional().describe('agents parameter'),
+    batchSize: z.any().optional().describe('batchSize parameter'),
+    force: z.any().optional().describe('force parameter'),
+    includeInactive: z.any().optional().describe('includeInactive parameter'),
+    revoke: z.any().optional().describe('revoke parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_unenroll API'),
   },
@@ -3907,11 +4426,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["agents","batchSize","includeInactive","tagsToAdd","tagsToRemove"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_bulk_update_agent_tags_Body.optional().describe('Body parameter: body'),
+    agents: z.any().optional().describe('agents parameter'),
+    batchSize: z.any().optional().describe('batchSize parameter'),
+    includeInactive: z.any().optional().describe('includeInactive parameter'),
+    tagsToAdd: z.any().optional().describe('tagsToAdd parameter'),
+    tagsToRemove: z.any().optional().describe('tagsToRemove parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_update_agent_tags API'),
   },
@@ -3925,11 +4448,19 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["agents","batchSize","force","includeInactive","rollout_duration_seconds","skipRateLimitCheck","source_uri","start_time","version"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_agents_bulk_upgrade_Body.optional().describe('Body parameter: body'),
+    agents: z.any().optional().describe('agents parameter'),
+    batchSize: z.any().optional().describe('batchSize parameter'),
+    force: z.any().optional().describe('force parameter'),
+    includeInactive: z.any().optional().describe('includeInactive parameter'),
+    rollout_duration_seconds: z.any().optional().describe('rollout_duration_seconds parameter'),
+    skipRateLimitCheck: z.any().optional().describe('skipRateLimitCheck parameter'),
+    source_uri: z.any().optional().describe('source_uri parameter'),
+    start_time: z.any().optional().describe('start_time parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_agents_bulk_upgrade API'),
   },
@@ -4086,11 +4617,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["expiration","name","policy_id"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_enrollment_api_keys_Body.optional().describe('Body parameter: body'),
+    expiration: z.any().optional().describe('expiration parameter'),
+    name: z.any().optional().describe('name parameter'),
+    policy_id: z.any().optional().describe('policy_id parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_enrollment_api_keys API'),
   },
@@ -4140,11 +4673,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["assetIds","id","type"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_bulk_assets_Body.optional().describe('Body parameter: body'),
+    assetIds: z.any().optional().describe('assetIds parameter'),
+    id: z.any().optional().describe('id parameter'),
+    type: z.any().optional().describe('type parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_bulk_assets API'),
   },
@@ -4176,11 +4711,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["datasets","name","type","force","integrationName"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_custom_integrations_Body.optional().describe('Body parameter: body'),
+    datasets: z.any().optional().describe('datasets parameter'),
+    name: z.any().optional().describe('name parameter'),
+    type: z.any().optional().describe('type parameter'),
+    force: z.any().optional().describe('force parameter'),
+    integrationName: z.any().optional().describe('integrationName parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_custom_integrations API'),
   },
@@ -4194,12 +4733,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["pkgName"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["categories","readMeData"]
     },
     paramsSchema: z.object({
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_epm_custom_integrations_pkgname_Body.optional().describe('Body parameter: body'),
+    categories: z.any().optional().describe('categories parameter'),
+    readMeData: z.any().optional().describe('readMeData parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_epm_custom_integrations_pkgname API'),
   },
@@ -4270,12 +4810,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["prerelease","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["force","packages","name","prerelease","version"]
     },
     paramsSchema: z.object({
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_packages_bulk_Body.optional().describe('Body parameter: body'),
+    force: z.any().optional().describe('force parameter'),
+    packages: z.any().optional().describe('packages parameter'),
+    name: z.any().optional().describe('name parameter'),
+    prerelease: z.any().optional().describe('prerelease parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk API'),
   },
@@ -4289,11 +4833,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["force","packages","name","version"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_packages_bulk_uninstall_Body.optional().describe('Body parameter: body'),
+    force: z.any().optional().describe('force parameter'),
+    packages: z.any().optional().describe('packages parameter'),
+    name: z.any().optional().describe('name parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk_uninstall API'),
   },
@@ -4325,11 +4872,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["force","packages","name","version","prerelease","upgrade_package_policies"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_packages_bulk_upgrade_Body.optional().describe('Body parameter: body'),
+    force: z.any().optional().describe('force parameter'),
+    packages: z.any().optional().describe('packages parameter'),
+    name: z.any().optional().describe('name parameter'),
+    version: z.any().optional().describe('version parameter'),
+    prerelease: z.any().optional().describe('prerelease parameter'),
+    upgrade_package_policies: z.any().optional().describe('upgrade_package_policies parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_bulk_upgrade API'),
   },
@@ -4412,7 +4964,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     ignoreMappingUpdateErrors: z.any().optional().describe('Query parameter: ignoreMappingUpdateErrors'),
     skipDataStreamRollover: z.any().optional().describe('Query parameter: skipDataStreamRollover'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_packages_pkgname_pkgversion_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion API'),
   },
@@ -4432,7 +4984,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_epm_packages_pkgname_pkgversion API'),
   },
@@ -4511,7 +5063,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion_kibana_assets API'),
   },
@@ -4525,14 +5077,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["pkgName","pkgVersion"],
       urlParams: ["prerelease","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["transforms","transformId"]
     },
     paramsSchema: z.object({
     pkgName: z.string().describe('Path parameter: pkgName (required)'),
     pkgVersion: z.string().describe('Path parameter: pkgVersion (required)'),
     prerelease: z.any().optional().describe('Query parameter: prerelease'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_Body.optional().describe('Body parameter: body'),
+    transforms: z.any().optional().describe('transforms parameter'),
+    transformId: z.any().optional().describe('transformId parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize API'),
   },
@@ -4651,11 +5204,26 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["host_urls","id","is_default","is_internal","is_preconfigured","name","proxy_id","secrets","ssl","es_key","key","certificate","certificate_authorities","client_auth","es_certificate","es_certificate_authorities"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_fleet_server_hosts_Body.optional().describe('Body parameter: body'),
+    host_urls: z.any().optional().describe('host_urls parameter'),
+    id: z.any().optional().describe('id parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    is_internal: z.any().optional().describe('is_internal parameter'),
+    is_preconfigured: z.any().optional().describe('is_preconfigured parameter'),
+    name: z.any().optional().describe('name parameter'),
+    proxy_id: z.any().optional().describe('proxy_id parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
+    ssl: z.any().optional().describe('ssl parameter'),
+    es_key: z.any().optional().describe('es_key parameter'),
+    key: z.any().optional().describe('key parameter'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
+    client_auth: z.any().optional().describe('client_auth parameter'),
+    es_certificate: z.any().optional().describe('es_certificate parameter'),
+    es_certificate_authorities: z.any().optional().describe('es_certificate_authorities parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_fleet_server_hosts API'),
   },
@@ -4705,12 +5273,26 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["itemId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["host_urls","is_default","is_internal","name","proxy_id","secrets","ssl","es_key","id","key","certificate","certificate_authorities","client_auth","es_certificate","es_certificate_authorities"]
     },
     paramsSchema: z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_fleet_server_hosts_itemid_Body.optional().describe('Body parameter: body'),
+    host_urls: z.any().optional().describe('host_urls parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    is_internal: z.any().optional().describe('is_internal parameter'),
+    name: z.any().optional().describe('name parameter'),
+    proxy_id: z.any().optional().describe('proxy_id parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
+    ssl: z.any().optional().describe('ssl parameter'),
+    es_key: z.any().optional().describe('es_key parameter'),
+    id: z.any().optional().describe('id parameter'),
+    key: z.any().optional().describe('key parameter'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
+    client_auth: z.any().optional().describe('client_auth parameter'),
+    es_certificate: z.any().optional().describe('es_certificate parameter'),
+    es_certificate_authorities: z.any().optional().describe('es_certificate_authorities parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_fleet_server_hosts_itemid API'),
   },
@@ -4728,7 +5310,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_health_check API'),
   },
@@ -4834,11 +5416,67 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["allow_edit","ca_sha256","ca_trusted_fingerprint","config_yaml","hosts","id","is_default","is_default_monitoring","is_internal","is_preconfigured","name","preset","proxy_id","secrets","ssl","key","shipper","compression_level","disk_queue_compression_enabled","disk_queue_enabled","disk_queue_encryption_enabled","disk_queue_max_size","disk_queue_path","loadbalance","max_batch_bytes","mem_queue_events","queue_flush_timeout","certificate","certificate_authorities","verification_mode","type","write_to_logs_streams","kibana_api_key","kibana_url","service_token","sync_integrations","sync_uninstalled_integrations","auth_type","broker_timeout","client_id","compression","connection_type","hash","random","headers","value","partition","password","group_events","required_acks","round_robin","sasl","mechanism","timeout","topic","username","version"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_outputs_Body.optional().describe('Body parameter: body'),
+    allow_edit: z.any().optional().describe('allow_edit parameter'),
+    ca_sha256: z.any().optional().describe('ca_sha256 parameter'),
+    ca_trusted_fingerprint: z.any().optional().describe('ca_trusted_fingerprint parameter'),
+    config_yaml: z.any().optional().describe('config_yaml parameter'),
+    hosts: z.any().optional().describe('hosts parameter'),
+    id: z.any().optional().describe('id parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    is_default_monitoring: z.any().optional().describe('is_default_monitoring parameter'),
+    is_internal: z.any().optional().describe('is_internal parameter'),
+    is_preconfigured: z.any().optional().describe('is_preconfigured parameter'),
+    name: z.any().optional().describe('name parameter'),
+    preset: z.any().optional().describe('preset parameter'),
+    proxy_id: z.any().optional().describe('proxy_id parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
+    ssl: z.any().optional().describe('ssl parameter'),
+    key: z.any().optional().describe('key parameter'),
+    shipper: z.any().optional().describe('shipper parameter'),
+    compression_level: z.any().optional().describe('compression_level parameter'),
+    disk_queue_compression_enabled: z.any().optional().describe('disk_queue_compression_enabled parameter'),
+    disk_queue_enabled: z.any().optional().describe('disk_queue_enabled parameter'),
+    disk_queue_encryption_enabled: z.any().optional().describe('disk_queue_encryption_enabled parameter'),
+    disk_queue_max_size: z.any().optional().describe('disk_queue_max_size parameter'),
+    disk_queue_path: z.any().optional().describe('disk_queue_path parameter'),
+    loadbalance: z.any().optional().describe('loadbalance parameter'),
+    max_batch_bytes: z.any().optional().describe('max_batch_bytes parameter'),
+    mem_queue_events: z.any().optional().describe('mem_queue_events parameter'),
+    queue_flush_timeout: z.any().optional().describe('queue_flush_timeout parameter'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
+    verification_mode: z.any().optional().describe('verification_mode parameter'),
+    type: z.any().optional().describe('type parameter'),
+    write_to_logs_streams: z.any().optional().describe('write_to_logs_streams parameter'),
+    kibana_api_key: z.any().optional().describe('kibana_api_key parameter'),
+    kibana_url: z.any().optional().describe('kibana_url parameter'),
+    service_token: z.any().optional().describe('service_token parameter'),
+    sync_integrations: z.any().optional().describe('sync_integrations parameter'),
+    sync_uninstalled_integrations: z.any().optional().describe('sync_uninstalled_integrations parameter'),
+    auth_type: z.any().optional().describe('auth_type parameter'),
+    broker_timeout: z.any().optional().describe('broker_timeout parameter'),
+    client_id: z.any().optional().describe('client_id parameter'),
+    compression: z.any().optional().describe('compression parameter'),
+    connection_type: z.any().optional().describe('connection_type parameter'),
+    hash: z.any().optional().describe('hash parameter'),
+    random: z.any().optional().describe('random parameter'),
+    headers: z.any().optional().describe('headers parameter'),
+    value: z.any().optional().describe('value parameter'),
+    partition: z.any().optional().describe('partition parameter'),
+    password: z.any().optional().describe('password parameter'),
+    group_events: z.any().optional().describe('group_events parameter'),
+    required_acks: z.any().optional().describe('required_acks parameter'),
+    round_robin: z.any().optional().describe('round_robin parameter'),
+    sasl: z.any().optional().describe('sasl parameter'),
+    mechanism: z.any().optional().describe('mechanism parameter'),
+    timeout: z.any().optional().describe('timeout parameter'),
+    topic: z.any().optional().describe('topic parameter'),
+    username: z.any().optional().describe('username parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_outputs API'),
   },
@@ -4888,12 +5526,68 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["outputId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["allow_edit","ca_sha256","ca_trusted_fingerprint","config_yaml","hosts","id","is_default","is_default_monitoring","is_internal","is_preconfigured","name","preset","proxy_id","secrets","ssl","key","shipper","compression_level","disk_queue_compression_enabled","disk_queue_enabled","disk_queue_encryption_enabled","disk_queue_max_size","disk_queue_path","loadbalance","max_batch_bytes","mem_queue_events","queue_flush_timeout","certificate","certificate_authorities","verification_mode","type","write_to_logs_streams","kibana_api_key","kibana_url","service_token","sync_integrations","sync_uninstalled_integrations","auth_type","broker_timeout","client_id","compression","connection_type","hash","random","headers","value","partition","password","group_events","required_acks","round_robin","sasl","mechanism","timeout","topic","username","version"]
     },
     paramsSchema: z.object({
     outputId: z.string().describe('Path parameter: outputId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_outputs_outputid_Body.optional().describe('Body parameter: body'),
+    allow_edit: z.any().optional().describe('allow_edit parameter'),
+    ca_sha256: z.any().optional().describe('ca_sha256 parameter'),
+    ca_trusted_fingerprint: z.any().optional().describe('ca_trusted_fingerprint parameter'),
+    config_yaml: z.any().optional().describe('config_yaml parameter'),
+    hosts: z.any().optional().describe('hosts parameter'),
+    id: z.any().optional().describe('id parameter'),
+    is_default: z.any().optional().describe('is_default parameter'),
+    is_default_monitoring: z.any().optional().describe('is_default_monitoring parameter'),
+    is_internal: z.any().optional().describe('is_internal parameter'),
+    is_preconfigured: z.any().optional().describe('is_preconfigured parameter'),
+    name: z.any().optional().describe('name parameter'),
+    preset: z.any().optional().describe('preset parameter'),
+    proxy_id: z.any().optional().describe('proxy_id parameter'),
+    secrets: z.any().optional().describe('secrets parameter'),
+    ssl: z.any().optional().describe('ssl parameter'),
+    key: z.any().optional().describe('key parameter'),
+    shipper: z.any().optional().describe('shipper parameter'),
+    compression_level: z.any().optional().describe('compression_level parameter'),
+    disk_queue_compression_enabled: z.any().optional().describe('disk_queue_compression_enabled parameter'),
+    disk_queue_enabled: z.any().optional().describe('disk_queue_enabled parameter'),
+    disk_queue_encryption_enabled: z.any().optional().describe('disk_queue_encryption_enabled parameter'),
+    disk_queue_max_size: z.any().optional().describe('disk_queue_max_size parameter'),
+    disk_queue_path: z.any().optional().describe('disk_queue_path parameter'),
+    loadbalance: z.any().optional().describe('loadbalance parameter'),
+    max_batch_bytes: z.any().optional().describe('max_batch_bytes parameter'),
+    mem_queue_events: z.any().optional().describe('mem_queue_events parameter'),
+    queue_flush_timeout: z.any().optional().describe('queue_flush_timeout parameter'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
+    verification_mode: z.any().optional().describe('verification_mode parameter'),
+    type: z.any().optional().describe('type parameter'),
+    write_to_logs_streams: z.any().optional().describe('write_to_logs_streams parameter'),
+    kibana_api_key: z.any().optional().describe('kibana_api_key parameter'),
+    kibana_url: z.any().optional().describe('kibana_url parameter'),
+    service_token: z.any().optional().describe('service_token parameter'),
+    sync_integrations: z.any().optional().describe('sync_integrations parameter'),
+    sync_uninstalled_integrations: z.any().optional().describe('sync_uninstalled_integrations parameter'),
+    auth_type: z.any().optional().describe('auth_type parameter'),
+    broker_timeout: z.any().optional().describe('broker_timeout parameter'),
+    client_id: z.any().optional().describe('client_id parameter'),
+    compression: z.any().optional().describe('compression parameter'),
+    connection_type: z.any().optional().describe('connection_type parameter'),
+    hash: z.any().optional().describe('hash parameter'),
+    random: z.any().optional().describe('random parameter'),
+    headers: z.any().optional().describe('headers parameter'),
+    value: z.any().optional().describe('value parameter'),
+    partition: z.any().optional().describe('partition parameter'),
+    password: z.any().optional().describe('password parameter'),
+    group_events: z.any().optional().describe('group_events parameter'),
+    required_acks: z.any().optional().describe('required_acks parameter'),
+    round_robin: z.any().optional().describe('round_robin parameter'),
+    sasl: z.any().optional().describe('sasl parameter'),
+    mechanism: z.any().optional().describe('mechanism parameter'),
+    timeout: z.any().optional().describe('timeout parameter'),
+    topic: z.any().optional().describe('topic parameter'),
+    username: z.any().optional().describe('username parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_outputs_outputid API'),
   },
@@ -4944,11 +5638,53 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["additional_datastreams_permissions","description","enabled","force","id","inputs","config","frozen","type","value","keep_enabled","policy_template","streams","compiled_stream","data_stream","dataset","elasticsearch","dynamic_dataset","dynamic_namespace","privileges","indices","release","vars","is_managed","name","namespace","output_id","overrides","package","experimental_data_stream_features","features","doc_value_only_numeric","doc_value_only_other","synthetic_source","tsdb","requires_root","title","version","policy_id","policy_ids","spaceIds","supports_agentless","isSecretRef"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_package_policies_Body.optional().describe('Body parameter: body'),
+    additional_datastreams_permissions: z.any().optional().describe('additional_datastreams_permissions parameter'),
+    description: z.any().optional().describe('description parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    force: z.any().optional().describe('force parameter'),
+    id: z.any().optional().describe('id parameter'),
+    inputs: z.any().optional().describe('inputs parameter'),
+    config: z.any().optional().describe('config parameter'),
+    frozen: z.any().optional().describe('frozen parameter'),
+    type: z.any().optional().describe('type parameter'),
+    value: z.any().optional().describe('value parameter'),
+    keep_enabled: z.any().optional().describe('keep_enabled parameter'),
+    policy_template: z.any().optional().describe('policy_template parameter'),
+    streams: z.any().optional().describe('streams parameter'),
+    compiled_stream: z.any().optional().describe('compiled_stream parameter'),
+    data_stream: z.any().optional().describe('data_stream parameter'),
+    dataset: z.any().optional().describe('dataset parameter'),
+    elasticsearch: z.any().optional().describe('elasticsearch parameter'),
+    dynamic_dataset: z.any().optional().describe('dynamic_dataset parameter'),
+    dynamic_namespace: z.any().optional().describe('dynamic_namespace parameter'),
+    privileges: z.any().optional().describe('privileges parameter'),
+    indices: z.any().optional().describe('indices parameter'),
+    release: z.any().optional().describe('release parameter'),
+    vars: z.any().optional().describe('vars parameter'),
+    is_managed: z.any().optional().describe('is_managed parameter'),
+    name: z.any().optional().describe('name parameter'),
+    namespace: z.any().optional().describe('namespace parameter'),
+    output_id: z.any().optional().describe('output_id parameter'),
+    overrides: z.any().optional().describe('overrides parameter'),
+    package: z.any().optional().describe('package parameter'),
+    experimental_data_stream_features: z.any().optional().describe('experimental_data_stream_features parameter'),
+    features: z.any().optional().describe('features parameter'),
+    doc_value_only_numeric: z.any().optional().describe('doc_value_only_numeric parameter'),
+    doc_value_only_other: z.any().optional().describe('doc_value_only_other parameter'),
+    synthetic_source: z.any().optional().describe('synthetic_source parameter'),
+    tsdb: z.any().optional().describe('tsdb parameter'),
+    requires_root: z.any().optional().describe('requires_root parameter'),
+    title: z.any().optional().describe('title parameter'),
+    version: z.any().optional().describe('version parameter'),
+    policy_id: z.any().optional().describe('policy_id parameter'),
+    policy_ids: z.any().optional().describe('policy_ids parameter'),
+    spaceIds: z.any().optional().describe('spaceIds parameter'),
+    supports_agentless: z.any().optional().describe('supports_agentless parameter'),
+    isSecretRef: z.any().optional().describe('isSecretRef parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies API'),
   },
@@ -4962,11 +5698,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["ids","ignoreMissing"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_package_policies_bulk_get_Body.optional().describe('Body parameter: body'),
+    ids: z.any().optional().describe('ids parameter'),
+    ignoreMissing: z.any().optional().describe('ignoreMissing parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_bulk_get API'),
   },
@@ -5017,12 +5754,54 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["packagePolicyId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["additional_datastreams_permissions","description","enabled","force","inputs","config","frozen","type","value","id","keep_enabled","policy_template","streams","compiled_stream","data_stream","dataset","elasticsearch","dynamic_dataset","dynamic_namespace","privileges","indices","release","vars","is_managed","name","namespace","output_id","overrides","package","experimental_data_stream_features","features","doc_value_only_numeric","doc_value_only_other","synthetic_source","tsdb","requires_root","title","version","policy_id","policy_ids","spaceIds","supports_agentless","isSecretRef"]
     },
     paramsSchema: z.object({
     packagePolicyId: z.string().describe('Path parameter: packagePolicyId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_package_policies_packagepolicyid_Body.optional().describe('Body parameter: body'),
+    additional_datastreams_permissions: z.any().optional().describe('additional_datastreams_permissions parameter'),
+    description: z.any().optional().describe('description parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    force: z.any().optional().describe('force parameter'),
+    inputs: z.any().optional().describe('inputs parameter'),
+    config: z.any().optional().describe('config parameter'),
+    frozen: z.any().optional().describe('frozen parameter'),
+    type: z.any().optional().describe('type parameter'),
+    value: z.any().optional().describe('value parameter'),
+    id: z.any().optional().describe('id parameter'),
+    keep_enabled: z.any().optional().describe('keep_enabled parameter'),
+    policy_template: z.any().optional().describe('policy_template parameter'),
+    streams: z.any().optional().describe('streams parameter'),
+    compiled_stream: z.any().optional().describe('compiled_stream parameter'),
+    data_stream: z.any().optional().describe('data_stream parameter'),
+    dataset: z.any().optional().describe('dataset parameter'),
+    elasticsearch: z.any().optional().describe('elasticsearch parameter'),
+    dynamic_dataset: z.any().optional().describe('dynamic_dataset parameter'),
+    dynamic_namespace: z.any().optional().describe('dynamic_namespace parameter'),
+    privileges: z.any().optional().describe('privileges parameter'),
+    indices: z.any().optional().describe('indices parameter'),
+    release: z.any().optional().describe('release parameter'),
+    vars: z.any().optional().describe('vars parameter'),
+    is_managed: z.any().optional().describe('is_managed parameter'),
+    name: z.any().optional().describe('name parameter'),
+    namespace: z.any().optional().describe('namespace parameter'),
+    output_id: z.any().optional().describe('output_id parameter'),
+    overrides: z.any().optional().describe('overrides parameter'),
+    package: z.any().optional().describe('package parameter'),
+    experimental_data_stream_features: z.any().optional().describe('experimental_data_stream_features parameter'),
+    features: z.any().optional().describe('features parameter'),
+    doc_value_only_numeric: z.any().optional().describe('doc_value_only_numeric parameter'),
+    doc_value_only_other: z.any().optional().describe('doc_value_only_other parameter'),
+    synthetic_source: z.any().optional().describe('synthetic_source parameter'),
+    tsdb: z.any().optional().describe('tsdb parameter'),
+    requires_root: z.any().optional().describe('requires_root parameter'),
+    title: z.any().optional().describe('title parameter'),
+    version: z.any().optional().describe('version parameter'),
+    policy_id: z.any().optional().describe('policy_id parameter'),
+    policy_ids: z.any().optional().describe('policy_ids parameter'),
+    spaceIds: z.any().optional().describe('spaceIds parameter'),
+    supports_agentless: z.any().optional().describe('supports_agentless parameter'),
+    isSecretRef: z.any().optional().describe('isSecretRef parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_package_policies_packagepolicyid API'),
   },
@@ -5036,11 +5815,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["force","packagePolicyIds"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_package_policies_delete_Body.optional().describe('Body parameter: body'),
+    force: z.any().optional().describe('force parameter'),
+    packagePolicyIds: z.any().optional().describe('packagePolicyIds parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_delete API'),
   },
@@ -5054,11 +5834,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["packagePolicyIds"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_package_policies_upgrade_Body.optional().describe('Body parameter: body'),
+    packagePolicyIds: z.any().optional().describe('packagePolicyIds parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_upgrade API'),
   },
@@ -5072,11 +5852,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["packagePolicyIds","packageVersion"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_package_policies_upgrade_dryrun_Body.optional().describe('Body parameter: body'),
+    packagePolicyIds: z.any().optional().describe('packagePolicyIds parameter'),
+    packageVersion: z.any().optional().describe('packageVersion parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_package_policies_upgrade_dryrun API'),
   },
@@ -5107,11 +5888,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["certificate","certificate_authorities","certificate_key","id","is_preconfigured","name","proxy_headers","url"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_fleet_proxies_Body.optional().describe('Body parameter: body'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
+    certificate_key: z.any().optional().describe('certificate_key parameter'),
+    id: z.any().optional().describe('id parameter'),
+    is_preconfigured: z.any().optional().describe('is_preconfigured parameter'),
+    name: z.any().optional().describe('name parameter'),
+    proxy_headers: z.any().optional().describe('proxy_headers parameter'),
+    url: z.any().optional().describe('url parameter'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_proxies API'),
   },
@@ -5161,12 +5949,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["itemId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["certificate","certificate_authorities","certificate_key","name","proxy_headers","url"]
     },
     paramsSchema: z.object({
     itemId: z.string().describe('Path parameter: itemId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_proxies_itemid_Body.optional().describe('Body parameter: body'),
+    certificate: z.any().optional().describe('certificate parameter'),
+    certificate_authorities: z.any().optional().describe('certificate_authorities parameter'),
+    certificate_key: z.any().optional().describe('certificate_key parameter'),
+    name: z.any().optional().describe('name parameter'),
+    proxy_headers: z.any().optional().describe('proxy_headers parameter'),
+    url: z.any().optional().describe('url parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_proxies_itemid API'),
   },
@@ -5219,7 +6012,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_fleet_service_tokens API'),
   },
@@ -5250,11 +6043,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["additional_yaml_config","delete_unenrolled_agents","enabled","is_preconfigured","has_seen_add_data_notice","kibana_ca_sha256","kibana_urls","prerelease_integrations_enabled"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_settings_Body.optional().describe('Body parameter: body'),
+    additional_yaml_config: z.any().optional().describe('additional_yaml_config parameter'),
+    delete_unenrolled_agents: z.any().optional().describe('delete_unenrolled_agents parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    is_preconfigured: z.any().optional().describe('is_preconfigured parameter'),
+    has_seen_add_data_notice: z.any().optional().describe('has_seen_add_data_notice parameter'),
+    kibana_ca_sha256: z.any().optional().describe('kibana_ca_sha256 parameter'),
+    kibana_urls: z.any().optional().describe('kibana_urls parameter'),
+    prerelease_integrations_enabled: z.any().optional().describe('prerelease_integrations_enabled parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_settings API'),
   },
@@ -5303,11 +6103,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["allowed_namespace_prefixes"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_fleet_space_settings_Body.optional().describe('Body parameter: body'),
+    allowed_namespace_prefixes: z.any().optional().describe('allowed_namespace_prefixes parameter'),
     }),
     outputSchema: z.any().describe('Response from put_fleet_space_settings API'),
   },
@@ -5395,10 +6195,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_version","description","id","meta","name","version"]
     },
     paramsSchema: z.object({
-    body: PatchList_Body.optional().describe('Body parameter: body'),
+    _version: z.any().optional().describe('_version parameter'),
+    description: z.any().optional().describe('description parameter'),
+    id: z.any().optional().describe('id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from PatchList API'),
   },
@@ -5412,10 +6217,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","deserializer","id","meta","name","serializer","type","version"]
     },
     paramsSchema: z.object({
-    body: CreateList_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    deserializer: z.any().optional().describe('deserializer parameter'),
+    id: z.any().optional().describe('id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    serializer: z.any().optional().describe('serializer parameter'),
+    type: z.any().optional().describe('type parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateList API'),
   },
@@ -5429,10 +6241,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_version","description","id","meta","name","version"]
     },
     paramsSchema: z.object({
-    body: UpdateList_Body.optional().describe('Body parameter: body'),
+    _version: z.any().optional().describe('_version parameter'),
+    description: z.any().optional().describe('description parameter'),
+    id: z.any().optional().describe('id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    name: z.any().optional().describe('name parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from UpdateList API'),
   },
@@ -5554,10 +6371,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_version","id","meta","refresh","value"]
     },
     paramsSchema: z.object({
-    body: PatchListItem_Body.optional().describe('Body parameter: body'),
+    _version: z.any().optional().describe('_version parameter'),
+    id: z.any().optional().describe('id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    refresh: z.any().optional().describe('refresh parameter'),
+    value: z.any().optional().describe('value parameter'),
     }),
     outputSchema: z.any().describe('Response from PatchListItem API'),
   },
@@ -5571,10 +6392,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["id","list_id","meta","refresh","value"]
     },
     paramsSchema: z.object({
-    body: CreateListItem_Body.optional().describe('Body parameter: body'),
+    id: z.any().optional().describe('id parameter'),
+    list_id: z.any().optional().describe('list_id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    refresh: z.any().optional().describe('refresh parameter'),
+    value: z.any().optional().describe('value parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateListItem API'),
   },
@@ -5588,10 +6413,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["_version","id","meta","value"]
     },
     paramsSchema: z.object({
-    body: UpdateListItem_Body.optional().describe('Body parameter: body'),
+    _version: z.any().optional().describe('_version parameter'),
+    id: z.any().optional().describe('id parameter'),
+    meta: z.any().optional().describe('meta parameter'),
+    value: z.any().optional().describe('value parameter'),
     }),
     outputSchema: z.any().describe('Response from UpdateListItem API'),
   },
@@ -5647,7 +6475,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     list_id: z.any().optional().describe('Query parameter: list_id'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from ImportListItems API'),
   },
@@ -5713,11 +6541,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","pipeline","settings"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: put_logstash_pipeline_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    pipeline: z.any().optional().describe('pipeline parameter'),
+    settings: z.any().optional().describe('settings parameter'),
     }),
     outputSchema: z.any().describe('Response from put_logstash_pipeline API'),
   },
@@ -5748,11 +6578,28 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["enabled","schedule","custom","duration","recurring","end","every","occurrences","onMonth","onMonthDay","onWeekDay","start","timezone","scope","alerting","query","kql","title"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_maintenance_window_Body.optional().describe('Body parameter: body'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    schedule: z.any().optional().describe('schedule parameter'),
+    custom: z.any().optional().describe('custom parameter'),
+    duration: z.any().optional().describe('duration parameter'),
+    recurring: z.any().optional().describe('recurring parameter'),
+    end: z.any().optional().describe('end parameter'),
+    every: z.any().optional().describe('every parameter'),
+    occurrences: z.any().optional().describe('occurrences parameter'),
+    onMonth: z.any().optional().describe('onMonth parameter'),
+    onMonthDay: z.any().optional().describe('onMonthDay parameter'),
+    onWeekDay: z.any().optional().describe('onWeekDay parameter'),
+    start: z.any().optional().describe('start parameter'),
+    timezone: z.any().optional().describe('timezone parameter'),
+    scope: z.any().optional().describe('scope parameter'),
+    alerting: z.any().optional().describe('alerting parameter'),
+    query: z.any().optional().describe('query parameter'),
+    kql: z.any().optional().describe('kql parameter'),
+    title: z.any().optional().describe('title parameter'),
     }),
     outputSchema: z.any().describe('Response from post_maintenance_window API'),
   },
@@ -5802,12 +6649,29 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["enabled","schedule","custom","duration","recurring","end","every","occurrences","onMonth","onMonthDay","onWeekDay","start","timezone","scope","alerting","query","kql","title"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: patch_maintenance_window_id_Body.optional().describe('Body parameter: body'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    schedule: z.any().optional().describe('schedule parameter'),
+    custom: z.any().optional().describe('custom parameter'),
+    duration: z.any().optional().describe('duration parameter'),
+    recurring: z.any().optional().describe('recurring parameter'),
+    end: z.any().optional().describe('end parameter'),
+    every: z.any().optional().describe('every parameter'),
+    occurrences: z.any().optional().describe('occurrences parameter'),
+    onMonth: z.any().optional().describe('onMonth parameter'),
+    onMonthDay: z.any().optional().describe('onMonthDay parameter'),
+    onWeekDay: z.any().optional().describe('onWeekDay parameter'),
+    start: z.any().optional().describe('start parameter'),
+    timezone: z.any().optional().describe('timezone parameter'),
+    scope: z.any().optional().describe('scope parameter'),
+    alerting: z.any().optional().describe('alerting parameter'),
+    query: z.any().optional().describe('query parameter'),
+    kql: z.any().optional().describe('kql parameter'),
+    title: z.any().optional().describe('title parameter'),
     }),
     outputSchema: z.any().describe('Response from patch_maintenance_window_id API'),
   },
@@ -5876,7 +6740,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
 
@@ -5918,10 +6782,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["note","noteId","version"]
     },
     paramsSchema: z.object({
-    body: PersistNoteRoute_Body.optional().describe('Body parameter: body'),
+    note: z.any().optional().describe('note parameter'),
+    noteId: z.any().optional().describe('noteId parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from PersistNoteRoute API'),
   },
@@ -5935,10 +6801,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["actions","connectorId","conversationId","disableFunctions","instructions","messages","persist","title"]
     },
     paramsSchema: z.object({
-    body: observability_ai_assistant_chat_complete_Body.optional().describe('Body parameter: body'),
+    actions: z.any().optional().describe('actions parameter'),
+    connectorId: z.any().optional().describe('connectorId parameter'),
+    conversationId: z.any().optional().describe('conversationId parameter'),
+    disableFunctions: z.any().optional().describe('disableFunctions parameter'),
+    instructions: z.any().optional().describe('instructions parameter'),
+    messages: z.any().optional().describe('messages parameter'),
+    persist: z.any().optional().describe('persist parameter'),
+    title: z.any().optional().describe('title parameter'),
     }),
     outputSchema: z.any().describe('Response from observability_ai_assistant_chat_complete API'),
   },
@@ -5972,10 +6845,22 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agent_all","agent_ids","agent_platforms","agent_policy_ids","alert_ids","case_ids","ecs_mapping","event_ids","metadata","pack_id","queries","query","saved_query_id"]
     },
     paramsSchema: z.object({
-    body: Security_Osquery_API_CreateLiveQueryRequestBody.optional().describe('Body parameter: body'),
+    agent_all: z.any().optional().describe('agent_all parameter'),
+    agent_ids: z.any().optional().describe('agent_ids parameter'),
+    agent_platforms: z.any().optional().describe('agent_platforms parameter'),
+    agent_policy_ids: z.any().optional().describe('agent_policy_ids parameter'),
+    alert_ids: z.any().optional().describe('alert_ids parameter'),
+    case_ids: z.any().optional().describe('case_ids parameter'),
+    ecs_mapping: z.any().optional().describe('ecs_mapping parameter'),
+    event_ids: z.any().optional().describe('event_ids parameter'),
+    metadata: z.any().optional().describe('metadata parameter'),
+    pack_id: z.any().optional().describe('pack_id parameter'),
+    queries: z.any().optional().describe('queries parameter'),
+    query: z.any().optional().describe('query parameter'),
+    saved_query_id: z.any().optional().describe('saved_query_id parameter'),
     }),
     outputSchema: z.any().describe('Response from OsqueryCreateLiveQuery API'),
   },
@@ -6048,10 +6933,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","enabled","name","policy_ids","queries","shards"]
     },
     paramsSchema: z.object({
-    body: Security_Osquery_API_CreatePacksRequestBody.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    name: z.any().optional().describe('name parameter'),
+    policy_ids: z.any().optional().describe('policy_ids parameter'),
+    queries: z.any().optional().describe('queries parameter'),
+    shards: z.any().optional().describe('shards parameter'),
     }),
     outputSchema: z.any().describe('Response from OsqueryCreatePacks API'),
   },
@@ -6100,11 +6990,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","enabled","name","policy_ids","queries","shards"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: Security_Osquery_API_UpdatePacksRequestBody.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    enabled: z.any().optional().describe('enabled parameter'),
+    name: z.any().optional().describe('name parameter'),
+    policy_ids: z.any().optional().describe('policy_ids parameter'),
+    queries: z.any().optional().describe('queries parameter'),
+    shards: z.any().optional().describe('shards parameter'),
     }),
     outputSchema: z.any().describe('Response from OsqueryUpdatePacks API'),
   },
@@ -6137,10 +7032,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","ecs_mapping","id","interval","platform","query","removed","snapshot","version"]
     },
     paramsSchema: z.object({
-    body: Security_Osquery_API_CreateSavedQueryRequestBody.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    ecs_mapping: z.any().optional().describe('ecs_mapping parameter'),
+    id: z.any().optional().describe('id parameter'),
+    interval: z.any().optional().describe('interval parameter'),
+    platform: z.any().optional().describe('platform parameter'),
+    query: z.any().optional().describe('query parameter'),
+    removed: z.any().optional().describe('removed parameter'),
+    snapshot: z.any().optional().describe('snapshot parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from OsqueryCreateSavedQuery API'),
   },
@@ -6189,11 +7092,19 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","ecs_mapping","id","interval","platform","query","removed","snapshot","version"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: Security_Osquery_API_UpdateSavedQueryRequestBody.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    ecs_mapping: z.any().optional().describe('ecs_mapping parameter'),
+    id: z.any().optional().describe('id parameter'),
+    interval: z.any().optional().describe('interval parameter'),
+    platform: z.any().optional().describe('platform parameter'),
+    query: z.any().optional().describe('query parameter'),
+    removed: z.any().optional().describe('removed parameter'),
+    snapshot: z.any().optional().describe('snapshot parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from OsqueryUpdateSavedQuery API'),
   },
@@ -6207,10 +7118,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["eventId","pinnedEventId","timelineId"]
     },
     paramsSchema: z.object({
-    body: PersistPinnedEventRoute_Body.optional().describe('Body parameter: body'),
+    eventId: z.any().optional().describe('eventId parameter'),
+    pinnedEventId: z.any().optional().describe('pinnedEventId parameter'),
+    timelineId: z.any().optional().describe('timelineId parameter'),
     }),
     outputSchema: z.any().describe('Response from PersistPinnedEventRoute API'),
   },
@@ -6241,10 +7154,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["exclude_alert_statuses","exclude_alert_tags","range","end","start"]
     },
     paramsSchema: z.object({
-    body: ConfigureRiskEngineSavedObject_Body.optional().describe('Body parameter: body'),
+    exclude_alert_statuses: z.any().optional().describe('exclude_alert_statuses parameter'),
+    exclude_alert_tags: z.any().optional().describe('exclude_alert_tags parameter'),
+    range: z.any().optional().describe('range parameter'),
+    end: z.any().optional().describe('end parameter'),
+    start: z.any().optional().describe('start parameter'),
     }),
     outputSchema: z.any().describe('Response from ConfigureRiskEngineSavedObject API'),
   },
@@ -6275,11 +7192,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["excludeExportDetails","hasReference","id","type","includeReferencesDeep","objects","search"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_saved_objects_export_Body.optional().describe('Body parameter: body'),
+    excludeExportDetails: z.any().optional().describe('excludeExportDetails parameter'),
+    hasReference: z.any().optional().describe('hasReference parameter'),
+    id: z.any().optional().describe('id parameter'),
+    type: z.any().optional().describe('type parameter'),
+    includeReferencesDeep: z.any().optional().describe('includeReferencesDeep parameter'),
+    objects: z.any().optional().describe('objects parameter'),
+    search: z.any().optional().describe('search parameter'),
     }),
     outputSchema: z.any().describe('Response from post_saved_objects_export API'),
   },
@@ -6300,7 +7223,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     createNewCopies: z.any().optional().describe('Query parameter: createNewCopies'),
     compatibilityMode: z.any().optional().describe('Query parameter: compatibilityMode'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_saved_objects_import API'),
   },
@@ -6314,13 +7237,22 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["compatibilityMode","createNewCopies","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["file","retries","destinationId","id","ignoreMissingReferences","overwrite","replaceReferences","from","to","type"]
     },
     paramsSchema: z.object({
     compatibilityMode: z.any().optional().describe('Query parameter: compatibilityMode'),
     createNewCopies: z.any().optional().describe('Query parameter: createNewCopies'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: resolveImportErrors_Body.optional().describe('Body parameter: body'),
+    file: z.any().optional().describe('file parameter'),
+    retries: z.any().optional().describe('retries parameter'),
+    destinationId: z.any().optional().describe('destinationId parameter'),
+    id: z.any().optional().describe('id parameter'),
+    ignoreMissingReferences: z.any().optional().describe('ignoreMissingReferences parameter'),
+    overwrite: z.any().optional().describe('overwrite parameter'),
+    replaceReferences: z.any().optional().describe('replaceReferences parameter'),
+    from: z.any().optional().describe('from parameter'),
+    to: z.any().optional().describe('to parameter'),
+    type: z.any().optional().describe('type parameter'),
     }),
     outputSchema: z.any().describe('Response from resolveImportErrors API'),
   },
@@ -6334,10 +7266,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["create","delete","ids","query","update"]
     },
     paramsSchema: z.object({
-    body: PerformAnonymizationFieldsBulkAction_Body.optional().describe('Body parameter: body'),
+    create: z.any().optional().describe('create parameter'),
+    delete: z.any().optional().describe('delete parameter'),
+    ids: z.any().optional().describe('ids parameter'),
+    query: z.any().optional().describe('query parameter'),
+    update: z.any().optional().describe('update parameter'),
     }),
     outputSchema: z.any().describe('Response from PerformAnonymizationFieldsBulkAction API'),
   },
@@ -6369,11 +7305,20 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["content_references_disabled"],
-      bodyParams: ["body"]
+      bodyParams: ["connectorId","conversationId","isStream","langSmithApiKey","langSmithProject","messages","model","persist","promptId","responseLanguage"]
     },
     paramsSchema: z.object({
     content_references_disabled: z.any().optional().describe('Query parameter: content_references_disabled'),
-    body: Security_AI_Assistant_API_ChatCompleteProps.optional().describe('Body parameter: body'),
+    connectorId: z.any().optional().describe('connectorId parameter'),
+    conversationId: z.any().optional().describe('conversationId parameter'),
+    isStream: z.any().optional().describe('isStream parameter'),
+    langSmithApiKey: z.any().optional().describe('langSmithApiKey parameter'),
+    langSmithProject: z.any().optional().describe('langSmithProject parameter'),
+    messages: z.any().optional().describe('messages parameter'),
+    model: z.any().optional().describe('model parameter'),
+    persist: z.any().optional().describe('persist parameter'),
+    promptId: z.any().optional().describe('promptId parameter'),
+    responseLanguage: z.any().optional().describe('responseLanguage parameter'),
     }),
     outputSchema: z.any().describe('Response from ChatComplete API'),
   },
@@ -6387,7 +7332,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
 
@@ -6404,10 +7349,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["apiConfig","category","excludeFromLastConversationStorage","id","messages","replacements","title"]
     },
     paramsSchema: z.object({
-    body: Security_AI_Assistant_API_ConversationCreateProps.optional().describe('Body parameter: body'),
+    apiConfig: z.any().optional().describe('apiConfig parameter'),
+    category: z.any().optional().describe('category parameter'),
+    excludeFromLastConversationStorage: z.any().optional().describe('excludeFromLastConversationStorage parameter'),
+    id: z.any().optional().describe('id parameter'),
+    messages: z.any().optional().describe('messages parameter'),
+    replacements: z.any().optional().describe('replacements parameter'),
+    title: z.any().optional().describe('title parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateConversation API'),
   },
@@ -6474,11 +7425,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["apiConfig","category","excludeFromLastConversationStorage","id","messages","replacements","title","users"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: Security_AI_Assistant_API_ConversationUpdateProps.optional().describe('Body parameter: body'),
+    apiConfig: z.any().optional().describe('apiConfig parameter'),
+    category: z.any().optional().describe('category parameter'),
+    excludeFromLastConversationStorage: z.any().optional().describe('excludeFromLastConversationStorage parameter'),
+    id: z.any().optional().describe('id parameter'),
+    messages: z.any().optional().describe('messages parameter'),
+    replacements: z.any().optional().describe('replacements parameter'),
+    title: z.any().optional().describe('title parameter'),
+    users: z.any().optional().describe('users parameter'),
     }),
     outputSchema: z.any().describe('Response from UpdateConversation API'),
   },
@@ -6533,7 +7491,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from CreateKnowledgeBaseEntry API'),
   },
@@ -6547,10 +7505,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["create","delete","ids","query","update"]
     },
     paramsSchema: z.object({
-    body: PerformKnowledgeBaseEntryBulkAction_Body.optional().describe('Body parameter: body'),
+    create: z.any().optional().describe('create parameter'),
+    delete: z.any().optional().describe('delete parameter'),
+    ids: z.any().optional().describe('ids parameter'),
+    query: z.any().optional().describe('query parameter'),
+    update: z.any().optional().describe('update parameter'),
     }),
     outputSchema: z.any().describe('Response from PerformKnowledgeBaseEntryBulkAction API'),
   },
@@ -6621,7 +7583,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from UpdateKnowledgeBaseEntry API'),
   },
@@ -6635,10 +7597,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["create","delete","ids","query","update"]
     },
     paramsSchema: z.object({
-    body: PerformPromptsBulkAction_Body.optional().describe('Body parameter: body'),
+    create: z.any().optional().describe('create parameter'),
+    delete: z.any().optional().describe('delete parameter'),
+    ids: z.any().optional().describe('ids parameter'),
+    query: z.any().optional().describe('query parameter'),
+    update: z.any().optional().describe('update parameter'),
     }),
     outputSchema: z.any().describe('Response from PerformPromptsBulkAction API'),
   },
@@ -6687,11 +7653,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["filters","showReservedRoles","from","query","size","sort","direction","field"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_security_role_query_Body.optional().describe('Body parameter: body'),
+    filters: z.any().optional().describe('filters parameter'),
+    showReservedRoles: z.any().optional().describe('showReservedRoles parameter'),
+    from: z.any().optional().describe('from parameter'),
+    query: z.any().optional().describe('query parameter'),
+    size: z.any().optional().describe('size parameter'),
+    sort: z.any().optional().describe('sort parameter'),
+    direction: z.any().optional().describe('direction parameter'),
+    field: z.any().optional().describe('field parameter'),
     }),
     outputSchema: z.any().describe('Response from post_security_role_query API'),
   },
@@ -6741,13 +7714,30 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["createOnly","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["description","elasticsearch","cluster","indices","allow_restricted_indices","field_security","names","privileges","query","remote_cluster","clusters","remote_indices","run_as","kibana","base","feature","spaces","metadata"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     createOnly: z.any().optional().describe('Query parameter: createOnly'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_security_role_name_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    elasticsearch: z.any().optional().describe('elasticsearch parameter'),
+    cluster: z.any().optional().describe('cluster parameter'),
+    indices: z.any().optional().describe('indices parameter'),
+    allow_restricted_indices: z.any().optional().describe('allow_restricted_indices parameter'),
+    field_security: z.any().optional().describe('field_security parameter'),
+    names: z.any().optional().describe('names parameter'),
+    privileges: z.any().optional().describe('privileges parameter'),
+    query: z.any().optional().describe('query parameter'),
+    remote_cluster: z.any().optional().describe('remote_cluster parameter'),
+    clusters: z.any().optional().describe('clusters parameter'),
+    remote_indices: z.any().optional().describe('remote_indices parameter'),
+    run_as: z.any().optional().describe('run_as parameter'),
+    kibana: z.any().optional().describe('kibana parameter'),
+    base: z.any().optional().describe('base parameter'),
+    feature: z.any().optional().describe('feature parameter'),
+    spaces: z.any().optional().describe('spaces parameter'),
+    metadata: z.any().optional().describe('metadata parameter'),
     }),
     outputSchema: z.any().describe('Response from put_security_role_name API'),
   },
@@ -6761,11 +7751,29 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["roles","description","elasticsearch","cluster","indices","allow_restricted_indices","field_security","names","privileges","query","remote_cluster","clusters","remote_indices","run_as","kibana","base","feature","spaces","metadata"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_security_roles_Body.optional().describe('Body parameter: body'),
+    roles: z.any().optional().describe('roles parameter'),
+    description: z.any().optional().describe('description parameter'),
+    elasticsearch: z.any().optional().describe('elasticsearch parameter'),
+    cluster: z.any().optional().describe('cluster parameter'),
+    indices: z.any().optional().describe('indices parameter'),
+    allow_restricted_indices: z.any().optional().describe('allow_restricted_indices parameter'),
+    field_security: z.any().optional().describe('field_security parameter'),
+    names: z.any().optional().describe('names parameter'),
+    privileges: z.any().optional().describe('privileges parameter'),
+    query: z.any().optional().describe('query parameter'),
+    remote_cluster: z.any().optional().describe('remote_cluster parameter'),
+    clusters: z.any().optional().describe('clusters parameter'),
+    remote_indices: z.any().optional().describe('remote_indices parameter'),
+    run_as: z.any().optional().describe('run_as parameter'),
+    kibana: z.any().optional().describe('kibana parameter'),
+    base: z.any().optional().describe('base parameter'),
+    feature: z.any().optional().describe('feature parameter'),
+    spaces: z.any().optional().describe('spaces parameter'),
+    metadata: z.any().optional().describe('metadata parameter'),
     }),
     outputSchema: z.any().describe('Response from post_security_roles API'),
   },
@@ -6779,11 +7787,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["match","query","provider","name","type","username"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_security_session_invalidate_Body.optional().describe('Body parameter: body'),
+    match: z.any().optional().describe('match parameter'),
+    query: z.any().optional().describe('query parameter'),
+    provider: z.any().optional().describe('provider parameter'),
+    name: z.any().optional().describe('name parameter'),
+    type: z.any().optional().describe('type parameter'),
+    username: z.any().optional().describe('username parameter'),
     }),
     outputSchema: z.any().describe('Response from post_security_session_invalidate API'),
   },
@@ -6797,10 +7810,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["humanReadableSlug","locatorId","params","slug"]
     },
     paramsSchema: z.object({
-    body: post_url_Body.optional().describe('Body parameter: body'),
+    humanReadableSlug: z.any().optional().describe('humanReadableSlug parameter'),
+    locatorId: z.any().optional().describe('locatorId parameter'),
+    params: z.any().optional().describe('params parameter'),
+    slug: z.any().optional().describe('slug parameter'),
     }),
     outputSchema: z.any().describe('Response from post_url API'),
   },
@@ -6867,11 +7883,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["compatibilityMode","createNewCopies","includeReferences","objects","id","type","overwrite","spaces"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_spaces_copy_saved_objects_Body.optional().describe('Body parameter: body'),
+    compatibilityMode: z.any().optional().describe('compatibilityMode parameter'),
+    createNewCopies: z.any().optional().describe('createNewCopies parameter'),
+    includeReferences: z.any().optional().describe('includeReferences parameter'),
+    objects: z.any().optional().describe('objects parameter'),
+    id: z.any().optional().describe('id parameter'),
+    type: z.any().optional().describe('type parameter'),
+    overwrite: z.any().optional().describe('overwrite parameter'),
+    spaces: z.any().optional().describe('spaces parameter'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_copy_saved_objects API'),
   },
@@ -6885,11 +7908,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["aliases","sourceId","targetSpace","targetType"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_spaces_disable_legacy_url_aliases_Body.optional().describe('Body parameter: body'),
+    aliases: z.any().optional().describe('aliases parameter'),
+    sourceId: z.any().optional().describe('sourceId parameter'),
+    targetSpace: z.any().optional().describe('targetSpace parameter'),
+    targetType: z.any().optional().describe('targetType parameter'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_disable_legacy_url_aliases API'),
   },
@@ -6903,11 +7929,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["objects","id","type"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_spaces_get_shareable_references_Body.optional().describe('Body parameter: body'),
+    objects: z.any().optional().describe('objects parameter'),
+    id: z.any().optional().describe('id parameter'),
+    type: z.any().optional().describe('type parameter'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_get_shareable_references API'),
   },
@@ -6921,11 +7949,21 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["compatibilityMode","createNewCopies","includeReferences","objects","id","type","retries","createNewCopy","destinationId","ignoreMissingReferences","overwrite"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_spaces_resolve_copy_saved_objects_errors_Body.optional().describe('Body parameter: body'),
+    compatibilityMode: z.any().optional().describe('compatibilityMode parameter'),
+    createNewCopies: z.any().optional().describe('createNewCopies parameter'),
+    includeReferences: z.any().optional().describe('includeReferences parameter'),
+    objects: z.any().optional().describe('objects parameter'),
+    id: z.any().optional().describe('id parameter'),
+    type: z.any().optional().describe('type parameter'),
+    retries: z.any().optional().describe('retries parameter'),
+    createNewCopy: z.any().optional().describe('createNewCopy parameter'),
+    destinationId: z.any().optional().describe('destinationId parameter'),
+    ignoreMissingReferences: z.any().optional().describe('ignoreMissingReferences parameter'),
+    overwrite: z.any().optional().describe('overwrite parameter'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_resolve_copy_saved_objects_errors API'),
   },
@@ -6939,11 +7977,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["objects","id","type","spacesToAdd","spacesToRemove"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_spaces_update_objects_spaces_Body.optional().describe('Body parameter: body'),
+    objects: z.any().optional().describe('objects parameter'),
+    id: z.any().optional().describe('id parameter'),
+    type: z.any().optional().describe('type parameter'),
+    spacesToAdd: z.any().optional().describe('spacesToAdd parameter'),
+    spacesToRemove: z.any().optional().describe('spacesToRemove parameter'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_update_objects_spaces API'),
   },
@@ -6974,11 +8016,19 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["_reserved","color","description","disabledFeatures","id","imageUrl","initials","name","solution"]
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_spaces_space_Body.optional().describe('Body parameter: body'),
+    _reserved: z.any().optional().describe('_reserved parameter'),
+    color: z.any().optional().describe('color parameter'),
+    description: z.any().optional().describe('description parameter'),
+    disabledFeatures: z.any().optional().describe('disabledFeatures parameter'),
+    id: z.any().optional().describe('id parameter'),
+    imageUrl: z.any().optional().describe('imageUrl parameter'),
+    initials: z.any().optional().describe('initials parameter'),
+    name: z.any().optional().describe('name parameter'),
+    solution: z.any().optional().describe('solution parameter'),
     }),
     outputSchema: z.any().describe('Response from post_spaces_space API'),
   },
@@ -7028,12 +8078,20 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["_reserved","color","description","disabledFeatures","id","imageUrl","initials","name","solution"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_spaces_space_Body.optional().describe('Body parameter: body'),
+    _reserved: z.any().optional().describe('_reserved parameter'),
+    color: z.any().optional().describe('color parameter'),
+    description: z.any().optional().describe('description parameter'),
+    disabledFeatures: z.any().optional().describe('disabledFeatures parameter'),
+    id: z.any().optional().describe('id parameter'),
+    imageUrl: z.any().optional().describe('imageUrl parameter'),
+    initials: z.any().optional().describe('initials parameter'),
+    name: z.any().optional().describe('name parameter'),
+    solution: z.any().optional().describe('solution parameter'),
     }),
     outputSchema: z.any().describe('Response from put_spaces_space_id API'),
   },
@@ -7065,7 +8123,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     query: z.record(z.any()).optional().describe('Query parameters'),
@@ -7086,7 +8144,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: get_streams_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_disable API'),
   },
@@ -7104,7 +8162,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: get_streams_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_enable API'),
   },
@@ -7122,7 +8180,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: get_streams_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_resync API'),
   },
@@ -7136,7 +8194,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7154,7 +8212,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7172,12 +8230,122 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["stream","name","description","dashboards","queries","id","title","kql","query","rules","ingest","lifecycle","dsl","data_retention","ilm","policy","inherit","processing","steps","action","customIdentifier","from","ignore_failure","ignore_missing","patterns","where","contains","endsWith","eq","field","gt","lt","lte","neq","range","startsWith","exists","and","or","not","never","always","append_separator","pattern","formats","output_format","to","override","copy_from","value","allow_duplicates","on_failure","processors","append","attachment","bytes","circle","community_id","convert","csv","date","date_index_name","dissect","dot_expander","drop","enrich","fail","fingerprint","foreach","geo_grid","geoip","grok","gsub","html_strip","inference","ip_location","join","json","kv","lowercase","network_direction","pipeline","redact","registered_domain","remove","rename","reroute","script","set","set_security_user","sort","split","terminate","trim","uppercase","uri_parts","urldecode","user_agent","tag","wired","fields","format","type","routing","destination","status","classic","field_overrides","group","members","tags"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_streams_name_Body.optional().describe('Body parameter: body'),
+    stream: z.any().optional().describe('stream parameter'),
+    name: z.any().optional().describe('name parameter'),
+    description: z.any().optional().describe('description parameter'),
+    dashboards: z.any().optional().describe('dashboards parameter'),
+    queries: z.any().optional().describe('queries parameter'),
+    id: z.any().optional().describe('id parameter'),
+    title: z.any().optional().describe('title parameter'),
+    kql: z.any().optional().describe('kql parameter'),
+    query: z.any().optional().describe('query parameter'),
+    rules: z.any().optional().describe('rules parameter'),
+    ingest: z.any().optional().describe('ingest parameter'),
+    lifecycle: z.any().optional().describe('lifecycle parameter'),
+    dsl: z.any().optional().describe('dsl parameter'),
+    data_retention: z.any().optional().describe('data_retention parameter'),
+    ilm: z.any().optional().describe('ilm parameter'),
+    policy: z.any().optional().describe('policy parameter'),
+    inherit: z.any().optional().describe('inherit parameter'),
+    processing: z.any().optional().describe('processing parameter'),
+    steps: z.any().optional().describe('steps parameter'),
+    action: z.any().optional().describe('action parameter'),
+    customIdentifier: z.any().optional().describe('customIdentifier parameter'),
+    from: z.any().optional().describe('from parameter'),
+    ignore_failure: z.any().optional().describe('ignore_failure parameter'),
+    ignore_missing: z.any().optional().describe('ignore_missing parameter'),
+    patterns: z.any().optional().describe('patterns parameter'),
+    where: z.any().optional().describe('where parameter'),
+    contains: z.any().optional().describe('contains parameter'),
+    endsWith: z.any().optional().describe('endsWith parameter'),
+    eq: z.any().optional().describe('eq parameter'),
+    field: z.any().optional().describe('field parameter'),
+    gt: z.any().optional().describe('gt parameter'),
+    lt: z.any().optional().describe('lt parameter'),
+    lte: z.any().optional().describe('lte parameter'),
+    neq: z.any().optional().describe('neq parameter'),
+    range: z.any().optional().describe('range parameter'),
+    startsWith: z.any().optional().describe('startsWith parameter'),
+    exists: z.any().optional().describe('exists parameter'),
+    and: z.any().optional().describe('and parameter'),
+    or: z.any().optional().describe('or parameter'),
+    not: z.any().optional().describe('not parameter'),
+    never: z.any().optional().describe('never parameter'),
+    always: z.any().optional().describe('always parameter'),
+    append_separator: z.any().optional().describe('append_separator parameter'),
+    pattern: z.any().optional().describe('pattern parameter'),
+    formats: z.any().optional().describe('formats parameter'),
+    output_format: z.any().optional().describe('output_format parameter'),
+    to: z.any().optional().describe('to parameter'),
+    override: z.any().optional().describe('override parameter'),
+    copy_from: z.any().optional().describe('copy_from parameter'),
+    value: z.any().optional().describe('value parameter'),
+    allow_duplicates: z.any().optional().describe('allow_duplicates parameter'),
+    on_failure: z.any().optional().describe('on_failure parameter'),
+    processors: z.any().optional().describe('processors parameter'),
+    append: z.any().optional().describe('append parameter'),
+    attachment: z.any().optional().describe('attachment parameter'),
+    bytes: z.any().optional().describe('bytes parameter'),
+    circle: z.any().optional().describe('circle parameter'),
+    community_id: z.any().optional().describe('community_id parameter'),
+    convert: z.any().optional().describe('convert parameter'),
+    csv: z.any().optional().describe('csv parameter'),
+    date: z.any().optional().describe('date parameter'),
+    date_index_name: z.any().optional().describe('date_index_name parameter'),
+    dissect: z.any().optional().describe('dissect parameter'),
+    dot_expander: z.any().optional().describe('dot_expander parameter'),
+    drop: z.any().optional().describe('drop parameter'),
+    enrich: z.any().optional().describe('enrich parameter'),
+    fail: z.any().optional().describe('fail parameter'),
+    fingerprint: z.any().optional().describe('fingerprint parameter'),
+    foreach: z.any().optional().describe('foreach parameter'),
+    geo_grid: z.any().optional().describe('geo_grid parameter'),
+    geoip: z.any().optional().describe('geoip parameter'),
+    grok: z.any().optional().describe('grok parameter'),
+    gsub: z.any().optional().describe('gsub parameter'),
+    html_strip: z.any().optional().describe('html_strip parameter'),
+    inference: z.any().optional().describe('inference parameter'),
+    ip_location: z.any().optional().describe('ip_location parameter'),
+    join: z.any().optional().describe('join parameter'),
+    json: z.any().optional().describe('json parameter'),
+    kv: z.any().optional().describe('kv parameter'),
+    lowercase: z.any().optional().describe('lowercase parameter'),
+    network_direction: z.any().optional().describe('network_direction parameter'),
+    pipeline: z.any().optional().describe('pipeline parameter'),
+    redact: z.any().optional().describe('redact parameter'),
+    registered_domain: z.any().optional().describe('registered_domain parameter'),
+    remove: z.any().optional().describe('remove parameter'),
+    rename: z.any().optional().describe('rename parameter'),
+    reroute: z.any().optional().describe('reroute parameter'),
+    script: z.any().optional().describe('script parameter'),
+    set: z.any().optional().describe('set parameter'),
+    set_security_user: z.any().optional().describe('set_security_user parameter'),
+    sort: z.any().optional().describe('sort parameter'),
+    split: z.any().optional().describe('split parameter'),
+    terminate: z.any().optional().describe('terminate parameter'),
+    trim: z.any().optional().describe('trim parameter'),
+    uppercase: z.any().optional().describe('uppercase parameter'),
+    uri_parts: z.any().optional().describe('uri_parts parameter'),
+    urldecode: z.any().optional().describe('urldecode parameter'),
+    user_agent: z.any().optional().describe('user_agent parameter'),
+    tag: z.any().optional().describe('tag parameter'),
+    wired: z.any().optional().describe('wired parameter'),
+    fields: z.any().optional().describe('fields parameter'),
+    format: z.any().optional().describe('format parameter'),
+    type: z.any().optional().describe('type parameter'),
+    routing: z.any().optional().describe('routing parameter'),
+    destination: z.any().optional().describe('destination parameter'),
+    status: z.any().optional().describe('status parameter'),
+    classic: z.any().optional().describe('classic parameter'),
+    field_overrides: z.any().optional().describe('field_overrides parameter'),
+    group: z.any().optional().describe('group parameter'),
+    members: z.any().optional().describe('members parameter'),
+    tags: z.any().optional().describe('tags parameter'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name API'),
   },
@@ -7191,12 +8359,31 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["status","stream","name","where","contains","endsWith","eq","field","gt","lt","lte","neq","range","startsWith","exists","and","or","not","never","always"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_streams_name_fork_Body.optional().describe('Body parameter: body'),
+    status: z.any().optional().describe('status parameter'),
+    stream: z.any().optional().describe('stream parameter'),
+    name: z.any().optional().describe('name parameter'),
+    where: z.any().optional().describe('where parameter'),
+    contains: z.any().optional().describe('contains parameter'),
+    endsWith: z.any().optional().describe('endsWith parameter'),
+    eq: z.any().optional().describe('eq parameter'),
+    field: z.any().optional().describe('field parameter'),
+    gt: z.any().optional().describe('gt parameter'),
+    lt: z.any().optional().describe('lt parameter'),
+    lte: z.any().optional().describe('lte parameter'),
+    neq: z.any().optional().describe('neq parameter'),
+    range: z.any().optional().describe('range parameter'),
+    startsWith: z.any().optional().describe('startsWith parameter'),
+    exists: z.any().optional().describe('exists parameter'),
+    and: z.any().optional().describe('and parameter'),
+    or: z.any().optional().describe('or parameter'),
+    not: z.any().optional().describe('not parameter'),
+    never: z.any().optional().describe('never parameter'),
+    always: z.any().optional().describe('always parameter'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_fork API'),
   },
@@ -7210,7 +8397,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7228,12 +8415,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["group","members","tags"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_streams_name_group_Body.optional().describe('Body parameter: body'),
+    group: z.any().optional().describe('group parameter'),
+    members: z.any().optional().describe('members parameter'),
+    tags: z.any().optional().describe('tags parameter'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_group API'),
   },
@@ -7247,7 +8436,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7265,12 +8454,110 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["ingest","lifecycle","dsl","data_retention","ilm","policy","inherit","processing","steps","action","customIdentifier","description","from","ignore_failure","ignore_missing","patterns","where","contains","endsWith","eq","field","gt","lt","lte","neq","range","startsWith","exists","and","or","not","never","always","append_separator","pattern","formats","output_format","to","override","copy_from","value","allow_duplicates","on_failure","processors","append","attachment","bytes","circle","community_id","convert","csv","date","date_index_name","dissect","dot_expander","drop","enrich","fail","fingerprint","foreach","geo_grid","geoip","grok","gsub","html_strip","inference","ip_location","join","json","kv","lowercase","network_direction","pipeline","redact","registered_domain","remove","rename","reroute","script","set","set_security_user","sort","split","terminate","trim","uppercase","uri_parts","urldecode","user_agent","tag","wired","fields","format","type","routing","destination","status","classic","field_overrides"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_streams_name_ingest_Body.optional().describe('Body parameter: body'),
+    ingest: z.any().optional().describe('ingest parameter'),
+    lifecycle: z.any().optional().describe('lifecycle parameter'),
+    dsl: z.any().optional().describe('dsl parameter'),
+    data_retention: z.any().optional().describe('data_retention parameter'),
+    ilm: z.any().optional().describe('ilm parameter'),
+    policy: z.any().optional().describe('policy parameter'),
+    inherit: z.any().optional().describe('inherit parameter'),
+    processing: z.any().optional().describe('processing parameter'),
+    steps: z.any().optional().describe('steps parameter'),
+    action: z.any().optional().describe('action parameter'),
+    customIdentifier: z.any().optional().describe('customIdentifier parameter'),
+    description: z.any().optional().describe('description parameter'),
+    from: z.any().optional().describe('from parameter'),
+    ignore_failure: z.any().optional().describe('ignore_failure parameter'),
+    ignore_missing: z.any().optional().describe('ignore_missing parameter'),
+    patterns: z.any().optional().describe('patterns parameter'),
+    where: z.any().optional().describe('where parameter'),
+    contains: z.any().optional().describe('contains parameter'),
+    endsWith: z.any().optional().describe('endsWith parameter'),
+    eq: z.any().optional().describe('eq parameter'),
+    field: z.any().optional().describe('field parameter'),
+    gt: z.any().optional().describe('gt parameter'),
+    lt: z.any().optional().describe('lt parameter'),
+    lte: z.any().optional().describe('lte parameter'),
+    neq: z.any().optional().describe('neq parameter'),
+    range: z.any().optional().describe('range parameter'),
+    startsWith: z.any().optional().describe('startsWith parameter'),
+    exists: z.any().optional().describe('exists parameter'),
+    and: z.any().optional().describe('and parameter'),
+    or: z.any().optional().describe('or parameter'),
+    not: z.any().optional().describe('not parameter'),
+    never: z.any().optional().describe('never parameter'),
+    always: z.any().optional().describe('always parameter'),
+    append_separator: z.any().optional().describe('append_separator parameter'),
+    pattern: z.any().optional().describe('pattern parameter'),
+    formats: z.any().optional().describe('formats parameter'),
+    output_format: z.any().optional().describe('output_format parameter'),
+    to: z.any().optional().describe('to parameter'),
+    override: z.any().optional().describe('override parameter'),
+    copy_from: z.any().optional().describe('copy_from parameter'),
+    value: z.any().optional().describe('value parameter'),
+    allow_duplicates: z.any().optional().describe('allow_duplicates parameter'),
+    on_failure: z.any().optional().describe('on_failure parameter'),
+    processors: z.any().optional().describe('processors parameter'),
+    append: z.any().optional().describe('append parameter'),
+    attachment: z.any().optional().describe('attachment parameter'),
+    bytes: z.any().optional().describe('bytes parameter'),
+    circle: z.any().optional().describe('circle parameter'),
+    community_id: z.any().optional().describe('community_id parameter'),
+    convert: z.any().optional().describe('convert parameter'),
+    csv: z.any().optional().describe('csv parameter'),
+    date: z.any().optional().describe('date parameter'),
+    date_index_name: z.any().optional().describe('date_index_name parameter'),
+    dissect: z.any().optional().describe('dissect parameter'),
+    dot_expander: z.any().optional().describe('dot_expander parameter'),
+    drop: z.any().optional().describe('drop parameter'),
+    enrich: z.any().optional().describe('enrich parameter'),
+    fail: z.any().optional().describe('fail parameter'),
+    fingerprint: z.any().optional().describe('fingerprint parameter'),
+    foreach: z.any().optional().describe('foreach parameter'),
+    geo_grid: z.any().optional().describe('geo_grid parameter'),
+    geoip: z.any().optional().describe('geoip parameter'),
+    grok: z.any().optional().describe('grok parameter'),
+    gsub: z.any().optional().describe('gsub parameter'),
+    html_strip: z.any().optional().describe('html_strip parameter'),
+    inference: z.any().optional().describe('inference parameter'),
+    ip_location: z.any().optional().describe('ip_location parameter'),
+    join: z.any().optional().describe('join parameter'),
+    json: z.any().optional().describe('json parameter'),
+    kv: z.any().optional().describe('kv parameter'),
+    lowercase: z.any().optional().describe('lowercase parameter'),
+    network_direction: z.any().optional().describe('network_direction parameter'),
+    pipeline: z.any().optional().describe('pipeline parameter'),
+    redact: z.any().optional().describe('redact parameter'),
+    registered_domain: z.any().optional().describe('registered_domain parameter'),
+    remove: z.any().optional().describe('remove parameter'),
+    rename: z.any().optional().describe('rename parameter'),
+    reroute: z.any().optional().describe('reroute parameter'),
+    script: z.any().optional().describe('script parameter'),
+    set: z.any().optional().describe('set parameter'),
+    set_security_user: z.any().optional().describe('set_security_user parameter'),
+    sort: z.any().optional().describe('sort parameter'),
+    split: z.any().optional().describe('split parameter'),
+    terminate: z.any().optional().describe('terminate parameter'),
+    trim: z.any().optional().describe('trim parameter'),
+    uppercase: z.any().optional().describe('uppercase parameter'),
+    uri_parts: z.any().optional().describe('uri_parts parameter'),
+    urldecode: z.any().optional().describe('urldecode parameter'),
+    user_agent: z.any().optional().describe('user_agent parameter'),
+    tag: z.any().optional().describe('tag parameter'),
+    wired: z.any().optional().describe('wired parameter'),
+    fields: z.any().optional().describe('fields parameter'),
+    format: z.any().optional().describe('format parameter'),
+    type: z.any().optional().describe('type parameter'),
+    routing: z.any().optional().describe('routing parameter'),
+    destination: z.any().optional().describe('destination parameter'),
+    status: z.any().optional().describe('status parameter'),
+    classic: z.any().optional().describe('classic parameter'),
+    field_overrides: z.any().optional().describe('field_overrides parameter'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_ingest API'),
   },
@@ -7284,12 +8571,21 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["description","include","objects","all","queries","id","routing","destination","name","version"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_streams_name_content_export_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    include: z.any().optional().describe('include parameter'),
+    objects: z.any().optional().describe('objects parameter'),
+    all: z.any().optional().describe('all parameter'),
+    queries: z.any().optional().describe('queries parameter'),
+    id: z.any().optional().describe('id parameter'),
+    routing: z.any().optional().describe('routing parameter'),
+    destination: z.any().optional().describe('destination parameter'),
+    name: z.any().optional().describe('name parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_content_export API'),
   },
@@ -7308,7 +8604,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_content_import API'),
   },
@@ -7322,7 +8618,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7340,12 +8636,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["operations","index","id","delete"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_streams_name_dashboards_bulk_Body.optional().describe('Body parameter: body'),
+    operations: z.any().optional().describe('operations parameter'),
+    index: z.any().optional().describe('index parameter'),
+    id: z.any().optional().describe('id parameter'),
+    delete: z.any().optional().describe('delete parameter'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_dashboards_bulk API'),
   },
@@ -7359,7 +8658,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name","dashboardId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7384,7 +8683,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     name: z.string().describe('Path parameter: name (required)'),
     dashboardId: z.string().describe('Path parameter: dashboardId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: get_streams_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_dashboards_dashboardid API'),
   },
@@ -7398,7 +8697,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7416,12 +8715,18 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["operations","index","id","title","kql","query","delete"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_streams_name_queries_bulk_Body.optional().describe('Body parameter: body'),
+    operations: z.any().optional().describe('operations parameter'),
+    index: z.any().optional().describe('index parameter'),
+    id: z.any().optional().describe('id parameter'),
+    title: z.any().optional().describe('title parameter'),
+    kql: z.any().optional().describe('kql parameter'),
+    query: z.any().optional().describe('query parameter'),
+    delete: z.any().optional().describe('delete parameter'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_queries_bulk API'),
   },
@@ -7435,7 +8740,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name","queryId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7454,13 +8759,15 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name","queryId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["kql","query","title"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
     queryId: z.string().describe('Path parameter: queryId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: put_streams_name_queries_queryid_Body.optional().describe('Body parameter: body'),
+    kql: z.any().optional().describe('kql parameter'),
+    query: z.any().optional().describe('query parameter'),
+    title: z.any().optional().describe('title parameter'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_queries_queryid API'),
   },
@@ -7474,7 +8781,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7492,7 +8799,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name","ruleId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7517,7 +8824,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     name: z.string().describe('Path parameter: name (required)'),
     ruleId: z.string().describe('Path parameter: ruleId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: get_streams_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from put_streams_name_rules_ruleid API'),
   },
@@ -7531,7 +8838,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["from","to","bucketSize"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7551,7 +8858,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["connectorId","currentDate","shortLookback","longLookback"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7572,7 +8879,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["name"],
       urlParams: ["from","to","bucketSize","kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["query","kql"]
     },
     paramsSchema: z.object({
     name: z.string().describe('Path parameter: name (required)'),
@@ -7580,7 +8887,8 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     to: z.any().optional().describe('Query parameter: to'),
     bucketSize: z.any().optional().describe('Query parameter: bucketSize'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: post_streams_name_significant_events_preview_Body.optional().describe('Body parameter: body'),
+    query: z.any().optional().describe('query parameter'),
+    kql: z.any().optional().describe('kql parameter'),
     }),
     outputSchema: z.any().describe('Response from post_streams_name_significant_events_preview API'),
   },
@@ -7639,7 +8947,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: post_synthetic_monitors_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_synthetic_monitors API'),
   },
@@ -7653,10 +8961,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["ids"]
     },
     paramsSchema: z.object({
-    body: delete_synthetic_monitors_Body.optional().describe('Body parameter: body'),
+    ids: z.any().optional().describe('ids parameter'),
     }),
     outputSchema: z.any().describe('Response from delete_synthetic_monitors API'),
   },
@@ -7709,7 +9017,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: post_synthetic_monitors_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from put_synthetic_monitor API'),
   },
@@ -7743,7 +9051,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
       bodyParams: ["body"]
     },
     paramsSchema: z.object({
-    body: post_parameters_Body.optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from post_parameters API'),
   },
@@ -7757,7 +9065,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
 
@@ -7809,11 +9117,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["id"],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["description","key","tags","value"]
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: put_parameter_Body.optional().describe('Body parameter: body'),
+    description: z.any().optional().describe('description parameter'),
+    key: z.any().optional().describe('key parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    value: z.any().optional().describe('value parameter'),
     }),
     outputSchema: z.any().describe('Response from put_parameter API'),
   },
@@ -7844,10 +9155,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["agentPolicyId","geo","lat","lon","label","spaces","tags"]
     },
     paramsSchema: z.object({
-    body: post_private_location_Body.optional().describe('Body parameter: body'),
+    agentPolicyId: z.any().optional().describe('agentPolicyId parameter'),
+    geo: z.any().optional().describe('geo parameter'),
+    lat: z.any().optional().describe('lat parameter'),
+    lon: z.any().optional().describe('lon parameter'),
+    label: z.any().optional().describe('label parameter'),
+    spaces: z.any().optional().describe('spaces parameter'),
+    tags: z.any().optional().describe('tags parameter'),
     }),
     outputSchema: z.any().describe('Response from post_private_location API'),
   },
@@ -7900,7 +9217,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     },
     paramsSchema: z.object({
     id: z.string().describe('Path parameter: id (required)'),
-    body: z.any().optional().describe('Body parameter: body'),
+    body: z.any().optional().describe('Request body'),
     }),
     outputSchema: z.any().describe('Response from put_private_location API'),
   },
@@ -7931,7 +9248,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
 
@@ -7966,10 +9283,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["timeline","timelineId","version"]
     },
     paramsSchema: z.object({
-    body: PatchTimeline_Body.optional().describe('Body parameter: body'),
+    timeline: z.any().optional().describe('timeline parameter'),
+    timelineId: z.any().optional().describe('timelineId parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from PatchTimeline API'),
   },
@@ -7983,10 +9302,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["status","templateTimelineId","templateTimelineVersion","timeline","timelineId","timelineType","version"]
     },
     paramsSchema: z.object({
-    body: CreateTimelines_Body.optional().describe('Body parameter: body'),
+    status: z.any().optional().describe('status parameter'),
+    templateTimelineId: z.any().optional().describe('templateTimelineId parameter'),
+    templateTimelineVersion: z.any().optional().describe('templateTimelineVersion parameter'),
+    timeline: z.any().optional().describe('timeline parameter'),
+    timelineId: z.any().optional().describe('timelineId parameter'),
+    timelineType: z.any().optional().describe('timelineType parameter'),
+    version: z.any().optional().describe('version parameter'),
     }),
     outputSchema: z.any().describe('Response from CreateTimelines API'),
   },
@@ -8000,7 +9325,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["query"],
-      bodyParams: ["body"]
+      bodyParams: []
     },
     paramsSchema: z.object({
     query: z.record(z.any()).optional().describe('Query parameters'),
@@ -8034,10 +9359,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["timelineType"]
     },
     paramsSchema: z.object({
-    body: CleanDraftTimelines_Body.optional().describe('Body parameter: body'),
+    timelineType: z.any().optional().describe('timelineType parameter'),
     }),
     outputSchema: z.any().describe('Response from CleanDraftTimelines API'),
   },
@@ -8051,11 +9376,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: ["file_name"],
-      bodyParams: ["body"]
+      bodyParams: ["ids"]
     },
     paramsSchema: z.object({
     file_name: z.any().optional().describe('Query parameter: file_name'),
-    body: ExportTimelines_Body.optional().describe('Body parameter: body'),
+    ids: z.any().optional().describe('ids parameter'),
     }),
     outputSchema: z.any().describe('Response from ExportTimelines API'),
   },
@@ -8069,10 +9394,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["templateTimelineId","templateTimelineVersion","timelineId","timelineType"]
     },
     paramsSchema: z.object({
-    body: PersistFavoriteRoute_Body.optional().describe('Body parameter: body'),
+    templateTimelineId: z.any().optional().describe('templateTimelineId parameter'),
+    templateTimelineVersion: z.any().optional().describe('templateTimelineVersion parameter'),
+    timelineId: z.any().optional().describe('timelineId parameter'),
+    timelineType: z.any().optional().describe('timelineType parameter'),
     }),
     outputSchema: z.any().describe('Response from PersistFavoriteRoute API'),
   },
@@ -8086,10 +9414,11 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["file","isImmutable"]
     },
     paramsSchema: z.object({
-    body: ImportTimelines_Body.optional().describe('Body parameter: body'),
+    file: z.any().optional().describe('file parameter'),
+    isImmutable: z.any().optional().describe('isImmutable parameter'),
     }),
     outputSchema: z.any().describe('Response from ImportTimelines API'),
   },
@@ -8103,10 +9432,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["prepackagedTimelines","timelinesToInstall","timelinesToUpdate"]
     },
     paramsSchema: z.object({
-    body: InstallPrepackedTimelines_Body.optional().describe('Body parameter: body'),
+    prepackagedTimelines: z.any().optional().describe('prepackagedTimelines parameter'),
+    timelinesToInstall: z.any().optional().describe('timelinesToInstall parameter'),
+    timelinesToUpdate: z.any().optional().describe('timelinesToUpdate parameter'),
     }),
     outputSchema: z.any().describe('Response from InstallPrepackedTimelines API'),
   },
@@ -8189,10 +9520,17 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: [],
       urlParams: [],
-      bodyParams: ["body"]
+      bodyParams: ["certAgeThreshold","certExpirationThreshold","defaultConnectors","defaultEmail","bcc","cc","to","heartbeatIndices"]
     },
     paramsSchema: z.object({
-    body: put_uptime_settings_Body.optional().describe('Body parameter: body'),
+    certAgeThreshold: z.any().optional().describe('certAgeThreshold parameter'),
+    certExpirationThreshold: z.any().optional().describe('certExpirationThreshold parameter'),
+    defaultConnectors: z.any().optional().describe('defaultConnectors parameter'),
+    defaultEmail: z.any().optional().describe('defaultEmail parameter'),
+    bcc: z.any().optional().describe('bcc parameter'),
+    cc: z.any().optional().describe('cc parameter'),
+    to: z.any().optional().describe('to parameter'),
+    heartbeatIndices: z.any().optional().describe('heartbeatIndices parameter'),
     }),
     outputSchema: z.any().describe('Response from put_uptime_settings API'),
   },
@@ -8229,12 +9567,21 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["spaceId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["budgetingMethod","description","groupBy","id","indicator","name","objective","settings","tags","timeWindow"]
     },
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: SLOs_create_slo_request.optional().describe('Body parameter: body'),
+    budgetingMethod: z.any().optional().describe('budgetingMethod parameter'),
+    description: z.any().optional().describe('description parameter'),
+    groupBy: z.any().optional().describe('groupBy parameter'),
+    id: z.any().optional().describe('id parameter'),
+    indicator: z.any().optional().describe('indicator parameter'),
+    name: z.any().optional().describe('name parameter'),
+    objective: z.any().optional().describe('objective parameter'),
+    settings: z.any().optional().describe('settings parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    timeWindow: z.any().optional().describe('timeWindow parameter'),
     }),
     outputSchema: z.any().describe('Response from createSloOp API'),
   },
@@ -8248,12 +9595,12 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["spaceId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["list"]
     },
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: SLOs_bulk_delete_request.optional().describe('Body parameter: body'),
+    list: z.any().optional().describe('list parameter'),
     }),
     outputSchema: z.any().describe('Response from bulkDeleteOp API'),
   },
@@ -8287,12 +9634,16 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["spaceId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["list","purgePolicy","age","purgeType","timestamp"]
     },
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: SLOs_bulk_purge_rollup_request.optional().describe('Body parameter: body'),
+    list: z.any().optional().describe('list parameter'),
+    purgePolicy: z.any().optional().describe('purgePolicy parameter'),
+    age: z.any().optional().describe('age parameter'),
+    purgeType: z.any().optional().describe('purgeType parameter'),
+    timestamp: z.any().optional().describe('timestamp parameter'),
     }),
     outputSchema: z.any().describe('Response from deleteRollupDataOp API'),
   },
@@ -8306,12 +9657,14 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["spaceId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["list","instanceId","sloId"]
     },
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: SLOs_delete_slo_instances_request.optional().describe('Body parameter: body'),
+    list: z.any().optional().describe('list parameter'),
+    instanceId: z.any().optional().describe('instanceId parameter'),
+    sloId: z.any().optional().describe('sloId parameter'),
     }),
     outputSchema: z.any().describe('Response from deleteSloInstancesOp API'),
   },
@@ -8364,13 +9717,21 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
     parameterTypes: {
       pathParams: ["spaceId","sloId"],
       urlParams: ["kbn-xsrf"],
-      bodyParams: ["body"]
+      bodyParams: ["budgetingMethod","description","groupBy","indicator","name","objective","settings","tags","timeWindow"]
     },
     paramsSchema: z.object({
     spaceId: z.string().describe('Path parameter: spaceId (required)'),
     sloId: z.string().describe('Path parameter: sloId (required)'),
     'kbn-xsrf': z.string().optional().describe('Header parameter: kbn-xsrf'),
-    body: SLOs_update_slo_request.optional().describe('Body parameter: body'),
+    budgetingMethod: z.any().optional().describe('budgetingMethod parameter'),
+    description: z.any().optional().describe('description parameter'),
+    groupBy: z.any().optional().describe('groupBy parameter'),
+    indicator: z.any().optional().describe('indicator parameter'),
+    name: z.any().optional().describe('name parameter'),
+    objective: z.any().optional().describe('objective parameter'),
+    settings: z.any().optional().describe('settings parameter'),
+    tags: z.any().optional().describe('tags parameter'),
+    timeWindow: z.any().optional().describe('timeWindow parameter'),
     }),
     outputSchema: z.any().describe('Response from updateSloOp API'),
   },
