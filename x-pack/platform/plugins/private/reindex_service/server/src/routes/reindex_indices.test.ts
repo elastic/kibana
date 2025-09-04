@@ -20,6 +20,7 @@ import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { ReindexServiceWrapper } from '../lib/reindex_service_wrapper';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -104,7 +105,7 @@ describe('reindex API', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /api/upgrade_assistant/reindex/{indexName}', () => {
+  describe(`GET ${REINDEX_SERVICE_BASE_PATH}/{indexName}`, () => {
     it('returns the attributes of the reindex operation and reindex warnings', async () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'wowIndex', status: ReindexStatus.inProgress },
@@ -120,7 +121,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}`,
       })(
         routeHandlerContextMock,
         createRequestMock({ params: { indexName: 'wowIndex' } }),
@@ -153,7 +154,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}`,
       })(
         routeHandlerContextMock,
         createRequestMock({ params: { indexName: 'anIndex' } }),
@@ -169,7 +170,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}`,
       })(
         routeHandlerContextMock,
         createRequestMock({ params: { indexName: 'anIndex' } }),
@@ -183,7 +184,7 @@ describe('reindex API', () => {
     });
   });
 
-  describe('POST /api/upgrade_assistant/reindex', () => {
+  describe(`POST ${REINDEX_SERVICE_BASE_PATH}`, () => {
     it('creates a new reindexOp', async () => {
       mockReindexService.createReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'theIndex' },
@@ -191,7 +192,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
         createRequestMock({ body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' } }),
@@ -220,7 +221,7 @@ describe('reindex API', () => {
 
       await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -245,7 +246,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -268,7 +269,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -281,13 +282,13 @@ describe('reindex API', () => {
     });
   });
 
-  describe('POST /api/upgrade_assistant/reindex/{indexName}/cancel', () => {
+  describe(`POST ${REINDEX_SERVICE_BASE_PATH}/{indexName}/cancel`, () => {
     it('returns a 501', async () => {
       mockReindexService.cancelReindexing.mockResolvedValueOnce({});
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}/cancel',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}/cancel`,
       })(
         routeHandlerContextMock,
         createRequestMock({

@@ -15,6 +15,7 @@ import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { ReindexServiceWrapper } from '../lib/reindex_service_wrapper';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -100,7 +101,7 @@ describe('reindex API', () => {
     jest.clearAllMocks();
   });
 
-  describe('POST /api/upgrade_assistant/reindex/batch', () => {
+  describe(`POST ${REINDEX_SERVICE_BASE_PATH}/batch`, () => {
     it('creates a collection of index operations', async () => {
       mockReindexService.createReindexOperation
         .mockResolvedValueOnce({
@@ -115,7 +116,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/batch',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/batch`,
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -174,7 +175,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/batch',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/batch`,
       })(
         routeHandlerContextMock,
         createRequestMock({

@@ -8,9 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
+import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexSchema } from './reindex_indices';
@@ -19,12 +18,10 @@ export function registerBatchReindexIndicesRoutes({
   router,
   getReindexService,
 }: RouteDependencies) {
-  const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
-
   // Get the current batch queue
   router.get(
     {
-      path: `${BASE_PATH}/batch/queue`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/batch/queue`,
       security: {
         authz: {
           enabled: false,
@@ -62,7 +59,7 @@ export function registerBatchReindexIndicesRoutes({
   // Add indices for reindexing to the worker's batch
   router.post(
     {
-      path: `${BASE_PATH}/batch`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/batch`,
       security: {
         authz: {
           enabled: false,
