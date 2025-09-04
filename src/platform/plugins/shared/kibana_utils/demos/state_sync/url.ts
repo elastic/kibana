@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TodoActions, TodoState } from '../state_containers/todomvc';
-import { defaultState, pureTransitions } from '../state_containers/todomvc';
 import type { BaseState, BaseStateContainer } from '@kbn/shared-ux-state-container';
 import { createStateContainer } from '@kbn/shared-ux-state-container';
+import type { TodoActions, TodoState } from '../state_containers/todomvc';
+import { defaultState, pureTransitions } from '../state_containers/todomvc';
 import type { INullableBaseStateContainer } from '../../public/state_sync';
 import {
   createKbnUrlStateStorage,

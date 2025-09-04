@@ -11,10 +11,10 @@ import type { Subscription } from 'rxjs';
 import { EMPTY } from 'rxjs';
 import { tap } from 'rxjs';
 import defaultComparator from 'fast-deep-equal';
+import type { BaseState } from '@kbn/shared-ux-state-container';
 import type { IStateSyncConfig } from './types';
 import type { IStateStorage } from './state_sync_state_storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
-import type { BaseState } from '@kbn/shared-ux-state-container';
 import { applyDiff } from '../state_management/utils/diff_object';
 
 /**
