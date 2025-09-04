@@ -27,19 +27,15 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   excludeFromLastConversationStorage: false,
   messages: [],
   replacements: {},
-  summary: {
-    semanticContent: 'Updated semantic content.',
-  },
 });
 
 const mockUser1 = authenticatedUser;
-
+const userAsUser = {
+  id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+  name: 'elastic',
+};
 const getEsConversationMock = (): EsConversationSchema => {
   return {
-    summary: {
-      '@timestamp': '2025-08-19T13:26:01.746Z',
-      semantic_content: 'Very nice demo semantic content 4.',
-    },
     '@timestamp': '2025-08-19T10:49:52.884Z',
     updated_at: '2025-08-19T13:26:01.746Z',
     api_config: {
@@ -48,11 +44,13 @@ const getEsConversationMock = (): EsConversationSchema => {
     },
     namespace: 'default',
     created_at: '2025-08-19T10:49:52.884Z',
+    created_by: userAsUser,
     messages: [
       {
         '@timestamp': '2025-08-19T10:49:53.799Z',
         role: 'user',
         content: 'Hello there, how many opened alerts do I have?',
+        user: userAsUser,
       },
       {
         metadata: {
@@ -76,12 +74,7 @@ const getEsConversationMock = (): EsConversationSchema => {
     replacements: [],
     title: 'Viewing the Number of Open Alerts in Elastic Security',
     category: 'assistant',
-    users: [
-      {
-        name: 'elastic',
-        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      },
-    ],
+    users: [userAsUser],
     id: 'a565baa8-5566-47b2-ab69-807248b2fc46',
   };
 };
@@ -143,11 +136,6 @@ describe('updateConversation', () => {
           id: 'test',
           messages: [],
           replacements: [],
-          summary: {
-            '@timestamp': expect.anything(),
-            semantic_content: 'Updated semantic content.',
-            summarized_message_ids: undefined,
-          },
           title: 'test',
           updated_at: expect.anything(),
         },
@@ -176,18 +164,9 @@ describe('updateConversation', () => {
     expect(updatedList).toEqual({
       timestamp: '2025-08-19T10:49:52.884Z',
       createdAt: '2025-08-19T10:49:52.884Z',
-      users: [
-        {
-          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-          name: 'elastic',
-        },
-      ],
+      users: [userAsUser],
       title: 'Viewing the Number of Open Alerts in Elastic Security',
       category: 'assistant',
-      summary: {
-        timestamp: '2025-08-19T13:26:01.746Z',
-        semanticContent: 'Very nice demo semantic content 4.',
-      },
       apiConfig: {
         actionTypeId: '.gen-ai',
         connectorId: 'gpt-4-1',
@@ -197,6 +176,7 @@ describe('updateConversation', () => {
           timestamp: '2025-08-19T10:49:53.799Z',
           content: 'Hello there, how many opened alerts do I have?',
           role: 'user',
+          user: userAsUser,
         },
         {
           timestamp: '2025-08-19T10:49:57.398Z',
@@ -220,6 +200,7 @@ describe('updateConversation', () => {
       replacements: {},
       namespace: 'default',
       id: 'a565baa8-5566-47b2-ab69-807248b2fc46',
+      createdBy: userAsUser,
     });
   });
 
@@ -254,6 +235,7 @@ describe('transformToUpdateScheme', () => {
       ...conversation,
       messages: [
         {
+          id: 'message-1',
           content: 'Message 3',
           role: 'user',
           timestamp: '2011-10-05T14:48:00.000Z',
@@ -273,6 +255,7 @@ describe('transformToUpdateScheme', () => {
           },
         },
         {
+          id: 'message-2',
           content: 'Message 4',
           role: 'user',
           timestamp: '2011-10-06T14:48:00.000Z',
@@ -295,6 +278,7 @@ describe('transformToUpdateScheme', () => {
       messages: [
         {
           '@timestamp': '2011-10-05T14:48:00.000Z',
+          id: 'message-1',
           content: 'Message 3',
           is_error: undefined,
           reader: undefined,
@@ -316,16 +300,13 @@ describe('transformToUpdateScheme', () => {
         },
         {
           '@timestamp': '2011-10-06T14:48:00.000Z',
+          id: 'message-2',
           content: 'Message 4',
           is_error: undefined,
           reader: undefined,
           role: 'user',
         },
       ],
-      summary: {
-        '@timestamp': updateAt,
-        semantic_content: 'Updated semantic content.',
-      },
     };
     expect(transformed).toEqual(expected);
   });
@@ -337,6 +318,7 @@ describe('transformToUpdateScheme', () => {
       id: conversation.id,
       messages: [
         {
+          id: 'message-3',
           content: 'Message 3',
           role: 'user',
           timestamp: '2011-10-05T14:48:00.000Z',
@@ -353,6 +335,7 @@ describe('transformToUpdateScheme', () => {
       messages: [
         {
           '@timestamp': '2011-10-05T14:48:00.000Z',
+          id: 'message-3',
           content: 'Message 3',
           is_error: undefined,
           reader: undefined,

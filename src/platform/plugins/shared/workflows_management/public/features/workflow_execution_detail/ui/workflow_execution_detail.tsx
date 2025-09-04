@@ -11,7 +11,7 @@ import React, { useEffect, useCallback } from 'react';
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowStepExecutionList } from './workflow_step_execution_list';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';

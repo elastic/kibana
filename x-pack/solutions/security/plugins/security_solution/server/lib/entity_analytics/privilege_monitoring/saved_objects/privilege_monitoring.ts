@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 
-import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics';
 import { privilegeMonitoringTypeName } from './privilege_monitoring_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 

@@ -6,8 +6,8 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { SiemMigrationRetryFilter } from '../../../../../../common/siem_migrations/constants';
 import type { SiemMigrationResourceType } from '../../../../../../common/siem_migrations/model/common.gen';
+import type { SiemMigrationRetryFilter } from '../../../../../../common/siem_migrations/constants';
 
 export enum SiemMigrationsEventTypes {
   /**

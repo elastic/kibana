@@ -9,7 +9,7 @@ import type { ActionsClientChatOpenAI } from '@kbn/langchain/server/language_mod
 import { loggerMock } from '@kbn/logging-mocks';
 import type { NodeResponse } from '../__mocks__/mocks';
 import { SiemMigrationFakeLLM, MockSiemMigrationTelemetryClient } from '../__mocks__/mocks';
-import { MockEsqlKnowledgeBase } from '../util/__mocks__/mocks';
+import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks';
 import { MockRuleMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getRuleMigrationAgent } from './graph';
 

@@ -9,10 +9,20 @@ import React, { useCallback } from 'react';
 
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import { ConversationSharedState, getConversationSharedState } from '@kbn/elastic-assistant-common';
+import { ShareBadge } from '../../share_conversation/share_badge';
+import {
+  PRIVATE,
+  RESTRICTED,
+  SHARED,
+  VISIBLE_PRIVATE,
+  VISIBLE_RESTRICTED,
+  VISIBLE_SHARED,
+} from '../../share_conversation/translations';
 import type { Conversation } from '../../../assistant_context/types';
 import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
@@ -97,7 +107,7 @@ export const useConversationsTable = () => {
               totalItemCount={totalItemCount}
             />
           ),
-          width: '70px',
+          width: '40px',
           sortable: false,
         },
         {
@@ -124,6 +134,33 @@ export const useConversationsTable = () => {
           render: (connectorTypeTitle: ConversationTableItem['connectorTypeTitle']) =>
             connectorTypeTitle ? <EuiBadge color="hollow">{connectorTypeTitle}</EuiBadge> : null,
           sortable: false,
+        },
+        {
+          name: i18n.CONVERSATIONS_TABLE_COLUMN_SHARING,
+          render: (conversation: ConversationTableItem) => {
+            const conversationSharedState = getConversationSharedState(conversation);
+            const sharingMap = {
+              [ConversationSharedState.SHARED]: { tooltip: VISIBLE_SHARED, badge: SHARED },
+              [ConversationSharedState.RESTRICTED]: {
+                tooltip: VISIBLE_RESTRICTED,
+                badge: RESTRICTED,
+              },
+              [ConversationSharedState.PRIVATE]: { tooltip: VISIBLE_PRIVATE, badge: PRIVATE },
+            };
+
+            const { tooltip: tooltipContent, badge: badgeLabel } =
+              sharingMap[conversationSharedState] || sharingMap[ConversationSharedState.PRIVATE];
+            return (
+              <EuiToolTip content={tooltipContent}>
+                <ShareBadge
+                  conversationSharedState={conversationSharedState}
+                  isConversationOwner
+                  label={badgeLabel}
+                />
+              </EuiToolTip>
+            );
+          },
+          width: '100px',
         },
         {
           field: 'updatedAt',

@@ -57,6 +57,34 @@ describe('isValidSchemaPath', () => {
       true
     );
   });
+
+  it('should return true for union paths', () => {
+    expect(
+      isValidSchemaPath(z.union([z.object({ a: z.string() }), z.object({ b: z.string() })]), 'a')
+    ).toBe(true);
+    expect(
+      isValidSchemaPath(z.union([z.object({ a: z.string() }), z.object({ b: z.string() })]), 'b')
+    ).toBe(true);
+    expect(
+      isValidSchemaPath(z.union([z.object({ a: z.string() }), z.object({ b: z.string() })]), 'c')
+    ).toBe(false);
+    expect(isValidSchemaPath(z.union([z.object({ a: z.string() }), z.any()]), 'c')).toBe(true);
+  });
+
+  it('should return true for union paths array', () => {
+    expect(
+      isValidSchemaPath(
+        z.object({ alerts: z.array(z.union([z.object({ a: z.string() }), z.any()])) }),
+        'alerts[0].a'
+      )
+    ).toBe(true);
+    expect(
+      isValidSchemaPath(
+        z.object({ alerts: z.array(z.union([z.object({ a: z.string() }), z.any()])) }),
+        'alerts[0].b'
+      )
+    ).toBe(true);
+  });
 });
 
 describe('getSchemaAtPath', () => {

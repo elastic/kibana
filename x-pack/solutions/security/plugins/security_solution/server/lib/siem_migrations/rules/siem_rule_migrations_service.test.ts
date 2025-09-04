@@ -10,7 +10,6 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import type { RuleMigrationsCreateClientParams } from './siem_rule_migrations_service';
 import { SiemRuleMigrationsService } from './siem_rule_migrations_service';
 import { Subject } from 'rxjs';
 import {
@@ -20,7 +19,7 @@ import {
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
 import { waitFor } from '@testing-library/dom';
-import type { RuleMigrationsClientDependencies } from './types';
+import type { RuleMigrationsClientDependencies, RuleMigrationsCreateClientParams } from './types';
 
 jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service');

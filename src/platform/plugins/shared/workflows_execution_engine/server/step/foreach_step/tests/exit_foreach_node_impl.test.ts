@@ -8,8 +8,8 @@
  */
 
 import type { ExitForeachNode } from '@kbn/workflows';
-import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import { ExitForeachNodeImpl } from '../exit_foreach_node_impl';
 
 describe('ExitForeachNodeImpl', () => {
   let step: ExitForeachNode;

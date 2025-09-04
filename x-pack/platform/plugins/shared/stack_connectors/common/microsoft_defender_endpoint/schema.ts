@@ -157,6 +157,11 @@ export const RunScriptParamsSchema = schema.object({
   }),
 });
 
+export const CancelParamsSchema = schema.object({
+  comment: schema.string({ minLength: 1 }),
+  actionId: schema.string({ minLength: 1 }),
+});
+
 const MachineActionTypeSchema = schema.oneOf([
   schema.literal('RunAntiVirusScan'),
   schema.literal('Offboard'),

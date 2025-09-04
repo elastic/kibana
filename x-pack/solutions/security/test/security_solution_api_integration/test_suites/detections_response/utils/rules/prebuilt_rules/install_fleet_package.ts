@@ -119,7 +119,8 @@ export const installFleetPackageByUpload = async ({
     },
     {
       retryCount: MAX_RETRIES,
-      timeout: FLEET_RATE_LIMIT_TIMEOUT * 3,
+      retryDelay: FLEET_RATE_LIMIT_TIMEOUT,
+      timeout: FLEET_RATE_LIMIT_TIMEOUT * 2,
     }
   );
 

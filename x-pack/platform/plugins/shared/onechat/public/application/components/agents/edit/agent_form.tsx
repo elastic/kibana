@@ -29,26 +29,35 @@ import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../agent_avatar';
 import { isValidAgentAvatarColor } from '../../../utils/color';
 
-export interface AgentFormProps {
-  agentId?: string;
+// We can't use useDeleteAgent here because DeleteAgentContext is not available for create mode
+// so pass onDelete as prop for edit mode.
+interface EditingAgentFormProps {
+  editingAgentId: string;
+  onDelete: () => void;
 }
+
+interface CreateAgentFormProps {
+  editingAgentId?: never;
+  onDelete?: never;
+}
+
+type AgentFormProps = EditingAgentFormProps | CreateAgentFormProps;
 
 export type AgentFormData = Omit<AgentDefinition, 'type'>;
 
-export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
+export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
   const { navigateToOnechatUrl } = useNavigation();
   const {
     services: { notifications },
   } = useKibana();
 
-  const isCreateMode = !agentId;
+  const isCreateMode = !editingAgentId;
 
   const onSaveSuccess = (agent: AgentDefinition) => {
     notifications.toasts.addSuccess(
@@ -60,7 +69,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             defaultMessage: 'Agent updated successfully',
           })
     );
-
     navigateToOnechatUrl(appPaths.agents.list);
   };
 
@@ -78,26 +86,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
       text: formatOnechatErrorMessage(err),
     });
   };
-
-  const { deleteAgent, isDeleting } = useAgentDelete({
-    onSuccess: () => {
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.onechat.agents.deleteSuccessMessage', {
-          defaultMessage: 'Agent deleted successfully',
-        })
-      );
-      navigateToOnechatUrl(appPaths.agents.list);
-    },
-    onError: (err: Error) => {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.onechat.agents.deleteErrorMessage', {
-          defaultMessage: 'Failed to delete agent',
-        }),
-        text: formatOnechatErrorMessage(err),
-      });
-    },
-  });
-
   const {
     state: agentState,
     isLoading,
@@ -106,7 +94,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     tools,
     error,
   } = useAgentEdit({
-    agentId,
+    editingAgentId,
     onSaveSuccess,
     onSaveError,
   });
@@ -127,7 +115,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     submit(data);
   };
 
-  const isFormDisabled = isLoading || isSubmitting || isDeleting;
+  const isFormDisabled = isLoading || isSubmitting;
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
@@ -269,7 +257,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
                             }),
                             icon: 'trash',
                             onClick: () => {
-                              deleteAgent(agentId!);
+                              onDelete?.();
                             },
                           },
                         ],
@@ -295,7 +283,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
             ? [
                 <EuiButton
                   onClick={() =>
-                    navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: agentId! }))
+                    navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: editingAgentId }))
                   }
                   iconType="comment"
                   isLoading={isSubmitting}

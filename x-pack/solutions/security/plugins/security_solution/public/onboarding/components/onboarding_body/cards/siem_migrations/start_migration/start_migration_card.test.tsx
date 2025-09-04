@@ -161,7 +161,7 @@ describe('StartMigrationsBody', () => {
         {
           id: '1',
           status: SiemMigrationTaskStatus.RUNNING,
-          rules: {
+          items: {
             total: 1,
             pending: 1,
             processing: 1,
@@ -187,7 +187,7 @@ describe('StartMigrationsBody', () => {
         {
           id: '1',
           status: SiemMigrationTaskStatus.RUNNING,
-          rules: {
+          items: {
             total: 1,
             pending: 1,
             processing: 1,
@@ -216,7 +216,7 @@ describe('StartMigrationsBody', () => {
         {
           id: '1',
           status: SiemMigrationTaskStatus.FINISHED,
-          rules: {
+          items: {
             total: 1,
             pending: 0,
             processing: 0,

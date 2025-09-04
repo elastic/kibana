@@ -7,11 +7,39 @@
 
 import React from 'react';
 import { AgentForm } from './agent_form';
+import { DeleteAgentProvider, useDeleteAgent } from '../../../context/delete_agent_context';
+import { appPaths } from '../../../utils/app_paths';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { useOnechatAgentById } from '../../../hooks/agents/use_agent_by_id';
 
 interface EditAgentProps {
   agentId: string;
 }
 
+const EditAgentForm: React.FC<EditAgentProps> = ({ agentId }) => {
+  const { deleteAgent } = useDeleteAgent();
+  const { agent } = useOnechatAgentById(agentId);
+  return (
+    <AgentForm
+      editingAgentId={agentId}
+      onDelete={() => {
+        if (agent) {
+          deleteAgent({ agent });
+        }
+      }}
+    />
+  );
+};
+
 export const EditAgent: React.FC<EditAgentProps> = ({ agentId }) => {
-  return <AgentForm agentId={agentId} />;
+  const { navigateToOnechatUrl } = useNavigation();
+  return (
+    <DeleteAgentProvider
+      onSuccess={() => {
+        navigateToOnechatUrl(appPaths.agents.list);
+      }}
+    >
+      <EditAgentForm agentId={agentId} />
+    </DeleteAgentProvider>
+  );
 };

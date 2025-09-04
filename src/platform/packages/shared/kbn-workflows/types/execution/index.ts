@@ -8,17 +8,36 @@
  */
 
 export type {
-  EnterIfNode,
-  ExitIfNode,
+  AtomicGraphNode,
+  HttpGraphNode,
+  HttpGraphNodeSchema,
+  WaitGraphNode,
+  WaitGraphNodeSchema,
+} from './nodes/base';
+export type {
   EnterConditionBranchNode,
   EnterConditionBranchNodeSchema,
+  EnterIfNode,
   ExitConditionBranchNode,
   ExitConditionBranchNodeSchema,
+  ExitIfNode,
 } from './nodes/branching_nodes';
+export type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
 export type {
-  EnterForeachNode,
-  ExitForeachNode,
   EnterRetryNode,
   ExitRetryNode,
-} from './nodes/loop_nodes';
-export type { AtomicGraphNode, WaitGraphNodeSchema, WaitGraphNode } from './nodes/base';
+  EnterContinueNode,
+  ExitContinueNode,
+  EnterTryBlockNodeSchema,
+  EnterTryBlockNode,
+  ExitTryBlockNodeSchema,
+  ExitTryBlockNode,
+  EnterNormalPathNodeSchema,
+  EnterNormalPathNode,
+  ExitNormalPathNodeSchema,
+  ExitNormalPathNode,
+  EnterFallbackPathNodeSchema,
+  EnterFallbackPathNode,
+  ExitFallbackPathNodeSchema,
+  ExitFallbackPathNode,
+} from './nodes/on_failure_nodes';

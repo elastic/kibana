@@ -274,7 +274,7 @@ const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
     path: t.type({
       dataStream: t.string,
     }),
-    query: t.intersection([rangeRt, typeRt]),
+    query: rangeRt,
   }),
   options: {
     tags: [],
@@ -292,12 +292,10 @@ const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
-
     return await getNonAggregatableDataStreams({
       esClient,
+      dataStream: params.path.dataStream,
       ...params.query,
-      types: [params.query.type],
     });
   },
 });

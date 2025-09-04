@@ -62,6 +62,7 @@ describe('State', () => {
       name: 'group_stream',
       description: '',
       group: {
+        tags: [],
         members: [],
       },
     };
@@ -124,6 +125,7 @@ describe('State', () => {
                 description: '',
                 name: 'whatever',
                 group: {
+                  tags: [],
                   members: [],
                 },
               },
@@ -156,6 +158,7 @@ describe('State', () => {
                 description: '',
                 name: 'new_group_stream',
                 group: {
+                  tags: [],
                   members: [],
                 },
               },
@@ -188,6 +191,7 @@ describe('State', () => {
                 name: 'stream_that_fails',
                 description: 'Something went wrong',
                 group: {
+                  tags: [],
                   members: [],
                 },
               },
@@ -304,6 +308,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
               name: 'and_another',
               description: '',
               group: {
+                tags: [],
                 members: [],
               },
             },

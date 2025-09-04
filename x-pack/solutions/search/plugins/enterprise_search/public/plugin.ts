@@ -105,6 +105,7 @@ const contentLinks: AppDeepLink[] = [
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentConnectorsLinkLabel', {
       defaultMessage: 'Connectors',
     }),
+    visibleIn: ['globalSearch'],
   },
   {
     id: 'webCrawlers',
@@ -112,6 +113,7 @@ const contentLinks: AppDeepLink[] = [
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
       defaultMessage: 'Web Crawlers',
     }),
+    visibleIn: ['globalSearch'],
   },
 ];
 

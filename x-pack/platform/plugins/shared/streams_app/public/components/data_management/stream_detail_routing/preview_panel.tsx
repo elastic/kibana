@@ -33,14 +33,14 @@ export function PreviewPanel() {
   let content;
 
   if (routingSnapshot.matches({ ready: 'idle' })) {
-    content = <IdlePanel />;
+    content = <SamplePreviewPanel />;
   } else if (
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' })
   ) {
     content = <EditingPanel />;
   } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
-    content = <RuleCreationPanel />;
+    content = <SamplePreviewPanel />;
   }
 
   return (
@@ -63,24 +63,6 @@ export function PreviewPanel() {
     </>
   );
 }
-
-const IdlePanel = () => (
-  <EuiEmptyPrompt
-    icon={<AssetImage type="yourPreviewWillAppearHere" />}
-    titleSize="s"
-    title={
-      <h2>
-        {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmpty', {
-          defaultMessage: 'Your preview will appear here',
-        })}
-      </h2>
-    }
-    body={i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription', {
-      defaultMessage:
-        'Create a new child stream to see what will be routed to it based on the conditions',
-    })}
-  />
-);
 
 const EditingPanel = () => (
   <EuiEmptyPrompt
@@ -112,7 +94,7 @@ const EditingPanel = () => (
   />
 );
 
-const RuleCreationPanel = () => {
+const SamplePreviewPanel = () => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const isUpdating =

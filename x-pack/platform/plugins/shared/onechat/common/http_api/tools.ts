@@ -10,6 +10,7 @@ import type {
   ToolDefinitionWithSchema,
   SerializedOnechatError,
 } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export interface ListToolsResponse {
   results: ToolDefinitionWithSchema[];
@@ -49,4 +50,8 @@ export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolF
 
 export interface BulkDeleteToolResponse {
   results: BulkDeleteToolResult[];
+}
+
+export interface ExecuteToolResponse {
+  result: ToolResult[];
 }

@@ -21,13 +21,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-interface Action {
+interface BaseAction {
   icon: IconType;
-  onClick: () => void;
   ariaLabel: string;
-  dataTestSubj: string;
+  dataTestSubj?: string;
   label?: string;
 }
+
+type Action =
+  | (BaseAction & { onClick: () => void; href?: never })
+  | (BaseAction & { href: string; onClick?: never });
 
 export interface ContentFrameworkSectionProps {
   id: string;
@@ -35,20 +38,23 @@ export interface ContentFrameworkSectionProps {
   description?: string;
   actions?: Action[];
   children: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
-export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = ({
+export function ContentFrameworkSection({
   id,
   title,
   description,
   actions,
   children,
-}) => {
+  'data-test-subj': accordionDataTestSubj,
+}: ContentFrameworkSectionProps) {
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions?.map((action, idx) => {
-        const { icon, onClick, ariaLabel, label, dataTestSubj } = action;
+        const { icon, onClick, ariaLabel, label, dataTestSubj, href } = action;
         const size = 'xs';
+        const buttonProps = onClick ? { onClick } : { href };
         return (
           <EuiFlexItem grow={false} key={idx}>
             {label ? (
@@ -56,8 +62,8 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
                 size={size}
                 iconType={icon}
                 aria-label={ariaLabel}
-                onClick={onClick}
                 data-test-subj={dataTestSubj}
+                {...buttonProps}
               >
                 {label}
               </EuiButtonEmpty>
@@ -65,9 +71,9 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
               <EuiButtonIcon
                 size={size}
                 iconType={icon}
-                onClick={onClick}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...buttonProps}
               />
             )}
           </EuiFlexItem>
@@ -78,6 +84,7 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
 
   return (
     <EuiAccordion
+      data-test-subj={accordionDataTestSubj}
       id={`sectionAccordion-${id}`}
       initialIsOpen
       buttonContent={
@@ -110,4 +117,4 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
       </>
     </EuiAccordion>
   );
-};
+}

@@ -60,6 +60,7 @@
     "@kbn/streamlang",
     "@kbn/licensing-types",
     "@kbn/safer-lodash-set",
-    "@kbn/sse-utils"
+    "@kbn/sse-utils",
+    "@kbn/global-search-plugin"
   ]
 }

@@ -155,9 +155,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
+    const { event, ...manualInputs } = inputs;
     const context = {
-      ...inputs,
+      event,
       spaceId,
+      inputs: manualInputs,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
@@ -189,6 +191,7 @@ export class WorkflowsManagementApi {
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
+        yaml: workflowYaml,
         isTestRun: true,
       },
       context

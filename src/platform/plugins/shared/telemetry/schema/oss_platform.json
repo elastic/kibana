@@ -11060,10 +11060,28 @@
             "description": "Enable significant events in streams."
           }
         },
+        "observability:streamsEnableGroupStreams": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enable Group streams in Streams"
+          }
+        },
         "observability:enableDiagnosticMode": {
           "type": "boolean",
           "_meta": {
             "description": "Enable diagnostic mode"
+          }
+        },
+        "genAiSettings:defaultAIConnector": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default AI connector"
+          }
+        },
+        "genAiSettings:defaultAIConnectorOnly": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Restrict to default AI connector only"
           }
         }
       }

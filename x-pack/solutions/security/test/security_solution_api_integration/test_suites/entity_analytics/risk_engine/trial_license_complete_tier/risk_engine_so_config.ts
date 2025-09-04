@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   riskEngineRouteHelpersFactory,
   getRiskEngineConfigSO,
-  waitForRiskEngineRun,
   waitForRiskEngineTaskToBeGone,
 } from '../../utils';
 
@@ -78,7 +77,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should include the right keys as per the update', async () => {
       await riskEngineRoutes.init();
-      await waitForRiskEngineRun;
 
       const currentSoConfig = await getRiskEngineConfigSO({ kibanaServer });
 
@@ -104,7 +102,6 @@ export default ({ getService }: FtrProviderContext) => {
       await riskEngineRoutes.soConfig(updatedSoBody, 200);
 
       await riskEngineRoutes.enable();
-      await waitForRiskEngineRun;
 
       const currentSoConfig3 = await getRiskEngineConfigSO({ kibanaServer });
       expect(JSON.stringify(currentSoConfig3.attributes.excludeAlertStatuses)).to.equal(
@@ -114,7 +111,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should succeed while updating the saved object', async () => {
       await riskEngineRoutes.init();
-      await waitForRiskEngineRun;
 
       const updatedSoBody = {
         exclude_alert_tags: ['False Positive'],
@@ -127,7 +123,6 @@ export default ({ getService }: FtrProviderContext) => {
     it('should update the config in the right space', async () => {
       await riskEngineRoutesForNamespace.init();
       await riskEngineRoutes.init();
-      await waitForRiskEngineRun;
 
       const updatedSoBody = {
         exclude_alert_tags: ['False Positive'],

@@ -46,6 +46,15 @@ export function getSchemaAtPath(
           return partial ? current : null;
         }
         current = shape[segment];
+      } else if (current instanceof z.ZodUnion) {
+        const branches = current.options;
+        const validBranch = branches.find((branch: z.ZodType) =>
+          isValidSchemaPath(branch, segment)
+        );
+        if (!validBranch) {
+          return partial ? current : null;
+        }
+        current = validBranch;
       } else if (current instanceof z.ZodArray) {
         if (!/^\d+$/.test(segment)) {
           return partial ? current : null;

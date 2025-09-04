@@ -86,22 +86,22 @@ describe('STATS Validation', () => {
 
       test('errors when input is not an aggregate function', () => {
         statsExpectErrors('from a_index | stats doubleField ', [
-          'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
+          'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
         ]);
       });
 
       test('various errors', () => {
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats avg(doubleField) by col0 = wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats col0 = avg(fn(number)), count(*)', [
-          'Unknown function [fn]',
+          'Unknown function FN',
         ]);
       });
 
@@ -134,12 +134,12 @@ describe('STATS Validation', () => {
       });
 
       test('various errors', () => {
-        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField)', [
-          'STATS BY does not support function percentile',
+        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField, 20)', [
+          'Function PERCENTILE not allowed in BY',
         ]);
         statsExpectErrors(
-          'from a_index | stats avg(doubleField) by textField, percentile(doubleField) by ipField',
-          ['STATS BY does not support function percentile']
+          'from a_index | stats avg(doubleField) by textField, percentile(doubleField, 50) by ipField',
+          ['Function PERCENTILE not allowed in BY']
         );
       });
 
@@ -149,28 +149,6 @@ describe('STATS Validation', () => {
           statsExpectErrors(
             'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
             []
-          );
-        });
-
-        test('errors', () => {
-          statsExpectErrors('from index | stats by bucket(dateField, pi(), "", "")', [
-            'Argument of [bucket] must be [integer], found value [pi()] type [double]',
-          ]);
-
-          statsExpectErrors('from index | stats by bucket(dateField, abs(doubleField), "", "")', [
-            'Argument of [bucket] must be a constant, received [abs(doubleField)]',
-          ]);
-          statsExpectErrors(
-            'from index | stats by bucket(dateField, abs(length(doubleField)), "", "")',
-            ['Argument of [bucket] must be a constant, received [abs(length(doubleField))]']
-          );
-          statsExpectErrors(
-            'from index | stats by bucket(dateField, doubleField, textField, textField)',
-            [
-              'Argument of [bucket] must be a constant, received [doubleField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-            ]
           );
         });
       });

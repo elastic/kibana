@@ -138,7 +138,7 @@ describe('COMPLETION Validation', () => {
           `FROM index | COMPLETION AVG(integerField) WITH { "inference_id": "inferenceId"}`,
           [
             '[COMPLETION] prompt must be of type [text] but is [double]',
-            'COMPLETION does not support function avg',
+            'Function AVG not allowed in COMPLETION',
           ]
         );
       });
@@ -165,11 +165,11 @@ describe('COMPLETION Validation', () => {
       it('prompt is an unknown field', () => {
         completionExpectErrors(
           `FROM index | COMPLETION unknownField WITH { "inference_id": "inferenceId"}`,
-          ['Unknown column [unknownField]']
+          ['Unknown column "unknownField"']
         );
         completionExpectErrors(
           `FROM index | COMPLETION \`unknownField\` WITH { "inference_id": "inferenceId"}`,
-          ['Unknown column [unknownField]']
+          ['Unknown column "unknownField"']
         );
       });
 

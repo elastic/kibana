@@ -40,7 +40,7 @@ export function AdvancedConfigKeyInput({
     setLocalKey(configKey);
   }, [configKey]);
 
-  const touched = useCallback((key: string) => key !== configKey, [configKey]);
+  const [touched, setTouched] = useState(false);
 
   const getErrorMsg = useCallback(
     (key: string) => {
@@ -49,32 +49,36 @@ export function AdvancedConfigKeyInput({
           defaultMessage: 'Key cannot be empty',
         });
       }
+      if (key.trim() === '') {
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+          defaultMessage: 'Key cannot be only whitespace characters',
+        });
+      }
       if (checkIfPredefinedConfigKeyExists(key)) {
         return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
           defaultMessage: 'This key is already predefined in the standard configuration above',
         });
       }
-      if (touched(key) && checkIfAdvancedConfigKeyExists(key)) {
+      if (key !== configKey && checkIfAdvancedConfigKeyExists(key)) {
         return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
           defaultMessage: 'This key is already used in another advanced configuration',
         });
       }
       return null;
     },
-    [checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists, touched]
+    [checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists, configKey]
   );
 
   useEffect(() => {
     const errorId = `key${id}`;
-    const isTouched = touched(localKey);
     const newErrorMsg = getErrorMsg(localKey);
     const hasValidationErrors = newErrorMsg !== null;
 
     setErrorMsg(newErrorMsg);
-    setIsFormInvalid((isTouched || revalidate) && hasValidationErrors);
+    setIsFormInvalid((touched || revalidate) && hasValidationErrors);
 
     if (hasValidationErrors) {
-      addValidationError(errorId, isTouched);
+      addValidationError(errorId, touched);
     } else {
       removeValidationError(errorId);
     }
@@ -85,6 +89,7 @@ export function AdvancedConfigKeyInput({
     const noValidationErrors = newErrorMsg === null;
 
     setLocalKey(key);
+    setTouched(true);
 
     if (noValidationErrors) {
       onChange({ key, oldKey: configKey });

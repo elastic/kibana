@@ -30,7 +30,7 @@ export async function updateFailureStore({
           enabled: failureStoreEnabled,
           lifecycle: {
             data_retention: customRetentionPeriod,
-            ...(isServerless ? {} : { enabled: !!customRetentionPeriod }),
+            ...(isServerless ? {} : { enabled: failureStoreEnabled }),
           },
         },
       },

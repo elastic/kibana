@@ -61,6 +61,7 @@ export const getGenAiTokenTracking = async ({
   if (hasTelemetryMetadata(validatedParams.subActionParams)) {
     telemetryMetadata = validatedParams.subActionParams.telemetryMetadata;
   }
+
   if (
     (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') ||
     (actionTypeId === '.inference' &&
@@ -136,15 +137,21 @@ export const getGenAiTokenTracking = async ({
 
   // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
   if (
-    validatedParams.subAction === 'invokeStream' &&
+    (validatedParams.subAction === 'invokeStream' ||
+      (actionTypeId === '.inference' &&
+        validatedParams.subAction === 'unified_completion_stream')) &&
     result.data instanceof Readable &&
     actionTypeId !== '.gemini'
   ) {
     try {
+      const body =
+        actionTypeId === '.inference'
+          ? (validatedParams as { subActionParams: { body: InvokeBody } }).subActionParams.body
+          : (validatedParams as { subActionParams: InvokeBody }).subActionParams;
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),
         actionTypeId,
-        body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
+        body,
         logger,
       });
       return {

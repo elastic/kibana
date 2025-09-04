@@ -281,8 +281,8 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+      ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
     ],
   },
   {
@@ -302,7 +302,6 @@ export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
     ],
     esArgs: [
       ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-
       ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
     ],
   },
@@ -661,7 +660,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
   if (clean && exists) {
     log.info('Cleaning existing object store.');
-    await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    try {
+      await Fsp.rm(objectStorePath, { recursive: true, force: true });
+    } catch (error) {
+      // Fall back to sudo if needed, CI user can have issues removing old state
+      await execa('sudo', ['rm', '-rf', objectStorePath]);
+    }
   }
 
   if (clean || !exists) {

@@ -138,6 +138,7 @@ export const fleetAgentsSchema: RootSchema<any> = {
         _meta: {
           description:
             'Boolean field, indicates if remote sync integrations feature is enabled on the remote elasticsearch output',
+          optional: true,
         },
       },
     },

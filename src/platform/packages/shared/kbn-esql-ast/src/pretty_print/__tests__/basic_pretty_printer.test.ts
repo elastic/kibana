@@ -205,39 +205,49 @@ describe('single line query', () => {
       });
     });
 
-    /**
-     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-     * get back to it after 9.1 release.
-     */
-    describe.skip('RERANK', () => {
-      test('single field', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+    describe('RERANK', () => {
+      test('single field with inference map', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}');
       });
 
-      test('two fields', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+      test('target assignment and multiple fields', () => {
+        const { text } = reprint(
+          `FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}'
+        );
       });
 
-      test('param as query', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+      test('field assignment in ON clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}'
+        );
       });
 
-      test('param as field part', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+      test('multi props in WITH clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}'
+        );
       });
 
-      test('param as inference ID', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+      test('without WITH clause', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1`);
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+        expect(text).toBe('FROM a | RERANK "query" ON field1');
       });
     });
 

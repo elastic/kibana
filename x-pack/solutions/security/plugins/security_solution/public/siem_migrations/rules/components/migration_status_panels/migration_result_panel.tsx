@@ -30,16 +30,13 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { css } from '@emotion/react';
 import { PanelText } from '../../../../common/components/panel_text';
-import {
-  convertTranslationResultIntoText,
-  useResultVisColors,
-} from '../../utils/translation_results';
+import { convertTranslationResultIntoText, useResultVisColors } from '../../../common/utils';
 import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { RuleMigrationStats } from '../../types';
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { RuleMigrationsLastError } from './last_error';
@@ -192,17 +189,17 @@ const TranslationResultsChart = React.memo<{
   const data = [
     {
       category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
-      type: convertTranslationResultIntoText(RuleTranslationResult.FULL),
+      type: convertTranslationResultIntoText(MigrationTranslationResult.FULL),
       value: translationStats.rules.success.result.full,
     },
     {
       category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
-      type: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
+      type: convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL),
       value: translationStats.rules.success.result.partial,
     },
     {
       category: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
-      type: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
+      type: convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE),
       value: translationStats.rules.success.result.untranslatable,
     },
     {
@@ -213,9 +210,9 @@ const TranslationResultsChart = React.memo<{
   ];
 
   const colors = [
-    translationResultColors[RuleTranslationResult.FULL],
-    translationResultColors[RuleTranslationResult.PARTIAL],
-    translationResultColors[RuleTranslationResult.UNTRANSLATABLE],
+    translationResultColors[MigrationTranslationResult.FULL],
+    translationResultColors[MigrationTranslationResult.PARTIAL],
+    translationResultColors[MigrationTranslationResult.UNTRANSLATABLE],
     translationResultColors.error,
   ];
 
@@ -274,19 +271,19 @@ const TranslationResultsTable = React.memo<{
   const items = useMemo<TranslationResultsTableItem[]>(
     () => [
       {
-        title: convertTranslationResultIntoText(RuleTranslationResult.FULL),
+        title: convertTranslationResultIntoText(MigrationTranslationResult.FULL),
         value: translationStats.rules.success.result.full,
-        color: translationResultColors[RuleTranslationResult.FULL],
+        color: translationResultColors[MigrationTranslationResult.FULL],
       },
       {
-        title: convertTranslationResultIntoText(RuleTranslationResult.PARTIAL),
+        title: convertTranslationResultIntoText(MigrationTranslationResult.PARTIAL),
         value: translationStats.rules.success.result.partial,
-        color: translationResultColors[RuleTranslationResult.PARTIAL],
+        color: translationResultColors[MigrationTranslationResult.PARTIAL],
       },
       {
-        title: convertTranslationResultIntoText(RuleTranslationResult.UNTRANSLATABLE),
+        title: convertTranslationResultIntoText(MigrationTranslationResult.UNTRANSLATABLE),
         value: translationStats.rules.success.result.untranslatable,
-        color: translationResultColors[RuleTranslationResult.UNTRANSLATABLE],
+        color: translationResultColors[MigrationTranslationResult.UNTRANSLATABLE],
       },
       {
         title: i18n.RULE_MIGRATION_TRANSLATION_FAILED,

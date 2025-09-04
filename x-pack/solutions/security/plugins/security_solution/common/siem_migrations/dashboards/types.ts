@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { DashboardMigrationDashboard } from '../model/dashboard_migration.gen';
+import type { SiemMigrationFilters } from '../types';
 
-export type CreateDashboardsInput = Omit<
-  DashboardMigrationDashboard,
-  '@timestamp' | 'id' | 'status' | 'created_by' | 'updated_by' | 'updated_at'
->;
+export interface DashboardMigrationFilters extends SiemMigrationFilters {
+  searchTerm?: string;
+  installed?: boolean;
+  installable?: boolean;
+}

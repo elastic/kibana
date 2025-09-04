@@ -39,11 +39,13 @@ const mockCompletedSearchResponse = {
 
 describe('getSessionStatus', () => {
   beforeEach(() => {
-    deps.internalClient.asyncSearch.status.mockReset();
+    deps.esClient.asyncSearch.status.mockReset();
   });
 
   const mockConfig = {} as unknown as SearchSessionsConfigSchema;
-  const deps = { internalClient: elasticsearchServiceMock.createElasticsearchClient() };
+  const deps = {
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
+  };
   test("returns an in_progress status if there's nothing inside the session", async () => {
     const session: any = {
       idMapping: {},
@@ -55,7 +57,7 @@ describe('getSessionStatus', () => {
   });
 
   test("returns an error status if there's at least one error", async () => {
-    deps.internalClient.asyncSearch.status.mockImplementation(async ({ id }): Promise<any> => {
+    deps.esClient.asyncSearch.status.mockImplementation(async ({ id }): Promise<any> => {
       switch (id) {
         case 'a':
           return mockInProgressSearchResponse;
@@ -96,7 +98,7 @@ describe('getSessionStatus', () => {
   });
 
   test('doesnt expire if expire > now', async () => {
-    deps.internalClient.asyncSearch.status.mockResolvedValue(mockInProgressSearchResponse as any);
+    deps.esClient.asyncSearch.status.mockResolvedValue(mockInProgressSearchResponse as any);
 
     const session: any = {
       idMapping: {
@@ -123,7 +125,7 @@ describe('getSessionStatus', () => {
   });
 
   test('returns a complete status if all are complete', async () => {
-    deps.internalClient.asyncSearch.status.mockResolvedValue(mockCompletedSearchResponse as any);
+    deps.esClient.asyncSearch.status.mockResolvedValue(mockCompletedSearchResponse as any);
 
     const session: any = {
       idMapping: {
@@ -138,7 +140,7 @@ describe('getSessionStatus', () => {
   });
 
   test('returns a running status if some are still running', async () => {
-    deps.internalClient.asyncSearch.status.mockImplementation(async ({ id }): Promise<any> => {
+    deps.esClient.asyncSearch.status.mockImplementation(async ({ id }): Promise<any> => {
       switch (id) {
         case 'a':
           return mockInProgressSearchResponse;

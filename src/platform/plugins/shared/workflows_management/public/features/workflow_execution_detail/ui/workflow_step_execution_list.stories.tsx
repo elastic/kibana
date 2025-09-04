@@ -29,6 +29,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
       finishedAt: new Date().toISOString(),
       duration: 1000,
       spaceId: 'default',
+      yaml: '',
       stepExecutions: [
         {
           id: '3',

@@ -17,8 +17,9 @@ import {
 import { css } from '@emotion/react';
 import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import type {
   CreateToolPayload,
   CreateToolResponse,
@@ -36,6 +37,7 @@ import {
 import { OnechatEsqlToolForm, OnechatEsqlToolFormMode } from './form/esql_tool_form';
 import type { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 import { useEsqlToolForm } from '../../../hooks/tools/use_esql_tool_form';
+import { OnechatTestFlyout } from '../execute/test_tools';
 
 interface EsqlToolBaseProps {
   tool?: EsqlToolDefinitionWithSchema;
@@ -65,8 +67,11 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
   const form = useEsqlToolForm();
-  const { reset, formState } = form;
-  const { errors } = formState;
+  const { reset, formState, watch } = form;
+  const { errors, isDirty } = formState;
+  const [showTestFlyout, setShowTestFlyout] = useState(false);
+
+  const currentToolId = watch('name');
 
   const handleClear = useCallback(() => {
     reset();
@@ -86,7 +91,10 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
 
   useEffect(() => {
     if (tool) {
-      reset(transformEsqlToolToFormData(tool), { keepDefaultValues: true });
+      reset(transformEsqlToolToFormData(tool), {
+        keepDefaultValues: true,
+        keepDirty: true,
+      });
     }
   }, [tool, reset]);
 
@@ -104,6 +112,43 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
       isLoading={isSubmitting}
     >
       {labels.tools.saveButtonLabel}
+    </EuiButton>
+  );
+
+  const saveAndTestButton = (
+    <EuiButton
+      fill
+      onClick={async () => {
+        const formData = form.getValues();
+        if (mode === OnechatEsqlToolFormMode.Edit) {
+          await saveTool(transformEsqlFormDataForUpdate(formData));
+        } else {
+          await saveTool(transformEsqlFormDataForCreate(formData));
+        }
+        if (currentToolId) {
+          setShowTestFlyout(true);
+        }
+      }}
+      disabled={Object.keys(errors).length > 0 || isSubmitting}
+      isLoading={isSubmitting}
+    >
+      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveAndTestButtonLabel', {
+        defaultMessage: 'Save and Test',
+      })}
+    </EuiButton>
+  );
+
+  const testButton = (
+    <EuiButton
+      fill
+      onClick={() => {
+        setShowTestFlyout(true);
+      }}
+      disabled={Object.keys(errors).length > 0}
+    >
+      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.testButtonLabel', {
+        defaultMessage: 'Test',
+      })}
     </EuiButton>
   );
 
@@ -127,7 +172,22 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
               <EuiLoadingSpinner size="xxl" />
             </EuiFlexGroup>
           ) : (
-            <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
+            <>
+              <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
+              {showTestFlyout && currentToolId && (
+                <OnechatTestFlyout
+                  isOpen={showTestFlyout}
+                  isLoading={isLoading}
+                  toolId={currentToolId}
+                  onClose={() => {
+                    setShowTestFlyout(false);
+                    if (mode === OnechatEsqlToolFormMode.Create) {
+                      navigateToOnechatUrl(appPaths.tools.list);
+                    }
+                  }}
+                />
+              )}
+            </>
           )}
         </KibanaPageTemplate.Section>
         <KibanaPageTemplate.BottomBar
@@ -139,6 +199,8 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
             <EuiFlexItem>
               <EuiButton onClick={handleClear}>{labels.tools.clearButtonLabel}</EuiButton>
             </EuiFlexItem>
+            {!isDirty && <EuiFlexItem>{testButton}</EuiFlexItem>}
+            {isDirty && <EuiFlexItem>{saveAndTestButton}</EuiFlexItem>}
             <EuiFlexItem>
               {Object.keys(errors).length > 0 ? (
                 <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>

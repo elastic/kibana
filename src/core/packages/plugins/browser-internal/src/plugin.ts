@@ -16,13 +16,8 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
-import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { toContainerModule } from '@kbn/core-di-internal';
-import {
-  CoreSetup as CoreSetupService,
-  CoreStart as CoreStartService,
-  PluginInitializer as PluginInitializerService,
-} from '@kbn/core-di-browser';
+import { Setup, Start } from '@kbn/core-di';
+import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 import { type PluginDefinition, read } from './plugin_reader';
 
 /**
@@ -75,9 +70,7 @@ export class PluginWrapper<
     if (this.definition.module) {
       this.container = setupContext.injection.getContainer();
       this.container.loadSync(this.definition.module);
-      this.container.loadSync(toContainerModule(this.initializerContext, PluginInitializerService));
-      this.container.loadSync(toContainerModule(setupContext, CoreSetupService));
-      this.container.loadSync(toContainerModule(plugins, PluginSetup));
+      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
     return [this.instance?.setup(setupContext, plugins), this.container?.get<TSetup>(Setup)].find(
@@ -97,8 +90,7 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.container?.loadSync(toContainerModule(startContext, CoreStartService));
-    this.container?.loadSync(toContainerModule(plugins, PluginStart));
+    this.container?.loadSync(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
       this.container?.get<TStart>(Start),

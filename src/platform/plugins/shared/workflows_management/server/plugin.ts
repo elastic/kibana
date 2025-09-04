@@ -18,6 +18,7 @@ import type {
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -79,8 +80,24 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
             throw new Error(`Workflow not found: ${workflowId}`);
           }
 
+          if (!workflow.definition) {
+            throw new Error(`Workflow definition not found: ${workflowId}`);
+          }
+
+          if (!workflow.valid) {
+            throw new Error(`Workflow is not valid: ${workflowId}`);
+          }
+
+          const workflowToRun: WorkflowExecutionEngineModel = {
+            id: workflow.id,
+            name: workflow.name,
+            enabled: workflow.enabled,
+            definition: workflow.definition,
+            yaml: workflow.yaml,
+          };
+
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflow, spaceId, inputs);
+          return await this.api.runWorkflow(workflowToRun, spaceId, inputs);
         };
       };
 

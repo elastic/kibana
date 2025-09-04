@@ -8,7 +8,7 @@
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 export const authenticatedUser = {
-  username: 'my_username',
+  username: 'elastic',
   profile_uid: 'my_profile_uid',
   authentication_realm: {
     type: 'my_realm_type',
