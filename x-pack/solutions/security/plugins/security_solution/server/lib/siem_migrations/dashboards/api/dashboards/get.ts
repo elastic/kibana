@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../../common/siem_migrations/constants';
-import type { GetRuleMigrationRulesResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { DashboardMigrationGetDashboardOptions } from '../../../../../../common/siem_migrations/dashboards/types';
+import type { GetDashboardMigrationDashboardsResponse } from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import {
-  GetRuleMigrationRulesRequestParams,
-  GetRuleMigrationRulesRequestQuery,
-} from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+  GetDashboardMigrationDashboardsRequestParams,
+  GetDashboardMigrationDashboardsRequestQuery,
+} from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { RuleMigrationGetRulesOptions } from '../../data/rule_migrations_data_rules_client';
-import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import { withExistingMigration } from '../util/with_existing_migration_id';
+import { withExistingDashboardMigration } from '../util/with_existing_dashboard_migration';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 
-export const registerSiemRuleMigrationsGetRulesRoute = (
+export const registerSiemDashboardMigrationsGetDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: SIEM_RULE_MIGRATION_RULES_PATH,
+      path: SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH,
       access: 'internal',
       security: { authz },
     })
@@ -35,43 +35,46 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetRuleMigrationRulesRequestParams),
-            query: buildRouteValidationWithZod(GetRuleMigrationRulesRequestQuery),
+            params: buildRouteValidationWithZod(GetDashboardMigrationDashboardsRequestParams),
+            query: buildRouteValidationWithZod(GetDashboardMigrationDashboardsRequestQuery),
           },
         },
       },
       withLicense(
-        withExistingMigration(
-          async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationRulesResponse>> => {
+        withExistingDashboardMigration(
+          async (
+            context,
+            req,
+            res
+          ): Promise<IKibanaResponse<GetDashboardMigrationDashboardsResponse>> => {
             const { migration_id: migrationId } = req.params;
 
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
               context.securitySolution,
-              'rules'
+              'dashboards'
             );
             try {
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+              const dashboardMigrationsClient =
+                ctx.securitySolution.siemMigrations.getDashboardsClient();
 
               const { page, per_page: size } = req.query;
-              const options: RuleMigrationGetRulesOptions = {
+              const options: DashboardMigrationGetDashboardOptions = {
                 filters: {
                   searchTerm: req.query.search_term,
                   ids: req.query.ids,
-                  prebuilt: req.query.is_prebuilt,
                   installed: req.query.is_installed,
                   fullyTranslated: req.query.is_fully_translated,
                   partiallyTranslated: req.query.is_partially_translated,
                   untranslatable: req.query.is_untranslatable,
                   failed: req.query.is_failed,
-                  missingIndex: req.query.is_missing_index,
                 },
                 sort: { sortField: req.query.sort_field, sortDirection: req.query.sort_direction },
                 size,
                 from: page && size ? page * size : 0,
               };
 
-              const result = await ruleMigrationsClient.data.items.get(migrationId, options);
+              const result = await dashboardMigrationsClient.data.items.get(migrationId, options);
 
               await siemMigrationAuditLogger.logGetMigrationItems({ migrationId });
               return res.ok({ body: result });
