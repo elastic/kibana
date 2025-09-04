@@ -188,12 +188,23 @@ export const useTopNavLinks = ({
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
   return useMemo(() => {
-    const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
+    const allEntries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
       convertAppMenuItemToTopNavItem({
         appMenuItem,
         services,
       })
     );
+
+    // Separate built-in Discover items from custom/outside app items
+    const builtInItems = allEntries.filter(item => 
+      !['dataset-quality-link'].includes(item.id || '')
+    );
+    const customItems = allEntries.filter(item => 
+      ['dataset-quality-link'].includes(item.id || '')
+    );
+
+    // Build entries: built-in items first, then custom items
+    const entries = [...builtInItems, ...customItems];
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
       /**
