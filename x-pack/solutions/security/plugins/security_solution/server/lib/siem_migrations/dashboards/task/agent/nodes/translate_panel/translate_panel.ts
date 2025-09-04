@@ -60,9 +60,10 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
         };
       }
     },
-    // Fan-out: for each panel, Send translatePanel to be executed in parallel.
-    // This function needs to be called inside a `conditionalEdge`
+
+    // Fan-out: `conditionalEdge` that Send all individual "translatePanel" to be executed in parallel
     conditionalEdge: (state: MigrateDashboardState) => {
+      // Pre-condition: `state.parsed_original_dashboard.panels` must not be empty, otherwise the execution will stop here
       const panels = state.parsed_original_dashboard.panels ?? [];
       return panels.map((panel, i) => {
         const resources = filterIdentifiedResources(
@@ -80,6 +81,7 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
         return new Send('translatePanel', translatePanelParams);
       });
     },
+
     subgraph: translatePanelSubGraph, // Only for the diagram generation
   };
 };

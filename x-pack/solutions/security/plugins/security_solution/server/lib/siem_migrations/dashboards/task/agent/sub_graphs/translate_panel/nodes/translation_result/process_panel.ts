@@ -50,8 +50,7 @@ interface PanelJSON {
 
 // Process the panel and return the modified panelJSON
 export const processPanel = (panel: object, query: string, parsedPanel: ParsedPanel): object => {
-  // Apply changes to panel - equivalent to Python convertToKibanaDashboard logic for single panel
-  const panelJSON = { ...panel } as PanelJSON;
+  const panelJSON = structuredClone(panel) as PanelJSON;
 
   const { columnList, columns } = parseColumns(query);
   const vizType = parsedPanel.viz_type;
@@ -72,26 +71,9 @@ export const processPanel = (panel: object, query: string, parsedPanel: ParsedPa
   }
 
   // Configure visualization-specific properties
-  configureChartSpecificProperties(panelJSON, vizType, columns);
-
-  if (vizType === 'treemap') {
-    configureTreemapProperties(panelJSON, columns);
-  }
-
+  configureVixTypeProperties(panelJSON, vizType, query, columns);
   configureStackedProperties(panelJSON, vizType, columns);
   configureDatasourceProperties(panelJSON, query, columnList);
-
-  // Handle metric visualization
-  if (vizType === 'metric') {
-    if (panelJSON.embeddableConfig?.attributes?.state?.visualization) {
-      panelJSON.embeddableConfig.attributes.state.visualization.metricAccessor = columns[0];
-    }
-  }
-
-  // Handle gauge visualization
-  if (vizType === 'gauge') {
-    configureGaugeProperties(panelJSON, query, columns);
-  }
 
   return panelJSON;
 };
@@ -105,9 +87,9 @@ function parseColumns(query: string): { columnList: ColumnInfo[]; columns: strin
   let metricIndex = 0;
 
   columnNames.forEach((columnName) => {
-    // For now, assume numeric columns are metrics (first columns) and string columns are dimensions
-    // This is a simplification - in real implementation you'd need type information
-    const isNumeric = metricIndex === 0; // First column is typically the metric
+    // For now, assume numeric columns are metrics (first columns) and string columns are dimensions. This is a simplification.
+    // TODO: Determine column types of the ESQL query using the LLM
+    const isNumeric = metricIndex === 0; // First column is "typically" the metric
 
     if (isNumeric) {
       columnList.splice(metricIndex, 0, {
@@ -137,9 +119,10 @@ function parseColumns(query: string): { columnList: ColumnInfo[]; columns: strin
 }
 
 // Configure chart-specific properties
-function configureChartSpecificProperties(
+function configureVixTypeProperties(
   panelJSON: PanelJSON,
   vizType: string,
+  query: string,
   columns: string[]
 ): void {
   const chartTypes = [
@@ -180,14 +163,35 @@ function configureChartSpecificProperties(
   }
 
   if (vizType === 'heatmap') {
+    configureHeatmapProperties(panelJSON, columns);
+  }
+
+  if (vizType === 'treemap') {
+    configureTreemapProperties(panelJSON, columns);
+  }
+
+  // Handle metric visualization
+  if (vizType === 'metric') {
     if (panelJSON.embeddableConfig?.attributes?.state?.visualization) {
-      panelJSON.embeddableConfig.attributes.state.visualization.valueAccessor = columns[0];
-      panelJSON.embeddableConfig.attributes.state.visualization.xAccessor =
-        columns[columns.length - 1];
-      if (columns.length > 1) {
-        panelJSON.embeddableConfig.attributes.state.visualization.yAccessor =
-          columns[columns.length - 2];
-      }
+      panelJSON.embeddableConfig.attributes.state.visualization.metricAccessor = columns[0];
+    }
+  }
+
+  // Handle gauge visualization
+  if (vizType === 'gauge') {
+    configureGaugeProperties(panelJSON, query, columns);
+  }
+}
+
+// Configure heatmap specific properties
+function configureHeatmapProperties(panelJSON: PanelJSON, columns: string[]): void {
+  if (panelJSON.embeddableConfig?.attributes?.state?.visualization) {
+    panelJSON.embeddableConfig.attributes.state.visualization.valueAccessor = columns[0];
+    panelJSON.embeddableConfig.attributes.state.visualization.xAccessor =
+      columns[columns.length - 1];
+    if (columns.length > 1) {
+      panelJSON.embeddableConfig.attributes.state.visualization.yAccessor =
+        columns[columns.length - 2];
     }
   }
 }
@@ -205,6 +209,27 @@ function configureTreemapProperties(panelJSON: PanelJSON, columns: string[]): vo
         );
       }
     }
+  }
+}
+
+// Configure gauge visualization
+function configureGaugeProperties(panelJSON: PanelJSON, query: string, columns: string[]): void {
+  const gaugeLayerId = '3b1b0102-bb45-40f5-9ef2-419d2eaaa56c';
+  if (
+    panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased?.layers?.[
+      gaugeLayerId
+    ]
+  ) {
+    const gaugeLayer =
+      panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[gaugeLayerId];
+    if (gaugeLayer.columns?.[0]) {
+      gaugeLayer.columns[0].fieldName = columns[0];
+      gaugeLayer.columns[0].columnId = columns[0];
+    }
+    gaugeLayer.query = { esql: query };
+  }
+  if (panelJSON.embeddableConfig?.attributes?.state?.visualization) {
+    panelJSON.embeddableConfig.attributes.state.visualization.metricAccessor = columns[0];
   }
 }
 
@@ -248,26 +273,5 @@ function configureDatasourceProperties(
 
   if (panelJSON.embeddableConfig?.attributes?.state?.query) {
     panelJSON.embeddableConfig.attributes.state.query.esql = query;
-  }
-}
-
-// Configure gauge visualization
-function configureGaugeProperties(panelJSON: PanelJSON, query: string, columns: string[]): void {
-  const gaugeLayerId = '3b1b0102-bb45-40f5-9ef2-419d2eaaa56c';
-  if (
-    panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased?.layers?.[
-      gaugeLayerId
-    ]
-  ) {
-    const gaugeLayer =
-      panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[gaugeLayerId];
-    if (gaugeLayer.columns?.[0]) {
-      gaugeLayer.columns[0].fieldName = columns[0];
-      gaugeLayer.columns[0].columnId = columns[0];
-    }
-    gaugeLayer.query = { esql: query };
-  }
-  if (panelJSON.embeddableConfig?.attributes?.state?.visualization) {
-    panelJSON.embeddableConfig.attributes.state.visualization.metricAccessor = columns[0];
   }
 }

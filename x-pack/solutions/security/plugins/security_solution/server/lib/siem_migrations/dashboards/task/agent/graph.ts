@@ -7,7 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { migrateDashboardConfigSchema, migrateDashboardState } from './state';
-import type { MigrateDashboardGraphParams } from './types';
+import type { MigrateDashboardGraphParams, MigrateDashboardState } from './types';
 import { getParseOriginalDashboardNode } from './nodes/parse_original_dashboard';
 import { getCreateDescriptionsNode } from './nodes/create_descriptions';
 import { getTranslatePanelNode } from './nodes/translate_panel/translate_panel';
@@ -30,7 +30,10 @@ export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) 
     .addNode('aggregateDashboard', aggregateDashboardNode)
     // Edges
     .addEdge(START, 'parseOriginalDashboard')
-    .addEdge('parseOriginalDashboard', 'createDescriptions')
+    .addConditionalEdges('parseOriginalDashboard', parsedDashboardRouter, [
+      'createDescriptions',
+      'aggregateDashboard',
+    ])
     .addConditionalEdges('createDescriptions', translatePanel.conditionalEdge, ['translatePanel'])
     .addEdge('translatePanel', 'aggregateDashboard')
     .addEdge('aggregateDashboard', END);
@@ -39,3 +42,10 @@ export function getDashboardMigrationAgent(params: MigrateDashboardGraphParams) 
   graph.name = 'Dashboard Migration Graph'; // Customizes the name displayed in LangSmith
   return graph;
 }
+
+// Routers
+const parsedDashboardRouter = (state: MigrateDashboardState) => {
+  return state.parsed_original_dashboard.panels?.length
+    ? 'createDescriptions'
+    : 'aggregateDashboard';
+};
