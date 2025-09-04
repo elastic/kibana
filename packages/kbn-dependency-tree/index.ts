@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/cli';
+export { runCli } from './src/cli';
+export { buildDependencyTree, printTree, printJson } from './src/dependency_tree';

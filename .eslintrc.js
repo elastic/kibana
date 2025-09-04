@@ -2244,6 +2244,7 @@ module.exports = {
         'src/platform/plugins/**/{server,public,common}/index.ts',
         'x-pack/platform/plugins/**/{server,public,common}/index.ts',
         'x-pack/solutions/*/plugins/**/{server,public,common}/index.ts',
+        'packages/kbn-dependency-tree/index.ts',
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
