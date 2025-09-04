@@ -16,7 +16,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findUsagesTool } from './find_usages';
+import { symbolAnalysisTool } from './symbol_analysis';
 import { client } from '../utils/elasticsearch';
 
 jest.mock('../utils/elasticsearch', () => ({
@@ -25,7 +25,7 @@ jest.mock('../utils/elasticsearch', () => ({
   },
 }));
 
-describe('findUsagesTool', () => {
+describe('symbolAnalysisTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -49,7 +49,7 @@ describe('findUsagesTool', () => {
     };
     (client.search as jest.Mock).mockResolvedValue({ aggregations: mockAggs });
 
-    const result = await findUsagesTool.handler({ symbol: 'CoreSetup' });
+    const result = await symbolAnalysisTool.handler({ symbol: 'CoreSetup' });
 
     expect(client.search).toHaveBeenCalledWith({
       index: 'kibana-code-search',
@@ -69,7 +69,7 @@ describe('findUsagesTool', () => {
   it('should handle cases where no usages are found', async () => {
     (client.search as jest.Mock).mockResolvedValue({ aggregations: { files: { buckets: [] } } });
 
-    const result = await findUsagesTool.handler({ symbol: 'NonExistentSymbol' });
+    const result = await symbolAnalysisTool.handler({ symbol: 'NonExistentSymbol' });
     const report = result.content[0].text;
     expect(report).toContain('### Usage Report for "NonExistentSymbol"');
     expect(report).toContain('No usages found.');

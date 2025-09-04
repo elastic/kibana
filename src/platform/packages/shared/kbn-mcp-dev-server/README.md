@@ -145,7 +145,7 @@ By following these steps, you can successfully add and register a new tool to th
 
 The following tools are available in the MCP Dev Server.
 
-## `code_search`
+## `semantic_code_search`
 
 Performs a semantic search of the Kibana codebase using a unified Elasticsearch index. This tool is ideal for a "chain of investigation" approach to exploring the codebase.
 
@@ -163,7 +163,7 @@ Retrieves all unique values for a specified field from the code search index. Ca
 - `field` (enum): The field for which to retrieve distinct values. Can be 'type', 'language', 'kind', 'filePath', or 'imports'.
 - `kql` (string, optional): An optional KQL filter to apply before aggregating.
 
-## `find_usages`
+## `symbol_analysis`
 
 Analyzes a code symbol's usage across the entire codebase and generates a rich, categorized report. Use this tool to quickly understand a symbol's architectural role, differentiate between its definition, execution sites, and type declarations, and discover where it is referenced in tests and documentation. This is a primary tool for high-level code intelligence and analysis.
 

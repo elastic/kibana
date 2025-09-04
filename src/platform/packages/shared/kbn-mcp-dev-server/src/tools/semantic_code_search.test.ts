@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { codeSearchTool } from './code_search';
+import { semanticCodeSearchTool } from './semantic_code_search';
 import { client } from '../utils/elasticsearch';
 
 jest.mock('../utils/elasticsearch', () => ({
@@ -16,7 +16,7 @@ jest.mock('../utils/elasticsearch', () => ({
   },
 }));
 
-describe('codeSearchTool', () => {
+describe('semanticCodeSearchTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -29,9 +29,9 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({ query: 'test query', size: 10, page: 1 });
+    await semanticCodeSearchTool.handler({ query: 'test query', size: 10, page: 1 });
     expect(mockSearch).toHaveBeenCalledWith({
-      index: 'kibana-code-search',
+      index: 'kibana-code-search-2.0',
       size: 10,
       from: 0,
       _source: [
@@ -53,9 +53,8 @@ describe('codeSearchTool', () => {
         bool: {
           must: [
             {
-              sparse_vector: {
-                field: 'content_embedding',
-                inference_id: '.elser_model_2',
+              semantic: {
+                field: 'semantic_text',
                 query: 'test query',
               },
             },
@@ -73,14 +72,14 @@ describe('codeSearchTool', () => {
     });
     (client.search as jest.Mock) = mockSearch;
 
-    await codeSearchTool.handler({
+    await semanticCodeSearchTool.handler({
       query: 'test query',
       kql: 'language:typescript',
       size: 20,
       page: 2,
     });
     expect(mockSearch).toHaveBeenCalledWith({
-      index: 'kibana-code-search',
+      index: 'kibana-code-search-2.0',
       size: 20,
       from: 20,
       _source: [
@@ -102,9 +101,8 @@ describe('codeSearchTool', () => {
         bool: {
           must: [
             {
-              sparse_vector: {
-                field: 'content_embedding',
-                inference_id: '.elser_model_2',
+              semantic: {
+                field: 'semantic_text',
                 query: 'test query',
               },
             },
