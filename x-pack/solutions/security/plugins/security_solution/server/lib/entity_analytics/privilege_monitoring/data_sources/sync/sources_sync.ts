@@ -13,7 +13,7 @@ import type { MonitoringEntitySourceType } from '../../types';
 
 type Processor<T = void> = (source: MonitoringEntitySource) => Promise<T>;
 
-export const createSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
 
   const syncBySourceType = async ({

@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 // TODO: fill in
 export const createUpdateDetectionService = (dataClient: PrivilegeMonitoringDataClient) => {
   const privilegedUsersFromMatchers = undefined; //  = findPrivilegedUsersFromMatchers(dataClient);
   const privilegedStatusUpdateOperations = undefined; // = bulkPrivilegeStatusUpdateOperationsFactory(dataClient);
+  const updateDetection = async (source: MonitoringEntitySource) => {
+    // implement update detection logic
+    dataClient.log('debug', `Checking for updates in integration source ${JSON.stringify(source)}`);
+  };
   return {
     privilegedUsersFromMatchers,
     privilegedStatusUpdateOperations,
+    updateDetection,
   };
 };
