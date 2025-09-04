@@ -34,6 +34,7 @@ import {
   withLatestFrom,
   catchError,
   exhaustMap,
+  asyncScheduler,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
@@ -373,11 +374,9 @@ export class IndexUpdateService {
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
     }),
-    switchMap(([indexName]) => {
-      return from(this.getDataView(indexName!));
-    }),
+    switchMap(([indexName]) => from(this.getDataView(indexName!))),
     tap(() => {
-      this.addAction('recalculate-column-placeholders');
+      asyncScheduler.schedule(() => this.addAction('recalculate-column-placeholders'));
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
