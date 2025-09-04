@@ -55,48 +55,6 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    core.uiSettings.register({
-      /**
-       * TODO:
-       * Once assistants changes have been made that watch this uiSetting,
-       * change the bellow configuration to the following:
-       * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
-       */
-      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
-        readonlyMode: 'ui',
-        readonly: true,
-        schema: schema.string(),
-        value: NO_DEFAULT_CONNECTOR,
-      },
-    });
-
-    core.uiSettings.register({
-      /**
-       * TODO:
-       * Once assistants changes have been made that watch this uiSetting,
-       * change the bellow configuration to the following:
-       * {"readonlyMode": "ui", "schema": schema.boolean(), "value": false}
-       */
-      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
-        readonlyMode: 'ui',
-        readonly: true,
-        schema: schema.boolean(),
-        value: false,
-      },
-    });
-
-    core.capabilities.registerProvider(() => {
-      return {
-        management: {
-          kibana: {
-            aiAssistantManagementSelection: true,
-            observabilityAiAssistantManagement: true,
-            securityAiAssistantManagement: true,
-          },
-        },
-      };
-    });
-
     plugins.features?.registerKibanaFeature({
       id: 'aiAssistantManagementSelection',
       name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
@@ -155,6 +113,48 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
+    core.uiSettings.register({
+      /**
+       * TODO:
+       * Once assistants changes have been made that watch this uiSetting,
+       * change the bellow configuration to the following:
+       * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
+       */
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.string(),
+        value: NO_DEFAULT_CONNECTOR,
+      },
+    });
+
+    core.uiSettings.register({
+      /**
+       * TODO:
+       * Once assistants changes have been made that watch this uiSetting,
+       * change the bellow configuration to the following:
+       * {"readonlyMode": "ui", "schema": schema.boolean(), "value": false}
+       */
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.boolean(),
+        value: false,
+      },
+    });
+
+    core.capabilities.registerProvider(() => {
+      return {
+        management: {
+          kibana: {
+            aiAssistantManagementSelection: true,
+            observabilityAiAssistantManagement: true,
+            securityAiAssistantManagement: true,
+          },
+        },
+      };
+    });
+
     const { cloud } = plugins;
     const serverlessProjectType = cloud?.serverless.projectType;
 

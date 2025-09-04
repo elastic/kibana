@@ -75,7 +75,17 @@ describe('SettingsTab', () => {
       installProductDoc: jest.fn().mockResolvedValue({}),
       uninstallProductDoc: jest.fn().mockResolvedValue({}),
     });
-    useGenAIConnectorsMock.mockReturnValue({ connectors: [{ id: 'test-connector' }] });
+    useGenAIConnectorsMock.mockReturnValue({
+      connectors: [
+        {
+          id: 'test-connector',
+          name: 'Test Connector',
+          isPreconfigured: false,
+          actionTypeId: 'test-action-type',
+        },
+      ],
+      loading: false,
+    });
     useInferenceEndpointsMock.mockReturnValue({
       inferenceEndpoints: [{ id: 'test-endpoint', inference_id: 'test-inference-id' }],
       isLoading: false,
@@ -120,7 +130,7 @@ describe('SettingsTab', () => {
   });
 
   it('should not show knowledge base model section when no connectors exist', () => {
-    useGenAIConnectorsMock.mockReturnValue({ connectors: [] });
+    useGenAIConnectorsMock.mockReturnValue({ connectors: [], loading: false });
 
     const { queryByTestId } = render(<SettingsTab />, {
       coreStart: {
