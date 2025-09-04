@@ -118,9 +118,12 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
             ) : (
               <>
                 <EuiFormRow
-                  label={i18n.translate('xpack.dataVisualizer.file.importView.indexNameLabel', {
-                    defaultMessage: 'Select existing index',
-                  })}
+                  label={i18n.translate(
+                    'xpack.dataVisualizer.file.importView.selectExistingIndexLabel',
+                    {
+                      defaultMessage: 'Select existing index',
+                    }
+                  )}
                   fullWidth
                 >
                   <EuiComboBox
