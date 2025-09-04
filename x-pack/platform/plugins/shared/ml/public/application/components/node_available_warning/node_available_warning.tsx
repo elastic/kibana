@@ -8,9 +8,10 @@
 import type { FC } from 'react';
 import React from 'react';
 
+import { Warning } from '@kbn/ml-node-checks/node_available_warning/warning';
+
 import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_check';
 import { getCloudDeploymentId, isCloud, isCloudTrial } from '../../services/ml_server_info';
-import { Warning } from './warning';
 
 export const NodeAvailableWarning: FC = () => {
   if (mlNodesAvailable() === true || permissionToViewMlNodeCount() === false) {

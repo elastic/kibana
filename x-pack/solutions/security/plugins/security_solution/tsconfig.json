@@ -263,5 +263,8 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/ml-common-types",
+    "@kbn/ml-locator",
+    "@kbn/ml-plugin-contracts",
+    "@kbn/ml-node-checks",
   ]
 }

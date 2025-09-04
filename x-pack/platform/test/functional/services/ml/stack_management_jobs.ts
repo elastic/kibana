@@ -11,7 +11,8 @@ import fs from 'fs';
 import path from 'path';
 
 import type { JobType, MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
-import type { Job, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';

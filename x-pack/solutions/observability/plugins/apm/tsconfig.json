@@ -147,6 +147,9 @@
     "@kbn/discover-shared-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/ml-common-types",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-locator",
+    "@kbn/ml-node-checks",
   ],
   "exclude": ["target/**/*"]
 }

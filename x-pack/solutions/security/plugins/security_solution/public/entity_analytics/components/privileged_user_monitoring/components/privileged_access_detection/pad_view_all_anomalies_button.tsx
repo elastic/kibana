@@ -8,7 +8,8 @@
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator/use_ml_href';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 

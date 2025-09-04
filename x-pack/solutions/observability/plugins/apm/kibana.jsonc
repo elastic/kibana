@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": ["@elastic/obs-ux-infra_services-team"],
+  "owner": [
+    "@elastic/obs-ux-infra_services-team"
+  ],
   "group": "observability",
   "visibility": "private",
   "description": "The user interface for Elastic APM",
@@ -9,7 +11,10 @@
     "id": "apm",
     "browser": true,
     "server": true,
-    "configPath": ["xpack", "apm"],
+    "configPath": [
+      "xpack",
+      "apm"
+    ],
     "requiredPlugins": [
       "apmSourcesAccess",
       "apmDataAccess",
@@ -61,6 +66,12 @@
       "observabilityAIAssistant",
       "share"
     ],
-    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
+    "requiredBundles": [
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "observability",
+      "maps"
+    ]
   }
 }

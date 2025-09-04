@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-node-checks/ml_jobs_awaiting_node_warning';
 import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';

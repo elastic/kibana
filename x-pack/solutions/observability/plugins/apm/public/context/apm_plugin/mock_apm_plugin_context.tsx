@@ -10,7 +10,8 @@ import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { MlLocatorDefinition, MlManagementLocatorInternal } from '@kbn/ml-plugin/public';
+import { MlLocatorDefinition } from '@kbn/ml-locator/ml_locator';
+import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
 import {
   createObservabilityRuleTypeRegistryMock,
   enableComparisonByDefault,

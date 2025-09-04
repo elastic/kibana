@@ -1,0 +1,25 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/kibana-react-plugin",
+    "@kbn/ml-services",
+    "@kbn/ml-common-types",
+    "@kbn/ml-common-utils",
+    "@kbn/i18n-react",
+    "@kbn/ml-common-constants",
+  ]
+}

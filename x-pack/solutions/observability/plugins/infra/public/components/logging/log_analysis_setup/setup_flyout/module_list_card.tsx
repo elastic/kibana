@@ -39,7 +39,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   const isComponentMounted = useMountedState();
   const [viewInMlLink, setViewInMlLink] = useState<string>('');
   const getMlUrl = useCallback(async () => {
-    if (!ml?.managementLocator) {
+    if (!ml?.getManagementLocator) {
       toasts.addWarning({
         title: mlNotAvailableMessage,
       });
@@ -48,7 +48,8 @@ export const LogAnalysisModuleListCard: React.FC<{
 
     // Get link to ML anomaly detection management job list
     // with filter to jobId
-    const link = await ml.managementLocator.getUrl(
+    const managementLocator = await ml.getManagementLocator();
+    const link = await managementLocator.getUrl(
       { page: '', pageState: { jobId } },
       'anomaly_detection'
     );
@@ -56,7 +57,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     if (link?.url && isComponentMounted()) {
       setViewInMlLink(link.url);
     }
-  }, [jobId, ml?.managementLocator, toasts, isComponentMounted]);
+  }, [jobId, ml, toasts, isComponentMounted]);
 
   useEffect(
     function getMlAnomalyDetectionJobLink() {

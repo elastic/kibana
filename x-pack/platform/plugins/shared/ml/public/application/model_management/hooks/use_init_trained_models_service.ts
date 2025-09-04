@@ -16,10 +16,10 @@ import type {
   ScheduledDeployment,
   TrainedModelsService,
 } from '@kbn/ml-services/model_management/trained_models_service';
+import { useCloudCheck } from '@kbn/ml-node-checks/node_available_warning/hooks';
 
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useMlServerInfo } from '../../contexts/ml';
-import { useCloudCheck } from '../../components/node_available_warning/hooks';
 import { getNewJobLimits } from '../../services/ml_server_info';
 import { useMlTelemetryClient } from '../../contexts/ml/ml_telemetry_context';
 

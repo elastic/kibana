@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Datafeed, Job } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

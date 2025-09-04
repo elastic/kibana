@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';

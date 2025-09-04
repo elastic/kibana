@@ -27,7 +27,7 @@ import type { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plu
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup, MlServerPluginStart } from '@kbn/ml-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
@@ -81,7 +81,7 @@ export interface APMPluginSetupDependencies {
   cloud?: CloudSetup;
   fleet?: FleetPluginSetup;
   home?: HomeServerPluginSetup;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
@@ -108,7 +108,7 @@ export interface APMPluginStartDependencies {
   cloud?: undefined;
   fleet?: FleetPluginStart;
   home?: HomeServerPluginStart;
-  ml?: MlPluginStart;
+  ml?: MlServerPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;

@@ -11,7 +11,7 @@ import type { IBasePath, Logger, SavedObjectsClientContract } from '@kbn/core/se
 import type { AlertingServerSetup, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
@@ -103,7 +103,7 @@ export interface RegisterRuleDependencies {
   getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
   apmConfig: APMConfig;
   logger: Logger;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleDataClient: IRuleDataClient;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;

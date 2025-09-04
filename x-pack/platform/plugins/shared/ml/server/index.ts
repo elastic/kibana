@@ -8,7 +8,10 @@
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { type ConfigSchema } from '@kbn/ml-common-constants/app';
 import { configSchema } from './config_schema';
-export type { MlPluginSetup, MlPluginStart } from './plugin';
+export type {
+  MlPluginSetup as MlServerPluginSetup,
+  MlPluginStart as MlServerPluginStart,
+} from './plugin';
 export type {
   AlertingService as MlAlertingService,
   AnomalyDetectors as MlAnomalyDetectors,
