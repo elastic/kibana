@@ -13,7 +13,7 @@ import type { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
 import { compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
 import type { ReduxLikeStateContainer } from '@kbn/shared-ux-state-container';
-import {  createStateContainer } from '@kbn/shared-ux-state-container';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 import {
   createKbnUrlStateStorage,
   syncStates,

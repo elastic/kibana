@@ -9,10 +9,7 @@
 
 import { orderBy, pick } from 'lodash';
 import { createStateContainer } from '@kbn/shared-ux-state-container';
-import {
-  type IKbnUrlStateStorage,
-  syncState,
-} from '@kbn/kibana-utils-plugin/public';
+import { type IKbnUrlStateStorage, syncState } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';

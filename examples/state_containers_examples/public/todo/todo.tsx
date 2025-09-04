@@ -24,15 +24,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  BaseState,
-  BaseStateContainer,
-  StateContainer,
-} from '@kbn/shared-ux-state-container';
-import {
-  createStateContainer,
-  useContainerSelector,
-} from '@kbn/shared-ux-state-container';
+import type { BaseState, BaseStateContainer, StateContainer } from '@kbn/shared-ux-state-container';
+import { createStateContainer, useContainerSelector } from '@kbn/shared-ux-state-container';
 import type { INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import {
   createKbnUrlStateStorage,

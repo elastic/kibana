@@ -28,10 +28,7 @@ import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public'
 import { connectToQueryState, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BaseStateContainer } from '@kbn/shared-ux-state-container';
-import {
-  createStateContainer,
-  useContainerState,
-} from '@kbn/shared-ux-state-container';
+import { createStateContainer, useContainerState } from '@kbn/shared-ux-state-container';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
 import type { ExampleLink } from '../common/example_page';

@@ -9,10 +9,7 @@
 
 import { createHashHistory } from 'history';
 import { createStateContainer } from '@kbn/shared-ux-state-container';
-import {
-  syncState,
-  createKbnUrlStateStorage,
-} from '@kbn/kibana-utils-plugin/public';
+import { syncState, createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 interface IEditIndexPatternState {
   tab: string;
