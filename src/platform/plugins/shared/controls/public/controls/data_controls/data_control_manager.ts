@@ -9,13 +9,8 @@
 
 import { BehaviorSubject, combineLatest, merge, switchMap, tap } from 'rxjs';
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState } from '@kbn/controls-schemas';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  type DataView,
-  type DataViewField,
-} from '@kbn/data-views-plugin/common';
+import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,11 +23,11 @@ import type { StateManager } from '@kbn/presentation-publishing/state_manager/ty
 
 import { dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
-import { getReferenceName } from './reference_name_utils';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...titleComparators,
+  id: 'referenceEquality', // TODO: Remove this?
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
   useGlobalFilters: (a, b) => a ?? true === b ?? true,
@@ -42,7 +37,6 @@ export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'
   api: DataControlApi;
   cleanup: () => void;
   internalApi: {
-    extractReferences: (referenceNameSuffix: string) => Reference[];
     onSelectionChange: () => void;
     setOutputFilter: (filter: Filter | undefined) => void;
   };
@@ -69,9 +63,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
 }): Promise<DataControlStateManager> => {
   const titlesManager = initializeTitleManager(state);
 
-  const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
+  const dataControlStateManager = initializeStateManager<
+    Omit<DataControlState, 'title' | 'description'>
+  >(
     state,
     {
+      id: '', // TODO: Remove
       dataViewId: '',
       fieldName: '',
       useGlobalFilters: true,
@@ -217,15 +214,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
       fieldNameSubscription.unsubscribe();
     },
     internalApi: {
-      extractReferences: (referenceNameSuffix: string) => {
-        return [
-          {
-            name: getReferenceName(controlId, referenceNameSuffix),
-            type: DATA_VIEW_SAVED_OBJECT_TYPE,
-            id: dataControlStateManager.api.dataViewId$.getValue(),
-          },
-        ];
-      },
       onSelectionChange: () => {
         filtersLoading$.next(true);
       },

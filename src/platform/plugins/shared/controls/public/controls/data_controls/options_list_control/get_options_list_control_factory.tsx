@@ -35,7 +35,6 @@ import {
   initializeDataControlManager,
   type DataControlStateManager,
 } from '../data_control_manager';
-import { parseReferenceName } from '../reference_name_utils';
 import { OptionsListControl } from './components/options_list_control';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
@@ -62,21 +61,6 @@ import {
   selectAll,
 } from './utils/selection_utils';
 
-const deserializeState = (
-  id: string,
-  state: SerializedPanelState<OptionsListControlState>
-): OptionsListControlState => {
-  const deserializedState = {
-    ...state.rawState,
-  };
-  (state.references ?? []).forEach((reference) => {
-    const referenceName = reference.name;
-    const { controlId } = parseReferenceName(referenceName);
-    if (controlId === id) deserializedState.dataViewId = reference.id;
-  });
-  return deserializedState;
-};
-
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
   OptionsListControlApi
@@ -84,9 +68,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
   return {
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      console.log('OPTIONS LIST', initialState, deserializeState(uuid, initialState));
-
-      const state = deserializeState(uuid, initialState);
+      console.log({ initialState });
+      const state = { ...initialState.rawState };
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const selectionsManager = initializeSelectionsManager(state);
@@ -247,10 +230,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         });
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {
-        // console.log(
-        //   'SERIAIZE STATE',
-        //   dataControlManager.internalApi.extractReferences('optionsListDataView')
-        // );
         return {
           rawState: {
             ...dataControlManager.getLatestState(),
@@ -260,7 +239,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             // serialize state that cannot be changed to keep it consistent
             displaySettings: state.displaySettings,
           },
-          references: dataControlManager.internalApi.extractReferences('optionsListDataView'),
         };
       }
 
