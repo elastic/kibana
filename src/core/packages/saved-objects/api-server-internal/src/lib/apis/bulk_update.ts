@@ -194,7 +194,7 @@ export const performBulkUpdate = async <T>(
     const accessControl = registry.supportsAccessControl(type)
       ? // @ts-expect-error MultiGetHit._source is optional
         preflightResult._source?.accessControl
-      : {};
+      : undefined;
 
     if (registry.isMultiNamespace(type)) {
       return {
@@ -202,7 +202,7 @@ export const performBulkUpdate = async <T>(
         id,
         objectNamespace,
         name,
-        accessControl,
+        ...(accessControl && { accessControl }),
         // @ts-expect-error MultiGetHit._source is optional
         existingNamespaces: preflightResult._source?.namespaces ?? [],
       };
@@ -212,7 +212,7 @@ export const performBulkUpdate = async <T>(
         id,
         objectNamespace,
         name,
-        accessControl,
+        ...(accessControl && { accessControl }),
         existingNamespaces: [],
       };
     }
