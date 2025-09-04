@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
+  BaseStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -48,10 +49,15 @@ export interface InternalConnectorContract extends ConnectorContract {
 function generateStepSchemaForConnector(
   connector: ConnectorContract,
   stepSchema: z.ZodType,
-  loose: boolean = false
+  loose: boolean = false,
+  stripTypeEnum: boolean = false
 ) {
+  const typeSchema = stripTypeEnum 
+    ? z.string() // Generic string that accepts any value but doesn't suggest specific types
+    : z.literal(connector.type); // Specific literal for validation
+    
   return BaseConnectorStepSchema.extend({
-    type: z.literal(connector.type),
+    type: typeSchema,
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
@@ -69,8 +75,10 @@ function createRecursiveStepSchema(
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
+    
+    // Create connector schemas but strip out type enum values for autocomplete
     const connectorSchemas = connectors.map((c) =>
-      generateStepSchemaForConnector(c, stepSchema, loose)
+      generateStepSchemaForConnector(c, stepSchema, loose, true) // Add stripTypeEnum flag
     );
 
     // Return discriminated union with all step types
@@ -81,7 +89,7 @@ function createRecursiveStepSchema(
       mergeSchema,
       WaitStepSchema,
       httpSchema,
-      ...connectorSchemas,
+      ...connectorSchemas, // Include them for validation
     ]);
   });
 
@@ -101,7 +109,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    settings: getWorkflowSettingsSchema(BaseStepSchema, loose).optional(), // Use BaseStepSchema to avoid circular reference
     steps: z.array(recursiveStepSchema),
   });
 }

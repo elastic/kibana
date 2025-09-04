@@ -175,7 +175,8 @@ function improveTypeFieldDescriptions(schema: any): any {
     return obj;
   };
 
-  return processSchema(schema);
+  const processedSchema =  processSchema(schema);
+  return processedSchema;
 }
 
 export interface WorkflowYAMLEditorProps {
