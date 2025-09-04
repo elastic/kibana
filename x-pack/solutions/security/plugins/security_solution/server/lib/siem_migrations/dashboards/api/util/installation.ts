@@ -99,13 +99,14 @@ const installDashboards = async (
   dashboardsToInstall: DashboardMigrationDashboard[],
   contentManagement: ContentManagementServerSetup,
   request: KibanaRequest,
-  context: RequestHandlerContext
+  context: RequestHandlerContext,
+  tags?: string[]
 ): Promise<{
-  dashboardsToUpdate: Array<{ id: string; elastic_dashboard: { id: string } }>;
+  dashboardsToUpdate: Array<DashboardMigrationDashboard>;
   errors: Error[];
 }> => {
   const errors: Error[] = [];
-  const dashboardsToUpdate: Array<{ id: string; elastic_dashboard: { id: string } }> = [];
+  const dashboardsToUpdate: Array<DashboardMigrationDashboard> = [];
 
   const createDashboardsOutcome = await initPromisePool({
     concurrency: MAX_DASHBOARDS_TO_CREATE_IN_PARALLEL,
@@ -132,15 +133,23 @@ const installDashboards = async (
           },
           {
             id: undefined, // Let the system generate an ID
-            references: [],
+            references: [
+              // Add tag references if tags are provided
+              ...(tags?.map((tagId) => ({
+                name: 'tag',
+                type: 'tag',
+                id: tagId,
+              })) || []),
+            ],
             initialNamespaces: [],
           }
         );
 
         dashboardsToUpdate.push({
-          id: dashboard.id,
+          ...dashboard,
           elastic_dashboard: {
-            id: result.item?.id || null,
+            ...dashboard.original_dashboard,
+            id: result.item?.id || '',
           },
         });
       } catch (error) {
