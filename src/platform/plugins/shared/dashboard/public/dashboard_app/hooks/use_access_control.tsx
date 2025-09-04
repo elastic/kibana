@@ -31,7 +31,7 @@ export const useAccessControl = ({ accessControl, createdBy }: UseAccessControl)
       });
       setCanManageAccessControl(isGloballyAuthorized || canManage);
 
-      const isInEditMode = accessControlClient.isDashboardInEditAccessMode(accessControl);
+      const isInEditMode = accessControlClient.isInEditAccessMode(accessControl);
       setIsInEditAccessMode(isInEditMode);
     };
 

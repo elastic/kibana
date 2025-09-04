@@ -24,7 +24,7 @@ export interface AccessControlClientPublic {
     accessMode,
   }: ChangeAccesModeParameters): Promise<ChangeAccessModeResponse>;
   checkUserAccessControl(params: CheckUserAccessControlParameters): boolean;
-  isDashboardInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean;
+  isInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean;
 }
 
 export class AccessControlClient implements AccessControlClientPublic {
@@ -83,7 +83,7 @@ export class AccessControlClient implements AccessControlClientPublic {
     return userId === accessControl.owner;
   }
 
-  isDashboardInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean {
+  isInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean {
     return (
       !accessControl ||
       accessControl.accessMode === undefined ||

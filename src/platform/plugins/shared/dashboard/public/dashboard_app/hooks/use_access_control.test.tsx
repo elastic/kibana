@@ -28,7 +28,7 @@ describe('useAccessControl', () => {
       checkGlobalPrivilege: jest.fn().mockResolvedValue({ isGloballyAuthorized: false }),
       changeAccessMode: jest.fn(),
       checkUserAccessControl: jest.fn().mockReturnValue(true),
-      isDashboardInEditAccessMode: jest.fn().mockReturnValue(true),
+      isInEditAccessMode: jest.fn().mockReturnValue(true),
     };
 
     (getAccessControlClient as jest.Mock).mockReturnValue(mockAccessControlClient);
@@ -39,7 +39,7 @@ describe('useAccessControl', () => {
   });
 
   it('returns correct values when accessControl is undefined and current user is equal to createdBy', async () => {
-    mockAccessControlClient.isDashboardInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
     mockAccessControlClient.checkUserAccessControl.mockReturnValue(true);
     mockAccessControlClient.checkGlobalPrivilege.mockResolvedValue({ isGloballyAuthorized: false });
 
@@ -52,7 +52,7 @@ describe('useAccessControl', () => {
       expect(result.current.canManageAccessControl).toBe(true);
     });
 
-    expect(mockAccessControlClient.isDashboardInEditAccessMode).toHaveBeenCalledWith(undefined);
+    expect(mockAccessControlClient.isInEditAccessMode).toHaveBeenCalledWith(undefined);
     expect(mockAccessControlClient.checkUserAccessControl).toHaveBeenCalledWith({
       accessControl: undefined,
       createdBy: 'user-id',
@@ -60,7 +60,7 @@ describe('useAccessControl', () => {
   });
 
   it('returns correct values when accessControl is undefined and current user is not equal to createdBy', async () => {
-    mockAccessControlClient.isDashboardInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
     mockAccessControlClient.checkUserAccessControl.mockReturnValue(false);
     mockAccessControlClient.checkGlobalPrivilege.mockResolvedValue({ isGloballyAuthorized: false });
 
@@ -80,7 +80,7 @@ describe('useAccessControl', () => {
   });
 
   it('returns correct values when current user has global privileges', async () => {
-    mockAccessControlClient.isDashboardInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
     mockAccessControlClient.checkUserAccessControl.mockReturnValue(false);
     mockAccessControlClient.checkGlobalPrivilege.mockResolvedValue({ isGloballyAuthorized: true });
 
@@ -99,7 +99,7 @@ describe('useAccessControl', () => {
   it('returns correct values when accessMode is "default"', async () => {
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
 
-    mockAccessControlClient.isDashboardInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
     mockAccessControlClient.checkUserAccessControl.mockReturnValue(true);
     mockAccessControlClient.checkGlobalPrivilege.mockResolvedValue({ isGloballyAuthorized: false });
 
@@ -110,13 +110,13 @@ describe('useAccessControl', () => {
       expect(result.current.canManageAccessControl).toBe(true);
     });
 
-    expect(mockAccessControlClient.isDashboardInEditAccessMode).toHaveBeenCalledWith(accessControl);
+    expect(mockAccessControlClient.isInEditAccessMode).toHaveBeenCalledWith(accessControl);
   });
 
   it('returns correct values when accessMode is "read_only"', async () => {
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'read_only' };
 
-    mockAccessControlClient.isDashboardInEditAccessMode.mockReturnValue(false);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(false);
     mockAccessControlClient.checkUserAccessControl.mockReturnValue(true);
     mockAccessControlClient.checkGlobalPrivilege.mockResolvedValue({ isGloballyAuthorized: false });
 
@@ -128,6 +128,6 @@ describe('useAccessControl', () => {
       expect(result.current.canManageAccessControl).toBe(true);
     });
 
-    expect(mockAccessControlClient.isDashboardInEditAccessMode).toHaveBeenCalledWith(accessControl);
+    expect(mockAccessControlClient.isInEditAccessMode).toHaveBeenCalledWith(accessControl);
   });
 });
