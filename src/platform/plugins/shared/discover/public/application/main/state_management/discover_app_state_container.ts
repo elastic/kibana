@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import type { ReduxLikeStateContainer } from '@kbn/shared-ux-state-container';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-} from '@kbn/kibana-utils-plugin/common';
+} from '@kbn/shared-ux-state-container';
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
 import {
   COMPARE_ALL_OPTIONS,

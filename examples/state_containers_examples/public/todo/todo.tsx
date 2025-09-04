@@ -27,15 +27,17 @@ import {
 import type {
   BaseState,
   BaseStateContainer,
-  INullableBaseStateContainer,
   StateContainer,
-} from '@kbn/kibana-utils-plugin/public';
+} from '@kbn/shared-ux-state-container';
+import {
+  createStateContainer,
+  useContainerSelector,
+} from '@kbn/shared-ux-state-container';
+import type { INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import {
   createKbnUrlStateStorage,
-  createStateContainer,
   getStateFromKbnUrl,
   syncState,
-  useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
 import type {
   TodoActions,

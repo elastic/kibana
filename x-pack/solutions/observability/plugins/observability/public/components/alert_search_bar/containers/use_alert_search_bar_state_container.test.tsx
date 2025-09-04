@@ -27,12 +27,7 @@ jest.mock('../../../hooks/use_timefilter_service', () => ({
   useTimefilterService: jest.fn(),
 }));
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => ({
-  createKbnUrlStateStorage: jest.fn(),
-  syncState: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
-  useContainerSelector: jest.fn(() => {
-    return MOCK_DEFAULT_STATE;
-  }),
+jest.mock('@kbn/shared-ux-state-container', () => ({
   createStateContainer: jest.fn(() => ({
     get: jest.fn(),
     set: jest.fn(),
@@ -51,6 +46,14 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => ({
   createStateContainerReactHelpers: jest.fn(() => ({
     useContainer: jest.fn(),
   })),
+}));
+
+jest.mock('@kbn/kibana-utils-plugin/public', () => ({
+  createKbnUrlStateStorage: jest.fn(),
+  syncState: jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })),
+  useContainerSelector: jest.fn(() => {
+    return MOCK_DEFAULT_STATE;
+  }),
 }));
 
 describe('useAlertSearchBarStateContainer', () => {

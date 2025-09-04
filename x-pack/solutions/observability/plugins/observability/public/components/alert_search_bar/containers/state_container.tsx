@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-} from '@kbn/kibana-utils-plugin/public';
+} from '@kbn/shared-ux-state-container';
 import type { AlertStatus } from '../../../../common/typings';
 import type { AlertSearchBarContainerState } from '../types';
 

@@ -8,8 +8,8 @@
  */
 
 import { createHashHistory } from 'history';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 import {
-  createStateContainer,
   syncState,
   createKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';

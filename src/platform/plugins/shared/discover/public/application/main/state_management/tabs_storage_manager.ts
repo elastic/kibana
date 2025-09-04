@@ -8,8 +8,8 @@
  */
 
 import { orderBy, pick } from 'lodash';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 import {
-  createStateContainer,
   type IKbnUrlStateStorage,
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
