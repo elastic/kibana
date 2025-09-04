@@ -924,6 +924,7 @@ describe('update', () => {
             "title": "Super Bad Security Issue",
             "totalAlerts": 2,
             "totalComment": 1,
+            "totalEvents": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -969,6 +970,7 @@ describe('update', () => {
             "title": "Damaging Data Destruction Detected",
             "totalAlerts": 4,
             "totalComment": 3,
+            "totalEvents": 0,
             "updated_at": "2019-11-25T22:32:00.900Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
