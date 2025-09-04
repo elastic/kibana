@@ -60,7 +60,6 @@ export enum FieldsGroupNames {
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
-  SmartFields = 'SmartFields',
   RecommendedFields = 'RecommendedFields',
 }
 

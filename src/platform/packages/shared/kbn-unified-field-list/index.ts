@@ -98,4 +98,3 @@ export {
 } from './src/containers/unified_field_list_sidebar';
 
 export * from './src/utils/fallback_fields';
-export { SmartFieldFallbackTooltip } from './src/components/fallback_fields';

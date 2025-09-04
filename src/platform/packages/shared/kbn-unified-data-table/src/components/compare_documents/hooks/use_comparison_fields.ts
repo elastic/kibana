@@ -10,7 +10,6 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import { convertFieldsToFallbackFields } from '@kbn/unified-field-list';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
@@ -47,10 +46,7 @@ export const useComparisonFields = ({
   }, [getDocById, selectedDocIds]);
 
   return useMemo(() => {
-    let comparisonFields = convertFieldsToFallbackFields({
-      fields: selectedFieldNames,
-      additionalFieldGroups,
-    });
+    let comparisonFields = selectedFieldNames;
 
     if (showAllFields) {
       const sortedFields = dataView.fields

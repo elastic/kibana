@@ -173,10 +173,6 @@ export interface FieldStatisticsTableProps {
    */
   searchSessionId?: string;
   /**
-   * Additional field groups (e.g. Smart Fields)
-   */
-  additionalFieldGroups?: AdditionalFieldGroups;
-  /**
    * If table should query using ES|QL
    */
   isEsqlMode?: boolean;
