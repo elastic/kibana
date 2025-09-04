@@ -73,7 +73,9 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(response.body).to.have.property('message');
-        expect(response.body.message).to.contain(`Tool id ${searchTool} is reserved`);
+        expect(response.body.message).to.contain(
+          `Tool id ${searchTool} is using a protected namespace`
+        );
       });
     });
 
