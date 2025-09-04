@@ -76,52 +76,6 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
       buttonDataTestSubj="lnsTextOptionsButton"
     >
       <AppearanceOptionGroup
-        title={i18n.translate('xpack.lens.metric.appearancePopover.titleAndSubtitle.title', {
-          defaultMessage: 'Title and subtitle',
-        })}
-      >
-        <SubtitleOption
-          value={state.subtitle}
-          onChange={(subtitle) => {
-            setState({
-              ...state,
-              subtitle,
-            });
-          }}
-          isDisabled={disabledStates.subtitle}
-        />
-        <AppearanceOption
-          label={i18n.translate('xpack.lens.metric.appearancePopover.alignment', {
-            defaultMessage: 'Alignment',
-          })}
-          value={state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign}
-          options={alignmentOptions}
-          onChange={(id) => {
-            setState({
-              ...state,
-              titlesTextAlign: id,
-            });
-          }}
-          isIconOnly
-          dataTestSubj="lens-metric-appearance-title-and-subtitle-alignment-btn"
-        />
-        <AppearanceOption
-          label={i18n.translate('xpack.lens.metric.appearancePopover.fontWeight', {
-            defaultMessage: 'Font weight',
-          })}
-          value={state.titleWeight ?? metricStateDefaults.titleWeight}
-          options={fontWeightOptions}
-          onChange={(id) => {
-            setState({
-              ...state,
-              titleWeight: id,
-            });
-          }}
-          dataTestSubj="lens-metric-appearance-title-and-subtitle-font-weight-btn"
-        />
-      </AppearanceOptionGroup>
-      <EuiHorizontalRule margin="xs" />
-      <AppearanceOptionGroup
         title={i18n.translate('xpack.lens.metric.appearancePopover.primaryMetric.title', {
           defaultMessage: 'Primary metric',
         })}
@@ -169,6 +123,52 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
             });
           }}
           dataTestSubj="lens-metric-appearance-primary-metric-font-size-btn"
+        />
+      </AppearanceOptionGroup>
+      <EuiHorizontalRule margin="xs" />
+      <AppearanceOptionGroup
+        title={i18n.translate('xpack.lens.metric.appearancePopover.titleAndSubtitle.title', {
+          defaultMessage: 'Title and subtitle',
+        })}
+      >
+        <SubtitleOption
+          value={state.subtitle}
+          onChange={(subtitle) => {
+            setState({
+              ...state,
+              subtitle,
+            });
+          }}
+          isDisabled={disabledStates.subtitle}
+        />
+        <AppearanceOption
+          label={i18n.translate('xpack.lens.metric.appearancePopover.alignment', {
+            defaultMessage: 'Alignment',
+          })}
+          value={state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign}
+          options={alignmentOptions}
+          onChange={(id) => {
+            setState({
+              ...state,
+              titlesTextAlign: id,
+            });
+          }}
+          isIconOnly
+          dataTestSubj="lens-metric-appearance-title-and-subtitle-alignment-btn"
+        />
+        <AppearanceOption
+          label={i18n.translate('xpack.lens.metric.appearancePopover.fontWeight', {
+            defaultMessage: 'Font weight',
+          })}
+          value={state.titleWeight ?? metricStateDefaults.titleWeight}
+          options={fontWeightOptions}
+          onChange={(id) => {
+            setState({
+              ...state,
+              titleWeight: id,
+            });
+          }}
+          dataTestSubj="lens-metric-appearance-title-and-subtitle-font-weight-btn"
         />
       </AppearanceOptionGroup>
       <EuiHorizontalRule margin="xs" />
