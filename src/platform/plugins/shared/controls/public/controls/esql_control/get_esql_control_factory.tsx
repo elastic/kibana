@@ -38,7 +38,10 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-      const defaultControlManager = await initializeDefaultControlManager(state);
+      const defaultControlManager = await initializeDefaultControlManager({
+        grow: state.grow,
+        width: state.width,
+      });
       const selections = initializeESQLControlSelections(
         { uuid, parentApi },
         state,
@@ -81,8 +84,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getTypeDisplayName: () => displayName,
         onEdit: async () => {
           const nextState = {
-            ...state,
             ...defaultControlManager.getLatestState(),
+            ...selections.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
