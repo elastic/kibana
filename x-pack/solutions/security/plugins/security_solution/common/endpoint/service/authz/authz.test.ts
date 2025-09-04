@@ -18,6 +18,7 @@ import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
 import {
   CONSOLE_RESPONSE_ACTION_COMMANDS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
+  NO_SPECIFIC_PRIVILEGE_REQUIRED,
   type ResponseConsoleRbacControls,
   type ResponseActionsApiCommandNames,
 } from '../response_actions/constants';
@@ -32,7 +33,8 @@ describe('Endpoint Authz service', () => {
     ResponseConsoleRbacControls[]
   >((acc, e) => {
     const item = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e];
-    if (!acc.includes(item)) {
+    // Filter out sentinel values that are not actual Fleet privileges
+    if (!acc.includes(item) && item !== NO_SPECIFIC_PRIVILEGE_REQUIRED) {
       acc.push(item);
     }
     return acc;
@@ -461,7 +463,6 @@ describe('Endpoint Authz service', () => {
       ['upload', 'canWriteFileOperations'],
       ['scan', 'canWriteScanOperations'],
       ['runscript', 'canWriteExecuteOperations'],
-      ['cancel', 'canReadActionsLogManagement'],
     ])('should return correct permissions for %s command', (command, expectedCommandSpecific) => {
       const result = getRequiredCancelPermissions(command);
 

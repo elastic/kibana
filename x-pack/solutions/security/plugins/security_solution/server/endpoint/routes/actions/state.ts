@@ -7,12 +7,16 @@
 
 import { uniq } from 'lodash/fp';
 import type { RequestHandler } from '@kbn/core/server';
-import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+  NO_SPECIFIC_PRIVILEGE_REQUIRED,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
@@ -25,7 +29,9 @@ export function registerActionStateRoutes(
   canEncrypt?: boolean
 ) {
   const responseActionAuthzNames = uniq(
-    Object.values(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ)
+    Object.values(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ).filter(
+      (authzKey) => authzKey !== NO_SPECIFIC_PRIVILEGE_REQUIRED
+    ) as Array<keyof EndpointAuthz>
   );
 
   router.versioned

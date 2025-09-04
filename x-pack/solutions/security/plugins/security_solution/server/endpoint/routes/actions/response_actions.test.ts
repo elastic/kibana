@@ -1133,13 +1133,21 @@ describe('Response actions', () => {
         });
       });
 
-      it('prohibits cancel action when user lacks baseline permissions', async () => {
+      it('allows cancel action route access regardless of baseline permissions', async () => {
+        // Mock the command-specific validation to succeed
+        // (this simulates the user having the required permission for the specific command being cancelled)
+        fetchActionByIdSpy.mockResolvedValue({
+          EndpointActions: {
+            data: { command: 'isolate' },
+          },
+        });
+
         await callRoute(CANCEL_ROUTE, {
           body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: false },
+          authz: { canReadActionsLogManagement: false, canIsolateHost: true }, // Has permission for the command being cancelled
           version: '2023-10-31',
         });
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.ok).toBeCalled();
       });
 
       it('prohibits cancel action when user lacks command-specific permission for isolate', async () => {

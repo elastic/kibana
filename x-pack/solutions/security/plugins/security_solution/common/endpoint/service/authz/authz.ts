@@ -13,6 +13,7 @@ import type { ProductFeaturesService } from '../../../../server/lib/product_feat
 import {
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  NO_SPECIFIC_PRIVILEGE_REQUIRED,
 } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
 import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
@@ -186,11 +187,11 @@ export const calculateEndpointAuthz = (
   // to allow access to Response Console.
   authz.canAccessResponseConsole =
     isEnterpriseLicense &&
-    Object.values(omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, 'release')).some(
-      (responseActionAuthzKey) => {
-        return authz[responseActionAuthzKey];
-      }
-    );
+    Object.values(
+      omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, ['release', 'cancel'])
+    ).some((responseActionAuthzKey) => {
+      return authz[responseActionAuthzKey];
+    });
 
   return authz;
 };
@@ -271,7 +272,7 @@ export const canFetchPackageAndAgentPolicies = (capabilities: Capabilities): boo
 
 export const getRequiredCancelPermissions = (
   command: ResponseActionsApiCommandNames
-): EndpointAuthzKeyList[number] => {
+): EndpointAuthzKeyList[number] | typeof NO_SPECIFIC_PRIVILEGE_REQUIRED => {
   const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
 
   if (!consoleCommand || !(consoleCommand in RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ)) {

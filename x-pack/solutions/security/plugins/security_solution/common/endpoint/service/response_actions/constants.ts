@@ -88,6 +88,19 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
 
+/**
+ * Sentinel value used to indicate that a response action command does not require
+ * any specific privilege beyond basic access to the Security Solution.
+ *
+ * This is used in privilege mapping to distinguish between commands that need
+ * specific authorizations (like 'writeHostIsolation') and commands that can be
+ * executed by any user who has access to the response actions system.
+ *
+ * Note: This is NOT an actual privilege in the EndpointAuthz interface - it's
+ * purely a marker value for the privilege mapping system.
+ */
+export const NO_SPECIFIC_PRIVILEGE_REQUIRED = 'NO_SPECIFIC_PRIVILEGE_REQUIRED' as const;
+
 export type ResponseConsoleRbacControls =
   | 'writeHostIsolation'
   | 'writeHostIsolationRelease'
@@ -95,8 +108,7 @@ export type ResponseConsoleRbacControls =
   | 'writeFileOperations'
   | 'writeExecuteOperations'
   | 'writeScanOperations'
-  // TODO: Check for Cancel action, or we can change RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL to use Partial and omit cancel
-  | 'readActionsLogManagement';
+  | typeof NO_SPECIFIC_PRIVILEGE_REQUIRED;
 
 /**
  * maps the console command to the RBAC control (kibana feature control) that is required to access it via console
@@ -115,7 +127,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
   runscript: 'writeExecuteOperations',
-  cancel: 'readActionsLogManagement',
+  cancel: NO_SPECIFIC_PRIVILEGE_REQUIRED,
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -170,7 +182,10 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
  * The list of console commands mapped to the required EndpointAuthz to access that command
  */
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
-  Record<ConsoleResponseActionCommands, EndpointAuthzKeyList[number]>
+  Record<
+    ConsoleResponseActionCommands,
+    EndpointAuthzKeyList[number] | typeof NO_SPECIFIC_PRIVILEGE_REQUIRED
+  >
 >({
   isolate: 'canIsolateHost',
   release: 'canUnIsolateHost',
@@ -182,7 +197,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
-  cancel: 'canReadActionsLogManagement',
+  cancel: NO_SPECIFIC_PRIVILEGE_REQUIRED,
 });
 
 // 4 hrs in seconds

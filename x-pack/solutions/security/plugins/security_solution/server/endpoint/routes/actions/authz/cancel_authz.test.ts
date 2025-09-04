@@ -79,7 +79,7 @@ describe('validateCommandSpecificCancelPermissions', () => {
       ['upload', 'canWriteFileOperations'],
       ['scan', 'canWriteScanOperations'],
       ['runscript', 'canWriteExecuteOperations'],
-      ['cancel', 'canReadActionsLogManagement'],
+      ['cancel', 'NO_SPECIFIC_PRIVILEGE_REQUIRED'],
     ])(
       'should pass command-specific authorization for %s command when user has permission',
       async (command, commandPermission) => {
@@ -116,7 +116,6 @@ describe('validateCommandSpecificCancelPermissions', () => {
       ['upload', 'canWriteFileOperations'],
       ['scan', 'canWriteScanOperations'],
       ['runscript', 'canWriteExecuteOperations'],
-      ['cancel', 'canReadActionsLogManagement'],
     ])(
       'should fail command-specific authorization for %s command when user lacks permission',
       async (command, commandPermission) => {
@@ -141,6 +140,26 @@ describe('validateCommandSpecificCancelPermissions', () => {
         ).rejects.toThrow(EndpointAuthorizationError);
       }
     );
+
+    it('should allow canceling cancel command regardless of user permissions', async () => {
+      mockedFetchActionRequestById.mockResolvedValue({
+        EndpointActions: {
+          data: { command: 'cancel' },
+        },
+      } as unknown as LogsEndpointAction);
+
+      const authz = getEndpointAuthzInitialStateMock({});
+      mockContext.securitySolution.getEndpointAuthz.mockResolvedValue(authz);
+
+      await expect(
+        validateCommandSpecificCancelPermissions(
+          mockContext as unknown as SecuritySolutionRequestHandlerContext,
+          mockRequest,
+          endpointContext,
+          mockLogger
+        )
+      ).resolves.not.toThrow();
+    });
   });
 
   describe('error handling', () => {

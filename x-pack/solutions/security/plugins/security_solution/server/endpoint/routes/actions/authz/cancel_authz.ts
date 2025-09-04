@@ -9,8 +9,10 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { CancelActionRequestBody } from '../../../../../common/api/endpoint';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { EndpointAppContext } from '../../../types';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import { fetchActionRequestById } from '../../../services/actions/utils/fetch_action_request_by_id';
 import { getRequiredCancelPermissions } from '../../../../../common/endpoint/service/authz/authz';
+import { NO_SPECIFIC_PRIVILEGE_REQUIRED } from '../../../../../common/endpoint/service/response_actions/constants';
 import { EndpointAuthorizationError } from '../../../errors';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
@@ -60,9 +62,12 @@ export const validateCommandSpecificCancelPermissions = async (
     });
   }
 
-  // Check command-specific authorization (baseline permission already checked by withEndpointAuthz)
+  // Check command-specific authorization
   const endpointAuthz = await (await context.securitySolution).getEndpointAuthz();
-  const hasCommandPermission = endpointAuthz[requiredPermissions];
+  const hasCommandPermission: boolean =
+    requiredPermissions === NO_SPECIFIC_PRIVILEGE_REQUIRED
+      ? true
+      : endpointAuthz[requiredPermissions as keyof EndpointAuthz];
 
   if (!hasCommandPermission) {
     logger.warn(

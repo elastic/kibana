@@ -351,10 +351,10 @@ export function registerResponseActionRoutes(
         },
       },
       withEndpointAuthz(
-        { all: ['canReadActionsLogManagement'] },
+        {}, // No baseline privilege required - command-specific authorization handles security
         logger,
         responseActionRequestHandler(endpointContext, 'cancel'),
-        // Additional command-specific authorization check
+        // Command-specific authorization check provides proper security validation
         async (context, request) => {
           await validateCommandSpecificCancelPermissions(context, request, endpointContext, logger);
         }
