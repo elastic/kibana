@@ -2584,7 +2584,7 @@
     }
   },
   "lens": {
-    "dynamic": "strict",
+    "dynamic": false,
     "properties": {
       "description": {
         "type": "text"
@@ -2597,7 +2597,6 @@
         "type": "text"
       },
       "version": {
-        "index": false,
         "type": "integer"
       },
       "visualizationType": {

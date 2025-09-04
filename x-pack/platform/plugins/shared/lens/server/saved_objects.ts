@@ -65,7 +65,6 @@ export function setupSavedObjects(
             addedMappings: {
               version: {
                 type: 'integer',
-                index: false,
               },
             },
           },
@@ -77,7 +76,7 @@ export function setupSavedObjects(
       },
     },
     mappings: {
-      dynamic: 'strict',
+      dynamic: false,
       properties: {
         title: {
           type: 'text',
@@ -90,7 +89,6 @@ export function setupSavedObjects(
         },
         version: {
           type: 'integer',
-          index: false,
         },
         state: {
           dynamic: false,
