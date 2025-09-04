@@ -13,6 +13,7 @@ import { internals } from '../internals';
 import type { TypeOptions, ExtendsDeepOptions, UnknownOptions, DefaultValue } from './type';
 import { Type } from './type';
 import { ValidationError } from '../errors';
+import { Reference } from '../references';
 
 export type Props = Record<string, Type<any, DefaultValue<any>>>;
 export type NullableProps = Record<string, Type<any> | undefined | null>;
@@ -186,6 +187,25 @@ export class ObjectType<
 
     if (options.meta?.id) {
       schema = schema.id(options.meta.id);
+    }
+
+    // Validate defaultValue object to fill defaults
+    if (defaultValue !== undefined) {
+      if (typeof defaultValue === 'function') {
+        const defaultValueFn = defaultValue;
+        const newDefaultFn = () => {
+          // @ts-expect-error - need to fix this error
+          return schema.validate(defaultValueFn());
+        };
+        schema = schema.default(newDefaultFn);
+        // @ts-expect-error - need to fix this error
+      } else if (Reference.isReference(defaultValue)) {
+        // Ref typings are ambagious, cannot validate but probably a rare case.
+        schema = schema.default(defaultValue.getSchema());
+      } else {
+        const newDefault = schema.validate(defaultValue).value;
+        schema = schema.default(newDefault);
+      }
     }
 
     super(schema, typeOptions);

@@ -140,12 +140,10 @@ export abstract class Type<V, D extends DefaultValue<V> = never> {
       // If default value is a function, then we must provide description for it.
       if (typeof options.defaultValue === 'function') {
         schema = schema.default(options.defaultValue);
+      } else if (Reference.isReference(options.defaultValue)) {
+        schema = schema.default(options.defaultValue.getSchema());
       } else {
-        schema = schema.default(
-          Reference.isReference(options.defaultValue)
-            ? options.defaultValue.getSchema()
-            : (options.defaultValue as any)
-        );
+        schema = schema.default(options.defaultValue);
       }
     }
 
