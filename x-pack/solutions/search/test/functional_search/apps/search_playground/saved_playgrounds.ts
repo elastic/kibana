@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         const { solutionNavigation } = pageObjects;
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'RAG Playground' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: testPlaygroundName,
         });

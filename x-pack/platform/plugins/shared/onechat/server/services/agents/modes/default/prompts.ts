@@ -6,15 +6,15 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { ToolResultType, builtinToolIds } from '@kbn/onechat-common';
+import { platformCoreTools, ToolResultType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 
 const tools = {
-  indexExplorer: sanitizeToolId(builtinToolIds.indexExplorer),
-  listIndices: sanitizeToolId(builtinToolIds.listIndices),
-  search: sanitizeToolId(builtinToolIds.search),
+  indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
+  listIndices: sanitizeToolId(platformCoreTools.listIndices),
+  search: sanitizeToolId(platformCoreTools.search),
 };
 
 export const getActPrompt = ({
@@ -82,7 +82,7 @@ export const getActPrompt = ({
           - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
           - Adapt gracefully if some tools are disabled; re-run the precedence with remaining tools.
           - Never expose internal tool selection reasoning unless the user asks.
-        
+
         OPERATING PROTOCOL
         Step 1 — Analyze & plan
           - Examine the user's query and conversation history.

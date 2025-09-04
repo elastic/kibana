@@ -33,14 +33,14 @@ The logs in Pipeline Steps contain `Info` level logging. To debug Functional UI 
 
 Looking at the failure, we first look at the Error and stack trace. In the example below, this test failed to find an element within the timeout; `Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])`
 
-We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibana/x-pack/ so the file is [`x-pack/platform/test/accessibility/apps/group1/spaces.ts`](https://github.com/elastic/kibana/blob/master/x-pack/platform/test/accessibility/apps/group1/spaces.ts#L50). The function to click on the element was called from a page object method in [`test/functional/page_objects/space_selector_page.ts`](https://github.com/elastic/kibana/blob/master/x-pack/test/functional/page_objects/space_selector_page.ts#L58).
+We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibana/x-pack/ so the file is [`x-pack/platform/test/accessibility/apps/group1/spaces.ts`](https://github.com/elastic/kibana/blob/master/x-pack/platform/test/accessibility/apps/group1/spaces.ts#L50). The function to click on the element was called from a page object method in [`test/functional/page_objects/space_selector_page.ts`](https://github.com/elastic/kibana/blob/master/x-pack/platform/test/functional/page_objects/space_selector_page.ts#L58).
 
 ```
 [00:03:36]             │ debg --- retry.try error: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])
 [00:03:36]             │      Wait timed out after 10020ms
-[00:03:36]             │ info Taking screenshot "/dev/shm/workspace/parallel/24/kibana/x-pack/test/functional/screenshots/failure/Kibana spaces page meets a11y validations a11y test for click on create space page.png"
+[00:03:36]             │ info Taking screenshot "/dev/shm/workspace/parallel/24/kibana/x-pack/platform/test/functional/screenshots/failure/Kibana spaces page meets a11y validations a11y test for click on create space page.png"
 [00:03:37]             │ info Current URL is: http://localhost:61241/app/home#/
-[00:03:37]             │ info Saving page source to: /dev/shm/workspace/parallel/24/kibana/x-pack/test/functional/failure_debug/html/Kibana spaces page meets a11y validations a11y test for click on create space page.html
+[00:03:37]             │ info Saving page source to: /dev/shm/workspace/parallel/24/kibana/x-pack/platform/test/functional/failure_debug/html/Kibana spaces page meets a11y validations a11y test for click on create space page.html
 [00:03:37]             └- ✖ fail: Kibana spaces page meets a11y validations a11y test for click on create space page
 [00:03:37]             │      Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])
 [00:03:37]             │ Wait timed out after 10020ms
