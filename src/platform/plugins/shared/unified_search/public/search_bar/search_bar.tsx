@@ -541,7 +541,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
               <EuiLink
                 onClick={() => {
                   this.services.notifications.toasts.remove(toast);
-                  this.services.data.search.showSearchSessionsFlyout();
+                  this.services.data.search.showSearchSessionsFlyout({
+                    appId: this.services.appName,
+                  });
                 }}
               >
                 {chunks}
