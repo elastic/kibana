@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
-import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
+import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 
