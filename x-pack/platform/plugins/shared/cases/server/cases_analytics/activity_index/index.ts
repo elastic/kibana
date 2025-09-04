@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
   CAI_ACTIVITY_INDEX_NAME,
@@ -26,19 +27,23 @@ export const createActivityAnalyticsIndex = ({
   logger,
   isServerless,
   taskManager,
+  spaceId,
+  owner,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  spaceId: string;
+  owner: Owner;
 }): AnalyticsIndex =>
   new AnalyticsIndex({
     logger,
     esClient,
     isServerless,
     taskManager,
-    indexName: CAI_ACTIVITY_INDEX_NAME,
-    indexAlias: CAI_ACTIVITY_INDEX_ALIAS,
+    indexName: getDestinationIndexName(spaceId, owner),
+    indexAlias: getDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_ACTIVITY_INDEX_VERSION,
     mappings: CAI_ACTIVITY_INDEX_MAPPINGS,
     painlessScriptId: CAI_ACTIVITY_INDEX_SCRIPT_ID,
@@ -51,14 +56,18 @@ export const createActivityAnalyticsIndex = ({
 export const scheduleActivityAnalyticsSyncTask = ({
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) => {
   scheduleCAISynchronizationTask({
     taskId: CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID,
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
-    destIndex: CAI_ACTIVITY_INDEX_NAME,
+    destIndex: getDestinationIndexName(spaceId, owner),
     taskManager,
     logger,
   }).catch((e) => {
@@ -67,3 +76,11 @@ export const scheduleActivityAnalyticsSyncTask = ({
     );
   });
 };
+
+function getDestinationIndexName(spaceId: string, owner: Owner) {
+  return `${CAI_ACTIVITY_INDEX_NAME}.${spaceId}-${owner}`.toLowerCase();
+}
+
+function getDestinationIndexAlias(spaceId: string, owner: Owner) {
+  return `${CAI_ACTIVITY_INDEX_ALIAS}.${spaceId}-${owner}`.toLowerCase();
+}

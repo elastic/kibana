@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type {
-  IContextProvider,
-  KibanaRequest,
-  Logger,
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
+import {
+  type IContextProvider,
+  type KibanaRequest,
+  type Logger,
+  type PluginInitializerContext,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  SavedObjectsClient,
 } from '@kbn/core/server';
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -21,7 +22,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { APP_ID } from '../common/constants';
+import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -212,11 +213,16 @@ export class CasePlugin
 
       if (this.caseConfig.analytics.index?.enabled) {
         scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
+        const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+          CASE_SAVED_OBJECT,
+        ]);
+        const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
         createCasesAnalyticsIndexes({
           esClient: core.elasticsearch.client.asInternalUser,
           logger: this.logger,
           isServerless: this.isServerless,
           taskManager: plugins.taskManager,
+          savedObjectsClient: internalSavedObjectsClient,
         }).catch(() => {}); // it shouldn't reject, but just in case
       }
     }
