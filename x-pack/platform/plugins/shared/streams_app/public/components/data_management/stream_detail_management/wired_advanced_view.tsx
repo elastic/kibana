@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Streams } from '@kbn/streams-schema';
@@ -29,6 +29,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { IngestStreamSettings } from '@kbn/streams-schema/src/models/ingest/settings';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export function WiredAdvancedView({
@@ -40,11 +42,7 @@ export function WiredAdvancedView({
 }) {
   const { isServerless } = useKibana();
 
-  const [settings, setSettings] = useState({
-    'index.number_of_shards': definition.effective_settings['index.number_of_shards']?.value,
-    'index.number_of_replicas': definition.effective_settings['index.number_of_replicas']?.value,
-    'index.refresh_interval': definition.effective_settings['index.refresh_interval']?.value,
-  });
+  const [settings, setSettings] = useState<IngestStreamSettings>(definition.effective_settings);
 
   return (
     <>
@@ -77,13 +75,15 @@ export function WiredAdvancedView({
                   'Control how the index is split across nodes. More shards can improve parallelism but may increase overhead.',
               }
             )}
-            value={settings['index.number_of_shards']}
-            onChange={(value) =>
-              setSettings((prev) => ({
-                ...prev,
-                'index.number_of_shards': Number(value),
-              }))
-            }
+            value={settings['index.number_of_shards']?.value}
+            onChange={(value) => {
+              if (value) {
+                setSettings((prev) => ({
+                  ...prev,
+                  'index.number_of_shards': { value: Number(value) },
+                }));
+              }
+            }}
           />
 
           <EuiHorizontalRule margin="m" />
@@ -108,13 +108,15 @@ export function WiredAdvancedView({
                   'Define how many copies of the data exist. More replicas improve resilience and read performance but increase storage usage.',
               }
             )}
-            value={settings['index.number_of_replicas']}
-            onChange={(value) =>
-              setSettings((prev) => ({
-                ...prev,
-                'index.number_of_replicas': Number(value),
-              }))
-            }
+            value={settings['index.number_of_replicas']?.value}
+            onChange={(value) => {
+              if (value) {
+                setSettings((prev) => ({
+                  ...prev,
+                  'index.number_of_replicas': { value: Number(value) },
+                }));
+              }
+            }}
           />
 
           <EuiHorizontalRule />
@@ -139,13 +141,15 @@ export function WiredAdvancedView({
                   'Control how frequently new data becomes visible for search. A longer interval reduces resource usage; a short one makes data searchable sooner.',
               }
             )}
-            value={settings['index.refresh_interval']}
-            onChange={(value) =>
-              setSettings((prev) => ({
-                ...prev,
-                'index.refresh_interval': String(value),
-              }))
-            }
+            value={settings['index.refresh_interval']?.value}
+            onChange={(value) => {
+              if (value) {
+                setSettings((prev) => ({
+                  ...prev,
+                  'index.refresh_interval': { value: String(value) },
+                }));
+              }
+            }}
           />
         </EuiPanel>
       </EuiPanel>
@@ -201,8 +205,30 @@ function SettingRow({
 }
 
 function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetResponse }) {
+  const {
+    appParams: { history },
+    core: {
+      application: { navigateToApp },
+    },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
   const [showModal, setShowModal] = useState(false);
   const [streamName, setStreamName] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const abortController = useAbortController();
+  const deleteStream = useCallback(async () => {
+    setIsDeleting(true);
+    await streamsRepositoryClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+      params: { path: { name: definition.stream.name } },
+      signal: abortController.signal,
+    });
+    navigateToApp('/streams');
+  }, [definition]);
 
   return (
     <>
@@ -269,8 +295,9 @@ function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetR
 
             <EuiButton
               isDisabled={streamName !== definition.stream.name}
+              isLoading={isDeleting}
               color="danger"
-              onClick={() => setShowModal(false)}
+              onClick={() => deleteStream()}
               fill
             >
               {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
