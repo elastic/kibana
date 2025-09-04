@@ -5004,6 +5004,18 @@
           "BulkEditOptions",
           "<Params>) => Promise<",
           "BulkEditResult",
+          "<Params>>; bulkEditRuleParamsWithReadAuth: <Params extends ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">(options: ",
+          "BulkEditRuleParamsOptions",
+          "<Params>) => Promise<",
+          "BulkEditResult",
           "<Params>>; bulkEnableRules: (params: ",
           "BulkEnableRulesParams",
           ") => Promise<",

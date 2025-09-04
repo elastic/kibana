@@ -313,6 +313,9 @@ export const toNavigationItems = (
     );
   }
 
+  // Check for duplicate icons
+  warnAboutDuplicateIcons(logoItem, primaryItems);
+
   return { logoItem, navItems: { primaryItems, footerItems }, activeItemId: deepestActiveItemId };
 };
 
@@ -412,6 +415,31 @@ const isRecentlyAccessedDefinition = (
 const filterEmpty = <T,>(arr: Array<T | null | undefined>): T[] =>
   arr.filter((item) => item !== null && item !== undefined) as T[];
 
+function warnAboutDuplicateIcons(logoItem: SideNavLogo, primaryItems: MenuItem[]) {
+  // Collect all items with icons
+  const itemsWithIcons = [logoItem, ...primaryItems]
+    .filter((item) => item.iconType && item.iconType !== FALLBACK_ICON)
+    .map((item) => ({ id: item.id, icon: String(item.iconType) }));
+
+  // Group items by icon and warn about duplicates
+  const iconGroups = new Map<string, string[]>();
+  itemsWithIcons.forEach(({ id, icon }) => {
+    const items = iconGroups.get(icon) || [];
+    iconGroups.set(icon, [...items, id]);
+  });
+
+  iconGroups.forEach((itemIds, iconType) => {
+    if (itemIds.length > 1) {
+      warnOnce(
+        `Icon "${iconType}" is used by multiple navigation items: ${itemIds.join(
+          ', '
+        )}. Consider using unique icons for better UX.`
+      );
+    }
+  });
+}
+
+const FALLBACK_ICON = 'broom' as const;
 const getIcon = (node: ChromeProjectNavigationNode | null): string => {
   if (node?.iconV2) {
     return node.iconV2 as string;
@@ -437,5 +465,5 @@ const getIcon = (node: ChromeProjectNavigationNode | null): string => {
     `No icon found for node "${node?.id}". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon "broom".`
   );
 
-  return 'broom';
+  return FALLBACK_ICON;
 };

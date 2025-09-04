@@ -10,8 +10,12 @@
 import {
   EuiBadge,
   EuiBeacon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiText,
+  useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -96,29 +100,20 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
 };
 
 export function StatusBadge({ status }: { status: ExecutionStatus | undefined }) {
+  const { euiTheme } = useEuiTheme();
   if (!status) {
     return <EuiBadge color="subdued">-</EuiBadge>;
   }
 
   const statusLabel = getStatusLabel(status);
+  const icon = getExecutionStatusIcon(euiTheme, status);
 
-  switch (status) {
-    case 'completed':
-      return <EuiBadge color="success">{statusLabel}</EuiBadge>;
-    case 'failed':
-      return <EuiBadge color="danger">{statusLabel}</EuiBadge>;
-    case 'pending':
-      return <EuiBadge color="subdued">{statusLabel}</EuiBadge>;
-    case 'running':
-      return (
-        <EuiBadge color="subdued" iconType={() => <EuiLoadingSpinner size="s" />}>
-          &nbsp;{statusLabel}
-        </EuiBadge>
-      );
-    case 'waiting_for_input':
-    case 'cancelled':
-    case 'skipped':
-    default:
-      return <EuiBadge color="subdued">{statusLabel}</EuiBadge>;
-  }
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+      <EuiFlexItem grow={false} className="eui-hideFor--s">
+        <EuiText size="s">{statusLabel}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }
