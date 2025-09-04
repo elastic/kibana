@@ -730,7 +730,29 @@ export const QueryBarTopRow = React.memo(
       ) : (
         <EuiFlexItem grow={false}>
           {props.isLoading && propsOnCancel && renderCancelButton()}
-          {(!props.isLoading || !propsOnCancel) && updateButton}
+          {(!props.isLoading || !propsOnCancel) && (
+            <EuiSuperUpdateButton
+              iconType={props.isDirty ? iconDirty : 'refresh'}
+              iconOnly={submitButtonIconOnly}
+              aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
+              isDisabled={isDateRangeInvalid || props.isDisabled}
+              isLoading={props.isLoading}
+              onClick={onClickSubmitButton}
+              size="s"
+              color={props.isDirty ? 'success' : 'text'}
+              fill={false}
+              needsUpdate={props.isDirty}
+              data-test-subj="querySubmitButton"
+              toolTipProps={{
+                content: props.isDirty ? labelDirty : strings.getRefreshQueryLabel(),
+                delay: 'long',
+                position: 'bottom',
+              }}
+              css={css({ minInlineSize: 'initial !important' })}
+            >
+              {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
+            </EuiSuperUpdateButton>
+          )}
         </EuiFlexItem>
       );
 
@@ -974,5 +996,10 @@ const inputStringStyles = {
       '.euiDatePopoverButton-isInvalid': {
         backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
       },
+
+      '.euiFormControlLayout, .euiFormControlLayout .euiButtonEmpty, .euiFormControlLayout .euiButtonIcon':
+        {
+          blockSize: euiTheme.size.xl,
+        },
     }),
 };
