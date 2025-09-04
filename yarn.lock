@@ -2211,9 +2211,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.3.0.tgz#3d65189b84f55440145eeb01dff9a77fb8036830"
   integrity sha512-rimxG9D/jCT/UvrZvet69kTHYMIpBqPwl+iR+aA9Ay5QaP7LFEPnEj6TMb1wk64vfzrTeV95eOLMAElJmXo4wA==
 
-"@elastic/eui-amsterdam@file:./eui_106.4.0_form_append_prepend_05.tgz", "@elastic/eui@file:./eui_106.4.0_form_append_prepend_05.tgz":
+"@elastic/eui-amsterdam@file:./eui_106.4.0_form_append_prepend_06.tgz", "@elastic/eui@file:./eui_106.4.0_form_append_prepend_06.tgz":
   version "106.4.0"
-  resolved "file:./eui_106.4.0_form_append_prepend_05.tgz#cc6288d41d66cb0c40930e1d17fa9fc8bc509d36"
+  resolved "file:./eui_106.4.0_form_append_prepend_06.tgz#3075826a4e7748aa5faf53ca27dc9514e246ebc1"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
