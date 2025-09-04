@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { prettifyQuery } from '@kbn/esql-utils';
 import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
+import { Parser } from '../../../parser';
+import { WrappingPrettyPrinter } from '../../../pretty_print';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
 import { METADATA_FIELDS } from '../metadata';
 
@@ -16,6 +17,11 @@ export interface EditorExtensions {
   recommendedQueries: RecommendedQuery[];
   recommendedFields: RecommendedField[];
 }
+
+const prettifyQuery = (src: string): string => {
+  const { root } = Parser.parse(src, { withFormatting: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
+};
 
 const prettifyQueryTemplate = (query: string) => {
   const formattedQuery = prettifyQuery(query);
