@@ -80,8 +80,8 @@ export const ExplainWithAiAssistant = <T extends EntityType>({
             }}
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.riskInputs.explainWithAiButton"
-              defaultMessage="Explain with AI Assistant"
+              id="xpack.securitySolution.flyout.entityDetails.riskInputs.askAiAssistant"
+              defaultMessage="Ask AI Assistant"
             />
           </EuiButton>
         </EuiFlexItem>

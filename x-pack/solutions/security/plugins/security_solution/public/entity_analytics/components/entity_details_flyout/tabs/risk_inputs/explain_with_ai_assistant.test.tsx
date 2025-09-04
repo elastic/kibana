@@ -77,7 +77,7 @@ describe('ExplainWithAiAssistant', () => {
     render(<ExplainWithAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
     expect(screen.getByTestId('explain-with-ai-button')).toBeInTheDocument();
-    expect(screen.getByText('Explain with AI Assistant')).toBeInTheDocument();
+    expect(screen.getByText('Ask AI Assistant')).toBeInTheDocument();
   });
 
   it('should not render the button when AI assistant is disabled', () => {
