@@ -9,7 +9,7 @@ import type {
   CreateMonitoringEntitySource,
   ListEntitySourcesRequestQuery,
   MonitoringEntitySource,
-} from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+} from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
 
 export interface MonitoringEntitySourceDependencies {
