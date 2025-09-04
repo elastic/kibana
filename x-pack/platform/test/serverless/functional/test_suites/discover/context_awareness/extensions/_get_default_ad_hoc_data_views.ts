@@ -54,8 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       expect(await toasts.getCount({ timeout: 2000 })).to.be(0);
       expect(await dataViews.getSelectedName()).to.be('Example profile data view');
-      expect(await dataViews.isManaged()).to.be(false);
-      expect(await dataViews.isAdHoc()).to.be(true);
+      expect(await dataViews.isManaged()).to.be(true);
     });
 
     it('should create a copy of the profile data view when saving the Discover session', async () => {
@@ -74,8 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.be('Jun 10, 2024 @ 14:00:00.000');
       await dataViews.switchTo('Example profile data view');
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataViews.isManaged()).to.be(false);
-      expect(await dataViews.isAdHoc()).to.be(true);
+      expect(await dataViews.isManaged()).to.be(true);
       expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.have.length(7);
       expect(
         await (await dataGrid.getCellElementByColumnName(0, '@timestamp')).getVisibleText()
@@ -107,8 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await dataViews.getSelectedName()).to.be('Example profile data view');
         await discover.waitUntilSearchingHasFinished();
-        expect(await dataViews.isManaged()).to.be(false);
-        expect(await dataViews.isAdHoc()).to.be(true);
+        expect(await dataViews.isManaged()).to.be(true);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.have.length(7);
         expect(
           await (await dataGrid.getCellElementByColumnName(0, '@timestamp')).getVisibleText()

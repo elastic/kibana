@@ -225,10 +225,14 @@ export const EditIndexPattern = withRouter(
                     </EuiBadge>
                   ) : tag.key === 'rollup' ? (
                     <RollupDeprecationTooltip>
-                      <EuiBadge color="warning">{tag.name}</EuiBadge>
+                      <EuiBadge color="warning" data-test-subj={tag['data-test-subj']}>
+                        {tag.name}
+                      </EuiBadge>
                     </RollupDeprecationTooltip>
                   ) : (
-                    <EuiBadge color="hollow">{tag.name}</EuiBadge>
+                    <EuiBadge color="hollow" data-test-subj={tag['data-test-subj']}>
+                      {tag.name}
+                    </EuiBadge>
                   )}
                 </EuiFlexItem>
               ))}

@@ -1212,6 +1212,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/kbn_archiver/discover.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_nested.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/kbn_archiver/date_* @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/managed_data_view.json @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/es_archiver/unmapped_fields @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L26
 /src/platform/test/functional/fixtures/es_archiver/message_with_newline @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/classic/_doc_table_newline.ts#L24
 /src/platform/test/functional/fixtures/es_archiver/hamlet @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L30

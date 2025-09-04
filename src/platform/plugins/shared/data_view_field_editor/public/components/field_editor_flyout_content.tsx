@@ -43,7 +43,7 @@ const i18nTexts = {
     'indexPatternFieldEditor.editor.flyoutDisabledSaveCalloutMessage',
     {
       defaultMessage:
-        'Fields cannot be edited on managed data views. Duplicate the data view in order to make changes.',
+        "You can't edit managed data view fields. Instead, you can duplicate the data view and make changes to your newly created copy.",
     }
   ),
 };
@@ -254,8 +254,8 @@ const FieldEditorFlyoutContentComponent = ({
               {dataView.managed && (
                 <EuiCallOut
                   title={i18nTexts.disabledSaveCalloutMessage}
-                  color="warning"
-                  iconType="warning"
+                  color="primary"
+                  iconType="info"
                   size="s"
                   style={{ marginTop: '10px' }}
                 />
