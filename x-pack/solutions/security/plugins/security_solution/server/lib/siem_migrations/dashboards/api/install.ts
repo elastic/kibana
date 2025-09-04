@@ -25,9 +25,6 @@ const InstallMigrationDashboardsResponse = z.object({
   installed: z.number(),
 });
 
-type InstallMigrationDashboardsRequestParams = z.infer<
-  typeof InstallMigrationDashboardsRequestParams
->;
 type InstallMigrationDashboardsRequestBody = z.infer<typeof InstallMigrationDashboardsRequestBody>;
 type InstallMigrationDashboardsResponse = z.infer<typeof InstallMigrationDashboardsResponse>;
 

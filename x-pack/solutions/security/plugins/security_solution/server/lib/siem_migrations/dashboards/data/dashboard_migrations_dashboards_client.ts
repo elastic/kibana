@@ -63,9 +63,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
   }
 
   /** Updates dashboard migration documents */
-  async update(
-    updates: Array<UpdateMigrationItemInput<DashboardMigrationDashboard>>
-  ): Promise<void> {
+  async update(updates: Array<Partial<DashboardMigrationDashboard>>): Promise<void> {
     if (updates.length === 0) {
       return;
     }
