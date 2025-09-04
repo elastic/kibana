@@ -16,7 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('ML Results Service - view_by endpoints', function () {
-    this.tags(['rbrtj']);
     const jobId = 'test-job';
     const basePath = '/internal/ml/results/view_by';
 
