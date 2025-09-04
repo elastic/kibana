@@ -95,7 +95,7 @@ export const DefaultAIConnectorHoc: React.FC<
 
   return (
     <DefaultAIConnector
-      toast={toasts!}
+      toast={toasts}
       uiSetting={{ fields, handleFieldChange, unsavedChanges }}
       connectors={{
         loading: false,
@@ -119,11 +119,11 @@ export const BottomBarActionsHoc = () => {
       await saveAll();
     } catch (e) {
       const error = e as Error;
-      toasts &&
-        toasts.addDanger({
-          title: i18n.BOTTOM_BAR_ACTIONS_SAVE_ERROR,
-          text: error.message,
-        });
+      
+      toasts?.addDanger({
+        title: i18n.BOTTOM_BAR_ACTIONS_SAVE_ERROR,
+        text: error.message,
+      });
       throw error;
     }
   }

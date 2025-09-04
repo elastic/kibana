@@ -57,7 +57,7 @@ const hasElasticManagedLlm = (connectors: ConnectorData['connectors'] | undefine
 };
 
 interface Props {
-  toast: IToasts;
+  toast: IToasts | undefined;
   application: ApplicationStart;
   docLinks: DocLinksStart;
   uiSetting: {
@@ -153,7 +153,7 @@ export const DefaultAIConnector: React.FC<Props> = ({
   const onChangeDefaultLlm = (selectedOptions: EuiComboBoxOptionOption<string>[]) => {
     const values = selectedOptions.map((option) => option.value);
     if (values.length > 1) {
-      toast.addDanger({
+      toast?.addDanger({
         title: i18n.translate(
           'xpack.observabilityAiAssistantManagement.defaultLlm.onChange.error.multipleSelected.title',
           {
@@ -274,7 +274,7 @@ export const DefaultAIConnector: React.FC<Props> = ({
         />
       </p>
     );
-  }, [hasElasticManagedLlm, application, docLinks]);
+  }, [elasticManagedLlmExists, application, docLinks]);
 
   return (
     <>

@@ -41,7 +41,7 @@ describe('settings_context', () => {
                         value: false,
                         userValue: true,
                       },
-                    } as Record<string, PublicUiSettingsParams & UserProvidedValues<any>>),
+                    } as Record<string, PublicUiSettingsParams & UserProvidedValues>),
                   },
                 } as unknown as SettingsStart
               }

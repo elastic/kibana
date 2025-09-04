@@ -4,15 +4,19 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-  ]
+  "kbn_references": []
 }

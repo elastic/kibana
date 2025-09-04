@@ -34,6 +34,7 @@ import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
+import { schema } from '@kbn/config-schema';
 
 export class AIAssistantManagementSelectionPlugin
   implements
