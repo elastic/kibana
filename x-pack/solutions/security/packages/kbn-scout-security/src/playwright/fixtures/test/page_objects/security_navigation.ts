@@ -22,6 +22,11 @@ export class SecurityNavigation {
   public usersLink: Locator;
   public casesLink: Locator;
 
+  // Page content locators
+  public createDashboardButton: Locator;
+  public timelinesTable: Locator;
+  public casesTable: Locator;
+
   constructor(private readonly page: ScoutPage) {
     this.dashboardsButton = this.page.testSubj.locator('solutionSideNavItemButton-dashboards');
     this.dashboardsLink = this.page.testSubj.locator('solutionSideNavItemLink-dashboards');
@@ -40,9 +45,14 @@ export class SecurityNavigation {
     this.networkLink = this.page.testSubj.locator('solutionSideNavPanelLink-network');
     this.usersLink = this.page.testSubj.locator('solutionSideNavPanelLink-users');
     this.casesLink = this.page.testSubj.locator('solutionSideNavItemLink-cases');
+
+    // Page content locators
+    this.createDashboardButton = this.page.testSubj.locator('createDashboardButton');
+    this.timelinesTable = this.page.testSubj.locator('timelines-table');
+    this.casesTable = this.page.testSubj.locator('cases-table-add-case');
   }
 
-  async goToTimelines() {
+  async gotoTimelines() {
     await this.page.gotoApp('security/timelines');
   }
 
