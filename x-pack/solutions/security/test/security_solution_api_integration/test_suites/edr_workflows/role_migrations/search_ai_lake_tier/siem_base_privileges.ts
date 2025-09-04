@@ -14,9 +14,9 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_wo
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const DEPRECATED_SIEM_VERSIONS = ['siem', 'siemV2'];
+  const DEPRECATED_SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3'];
 
-  const ROLE_NAME = 'siem_v3_test_role';
+  const ROLE_NAME = 'siem_test_role';
 
   const putKibanaFeatureInRole = (feature: string) => (privileges: string[]) =>
     supertest
@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
     return role.kibana[0].feature[SECURITY_FEATURE_ID];
   };
 
-  describe('@serverless @skipInServerlessMKI Role migrations towards siemV3 without Endpoint product line', () => {
+  describe('@serverless @skipInServerlessMKI Role migrations without Endpoint product line', () => {
     afterEach(async () => {
       await supertest
         .delete(`/api/security/role/${ROLE_NAME}`)
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`from ${deprecatedSiem}`, () => {
         const putDeprecatedSiemPrivilegesInRole = putKibanaFeatureInRole(deprecatedSiem);
 
-        it(`should keep ${deprecatedSiem}:READ privilege`, async () => {
+        it(`should keep ${deprecatedSiem}:READ privilege without switching to MINIMAL_READ`, async () => {
           await putDeprecatedSiemPrivilegesInRole(['read']);
 
           expect(await getMigratedSiemFeaturesFromRole()).to.eql(['read']);
@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(await getMigratedSiemFeaturesFromRole()).to.eql(['minimal_read']);
         });
 
-        it(`should keep ${deprecatedSiem}:ALL privilege`, async () => {
+        it(`should keep ${deprecatedSiem}:ALL privilege without switching to MINIMAL_ALL`, async () => {
           await putDeprecatedSiemPrivilegesInRole(['all']);
 
           expect(await getMigratedSiemFeaturesFromRole()).to.eql(['all']);
