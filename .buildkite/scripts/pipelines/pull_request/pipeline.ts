@@ -500,6 +500,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       await doAnyChangesMatch([
         /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
         /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
+        /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
