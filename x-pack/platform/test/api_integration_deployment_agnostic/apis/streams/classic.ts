@@ -222,6 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
@@ -601,6 +602,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
@@ -674,6 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           dashboards: [],
           queries: [],
+          rules: [],
           stream: {
             description: '',
             ingest: {
