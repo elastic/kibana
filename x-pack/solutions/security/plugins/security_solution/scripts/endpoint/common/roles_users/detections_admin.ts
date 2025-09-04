@@ -18,19 +18,7 @@ export const getDetectionsAdmin: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          [SECURITY_FEATURE_ID]: [
-            'all',
-
-            'policy_management_read',
-
-            'global_artifact_management_all',
-            'trusted_applications_read',
-            'event_filters_read',
-            'host_isolation_exceptions_read',
-            'blocklist_all',
-
-            'actions_log_management_read',
-          ],
+          [SECURITY_FEATURE_ID]: ['all', 'global_artifact_management_all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

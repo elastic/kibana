@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type {
-  RuleMigrationResourceBase,
-  RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export type OnMigrationCreated = (migrationStats: RuleMigrationTaskStats) => void;
 export type OnResourcesCreated = () => void;
-export type OnMissingResourcesFetched = (missingResources: RuleMigrationResourceBase[]) => void;
+export type OnMissingResourcesFetched = (missingResources: SiemMigrationResourceBase[]) => void;

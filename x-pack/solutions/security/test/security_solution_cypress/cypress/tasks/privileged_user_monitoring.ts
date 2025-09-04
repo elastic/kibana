@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { MONITORING_ENGINE_DELETE_URL } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
+import { getDataTestSubjectSelector } from '../helpers/common';
 import { rootRequest } from './api_calls/common';
 
 export const deletePrivMonEngine = () => {
   return rootRequest({
     method: 'DELETE',
-    url: `/api/entity_analytics/monitoring/engine/delete`,
+    url: MONITORING_ENGINE_DELETE_URL,
     failOnStatusCode: false,
     timeout: 300000,
   });
 };
 
 export const uploadCSVFile = (fileName: string, content: string) => {
-  return cy.get('[data-test-subj="privileged-user-monitoring-file-picker"]').selectFile({
+  return cy.get(getDataTestSubjectSelector('privileged-user-monitoring-file-picker')).selectFile({
     contents: Cypress.Buffer.from(content),
     fileName,
     mimeType: 'text/csv',
@@ -26,9 +28,54 @@ export const uploadCSVFile = (fileName: string, content: string) => {
 };
 
 export const openFilePicker = () => {
-  cy.get('[data-test-subj="privilegedUserMonitoringImportCSVCard"]').click();
+  cy.get(getDataTestSubjectSelector('privilegedUserMonitoringImportCSVCard')).click();
+};
+
+export const openIndexPicker = () => {
+  cy.get(getDataTestSubjectSelector('privilegedUserMonitoringAddIndexCard')).click();
+};
+
+export const openCreateIndexModal = () => {
+  cy.get(`${getDataTestSubjectSelector('create-index-button')}`)
+    .should('exist')
+    .click();
+};
+
+export const typeIndexName = (newIndex: string) => {
+  cy.get(`${getDataTestSubjectSelector('createIndexModalIndexName')}`)
+    .should('exist')
+    .type(newIndex);
+};
+
+export const clickCreateIndexButton = () => {
+  cy.get(`${getDataTestSubjectSelector('createIndexModalCreateButton')}`)
+    .should('exist')
+    .click();
+};
+
+export const waitForIndexPickerLoader = () => {
+  const loaderSelector = `${getDataTestSubjectSelector(
+    'index-selector-modal'
+  )} span[aria-label="Loading"]`;
+  cy.get(loaderSelector).should('exist');
+  cy.get(loaderSelector).should('not.exist');
+};
+
+export const expandIndexPickerOptions = () => {
+  waitForIndexPickerLoader();
+  cy.get(`${getDataTestSubjectSelector('comboBoxToggleListButton')}`)
+    .should('exist')
+    .click();
+};
+
+export const selectIndexPickerOption = (index: string) => {
+  cy.get(`button[title="${index}"]`).should('exist').click();
 };
 
 export const clickFileUploaderAssignButton = () => {
-  cy.get('[data-test-subj="privileged-user-monitoring-assign-button"]').click();
+  cy.get(getDataTestSubjectSelector('privileged-user-monitoring-assign-button')).click();
+};
+
+export const clickFileUploaderUpdateButton = () => {
+  cy.get(getDataTestSubjectSelector('privileged-user-monitoring-update-button')).click();
 };

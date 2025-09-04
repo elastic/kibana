@@ -48,6 +48,7 @@ export const labels = {
     // Tool types
     esqlLabel: i18n.translate('xpack.onechat.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
     builtinLabel: i18n.translate('xpack.onechat.tools.builtinLabel', { defaultMessage: 'System' }),
+    searchLabel: i18n.translate('xpack.onechat.tools.searchLabel', { defaultMessage: 'Search' }),
 
     // Actions
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
@@ -195,5 +196,10 @@ export const labels = {
     createAgent: i18n.translate('xpack.onechat.agents.create.title', {
       defaultMessage: 'Create Agent',
     }),
+    settings: {
+      optionalLabel: i18n.translate('xpack.onechat.agents.form.settings.optionalLabel', {
+        defaultMessage: 'Optional',
+      }),
+    },
   },
 };

@@ -1,0 +1,42 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/monaco'
+type: unknown
+owners:
+  defaultOwner: '@elastic/appex-sharedux'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/monaco'
+  description: Moon project for @kbn/monaco
+  channel: ''
+  owner: '@elastic/appex-sharedux'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-monaco
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - src/**/*
+    - '**/*.ts'
+    - src/languages/painless/autocomplete_definitions/*.json
+    - '!target/**/*'
+tasks:
+  build-webpack:
+    command: yarn
+    args:
+      - 'build'
+    outputs:
+      - /target/build/src/platform/packages/shared/kbn-monaco
+  watch-webpack:
+    type: run
+    options:
+      persistent: true
+    command: yarn
+    args:
+      - build
+      - --watch
+    outputs:
+      - /target/build/src/platform/packages/shared/kbn-monaco

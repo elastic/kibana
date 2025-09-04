@@ -7,13 +7,14 @@
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useEffect, useState } from 'react';
 
 export function AdvancedConfigKeyInput({
   configKey,
   id,
   showLabel,
+  revalidate,
   onChange,
   checkIfAdvancedConfigKeyExists,
   checkIfPredefinedConfigKeyExists,
@@ -23,52 +24,75 @@ export function AdvancedConfigKeyInput({
   configKey: string;
   id: number;
   showLabel: boolean;
-  onChange: (newKey: string) => void;
-  checkIfAdvancedConfigKeyExists: (newKey: string, oldKey: string) => boolean;
+  revalidate: boolean;
+  onChange: ({ key, oldKey }: { key: string; oldKey: string }) => void;
+  checkIfAdvancedConfigKeyExists: (key: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
-  addValidationError: (key: string) => void;
+  addValidationError: (key: string, active: boolean) => void;
   removeValidationError: (key: string) => void;
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(configKey);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const isFormInvalid = localKey !== configKey && Boolean(errorMsg);
+  const [isFormInvalid, setIsFormInvalid] = useState(false);
 
   useEffect(() => {
     setLocalKey(configKey);
   }, [configKey]);
 
-  const getErrorMsg = (newKey: string) => {
-    if (newKey === '') {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
-        defaultMessage: 'Key cannot be empty',
-      });
-    }
-    if (checkIfPredefinedConfigKeyExists(newKey)) {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
-        defaultMessage: 'This key is already predefined in the standard configuration above',
-      });
-    }
-    if (checkIfAdvancedConfigKeyExists(newKey, configKey)) {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
-        defaultMessage: 'This key is already used in another advanced configuration',
-      });
-    }
-    return null;
-  };
+  const [touched, setTouched] = useState(false);
 
-  const handleKeyChange = (newKey: string) => {
-    const errorKey = `key${id}`;
-    const formErrorMsg = getErrorMsg(newKey);
+  const getErrorMsg = useCallback(
+    (key: string) => {
+      if (key === '') {
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+          defaultMessage: 'Key cannot be empty',
+        });
+      }
+      if (key.trim() === '') {
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+          defaultMessage: 'Key cannot be only whitespace characters',
+        });
+      }
+      if (checkIfPredefinedConfigKeyExists(key)) {
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
+          defaultMessage: 'This key is already predefined in the standard configuration above',
+        });
+      }
+      if (key !== configKey && checkIfAdvancedConfigKeyExists(key)) {
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
+          defaultMessage: 'This key is already used in another advanced configuration',
+        });
+      }
+      return null;
+    },
+    [checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists, configKey]
+  );
 
-    setLocalKey(newKey);
-    setErrorMsg(formErrorMsg);
+  useEffect(() => {
+    const errorId = `key${id}`;
+    const newErrorMsg = getErrorMsg(localKey);
+    const hasValidationErrors = newErrorMsg !== null;
 
-    if (Boolean(formErrorMsg)) {
-      addValidationError(errorKey);
+    setErrorMsg(newErrorMsg);
+    setIsFormInvalid((touched || revalidate) && hasValidationErrors);
+
+    if (hasValidationErrors) {
+      addValidationError(errorId, touched);
     } else {
-      removeValidationError(errorKey);
-      onChange(newKey);
+      removeValidationError(errorId);
+    }
+  }, [id, addValidationError, removeValidationError, touched, localKey, revalidate, getErrorMsg]);
+
+  const handleKeyChange = (key: string) => {
+    const newErrorMsg = getErrorMsg(key);
+    const noValidationErrors = newErrorMsg === null;
+
+    setLocalKey(key);
+    setTouched(true);
+
+    if (noValidationErrors) {
+      onChange({ key, oldKey: configKey });
     }
   };
 

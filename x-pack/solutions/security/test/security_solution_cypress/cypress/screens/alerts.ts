@@ -276,3 +276,11 @@ export const HOVER_ACTIONS = {
 export const ADD_TO_NEW_CASE_BUTTON = '[data-test-subj="attach-new-case"]';
 
 export const ADD_TO_EXISTING_CASE_BUTTON = '[data-test-subj="attach-existing-case"]';
+
+export const GROUP_ALERTS_BY_BTN = '[data-test-subj="alerts-table-group-selector"]';
+
+export const TAKE_ACTION_GROUPED_ALERTS_BTN = '[data-test-subj="take-action-button"]';
+
+export const ALERT_STATUS_BADGE_BUTTON = '[data-test-subj="rule-status-badge"]';
+
+export const ALERTS_PAGE_KQL_BAR = '[data-test-subj="alerts-page-search-bar"]';
