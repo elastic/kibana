@@ -20,6 +20,7 @@ import {
   SPAN_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
+  TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
@@ -35,6 +36,7 @@ import { ServiceNameLink } from '../service_name_link';
 import { TransactionNameLink } from '../transaction_name_link';
 import { HighlightField } from '../highlight_field';
 import { DependencyNameLink } from '../dependency_name_link';
+import { TraceIdLink } from '../trace_id_link';
 
 export const getSharedFieldConfigurations = (
   flattenedHit: TraceDocumentOverview
@@ -74,6 +76,16 @@ export const getSharedFieldConfigurations = (
       title: i18n.translate('unifiedDocViewer.observability.traces.transactionId.title', {
         defaultMessage: 'Transaction ID',
       }),
+    },
+    [TRACE_ID]: {
+      title: i18n.translate('unifiedDocViewer.observability.traces.traceId.title', {
+        defaultMessage: 'Trace ID',
+      }),
+      formatter: (value: unknown, formattedValue: string) => (
+        <HighlightField value={value as string} formattedValue={formattedValue}>
+          {({ content }) => <TraceIdLink traceId={value as string} formattedTraceId={content} />}
+        </HighlightField>
+      ),
     },
   };
 };
