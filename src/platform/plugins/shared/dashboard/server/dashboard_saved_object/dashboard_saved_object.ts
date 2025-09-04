@@ -69,20 +69,6 @@ export const createDashboardSavedObjectType = ({
         create: dashboardAttributesSchemaV2,
       },
     },
-    3: {
-      changes: [
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            sections: { properties: {}, dynamic: false },
-          },
-        },
-      ],
-      schemas: {
-        forwardCompatibility: dashboardAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
-        create: dashboardAttributesSchemaV3,
-      },
-    },
   },
   mappings: {
     dynamic: false,
