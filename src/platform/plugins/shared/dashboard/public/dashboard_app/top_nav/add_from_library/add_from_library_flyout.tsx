@@ -61,7 +61,7 @@ export const AddFromLibraryFlyout = ({
       const libraryType = getAddFromLibraryType(type);
       if (!libraryType) {
         coreServices.notifications.toasts.addWarning(
-          i18n.translate('embeddableApi.addPanel.typeNotFound', {
+          i18n.translate('dashboard.addFromLibrary.typeNotFound', {
             defaultMessage: 'Unable to load type: {type}',
             values: { type },
           })
@@ -79,7 +79,7 @@ export const AddFromLibraryFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={modalTitleId}>
-            {i18n.translate('embeddableApi.addPanel.Title', { defaultMessage: 'Add from library' })}
+            {i18n.translate('dashboard.addFromLibrary.title', { defaultMessage: 'Add from library' })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -94,12 +94,12 @@ export const AddFromLibraryFlyout = ({
           onChoose={onChoose}
           savedObjectMetaData={libraryTypes}
           showFilter={true}
-          noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
+          noItemsMessage={i18n.translate('dashboard.addFromLibrary.noMatchingObjectsMessage', {
             defaultMessage: 'No matching objects found.',
           })}
           getTooltipText={(item) => {
             return item.managed
-              ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {
+              ? i18n.translate('dashboard.addFromLibrary.managedPanelTooltip', {
                   defaultMessage:
                     'Elastic manages this panel. Adding it to a dashboard unlinks it from the library.',
                 })
