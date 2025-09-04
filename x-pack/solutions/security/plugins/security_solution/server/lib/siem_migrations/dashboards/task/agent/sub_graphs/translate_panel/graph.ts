@@ -25,7 +25,7 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const fixQueryErrorsNode = getFixQueryErrorsNode(params);
   const ecsMappingNode = getEcsMappingNode(params);
   const selectIndexPatternNode = getSelectIndexPatternNode(params);
-  const translationResultNode = getTranslationResultNode();
+  const translationResultNode = getTranslationResultNode(params);
 
   const translateDashboardPanelGraph = new StateGraph(
     translateDashboardPanelState,

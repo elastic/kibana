@@ -7,6 +7,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
@@ -21,19 +22,9 @@ export const getAggregateDashboardNode = (): GraphNode => {
   return async (state) => {
     let dashboardData: DashboardData;
     try {
-      const templatePath = path.join(__dirname, `./dashboard.json`);
-      const template = fs.readFileSync(templatePath, 'utf-8');
-
-      if (!template) {
-        throw new Error(`Dashboard template not found`);
-      }
-      dashboardData = JSON.parse(template);
+      dashboardData = readDashboardTemplate();
     } catch (error) {
-      // TODO: log the error
-      return {
-        // TODO: add comment: "panel chart type not supported"
-        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
-      };
+      throw new Error(`Error loading dashboard template: ${error}`); // The dashboard migration status will be set to 'failed' and the error stored in the document
     }
 
     const panels = state.translated_panels.sort((a, b) => a.index - b.index);
@@ -41,26 +32,46 @@ export const getAggregateDashboardNode = (): GraphNode => {
     dashboardData.attributes.title = state.original_dashboard.title;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
 
-    // TODO: Use individual translation results for each panel:
-    // panels.map((panel) => panel.translation_result)
-    // and aggregate the top level translation_result here
     let translationResult;
     if (state.translated_panels.length > 0) {
-      if (state.translated_panels.length > 0) {
-        translationResult = MigrationTranslationResult.PARTIAL;
+      if (state.translated_panels.length === state.parsed_original_dashboard.panels.length) {
+        // Set to FULL only if all panels are fully translated
+        const allFull = state.translated_panels.every(
+          (panel) => panel.translation_result === MigrationTranslationResult.FULL
+        );
+        translationResult = allFull
+          ? MigrationTranslationResult.FULL
+          : MigrationTranslationResult.PARTIAL;
       } else {
-        translationResult = MigrationTranslationResult.FULL;
+        translationResult = MigrationTranslationResult.PARTIAL;
       }
     } else {
       translationResult = MigrationTranslationResult.UNTRANSLATABLE;
     }
 
+    const comments = state.translated_panels.flatMap((panel) => {
+      if (panel.comments?.length) {
+        return [generateAssistantComment(`# Panel: ${panel.title}`), ...panel.comments];
+      }
+      return [];
+    });
+
     return {
       elastic_dashboard: {
-        title: state.original_dashboard.title,
+        ...state.original_dashboard,
         data: JSON.stringify(dashboardData),
       },
       translation_result: translationResult,
+      comments,
     };
   };
 };
+
+function readDashboardTemplate() {
+  const templatePath = path.join(__dirname, `./dashboard.json`);
+  const template = fs.readFileSync(templatePath, 'utf-8');
+  if (!template) {
+    throw new Error(`Dashboard template not found`);
+  }
+  return JSON.parse(template);
+}

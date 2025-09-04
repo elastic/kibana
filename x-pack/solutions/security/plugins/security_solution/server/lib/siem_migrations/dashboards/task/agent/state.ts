@@ -7,11 +7,11 @@
 
 import { Annotation } from '@langchain/langgraph';
 import { uniq } from 'lodash/fp';
+import type { MigrationComments } from '../../../../../../common/siem_migrations/model/common.gen';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
   ElasticDashboard,
   OriginalDashboard,
-  DashboardMigrationDashboard,
 } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
 import type {
@@ -39,7 +39,7 @@ export const migrateDashboardState = Annotation.Root({
   }),
   resources: Annotation<MigrationResources>(),
   translation_result: Annotation<MigrationTranslationResult>(),
-  comments: Annotation<DashboardMigrationDashboard['comments']>({
+  comments: Annotation<MigrationComments>({
     // Translation subgraph causes the original main graph comments to be concatenated again, we need to deduplicate them.
     reducer: (current, value) => uniq(value ? (current ?? []).concat(value) : current),
     default: () => [],

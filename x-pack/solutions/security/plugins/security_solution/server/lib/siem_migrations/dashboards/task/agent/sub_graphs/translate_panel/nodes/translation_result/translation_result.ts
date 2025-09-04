@@ -7,12 +7,18 @@
 
 import fs from 'fs';
 import path from 'path';
+import type { Logger } from '@kbn/core/server';
+import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import { processPanel } from './process_panel';
 
-export const getTranslationResultNode = (): GraphNode => {
+interface GetTranslationResultNodeParams {
+  logger: Logger;
+}
+
+export const getTranslationResultNode = (params: GetTranslationResultNodeParams): GraphNode => {
   return async (state) => {
     const query = state.esql_query;
     if (!query) {
@@ -36,19 +42,12 @@ export const getTranslationResultNode = (): GraphNode => {
       if (!vizType) {
         throw new Error('Panel visualization type could not be extracted');
       }
-
-      const templatePath = path.join(__dirname, `./templates/${vizType}.viz.json`);
-      const template = fs.readFileSync(templatePath, 'utf-8');
-
-      if (!template) {
-        throw new Error(`Template not found for visualization type: ${vizType}`);
-      }
-      panel = JSON.parse(template);
+      panel = readVisualizationTemplate(vizType);
     } catch (error) {
-      // TODO: log the error
+      params.logger.error(`Error retrieving visualization template: ${error}`);
       return {
-        // TODO: add comment: "panel chart type not supported"
         translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+        comments: [generateAssistantComment(`Error retrieving visualization template: ${error}`)],
       };
     }
 
@@ -60,3 +59,12 @@ export const getTranslationResultNode = (): GraphNode => {
     };
   };
 };
+
+function readVisualizationTemplate(vizType: string): object {
+  const templatePath = path.join(__dirname, `./templates/${vizType}.viz.json`);
+  const template = fs.readFileSync(templatePath, 'utf-8');
+  if (!template) {
+    throw new Error(`Template not found for visualization type "${vizType}"`);
+  }
+  return JSON.parse(template);
+}

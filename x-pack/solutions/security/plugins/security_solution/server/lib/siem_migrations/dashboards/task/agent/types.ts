@@ -7,6 +7,7 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import type { MigrationComments } from '../../../../../../common/siem_migrations/model/common.gen';
 import type { ParsedPanel } from '../../../../../../common/siem_migrations/parsers/types';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type { DashboardMigrationsRetriever } from '../retrievers';
@@ -52,10 +53,14 @@ export type TranslatedPanels = Array<{
    * this is probably not necessary since we have already calculated the `position` of each panel, but maintained for consistency
    */
   index: number;
+  /* The panel title */
+  title: string;
   /* The visualization json */
   data: object;
   /* The individual panel translation result */
   translation_result: MigrationTranslationResult;
+  /* Any comments generated during the panel translation */
+  comments: MigrationComments;
 }>;
 
 export type FailedPanelTranslations = Array<{

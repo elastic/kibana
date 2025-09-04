@@ -6,9 +6,9 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
+import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
-import type { DashboardMigrationDashboard } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type { ValidationErrors } from './types';
 
@@ -32,7 +32,7 @@ export const translateDashboardPanelState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => MigrationTranslationResult.UNTRANSLATABLE,
   }),
-  comments: Annotation<DashboardMigrationDashboard['comments']>({
+  comments: Annotation<MigrationComments>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
     default: () => [],
   }),

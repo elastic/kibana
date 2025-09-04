@@ -41,8 +41,10 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
           translated_panels: [
             {
               index,
+              title: nodeParams.parsed_panel.title,
               data: output.elastic_panel ?? {},
               translation_result: output.translation_result,
+              comments: output.comments,
             },
           ],
         };
