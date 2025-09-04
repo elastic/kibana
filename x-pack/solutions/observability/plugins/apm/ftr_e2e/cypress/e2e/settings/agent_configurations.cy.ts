@@ -285,6 +285,11 @@ describe('Agent configuration', () => {
           cy.contains('Key cannot be empty').should('be.visible');
         });
 
+        it('should show error when key is only whitespace', () => {
+          cy.getByTestSubj('apmSettingsAdvancedConfigurationKeyField').first().type(' ');
+          cy.contains('Key cannot be only whitespace characters').should('be.visible');
+        });
+
         it('should show error when key conflicts with predefined settings', () => {
           cy.getByTestSubj('apmSettingsAdvancedConfigurationKeyField')
             .first()

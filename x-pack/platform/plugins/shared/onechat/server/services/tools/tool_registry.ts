@@ -10,17 +10,18 @@ import {
   createToolNotFoundError,
   createBadRequestError,
   createInternalError,
+  validateToolId,
 } from '@kbn/onechat-common';
 import type { Runner, RunToolReturn, ScopedRunnerRunToolsParams } from '@kbn/onechat-server';
 import type {
   InternalToolDefinition,
   ToolCreateParams,
   ToolUpdateParams,
-  ToolTypeDefinition,
+  ToolSource,
   ReadonlyToolTypeClient,
   ToolTypeClient,
 } from './tool_provider';
-import { toExecutableTool, ensureValidId } from './utils';
+import { toExecutableTool } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ToolListParams {
@@ -47,21 +48,21 @@ export interface ToolRegistry {
 
 interface CreateToolClientParams {
   getRunner: () => Runner;
-  typesDefinitions: ToolTypeDefinition[];
+  toolSources: ToolSource[];
   request: KibanaRequest;
 }
 
 export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry => {
-  return new ToolClientImpl(params);
+  return new ToolRegistryImpl(params);
 };
 
-class ToolClientImpl implements ToolRegistry {
-  private readonly typesDefinitions: ToolTypeDefinition[];
+class ToolRegistryImpl implements ToolRegistry {
+  private readonly toolSources: ToolSource[];
   private readonly request: KibanaRequest;
   private readonly getRunner: () => Runner;
 
-  constructor({ typesDefinitions, request, getRunner }: CreateToolClientParams) {
-    this.typesDefinitions = typesDefinitions;
+  constructor({ toolSources, request, getRunner }: CreateToolClientParams) {
+    this.toolSources = toolSources;
     this.request = request;
     this.getRunner = getRunner;
   }
@@ -76,8 +77,8 @@ class ToolClientImpl implements ToolRegistry {
   }
 
   async has(toolId: string) {
-    for (const type of this.typesDefinitions) {
-      const client = await type.getClient({ request: this.request });
+    for (const source of this.toolSources) {
+      const client = await source.getClient({ request: this.request });
       if (await client.has(toolId)) {
         return true;
       }
@@ -86,8 +87,8 @@ class ToolClientImpl implements ToolRegistry {
   }
 
   async get(toolId: string) {
-    for (const type of this.typesDefinitions) {
-      const client = await type.getClient({ request: this.request });
+    for (const source of this.toolSources) {
+      const client = await source.getClient({ request: this.request });
       if (await client.has(toolId)) {
         return client.get(toolId);
       }
@@ -97,7 +98,7 @@ class ToolClientImpl implements ToolRegistry {
 
   async list(opts?: ToolListParams | undefined) {
     const allTools: InternalToolDefinition[] = [];
-    for (const type of this.typesDefinitions) {
+    for (const type of this.toolSources) {
       const client = await type.getClient({ request: this.request });
       const toolsFromType = await client.list();
       allTools.push(...toolsFromType);
@@ -105,40 +106,41 @@ class ToolClientImpl implements ToolRegistry {
     return allTools;
   }
 
-  async create(tool: ToolCreateParams) {
-    const { type, ...toolCreateParams } = tool;
+  async create(createRequest: ToolCreateParams) {
+    const { type, id: toolId } = createRequest;
 
-    ensureValidId(tool.id);
-
-    if (await this.has(tool.id)) {
-      throw createBadRequestError(`Tool with id ${tool.id} already exists`);
+    const validationError = validateToolId({ toolId, builtIn: false });
+    if (validationError) {
+      throw createBadRequestError(`Invalid tool id: "${toolId}": ${validationError}`);
     }
 
-    const typeDef = this.typesDefinitions.find((t) => t.toolType === type);
-    if (!typeDef) {
+    if (await this.has(toolId)) {
+      throw createBadRequestError(`Tool with id ${toolId} already exists`);
+    }
+
+    const source = this.toolSources.find((t) => t.toolTypes.includes(type));
+    if (!source) {
       throw createBadRequestError(`Unknown tool type ${type}`);
     }
-    const client = await typeDef.getClient({ request: this.request });
+    const client = await source.getClient({ request: this.request });
     if (isToolTypeClient(client)) {
-      return client.create(toolCreateParams);
+      return client.create(createRequest);
     } else {
-      throw createInternalError(`Non-readonly type ${type} exposes a read-only client`);
+      throw createInternalError(`Non-readonly source ${source.id} exposes a read-only client`);
     }
   }
 
   async update(toolId: string, update: ToolUpdateParams) {
-    for (const type of this.typesDefinitions) {
-      const client = await type.getClient({ request: this.request });
+    for (const source of this.toolSources) {
+      const client = await source.getClient({ request: this.request });
       if (await client.has(toolId)) {
-        if (type.readonly) {
+        if (source.readonly) {
           throw createBadRequestError(`Tool ${toolId} is read-only and can't be updated`);
         }
         if (isToolTypeClient(client)) {
           return client.update(toolId, update);
         } else {
-          throw createInternalError(
-            `Non-readonly type ${type.toolType} exposes a read-only client`
-          );
+          throw createInternalError(`Non-readonly source ${source.id} exposes a read-only client`);
         }
       }
     }
@@ -146,18 +148,16 @@ class ToolClientImpl implements ToolRegistry {
   }
 
   async delete(toolId: string): Promise<boolean> {
-    for (const type of this.typesDefinitions) {
-      const client = await type.getClient({ request: this.request });
+    for (const source of this.toolSources) {
+      const client = await source.getClient({ request: this.request });
       if (await client.has(toolId)) {
-        if (type.readonly) {
+        if (source.readonly) {
           throw createBadRequestError(`Tool ${toolId} is read-only and can't be deleted`);
         }
         if (isToolTypeClient(client)) {
           return client.delete(toolId);
         } else {
-          throw createInternalError(
-            `Non-readonly type ${type.toolType} exposes a read-only client`
-          );
+          throw createInternalError(`Non-readonly source ${source.id} exposes a read-only client`);
         }
       }
     }

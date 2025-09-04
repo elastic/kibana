@@ -88,7 +88,9 @@ export const updateDateRangeInLocalDatePickers = (
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${endDate}{enter}`);
+  cy.intercept('internal/search/esql_async').as('esqlQuery');
   cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
+  cy.wait('@esqlQuery');
 };
 
 export const showStartEndDate = (container: string = GLOBAL_FILTERS_CONTAINER) => {
