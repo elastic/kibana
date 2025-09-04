@@ -25,8 +25,8 @@ import {
   ExitConditionBranchNodeImpl,
   ExitIfNodeImpl,
 } from './if_step';
-import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
-import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './continue_step';
+import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
 import {
   EnterTryBlockNodeImpl,
   ExitTryBlockNodeImpl,
@@ -34,7 +34,7 @@ import {
   ExitNormalPathNodeImpl,
   EnterFallbackPathNodeImpl,
   ExitFallbackPathNodeImpl,
-} from './fallback-step';
+} from './on_failure/fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
 
 export class StepFactory {

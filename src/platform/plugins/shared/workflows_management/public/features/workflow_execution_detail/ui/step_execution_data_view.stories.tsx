@@ -127,3 +127,35 @@ export const Default: Story = {
     data: alertsMockData.alerts,
   },
 };
+
+export const ArrayData: Story = {
+  args: {
+    title: 'Step Execution Data',
+    data: {
+      alerts: [
+        {
+          name: 'Alert 1',
+          description: 'Alert 1 description',
+          severity: 'high',
+        },
+        {
+          name: 'Alert 2',
+          description: 'Alert 2 description',
+          severity: 'medium',
+        },
+        {
+          name: 'Alert 3',
+          description: 'Alert 3 description',
+          severity: 'low',
+        },
+      ],
+    },
+  },
+};
+
+export const Empty: Story = {
+  args: {
+    title: 'Step Execution Data',
+    data: null,
+  },
+};

@@ -18,6 +18,15 @@ export enum AuthorFilter {
   CUSTOM = 'custom',
 }
 
+export enum StatusFilter {
+  INSTALLED = 'installed',
+  TRANSLATED = 'translated',
+  PARTIALLY_TRANSLATED = 'partially_translated',
+  UNTRANSLATABLE = 'untranslatable',
+  FAILED = 'failed',
+  INDEX_PATTERN_MISSING = 'index_pattern_missing',
+}
+
 export interface FilterOptions extends FilterOptionsBase {
   author?: AuthorFilter;
 }

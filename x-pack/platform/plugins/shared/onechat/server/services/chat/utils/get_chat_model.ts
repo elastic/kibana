@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { defer, switchMap } from 'rxjs';
+import { defer } from 'rxjs';
 import type { Span } from '@opentelemetry/api';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -19,28 +19,19 @@ export const getChatModel$ = ({
   inference,
   span,
 }: {
-  connectorId?: string;
+  connectorId: string;
   request: KibanaRequest;
   inference: InferenceServerStart;
   span?: Span;
 }): Observable<InferenceChatModel> => {
   return defer(async () => {
-    let selectedConnectorId = connectorId;
-    if (!selectedConnectorId) {
-      const defaultConnector = await inference.getDefaultConnector(request);
-      selectedConnectorId = defaultConnector.connectorId;
-    }
-    span?.setAttribute('elastic.connector.id', selectedConnectorId);
-    return selectedConnectorId;
-  }).pipe(
-    switchMap((selectedConnectorId) => {
-      return inference.getChatModel({
-        request,
-        connectorId: selectedConnectorId,
-        chatModelOptions: {
-          telemetryMetadata: MODEL_TELEMETRY_METADATA,
-        },
-      });
-    })
-  );
+    span?.setAttribute('elastic.connector.id', connectorId);
+    return inference.getChatModel({
+      request,
+      connectorId,
+      chatModelOptions: {
+        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+      },
+    });
+  });
 };

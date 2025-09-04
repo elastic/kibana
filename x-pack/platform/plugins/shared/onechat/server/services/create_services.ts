@@ -47,6 +47,8 @@ export class ServiceManager {
     security,
     elasticsearch,
     inference,
+    uiSettings,
+    savedObjects,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -94,6 +96,8 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      uiSettings,
+      savedObjects,
     });
 
     this.internalStart = {
