@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates OpenTelemetry logs and metrics, but no traces.
+ */
+
 import type { OtelLogDocument } from '@kbn/apm-synthtrace-client';
 import {
   generateLongId,
