@@ -347,7 +347,6 @@ describe('useDashboardListingTable', () => {
         id: 'dashboard-1',
         canManageAccessControl: false,
         accessMode: 'read_only',
-        authorName: 'Test User',
       } as DashboardSavedObjectUserContent;
 
       const actions = rowItemActions!(item);
