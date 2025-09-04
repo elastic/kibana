@@ -89,7 +89,7 @@ export const MetricsExperienceGrid = ({
     dispatch(setValueFilters([]));
   }, [dispatch]);
 
-  const onClearValues = useCallback(() => dispatch(setValueFilters([])), [dispatch]);
+  const onClearValues = useCallback(() => onValuesChange([]), [onValuesChange]);
 
   const pageSize = columns === 4 ? 20 : 15;
   const actions: IconButtonGroupProps['buttons'] = [
