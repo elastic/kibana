@@ -11,6 +11,7 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import type {
+  ESQLQueryRequest,
   PublicRuleResultService,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server/types';
@@ -22,7 +23,6 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
-import type { ESQLSearchParams } from '@kbn/es-types';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
@@ -55,7 +55,7 @@ export async function fetchEsqlQuery({
 }: FetchEsqlQueryOpts) {
   const { logger, getAsyncSearchClient, share, ruleResultService } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
-  const asyncSearchClient = getAsyncSearchClient<ESQLSearchParams>(ESQL_ASYNC_SEARCH_STRATEGY);
+  const asyncSearchClient = getAsyncSearchClient<ESQLQueryRequest>(ESQL_ASYNC_SEARCH_STRATEGY);
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
   logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
@@ -63,7 +63,7 @@ export async function fetchEsqlQuery({
   let response: EsqlTable;
   try {
     response = await asyncSearchClient.search({
-      request: { params: { query: query.query, filter: query.filter } },
+      request: { params: { query: query.query, filter: query.filter, keep_alive: '10m' } },
     });
   } catch (e) {
     if (e.message?.includes('verification_exception')) {

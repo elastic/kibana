@@ -8,6 +8,7 @@
 import type { IAsyncSearchRequestParams } from '@kbn/data-plugin/server/search';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
   CustomRequestHandlerContext,
@@ -148,7 +149,8 @@ export type AsyncSearchStrategies =
   | typeof EQL_SEARCH_STRATEGY // EQL
   | typeof ENHANCED_ES_SEARCH_STRATEGY; // search
 
-export type AsyncSearchParams = ESQLSearchParams | IAsyncSearchRequestParams | EqlRequestParams;
+export type ESQLQueryRequest = ESQLSearchParams & Omit<SqlQueryRequest, 'filter'>;
+export type AsyncSearchParams = ESQLQueryRequest | IAsyncSearchRequestParams | EqlRequestParams;
 
 export interface RuleExecutorOptions<
   Params extends RuleTypeParams = never,
