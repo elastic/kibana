@@ -128,6 +128,7 @@ import {
   deleteEntityPriorityUpdateIndex,
 } from './elasticsearch_assets/priority_update_entity_index';
 import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
+import { createPriorityUpdateEntityIndexComponentTemplate } from './elasticsearch_assets/priority_update_component_template';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -507,7 +508,10 @@ export class EntityStoreDataClient {
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
-      // @TODO FIX MAPPING
+
+      /* Priority update components */
+      await createPriorityUpdateEntityIndexComponentTemplate(description, this.esClient);
+      this.log(`debug`, entityType, `Created entity priority update index component template`);
       await createEntityPriorityUpdateIndex(entityType, this.esClient, namespace, logger);
       this.log(`debug`, entityType, `Created entity priority update index`);
 
