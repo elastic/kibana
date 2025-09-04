@@ -2596,12 +2596,12 @@
           {
             "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.OtherResult.data",
-            "type": "Unknown",
+            "type": "Object",
             "tags": [],
             "label": "data",
             "description": [],
             "signature": [
-              "unknown"
+              "{ [x: string]: unknown; }"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_result.ts",
             "deprecated": false,
@@ -2849,6 +2849,17 @@
         "children": [
           {
             "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.TabularDataResult.tool_result_id",
+            "type": "string",
+            "tags": [],
+            "label": "tool_result_id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_result.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.TabularDataResult.type",
             "type": "string",
             "tags": [],
@@ -2876,7 +2887,7 @@
             "label": "data",
             "description": [],
             "signature": [
-              "{ columns: ",
+              "{ source?: \"esql\" | undefined; query: string; columns: ",
               "EsqlEsqlColumnInfo",
               "[]; values: ",
               "FieldValue",

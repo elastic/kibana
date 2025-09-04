@@ -19,14 +19,14 @@ import {
 } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
-import { WorkflowEventModal } from '../../../features/run_workflow/ui/workflow_event_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 
 const WorkflowYAMLEditor = React.lazy(() =>
@@ -108,11 +108,23 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     );
   };
 
-  const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const handleRunClick = () => {
-    setWorkflowEventModalOpen(true);
+    let needInput: boolean | undefined = false;
+    if (workflow?.definition?.triggers) {
+      needInput =
+        workflow.definition.triggers.some((trigger) => trigger.type === 'alert') ||
+        (workflow.definition.triggers.some((trigger) => trigger.type === 'manual') &&
+          workflow.definition.inputs &&
+          Object.keys(workflow.definition.inputs).length > 0);
+    }
+    if (needInput) {
+      setWorkflowExecuteModalOpen(true);
+    } else {
+      handleRunWorkflow({});
+    }
   };
 
   const handleRunWorkflow = (event: Record<string, any>) => {
@@ -280,9 +292,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {workflowEventModalOpen && (
-        <WorkflowEventModal
-          onClose={() => setWorkflowEventModalOpen(false)}
+      {workflowExecuteModalOpen && workflow && (
+        <WorkflowExecuteModal
+          workflow={workflow}
+          onClose={() => setWorkflowExecuteModalOpen(false)}
           onSubmit={handleRunWorkflow}
         />
       )}
