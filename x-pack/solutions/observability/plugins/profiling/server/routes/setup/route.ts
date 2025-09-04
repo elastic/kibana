@@ -7,6 +7,7 @@
 
 import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common/setup';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { schema } from '@kbn/config-schema';
 import type { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
 import { getHasSetupPrivileges } from '../../lib/setup/get_has_setup_privileges';
@@ -32,7 +33,15 @@ export function registerSetupRoute({
           requiredPrivileges: ['profiling'],
         },
       },
-      validate: false,
+      options: {
+        access: 'public',
+        summary: 'Get Universal Profiling setup status',
+        description: 'Check if Universal Profiling has been set up and configured properly',
+        tags: ['Universal Profiling'],
+      },
+      validate: {
+        query: schema.object({}, { unknowns: 'allow' }),
+      },
     },
     async (context, request, response) => {
       try {
@@ -71,7 +80,15 @@ export function registerSetupRoute({
           requiredPrivileges: ['profiling'],
         },
       },
-      validate: false,
+      options: {
+        access: 'public',
+        summary: 'Initialize Universal Profiling setup',
+        description: 'Set up Universal Profiling resources and configuration',
+        tags: ['Universal Profiling'],
+      },
+      validate: {
+        body: schema.object({}, { unknowns: 'allow' }),
+      },
     },
     async (context, request, response) => {
       try {
