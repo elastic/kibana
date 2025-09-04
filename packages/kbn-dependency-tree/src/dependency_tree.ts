@@ -10,6 +10,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parse as parseJsonc } from '@kbn/repo-packages/utils/jsonc';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 // Constants
 const TREE_CHARS = {
@@ -26,11 +27,13 @@ const ROOT_PACKAGE_JSON_PATH = 'package.json';
 interface State {
   packageMap: Map<string, string> | null;
   reversePackageMap: Map<string, string> | null;
+  logger: ToolingLog | null;
 }
 
 const state: State = {
   packageMap: null,
   reversePackageMap: null,
+  logger: null,
 };
 
 interface DependencyNode {
@@ -46,6 +49,7 @@ interface DependencyNode {
 interface BuildOptions {
   maxDepth?: number;
   filter?: string;
+  logger?: ToolingLog;
 }
 
 /**
@@ -78,9 +82,11 @@ function loadPackageMap(): Map<string, string> {
 
     return state.packageMap;
   } catch (error) {
-    // TODO: Use logger instead of console.error - need to pass logger down from CLI context
-    // eslint-disable-next-line no-console
-    console.error('Failed to load package map from root package.json:', (error as Error).message);
+    if (state.logger) {
+      state.logger.error(
+        `Failed to load package map from root package.json: ${(error as Error).message}`
+      );
+    }
     return new Map();
   }
 }
@@ -91,9 +97,9 @@ function loadPackageMap(): Map<string, string> {
 function readTsconfigReferences(tsconfigPath: string): string[] {
   try {
     if (!fs.existsSync(tsconfigPath)) {
-      // TODO: Use logger instead of console.warn - need to pass logger down from CLI context
-      // eslint-disable-next-line no-console
-      console.warn(`Warning: File does not exist at ${tsconfigPath}`);
+      if (state.logger) {
+        state.logger.warning(`Warning: File does not exist at ${tsconfigPath}`);
+      }
       return [];
     }
 
@@ -113,11 +119,11 @@ function readTsconfigReferences(tsconfigPath: string): string[] {
       return false;
     });
   } catch (error) {
-    // TODO: Use logger instead of console.warn - need to pass logger down from CLI context
-    // eslint-disable-next-line no-console
-    console.warn(
-      `Warning: Could not read tsconfig at ${tsconfigPath}: ${(error as Error).message}`
-    );
+    if (state.logger) {
+      state.logger.warning(
+        `Warning: Could not read tsconfig at ${tsconfigPath}: ${(error as Error).message}`
+      );
+    }
     return [];
   }
 }
@@ -233,6 +239,11 @@ export function buildDependencyTree(
 ): DependencyNode | null {
   const maxDepth = options.maxDepth || DEFAULT_MAX_DEPTH;
   const filter = options.filter;
+
+  // Set logger if provided
+  if (options.logger) {
+    state.logger = options.logger;
+  }
   const nodeCache = new Map<string, DependencyNode>(); // Cache complete dependency nodes
   const processing = new Set<string>();
 
@@ -293,7 +304,8 @@ export function printTree(
   node: DependencyNode | null,
   prefix = '',
   isLast = true,
-  showPaths = false
+  showPaths = false,
+  logger?: ToolingLog
 ): void {
   if (!node) return;
 
@@ -317,9 +329,9 @@ export function printTree(
     label += ' [NO-TSCONFIG]';
   }
 
-  // TODO: Use logger instead of console.log - need to pass logger down from CLI context
-  // eslint-disable-next-line no-console
-  console.log(prefix + connector + label + info);
+  if (logger) {
+    logger.write(prefix + connector + label + info);
+  }
 
   if (node.dependencies && node.dependencies.length > 0) {
     const newPrefix = prefix + (isLast ? TREE_CHARS.space : TREE_CHARS.pipe);
@@ -327,7 +339,7 @@ export function printTree(
     for (let i = 0; i < node.dependencies.length; i++) {
       const child = node.dependencies[i];
       const isLastChild = i === node.dependencies.length - 1;
-      printTree(child, newPrefix, isLastChild, showPaths);
+      printTree(child, newPrefix, isLastChild, showPaths, logger);
     }
   }
 }
@@ -335,8 +347,8 @@ export function printTree(
 /**
  * Prints the dependency tree as JSON
  */
-export function printJson(tree: DependencyNode | null): void {
-  // TODO: Use logger instead of console.log - need to pass logger down from CLI context
-  // eslint-disable-next-line no-console
-  console.log(JSON.stringify(tree, null, 2));
+export function printJson(tree: DependencyNode | null, logger?: ToolingLog): void {
+  if (logger) {
+    logger.write(JSON.stringify(tree, null, 2));
+  }
 }

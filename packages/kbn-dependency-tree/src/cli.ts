@@ -31,6 +31,7 @@ export function runCli() {
       const treeOptions = {
         maxDepth,
         filter,
+        logger: log,
       };
 
       if (!jsonOutput) {
@@ -44,10 +45,10 @@ export function runCli() {
       const tree = buildDependencyTree(tsconfigPath, treeOptions);
 
       if (jsonOutput) {
-        printJson(tree);
+        printJson(tree, log);
       } else {
         if (tree) {
-          printTree(tree, '', true, showPaths);
+          printTree(tree, '', true, showPaths, log);
         } else {
           log.info('No dependencies found or unable to build dependency tree.');
         }
