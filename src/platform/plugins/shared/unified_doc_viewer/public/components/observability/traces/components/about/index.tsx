@@ -28,6 +28,7 @@ import {
 } from '@kbn/apm-types';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { Duration } from '@kbn/apm-ui-shared';
 import { ContentFrameworkTable } from '../../../../content_framework';
 import { isTransaction } from '../../helpers';
 import {
@@ -36,6 +37,7 @@ import {
   getTransactionFieldConfigurations,
 } from './field_configurations';
 import { useRootTransactionContext } from '../../doc_viewer_overview/hooks/use_root_transaction';
+import { useRootSpanContext } from '../../doc_viewer_overview/hooks/use_root_span';
 
 const spanFieldNames = [
   SPAN_ID,
@@ -70,10 +72,11 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
-  const rootTrace = useRootTransactionContext();
+  const rootTransaction = useRootTransactionContext(); // start of the trace
+  const rootSpan = useRootSpanContext(); // direct parent of the span
 
   if (isSpan && !flattenedHit[TRANSACTION_DURATION]) {
-    flattenedHit[TRANSACTION_DURATION] = rootTrace.transaction?.duration;
+    flattenedHit[TRANSACTION_DURATION] = rootSpan.trace?.duration;
   }
 
   const aboutFieldConfigurations = {
@@ -82,6 +85,22 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
       ? getSpanFieldConfigurations(flattenedHit)
       : getTransactionFieldConfigurations(flattenedHit)),
   };
+
+  if (!isSpan) {
+    aboutFieldConfigurations[TRANSACTION_DURATION] = {
+      ...aboutFieldConfigurations[TRANSACTION_DURATION],
+      formatter: (value: unknown) => (
+        <Duration
+          duration={value as number}
+          size="xs"
+          parent={{
+            duration: rootTransaction?.transaction?.duration,
+            type: 'trace',
+          }}
+        />
+      ),
+    };
+  }
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">

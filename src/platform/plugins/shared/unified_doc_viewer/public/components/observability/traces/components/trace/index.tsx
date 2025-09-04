@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedTraceDocumentOverview, type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID, TRANSACTION_NAME } from '@kbn/apm-types';
+import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -74,7 +74,7 @@ export const Trace = ({
     [docId, rangeFrom, rangeTo, traceId]
   );
 
-  const fieldNames = useMemo(() => [TRACE_ID, ...(isSpan ? [TRANSACTION_NAME] : [])], [isSpan]);
+  const fieldNames = useMemo(() => [TRACE_ID, ...(isSpan ? [TRANSACTION_ID] : [])], [isSpan]);
 
   const sectionActions = useMemo(
     () =>
