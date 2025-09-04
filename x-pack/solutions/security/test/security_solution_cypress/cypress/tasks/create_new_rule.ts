@@ -945,7 +945,7 @@ export const enablesAndPopulatesThresholdSuppression = (
  * @param checkFieldsInComboBox - Whether to check if the fields are in the combo box before filling. It can be useful if takes time to load all options from index.
  * If there are many fields in combobox, they are might be visible only after scrolling down menu.
  */
-export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox: boolean) => {
+export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
