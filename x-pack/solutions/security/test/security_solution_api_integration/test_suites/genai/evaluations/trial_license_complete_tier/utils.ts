@@ -13,7 +13,7 @@ import {
   GetEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { routeWithNamespace, waitFor } from '../../../../../common/utils/security_solution';
+import { routeWithNamespace, waitFor } from '../../../../config/services/detections_response';
 
 export const waitForEvaluationComplete = async ({
   evaluationId,

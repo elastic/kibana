@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { SvlCommonPageProvider } from '@kbn/test-suites-serverless/functional/page_objects/svl_common_page';
-import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
+import { SvlCommonPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_common_page';
+import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
-import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
-import { HostsPageObject } from '../../security_solution_ftr/page_objects/hosts';
+import { DetectionsPageObjectProvider } from './detections';
+import { HostsPageObjectProvider } from './hosts';
 import { EndpointResponderPageObjects } from './endpoint_responder';
-import { TimelinePageObject } from '../../security_solution_ftr/page_objects/timeline';
+import { TimelinePageObjectProvider } from './timeline';
 import { EndpointPolicyPageProvider } from './policy_page';
 import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { FleetIntegrations } from './fleet_integrations_page';
 import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
 
 export const pageObjects = {
-  ...xpackFunctionalPageObjects,
+  ...platformPageObjects,
 
   endpoint: EndpointPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
-  detections: DetectionsPageObject,
-  timeline: TimelinePageObject,
-  hosts: HostsPageObject,
+  detections: DetectionsPageObjectProvider,
+  timeline: TimelinePageObjectProvider,
+  hosts: HostsPageObjectProvider,
   responder: EndpointResponderPageObjects,
   policy: EndpointPolicyPageProvider,
   trustedApps: TrustedAppsPageProvider,

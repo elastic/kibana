@@ -23,7 +23,7 @@ import {
   deleteAllAlerts,
   deleteAllRules,
   createRule,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import {
   createListsIndex,
   deleteAllExceptions,

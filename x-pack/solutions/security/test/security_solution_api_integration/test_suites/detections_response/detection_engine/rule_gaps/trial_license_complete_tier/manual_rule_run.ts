@@ -16,7 +16,7 @@ import {
   deleteAllRules,
   createRule,
   deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
+} from '../../../../../config/services/detections_response';
 
 const buildSchedule = (
   startDate: moment.Moment,

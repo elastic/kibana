@@ -69,7 +69,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../common/utils/security_solution';
+} from '../../../../../common/utils/detections_response';
 import {
   getSecuritySolutionAlerts,
   createSecuritySolutionAlerts,

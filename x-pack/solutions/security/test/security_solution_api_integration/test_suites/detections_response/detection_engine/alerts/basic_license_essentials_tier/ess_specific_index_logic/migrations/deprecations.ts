@@ -11,7 +11,7 @@ import type { DeprecationsDetails } from '@kbn/core/server';
 import {
   createAlertsIndex,
   deleteAllAlerts,
-} from '../../../../../../../../common/utils/security_solution';
+} from '../../../../../../../config/services/detections_response';
 
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 

@@ -9,10 +9,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../../config/services/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

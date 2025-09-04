@@ -44,7 +44,7 @@ import {
   countDownTest,
   waitFor,
   routeWithNamespace,
-} from '../../../../common/utils/security_solution';
+} from '../../../config/services/detections_response';
 
 const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRiskScoreRecord> => {
   const {

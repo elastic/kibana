@@ -22,8 +22,8 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
-import { searchAlerts } from '../../../../../../../common/utils/security_solution/detections_response/alerts/search_alerts';
+} from '../../../../../../config/services/detections_response';
+import { searchAlerts } from '../../../../../../config/services/detections_response/alerts/search_alerts';
 import { getPreviewAlerts, previewRule } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 

@@ -8,10 +8,7 @@
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
 import { setAlertAssignees } from '../../../../utils';
 import {
   createAlertsIndex,
@@ -22,7 +19,7 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

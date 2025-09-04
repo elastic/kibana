@@ -7,13 +7,13 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { CreateRuleProps } from '../../../../../../../api_integration/services/security_solution_api.gen';
+import type { CreateRuleProps } from '../../../../../../config/services/security_solution_api.gen';
 
 import { dataGeneratorFactory } from '../../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { moveIndexToFrozenDataTier } from '../../../../utils/frozen_data_tier';
 

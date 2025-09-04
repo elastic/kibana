@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { deleteAllAlerts } from '../../../../../../common/utils/security_solution';
+import { deleteAllAlerts } from '../../../../../config/services/detections_response';
 
 const roleToAccessSecuritySolution = {
   name: 'sec_all_spaces',

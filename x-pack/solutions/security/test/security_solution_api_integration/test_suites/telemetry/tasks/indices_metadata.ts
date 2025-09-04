@@ -19,7 +19,7 @@ import {
   randomIngestPipeline,
   taskHasRun,
   waitFor,
-} from '../../../../common/utils/security_solution';
+} from '../../../config/services/detections_response';
 
 const TASK_ID = 'security:indices-metadata-telemetry:1.0.0';
 const NUM_INDICES = 5;

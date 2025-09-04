@@ -41,5 +41,6 @@
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/ml-string-hash",
+    "@kbn/ftr-common-functional-services",
   ]
 }

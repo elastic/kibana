@@ -9,21 +9,22 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": [
     "**/*",
     "../../../../typings/**/*",
-    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": [
-    "security_solution_cypress/cypress/**/*",
     "target/**/*",
     "*/plugins/**/*",
-    "*/packages/**/*",
-    "*/*/packages/**/*",
+    "plugins/**/*",
+    "security_solution_cypress/cypress/**/*",
     "security_solution_api_integration/**/*",
-    "security_solution_endpoint/**/*"
+    "security_solution_endpoint/**/*",
+    "*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
     "@kbn/test",
@@ -56,17 +57,19 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
-    "@kbn/kubernetes-security-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/openapi-common",
+    "@kbn/spaces-plugin",
+    "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/securitysolution-lists-common",
-    "@kbn/openapi-common",
-    "@kbn/securitysolution-exceptions-common",
     "@kbn/osquery-plugin",
-    "@kbn/search-types",
-    "@kbn/bfetch-plugin",
-    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/serverless-security-settings",
+    "@kbn/rison",
+    "@kbn/core-chrome-browser",
+    "@kbn/openapi-common",
     "@kbn/spaces-plugin",
-    "@kbn/task-manager-plugin",
-    "@kbn/es-query",
+    "@kbn/kubernetes-security-plugin",
+    "@kbn/es-query"
   ]
 }

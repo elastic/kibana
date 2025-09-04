@@ -27,7 +27,7 @@ import {
   deleteAllAlerts,
   deleteAllAnomalies,
   deleteAllRules,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

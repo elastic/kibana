@@ -31,7 +31,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   createRule,
-} from '../../../../../../common/utils/security_solution';
+} from '../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

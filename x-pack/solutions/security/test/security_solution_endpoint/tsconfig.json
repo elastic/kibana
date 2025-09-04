@@ -2,20 +2,15 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "node",
-      "@kbn/ambient-ftr-types"
-    ],
+    "types": ["node", "@kbn/ambient-ftr-types"],
     "allowJs": false
   },
   "include": [
     "**/*",
-    "../../../typings/**/*",
-    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
+    "../../../../../typings/**/*",
+    "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/expect",
     "@kbn/security-solution-plugin",
@@ -30,6 +25,6 @@
     "@kbn/spaces-plugin",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/test-suites-serverless",
+    "@kbn/es-query",
   ]
 }

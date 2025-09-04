@@ -19,7 +19,7 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRulesPackageByVersion,
 } from '../../../../../utils';
-import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../../config/services/detections_response';
 import { MOCK_PKG_VERSION } from '../../configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext): void => {
