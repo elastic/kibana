@@ -10,7 +10,7 @@ import { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { fetchDocument, indexDocument, putStream } from './helpers/requests';
+import { deleteStream, fetchDocument, indexDocument, putStream } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -652,6 +652,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         const response = await putStream(apiClient, TEST_STREAM_NAME, body);
         expect(response).to.have.property('acknowledged', true);
+      });
+
+      after(async () => {
+        await deleteStream(apiClient, TEST_STREAM_NAME);
       });
 
       it('Transforms doc on index', async () => {
