@@ -22,7 +22,6 @@ For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 1. [Serverless End-to-End Tests](../../../../test_serverless/functional/test_suites/security/config.ts)
 1. [Cypress End-to-End Tests](../../../../test/security_solution_cypress/cypress/e2e/cloud_security_posture)
 
-
 ### Tools
 
 Run **TypeScript**:
@@ -38,6 +37,7 @@ yarn lint:es x-pack/solutions/security/plugins/cloud_security_posture
 ```
 
 Run **i18n check**:
+
 ```bash
 node scripts/i18n_check.js
 ```
@@ -75,9 +75,11 @@ yarn test:ftr --config x-pack/test_serverless/functional/test_suites/security/co
 ```
 
 Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/test/security_solution_cypress/cypress):
-> **Note**
+
+q> **Note**
 >
 > Run this from security_solution_cypress folder
+
 ```bash
 yarn cypress:open:serverless
 yarn cypress:open:ess
@@ -89,57 +91,67 @@ yarn cypress:cloud_security_posture:run:ess
 
 Functional test runner (FTR) can be used separately with `ftr:runner` and `ftr:server`. This is convenient while developing tests.
 
-For example, 
+For example,
 
 run ESS (stateful) api integration tests:
+
 ```bash
 yarn test:ftr:server --config x-pack/solutions/security/test/api_integration/config.ts
 yarn test:ftr:runner --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
 ```
 
 run ESS (stateful) telemetry integration tests:
+
 ```bash
 yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
 yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
 ```
 
 run ESS (stateful) e2e tests:
+
 ```bash
 yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 ```
 
 run serverless api integration tests:
+
 ```bash
 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/config.ts
 yarn test:ftr:runner --config x-pack/test_serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
 ```
 
 run serverless e2e tests:
+
 ```bash
 yarn test:ftr:server --config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
 yarn test:ftr:runner ---config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
 ```
 
 #### Run **Cypress tests (e2e) for development**
+
 When developing feature outside our plugin folder, instead of using FTRs for e2e test, we may use Cypress. Before running cypress, make sure you have installed it first. Like FTRs, we can run cypress in different environment, for example:
 
 run ess e2e tests:
+
 ```bash
 yarn cypress:open:ess
 ```
 
 run ess Cloud Security Posture e2e tests:
+
 ```bash
 yarn cypress:cloud_security_posture:run:ess
 ```
 
 run serverless e2e tests:
+
 ```bash
 yarn cypress:open:serverless
 ```
 
 run serverless Cloud Security Posture e2e tests:
+
 ```bash
 yarn cypress:cloud_security_posture:run:serverless
 ```
@@ -148,9 +160,10 @@ Unlike FTR where we have to set server and runner separately, Cypress handles ev
 
 ### Troubleshooting
 
-If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/test/functional/config.base.js` file.
+If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/solutions/security/test/functional/config.base.js` file.
 
 Example:
+
 ```javascript
 module.exports = {
   esTestCluster: {
@@ -162,3 +175,4 @@ module.exports = {
   },
   // ...other configurations...
 };
+```

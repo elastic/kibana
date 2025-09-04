@@ -606,7 +606,7 @@ You can also check out the dedicated app view, which enables easier search and f
 | [cloud_security_posture](x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/index.ts) | describe |  |  |
 </details>
 
-## Directory: x-pack/test/api_integration/apis/cloud_security_posture
+## Directory: x-pack/solutions/security/test/api_integration/apis/cloud_security_posture
 
 **Total Tests:** 65 | **Skipped:** 0 (0.00%) | **Todo:** 0 (0.00%)
 
