@@ -37,8 +37,7 @@ import {
   getSpanFieldConfigurations,
   getTransactionFieldConfigurations,
 } from './field_configurations';
-import { useRootTransactionContext } from '../../doc_viewer_overview/hooks/use_root_transaction';
-import { useRootSpanContext } from '../../doc_viewer_overview/hooks/use_root_span';
+import { useTraceRootSpanContext } from '../../doc_viewer_overview/hooks/use_trace_root_span';
 
 const spanFieldNames = [
   SPAN_ID,
@@ -75,11 +74,11 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
   const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
-  const rootTransaction = useRootTransactionContext(); // start of the trace
-  const rootSpan = useRootSpanContext(); // direct parent of the span
+  const rootTransaction = useTraceRootSpanContext(); // start of the trace
+  const traceRootSpan = useTraceRootSpanContext();
 
   if (isSpan && !flattenedHit[TRANSACTION_DURATION]) {
-    flattenedHit[TRANSACTION_DURATION] = rootSpan.trace?.duration;
+    flattenedHit[TRANSACTION_DURATION] = traceRootSpan.span?.duration;
   }
 
   const aboutFieldConfigurations = {

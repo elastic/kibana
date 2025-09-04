@@ -11,13 +11,13 @@ import createContainer from 'constate';
 import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  PARENT_ID_FIELD,
-  SERVICE_NAME_FIELD,
-  SPAN_ID_FIELD,
-  TRACE_ID_FIELD,
-  TRANSACTION_DURATION_FIELD,
-  TRANSACTION_ID_FIELD,
-} from '@kbn/discover-utils';
+  PARENT_ID,
+  SERVICE_NAME,
+  SPAN_ID,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+} from '@kbn/apm-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -34,12 +34,7 @@ interface GetRootTransactionParams {
   indexPattern: string;
 }
 
-async function getRootTransaction({
-  data,
-  signal,
-  traceId,
-  indexPattern,
-}: GetRootTransactionParams) {
+async function getTraceRootSpan({ data, signal, traceId, indexPattern }: GetRootTransactionParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -48,12 +43,7 @@ async function getRootTransaction({
           size: 1,
           body: {
             timeout: '20s',
-            fields: [
-              TRANSACTION_DURATION_FIELD,
-              SPAN_ID_FIELD,
-              SERVICE_NAME_FIELD,
-              TRANSACTION_ID_FIELD,
-            ],
+            fields: [TRANSACTION_DURATION, SPAN_ID, SERVICE_NAME, TRANSACTION_ID],
             query: {
               bool: {
                 should: [
@@ -61,13 +51,13 @@ async function getRootTransaction({
                     constant_score: {
                       filter: {
                         bool: {
-                          must_not: { exists: { field: PARENT_ID_FIELD } },
+                          must_not: { exists: { field: PARENT_ID } },
                         },
                       },
                     },
                   },
                 ],
-                filter: [{ term: { [TRACE_ID_FIELD]: traceId } }],
+                filter: [{ term: { [TRACE_ID]: traceId } }],
               },
             },
           },
@@ -78,23 +68,23 @@ async function getRootTransaction({
   );
 }
 
-export interface Transaction {
+export interface Span {
   duration: number;
-  [SPAN_ID_FIELD]: string;
-  [TRANSACTION_ID_FIELD]: string;
-  [SERVICE_NAME_FIELD]: string;
+  [SPAN_ID]: string;
+  [TRANSACTION_ID]: string;
+  [SERVICE_NAME]: string;
 }
 
-const useRootTransaction = ({ traceId }: UseRootTransactionParams) => {
+const useTraceRootSpan = ({ traceId }: UseRootTransactionParams) => {
   const { indexes } = useDataSourcesContext();
   const indexPattern = indexes.apm.traces;
   const { core, data } = getUnifiedDocViewerServices();
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const [span, setSpan] = useState<Span | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!traceId) {
-      setTransaction(null);
+      setSpan(null);
       setLoading(false);
       return;
     }
@@ -106,34 +96,31 @@ const useRootTransaction = ({ traceId }: UseRootTransactionParams) => {
       try {
         setLoading(true);
         const result = indexPattern
-          ? await getRootTransaction({ data, signal, traceId, indexPattern })
+          ? await getTraceRootSpan({ data, signal, traceId, indexPattern })
           : undefined;
 
         const fields = result?.rawResponse.hits.hits[0]?.fields;
-        const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
-        const spanId = fields?.[SPAN_ID_FIELD];
-        const transactionId = fields?.[TRANSACTION_ID_FIELD];
-        const serviceName = fields?.[SERVICE_NAME_FIELD];
+        const transactionDuration = fields?.[TRANSACTION_DURATION]; // TODO: make it OTEL compatible?
+        const spanId = fields?.[SPAN_ID];
+        const transactionId = fields?.[TRANSACTION_ID];
+        const serviceName = fields?.[SERVICE_NAME];
 
-        setTransaction({
+        setSpan({
           duration: transactionDuration,
-          [SPAN_ID_FIELD]: spanId,
-          [TRANSACTION_ID_FIELD]: transactionId,
-          [SERVICE_NAME_FIELD]: serviceName,
+          [SPAN_ID]: spanId,
+          [TRANSACTION_ID]: transactionId,
+          [SERVICE_NAME]: serviceName,
         });
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
-            title: i18n.translate(
-              'unifiedDocViewer.docViewerSpanOverview.useRootTransaction.error',
-              {
-                defaultMessage: 'An error occurred while fetching the transaction',
-              }
-            ),
+            title: i18n.translate('unifiedDocViewer.docViewerSpanOverview.useTraceRootSpan.error', {
+              defaultMessage: 'An error occurred while fetching the root span of the trace.',
+            }),
             text: error.message,
           });
-          setTransaction(null);
+          setSpan(null);
         }
       } finally {
         setLoading(false);
@@ -146,8 +133,7 @@ const useRootTransaction = ({ traceId }: UseRootTransactionParams) => {
       controller.abort();
     };
   }, [data, core.notifications.toasts, traceId, indexPattern]);
-  return { loading, transaction };
+  return { loading, span };
 };
 
-export const [RootTransactionProvider, useRootTransactionContext] =
-  createContainer(useRootTransaction);
+export const [TraceRootSpanProvider, useTraceRootSpanContext] = createContainer(useTraceRootSpan);

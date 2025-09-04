@@ -37,7 +37,7 @@ import { About } from '../components/about';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { SimilarSpans } from '../components/similar_spans';
 import { isTransaction } from '../helpers';
-import { RootTransactionProvider } from './hooks/use_root_transaction';
+import { TraceRootSpanProvider } from './hooks/use_trace_root_span';
 
 export type OverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -79,7 +79,7 @@ export function Overview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider traceId={traceId}>
+      <TraceRootSpanProvider traceId={traceId}>
         <RootSpanProvider traceId={traceId} transactionId={transactionId}>
           <EuiFlexGroup
             direction="column"
@@ -142,7 +142,7 @@ export function Overview({
             </EuiFlexItem>
           </EuiFlexGroup>
         </RootSpanProvider>
-      </RootTransactionProvider>
+      </TraceRootSpanProvider>
     </DataSourcesProvider>
   );
 }
