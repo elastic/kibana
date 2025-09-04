@@ -114,7 +114,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
     const maxIdleSocketsObservable = meter.createObservableUpDownCounter(
       'elasticsearch.client.sockets.max_idle',
       {
-        description: 'Elasticsearch Clients: Maximum number of sockets allowed to each client.',
+        description: 'Elasticsearch Clients: Maximum number of idle sockets allowed to each client.',
         unit: '1',
         valueType: ValueType.INT,
       }
