@@ -13,9 +13,26 @@ import {
 } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import { uniqueId } from 'lodash';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from './services/private_location_test_service';
+
+const getLocation = ({
+  agentPolicyId,
+  spaces,
+}: {
+  agentPolicyId: string;
+  spaces?: string[];
+}): Omit<PrivateLocation, 'id'> => ({
+  label: `Test private location ${uniqueId()}`,
+  agentPolicyId,
+  geo: {
+    lat: 0,
+    lon: 0,
+  },
+  spaces,
+});
 
 export default function ({ getService }: FtrProviderContext) {
   describe('PrivateLocationAPI', function () {
@@ -73,14 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { username, password } = await monitorTestService.addsNewSpace(['minimal_all']);
 
-      const location: Omit<PrivateLocation, 'id'> = {
-        label: 'Test private location 10',
-        agentPolicyId: agentPolicyId!,
-        geo: {
-          lat: 0,
-          lon: 0,
-        },
-      };
+      const location = getLocation({ agentPolicyId });
       const response = await supertestWithoutAuth
         .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
         .auth(username, password)
@@ -99,14 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         'can_manage_private_locations',
       ]);
 
-      const location: Omit<PrivateLocation, 'id'> = {
-        label: 'Test private location 10',
-        agentPolicyId: agentPolicyId!,
-        geo: {
-          lat: 0,
-          lon: 0,
-        },
-      };
+      const location = getLocation({ agentPolicyId });
       const response = await supertestWithoutAuth
         .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
         .auth(username, password)
@@ -144,22 +147,53 @@ export default function ({ getService }: FtrProviderContext) {
         SPACE_ID,
       ]);
       const agentPolicyId = apiResponse.body.item.id;
-
-      const location: Omit<PrivateLocation, 'id'> = {
-        label: 'Test private location 11',
-        agentPolicyId: agentPolicyId!,
-        geo: {
-          lat: 0,
-          lon: 0,
-        },
-        spaces: [SPACE_ID, 'default'],
-      };
+      const location = getLocation({ agentPolicyId, spaces: [SPACE_ID, 'default'] });
       const response = await supertest
         .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
         .set('kbn-xsrf', 'true')
         .send(location);
 
       expect(response.status).to.be(200);
+    });
+
+    it('creates private location in agent policy spaces if no spaces are defined for the location', async () => {
+      const { SPACE_ID } = await monitorTestService.addsNewSpace([
+        'minimal_all',
+        'can_manage_private_locations',
+      ]);
+      const apiResponse = await testPrivateLocations.addFleetPolicy(undefined, [
+        'default',
+        SPACE_ID,
+      ]);
+      const agentPolicyId = apiResponse.body.item.id;
+
+      const location = getLocation({ agentPolicyId });
+      const response = await supertest
+        .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+        .set('kbn-xsrf', 'true')
+        .send(location);
+
+      expect(response.body.spaces).to.eql(['default', SPACE_ID]);
+    });
+
+    it('creates private location in agent policy spaces if locations spaces is an empty array', async () => {
+      const { SPACE_ID } = await monitorTestService.addsNewSpace([
+        'minimal_all',
+        'can_manage_private_locations',
+      ]);
+      const apiResponse = await testPrivateLocations.addFleetPolicy(undefined, [
+        'default',
+        SPACE_ID,
+      ]);
+      const agentPolicyId = apiResponse.body.item.id;
+      const location = getLocation({ agentPolicyId, spaces: [] });
+
+      const response = await supertest
+        .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+        .set('kbn-xsrf', 'true')
+        .send(location);
+
+      expect(response.body.spaces).to.eql(['default', SPACE_ID]);
     });
 
     it('validation errors works in multiple spaces as well', async () => {
@@ -173,15 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
       const agentPolicyId = apiResponse.body.item.id;
 
-      const location: Omit<PrivateLocation, 'id'> = {
-        label: 'Test private location 12',
-        agentPolicyId: agentPolicyId!,
-        geo: {
-          lat: 0,
-          lon: 0,
-        },
-        spaces: [SPACE_ID, 'default'],
-      };
+      const location = getLocation({ agentPolicyId, spaces: [SPACE_ID, 'default'] });
       const response = await supertest
         .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
         .set('kbn-xsrf', 'true')
@@ -205,15 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await testPrivateLocations.addFleetPolicy();
       const agentPolicyId = apiResponse.body.item.id;
 
-      const location: Omit<PrivateLocation, 'id'> = {
-        label: 'Test private location 13',
-        agentPolicyId: agentPolicyId!,
-        geo: {
-          lat: 0,
-          lon: 0,
-        },
-        spaces: [SPACE_ID, 'default'],
-      };
+      const location = getLocation({ agentPolicyId, spaces: [SPACE_ID, 'default'] });
       const response = await supertest
         .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
         .set('kbn-xsrf', 'true')
