@@ -165,7 +165,7 @@ describe('useGetCases', () => {
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: '123',
-        searchFields: ['incremental_id.raw'],
+        searchFields: ['incremental_id.keyword'],
         owner: ['securitySolution'],
       },
       queryParams: DEFAULT_QUERY_PARAMS,
@@ -188,7 +188,7 @@ describe('useGetCases', () => {
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: 'test #123',
-        searchFields: ['title', 'description', 'incremental_id.raw'],
+        searchFields: ['title', 'description', 'incremental_id.keyword'],
         owner: ['securitySolution'],
       },
       queryParams: DEFAULT_QUERY_PARAMS,

@@ -77,7 +77,7 @@ export const inferenceKeys = {
   getConnectors: () => ['get-inference-connectors'] as const,
 };
 
-const DEFAULT_SEARCH_FIELDS = ['title', 'description', 'incremental_id.raw'];
+const DEFAULT_SEARCH_FIELDS = ['title', 'description', 'incremental_id.keyword'];
 
 // TODO: Remove reporters. Move searchFields to API.
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
