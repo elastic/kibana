@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import type { IntegrationType } from '../data_sources';
 import {
-  defaultMonitoringUsersIndex,
   getMatchersFor,
   getStreamPatternFor,
   INTEGRATION_TYPES,

@@ -157,6 +157,7 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
       dataClient.log('info', 'Creating default index source for privilege monitoring.');
 
       try {
+        // TODO: failing test, empty sources array. FIX
         const indexSourceDescriptor = monitoringIndexSourceClient.create(defaultIndexSource);
 
         dataClient.log(
