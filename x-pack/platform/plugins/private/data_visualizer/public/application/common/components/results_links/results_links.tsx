@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';

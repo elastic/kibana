@@ -15317,6 +15317,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -16002,6 +16004,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -16222,6 +16226,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -16927,6 +16933,8 @@ paths:
                               nullable: true
                             agent_logging_to_files:
                               nullable: true
+                            agent_monitoring_runtime_experimental:
+                              nullable: true
                         agent_features:
                           items:
                             additionalProperties: false
@@ -17609,6 +17617,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -18293,6 +18303,8 @@ paths:
                       nullable: true
                     agent_logging_to_files:
                       nullable: true
+                    agent_monitoring_runtime_experimental:
+                      nullable: true
                 agent_features:
                   items:
                     additionalProperties: false
@@ -18515,6 +18527,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -19283,6 +19297,8 @@ paths:
                           agent_logging_metrics_period:
                             nullable: true
                           agent_logging_to_files:
+                            nullable: true
+                          agent_monitoring_runtime_experimental:
                             nullable: true
                       agent_features:
                         items:
@@ -20072,6 +20088,10 @@ paths:
                                         type: string
                                       verification_mode:
                                         type: string
+                                  target_directory:
+                                    type: string
+                                  timeout:
+                                    type: string
                                 required:
                                   - sourceURI
                               features:
@@ -20106,12 +20126,20 @@ paths:
                                         type: number
                                   level:
                                     type: string
+                                  metrics:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      period:
+                                        type: string
                                   to_files:
                                     type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  _runtime_experimental:
+                                    type: string
                                   apm: {}
                                   enabled:
                                     type: boolean
@@ -28871,6 +28899,8 @@ paths:
                               enum:
                                 - elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29033,6 +29063,8 @@ paths:
                               enum:
                                 - remote_elasticsearch
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29163,6 +29195,8 @@ paths:
                               enum:
                                 - logstash
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29448,6 +29482,8 @@ paths:
                                 - not: {}
                             version:
                               type: string
+                            write_to_logs_streams:
+                              type: boolean
                           required:
                             - name
                             - type
@@ -29646,6 +29682,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -29808,6 +29846,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -29938,6 +29978,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30223,6 +30265,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - type
@@ -30377,6 +30421,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30539,6 +30585,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30669,6 +30717,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -30954,6 +31004,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31220,6 +31272,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31382,6 +31436,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31512,6 +31568,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31797,6 +31855,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -31988,6 +32048,8 @@ paths:
                       enum:
                         - elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32144,6 +32206,8 @@ paths:
                       enum:
                         - remote_elasticsearch
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32268,6 +32332,8 @@ paths:
                       enum:
                         - logstash
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                 - additionalProperties: false
                   type: object
                   properties:
@@ -32549,6 +32615,8 @@ paths:
                         - not: {}
                     version:
                       type: string
+                    write_to_logs_streams:
+                      type: boolean
                   required:
                     - name
                     - compression_level
@@ -32700,6 +32768,8 @@ paths:
                             enum:
                               - elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -32862,6 +32932,8 @@ paths:
                             enum:
                               - remote_elasticsearch
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -32992,6 +33064,8 @@ paths:
                             enum:
                               - logstash
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -33277,6 +33351,8 @@ paths:
                               - not: {}
                           version:
                             type: string
+                          write_to_logs_streams:
+                            type: boolean
                         required:
                           - name
                           - type
@@ -45569,8 +45645,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -47275,8 +47356,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -48757,8 +48843,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -50196,7 +50287,61 @@ paths:
                                             classic:
                                               additionalProperties: false
                                               type: object
-                                              properties: {}
+                                              properties:
+                                                field_overrides:
+                                                  additionalProperties:
+                                                    allOf:
+                                                      - additionalProperties:
+                                                          anyOf:
+                                                            - anyOf:
+                                                                - type: string
+                                                                - type: number
+                                                                - type: boolean
+                                                                - enum:
+                                                                    - 'null'
+                                                                  nullable: true
+                                                                - not: {}
+                                                            - items:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                                  - enum:
+                                                                      - 'null'
+                                                                    nullable: true
+                                                                  - not: {}
+                                                              type: array
+                                                            - {}
+                                                        type: object
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              format:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - keyword
+                                                                  - match_only_text
+                                                                  - long
+                                                                  - double
+                                                                  - date
+                                                                  - boolean
+                                                                  - ip
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              type:
+                                                                enum:
+                                                                  - system
+                                                                type: string
+                                                            required:
+                                                              - type
+                                                  type: object
                                           required:
                                             - classic
                                       required:
@@ -50259,8 +50404,13 @@ paths:
                                     required:
                                       - kql
                               type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
                           required:
                             - dashboards
+                            - rules
                             - queries
                         - type: object
                           properties:
@@ -51741,8 +51891,13 @@ paths:
                                 required:
                                   - kql
                           type: array
+                        rules:
+                          items:
+                            type: string
+                          type: array
                       required:
                         - dashboards
+                        - rules
                         - queries
                     - type: object
                       properties:
@@ -55115,7 +55270,61 @@ paths:
                             classic:
                               additionalProperties: false
                               type: object
-                              properties: {}
+                              properties:
+                                field_overrides:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
                           required:
                             - classic
               required:
@@ -55631,6 +55840,119 @@ paths:
                 - kql
       responses: {}
       summary: Upsert a query to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/streams/{name}/rules:
+    get:
+      description: 'Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: get-streams-name-rules
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream rules
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/streams/{name}/rules/{ruleId}:
+    delete:
+      description: 'Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      operationId: delete-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Unlink a rule from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: 'Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      operationId: put-streams-name-rules-ruleid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: ruleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Link a rule to a stream
       tags:
         - streams
       x-state: Technical Preview
@@ -75901,10 +76223,6 @@ components:
       required:
         - message
         - subject
-        - anyOf:
-            - to
-            - cc
-            - bcc
       properties:
         bcc:
           type: array
