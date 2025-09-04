@@ -34,7 +34,7 @@ export function getMonitorStatusChartTheme(
       visible: true,
       fontSize: 10,
       fontFamily: euiTheme.font.family,
-      fontWeight: euiTheme.font.weight.light,
+      fontWeight: euiTheme.font.weight.light === 300 ? 300 : 'normal',
       textColor: euiTheme.colors.subduedText,
     },
     yAxisLabel: {
