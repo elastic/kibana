@@ -7,8 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { useSecretHeaders } from '@kbn/stack-connectors-plugin/public/common';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Form,
@@ -61,43 +60,6 @@ interface Props {
   setResetForm?: (value: ResetForm) => void;
 }
 
-interface SecretHeadersResponse {
-  secretHeaders: Array<{ key: string; value: string }>;
-}
-
-const useSecretHeaders = (connectorId?: string) => {
-  const { http } = useKibana<CoreStart>().services;
-  const [secretHeaders, setSecretHeaders] = useState<
-    Array<{ key: string; value: string; type: 'secret' }>
-  >([]);
-
-  const fetchData = useCallback(async () => {
-    if (!connectorId) return;
-    try {
-      const response = await http.get<SecretHeadersResponse>(
-        '/internal/stack_connectors/_secret_headers',
-        { query: { connectorId } }
-      );
-
-      const headers = response.secretHeaders.map((header) => ({
-        ...header,
-        type: 'secret' as const,
-      }));
-
-      setSecretHeaders(headers);
-    } catch (err) {
-      setSecretHeaders([]);
-      throw err;
-    }
-  }, [connectorId, http]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return secretHeaders;
-};
-
 /**
  * The serializer and deserializer are needed to transform the headers of
  * the webhook connectors. The webhook connector uses the UseArray component
@@ -130,6 +92,8 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
     value,
     type: 'config' as const,
   }));
+
+  console.log('deserializer, configHeaders: ', configHeaders);
 
   return {
     ...(data as any),
@@ -168,8 +132,6 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
 
   const headers = webhookFormData?.__internal__?.headers ?? [];
 
-  console.log('serializer, ', { headers });
-
   const configHeaders = headers
     .filter((header) => header.type === 'config' && header.key)
     .reduce((acc, { key, value }) => {
@@ -180,6 +142,9 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
   const secretHeaders = headers
     .filter((header) => header.type === 'secret' && header.key)
     .reduce((acc, { key, value }) => {
+      // here if the value is undefined it will be defaulted to "", but the backend doesn t accept value: ""
+      // so maybe we should also fetch the decrypted value, but never show it?
+      // because value: "" -> error and the changes will not be saved
       acc[key] = value;
       return acc;
     }, {} as Record<string, string>);
@@ -214,6 +179,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
 }) => {
   const secretHeaders = useSecretHeaders(connector.id);
   console.log('after fetching secretHeaders: ', secretHeaders);
+  console.log('default connector value: ', connector);
   const { form } = useForm({
     defaultValue: connector,
     serializer: formSerializer,
@@ -259,13 +225,11 @@ const ConnectorFormComponent: React.FC<Props> = ({
       type: 'config' as const,
     }));
 
-    const secretHeadersWithId = secretHeaders.map((h, i) => ({ ...h, id: `secret-${i}` }));
+    console.log('in use effect, configHeaders: ', configHeaders);
 
-    console.log({ secretHeadersWithId });
-    console.log({ configHeaders });
-    const mergedHeaders = [...configHeaders, ...secretHeaders].filter(Boolean);
+    const mergedHeaders = [...configHeaders, ...secretHeaders];
 
-    console.log({ mergedHeaders });
+    console.log('mergedHeaders: ', mergedHeaders);
 
     form.updateFieldValues(
       {

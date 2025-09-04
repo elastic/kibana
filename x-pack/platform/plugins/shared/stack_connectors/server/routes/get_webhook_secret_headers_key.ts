@@ -36,7 +36,6 @@ export interface ConnectorAttributes {
 
 export const getWebhookSecretHeadersKeyRoute = (
   router: IRouter,
-  logger: Logger,
   getStartServices: StartServicesAccessor<ConnectorsPluginsStart, unknown>
 ) => {
   router.get(
@@ -84,13 +83,18 @@ export const getWebhookSecretHeadersKeyRoute = (
           id
         );
 
+      console.log('decryptedConnector: ', decryptedConnector.attributes);
+
       const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || [];
+
+      console.log('secretHeaders: ', secretHeaders);
 
       const secretHeadersArray = Object.keys(secretHeaders).map((key) => ({
         key,
       }));
 
       return res.ok({ body: { secretHeaders: secretHeadersArray } });
+      // return res.ok({ body: secretHeaders });
     }
   );
 };
