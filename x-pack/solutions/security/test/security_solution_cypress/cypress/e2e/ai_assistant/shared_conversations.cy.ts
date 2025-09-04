@@ -110,7 +110,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     // Open the share menu and verify not shared state
     openShareMenu();
     assertShareMenuStatus('Private');
-    // Selecting 'not shared' should not change sharing settings
+    // Selecting 'not shared' should not change sharing settings.
     selectPrivate();
     assertCalloutState('private');
     openShareMenu();
