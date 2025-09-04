@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a mix of well-formed and malformed (overly long fields) log documents.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

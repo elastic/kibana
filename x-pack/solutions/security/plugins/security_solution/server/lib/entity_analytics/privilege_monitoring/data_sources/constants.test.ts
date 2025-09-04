@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- */
-
+*/
+import type { IntegrationType } from './constants';
+import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { IntegrationType } from './constants';
 import {
   AD_ADMIN_ROLES,
-  defaultMonitoringUsersIndex,
   getMatchersFor,
   getStreamPatternFor,
   INTEGRATION_MATCHERS_DETAILED,
