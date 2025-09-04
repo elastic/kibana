@@ -52,40 +52,42 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       }
     }
 
-    const cascadingChanges: StreamChange[] = [];
-    if (missingMembers.length > 0) {
-      for (const member of missingMembers) {
+    const existsAsDataStream = await Promise.all(
+      missingMembers.map(async (member) => {
         try {
           const dataStreamResult =
             await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
               name: member,
             });
 
-          if (dataStreamResult.data_streams.length > 0) {
-            cascadingChanges.push({
-              type: 'upsert',
-              definition: {
-                name: member,
-                description: '',
-                ingest: {
-                  classic: {},
-                  lifecycle: {
-                    inherit: {},
-                  },
-                  processing: {
-                    steps: [],
-                  },
-                },
-              },
-            });
-          }
+          return dataStreamResult.data_streams.length > 0 ? member : null;
         } catch (error) {
           if (!isNotFoundError(error)) {
             throw error;
           }
+          return null;
         }
-      }
-    }
+      })
+    );
+
+    const cascadingChanges: StreamChange[] = existsAsDataStream
+      .filter((member): member is string => member !== null)
+      .map((member) => ({
+        type: 'upsert',
+        definition: {
+          name: member,
+          description: '',
+          ingest: {
+            classic: {},
+            lifecycle: {
+              inherit: {},
+            },
+            processing: {
+              steps: [],
+            },
+          },
+        },
+      }));
 
     return { cascadingChanges, changeStatus: 'upserted' };
   }
@@ -157,16 +159,24 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       };
     }
 
+    const missingMembers: string[] = [];
     for (const member of this._definition.group.members) {
       const relatedStream = desiredState.get(member);
       if (!relatedStream || relatedStream.isDeleted()) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(`Group stream ${this.name} has ${member} as a member which was not found`),
-          ],
-        };
+        missingMembers.push(member);
       }
+    }
+    if (missingMembers.length > 0) {
+      return {
+        isValid: false,
+        errors: [
+          new Error(
+            `Group stream ${
+              this.name
+            } has the following members which were not found: ${missingMembers.join(', ')}`
+          ),
+        ],
+      };
     }
 
     const duplicates = this._definition.group.members.filter(
