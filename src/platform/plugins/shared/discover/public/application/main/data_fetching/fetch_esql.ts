@@ -42,6 +42,7 @@ export function fetchEsql({
   expressions,
   scopedProfilesManager,
   esqlVariables,
+  searchSessionId,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -54,6 +55,7 @@ export function fetchEsql({
   expressions: ExpressionsStart;
   scopedProfilesManager: ScopedProfilesManager;
   esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
 }): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -72,6 +74,7 @@ export function fetchEsql({
             timeRange,
             esqlVariables,
           },
+          searchSessionId,
         });
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();
