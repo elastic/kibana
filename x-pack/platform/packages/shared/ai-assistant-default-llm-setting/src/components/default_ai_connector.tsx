@@ -273,7 +273,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) =>
   }, [elasticManagedLlmExists, application, docLinks]);
 
   if (!featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, false)) {
-    return null
+    return null;
   }
 
   return (
