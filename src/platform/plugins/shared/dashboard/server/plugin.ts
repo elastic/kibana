@@ -144,7 +144,7 @@ export class DashboardPlugin
       logger: this.logger,
     });
 
-    registerAccessControl({
+    void registerAccessControl({
       http: core.http,
       getStartServices: () =>
         core.getStartServices().then(([_, { security }]) => ({
