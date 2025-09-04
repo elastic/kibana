@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { coreServices } from '../../services/kibana_services';
 import { checkGlobalManageControlPrivilege } from '../access_control/check_global_manage_control_privilege';
 import { getBulkAuthorNames } from '../access_control/get_bulk_author_names';

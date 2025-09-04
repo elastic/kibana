@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { useAccessControl } from '../hooks/use_access_control';
 import { spacesService } from '../../services/kibana_services';
 

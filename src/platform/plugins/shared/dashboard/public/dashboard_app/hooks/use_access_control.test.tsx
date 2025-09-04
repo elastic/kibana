@@ -8,7 +8,7 @@
  */
 
 import { coreServices } from '../../services/kibana_services';
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { useAccessControl } from './use_access_control';
 import { renderHook, waitFor } from '@testing-library/react';
 

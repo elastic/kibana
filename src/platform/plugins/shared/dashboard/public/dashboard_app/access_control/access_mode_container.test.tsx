@@ -10,7 +10,7 @@
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { AccessModeContainer } from './access_mode_container';
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { spacesService } from '../../services/kibana_services';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { act, waitFor, screen } from '@testing-library/react';

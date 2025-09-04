@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { Version } from '@kbn/object-versioning';
 import type { ProcedureSchemas } from './types';
 import { versionSchema } from './constants';

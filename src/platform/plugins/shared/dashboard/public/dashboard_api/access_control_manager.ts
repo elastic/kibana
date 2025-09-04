@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 

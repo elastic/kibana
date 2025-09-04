@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { isDashboardInEditAccessMode } from './is_dashboard_in_edit_access_mode';
 
 describe('isDashboardInEditAccessMode', () => {
