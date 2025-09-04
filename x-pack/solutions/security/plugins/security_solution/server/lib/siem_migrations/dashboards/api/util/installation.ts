@@ -114,7 +114,7 @@ const installDashboards = async (
     executor: async (dashboard) => {
       try {
         // Parse the dashboard data (assuming it's JSON)
-        const dashboardData = JSON.parse(dashboard.original_dashboard.data);
+        const dashboardData = JSON.parse(dashboard.elastic_dashboard.data);
 
         // Create dashboard using content management client
         const client = contentManagement.contentClient
