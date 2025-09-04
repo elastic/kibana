@@ -160,7 +160,9 @@ export const getTableColumns = (
                 type="error"
                 color="danger"
                 size="m"
-                data-test-subj="ESQLEditor-queryHistory-error"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-error',
+                }}
               />
             );
           case 'warning':

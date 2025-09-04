@@ -295,7 +295,9 @@ export class RelationshipsClass extends Component<
               type={object.meta.icon || 'apps'}
               size="s"
               aria-label={typeLabel}
-              data-test-subj="relationshipsObjectType"
+              iconProps={{
+                'data-test-subj': 'relationshipsObjectType',
+              }}
             />
           );
         },

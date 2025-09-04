@@ -78,7 +78,9 @@ export const RelationshipsTable = ({
             aria-label={typeLabel}
             type={object.meta.icon || 'apps'}
             size="s"
-            data-test-subj="relationshipsObjectType"
+            iconProps={{
+              'data-test-subj': 'relationshipsObjectType',
+            }}
           />
         );
       },

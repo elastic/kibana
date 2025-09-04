@@ -36,7 +36,9 @@ export const AlertSuppressionLabel = ({ label, ruleType }: AlertSuppressionLabel
           size="l"
           color="danger"
           css={{ marginLeft: '8px' }}
-          data-test-subj="alertSuppressionInsufficientLicensingIcon"
+          iconProps={{
+            'data-test-subj': 'alertSuppressionInsufficientLicensingIcon',
+          }}
         />
       )}
     </>
