@@ -21,14 +21,14 @@ interface DimensionsFilterProps {
   }>;
   selectedDimensions: string[];
   onChange: (dimensions: string[]) => void;
-  clearDimensionSelection: () => void;
+  onClear: () => void;
 }
 
 export const DimensionsSelector = ({
   fields,
   selectedDimensions,
   onChange,
-  clearDimensionSelection,
+  onClear,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
@@ -124,7 +124,7 @@ export const DimensionsSelector = ({
     return (
       <ClearAllSection
         selectedOptionsLength={selectedDimensions.length}
-        onClearAllAction={clearDimensionSelection}
+        onClearAllAction={onClear}
         selectedOptionsMessage={i18n.translate(
           'metricsExperience.dimensionsSelector.selectedStatusMessage',
           {
@@ -135,7 +135,7 @@ export const DimensionsSelector = ({
         )}
       />
     );
-  }, [clearDimensionSelection, selectedDimensions.length]);
+  }, [onClear, selectedDimensions.length]);
 
   return (
     <ToolbarSelector

@@ -33,7 +33,7 @@ interface ValuesFilterProps {
     to?: string;
   };
   onChange: (values: string[]) => void;
-  clearValuesSelection: () => void;
+  onClear: () => void;
 }
 export const ValuesSelector = ({
   selectedDimensions,
@@ -42,7 +42,7 @@ export const ValuesSelector = ({
   timeRange,
   disabled = false,
   indices = [],
-  clearValuesSelection,
+  onClear,
 }: ValuesFilterProps) => {
   const {
     data: values = [],
@@ -128,7 +128,7 @@ export const ValuesSelector = ({
     return (
       <ClearAllSection
         selectedOptionsLength={selectedValues.length}
-        onClearAllAction={clearValuesSelection}
+        onClearAllAction={onClear}
         selectedOptionsMessage={i18n.translate(
           'metricsExperience.valuesSelector.selectedStatusMessage',
           {
@@ -138,7 +138,7 @@ export const ValuesSelector = ({
         )}
       />
     );
-  }, [selectedValues.length, clearValuesSelection]);
+  }, [selectedValues.length, onClear]);
 
   if (error) {
     return (
