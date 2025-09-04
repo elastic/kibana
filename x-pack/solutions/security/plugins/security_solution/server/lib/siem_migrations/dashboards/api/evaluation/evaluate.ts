@@ -12,11 +12,9 @@ import { z } from '@kbn/zod';
 import { DashboardMigrationTaskExecutionSettings } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_DASHBOARD_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
-import { createTracersCallbacks } from '../../../common/api/util/tracing';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import type { MigrateDashboardConfig } from '../../task/agent/types';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
@@ -60,16 +58,11 @@ export const registerSiemDashboardMigrationsEvaluateRoute = (
             const dashboardMigrationsClient =
               securitySolutionContext.siemMigrations.getDashboardsClient();
 
-            const invocationConfig: MigrateDashboardConfig = {
-              callbacks: createTracersCallbacks(langsmithOptions, logger),
-            };
-
             await dashboardMigrationsClient.task.evaluate({
               evaluationId,
               connectorId,
               langsmithOptions,
               abortController,
-              invocationConfig,
             });
 
             return res.ok({ body: { evaluationId } });

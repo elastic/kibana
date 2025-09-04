@@ -56,6 +56,16 @@ const EXECUTOR_SLEEP = {
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
+export type SiemTaskRunnerConstructor<
+  M extends MigrationDocument = MigrationDocument,
+  I extends ItemDocument = ItemDocument,
+  P extends object = {},
+  C extends object = {},
+  O extends object = {}
+> = new (
+  ...params: ConstructorParameters<typeof SiemMigrationTaskRunner<M, I, P, C, O>>
+) => SiemMigrationTaskRunner<M, I, P, C, O>;
+
 export abstract class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type

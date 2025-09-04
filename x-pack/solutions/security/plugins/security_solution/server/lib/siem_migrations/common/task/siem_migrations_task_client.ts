@@ -27,7 +27,10 @@ import type {
   SiemMigrationTaskStartResult,
   SiemMigrationTaskStopResult,
 } from './types';
-import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
+import type {
+  SiemMigrationTaskRunner,
+  SiemTaskRunnerConstructor,
+} from './siem_migrations_task_runner';
 import type { SiemMigrationEvaluatorConstructor } from './siem_migrations_task_evaluator';
 
 export type MigrationsRunning<
@@ -45,7 +48,7 @@ export abstract class SiemMigrationsTaskClient<
   C extends object = {}, // The migration task config schema
   O extends object = {} // The migration task output schema
 > {
-  protected abstract readonly TaskRunnerClass: typeof SiemMigrationTaskRunner<M, I, P, C, O>;
+  protected abstract readonly TaskRunnerClass: SiemTaskRunnerConstructor<M, I, P, C, O>;
   protected abstract readonly EvaluatorClass?: SiemMigrationEvaluatorConstructor<M, I, P, C, O>;
 
   constructor(
@@ -242,9 +245,7 @@ export abstract class SiemMigrationsTaskClient<
     if (!this.EvaluatorClass) {
       throw new Error('Evaluator class needs to be defined to use evaluate method');
     }
-
-    const { evaluationId, langsmithOptions, connectorId, invocationConfig, abortController } =
-      params;
+    const { evaluationId, langsmithOptions, connectorId, abortController } = params;
 
     const migrationLogger = this.logger.get('evaluate');
 
@@ -267,7 +268,6 @@ export abstract class SiemMigrationsTaskClient<
     await migrationTaskEvaluator.evaluate({
       connectorId,
       langsmithOptions,
-      invocationConfig,
     });
   }
 

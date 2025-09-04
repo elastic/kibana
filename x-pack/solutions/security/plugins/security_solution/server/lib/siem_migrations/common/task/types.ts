@@ -38,7 +38,6 @@ export interface SiemMigrationTaskEvaluateParams<C extends object = {}> {
   evaluationId: string;
   connectorId: string;
   langsmithOptions: LangSmithEvaluationOptions;
-  invocationConfig: RunnableConfig<C>;
   abortController: AbortController;
 }
 

@@ -16,10 +16,9 @@ import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migr
 import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import type { MigrationDocument, ItemDocument, SiemMigrationsClientDependencies } from '../types';
 
-export interface EvaluateParams<C extends object = {}> {
+export interface EvaluateParams {
   connectorId: string;
   langsmithOptions: LangSmithEvaluationOptions;
-  invocationConfig?: RunnableConfig<C>;
 }
 
 export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResult;
@@ -55,7 +54,7 @@ export abstract class SiemMigrationsBaseEvaluator<
     protected logger: Logger
   ) {}
 
-  public async evaluate({ connectorId, langsmithOptions, invocationConfig }: EvaluateParams<C>) {
+  public async evaluate({ connectorId, langsmithOptions }: EvaluateParams): Promise<void> {
     if (!isLangSmithEnabled()) {
       throw Error('LangSmith is not enabled');
     }

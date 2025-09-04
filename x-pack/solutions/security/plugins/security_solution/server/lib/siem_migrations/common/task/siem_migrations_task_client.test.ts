@@ -12,6 +12,7 @@ import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
+import type { SiemTaskRunnerConstructor } from './siem_migrations_task_runner';
 import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -35,9 +36,8 @@ const mockRunnerInstance = {
   abortController: { abort: jest.fn() },
 } as unknown as SiemMigrationTaskRunner;
 
-const MockTaskRunnerClass = SiemMigrationTaskRunner as unknown as jest.MockedClass<
-  new (...args: ConstructorParameters<typeof SiemMigrationTaskRunner>) => SiemMigrationTaskRunner
->;
+const MockTaskRunnerClass =
+  SiemMigrationTaskRunner as unknown as jest.MockedClass<SiemTaskRunnerConstructor>;
 
 MockTaskRunnerClass.mockImplementation(() => mockRunnerInstance);
 
