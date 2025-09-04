@@ -16,7 +16,6 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
@@ -37,16 +36,14 @@ import {
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
-
+import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
   RiskScoreBucket,
 } from '../types';
-import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import type { PainlessScripts } from './painless';
-import { getPainlessScripts } from './painless';
-import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
+import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
+import { getPainlessScripts, type PainlessScripts } from './painless';
 
 const formatForResponse = ({
   bucket,
@@ -210,34 +207,30 @@ export const getGlobalWeightForIdentifierType = (
 ): number | undefined =>
   weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
 
-export const calculateRiskScores = async (
-  params: {
-    assetCriticalityService: AssetCriticalityService;
-    esClient: ElasticsearchClient;
-    logger: Logger;
-    experimentalFeatures: ExperimentalFeatures;
-  } & CalculateScoresParams
-): Promise<RiskScoresPreviewResponse> =>
+export const calculateRiskScores = async ({
+  afterKeys: userAfterKeys,
+  assetCriticalityService,
+  debug,
+  esClient,
+  filter: userFilter,
+  identifierType,
+  index,
+  logger,
+  pageSize,
+  range,
+  runtimeMappings,
+  weights,
+  alertSampleSizePerShard = 10_000,
+  excludeAlertStatuses = [],
+  experimentalFeatures,
+  excludeAlertTags = [],
+}: {
+  assetCriticalityService: AssetCriticalityService;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  experimentalFeatures: ExperimentalFeatures;
+} & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
-    const {
-      afterKeys: userAfterKeys,
-      assetCriticalityService,
-      debug,
-      esClient,
-      filter: userFilter,
-      identifierType,
-      index,
-      logger,
-      pageSize,
-      range,
-      runtimeMappings,
-      weights,
-      alertSampleSizePerShard = 10_000,
-      excludeAlertStatuses = [],
-      experimentalFeatures,
-      excludeAlertTags = [],
-    } = params;
-
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
     const filter = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
@@ -297,6 +290,7 @@ export const calculateRiskScores = async (
     if (debug) {
       logger.info(`Executing Risk Score query:\n${JSON.stringify(request)}`);
     }
+
     const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
 
     if (debug) {

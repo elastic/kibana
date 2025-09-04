@@ -59,7 +59,12 @@ export const calculateScoresWithESQL = async (
     logger.trace(
       `STEP ONE: Executing ESQL Risk Score composite query:\n${JSON.stringify(compositeQuery)}`
     );
-    const response = await esClient.search<never, RiskScoreCompositeBuckets>(compositeQuery);
+    const response = await esClient
+      .search<never, RiskScoreCompositeBuckets>(compositeQuery)
+      .catch((e) => {
+        logger.error(`Error executing composite query: ${e.message}`);
+        console.log(JSON.stringify(compositeQuery));
+      });
 
     if (!response.aggregations) {
       throw new Error('No aggregations in composite response');
@@ -184,7 +189,7 @@ export const getCompositeQuery = (
         ...aggs,
         [entityType]: {
           composite: {
-            size: params.pageSize,
+            size: 500,
             sources: [{ [idField]: { terms: { field: idField } } }],
             after: params.afterKeys[entityType],
           },
