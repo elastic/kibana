@@ -255,18 +255,14 @@ const esqlMetricState = schema.object({
    * Secondary value configuration, must define operation.
    */
   secondary_metric: schema.maybe(
-    schema.allOf([metricStateSecondaryMetricOptionsSchema,  esqlColumnSchema]),
+    schema.allOf([metricStateSecondaryMetricOptionsSchema, esqlColumnSchema])
   ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
    */
-  breakdown_by: schema.maybe(
-    schema.allOf([metricStateBreakdownByOptionsSchema, esqlColumnSchema])
-  ),
+  breakdown_by: schema.maybe(schema.allOf([metricStateBreakdownByOptionsSchema, esqlColumnSchema])),
 });
 
-export const metricStateSchema = schema.oneOf(
-  [metricStateSchemaNoESQL, esqlMetricState]
-);
+export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState]);
 
 export type MetricState = TypeOf<typeof metricStateSchema>;

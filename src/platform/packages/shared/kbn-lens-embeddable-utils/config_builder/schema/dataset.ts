@@ -101,7 +101,6 @@ export const datasetSchema = {
   dataset: datasetTypeSchema,
 };
 
-
 export const datasetEsqlTableTypeSchema = schema.oneOf([
   // ESQL dataset type
   schema.object({
@@ -133,5 +132,5 @@ export const datasetEsqlTableTypeSchema = schema.oneOf([
 ]);
 
 export const datasetEsqlTableSchema = {
-  dataset: datasetEsqlTableTypeSchema
-}
+  dataset: datasetEsqlTableTypeSchema,
+};
