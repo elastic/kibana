@@ -205,7 +205,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                       'data-test-subj': SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID,
                     }}
                     position="top"
-
                   />
                 )}
               </h3>
