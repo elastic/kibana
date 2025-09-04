@@ -11,15 +11,9 @@ import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { Version } from '@kbn/object-versioning';
 
-import type {
-  MSearchIn,
-  MSearchOut,
-  ChangeAccessModeIn,
-  ChangeAccessModeResult,
-} from '../../common';
+import type { MSearchIn, MSearchOut } from '../../common';
 import type { ContentRegistry, StorageContext } from '../core';
 import type { MSearchService } from '../core/msearch';
-import type { ChangeAccessModeService } from '../core/change_access_mode';
 import { getServiceObjectTransformFactory, getStorageContext } from '../utils';
 import { ContentClient } from './content_client';
 
@@ -119,65 +113,5 @@ export const getMSearchClientFactory =
 
     return {
       msearch,
-    };
-  };
-
-export const getChangeAccessModeClientFactory =
-  ({
-    contentRegistry,
-    changeAccessModeService,
-    logger,
-  }: {
-    contentRegistry: ContentRegistry;
-    changeAccessModeService: ChangeAccessModeService;
-    logger: Logger;
-  }) =>
-  ({
-    requestHandlerContext,
-    request,
-  }: {
-    requestHandlerContext: RequestHandlerContext;
-    request: KibanaRequest;
-  }) => {
-    const changeAccessMode = async ({
-      objects,
-      options,
-      version,
-    }: ChangeAccessModeIn): Promise<ChangeAccessModeResult> => {
-      const objectsWithStorageContext = objects.map(({ contentTypeId, id }) => {
-        const contentDefinition = contentRegistry.getDefinition(contentTypeId);
-
-        if (!contentDefinition.storage.changeAccessMode) {
-          throw new Error(`changeAccessMode method missing for content type "${contentTypeId}".`);
-        }
-
-        const storageContext = getStorageContext({
-          request,
-          contentTypeId,
-          version: version ?? contentDefinition.version.latest,
-          ctx: {
-            contentRegistry,
-            requestHandlerContext,
-            getTransformsFactory: getServiceObjectTransformFactory,
-          },
-        });
-
-        return {
-          type: contentTypeId,
-          id,
-          ctx: storageContext,
-        };
-      });
-
-      const result = await changeAccessModeService.changeAccessMode(
-        objectsWithStorageContext,
-        options
-      );
-
-      return result;
-    };
-
-    return {
-      changeAccessMode,
     };
   };

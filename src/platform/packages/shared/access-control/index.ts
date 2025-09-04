@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getContentClientFactory, getMSearchClientFactory } from './content_client_factory';
-
-export type { IContentClient } from './types';
+export { registerAccessControl } from './src';
+export { AccessControlClient, type AccessControlClientPublic } from './src';
+export type { CheckGlobalPrivilegeResponse } from './src';

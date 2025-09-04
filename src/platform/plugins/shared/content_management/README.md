@@ -2,25 +2,8 @@
 
 The content management plugin provides functionality to manage content in Kibana.
 
-## API Methods
-
-The Content Management plugin provides the following methods for managing content:
-
-### Core CRUD Operations
-
-- `get()` - Retrieve a single content item
-- `bulkGet()` - Retrieve multiple content items
-- `create()` - Create a new content item
-- `update()` - Update an existing content item
-- `delete()` - Delete a content item
-- `search()` - Search for content items
-- `mSearch()` - Multi-type search across content
-
-### Access Control
-
-- `changeAccessMode()` - Change the access mode for content items
-
 ## Testing
+
 
 Many parts of the Content Management service are implemented *in-memory*, hence it
 is possible to test big chunks of the Content Management plugin using Jest

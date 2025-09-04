@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/access-control",
+  "owner": [
+    "@elastic/shared-ux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

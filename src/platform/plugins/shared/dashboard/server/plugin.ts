@@ -29,6 +29,7 @@ import { registerContentInsights } from '@kbn/content-management-content-insight
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { registerAccessControl } from '@kbn/access-control';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -141,7 +142,14 @@ export class DashboardPlugin
       http: core.http,
       contentManagement: plugins.contentManagement,
       logger: this.logger,
-      getStartServices: core.getStartServices,
+    });
+
+    registerAccessControl({
+      http: core.http,
+      getStartServices: () =>
+        core.getStartServices().then(([_, { security }]) => ({
+          security,
+        })),
     });
 
     return {};

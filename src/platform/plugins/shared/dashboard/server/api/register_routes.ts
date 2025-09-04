@@ -9,11 +9,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
+import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
-import type { StartDeps } from '../plugin';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
@@ -29,7 +28,6 @@ interface RegisterAPIRoutesArgs {
   contentManagement: ContentManagementServerSetup;
   restCounter?: UsageCounter;
   logger: Logger;
-  getStartServices: StartServicesAccessor<StartDeps>;
 }
 
 const commonRouteConfig = {
@@ -63,7 +61,6 @@ export function registerAPIRoutes({
   contentManagement,
   restCounter,
   logger,
-  getStartServices,
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
 
@@ -357,64 +354,6 @@ export function registerAPIRoutes({
       }
 
       return res.ok();
-    }
-  );
-
-  // Check global manage access control privilege route
-  // This route checks if the current user has global privilege to manage access control for dashboards, e.g they're an admin or project/cluster admin.
-  const checkGlobalManageAccessControlRoute = versionedRouter.get({
-    path: `${PUBLIC_API_PATH}/access-control/global-authorization`,
-    summary: 'Check if user has global manage access control privileges for dashboards',
-    ...commonRouteConfig,
-  });
-
-  checkGlobalManageAccessControlRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: {
-        request: {},
-        response: {
-          200: {
-            body: () =>
-              schema.object({
-                isGloballyAuthorized: schema.boolean(),
-              }),
-          },
-        },
-      },
-    },
-    async (ctx, req, res) => {
-      try {
-        const [_, { security }] = await getStartServices();
-        const authorization = security?.authz;
-
-        if (!authorization) {
-          logger.warn('Authorization client is not available');
-          return res.ok({
-            body: {
-              isGloballyAuthorized: false,
-            },
-          });
-        }
-
-        const privileges = {
-          kibana: authorization.actions.savedObject.get(CONTENT_ID, 'manage_access_control'),
-        };
-
-        const { hasAllRequested } = await authorization
-          .checkPrivilegesWithRequest(req)
-          .globally(privileges);
-
-        return res.ok({
-          body: {
-            isGloballyAuthorized: hasAllRequested,
-          },
-        });
-      } catch (error) {
-        return res.badRequest({
-          body: { message: 'Failed to check privileges' },
-        });
-      }
     }
   );
 }

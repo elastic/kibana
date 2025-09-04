@@ -16,7 +16,6 @@ import { updateSchemas } from './update';
 import { deleteSchemas } from './delete';
 import { searchSchemas } from './search';
 import { mSearchSchemas } from './msearch';
-import { changeAccessModeSchemas } from './change_access_mode';
 
 export const schemas = {
   get: getSchemas,
@@ -26,7 +25,6 @@ export const schemas = {
   delete: deleteSchemas,
   search: searchSchemas,
   mSearch: mSearchSchemas,
-  changeAccessMode: changeAccessModeSchemas,
 } satisfies {
   [key in ProcedureName]: ProcedureSchemas;
 };

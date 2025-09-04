@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AccessControlClient } from '@kbn/access-control';
+import { CONTENT_ID } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
 
 export const checkGlobalManageControlPrivilege = async () => {
-  const response = await coreServices.http.get<{
-    isGloballyAuthorized: boolean;
-  }>('/api/dashboards/dashboard/access-control/global-authorization', {
-    query: { apiVersion: '1' },
-  });
+  const client = new AccessControlClient({ http: coreServices.http });
 
-  return Boolean(response?.isGloballyAuthorized);
+  const { isGloballyAuthorized } = await client.checkGlobalPrivilege(CONTENT_ID);
+
+  return isGloballyAuthorized;
 };

@@ -7,6 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getContentClientFactory, getMSearchClientFactory } from './content_client_factory';
+import type {
+  SavedObjectAccessControl,
+  SavedObjectsChangeAccessControlResponse,
+} from '@kbn/core-saved-objects-api-server';
 
-export type { IContentClient } from './types';
+export interface CheckGlobalPrivilegeResponse {
+  isGloballyAuthorized: boolean;
+}
+
+export interface ChangeAccesModeParams {
+  objects: Array<{ type: string; id: string }>;
+  accessMode: SavedObjectAccessControl['accessMode'];
+}
+
+export interface ChangeAccessModeResponse {
+  result: SavedObjectsChangeAccessControlResponse;
+}

@@ -17,7 +17,6 @@ export const createCrudClientMock = (): jest.Mocked<CrudClient> => {
     delete: jest.fn((input) => Promise.resolve({} as any)),
     search: jest.fn((input) => Promise.resolve({ hits: [] } as any)),
     mSearch: jest.fn((input) => Promise.resolve({ hits: [] } as any)),
-    changeAccessMode: jest.fn((input) => Promise.resolve({ objects: [] } as any)),
   };
   return mock;
 };
