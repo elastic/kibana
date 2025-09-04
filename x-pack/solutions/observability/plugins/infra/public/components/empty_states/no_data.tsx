@@ -6,14 +6,15 @@
  */
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import type { ReactNode } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
 
 interface NoDataProps {
   titleText: string;
-  bodyText: string;
-  refetchText: string;
-  onRefetch: () => void;
+  bodyText: string | ReactNode;
+  refetchText?: string;
+  onRefetch?: () => void;
   testString?: string;
 }
 
@@ -29,15 +30,17 @@ export const NoData: React.FC<NoDataProps> = ({
     titleSize="m"
     body={<p>{bodyText}</p>}
     actions={
-      <EuiButton
-        data-test-subj="infraNoDataButton"
-        iconType="refresh"
-        color="primary"
-        fill
-        onClick={onRefetch}
-      >
-        {refetchText}
-      </EuiButton>
+      refetchText && onRefetch ? (
+        <EuiButton
+          data-test-subj="infraNoDataButton"
+          iconType="refresh"
+          color="primary"
+          fill
+          onClick={onRefetch}
+        >
+          {refetchText}
+        </EuiButton>
+      ) : null
     }
     data-test-subj={testString}
   />
