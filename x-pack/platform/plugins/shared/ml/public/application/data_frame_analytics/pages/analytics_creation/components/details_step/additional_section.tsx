@@ -50,21 +50,24 @@ export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
     setFormState({ _meta: { ...formMeta, custom_urls: urls } });
   };
 
-  const description = (
-    <FormattedMessage
-      id="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.description"
-      defaultMessage="Provide links from analytics job results to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
-      values={{
-        learnMoreLink: (
-          <EuiLink href={docsUrl} target="_blank">
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
-              defaultMessage="Learn more"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
+  const description = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.description"
+        defaultMessage="Provide links from analytics job results to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
+        values={{
+          learnMoreLink: (
+            <EuiLink href={docsUrl} target="_blank">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.create.detailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
+                defaultMessage="Learn more"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+    [docsUrl]
   );
 
   return (

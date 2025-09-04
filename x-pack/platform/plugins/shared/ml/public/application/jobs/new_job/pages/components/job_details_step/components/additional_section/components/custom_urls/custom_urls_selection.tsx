@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
@@ -35,22 +35,26 @@ export const CustomUrlsSelection: FC = () => {
   };
   const dashboardService = useDashboardService();
 
-  const description = (
-    <FormattedMessage
-      id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.description"
-      defaultMessage="Provide links from anomalies to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
-      values={{
-        learnMoreLink: (
-          <EuiLink href={docsUrl} target="_blank">
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
-              defaultMessage="Learn more"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
+  const description = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.description"
+        defaultMessage="Provide links from anomalies to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
+        values={{
+          learnMoreLink: (
+            <EuiLink href={docsUrl} target="_blank">
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
+                defaultMessage="Learn more"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+    [docsUrl]
   );
+
   return (
     <CustomUrlsDescription description={description}>
       <CustomUrls

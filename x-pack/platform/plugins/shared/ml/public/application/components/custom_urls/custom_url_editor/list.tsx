@@ -112,7 +112,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const mlApi = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
-  const [shouldShowTimeRange, setShouldShowTimeRange] = useState<boolean[]>([]);
+  const [showTimeRange, setShowTimeRange] = useState<boolean[]>([]);
 
   const styles = useMemo(
     () => ({
@@ -154,7 +154,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
           }
         })
       );
-      setShouldShowTimeRange(results);
+      setShowTimeRange(results);
     };
 
     checkTimeRangeVisibility();
@@ -384,7 +384,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            {isCustomTimeRange === false && shouldShowTimeRange[index] ? (
+            {isCustomTimeRange === false && showTimeRange[index] ? (
               <EuiFlexItem css={styles.narrowField} grow={2}>
                 <EuiFormRow
                   fullWidth={true}
