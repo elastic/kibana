@@ -11,53 +11,53 @@ import { screen, fireEvent, render, within, act, waitFor } from '@testing-librar
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { StepDefineRule } from '.';
-import type { StepDefineRuleProps } from '.';
-import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { TestProviders } from '../../../../common/mock';
-import { schema as defineRuleSchema } from './schema';
-import { stepDefineDefaultValue } from '../../../../detections/pages/detection_engine/rules/utils';
-import type { FormSubmitHandler } from '../../../../shared_imports';
-import { useForm } from '../../../../shared_imports';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
+import { StepDefineRule } from '..';
+import type { StepDefineRuleProps } from '..';
+import { mockBrowserFields } from '../../../../../common/containers/source/mock';
+import { useRuleFromTimeline } from '../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+import { TestProviders } from '../../../../../common/mock';
+import { schema as defineRuleSchema } from '../schema';
+import { stepDefineDefaultValue } from '../../../../../detections/pages/detection_engine/rules/utils';
+import type { FormSubmitHandler } from '../../../../../shared_imports';
+import { useForm } from '../../../../../shared_imports';
+import type { DefineStepRule } from '../../../../../detections/pages/detection_engine/rules/types';
+import { fleetIntegrationsApi } from '../../../../fleet_integrations/api/__mocks__';
 import {
   addRequiredFieldRow,
   createIndexPatternField,
   getSelectToggleButtonForName,
-} from '../../../rule_creation/components/required_fields/required_fields.test';
-import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
+} from '../../../../rule_creation/components/required_fields/required_fields.test';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../../rule_creation/components/alert_suppression_edit';
 import {
   expectDuration,
   expectSuppressionFields,
   setDuration,
   setDurationType,
   setSuppressionFields,
-} from '../../../rule_creation/components/alert_suppression_edit/test_helpers';
+} from '../../../../rule_creation/components/alert_suppression_edit/test_helpers';
 import {
   selectEuiComboBoxOption,
   selectFirstEuiComboBoxOption,
-} from '../../../../common/test/eui/combobox';
+} from '../../../../../common/test/eui/combobox';
 import {
   addRelatedIntegrationRow,
   setVersion,
-} from '../../../rule_creation/components/related_integrations/test_helpers';
-import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
-import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+} from '../../../../rule_creation/components/related_integrations/test_helpers';
+import { useEsqlAvailability } from '../../../../../common/hooks/esql/use_esql_availability';
+import { useMLRuleConfig } from '../../../../../common/components/ml/hooks/use_ml_rule_config';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 // Set the extended default timeout for all define rule step form test
 jest.setTimeout(10 * 1000);
 
 // Mocks integrations
-jest.mock('../../../fleet_integrations/api');
+jest.mock('../../../../fleet_integrations/api');
 
 const MOCKED_QUERY_BAR_TEST_ID = 'mockedQueryBar';
 const MOCKED_LANGUAGE_INPUT_TEST_ID = 'languageInput';
 
 // Mocking QueryBar to avoid pulling and mocking a ton of dependencies
-jest.mock('../../../../common/components/query_bar', () => {
+jest.mock('../../../../../common/components/query_bar', () => {
   return {
     QueryBar: jest.fn().mockImplementation(({ filterQuery, onSubmitQuery }) => {
       const handleQueryChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -87,11 +87,11 @@ jest.mock('../../../../common/components/query_bar', () => {
   };
 });
 
-jest.mock('../../../rule_creation/components/pick_timeline', () => ({
+jest.mock('../../../../rule_creation/components/pick_timeline', () => ({
   PickTimeline: 'pick-timeline',
 }));
 
-jest.mock('../ai_assistant', () => {
+jest.mock('../../ai_assistant', () => {
   return {
     AiAssistant: jest.fn(() => {
       return <div data-test-subj="ai-assistant" />;
@@ -99,9 +99,9 @@ jest.mock('../ai_assistant', () => {
   };
 });
 
-jest.mock('../data_view_selector_field/use_data_view_list_items');
+jest.mock('../../data_view_selector_field/use_data_view_list_items');
 
-jest.mock('../../../../common/hooks/use_license', () => ({
+jest.mock('../../../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({
     isAtLeast: jest.fn().mockReturnValue(true),
   }),
@@ -109,8 +109,8 @@ jest.mock('../../../../common/hooks/use_license', () => ({
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
 
   return {
     ...originalModule,
@@ -159,8 +159,8 @@ jest.mock('../../../../common/lib/kibana', () => {
     },
   };
 });
-jest.mock('../../../../common/hooks/use_selector', () => {
-  const actual = jest.requireActual('../../../../common/hooks/use_selector');
+jest.mock('../../../../../common/hooks/use_selector', () => {
+  const actual = jest.requireActual('../../../../../common/hooks/use_selector');
   return {
     ...actual,
     useDeepEqualSelector: () => ({
@@ -174,8 +174,8 @@ jest.mock('../../../../common/hooks/use_selector', () => {
     }),
   };
 });
-jest.mock('../../../../common/components/link_to', () => {
-  const originalModule = jest.requireActual('../../../../common/components/link_to');
+jest.mock('../../../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../../../common/components/link_to');
   return {
     ...originalModule,
     getTimelineUrl: jest.fn(),
@@ -184,8 +184,8 @@ jest.mock('../../../../common/components/link_to', () => {
     }),
   };
 });
-jest.mock('../../../../sourcerer/containers', () => {
-  const actual = jest.requireActual('../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer/containers', () => {
+  const actual = jest.requireActual('../../../../../sourcerer/containers');
   return {
     ...actual,
     useSourcererDataView: jest
@@ -207,11 +207,11 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_from_timeline');
+jest.mock('../../../../../detections/containers/detection_engine/rules/use_rule_from_timeline');
 
-jest.mock('../../../../common/hooks/esql/use_esql_availability');
-jest.mock('../../../../common/components/ml/hooks/use_ml_rule_config');
-jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../../common/hooks/esql/use_esql_availability');
+jest.mock('../../../../../common/components/ml/hooks/use_ml_rule_config');
+jest.mock('../../../../../common/components/user_privileges');
 
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
