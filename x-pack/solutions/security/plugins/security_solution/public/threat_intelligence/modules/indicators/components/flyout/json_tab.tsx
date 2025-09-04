@@ -11,7 +11,7 @@ import type { Indicator } from '../../../../../../common/threat_intelligence/typ
 import { IndicatorEmptyPrompt } from './empty_prompt';
 import { JsonTab } from '../../../../../flyout/shared/components/json_tab';
 
-const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
+export const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
 
 export interface IndicatorsFlyoutJsonProps {
   /**

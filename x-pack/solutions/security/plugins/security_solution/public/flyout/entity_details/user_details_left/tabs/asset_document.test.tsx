@@ -15,6 +15,7 @@ import { mockContextValue } from '../../../document_details/shared/mocks/mock_co
 import userEvent from '@testing-library/user-event';
 import { TABLE_TAB_CONTENT_TEST_ID } from '../../../document_details/right/tabs/test_ids';
 import { JSON_TAB_CONTENT_TEST_ID } from '../../../shared/components/json_tab';
+import { PREFIX } from '../../../shared/test_ids';
 
 describe('AssetDocumentTab', () => {
   it('renders', () => {
@@ -52,7 +53,7 @@ describe('AssetDocumentTab', () => {
 
     await userEvent.click(getByTitle('JSON'));
 
-    expect(getByTestId(JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREFIX + JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should select table tab when path tab is table', async () => {

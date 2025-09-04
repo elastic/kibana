@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
-import { IndicatorsFlyoutJson } from './json_tab';
+import { FLYOUT_JSON_TEST_ID, IndicatorsFlyoutJson } from './json_tab';
 import { EMPTY_PROMPT_TEST_ID } from './empty_prompt';
 import { JSON_TAB_CONTENT_TEST_ID } from '../../../../../flyout/shared/components/json_tab';
 
@@ -24,7 +24,7 @@ describe('<IndicatorsFlyoutJson />', () => {
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_JSON_TEST_ID + JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render error message on invalid indicator', () => {
