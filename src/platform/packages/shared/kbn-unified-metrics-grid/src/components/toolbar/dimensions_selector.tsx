@@ -108,9 +108,6 @@ export const DimensionsSelector = ({
           <FormattedMessage
             id="metricsExperience.breakdownFieldSelector.breakdownFieldButtonLabelWithSelection"
             defaultMessage="Dimensions"
-            values={{
-              count: selectedDimensions.length,
-            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -13,6 +13,7 @@ import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useMetricDataQuery } from '../../hooks';
 import { ChartContent } from './chart_content';
 import { ChartHeader } from './chart_header';
+import { createESQLQuery } from '../../utils/create_esql_query';
 
 interface MetricChartProps {
   metric: MetricField;
@@ -51,9 +52,27 @@ export const MetricChart = ({
   const data = useMemo(() => queryData?.data || [], [queryData?.data]);
   const hasDimensions = queryData?.hasDimensions || false;
 
+  // Generate ESQL query using the same logic as the hook
+  const esqlQuery = useMemo(() => {
+    if (!isSupported) return '';
+    return createESQLQuery({
+      metricName: metric.name,
+      timeSeriesMetric: metric.instrument,
+      index: metric.index,
+      dimensions,
+      filters,
+    });
+  }, [isSupported, metric.name, metric.instrument, metric.index, dimensions, filters]);
+
   return (
     <EuiPanel grow={false} hasBorder={true} style={{ width: '100%', minWidth: 0 }}>
-      <ChartHeader title={metric.name} byDimension={byDimension} metric={metric} size={size} />
+      <ChartHeader
+        title={metric.name}
+        byDimension={byDimension}
+        metric={metric}
+        size={size}
+        esqlQuery={esqlQuery}
+      />
       <EuiSpacer size="m" />
       <ChartContent
         isLoading={isLoading}
