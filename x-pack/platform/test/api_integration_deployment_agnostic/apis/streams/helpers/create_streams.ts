@@ -16,6 +16,7 @@ type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'que
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
+    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -109,6 +110,7 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test',
+    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -129,6 +131,7 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test2',
+    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -156,6 +159,7 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.deeply.nested.streamname',
+    rules: [],
     stream: {
       description: '',
       ingest: {
