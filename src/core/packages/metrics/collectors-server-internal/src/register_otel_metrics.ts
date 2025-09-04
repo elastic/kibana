@@ -13,11 +13,25 @@ import { EventLoopUtilizationMonitor } from './event_loop_utilization_monitor';
 import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 export function registerOtelMetrics() {
+  // scope.name: "kibana.process"
   const meter = metrics.getMeter('kibana.process');
+
+  // onRequest
+  const activeRequestsCounter = meter.createUpDownCounter('http.server.active_requests');
+
+  // .on('onRequest')
+  activeRequestsCounter.add(1, { 'http.request.method': 'GET', 'http.route': '/api/status' });
+  // .on('onRequestComplete')
+  activeRequestsCounter.add(-1, { 'http.request.method': 'GET', 'http.route': '/api/status' });
+
+  meter.createCounter('name', {}).add(1);
+  meter.createUpDownCounter().add(1);
+  meter.createHistogram().record(1);
+  meter.createGauge().record(1);
 
   // opentelemetry.io/docs/specs/semconv/system/process-metrics/#metric-processuptime
   meter
-    .createObservableGauge('process.uptime', {
+    .createObservableCounter('process.uptime', {
       description: 'Process Uptime: The time the process has been running.',
       unit: 's',
       valueType: ValueType.DOUBLE,
