@@ -72,7 +72,7 @@ describe('createCloudUsageCollector', () => {
     it('return inTrial true if inTrial is provided', async () => {
       const collector = createCloudUsageCollector(usageCollection, {
         isCloudEnabled: true,
-        inTrial: true,
+        organizationInTrial: true,
       } as CloudUsageCollectorConfig);
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
@@ -100,7 +100,7 @@ describe('createCloudUsageCollector', () => {
         projectType: 'security',
         productTier: 'complete',
         orchestratorTarget: 'canary',
-        inTrial: undefined,
+        organizationInTrial: undefined,
       });
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({

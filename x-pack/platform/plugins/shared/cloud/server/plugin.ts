@@ -164,7 +164,7 @@ export interface CloudSetup {
     /**
      * Whether the serverless project belongs to an organization currently in trial.
      */
-    inTrial?: boolean;
+    organizationInTrial?: boolean;
   };
 }
 
@@ -220,7 +220,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       projectType,
       productTier,
       orchestratorTarget,
-      inTrial: this.config.serverless?.in_trial,
+      organizationInTrial: this.config.serverless?.in_trial,
     });
     const basePath = core.http.basePath.serverBasePath;
     core.http.resources.register(
@@ -379,7 +379,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
         // Use `core.pricing` when checking if a feature is available for the current product tier.
         productTier,
-        inTrial: this.config.serverless?.in_trial,
+        organizationInTrial: this.config.serverless?.in_trial,
       },
     };
   }

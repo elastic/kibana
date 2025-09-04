@@ -93,7 +93,7 @@ export interface CloudStart {
     /**
      * Whether the serverless project belongs to an organization currently in trial.
      */
-    inTrial?: boolean;
+    organizationInTrial?: boolean;
   };
 }
 
@@ -238,7 +238,7 @@ export interface CloudSetup {
     /**
      * Whether the serverless project belongs to an organization currently in trial.
      */
-    inTrial?: boolean;
+    organizationInTrial?: boolean;
   };
 }
 
