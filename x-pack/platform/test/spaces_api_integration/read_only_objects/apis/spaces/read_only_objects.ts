@@ -226,7 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: type2,
           },
         ];
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
         const res = await supertestWithoutAuth
           .post('/read_only_objects/bulk_update')
           .set('kbn-xsrf', 'true')
@@ -246,8 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('does not allow non-owner to bulk update objects marked as read only', async () => {
         await activateSimpleUserProfile();
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
         const firstObject = await supertestWithoutAuth
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
