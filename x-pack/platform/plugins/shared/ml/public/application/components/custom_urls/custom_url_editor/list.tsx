@@ -140,7 +140,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
           const urlState = parseUrlState(customUrl.url_value);
           const dataViewId = urlState._a?.index;
 
-          // Show time range field by default for unknown urls
+          // Show time range field by default for others or unknown urls
           if (!dataViewId) return true;
 
           try {

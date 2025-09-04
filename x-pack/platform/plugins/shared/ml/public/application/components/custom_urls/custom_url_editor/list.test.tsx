@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { CustomUrlListProps } from './list';
-import { CustomUrlList, findDataViewId } from './list';
+import { CustomUrlList, extractDataViewIdFromCustomUrl } from './list';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
@@ -21,8 +21,6 @@ import { parseUrlState } from '@kbn/ml-url-state';
 jest.mock('@kbn/ml-url-state', () => ({
   parseUrlState: jest.fn(),
 }));
-
-jest.mock('../../../contexts/kibana');
 
 const mockDataViews = {
   get: jest.fn(),
@@ -58,6 +56,11 @@ const TEST_CUSTOM_URLS = {
     url_name: 'Show airline',
     time_range: 'auto',
     url_value: 'http://airlinecodes.info/airline-code-$airline$',
+  },
+  unknown: {
+    url_name: 'Unknown URL',
+    url_value: 'some/view/nonexistent',
+    time_range: 'auto',
   },
 };
 
@@ -246,66 +249,72 @@ describe('checkTimeRangeVisibility', () => {
   });
 
   describe('should display time range field when', () => {
+    it('should always display time range field for dashboard URLs', async () => {
+      // Even with no timeFieldName, dashboards should show time range
+      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard]);
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('input[aria-label^="Time range for custom URL"]')
+        ).toBeInTheDocument();
+      });
+
+      // Verify dataViews.get was never called for dashboard URLs
+      expect(mockDataViews.get).not.toHaveBeenCalled();
+
+      unmount();
+    });
+
     it('index has timestamp field', async () => {
       mockDataViews.get.mockResolvedValue({
         timeFieldName: '@timestamp',
       });
 
-      const customUrls = [
-        {
-          url_name: 'Dashboard Test',
-          time_range: 'auto',
-          url_value: 'dashboards#/view/test-dashboard',
-        },
-      ];
-      const { container, unmount } = renderCustomUrlList(customUrls);
+      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
 
       // Wait for async checkTimeRangeVisibility to complete
       await waitFor(() => {
-        expect(container.querySelector('input[placeholder="auto"]')).toBeInTheDocument();
+        const inputs = container.querySelectorAll('input[aria-label^="Time range for custom URL"]');
+        expect(inputs).toHaveLength(1);
       });
 
       unmount();
     });
 
-    it('time range is auto', async () => {
-      mockDataViews.get.mockResolvedValue({
-        timeFieldName: '@timestamp',
-      });
-
-      const customUrls = [
-        {
-          url_name: 'Auto Time Range Test',
-          time_range: 'auto',
-          url_value: 'dashboards#/view/auto-test-dashboard',
-        },
-      ];
-
-      const { container, unmount } = renderCustomUrlList(customUrls);
+    it('dashboard time range is 1h', async () => {
+      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.dashboard]);
 
       await waitFor(() => {
-        expect(container.querySelector('input[placeholder="auto"]')).toBeInTheDocument();
+        expect(container).toBeTruthy();
+      });
+
+      await waitFor(() => {
+        const input = container.querySelector('input[aria-label^="Time range for custom URL"]');
+        expect(input).toBeInTheDocument();
+        expect(input).toHaveValue('1h');
       });
 
       unmount();
     });
 
-    it('time range is an interval', async () => {
-      mockDataViews.get.mockResolvedValue({
-        timeFieldName: '@timestamp',
-      });
-
+    it('dashboard time range is auto', async () => {
       const customUrls = [
         {
           ...TEST_CUSTOM_URLS.dashboard,
-          time_range: '1h',
+          time_range: 'auto',
         },
       ];
 
       const { container, unmount } = renderCustomUrlList(customUrls);
 
       await waitFor(() => {
-        expect(container.querySelector('input[value="1h"]')).toBeInTheDocument();
+        expect(container).toBeTruthy();
+      });
+
+      await waitFor(() => {
+        const input = container.querySelector('input[aria-label^="Time range for custom URL"]');
+        expect(input).toBeInTheDocument();
+        expect(input).toHaveValue('auto');
       });
 
       unmount();
@@ -315,20 +324,17 @@ describe('checkTimeRangeVisibility', () => {
   describe('should not display time range field when', () => {
     it('index does not have timestamp field', async () => {
       mockDataViews.get.mockResolvedValue({
-        timeFieldName: null,
+        timeFieldName: undefined,
       });
 
-      const customUrls = [
-        {
-          url_name: 'No Timestamp Test',
-          time_range: 'auto',
-          url_value: 'dashboards#/view/no-timestamp-dashboard',
-        },
-      ];
-      const { container, unmount } = renderCustomUrlList(customUrls);
+      const { unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
 
       await waitFor(() => {
-        expect(container.querySelector('input[placeholder="auto"]')).not.toBeInTheDocument();
+        expect(mockDataViews.get).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByLabelText(/^Time range for custom URL \d+$/)).not.toBeInTheDocument();
       });
 
       unmount();
@@ -341,9 +347,7 @@ describe('checkTimeRangeVisibility', () => {
 
       const customUrls = [
         {
-          url_name: 'Custom Time Range Test',
-          time_range: 'auto',
-          url_value: 'dashboards#/view/custom-time-dashboard',
+          ...TEST_CUSTOM_URLS.discover,
           is_custom_time_range: true, // Custom time range selected
         },
       ];
@@ -351,27 +355,31 @@ describe('checkTimeRangeVisibility', () => {
       const { container, unmount } = renderCustomUrlList(customUrls);
 
       await waitFor(() => {
-        expect(container.querySelector('input[placeholder="auto"]')).not.toBeInTheDocument();
+        expect(mockDataViews.get).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('input[aria-label^="Time range for custom URL"]')
+        ).not.toBeInTheDocument();
       });
 
       unmount();
     });
 
     it('data view cannot be found', async () => {
-      // Mock dataViews.get to throw error (data view not found)
       mockDataViews.get.mockRejectedValue(new Error('Data view not found'));
 
-      const customUrls = [
-        {
-          url_name: 'Data View Error Test',
-          time_range: 'auto',
-          url_value: 'dashboards#/view/error-dashboard',
-        },
-      ];
-      const { container, unmount } = renderCustomUrlList(customUrls);
+      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
 
       await waitFor(() => {
-        expect(container.querySelector('input[placeholder="auto"]')).not.toBeInTheDocument();
+        expect(mockDataViews.get).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('input[aria-label^="Time range for custom URL"]')
+        ).not.toBeInTheDocument();
       });
 
       unmount();
@@ -380,22 +388,16 @@ describe('checkTimeRangeVisibility', () => {
 
   describe('should display time range field when no data view info available', () => {
     it('no data view ID can be determined', async () => {
-      const customUrls = [
-        {
-          url_name: 'Test Dashboard',
-          time_range: 'auto',
-          url_value: 'dashboards#/view/unknown-dashboard-id',
-          // Explicitly ensure is_custom_time_range is false
-        },
-      ];
+      mockParseUrlState.mockReturnValue({ _a: { index: undefined } });
 
       // Use empty data view list so no ID is found
-      const { container, unmount } = renderCustomUrlList(customUrls, { dataViewListItems: [] });
+      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.discover]);
 
       await waitFor(() => {
         // Based on business logic: if (!dataViewId) return true; - should show time range field
-        const timeRangeInput = container.querySelector('input[placeholder="auto"]');
-        expect(timeRangeInput).toBeInTheDocument();
+        expect(
+          container.querySelector('input[aria-label^="Time range for custom URL"]')
+        ).toBeInTheDocument();
       });
 
       unmount();
@@ -406,14 +408,16 @@ describe('checkTimeRangeVisibility', () => {
     it('should handle multiple custom URLs with mixed timestamp support', async () => {
       mockDataViews.get
         .mockResolvedValueOnce({ timeFieldName: '@timestamp' }) // First URL has timestamp
-        .mockResolvedValueOnce({ timeFieldName: null }); // Second URL has no timestamp
+        .mockResolvedValueOnce({ timeFieldName: undefined }); // Second URL has no timestamp
 
-      const customUrls = [TEST_CUSTOM_URLS.dashboard, TEST_CUSTOM_URLS.discover];
+      const customUrls = [TEST_CUSTOM_URLS.discover, TEST_CUSTOM_URLS.discover];
       const { container, unmount } = renderCustomUrlList(customUrls);
 
       // Should render time range for first URL only
       await waitFor(() => {
-        const timeRangeInputs = container.querySelectorAll('input[placeholder="auto"]');
+        const timeRangeInputs = container.querySelectorAll(
+          'input[aria-label^="Time range for custom URL"]'
+        );
         expect(timeRangeInputs).toHaveLength(1);
       });
 
@@ -421,20 +425,13 @@ describe('checkTimeRangeVisibility', () => {
     });
 
     it('should default to showing time range when data view ID cannot be determined', async () => {
-      // This covers the case where findDataViewId returns undefined
-      const customUrls = [
-        {
-          url_name: 'Unknown URL',
-          url_value: 'dashboards#/view/nonexistent',
-          time_range: 'auto',
-        },
-      ];
-
-      const { container, unmount } = renderCustomUrlList(customUrls, { dataViewListItems: [] });
+      const { container, unmount } = renderCustomUrlList([TEST_CUSTOM_URLS.unknown]);
 
       // Should show time range by default when unable to determine data view
       await waitFor(() => {
-        expect(container.querySelector('input[placeholder="auto"]')).toBeInTheDocument();
+        expect(
+          container.querySelector('input[aria-label^="Time range for custom URL"]')
+        ).toBeInTheDocument();
       });
 
       unmount();
@@ -442,10 +439,10 @@ describe('checkTimeRangeVisibility', () => {
   });
 });
 
-describe('findDataViewId', () => {
+describe('extractDataViewIdFromCustomUrl', () => {
   describe('dashboard URLs', () => {
     it('should return data view ID for destination index when not a partial job', () => {
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         mockDFAJob,
         TEST_CUSTOM_URLS.dashboard,
         mockDataViewListItems,
@@ -455,7 +452,7 @@ describe('findDataViewId', () => {
       expect(result).toBe(mockDFAJob.dest.index);
     });
     it('should return data view ID for source index when a partial job', () => {
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         mockDFAJob,
         TEST_CUSTOM_URLS.dashboard,
         mockDataViewListItems,
@@ -466,7 +463,7 @@ describe('findDataViewId', () => {
     });
 
     it('should return data view ID for source index when partial job', () => {
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         mockDFAJob,
         TEST_CUSTOM_URLS.dashboard,
         mockDataViewListItems,
@@ -482,7 +479,7 @@ describe('findDataViewId', () => {
         dest: { index: 'non-existent-dest' },
       };
 
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         jobWithMissingDest,
         TEST_CUSTOM_URLS.dashboard,
         mockDataViewListItems,
@@ -498,7 +495,7 @@ describe('findDataViewId', () => {
         source: { index: ['source-index', 'other-index'] },
       };
 
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         jobWithArraySource,
         TEST_CUSTOM_URLS.dashboard,
         mockDataViewListItems,
@@ -515,7 +512,7 @@ describe('findDataViewId', () => {
         dest: { index: 'unknown-dest' },
       };
 
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         jobWithUnknownIndexes,
         TEST_CUSTOM_URLS.dashboard,
         mockDataViewListItems,
@@ -532,7 +529,7 @@ describe('findDataViewId', () => {
         _a: { index: 'logs-*' },
       });
 
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         mockDFAJob,
         TEST_CUSTOM_URLS.discover,
         mockDataViewListItems,
@@ -552,7 +549,12 @@ describe('findDataViewId', () => {
 
       mockParseUrlState.mockReturnValue({});
 
-      const result = findDataViewId(mockDFAJob, malformedDiscoverUrl, mockDataViewListItems, false);
+      const result = extractDataViewIdFromCustomUrl(
+        mockDFAJob,
+        malformedDiscoverUrl,
+        mockDataViewListItems,
+        false
+      );
 
       expect(result).toBeUndefined();
     });
@@ -562,7 +564,7 @@ describe('findDataViewId', () => {
         _a: { columns: [] },
       });
 
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         mockDFAJob,
         TEST_CUSTOM_URLS.discover,
         mockDataViewListItems,
@@ -575,7 +577,7 @@ describe('findDataViewId', () => {
 
   describe('edge cases', () => {
     it('should handle missing dataViewListItems', () => {
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         mockDFAJob,
         TEST_CUSTOM_URLS.dashboard,
         undefined, // no data view list items
@@ -586,7 +588,7 @@ describe('findDataViewId', () => {
     });
 
     it('should handle empty dataViewListItems array', () => {
-      const result = findDataViewId(
+      const result = extractDataViewIdFromCustomUrl(
         mockDFAJob,
         TEST_CUSTOM_URLS.dashboard,
         [], // empty array
