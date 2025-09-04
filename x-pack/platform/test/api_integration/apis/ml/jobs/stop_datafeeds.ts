@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';

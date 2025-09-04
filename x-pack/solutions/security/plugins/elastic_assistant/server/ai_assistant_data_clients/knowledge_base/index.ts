@@ -11,7 +11,7 @@ import type {
   SearchTotalHits,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import { Document } from 'langchain/document';
 import type {
   DocumentEntry,
@@ -93,7 +93,7 @@ export interface GetAIAssistantKnowledgeBaseDataClientParams {
 }
 
 export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
-  ml: MlPluginSetup;
+  ml: MlServerPluginSetup;
   getElserId: GetElser;
   getIsKBSetupInProgress: (spaceId: string) => boolean;
   getProductDocumentationStatus: () => Promise<InstallationStatus>;

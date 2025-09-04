@@ -33,13 +33,13 @@ import {
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useCloudCheck } from '@kbn/ml-node-checks/node_available_warning/hooks';
 
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { isTestable } from './test_models';
-import { useCloudCheck } from '../components/node_available_warning/hooks';
 
 export function useModelActions({
   onDfaTestAction,

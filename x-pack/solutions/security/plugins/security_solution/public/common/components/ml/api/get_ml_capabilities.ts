@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import type { InfluencerInput } from '../types';
 
 export interface Body {

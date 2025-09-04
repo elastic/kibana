@@ -6,7 +6,7 @@
  */
 import { registerAnomalyRuleType } from './register_anomaly_rule_type';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from '../../test_utils';
 import type { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
@@ -48,7 +48,7 @@ describe('Transaction duration anomaly alert', () => {
       const ml = {
         mlSystemProvider: () => ({ mlAnomalySearch: jest.fn() }),
         anomalyDetectorsProvider: jest.fn(),
-      } as unknown as MlPluginSetup;
+      } as unknown as MlServerPluginSetup;
 
       registerAnomalyRuleType({
         ...dependencies,
@@ -108,7 +108,7 @@ describe('Transaction duration anomaly alert', () => {
           }),
         }),
         anomalyDetectorsProvider: jest.fn(),
-      } as unknown as MlPluginSetup;
+      } as unknown as MlServerPluginSetup;
 
       registerAnomalyRuleType({
         ...dependencies,
@@ -192,7 +192,7 @@ describe('Transaction duration anomaly alert', () => {
           }),
         }),
         anomalyDetectorsProvider: jest.fn(),
-      } as unknown as MlPluginSetup;
+      } as unknown as MlServerPluginSetup;
 
       registerAnomalyRuleType({
         ...dependencies,
@@ -338,7 +338,7 @@ describe('recovered alerts', () => {
         }),
       }),
       anomalyDetectorsProvider: jest.fn(),
-    } as unknown as MlPluginSetup;
+    } as unknown as MlServerPluginSetup;
 
     registerAnomalyRuleType({
       ...dependencies,

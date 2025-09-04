@@ -13,10 +13,9 @@ import type { MlPages } from '@kbn/ml-common-types/locator_ml_pages';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useJobsApiService } from '@kbn/ml-hooks/jobs/use_jobs_api_service';
+import { useCloudCheck } from '@kbn/ml-node-checks/node_available_warning/hooks';
 
 import { useEnabledFeatures } from '../../contexts/ml';
-
-import { useCloudCheck } from '../node_available_warning/hooks';
 
 import { FeatureFeedbackButton } from './feature_feedback_button';
 

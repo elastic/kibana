@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
@@ -24,7 +24,7 @@ import type { GetElser } from '../types';
  * @param ml
  */
 export const createGetElserId =
-  (trainedModelsProvider: MlPluginSetup['trainedModelsProvider']): GetElser =>
+  (trainedModelsProvider: MlServerPluginSetup['trainedModelsProvider']): GetElser =>
   async () =>
     // Force check to happen as internal user
     (await trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract).getELSER())

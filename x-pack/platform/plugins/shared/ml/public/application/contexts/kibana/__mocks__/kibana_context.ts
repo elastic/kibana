@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
-import { getDefaultCapabilities } from '@kbn/ml-common-types/capabilities';
+import { getDefaultMlCapabilities } from '@kbn/ml-common-types/capabilities';
 
 import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 
@@ -30,7 +30,7 @@ export const chartsServiceMock = {
   },
 };
 
-const defaultCapabilities = Object.keys(getDefaultCapabilities()).reduce((acc, key) => {
+const defaultCapabilities = Object.keys(getDefaultMlCapabilities()).reduce((acc, key) => {
   acc[key] = true;
   return acc;
 }, {} as Record<string, boolean>);

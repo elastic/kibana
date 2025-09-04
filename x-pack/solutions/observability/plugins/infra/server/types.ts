@@ -12,7 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { InfraServerPluginStartDeps } from './lib/adapters/framework';
 import type {
   InventoryViewsServiceSetup,
@@ -38,8 +38,8 @@ export interface InfraPluginStart {
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
 }
 
-export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
-export type MlAnomalyDetectors = ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
+export type MlSystem = ReturnType<MlServerPluginSetup['mlSystemProvider']>;
+export type MlAnomalyDetectors = ReturnType<MlServerPluginSetup['anomalyDetectorsProvider']>;
 
 export interface InfraRequestHandlerContext {
   mlAnomalyDetectors?: MlAnomalyDetectors;

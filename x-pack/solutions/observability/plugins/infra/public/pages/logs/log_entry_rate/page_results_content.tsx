@@ -12,7 +12,7 @@ import { stringify } from 'query-string';
 import React, { useCallback, useMemo } from 'react';
 import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-node-checks/ml_jobs_awaiting_node_warning';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
 import type { IdFormatByJobType } from '../../../../common/http_api/latest';

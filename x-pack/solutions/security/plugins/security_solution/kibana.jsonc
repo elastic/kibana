@@ -84,7 +84,6 @@
       "kibanaReact",
       "usageCollection",
       "lists",
-      "ml",
       "unifiedSearch",
       "esql"
     ],

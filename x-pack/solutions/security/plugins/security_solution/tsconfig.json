@@ -259,5 +259,8 @@
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
     "@kbn/ml-common-types",
+    "@kbn/ml-node-checks",
+    "@kbn/ml-locator",
+    "@kbn/ml-plugin-contracts",
   ]
 }
