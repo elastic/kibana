@@ -25,7 +25,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 
 const mockContext = {
