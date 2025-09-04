@@ -48,8 +48,7 @@ export const MetricsGrid = ({
   discoverFetch$,
   filters = [],
 }: MetricsGridProps) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 

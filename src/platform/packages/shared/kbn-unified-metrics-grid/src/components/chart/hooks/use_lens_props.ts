@@ -14,7 +14,15 @@ import useAsync from 'react-use/lib/useAsync';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useStableCallback } from '@kbn/unified-histogram';
-import { BehaviorSubject, filter, merge, withLatestFrom, type Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  filter,
+  merge,
+  withLatestFrom,
+  startWith,
+  type Observable,
+} from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useChartLayers } from './use_chart_layers';
 export type LensProps = Pick<
@@ -109,8 +117,16 @@ export const useLensProps = ({
 
   useEffect(() => {
     const attributesCurrent = attributes$.current;
-    const subscription = merge(discoverFetch$, attributesCurrent)
+    const subscription = merge(
+      discoverFetch$,
+      // Emit the current attributes value immediately to handle cases where
+      // attributes are already set but discoverFetch$ emitted before this hook mounted.
+      // This ensures we don't miss an update that occurred between unmount and mount.
+      attributesCurrent.pipe(startWith(attributesCurrent.value))
+    )
       .pipe(
+        // prevent rapid successive updates
+        debounceTime(100),
         withLatestFrom(attributesCurrent),
         filter(([, attr]) => !!attr)
       )

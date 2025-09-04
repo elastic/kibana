@@ -17,7 +17,7 @@ interface CreateESQLQueryParams {
   instrument?: string;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
-  timeRange: TimeRange;
+  timeRange?: TimeRange;
 }
 
 const separator = '\u203A'.normalize('NFC');

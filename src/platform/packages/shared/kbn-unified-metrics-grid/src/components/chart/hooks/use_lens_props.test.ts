@@ -16,6 +16,7 @@ import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import type { UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type { TimeRange } from '@kbn/data-plugin/common';
 
 jest.mock('./use_chart_layers');
 jest.mock('@kbn/lens-embeddable-utils/config_builder');
@@ -36,7 +37,7 @@ describe('useLensProps', () => {
     },
   ];
   const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
-  const timeRange = { from: 'now-1h', to: 'now' } as any;
+  const timeRange: TimeRange = { from: 'now-1h', to: 'now' };
 
   beforeEach(() => {
     LensConfigBuilderMock.prototype.build.mockImplementation(() =>
@@ -134,7 +135,7 @@ describe('useLensProps', () => {
         id: 'metricsExperienceLensComponent',
         noPadding: true,
         searchSessionId: undefined,
-        timeRange: { from: 'now-1h', to: 'now' },
+        timeRange,
         viewMode: 'view',
       });
     });
