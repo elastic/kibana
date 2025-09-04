@@ -18,8 +18,8 @@ import { conditionSchema } from '../conditions';
  */
 export interface ProcessorBase {
   /* Optional property that can be used to identify / relate the processor block in transpilation targets.
-  This will be mapped as a tag for ingest pipelines. 
-  This can then be used to relate transpilation output back to the DSL definition, 
+  This will be mapped as a tag for ingest pipelines.
+  This can then be used to relate transpilation output back to the DSL definition,
   useful for things like simulation handling, debugging, or gathering of metrics. */
   customIdentifier?: string;
   description?: string;
@@ -205,6 +205,16 @@ export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   appendProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
+
+export const isProcessWithOverrideOption = createIsNarrowSchema(
+  processorBaseSchema,
+  z.union([renameProcessorSchema, setProcessorSchema])
+);
+
+export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
+  processorBaseSchema,
+  z.union([renameProcessorSchema, grokProcessorSchema, dissectProcessorSchema])
+);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(
   streamlangProcessorSchema,
