@@ -1783,6 +1783,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/cli/serve/ @elastic/kibana-operations
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
+/.github/copilot-instructions.md @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
@@ -2308,6 +2309,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
+/x-pack/platform/test/reindex_service @elastic/kibana-management
 /x-pack/platform/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/*.ts @elastic/kibana-management
