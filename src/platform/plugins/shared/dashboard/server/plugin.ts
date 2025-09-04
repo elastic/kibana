@@ -81,20 +81,17 @@ export class DashboardPlugin
       })
     );
 
-    void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
-      const { contentClient } = plugins.contentManagement.register({
-        id: CONTENT_ID,
-        storage: new DashboardStorage({
-          throwOnResultValidationError: this.initializerContext.env.mode.dev,
-          logger: this.logger.get('storage'),
-          savedObjectsTagging,
-        }),
-        version: {
-          latest: LATEST_VERSION,
-        },
-      });
-      this.contentClient = contentClient;
+    const { contentClient } = plugins.contentManagement.register({
+      id: CONTENT_ID,
+      storage: new DashboardStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
+      version: {
+        latest: LATEST_VERSION,
+      },
     });
+    this.contentClient = contentClient;
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
