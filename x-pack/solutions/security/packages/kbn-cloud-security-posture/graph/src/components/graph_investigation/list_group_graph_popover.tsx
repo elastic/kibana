@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiHorizontalRule, EuiListGroup } from '@elastic/eui';
 import { ExpandPopoverListItem } from '../styles';
 import { GraphPopover } from '../../..';
@@ -54,6 +55,9 @@ export interface ItemExpandPopoverListItemProps {
   onClick: () => void;
   testSubject: string;
   disabled?: boolean;
+  showToolTip?: boolean;
+  toolTipText?: string;
+  toolTipProps?: Partial<EuiToolTipProps>;
 }
 
 export interface SeparatorExpandPopoverListItemProps {
@@ -89,6 +93,9 @@ export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
                 onClick={item.onClick}
                 disabled={item.disabled}
                 data-test-subj={item.testSubject}
+                showToolTip={item.showToolTip}
+                toolTipText={item.toolTipText}
+                toolTipProps={item.toolTipProps}
               />
             );
           })}
