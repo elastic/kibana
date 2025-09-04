@@ -130,7 +130,7 @@ describe('Moving Average Transforms', () => {
         of: referenceOp,
       };
 
-      expect(fromMovingAverageLensStateToAPI(input, referenceOp, 'Sum of sales')).toEqual(expected);
+      expect(fromMovingAverageLensStateToAPI(input, referenceOp)).toEqual(expected);
     });
 
     it('should use default window when not provided', () => {
@@ -144,7 +144,7 @@ describe('Moving Average Transforms', () => {
         params: { window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW },
       };
 
-      const result = fromMovingAverageLensStateToAPI(input, referenceOp, 'Total Sales');
+      const result = fromMovingAverageLensStateToAPI(input, referenceOp);
       expect(result.window).toBe(LENS_MOVING_AVERAGE_DEFAULT_WINDOW);
     });
 
@@ -167,7 +167,7 @@ describe('Moving Average Transforms', () => {
         },
       };
 
-      const result = fromMovingAverageLensStateToAPI(input, referenceOp, 'Total Sales');
+      const result = fromMovingAverageLensStateToAPI(input, referenceOp);
       expect(result.format).toEqual({
         type: 'number',
         decimals: 2,

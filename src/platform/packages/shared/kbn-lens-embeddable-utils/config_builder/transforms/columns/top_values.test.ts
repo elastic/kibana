@@ -15,12 +15,30 @@ import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 describe('Top Values Transforms', () => {
   const columns = [
     {
+      column: {
+        id: 'metricCol1',
+        operationType: 'sum' as const,
+        sourceField: 'value',
+        label: 'Sum of value',
+        dataType: 'number' as const,
+        params: {
+          emptyAsNull: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+        },
+        isBucketed: false,
+      },
       id: 'metricCol1',
-      operation: 'sum' as const,
-      field: 'value',
-      empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
     },
-    { id: 'metricCol2', operation: 'average' as const, field: 'score' },
+    { 
+      column: { 
+        id: 'metricCol2', 
+        operationType: 'average' as const, 
+        sourceField: 'score',
+        label: 'Average of score',
+        dataType: 'number' as const,   
+        isBucketed: false,    
+      },
+      id: 'metricCol2',
+    },
   ];
   const getMetricColumnIdByIndex = (index: number) => columns[index]?.id;
 

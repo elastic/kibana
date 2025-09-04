@@ -150,7 +150,9 @@ describe('Max, Min, Avg, Median, Standard Deviation, Sum Transforms', () => {
           label: '',
           isBucketed: false,
           dataType: 'number',
-          params: {},
+          params: {
+            emptyAsNull: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
         };
 
         expect(fromSumMetricAPIToLensState(input)).toEqual(expected);

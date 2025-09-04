@@ -98,7 +98,7 @@ describe('Differences Transforms', () => {
         of: referenceOp,
       };
 
-      expect(fromDifferencesLensStateToAPI(input, referenceOp, 'Sum of Total Sales')).toEqual(
+      expect(fromDifferencesLensStateToAPI(input, referenceOp)).toEqual(
         expected
       );
     });
@@ -120,7 +120,7 @@ describe('Differences Transforms', () => {
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       };
 
-      const result = fromDifferencesLensStateToAPI(input, referenceOp, 'Sum of Total Sales');
+      const result = fromDifferencesLensStateToAPI(input, referenceOp);
       expect(result.label).toBe('Sales Change');
     });
 
@@ -172,7 +172,6 @@ describe('Differences Transforms', () => {
         const result = fromDifferencesLensStateToAPI(
           { ...input, label: `Differences of ${ref.label!}` },
           ref,
-          ref.label!
         );
         expect(result.of).toEqual(ref);
         expect(result.label).toBeUndefined();

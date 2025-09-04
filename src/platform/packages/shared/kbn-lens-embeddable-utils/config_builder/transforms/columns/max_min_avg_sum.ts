@@ -42,6 +42,7 @@ export function fromBasicMetricAPItoLensState(
 export function fromSumMetricAPIToLensState(
   options: LensApiSumMetricOperation
 ): SumIndexPatternColumn {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { field, format, empty_as_null } = options;
 
   return {

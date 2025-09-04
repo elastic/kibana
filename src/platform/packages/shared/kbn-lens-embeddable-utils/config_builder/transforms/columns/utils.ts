@@ -38,9 +38,9 @@ export function getLensStateMetricSharedProps(
     dataType,
     isBucketed: false,
     filter: fromFilterAPIToLensState(options.filter),
-    timeScale: options.time_scale,
-    reducedTimeRange: options.reduced_time_range,
-    timeShift: options.time_shift,
+    ...(options.time_scale ? { timeScale: options.time_scale } : {}),
+    ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
+    ...(options.time_shift ? { timeShift: options.time_shift } : {}),
     label: options.label ?? LENS_DEFAULT_LABEL,
     // @TODO improve this based on default label logic
     customLabel: options.label != null,

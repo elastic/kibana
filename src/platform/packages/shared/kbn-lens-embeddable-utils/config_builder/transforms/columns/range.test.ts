@@ -113,7 +113,7 @@ describe('Range Transforms', () => {
             { from: 50, to: 100, label: 'Medium' },
             { from: 100, to: null, label: 'High' },
           ],
-          format: { id: 'number', params: { decimals: 2 } },
+          format: { id: 'number', params: { decimals: 2, compact: false } },
         },
       };
 
@@ -125,7 +125,7 @@ describe('Range Transforms', () => {
           { gt: 50, lte: 100, label: 'Medium' },
           { gt: 100, label: 'High' },
         ],
-        format: { type: 'number', decimals: 2 },
+        format: { type: 'number', decimals: 2, compact: false },
       };
 
       expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);
@@ -153,7 +153,7 @@ describe('Range Transforms', () => {
         field: 'price',
         granularity: 10,
         include_empty_rows: true,
-        format: { type: 'number', decimals: 0, compact: false },
+        format: { type: 'number', decimals: 0, compact: false},
       };
 
       expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);
