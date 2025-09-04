@@ -14,6 +14,7 @@ import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import {
   MORE_THAN_1024_CHARS,
+  getAgentName,
   getCloudProvider,
   getCloudRegion,
   getCluster,
@@ -52,6 +53,7 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
           'cloud.availability_zone': `${cloudRegion}a`,
           'cloud.account.id': generateShortId(),
           'cloud.resource_id': generateShortId(),
+          'telemetry.sdk.language': getAgentName(),
         },
       },
       attributes: {
