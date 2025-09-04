@@ -87,23 +87,22 @@ export class SavedObjectsManager {
     soClient: SavedObjectsClientContract,
     sampleType: DatasetSampleType
   ): Promise<string | undefined> {
+    const id = getDashboardId(sampleType);
+    if (!id) {
+      return undefined;
+    }
+
     try {
-      const id = getDashboardId(sampleType);
-      if (!id) {
+      await soClient.get('dashboard', id);
+      return id;
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        this.log.debug(`Dashboard ${id} not found in saved objects`);
         return undefined;
       }
 
-      const dashboard = await soClient.get('dashboard', id);
-
-      return dashboard.id;
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        this.log.debug(`Saved object dashboard not found, skipping deletion`);
-        return;
-      }
-
       this.log.error(`Failed to get dashboard id for sample type ${sampleType}: ${err.message}`);
-      return undefined;
+      throw err;
     }
   }
 }
