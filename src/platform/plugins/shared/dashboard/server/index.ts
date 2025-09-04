@@ -44,7 +44,6 @@ export type {
   DashboardAttributes,
   DashboardPanel,
   DashboardSection,
-  DashboardAPISearchOut,
   DashboardFilter,
   DashboardQuery,
 } from './content_management';

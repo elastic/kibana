@@ -21,7 +21,6 @@ export type {
   DashboardCreateOut,
   DashboardCreateOptions,
   DashboardSearchIn,
-  DashboardAPISearchOut,
   DashboardSearchOut,
   DashboardSearchAPIResult,
   DashboardSearchOptions,

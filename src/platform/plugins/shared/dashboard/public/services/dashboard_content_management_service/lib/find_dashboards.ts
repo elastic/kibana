@@ -14,7 +14,6 @@ import type {
   DashboardAttributes,
   DashboardGetIn,
   DashboardSearchIn,
-  DashboardAPISearchOut,
   DashboardSearchOptions,
   DashboardSearchAPIResult,
   DashboardGetOut,
@@ -34,7 +33,7 @@ export interface SearchDashboardsArgs {
 
 export interface SearchDashboardsResponse {
   total: number;
-  hits: DashboardAPISearchOut['hits'];
+  hits: DashboardSearchAPIResult['hits'];
 }
 
 export async function searchDashboards({
