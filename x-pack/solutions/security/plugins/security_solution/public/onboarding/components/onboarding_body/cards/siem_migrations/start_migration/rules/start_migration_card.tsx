@@ -10,21 +10,21 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   MissingPrivilegesCallOut,
   MissingPrivilegesDescription,
-} from '../../../../../../common/missing_privileges';
-import { useUpsellingComponent } from '../../../../../../common/hooks/use_upselling';
-import { PanelText } from '../../../../../../common/components/panel_text';
-import { RuleMigrationDataInputWrapper } from '../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
-import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
-import { OnboardingCardId } from '../../../../../constants';
-import { useLatestStats } from '../../../../../../siem_migrations/rules/service/hooks/use_latest_stats';
-import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
-import type { OnboardingCardComponent } from '../../../../../types';
-import { OnboardingCardContentPanel } from '../../common/card_content_panel';
-import type { StartMigrationCardMetadata } from './types';
+} from '../../../../../../../common/missing_privileges';
+import { useUpsellingComponent } from '../../../../../../../common/hooks/use_upselling';
+import { PanelText } from '../../../../../../../common/components/panel_text';
+import { RuleMigrationDataInputWrapper } from '../../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
+import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
+import { OnboardingCardId } from '../../../../../../constants';
+import { useLatestStats } from '../../../../../../../siem_migrations/rules/service/hooks/use_latest_stats';
+import { CenteredLoadingSpinner } from '../../../../../../../common/components/centered_loading_spinner';
+import type { OnboardingCardComponent } from '../../../../../../types';
+import { OnboardingCardContentPanel } from '../../../common/card_content_panel';
+import type { StartMigrationCardMetadata } from '../common/types';
 import { RuleMigrationsPanels } from './rule_migrations_panels';
-import { useStyles } from './start_migration_card.styles';
-import * as i18n from './translations';
+import { useStyles } from '../common/start_migration_card.styles';
 import { UploadRulesSectionPanel } from './upload_rules_panel';
+import { START_MIGRATION_CARD_FOOTER_NOTE } from '../common/translations';
 
 const StartMigrationsBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId, checkComplete }) => {
@@ -68,7 +68,7 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
           )}
           <EuiSpacer size="m" />
           <PanelText size="xs" subdued cursive>
-            <p>{i18n.START_MIGRATION_CARD_FOOTER_NOTE}</p>
+            <p>{START_MIGRATION_CARD_FOOTER_NOTE}</p>
           </PanelText>
         </OnboardingCardContentPanel>
       </RuleMigrationDataInputWrapper>

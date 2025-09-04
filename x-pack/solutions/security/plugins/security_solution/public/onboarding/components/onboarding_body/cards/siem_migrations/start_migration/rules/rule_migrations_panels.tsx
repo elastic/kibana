@@ -7,13 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
-import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
+import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
+import type { RuleMigrationStats } from '../../../../../../../siem_migrations/rules/types';
 import { UploadRulesPanel } from './upload_rules_panel';
-import { MigrationProgressPanel } from '../../../../../../siem_migrations/rules/components/migration_status_panels/migration_progress_panel';
-import { MigrationResultPanel } from '../../../../../../siem_migrations/rules/components/migration_status_panels/migration_result_panel';
-import { MigrationReadyPanel } from '../../../../../../siem_migrations/rules/components/migration_status_panels/migration_ready_panel';
-import { MissingAIConnectorCallout } from './missing_ai_connector_callout';
+import { MigrationProgressPanel } from '../../../../../../../siem_migrations/rules/components/migration_status_panels/migration_progress_panel';
+import { MigrationResultPanel } from '../../../../../../../siem_migrations/rules/components/migration_status_panels/migration_result_panel';
+import { MigrationReadyPanel } from '../../../../../../../siem_migrations/rules/components/migration_status_panels/migration_ready_panel';
+import { MissingAIConnectorCallout } from '../common/missing_ai_connector_callout';
 
 export interface RuleMigrationsPanelsProps {
   migrationsStats: RuleMigrationStats[];

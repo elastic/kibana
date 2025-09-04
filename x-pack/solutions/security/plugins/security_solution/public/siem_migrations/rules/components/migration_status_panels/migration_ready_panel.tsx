@@ -20,7 +20,7 @@ import { CenteredLoadingSpinner } from '../../../../common/components/centered_l
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
+import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import { RuleMigrationsLastError } from './last_error';
@@ -32,7 +32,7 @@ export interface MigrationReadyPanelProps {
 }
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
-  const { openFlyout } = useRuleMigrationDataInputContext();
+  const { openFlyout } = useMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
   const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
   const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);

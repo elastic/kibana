@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
-import { createStartServicesMock } from '../../../../../../common/lib/kibana/kibana_react.mock';
-import type { SiemMigrationsService } from '../../../../../../siem_migrations/service';
+import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
+import { createStartServicesMock } from '../../../../../../../common/lib/kibana/kibana_react.mock';
+import type { SiemMigrationsService } from '../../../../../../../siem_migrations/service';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
 
 describe('startMigrationCheckComplete', () => {
@@ -38,7 +38,7 @@ describe('startMigrationCheckComplete', () => {
       rules: {
         getMissingCapabilities: jest.fn().mockReturnValue([]),
         isAvailable: jest.fn().mockReturnValue(true),
-        getMigrationsStats: jest.fn().mockReturnValue([
+        getRuleMigrationsStats: jest.fn().mockReturnValue([
           {
             status: SiemMigrationTaskStatus.FINISHED,
           },
@@ -53,7 +53,7 @@ describe('startMigrationCheckComplete', () => {
 
     const result = await checkStartMigrationCardComplete(services);
 
-    expect(siemMigrations.rules.getMigrationsStats).toHaveBeenCalled();
+    expect(siemMigrations.rules.getRuleMigrationsStats).toHaveBeenCalled();
 
     expect(result).toEqual({
       completeBadgeText: '1 migration',

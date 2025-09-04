@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
-import { CardCallOut } from '../../common/card_callout';
 import * as i18n from './translations';
+import { CardCallOut } from '../../../common/card_callout';
 
 interface MissingAIConnectorCalloutProps {
   onExpandAiConnectorsCard: () => void;

@@ -11,24 +11,6 @@ export const START_MIGRATION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.title',
   { defaultMessage: 'Migrate your existing Splunk® SIEM rules to Elastic' }
 );
-export const START_MIGRATION_CARD_FOOTER_NOTE = i18n.translate(
-  'xpack.securitySolution.onboarding.startMigration.footerNote',
-  {
-    defaultMessage:
-      'Splunk and related marks are trademarks or registered trademarks of Splunk LLC in the United States and other countries.',
-  }
-);
-export const START_MIGRATION_CARD_CONNECTOR_MISSING_TEXT = i18n.translate(
-  'xpack.securitySolution.onboarding.startMigration.connectorMissingText',
-  {
-    defaultMessage:
-      'You need an LLM connector to power SIEM rule migration. Set one up or choose an existing one to get started.',
-  }
-);
-export const START_MIGRATION_CARD_CONNECTOR_MISSING_BUTTON = i18n.translate(
-  'xpack.securitySolution.onboarding.startMigration.connectorMissingText',
-  { defaultMessage: 'Set up AI Connector' }
-);
 
 export const START_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.upload.title',
