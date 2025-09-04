@@ -14,7 +14,6 @@ import { createServerRoute } from '../create_server_route';
 import { dateFromString, durationSchema } from '../significant_events/route';
 import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
 
-// TODO: Move to an existing file?
 const generateDescriptionRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/description/_generate 2023-10-31',
   params: z.object({

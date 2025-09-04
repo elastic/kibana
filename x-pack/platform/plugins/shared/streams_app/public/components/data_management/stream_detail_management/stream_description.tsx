@@ -90,24 +90,11 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
                   <h5>Stream description</h5>
                 </EuiText>
               </EuiFlexGroup>
-              {/* {isOpen && summary && summaryDateTime && (*/}
-              {/*  <EuiText size="xs" color="subdued">*/}
-              {/*    <FormattedMessage*/}
-              {/*      id="xpack.aiSummary.description"*/}
-              {/*      defaultMessage="Generated on {date} at {time}"*/}
-              {/*      values={{*/}
-              {/*        date: summaryDateTime.date,*/}
-              {/*        time: summaryDateTime.time,*/}
-              {/*      }}*/}
-              {/*    />*/}
-              {/*  </EuiText>*/}
-              {/* )}*/}
             </EuiFlexItem>
           </EuiFlexGroup>
         }
         isLoading={isGenerating}
-        // isDisabled={loading}
-        // onToggle={onToggle}
+        isDisabled={isGenerating}
       >
         {description && (
           <>
