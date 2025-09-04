@@ -35,7 +35,7 @@ import {
   getSpanFieldConfigurations,
   getTransactionFieldConfigurations,
 } from './field_configurations';
-import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import { useRootTransactionContext } from '../../doc_viewer_overview/hooks/use_root_transaction';
 
 const spanFieldNames = [
   SPAN_ID,
