@@ -8,6 +8,7 @@
  */
 
 import type { BaseStep } from '@kbn/workflows'; // Adjust path as needed
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { StepImplementation } from './step_base';
 // Import schema and inferred types
@@ -36,7 +37,6 @@ import {
   ExitFallbackPathNodeImpl,
 } from './on_failure/fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
-import { WorkflowGraph } from '../workflow_context_manager/workflow_graph';
 
 export class StepFactory {
   constructor(

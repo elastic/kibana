@@ -8,8 +8,8 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { GraphNode } from '@kbn/workflows';
-import { convertToWorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNode } from '../types/execution';
+import { convertToWorkflowGraph } from './build_execution_graph/build_execution_graph';
 
 export class WorkflowGraph {
   private graph: graphlib.Graph | null = null;

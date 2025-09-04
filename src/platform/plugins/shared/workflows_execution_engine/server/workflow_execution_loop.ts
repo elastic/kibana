@@ -8,11 +8,11 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepFactory } from './step/step_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import type { StepErrorCatcher } from './step/step_base';
-import type { WorkflowGraph } from './workflow_context_manager/workflow_graph';
 
 /**
  * Executes a workflow by continuously processing its steps until completion.

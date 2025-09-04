@@ -8,8 +8,8 @@
  */
 
 import type { StepContext, WorkflowContext } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
-import type { WorkflowGraph } from './workflow_graph';
 
 export interface ContextManagerInit {
   // New properties for logging
