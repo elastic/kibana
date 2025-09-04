@@ -42,8 +42,8 @@ describe('useUiState', () => {
     const { result, unmount } = renderHook(() => useUiState(uiState));
 
     expect(uiState.on).toHaveBeenCalledWith('change', expect.any(Function));
-    // @ts-expect-error
-    const updateOnChange = uiState.on.mock.calls[0][1];
+
+    const updateOnChange = jest.mocked(uiState.on).mock.calls[0][1];
 
     uiState.getChanges = jest.fn(() => ({
       vis: {
@@ -177,8 +177,7 @@ describe('useUiState', () => {
         },
       }));
 
-      // @ts-expect-error
-      const updateOnChange = uiState.on.mock.calls[0][1];
+      const updateOnChange = jest.mocked(uiState.on).mock.calls[0][1];
 
       act(() => {
         updateOnChange();
