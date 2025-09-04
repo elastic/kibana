@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseState, BaseStateContainer } from '../../common/state_containers/types';
+import type { BaseState, BaseStateContainer } from '@kbn/shared-ux-state-container';
 import type { IStateStorage } from './state_sync_state_storage';
 
 /**

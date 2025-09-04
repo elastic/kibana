@@ -9,8 +9,8 @@
 
 import type { TodoActions, TodoState } from '../state_containers/todomvc';
 import { defaultState, pureTransitions } from '../state_containers/todomvc';
-import type { BaseState, BaseStateContainer } from '../../common/state_containers';
-import { createStateContainer } from '../../common/state_containers';
+import type { BaseState, BaseStateContainer } from '@kbn/shared-ux-state-container';
+import { createStateContainer } from '@kbn/shared-ux-state-container';
 import type { INullableBaseStateContainer } from '../../public/state_sync';
 import {
   createKbnUrlStateStorage,

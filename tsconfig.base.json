@@ -2026,6 +2026,8 @@
       "@kbn/shared-ux-router-mocks/*": ["src/platform/packages/shared/shared-ux/router/mocks/*"],
       "@kbn/shared-ux-router-types": ["src/platform/packages/shared/shared-ux/router/types"],
       "@kbn/shared-ux-router-types/*": ["src/platform/packages/shared/shared-ux/router/types/*"],
+      "@kbn/shared-ux-state-container": ["src/platform/packages/shared/shared-ux/state_container"],
+      "@kbn/shared-ux-state-container/*": ["src/platform/packages/shared/shared-ux/state_container/*"],
       "@kbn/shared-ux-storybook-config": ["src/platform/packages/private/shared-ux/storybook/config"],
       "@kbn/shared-ux-storybook-config/*": ["src/platform/packages/private/shared-ux/storybook/config/*"],
       "@kbn/shared-ux-storybook-mock": ["src/platform/packages/shared/shared-ux/storybook/mock"],
