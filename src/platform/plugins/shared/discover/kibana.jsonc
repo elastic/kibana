@@ -14,6 +14,7 @@
     "requiredPlugins": [
       "charts",
       "contentManagement",
+      "dashboard",
       "data",
       "dataViews",
       "discoverShared",
