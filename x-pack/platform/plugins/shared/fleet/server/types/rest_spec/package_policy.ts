@@ -55,6 +55,7 @@ export const GetPackagePoliciesRequestSchema = {
       schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
     ),
     withAgentCount: schema.maybe(schema.boolean()),
+    withRevisions: schema.maybe(schema.boolean()),
   }),
 };
 

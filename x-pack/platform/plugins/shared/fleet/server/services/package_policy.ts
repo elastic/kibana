@@ -968,7 +968,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery & { spaceId?: string }
+    options: ListWithKuery & { spaceId?: string; withRevisions?: boolean }
   ): Promise<ListResult<PackagePolicy>> {
     const logger = this.getLogger('list');
     const savedObjectType = await getPackagePolicySavedObjectType();
@@ -981,6 +981,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       sortOrder = 'desc',
       kuery,
       fields,
+      withRevisions,
     } = options;
 
     logger.debug(
@@ -990,12 +991,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )}`
     );
 
-    const filter = _normalizePackagePolicyKuery(
-      savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
-    );
+    let filter = kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : '';
+    if (!withRevisions) {
+      filter = _normalizePackagePolicyKuery(
+        savedObjectType,
+        kuery
+          ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
+          : `${savedObjectType}.attributes.latest_revision:true`
+      );
+    }
 
     const packagePolicies = await soClient
       .find<PackagePolicySOAttributes>({
