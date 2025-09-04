@@ -54,21 +54,37 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
     }
   }
 
-  async searchLogs(params: GetExecutionLogsParams | GetStepLogsParams): Promise<LogSearchResult> {
+  async searchLogs(
+    params: GetExecutionLogsParams | GetStepLogsParams,
+    spaceId?: string
+  ): Promise<LogSearchResult> {
     try {
       const { limit = 100, offset = 0, sortField = '@timestamp', sortOrder = 'desc' } = params;
+
+      // Map API field names to Elasticsearch field names
+      const fieldMapping: Record<string, string> = {
+        timestamp: '@timestamp',
+        '@timestamp': '@timestamp',
+      };
+      const mappedSortField = fieldMapping[sortField] || sortField;
 
       const mustQueries: any[] = [];
 
       if ('executionId' in params) {
         mustQueries.push({
-          term: { 'workflow.execution_id': params.executionId },
+          term: { 'workflow.execution_id.keyword': params.executionId },
         });
       }
 
       if ('stepId' in params && params.stepId) {
         mustQueries.push({
-          term: { 'workflow.step_id': params.stepId },
+          term: { 'workflow.step_id.keyword': params.stepId },
+        });
+      }
+
+      if (spaceId) {
+        mustQueries.push({
+          term: { 'spaceId.keyword': spaceId },
         });
       }
 
@@ -81,7 +97,7 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
             must: mustQueries,
           },
         },
-        sort: [{ [sortField]: { order: sortOrder } }],
+        sort: [{ [mappedSortField]: { order: sortOrder } }],
       });
 
       const logs = response.hits.hits.map((hit: any) => hit._source);

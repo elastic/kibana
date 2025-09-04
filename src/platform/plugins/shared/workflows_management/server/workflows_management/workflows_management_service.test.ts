@@ -10,13 +10,11 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import { WorkflowsService } from './workflows_management_service';
 
 describe('WorkflowsService', () => {
   let service: WorkflowsService;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockTaskScheduler: jest.Mocked<WorkflowTaskScheduler>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const mockWorkflowDocument = {
@@ -77,10 +75,6 @@ describe('WorkflowsService', () => {
       index: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       update: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       delete: jest.fn().mockResolvedValue({ _id: 'test-id' }),
-    } as any;
-
-    mockTaskScheduler = {
-      unscheduleWorkflowTasks: jest.fn(),
     } as any;
 
     mockLogger = loggerMock.create();
@@ -597,6 +591,71 @@ describe('WorkflowsService', () => {
       await expect(service.getWorkflowExecutions('workflow-1', 'default')).rejects.toThrow(
         'Search failed'
       );
+    });
+  });
+
+  describe('getStepExecution', () => {
+    it('should return step execution when found', async () => {
+      const stepExecution = {
+        id: 'step-execution-1',
+        stepId: 'first-step',
+        workflowRunId: 'execution-1',
+        workflowId: 'workflow-1',
+        spaceId: 'default',
+        status: 'completed',
+        startedAt: '2023-01-01T00:00:00.000Z',
+        completedAt: '2023-01-01T00:00:01.000Z',
+      };
+
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: stepExecution, _index: 'workflows-steps', _id: 'step-execution-1' }],
+          total: { value: 1 },
+        },
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
+
+      const result = await service.getStepExecution(
+        { executionId: 'execution-1', stepId: 'first-step' },
+        'default'
+      );
+
+      expect(result).toEqual(stepExecution);
+      expect(mockEsClient.search).toHaveBeenCalledWith({
+        index: 'workflows-steps',
+        query: {
+          bool: {
+            must: [
+              { term: { workflowRunId: 'execution-1' } },
+              { term: { stepId: 'first-step' } },
+              { term: { spaceId: 'default' } },
+            ],
+          },
+        },
+        size: 1,
+        track_total_hits: false,
+      });
+    });
+
+    it('should return null when step execution not found', async () => {
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
+
+      const result = await service.getStepExecution(
+        { executionId: 'execution-1', stepId: 'first-step' },
+        'default'
+      );
+
+      expect(result).toBeNull();
     });
   });
 

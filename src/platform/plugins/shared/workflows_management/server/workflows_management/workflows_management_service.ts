@@ -455,16 +455,7 @@ export class WorkflowsService {
                   },
                 },
               },
-              {
-                bool: {
-                  should: [
-                    { term: { spaceId } },
-                    // Backward compatibility for objects without spaceId
-                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
+              { term: { spaceId } },
             ],
           },
         },
@@ -494,7 +485,7 @@ export class WorkflowsService {
 
       return buckets.map((bucket: any) => ({
         date: bucket.key_as_string,
-        timestamp: bucket.key_as_string,
+        timestamp: bucket.key,
         completed: bucket.completed.doc_count,
         failed: bucket.failed.doc_count,
         cancelled: bucket.cancelled.doc_count,
@@ -632,16 +623,46 @@ export class WorkflowsService {
     });
   }
 
-  public async getExecutionLogs(params: GetExecutionLogsParams): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params);
+  public async getExecutionLogs(
+    params: GetExecutionLogsParams,
+    spaceId: string
+  ): Promise<LogSearchResult> {
+    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
   }
 
-  public async getStepLogs(params: GetStepLogsParams): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params);
+  public async getStepLogs(params: GetStepLogsParams, spaceId: string): Promise<LogSearchResult> {
+    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
   }
 
   public getLogger(): IWorkflowEventLogger {
     return this.workflowEventLoggerService!;
+  }
+
+  public async getStepExecution(
+    params: GetStepExecutionParams,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    const { executionId, stepId } = params;
+    const response = await this.esClient!.search<EsWorkflowStepExecution>({
+      index: this.stepsExecutionIndex,
+      query: {
+        bool: {
+          must: [
+            { term: { workflowRunId: executionId } },
+            { term: { stepId } },
+            { term: { spaceId } },
+          ],
+        },
+      },
+      size: 1,
+      track_total_hits: false,
+    });
+
+    if (response.hits.hits.length === 0) {
+      return null;
+    }
+
+    return response.hits.hits[0]._source as EsWorkflowStepExecution;
   }
 
   private transformStorageDocumentToWorkflowDto(

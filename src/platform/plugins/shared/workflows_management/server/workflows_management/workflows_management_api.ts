@@ -47,6 +47,11 @@ export interface GetWorkflowExecutionLogsParams {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface GetStepExecutionParams {
+  executionId: string;
+  stepId: string;
+}
+
 export interface WorkflowExecutionLogEntry {
   id: string;
   timestamp: string;

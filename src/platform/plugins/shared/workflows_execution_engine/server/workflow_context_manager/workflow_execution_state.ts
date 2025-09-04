@@ -9,8 +9,8 @@
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 interface Change {
   objectId: string;
@@ -157,6 +157,7 @@ export class WorkflowExecutionState {
         executionIndex: stepExecutions.length,
         workflowRunId: this.workflowExecution.id,
         workflowId: this.workflowExecution.workflowId,
+        spaceId: this.workflowExecution.spaceId,
       } as EsWorkflowStepExecution
     );
     this.stepChanges.set(stepExecutionId, {
