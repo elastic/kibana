@@ -5,7 +5,70 @@
  * 2.0.
  */
 
-import { toolIdRegexp } from './tool_ids';
+import { toolIdRegexp, validateToolId, toolIdMaxLength } from './tool_ids';
+import { protectedNamespaces } from './namespaces';
+
+describe('validateToolId', () => {
+  test('returns undefined for valid id (non built-in)', () => {
+    expect(validateToolId({ toolId: 'mytool', builtIn: false })).toBeUndefined();
+
+    expect(validateToolId({ toolId: 'foo_bar-baz.qux_123', builtIn: false })).toBeUndefined();
+  });
+
+  test('fails on invalid format (regexp)', () => {
+    const invalids = [
+      '',
+      '.mytool',
+      'mytool.',
+      'core..mytool',
+      'MyTool',
+      'core.MyTool',
+      '-tool',
+      'tool-',
+      '_tool',
+      'tool_',
+      'tool..id',
+      'tool..',
+      'tool.',
+      '.tool',
+      'tool#id',
+      'tool/id',
+    ];
+
+    for (const toolId of invalids) {
+      const error = validateToolId({ toolId, builtIn: false });
+      expect(error).toBe(
+        'Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, hyphens and underscores'
+      );
+    }
+  });
+
+  test('fails on toolId exceeding max length', () => {
+    const overMax = 'a'.repeat(toolIdMaxLength + 1);
+    const error = validateToolId({ toolId: overMax, builtIn: false });
+    expect(error).toBe(`Tool ids are limited to ${toolIdMaxLength} characters.`);
+  });
+
+  test('fails when toolId equals a protected namespace name', () => {
+    const protectedNamespaceName = protectedNamespaces[0];
+    const error = validateToolId({ toolId: protectedNamespaceName, builtIn: false });
+    expect(error).toBe('Tool id cannot have the same name as a reserved namespaces');
+  });
+
+  test('fails when non built-in tool uses a protected namespace', () => {
+    const protectedNamespaceName = protectedNamespaces[0];
+    const toolId = `${protectedNamespaceName}.mytool`;
+    const error = validateToolId({ toolId, builtIn: false });
+    expect(error).toBe('Tool id is using a protected namespaces.');
+  });
+
+  test('allows built-in tool to use a protected namespace', () => {
+    const protectedNamespaceName = protectedNamespaces[0];
+    const toolId = `${protectedNamespaceName}.internal_tool`;
+    const error = validateToolId({ toolId, builtIn: true });
+    expect(error).toBeUndefined();
+  });
+});
 
 describe('toolId regexp', () => {
   const validToolIds = [
