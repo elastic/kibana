@@ -12,7 +12,6 @@ import type {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  Logger,
 } from '@kbn/core/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
@@ -36,7 +35,6 @@ export interface ConnectorAttributes {
 
 export const getWebhookSecretHeadersKeyRoute = (
   router: IRouter,
-  logger: Logger,
   getStartServices: StartServicesAccessor<ConnectorsPluginsStart, unknown>
 ) => {
   router.get(
@@ -86,8 +84,8 @@ export const getWebhookSecretHeadersKeyRoute = (
 
       const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || [];
 
-      const secretHeadersArray = Object.keys(secretHeaders).map((key) => ({
-        key,
+      const secretHeadersArray = secretHeaders.map((header) => ({
+        key: header.key,
       }));
 
       return res.ok({ body: { secretHeaders: secretHeadersArray } });
