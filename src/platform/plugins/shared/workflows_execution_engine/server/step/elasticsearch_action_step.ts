@@ -112,6 +112,38 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
       };
       
       console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
+      if(requestOptions.path.endsWith("/_bulk")){
+        console.log('DEBUG - Bulk request detected:', JSON.stringify(requestOptions.body, null, 2));
+        // Further processing for bulk requests can be added here
+        // SG: ugly hack cuz _bulk is special
+        const docs = requestOptions.body.operations; // your 3 doc objects
+        // If the index is in the path `/tin-workflows/_bulk`, pass it explicitly:
+        const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
+
+        // Optional: forward query flags like refresh if you have them
+        const refresh = requestOptions.query?.refresh ?? false;
+
+        // Turn each doc into an action+doc pair
+        const body = docs.flatMap((doc, i) => {
+          // If you have ids, use: { index: { _id: doc._id } }
+          return [{ index: {} }, doc];
+        });
+
+        const resp = await esClient.bulk({
+          index: pathIndex,     // default index for all actions
+          refresh,              // true | false | 'wait_for'
+          body                  // [ {index:{}}, doc, {index:{}}, doc, ... ]
+        });
+
+        // Helpful: surface per-item errors if any
+        if (resp.errors) {
+          const itemsWithErrors = resp.items
+            .map((it, idx) => ({ idx, action: Object.keys(it)[0], result: it[Object.keys(it)[0]] }))
+            .filter(x => x.result.error);
+          console.error('Bulk had item errors:', itemsWithErrors);
+        }
+        return resp;
+      }
       return await esClient.transport.request(requestOptions);
     }
   }

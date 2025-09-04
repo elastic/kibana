@@ -88,83 +88,14 @@ const useWorkflowJsonSchema = () => {
   // Generate JSON schema dynamically to include all current connectors
   return useMemo(() => {
     try {
-      console.log(WORKFLOW_ZOD_SCHEMA);
-      console.log(JSON.stringify(WORKFLOW_ZOD_SCHEMA, null, 2));
-      // 🔥 Expose schema to global scope for debugging
+      // Expose schema to global scope for debugging if needed
       (window as any).WORKFLOW_ZOD_SCHEMA = WORKFLOW_ZOD_SCHEMA;
-      Object.entries(WORKFLOW_ZOD_SCHEMA.shape).forEach(([key, schema]) => {
-        try {
-          console.log(`Testing field: ${key}`);
-          console.log(`  - Type:`, schema?.constructor?.name);
-          console.log(`  - Has _def:`, !!schema?._def);
-          console.log(`  - TypeName:`, schema?._def?.typeName);
-          
-          // Don't create new schemas, just inspect existing ones
-          if (schema._def.typeName === 'ZodDefault') {
-            console.log(`  - Default value:`, schema._def.defaultValue());
-          }
-          if (schema._def.typeName === 'ZodOptional') {
-            console.log(`  - Inner type:`, schema._def.innerType);
-          }
-        } catch (error) {
-          console.error(`  ✗ ${key} inspection fails:`, error.message);
-        }
-      });
-      const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 
-      // DEBUG: Auto-download the JSON schema for debugging $ref issues
-      try {
-        const schemaStr = JSON.stringify(jsonSchema, null, 2);
-        const schemaBlob = new Blob([schemaStr], { type: 'application/json' });
-        const url = URL.createObjectURL(schemaBlob);
-        
-        // Create download link
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'workflow-schema-debug.json';
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        
-        // Auto-download to help debug the $ref issue
-        console.log('📥 Auto-downloading schema for $ref debugging:', url);
-        a.click();
-        
-        // Also expose for manual download and debugging helpers
-        (window as any).downloadWorkflowSchema = () => a.click();
-        (window as any).debugSchemaPath = (path) => {
-          try {
-            const parts = path.split('/').filter(p => p !== '#' && p !== '');
-            let current = jsonSchema;
-            console.log('🔍 Debugging path:', path);
-            console.log('Starting from:', current);
-            
-            for (const part of parts) {
-              console.log(`  -> ${part}:`, current[part]);
-              current = current[part];
-              if (!current) {
-                console.error(`❌ Path broken at: ${part}`);
-                return null;
-              }
-            }
-            return current;
-          } catch (error) {
-            console.error('❌ Error debugging path:', error);
-            return null;
-          }
-        };
-        
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 5000);
-      } catch (debugError) {
-        console.warn('⚠️ Could not create debug download:', debugError);
-      }
+      const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 
       // Post-process to improve type field descriptions in Monaco tooltips
       return improveTypeFieldDescriptions(jsonSchema) ?? null;
     } catch (error) {
-      console.error('Error generating workflow JSON schema', error);
       return null;
     }
   }, []);

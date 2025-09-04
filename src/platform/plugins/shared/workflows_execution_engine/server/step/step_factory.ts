@@ -124,35 +124,6 @@ export class StepFactory {
           this.workflowTaskManager
         );
       case 'atomic':
-        // Check if this is an internal action (elasticsearch.* or kibana.*)
-        const atomicStepType = (step as any).configuration?.type;
-
-        if (atomicStepType && atomicStepType.startsWith('elasticsearch.')) {
-          this.workflowLogger.logInfo(`Creating Elasticsearch action step: ${atomicStepType}`, {
-            event: { action: 'internal-action-creation', outcome: 'success' },
-            tags: ['step-factory', 'elasticsearch', 'internal-action'],
-          });
-          return new ElasticsearchActionStepImpl(
-            step as any,
-            this.contextManager,
-            this.workflowRuntime,
-            this.workflowLogger
-          );
-        }
-
-        if (atomicStepType && atomicStepType.startsWith('kibana.')) {
-          this.workflowLogger.logInfo(`Creating Kibana action step: ${atomicStepType}`, {
-            event: { action: 'internal-action-creation', outcome: 'success' },
-            tags: ['step-factory', 'kibana', 'internal-action'],
-          });
-          return new KibanaActionStepImpl(
-            step as any,
-            this.contextManager,
-            this.workflowRuntime,
-            this.workflowLogger
-          );
-        }
-
         // Default atomic step (connector-based)
         return new AtomicStepImpl(
           step as any,
