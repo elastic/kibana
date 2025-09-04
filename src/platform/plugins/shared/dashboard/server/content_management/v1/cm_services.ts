@@ -405,29 +405,6 @@ export const dashboardCreateResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardChangeAccessModeOptionsSchema = schema.object(
-  {
-    accessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
-  },
-  { unknowns: 'forbid' }
-);
-
-export const dashboardChangeAccessModeResultSchema = schema.object(
-  {
-    objects: schema.arrayOf(
-      schema.object(
-        {
-          type: schema.string(),
-          id: schema.string(),
-          error: schema.maybe(apiError),
-        },
-        { unknowns: 'forbid' }
-      )
-    ),
-  },
-  { unknowns: 'forbid' }
-);
-
 export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {

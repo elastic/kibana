@@ -16,8 +16,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import { checkUserAccessControl } from '../../dashboard_app/access_control/check_user_access_control';
-import { checkGlobalManageControlPrivilege } from '../../dashboard_app/access_control/check_global_manage_control_privilege';
+import { getAccessControlClient } from '../../dashboard_app/access_control/get_access_control_client';
 import type { DashboardSearchOut } from '../../../server/content_management';
 import {
   DASHBOARD_CONTENT_ID,
@@ -224,14 +223,11 @@ export const useDashboardListingTable = ({
         },
       });
 
-      const [userRes, globalAuthRes] = await Promise.allSettled([
-        coreServices.security.authc.getCurrentUser(),
-        checkGlobalManageControlPrivilege(),
-      ]);
+      const accessControlClient = getAccessControlClient();
 
-      const user = userRes.status === 'fulfilled' ? userRes.value : undefined;
-      const isGloballyAuthorized =
-        globalAuthRes.status === 'fulfilled' ? globalAuthRes.value : false;
+      const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(
+        DASHBOARD_CONTENT_ID
+      );
 
       const searchEndTime = window.performance.now();
       const searchDuration = searchEndTime - searchStartTime;
@@ -246,13 +242,10 @@ export const useDashboardListingTable = ({
       const results = hits.map((hit) => {
         const canManageAccessControl =
           isGloballyAuthorized ||
-          (user &&
-            checkUserAccessControl({
-              accessControl: hit.accessControl,
-              createdBy: hit.createdBy,
-              userId: user.profile_uid,
-            })) ||
-          false;
+          accessControlClient.checkUserAccessControl({
+            accessControl: hit.accessControl,
+            createdBy: hit.createdBy,
+          });
 
         return toTableListViewSavedObject(hit, canManageAccessControl);
       });

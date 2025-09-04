@@ -8,10 +8,13 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { AuthenticatedUser, CoreAuthenticationService } from '@kbn/core/public';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type {
-  ChangeAccesModeParams,
+  ChangeAccesModeParameters,
   ChangeAccessModeResponse,
   CheckGlobalPrivilegeResponse,
+  CheckUserAccessControlParameters,
 } from './types';
 
 export interface AccessControlClientPublic {
@@ -19,11 +22,19 @@ export interface AccessControlClientPublic {
   changeAccessMode({
     objects,
     accessMode,
-  }: ChangeAccesModeParams): Promise<ChangeAccessModeResponse>;
+  }: ChangeAccesModeParameters): Promise<ChangeAccessModeResponse>;
+  checkUserAccessControl(params: CheckUserAccessControlParameters): boolean;
+  isDashboardInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean;
 }
 
 export class AccessControlClient implements AccessControlClientPublic {
-  constructor(private readonly deps: { http: HttpStart }) {}
+  private user: AuthenticatedUser | null = null;
+
+  constructor(private readonly deps: { http: HttpStart; coreAuth: CoreAuthenticationService }) {
+    this.deps.coreAuth.getCurrentUser()?.then((user) => {
+      this.user = user;
+    });
+  }
 
   async checkGlobalPrivilege(contentTypeId: string): Promise<CheckGlobalPrivilegeResponse> {
     const response = await this.deps.http.get<CheckGlobalPrivilegeResponse>(
@@ -34,14 +45,14 @@ export class AccessControlClient implements AccessControlClientPublic {
     );
 
     return {
-      isGloballyAuthorized: response.isGloballyAuthorized,
+      isGloballyAuthorized: response?.isGloballyAuthorized,
     };
   }
 
   async changeAccessMode({
     objects,
     accessMode,
-  }: ChangeAccesModeParams): Promise<ChangeAccessModeResponse> {
+  }: ChangeAccesModeParameters): Promise<ChangeAccessModeResponse> {
     const { result } = await this.deps.http.post<ChangeAccessModeResponse>(
       `/internal/access_control/change_access_mode`,
       {
@@ -52,5 +63,31 @@ export class AccessControlClient implements AccessControlClientPublic {
     return {
       result,
     };
+  }
+
+  checkUserAccessControl({ accessControl, createdBy }: CheckUserAccessControlParameters): boolean {
+    const userId = this.user?.profile_uid;
+
+    if (!userId) {
+      return false;
+    }
+
+    if (!accessControl?.owner) {
+      // New saved object
+      if (!createdBy) {
+        return true;
+      }
+      return userId === createdBy;
+    }
+
+    return userId === accessControl.owner;
+  }
+
+  isDashboardInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean {
+    return (
+      !accessControl ||
+      accessControl.accessMode === undefined ||
+      accessControl.accessMode === 'default'
+    );
   }
 }

@@ -16,11 +16,16 @@ export interface CheckGlobalPrivilegeResponse {
   isGloballyAuthorized: boolean;
 }
 
-export interface ChangeAccesModeParams {
+export interface ChangeAccesModeParameters {
   objects: Array<{ type: string; id: string }>;
   accessMode: SavedObjectAccessControl['accessMode'];
 }
 
 export interface ChangeAccessModeResponse {
   result: SavedObjectsChangeAccessControlResponse;
+}
+
+export interface CheckUserAccessControlParameters {
+  accessControl?: Partial<SavedObjectAccessControl>;
+  createdBy?: string;
 }

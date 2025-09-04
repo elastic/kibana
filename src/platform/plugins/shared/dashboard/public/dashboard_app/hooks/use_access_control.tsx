@@ -9,10 +9,8 @@
 
 import { useEffect, useState } from 'react';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { coreServices } from '../../services/kibana_services';
-import { checkGlobalManageControlPrivilege } from '../access_control/check_global_manage_control_privilege';
-import { isDashboardInEditAccessMode } from '../access_control/is_dashboard_in_edit_access_mode';
-import { checkUserAccessControl } from '../access_control/check_user_access_control';
+import { getAccessControlClient } from '../access_control/get_access_control_client';
+import { CONTENT_ID } from '../../../common/content_management';
 
 interface UseAccessControl {
   accessControl?: Partial<SavedObjectAccessControl>;
@@ -24,20 +22,17 @@ export const useAccessControl = ({ accessControl, createdBy }: UseAccessControl)
   const [isInEditAccessMode, setIsInEditAccessMode] = useState(false);
 
   useEffect(() => {
-    const isInEditMode = isDashboardInEditAccessMode(accessControl);
-    setIsInEditAccessMode(isInEditMode);
-  }, [accessControl]);
-
-  useEffect(() => {
     const checkUserPrivileges = async () => {
-      const user = await coreServices.security.authc.getCurrentUser();
-      const isGloballyAuthorized = await checkGlobalManageControlPrivilege();
-      const canManage = checkUserAccessControl({
+      const accessControlClient = getAccessControlClient();
+      const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(CONTENT_ID);
+      const canManage = accessControlClient.checkUserAccessControl({
         accessControl,
         createdBy,
-        userId: user?.profile_uid,
       });
       setCanManageAccessControl(isGloballyAuthorized || canManage);
+
+      const isInEditMode = accessControlClient.isDashboardInEditAccessMode(accessControl);
+      setIsInEditAccessMode(isInEditMode);
     };
 
     checkUserPrivileges();

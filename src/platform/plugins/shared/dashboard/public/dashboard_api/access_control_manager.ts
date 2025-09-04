@@ -9,9 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { AccessControlClient } from '@kbn/access-control';
+import { getAccessControlClient } from '../dashboard_app/access_control/get_access_control_client';
 import { CONTENT_ID } from '../../common/content_management';
-import { coreServices } from '../services/kibana_services';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 
 export function initializeAccessControlManager(
@@ -30,7 +29,7 @@ export function initializeAccessControlManager(
     }
 
     try {
-      const client = new AccessControlClient({ http: coreServices.http });
+      const client = getAccessControlClient();
       await client.changeAccessMode({
         objects: [{ id: dashboardId, type: CONTENT_ID }],
         accessMode: accessMode as SavedObjectAccessControl['accessMode'],

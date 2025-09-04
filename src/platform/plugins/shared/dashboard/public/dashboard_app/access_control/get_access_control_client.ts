@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import { AccessControlClient } from '@kbn/access-control';
+import { coreServices } from '../../services/kibana_services';
 
-export const isDashboardInEditAccessMode = (accessControl?: Partial<SavedObjectAccessControl>) =>
-  !accessControl ||
-  accessControl.accessMode === undefined ||
-  accessControl.accessMode === 'default';
+export const getAccessControlClient = () => {
+  const client = new AccessControlClient({
+    http: coreServices.http,
+    coreAuth: coreServices.security.authc,
+  });
+  return client;
+};

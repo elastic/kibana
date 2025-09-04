@@ -35,8 +35,6 @@ import type {
   DashboardUpdateOptions,
   DashboardUpdateOut,
   DashboardSearchOptions,
-  DashboardChangeAccessModeOptions,
-  DashboardChangeAccessModeOut,
 } from './latest';
 
 const getRandomColor = (): string => {
@@ -486,30 +484,5 @@ export class DashboardStorage {
     }
 
     return value;
-  }
-
-  async changeAccessMode(
-    ctx: StorageContext,
-    ids: string[],
-    options: DashboardChangeAccessModeOptions
-  ): Promise<DashboardChangeAccessModeOut> {
-    const soClient = await savedObjectClientFromRequest(ctx);
-
-    const soObjects = ids.map((id) => ({
-      type: DASHBOARD_SAVED_OBJECT_TYPE,
-      id,
-    }));
-
-    const result = await soClient.changeAccessMode(soObjects, {
-      accessMode: options.accessMode || 'default',
-    });
-
-    return {
-      objects: result.objects.map((obj) => ({
-        type: 'dashboard',
-        id: obj.id,
-        error: obj.error,
-      })),
-    };
   }
 }

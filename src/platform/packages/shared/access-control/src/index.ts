@@ -11,6 +11,7 @@ export { registerAccessControl } from './register_access_control';
 export { AccessControlClient, type AccessControlClientPublic } from './access_control_client';
 export type {
   CheckGlobalPrivilegeResponse,
-  ChangeAccesModeParams,
+  ChangeAccesModeParameters,
   ChangeAccessModeResponse,
+  CheckUserAccessControlParameters,
 } from './types';
