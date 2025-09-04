@@ -14,14 +14,13 @@ import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
-import type { FieldsGroupNames } from '../types';
+import type { FieldsGroupNames, AdditionalFieldGroups } from '../types';
 import {
   type FieldListGroups,
   type FieldsGroup,
   type FieldListItem,
   type OverrideFieldGroupDetails,
   ExistenceFetchStatus,
-  AdditionalFieldGroups,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
@@ -141,7 +140,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     const sortedFields = [...(allFieldsModified || [])].sort(sortFields);
 
     const groupedFields = {
-      ...getDefaultFieldGroups(),
+      ...getDefaultFieldGroups<T>(),
       ...groupBy(sortedFields, (field) => {
         if (!sortedSelectedFields && onSelectedFieldFilter && onSelectedFieldFilter(field)) {
           selectedFields.push(field);
@@ -187,10 +186,15 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       : [];
 
     // Recommended fields are not part of the data view fields list, so we need to check them separately
-    const recommendedFields = additionalFieldGroups?.recommendedFields || [];
+    // Filter recommended fields to only include those that are also available in availableFields
+    const allRecommendedFields = additionalFieldGroups?.recommendedFields ?? ([] as T[]);
+    const availableFieldNames = new Set(groupedFields.availableFields.map((field) => field.name));
+    const recommendedFields = allRecommendedFields.filter((field) =>
+      availableFieldNames.has(field.name)
+    );
 
     let fieldGroupDefinitions: FieldListGroups<T> = {
-      ...(recommendedFields
+      ...(recommendedFields.length > 0
         ? {
             RecommendedFields: {
               fields: recommendedFields,
@@ -447,13 +451,13 @@ function hasFieldDataByDefault(): boolean {
   return true;
 }
 
-function getDefaultFieldGroups() {
+function getDefaultFieldGroups<T extends FieldListItem>() {
   return {
-    specialFields: [],
-    availableFields: [],
-    emptyFields: [],
-    metaFields: [],
-    unmappedFields: [],
-    skippedFields: [],
+    specialFields: [] as T[],
+    availableFields: [] as T[],
+    emptyFields: [] as T[],
+    metaFields: [] as T[],
+    unmappedFields: [] as T[],
+    skippedFields: [] as T[],
   };
 }
