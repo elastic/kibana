@@ -77,7 +77,7 @@ describe('fieldWildcard', () => {
     it('logs and safely handles invalid glob inputs (non-string) without throwing', function () {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       // Pass a non-string value to trigger the try/catch path inside fieldWildcardMatcher
-      const matcher = fieldWildcardMatcher([{} as any], metaFields);
+      const matcher = fieldWildcardMatcher([null as unknown as string], metaFields);
       expect(() => matcher('foo')).not.toThrow();
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
