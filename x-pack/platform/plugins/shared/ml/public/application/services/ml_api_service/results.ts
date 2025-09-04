@@ -18,6 +18,7 @@ import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   GetAnomaliesTableDataResult,
+  ViewByResponse,
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
@@ -265,10 +266,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     swimLaneSeverity?: Array<{ min: number; max?: number }>;
   }) {
     const body = JSON.stringify(payload);
-    return httpService.http<{
-      results: Record<string, Record<number, number>>;
-      cardinality: number;
-    }>({
+    return httpService.http<ViewByResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/results/view_by/scores_by_bucket`,
       method: 'POST',
       body,
@@ -290,10 +288,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     swimLaneSeverity?: Array<{ min: number; max?: number }>;
   }) {
     const body = JSON.stringify(payload);
-    return httpService.http<{
-      results: Record<string, Record<number, number>>;
-      cardinality: number;
-    }>({
+    return httpService.http<ViewByResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/results/view_by/influencer_values_by_time`,
       method: 'POST',
       body,

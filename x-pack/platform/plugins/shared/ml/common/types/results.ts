@@ -153,3 +153,8 @@ export type InfluencersByFieldResponse = Record<
   string,
   Array<{ influencerFieldValue: string; maxAnomalyScore: number; sumAnomalyScore: number }>
 >;
+
+export interface ViewByResponse {
+  results: Record<string, Record<number, number>>;
+  cardinality: number;
+}
