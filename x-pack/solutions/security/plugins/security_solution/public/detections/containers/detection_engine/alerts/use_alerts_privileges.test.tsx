@@ -101,8 +101,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexMaintenance: null,
         hasIndexWrite: null,
         hasIndexUpdateDelete: null,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: false,
+        hasSiemCRUD: false,
+        hasSiemRead: false,
         isAuthenticated: null,
         loading: false,
       })
@@ -123,8 +123,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: false,
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
-        hasKibanaCRUD: true,
-        hasKibanaREAD: true,
+        hasSiemCRUD: true,
+        hasSiemRead: true,
         isAuthenticated: false,
         loading: false,
       })
@@ -149,8 +149,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: true,
-        hasKibanaREAD: true,
+        hasSiemCRUD: true,
+        hasSiemRead: true,
         isAuthenticated: true,
         loading: false,
       })
@@ -172,15 +172,15 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: true,
-        hasKibanaREAD: true,
+        hasSiemCRUD: true,
+        hasSiemRead: true,
         isAuthenticated: true,
         loading: false,
       })
     );
   });
 
-  test('returns "hasKibanaCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
+  test('returns "hasSiemCRUD" as false if user does not have SIEM Kibana "all" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
       draft.siemPrivileges = { crud: false, read: true };
@@ -196,15 +196,15 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: true,
+        hasSiemCRUD: false,
+        hasSiemRead: true,
         isAuthenticated: true,
         loading: false,
       })
     );
   });
 
-  test('returns "hasKibanaREAD" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
+  test('returns "hasSiemRead" as false if user does not have at least SIEM Kibana "read" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
       draft.siemPrivileges = { crud: false, read: false };
@@ -220,8 +220,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: true,
         hasIndexWrite: true,
         hasIndexUpdateDelete: true,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: false,
+        hasSiemCRUD: false,
+        hasSiemRead: false,
         isAuthenticated: true,
         loading: false,
       })
