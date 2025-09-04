@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ProcessorType } from '@kbn/streamlang';
+import { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
 import type { ProcessorFormState } from '../types';
@@ -32,7 +33,7 @@ type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
 export const ProcessorTypeSelector = ({
   disabled = false,
 }: Pick<EuiSuperSelectProps, 'disabled'>) => {
-  const { core, isServerless } = useKibana();
+  const { core } = useKibana();
   const getEnrichmentState = useGetStreamEnrichmentState();
 
   const { reset } = useFormContext();
@@ -42,6 +43,9 @@ export const ProcessorTypeSelector = ({
   });
 
   const processorType = useWatch<{ action: ProcessorType }>({ name: 'action' });
+  const isWired = useStreamEnrichmentSelector((snapshot) =>
+    Streams.WiredStream.GetResponse.is(snapshot.context.definition)
+  );
 
   const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
@@ -54,10 +58,7 @@ export const ProcessorTypeSelector = ({
     reset(formState);
   };
 
-  const selectorOptions = React.useMemo(
-    () => getProcessorTypeSelectorOptions(isServerless),
-    [isServerless]
-  );
+  const selectorOptions = React.useMemo(() => getProcessorTypeSelectorOptions(isWired), [isWired]);
 
   return (
     <EuiFormRow
@@ -66,7 +67,7 @@ export const ProcessorTypeSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(core.docLinks, isServerless)(processorType)}
+      helpText={getProcessorDescription(core.docLinks, isWired)(processorType)}
     >
       <EuiSuperSelect
         data-test-subj="streamsAppProcessorTypeSelector"
@@ -85,9 +86,7 @@ export const ProcessorTypeSelector = ({
   );
 };
 
-const getAvailableProcessors: (isServerless: boolean) => Partial<TAvailableProcessors> = (
-  isServerless
-) => ({
+const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors> = (isWired) => ({
   date: {
     type: 'date',
     inputDisplay: 'Date',
@@ -178,7 +177,7 @@ const getAvailableProcessors: (isServerless: boolean) => Partial<TAvailableProce
     },
   },
   ...configDrivenProcessors,
-  ...(isServerless
+  ...(isWired
     ? {}
     : {
         manual_ingest_pipeline: {
@@ -195,12 +194,12 @@ const getAvailableProcessors: (isServerless: boolean) => Partial<TAvailableProce
 });
 
 const getProcessorDescription =
-  (docLinks: DocLinksStart, isServerless: boolean) => (type: ProcessorType) => {
-    return getAvailableProcessors(isServerless)[type]?.getDocUrl(docLinks);
+  (docLinks: DocLinksStart, isWired: boolean) => (type: ProcessorType) => {
+    return getAvailableProcessors(isWired)[type]?.getDocUrl(docLinks);
   };
 
-const getProcessorTypeSelectorOptions = (isServerless: boolean) =>
-  Object.values(getAvailableProcessors(isServerless)).map(({ type, inputDisplay }) => ({
+const getProcessorTypeSelectorOptions = (isWired: boolean) =>
+  Object.values(getAvailableProcessors(isWired)).map(({ type, inputDisplay }) => ({
     value: type,
     inputDisplay,
   }));
