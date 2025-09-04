@@ -79,8 +79,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
     const totalActiveSocketsObservable = meter.createObservableUpDownCounter(
       'elasticsearch.client.sockets.active',
       {
-        description:
-          'Elasticsearch Clients: Total number of active sockets (sum for all agents, all nodes, all connections)',
+        description: 'Elasticsearch Clients: Number of active sockets',
         unit: '1',
         valueType: ValueType.INT,
       }
@@ -88,8 +87,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
     const totalIdleSocketsObservable = meter.createObservableUpDownCounter(
       'elasticsearch.client.sockets.idle',
       {
-        description:
-          'Elasticsearch Clients: Total number of available idle sockets (sum for all agents, all nodes, all connections)',
+        description: 'Elasticsearch Clients: Number of available idle sockets',
         unit: '1',
         valueType: ValueType.INT,
       }
@@ -97,16 +95,15 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
     const totalQueuedRequestsObservable = meter.createObservableUpDownCounter(
       'elasticsearch.client.requests.queued',
       {
-        description:
-          'Elasticsearch Clients: Total number of queued requests (sum for all agents, all nodes, all connections)',
+        description: 'Elasticsearch Clients: Number of queued requests',
         unit: '1',
         valueType: ValueType.INT,
       }
     );
     const maxTotalSocketsObservable = meter.createObservableUpDownCounter(
-      'elasticsearch.client.sockets.max_total',
+      'elasticsearch.client.sockets.max_open',
       {
-        description: 'Elasticsearch Clients: Maximum number of sockets allowed to each client.',
+        description: 'Elasticsearch Clients: Maximum number of sockets allowed to each agent.',
         unit: '1',
         valueType: ValueType.INT,
       }
@@ -114,8 +111,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
     const maxIdleSocketsObservable = meter.createObservableUpDownCounter(
       'elasticsearch.client.sockets.max_idle',
       {
-        description:
-          'Elasticsearch Clients: Maximum number of idle sockets allowed to each client.',
+        description: 'Elasticsearch Clients: Maximum number of idle sockets allowed to each agent.',
         unit: '1',
         valueType: ValueType.INT,
       }
@@ -131,25 +127,58 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
 
     meter.addBatchObservableCallback(
       (result) => {
-        let totalActiveSockets = 0;
-        let totalIdleSockets = 0;
-        let totalQueuedRequests = 0;
-        let maxMaxSockets = 0;
-        let maxMaxIdleSockets = 0;
-        this.agents.forEach(
-          ({ requests = {}, sockets = {}, freeSockets = {}, maxTotalSockets, maxFreeSockets }) => {
-            totalQueuedRequests += Object.values(requests).flat().length;
-            totalActiveSockets += Object.values(sockets).flat().length;
-            totalIdleSockets += Object.values(freeSockets).flat().length;
-            maxMaxSockets = Math.max(maxMaxSockets, maxTotalSockets);
-            maxMaxIdleSockets = Math.max(maxMaxIdleSockets, maxFreeSockets);
+        [...this.agents].forEach((agent, index) => {
+          const {
+            requests = {},
+            sockets = {},
+            freeSockets = {},
+            maxTotalSockets,
+            maxFreeSockets,
+          } = agent;
+          const isHttps = agent instanceof HttpsAgent;
+          const agentName = isHttps ? `https-${index}` : `http-${index}`;
+
+          const nodesMetrics = new Map<string, { queued: number; active: number; idle: number }>();
+
+          function getOrCreateNodeMetrics(node: string) {
+            let nodeMetric = nodesMetrics.get(node);
+            if (!nodeMetric) {
+              nodeMetric = { queued: 0, active: 0, idle: 0 };
+              nodesMetrics.set(node, nodeMetric);
+            }
+            return nodeMetric;
           }
-        );
-        result.observe(totalActiveSocketsObservable, totalActiveSockets);
-        result.observe(totalIdleSocketsObservable, totalIdleSockets);
-        result.observe(totalQueuedRequestsObservable, totalQueuedRequests);
-        result.observe(maxTotalSocketsObservable, maxMaxSockets);
-        result.observe(maxIdleSocketsObservable, maxMaxIdleSockets);
+
+          Object.entries(requests).forEach(([node, reqs = []]) => {
+            const nodeMetric = getOrCreateNodeMetrics(node);
+            nodeMetric.queued += reqs.length;
+          });
+          Object.entries(sockets).map(([node, reqs = []]) => {
+            const nodeMetric = getOrCreateNodeMetrics(node);
+            nodeMetric.active += reqs.length;
+          });
+          Object.entries(freeSockets).map(([node, reqs = []]) => {
+            const nodeMetric = getOrCreateNodeMetrics(node);
+            nodeMetric.idle += reqs.length;
+          });
+
+          nodesMetrics.forEach(({ queued, active, idle }, node) => {
+            const attributes = {
+              'elasticsearch.client.agent': agentName,
+              'elasticsearch.client.node': node,
+            };
+            result.observe(totalQueuedRequestsObservable, queued, attributes);
+            result.observe(totalActiveSocketsObservable, active, attributes);
+            result.observe(totalIdleSocketsObservable, idle, attributes);
+          });
+
+          result.observe(maxTotalSocketsObservable, maxTotalSockets, {
+            'elasticsearch.client.agent': agentName,
+          });
+          result.observe(maxIdleSocketsObservable, maxFreeSockets, {
+            'elasticsearch.client.agent': agentName,
+          });
+        });
         result.observe(numberOfAgentsObservable, this.agents.size);
       },
       [
