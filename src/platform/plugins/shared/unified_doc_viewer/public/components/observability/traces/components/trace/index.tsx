@@ -28,6 +28,10 @@ const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.d
   defaultMessage: 'Timeline of all spans in the trace, including their duration and hierarchy.',
 });
 
+const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
+  defaultMessage: 'Trace',
+});
+
 export interface TraceProps {
   dataView: DocViewRenderProps['dataView'];
   traceId: string;
@@ -72,9 +76,7 @@ export const Trace = ({ traceId, serviceName, docId, dataView }: TraceProps) => 
     <>
       <ContentFrameworkSection
         id={'traceSection'}
-        title={i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
-          defaultMessage: 'Trace',
-        })}
+        title={sectionTitle}
         description={sectionTip}
         actions={sectionActions}
       >
@@ -83,7 +85,7 @@ export const Trace = ({ traceId, serviceName, docId, dataView }: TraceProps) => 
             padding-inline: ${euiTheme.size.base};
           `}
         >
-          <EmbeddableRenderer
+          <EmbeddableRenderer // TODO check what might be happening with the content being hidden if there's no element above
             type="APM_TRACE_WATERFALL_EMBEDDABLE"
             getParentApi={getParentApi}
             hidePanelChrome
