@@ -11,6 +11,7 @@ describe('Suggestion Schemas and Types', () => {
   describe('suggestionContextRt', () => {
     it('should validate a valid context', () => {
       const validContext = {
+        spaceId: 'default',
         'service.name': ['my-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
@@ -22,12 +23,15 @@ describe('Suggestion Schemas and Types', () => {
     });
 
     it('should allow optional fields to be omitted', () => {
-      const validContext = {};
+      const validContext = {
+        spaceId: 'default',
+      };
       expect(() => suggestionContextRt.parse(validContext)).not.toThrow();
     });
 
     it('should throw an error for invalid fields', () => {
       const invalidContext = {
+        spaceId: 123, // Invalid type
         'service.name': 123, // Invalid type
         timeRange: {
           from: '2023-01-01T00:00:00Z',
