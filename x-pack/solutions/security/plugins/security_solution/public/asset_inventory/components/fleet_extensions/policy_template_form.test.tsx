@@ -183,7 +183,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: { ...policy, name: `${policy.name}1` },
       });
     });
@@ -202,7 +202,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: { ...policy, description: `${policy.description}1` },
       });
     });
@@ -284,7 +284,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy,
       });
     });
@@ -292,7 +292,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments cspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+      isValid: undefined,
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => {
@@ -320,13 +320,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: true,
+      isValid: undefined,
       updatedPolicy: updatedPolicy2,
     });
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+      isValid: undefined,
       updatedPolicy: updatedPolicy2,
     });
   });
@@ -398,7 +398,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: newPolicy,
       });
     });
@@ -433,7 +433,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
       rerender(
@@ -443,7 +443,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       policy = getAssetPolicy(policy, CLOUDBEAT_AWS, { 'aws.secret_access_key': { value: 'b' } });
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
     });
@@ -477,7 +477,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy,
       });
 
@@ -492,7 +492,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: updatedPolicy2,
       });
 
@@ -507,7 +507,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: updatedPolicy3,
       });
     });
@@ -543,7 +543,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
 
@@ -558,7 +558,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
     });
@@ -620,7 +620,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         'gcp.credentials.file': { value: 'b' },
       });
       expect(onChange).toHaveBeenCalledWith({
-        isValid: true,
+        isValid: undefined,
         isExtensionLoaded: true,
         updatedPolicy: policy,
       });
@@ -695,7 +695,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
     });
@@ -735,7 +735,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
 
@@ -750,7 +750,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
 
@@ -765,7 +765,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
     });
@@ -1011,7 +1011,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
 
@@ -1026,7 +1026,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
 
@@ -1041,7 +1041,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
 
@@ -1056,7 +1056,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: undefined,
         updatedPolicy: policy,
       });
     });
