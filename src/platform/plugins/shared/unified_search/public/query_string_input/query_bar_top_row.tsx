@@ -550,7 +550,7 @@ export const QueryBarTopRow = React.memo(
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
-          compressed={shouldShowDatePickerAsBadge()}
+          compressed
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
@@ -571,7 +571,7 @@ export const QueryBarTopRow = React.memo(
             iconType="cross"
             aria-label={buttonLabelCancel}
             onClick={onClickCancelButton}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            size="s"
             data-test-subj="queryCancelButton"
             color="text"
             display="base"
@@ -586,7 +586,7 @@ export const QueryBarTopRow = React.memo(
           iconType="cross"
           aria-label={buttonLabelCancel}
           onClick={onClickCancelButton}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          size="s"
           data-test-subj="queryCancelButton"
           color="text"
         >
@@ -620,8 +620,8 @@ export const QueryBarTopRow = React.memo(
               isDisabled={isDateRangeInvalid || props.isDisabled}
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-              color={props.isDirty ? 'success' : 'primary'}
+              size="s"
+              color={props.isDirty ? 'success' : 'text'}
               fill={false}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
@@ -630,6 +630,7 @@ export const QueryBarTopRow = React.memo(
                 delay: 'long',
                 position: 'bottom',
               }}
+              css={css({ minInlineSize: 'initial !important' })}
             >
               {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
             </EuiSuperUpdateButton>
@@ -679,7 +680,7 @@ export const QueryBarTopRow = React.memo(
               filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
               buttonProps={{
-                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
+                size: 's',
                 display: 'empty',
               }}
               isDisabled={props.isDisabled}
@@ -697,7 +698,7 @@ export const QueryBarTopRow = React.memo(
             <FilterButtonGroup
               items={[props.prepend, renderAddButton()]}
               attached={renderFilterMenuOnly()}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+              size="s"
             />
           </EuiFlexItem>
         )
@@ -863,5 +864,10 @@ const inputStringStyles = {
       '.euiDatePopoverButton-isInvalid': {
         backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
       },
+
+      '.euiFormControlLayout, .euiFormControlLayout .euiButtonEmpty, .euiFormControlLayout .euiButtonIcon':
+        {
+          blockSize: euiTheme.size.xl,
+        },
     }),
 };

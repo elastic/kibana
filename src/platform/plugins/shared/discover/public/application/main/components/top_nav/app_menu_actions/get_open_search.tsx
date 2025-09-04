@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { AppMenuActionPrimary } from '@kbn/discover-utils';
+import type { AppMenuActionSecondary } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { OpenSearchPanel } from '../open_search_panel';
@@ -17,15 +17,14 @@ export const getOpenSearchAppMenuItem = ({
   onOpenSavedSearch,
 }: {
   onOpenSavedSearch: (savedSearchId: string) => void;
-}): AppMenuActionPrimary => {
+}): AppMenuActionSecondary => {
   return {
     id: AppMenuActionId.open,
-    type: AppMenuActionType.primary,
+    type: AppMenuActionType.secondary,
     controlProps: {
       label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
-        defaultMessage: 'Open session',
+        defaultMessage: 'Open',
       }),
-      iconType: 'folderOpen',
       testId: 'discoverOpenButton',
       onClick: ({ onFinishAction }) => {
         return <OpenSearchPanel onClose={onFinishAction} onOpenSavedSearch={onOpenSavedSearch} />;
