@@ -33,7 +33,6 @@ export type ActionsFromReducers<T extends ReducersMap<any>> = {
     : (payload: ExtractPayload<T[K]>) => void;
 };
 
-// Improved reducers map with better constraint
 export interface ReducersMap<State> {
   [K: string]: StoreReducer<State, any>;
 }
@@ -68,15 +67,15 @@ export const useCreateStore = <S extends Record<string, unknown>, R extends Redu
   const createActions = useCallback(() => {
     return Object.keys(reducers).reduce((acc, key) => {
       const typedKey = key as keyof R;
-      acc[typedKey] = ((payload?: any) => {
+      acc[typedKey] = ((payload?: unknown) => {
         dispatch({ type: key, payload });
-      }) as any;
+      }) satisfies ActionsFromReducers<R>[keyof R];
       return acc;
     }, {} as ActionsFromReducers<R>);
   }, [reducers, dispatch]);
 
   // stable reference for store actions
-  const actionsRef = useRef<ActionsFromReducers<R>>(createActions());
+  const actionsRef = useRef(createActions());
 
   return {
     get state() {
