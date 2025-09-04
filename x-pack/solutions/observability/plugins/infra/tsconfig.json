@@ -123,7 +123,9 @@
     "@kbn/apm-types",
     "@kbn/ml-common-types",
     "@kbn/ml-embeddables",
-    "@kbn/ml-ui-actions"
+    "@kbn/ml-ui-actions",
+    "@kbn/ml-locator",
+    "@kbn/ml-node-checks"
   ],
   "exclude": ["target/**/*"]
 }
