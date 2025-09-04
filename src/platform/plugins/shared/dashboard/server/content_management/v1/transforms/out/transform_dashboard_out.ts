@@ -14,6 +14,8 @@ import { transformControlGroupOut } from './transform_control_group_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
+import { ControlsGroupState } from '@kbn/controls-schemas';
+import { Reference } from '@kbn/content-management-utils';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
@@ -41,8 +43,18 @@ export function transformDashboardOut(
   }
 
   // try to maintain a consistent (alphabetical) order of keys
+
+  let controlGroupOut;
+  if (controlGroupInput) {
+    controlGroupOut = {
+      controls: transformControlGroupOut(controlGroupInput).controls.map((control) => {
+        return injectControlReferences(control.id!, control, references ?? []);
+      }),
+    };
+  }
+  console.log('HERE!', controlGroupOut);
   return {
-    ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
+    ...(controlGroupOut && { controlGroupInput: controlGroupOut }),
     ...(description && { description }),
     ...(kibanaSavedObjectMeta && {
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
@@ -60,5 +72,33 @@ export function transformDashboardOut(
     ...(timeTo && { timeTo }),
     title,
     ...(version && { version }),
+  };
+}
+
+const injectControlReferences = (
+  id: string,
+  state: Omit<ControlsGroupState['controls'][number], 'dataViewId'>,
+  references: Reference[]
+): ControlsGroupState['controls'][number] => {
+  const deserializedState = {
+    dataViewId: '',
+    ...state,
+  };
+  references.forEach((reference) => {
+    const referenceName = reference.name;
+    const { controlId } = parseReferenceName(referenceName);
+    if (controlId === id) deserializedState.dataViewId = reference.id;
+  });
+  return deserializedState;
+};
+
+const REFERENCE_NAME_PREFIX = 'controlGroup_';
+
+export function parseReferenceName(referenceName: string) {
+  return {
+    controlId: referenceName.substring(
+      REFERENCE_NAME_PREFIX.length,
+      referenceName.lastIndexOf(':')
+    ),
   };
 }

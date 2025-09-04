@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
+import { flow, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ControlsGroupState } from '@kbn/controls-schemas';
@@ -19,43 +19,21 @@ export function transformControlGroupIn(
   if (!controlGroupInput) {
     return;
   }
-  return flow(
-    // transformControlStyle,
-    // transformShowApplySelections,
-    // transformIgnoreParentSettings,
-    transformPanelsJSON
-  )(controlGroupInput);
+  return flow(transformPanelsJSON)(controlGroupInput);
 }
-
-// function transformControlStyle(controlGroupInput: ControlsGroupState) {
-//   const { labelPosition, ...restControlGroupInput } = controlGroupInput;
-//   return {
-//     ...restControlGroupInput,
-//     controlStyle: labelPosition,
-//   };
-// }
-
-// function transformShowApplySelections(controlGroupInput: ControlsGroupState) {
-//   const { autoApplySelections, ...restControlGroupInput } = controlGroupInput;
-//   return {
-//     ...restControlGroupInput,
-//     showApplySelections: !autoApplySelections,
-//   };
-// }
-
-// function transformIgnoreParentSettings(controlGroupInput: ControlsGroupState) {
-//   const { ignoreParentSettings, ...restControlGroupInput } = controlGroupInput;
-//   return {
-//     ...restControlGroupInput,
-//     ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings),
-//   };
-// }
 
 function transformPanelsJSON(controlGroupInput: ControlsGroupState) {
   const { controls, ...restControlGroupInput } = controlGroupInput;
   const updatedControls = Object.fromEntries(
-    controls.map(({ controlConfig, id = uuidv4(), ...restOfControl }) => {
-      return [id, { ...restOfControl, explicitInput: controlConfig }];
+    controls.map(({ id = uuidv4(), ...restOfControl }, index) => {
+      return [
+        id,
+        {
+          order: index,
+          type: restOfControl.type,
+          explicitInput: { ...omit(restOfControl, ['order', 'type', 'dataViewId']) },
+        },
+      ];
     })
   );
   return {

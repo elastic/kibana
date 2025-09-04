@@ -8,15 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { optionsListControlSchema } from './options_list_schema';
-import { rangeSliderControlSchema } from './range_slider_schema';
+import { dataControlSchema } from './control_schema';
 
-export const controlsGroupSchema = schema.object({
-  controls: schema.arrayOf(
-    schema.oneOf([optionsListControlSchema, rangeSliderControlSchema]), // order will be determined by array
-    {
-      defaultValue: [],
-      meta: { description: 'An array of control panels and their state in the control group.' },
-    }
-  ),
+const rangeValueSchema = schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 });
+
+export const rangeSliderControlSchema = dataControlSchema.extends({
+  value: schema.maybe(rangeValueSchema),
+  step: schema.maybe(schema.number()),
 });

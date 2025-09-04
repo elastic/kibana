@@ -12,20 +12,16 @@ import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-constants';
 
 export const controlSchema = schema.object(
   {
+    id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
     title: schema.maybe(
       schema.string({ meta: { description: 'A human-readable title for the control' } })
+    ),
+    description: schema.maybe(
+      schema.string({ meta: { description: 'A description for the control' } })
     ),
   },
   { unknowns: 'allow' }
 );
-
-export const pinnedControlSchema = controlSchema.extends({
-  order: schema.number({
-    meta: {
-      description: 'The order of the control panel in the control group.',
-    },
-  }),
-});
 
 export const dataControlSchema = controlSchema.extends({
   dataViewId: schema.string({

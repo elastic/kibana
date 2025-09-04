@@ -9,7 +9,7 @@
 
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { flow } from 'lodash';
+import { flow, omit } from 'lodash';
 
 /**
  * Transform functions for serialized controls state.
@@ -19,8 +19,7 @@ export const transformControlsState: (
 ) => ControlsGroupState['controls'] = flow(
   JSON.parse,
   transformControlObjectToArray,
-  // transformControlsWidthAuto,
-  // transformControlsSetDefaults,
+  dropControlDisplayProperties,
   transformControlProperties
 );
 
@@ -29,32 +28,19 @@ export function transformControlObjectToArray(controls: Record<string, Serializa
 }
 
 /**
- * Some controls were serialized with width set to 'auto'. This function will transform those controls
- * to have the default width and grow set to true. See @link https://github.com/elastic/kibana/issues/211113.
+ * With controls as a panel, the `width` and `grow` attributes are no longer relavant
  */
-// export function transformControlsWidthAuto(controls: SerializableRecord[]) {
-//   return controls.map((control) => {
-//     if (control.width === 'auto') {
-//       return { ...control, width: DEFAULT_CONTROL_WIDTH, grow: true };
-//     }
-//     return control;
-//   });
-// }
-
-// TODO We may want to remove setting defaults in the future
-// export function transformControlsSetDefaults(controls: SerializableRecord[]) {
-//   return controls.map((control) => ({
-//     grow: DEFAULT_CONTROL_GROW,
-//     width: DEFAULT_CONTROL_WIDTH,
-//     ...control,
-//   }));
-// }
+export function dropControlDisplayProperties(controls: SerializableRecord[]) {
+  return controls.map((control) => {
+    return { ...omit(control, ['width', 'grow']) };
+  });
+}
 
 export function transformControlProperties(controls: SerializableRecord[]): SerializableRecord[] {
   return controls.map(({ explicitInput, id, type, order }) => ({
-    controlConfig: explicitInput,
     id,
     order,
     type,
+    ...(explicitInput as SerializableRecord),
   }));
 }

@@ -10,7 +10,7 @@
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import {
   transformControlObjectToArray,
-  transformControlsWidthAuto,
+  dropControlDisplayProperties,
   transformControlProperties,
   transformControlsSetDefaults,
   transformControlsState,
@@ -41,7 +41,7 @@ describe('control_state', () => {
   describe('transformControlsWidthAuto', () => {
     it('should transform controls with width auto to default width and grow = true', () => {
       const controlsArray = transformControlObjectToArray(mockControls);
-      const result = transformControlsWidthAuto(controlsArray);
+      const result = dropControlDisplayProperties(controlsArray);
       expect(result).toHaveProperty('0.width', DEFAULT_CONTROL_WIDTH);
       expect(result).toHaveProperty('0.grow', true);
     });
