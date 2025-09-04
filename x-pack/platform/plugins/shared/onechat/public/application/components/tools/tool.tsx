@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -61,18 +62,18 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
   const form = useEsqlToolForm();
-  const { reset, formState, watch } = form;
-  const { errors, isDirty } = formState;
+  const { reset, formState, watch, handleSubmit } = form;
+  const { errors } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
 
   const currentToolId = watch('toolId');
 
-  const handleClear = useCallback(() => {
-    reset();
-  }, [reset]);
+  const handleCancel = useCallback(() => {
+    navigateToOnechatUrl(appPaths.tools.list);
+  }, [navigateToOnechatUrl]);
 
   const handleSave = useCallback(
-    async (data: EsqlToolFormData) => {
+    async (data: EsqlToolFormData, shouldRedirect = true) => {
       if (mode === ToolFormMode.Edit) {
         await saveTool(transformEsqlFormDataForUpdate(data));
       } else {
@@ -81,6 +82,18 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       navigateToOnechatUrl(appPaths.tools.list);
     },
     [mode, saveTool, navigateToOnechatUrl]
+  );
+
+  const handleTestTool = useCallback(() => {
+    setShowTestFlyout(true);
+  }, []);
+
+  const handleSaveAndTest = useCallback(
+    async (data: EsqlToolFormData) => {
+      await handleSave(data, false);
+      handleTestTool();
+    },
+    [handleSave, handleTestTool]
   );
 
   useEffect(() => {
@@ -98,12 +111,16 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const saveButton = (
     <EuiButton
+      size="s"
       type="submit"
       fill
-      fullWidth
+      iconType="save"
       form={esqlToolFormId}
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
+      css={css`
+        width: 124px;
+      `}
     >
       {labels.tools.saveButtonLabel}
     </EuiButton>
@@ -111,20 +128,14 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const saveAndTestButton = (
     <EuiButton
-      fill
-      onClick={async () => {
-        const formData = form.getValues();
-        if (mode === ToolFormMode.Edit) {
-          await saveTool(transformEsqlFormDataForUpdate(formData));
-        } else {
-          await saveTool(transformEsqlFormDataForCreate(formData));
-        }
-        if (currentToolId) {
-          setShowTestFlyout(true);
-        }
-      }}
+      size="s"
+      iconType="eye"
+      onClick={handleSubmit(handleSaveAndTest)}
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
+      css={css`
+        width: 124px;
+      `}
     >
       {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveAndTestButtonLabel', {
         defaultMessage: 'Save & test',
@@ -134,11 +145,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const testButton = (
     <EuiButton
-      fill
-      onClick={() => {
-        setShowTestFlyout(true);
-      }}
+      size="s"
+      onClick={handleTestTool}
       disabled={Object.keys(errors).length > 0}
+      iconType="eye"
+      css={css`
+        width: 124px;
+      `}
     >
       {i18n.translate('xpack.onechat.tools.esqlToolFlyout.testButtonLabel', {
         defaultMessage: 'Test',
@@ -184,14 +197,19 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           css={css`
             z-index: ${euiTheme.levels.header};
           `}
+          paddingSize="m"
+          restrictWidth={false}
         >
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiButton onClick={handleClear}>{labels.tools.clearButtonLabel}</EuiButton>
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="s" iconType="cross" onClick={handleCancel}>
+                {labels.tools.cancelButtonLabel}
+              </EuiButtonEmpty>
             </EuiFlexItem>
-            {!isDirty && <EuiFlexItem>{testButton}</EuiFlexItem>}
-            {isDirty && <EuiFlexItem>{saveAndTestButton}</EuiFlexItem>}
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {mode === ToolFormMode.Edit ? testButton : saveAndTestButton}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               {Object.keys(errors).length > 0 ? (
                 <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>
                   {saveButton}

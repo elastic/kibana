@@ -28,8 +28,8 @@ export const labels = {
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
-    clearButtonLabel: i18n.translate('xpack.onechat.tools.clearButtonLabel', {
-      defaultMessage: 'Clear',
+    cancelButtonLabel: i18n.translate('xpack.onechat.tools.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
     }),
     saveButtonTooltip: i18n.translate('xpack.onechat.tools.saveButtonTooltip', {
       defaultMessage: 'Resolve all form errors to save.',
