@@ -56,12 +56,12 @@ export const getSharedFieldConfigurations = (
             )}
           </HighlightField>
         </>
-      ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
+      ),
     },
     [AT_TIMESTAMP]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.timestamp.title', {
         defaultMessage: 'Start time',
-      }), // TODO check timestamp formatter, something is happening here
+      }),
       formatter: (value: unknown) => <Timestamp timestamp={value as number} size="xs" />,
     },
     [HTTP_RESPONSE_STATUS_CODE]: {
@@ -73,7 +73,7 @@ export const getSharedFieldConfigurations = (
     [TRANSACTION_ID]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.transactionId.title', {
         defaultMessage: 'Transaction ID',
-      }), // TODO add link? Same question as in the trace section.
+      }),
     },
   };
 };
@@ -85,12 +85,12 @@ export const getSpanFieldConfigurations = (
     [SPAN_ID]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.spanId.title', {
         defaultMessage: 'Span ID',
-      }), // TODO add link?
+      }),
     },
     [SPAN_NAME]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.spanName.title', {
         defaultMessage: 'Span Name',
-      }), // TODO add link?
+      }),
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE]: {
       title: i18n.translate(
@@ -111,7 +111,7 @@ export const getSpanFieldConfigurations = (
             />
           )}
         </HighlightField>
-      ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
+      ),
       description: i18n.translate(
         'unifiedDocViewer.observability.traces.spanDestinationServiceResource.description',
         {
@@ -175,7 +175,7 @@ export const getTransactionFieldConfigurations = (
             />
           )}
         </HighlightField>
-      ), // TODO should I update the link to go to discover instead of APM? (same as the span links links)
+      ),
     },
     [TRANSACTION_DURATION]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.transactionDuration.title', {
