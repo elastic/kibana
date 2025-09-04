@@ -12,19 +12,21 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/suggestion/v1';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SYNTHETICS_SUGGESTION_COMPONENT_ID } from '../../common/constants/cases';
-import { syntheticsMonitorSavedObjectType } from '../../common/types/saved_objects';
 import type {
-  EncryptedSyntheticsMonitor,
   EncryptedSyntheticsMonitorAttributes,
   OverviewStatusMetaData,
 } from '../../common/runtime_types';
 import type { SyntheticsSuggestion } from '../../common/types';
 import type { SyntheticsAggregationsResponse } from './types';
+import { getSavedObjectKqlFilter } from '../routes/common';
+import { MonitorConfigRepository } from '../services/monitor_config_repository';
 
-export function getMonitorByServiceName(
+export function getMonitors(
   coreStart: CoreStart,
   logger: Logger,
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart,
   locatorClient?: LocatorClient
 ): SuggestionType<SyntheticsSuggestion> {
   return {
@@ -76,7 +78,7 @@ export function getMonitorByServiceName(
             aggs: {
               by_monitor: {
                 terms: {
-                  field: 'monitor.name',
+                  field: 'config_id',
                   // TODO: TBD
                   // it limits suggestions to 5 monitors
                   size: 5,
@@ -99,7 +101,6 @@ export function getMonitorByServiceName(
                           'monitor.name',
                           'monitor.type',
                           'monitor.status',
-                          'status',
                           'observer.geo.name',
                           'observer.name',
                           'service.name',
@@ -108,7 +109,6 @@ export function getMonitorByServiceName(
                           'url.full',
                           '@timestamp',
                           'meta.space_id',
-                          'type',
                         ],
                       },
                     },
@@ -125,26 +125,29 @@ export function getMonitorByServiceName(
             logger.debug(`No Synthetics monitors found for service ${serviceNames.join(', ')}`);
             return { suggestions: [] };
           }
-
           const savedObjectsAttrHash: Record<string, EncryptedSyntheticsMonitorAttributes> = {};
-          const bulkGetRequests: Array<{ id: string; type: string }> = [];
+          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+          const monitorConfigRepository = new MonitorConfigRepository(
+            scopedSavedObjectsClient,
+            encryptedSavedObjectsClient
+          );
+          const configIdsFilter = getSavedObjectKqlFilter({
+            field: 'config_id',
+            values: monitors.map((mon) => mon.latest_run.hits.hits[0]._source.config_id),
+          });
 
-          for (const mon of monitors) {
-            bulkGetRequests.push({
-              id: mon.latest_run.hits.hits[0]._source.config_id,
-              type: syntheticsMonitorSavedObjectType,
+          const resultMonitorsConfigWithLegacy =
+            await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+              filter: configIdsFilter,
+              perPage: 10,
             });
-          }
 
-          const monitorsSavedObject =
-            await scopedSavedObjectsClient.bulkGet<EncryptedSyntheticsMonitor>(bulkGetRequests);
-
-          if (bulkGetRequests.length === 0) {
+          if (resultMonitorsConfigWithLegacy.total === 0) {
             logger.error(`No Synthetics SavedObjects found for the related tests runs`);
             return { suggestions: [] };
           }
 
-          for (const savedObj of monitorsSavedObject.saved_objects) {
+          for (const savedObj of resultMonitorsConfigWithLegacy.saved_objects) {
             if (!savedObj.error && savedObj.id && savedObj.attributes) {
               savedObjectsAttrHash[savedObj.id] = savedObj.attributes;
             }

@@ -31,7 +31,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
-import { getMonitorByServiceName } from './cases/suggestion';
+import { getMonitors } from './cases/suggestion';
 import type { SyntheticsSuggestion } from '../common/types';
 import { locators } from '../common/locators';
 
@@ -104,9 +104,11 @@ export class Plugin implements PluginType {
 
     core
       .getStartServices()
-      .then(([coreStart]) => {
+      .then(([coreStart, pluginsStart]) => {
+        const encryptedSavedObjects = (pluginsStart as SyntheticsPluginsStartDependencies)
+          .encryptedSavedObjects;
         plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
-          getMonitorByServiceName(coreStart, this.logger, plugins.share.url.locators)
+          getMonitors(coreStart, this.logger, encryptedSavedObjects, plugins.share.url.locators)
         );
       })
       .catch((error) => {

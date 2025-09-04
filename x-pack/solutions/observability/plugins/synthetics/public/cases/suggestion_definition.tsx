@@ -12,8 +12,6 @@ import { SYNTHETICS_SUGGESTION_COMPONENT_ID } from '../../common/constants/cases
 import type { SyntheticsSuggestion } from '../../common/types';
 import { store } from '../apps/synthetics/state';
 
-// Use named export from the module; do not assume a default export.
-// Wrap it in the Provider only once inside the lazy factory.
 export const syntheticsSuggestionDefinition: SuggestionType<SyntheticsSuggestion> = {
   id: SYNTHETICS_SUGGESTION_COMPONENT_ID,
   owner: 'observability',

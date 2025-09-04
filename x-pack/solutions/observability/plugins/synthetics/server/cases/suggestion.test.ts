@@ -8,8 +8,9 @@
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { SuggestionContext } from '@kbn/cases-plugin/common';
-import { getMonitorByServiceName } from './suggestion';
+import { getMonitors } from './suggestion';
 import type { ScheduleUnit } from '../../common/runtime_types';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
 const mockServiceNames = ['test-service-1', 'test-service-2'];
 const mockSpaceId = 'default';
@@ -83,16 +84,20 @@ const mockSavedObject = {
   error: undefined,
 };
 
+const mockMonitorConfigRepositoryFind = jest.fn();
+jest.mock('../services/monitor_config_repository', () => ({
+  MonitorConfigRepository: jest.fn().mockImplementation(() => ({
+    find: mockMonitorConfigRepositoryFind,
+  })),
+}));
+
 // Mock implementations
 const createMockCoreStart = () => {
   const mockSearch = jest.fn();
-  const mockBulkGet = jest.fn();
 
   const coreStart = {
     savedObjects: {
-      getScopedClient: jest.fn(() => ({
-        bulkGet: mockBulkGet,
-      })),
+      getScopedClient: jest.fn(() => ({})),
     },
     elasticsearch: {
       client: {
@@ -105,7 +110,7 @@ const createMockCoreStart = () => {
     },
   } as unknown as CoreStart;
 
-  return { coreStart, mockSearch, mockBulkGet };
+  return { coreStart, mockSearch };
 };
 
 const createMockLogger = (): Logger => ({
@@ -135,13 +140,24 @@ const createMockRequest = (): KibanaRequest =>
     isSystemRequest: false,
   } as KibanaRequest);
 
-describe('getMonitorByServiceName', () => {
+const createMockEncryptedSavedObjectsStart = (): EncryptedSavedObjectsPluginStart => {
+  return {
+    isEncryptionError: jest.fn(() => false),
+    getClient: jest.fn(() => ({
+      getDecryptedAsInternalUser: jest.fn(),
+      getDecryptedAsSOClient: jest.fn(),
+      createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+    })),
+  } as unknown as EncryptedSavedObjectsPluginStart;
+};
+
+describe('getMonitors', () => {
   let mockCoreStart: CoreStart;
   let mockSearch: jest.Mock;
-  let mockBulkGet: jest.Mock;
   let mockLogger: Logger;
   let mockLocatorClient: LocatorClient;
   let mockRequest: KibanaRequest;
+  let encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -149,16 +165,29 @@ describe('getMonitorByServiceName', () => {
     const mocks = createMockCoreStart();
     mockCoreStart = mocks.coreStart;
     mockSearch = mocks.mockSearch;
-    mockBulkGet = mocks.mockBulkGet;
 
     mockLogger = createMockLogger();
     mockLocatorClient = createMockLocatorClient();
     mockRequest = createMockRequest();
+    encryptedSavedObjects = createMockEncryptedSavedObjectsStart();
+
+    // Default mock implementation for MonitorConfigRepository.find
+    mockMonitorConfigRepositoryFind.mockResolvedValue({
+      total: 1,
+      saved_objects: [mockSavedObject],
+      per_page: 10,
+      page: 1,
+    });
   });
 
   describe('configuration', () => {
     it('should return correct suggestion type configuration', () => {
-      const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
+      const suggestionType = getMonitors(
+        mockCoreStart,
+        mockLogger,
+        encryptedSavedObjects,
+        mockLocatorClient
+      );
 
       expect(suggestionType.id).toBe('syntheticMonitor');
       expect(suggestionType.attachmentTypeId).toBe('.page');
@@ -168,7 +197,12 @@ describe('getMonitorByServiceName', () => {
     });
 
     it('should have correct tool description', () => {
-      const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
+      const suggestionType = getMonitors(
+        mockCoreStart,
+        mockLogger,
+        encryptedSavedObjects,
+        mockLocatorClient
+      );
 
       expect(suggestionType.handlers.syntheticMonitor.tool.description).toBe(
         'Suggest Synthetic monitors operating on the same service.'
@@ -180,7 +214,12 @@ describe('getMonitorByServiceName', () => {
     let handler: any;
 
     beforeEach(() => {
-      const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
+      const suggestionType = getMonitors(
+        mockCoreStart,
+        mockLogger,
+        encryptedSavedObjects,
+        mockLocatorClient
+      );
       handler = suggestionType.handlers.syntheticMonitor.handler;
     });
 
@@ -214,9 +253,6 @@ describe('getMonitorByServiceName', () => {
       };
 
       mockSearch.mockResolvedValue(mockAggregationResponse);
-      mockBulkGet.mockResolvedValue({
-        saved_objects: [mockSavedObject],
-      });
 
       await handler({ context, request: mockRequest });
 
@@ -246,7 +282,7 @@ describe('getMonitorByServiceName', () => {
         aggs: {
           by_monitor: {
             terms: {
-              field: 'monitor.name',
+              field: 'config_id',
               size: 5,
             },
             aggs: {
@@ -265,7 +301,6 @@ describe('getMonitorByServiceName', () => {
                       'monitor.name',
                       'monitor.type',
                       'monitor.status',
-                      'status',
                       'observer.geo.name',
                       'observer.name',
                       'service.name',
@@ -274,7 +309,6 @@ describe('getMonitorByServiceName', () => {
                       'url.full',
                       '@timestamp',
                       'meta.space_id',
-                      'type',
                     ],
                   },
                 },
@@ -307,27 +341,6 @@ describe('getMonitorByServiceName', () => {
       );
     });
 
-    it('should perform bulk get for saved objects', async () => {
-      const context: SuggestionContext = {
-        'service.name': mockServiceNames,
-        spaceId: mockSpaceId,
-      };
-
-      mockSearch.mockResolvedValue(mockAggregationResponse);
-      mockBulkGet.mockResolvedValue({
-        saved_objects: [mockSavedObject],
-      });
-
-      await handler({ context, request: mockRequest });
-
-      expect(mockBulkGet).toHaveBeenCalledWith([
-        {
-          id: 'test-config-id',
-          type: 'synthetics-monitor-multi-space',
-        },
-      ]);
-    });
-
     it('should return empty suggestions when no saved objects found', async () => {
       const context: SuggestionContext = {
         'service.name': mockServiceNames,
@@ -335,22 +348,19 @@ describe('getMonitorByServiceName', () => {
       };
 
       mockSearch.mockResolvedValue(mockAggregationResponse);
-      mockBulkGet.mockResolvedValue({
+      mockMonitorConfigRepositoryFind.mockResolvedValue({
+        total: 0,
         saved_objects: [],
-      });
-
-      // Mock the bulkGetRequests to be empty by returning empty buckets first
-      mockSearch.mockResolvedValue({
-        aggregations: {
-          by_monitor: {
-            buckets: [],
-          },
-        },
+        per_page: 10,
+        page: 1,
       });
 
       const result = await handler({ context, request: mockRequest });
 
       expect(result.suggestions).toEqual([]);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'No Synthetics SavedObjects found for the related tests runs'
+      );
     });
 
     it('should create correct suggestion structure', async () => {
@@ -360,9 +370,6 @@ describe('getMonitorByServiceName', () => {
       };
 
       mockSearch.mockResolvedValue(mockAggregationResponse);
-      mockBulkGet.mockResolvedValue({
-        saved_objects: [mockSavedObject],
-      });
 
       const result = await handler({ context, request: mockRequest });
 
@@ -386,9 +393,6 @@ describe('getMonitorByServiceName', () => {
       };
 
       mockSearch.mockResolvedValue(mockAggregationResponse);
-      mockBulkGet.mockResolvedValue({
-        saved_objects: [mockSavedObject],
-      });
 
       const result = await handler({ context, request: mockRequest });
 
@@ -414,6 +418,7 @@ describe('getMonitorByServiceName', () => {
         locationId: 'us-east-1',
         urls: 'https://example.com',
         projectId: 'test-project',
+        service: { name: 'Test Service' },
       });
 
       expect(attachmentItem.attachment).toMatchObject({
@@ -441,6 +446,7 @@ describe('getMonitorByServiceName', () => {
         _source: {
           ...mockElasticsearchHit._source,
           monitor: {
+            ...mockElasticsearchHit._source.monitor,
             status: undefined,
           },
         },
@@ -473,8 +479,11 @@ describe('getMonitorByServiceName', () => {
         },
       };
 
-      mockBulkGet.mockResolvedValue({
+      mockMonitorConfigRepositoryFind.mockResolvedValue({
+        total: 1,
         saved_objects: [savedObjectWithMissingFields],
+        per_page: 10,
+        page: 1,
       });
 
       const result = await handler({ context, request: mockRequest });
@@ -507,6 +516,7 @@ describe('getMonitorByServiceName', () => {
                           ...mockElasticsearchHit._source,
                           config_id: 'monitor-1-id',
                           monitor: {
+                            ...mockElasticsearchHit._source.monitor,
                             id: 'monitor-1-id',
                             name: 'Monitor 1',
                           },
@@ -526,6 +536,7 @@ describe('getMonitorByServiceName', () => {
                           ...mockElasticsearchHit._source,
                           config_id: 'monitor-2-id',
                           monitor: {
+                            ...mockElasticsearchHit._source.monitor,
                             id: 'monitor-2-id',
                             name: 'Monitor 2',
                           },
@@ -541,11 +552,14 @@ describe('getMonitorByServiceName', () => {
       };
 
       mockSearch.mockResolvedValue(multipleMonitorsResponse);
-      mockBulkGet.mockResolvedValue({
+      mockMonitorConfigRepositoryFind.mockResolvedValue({
+        total: 2,
         saved_objects: [
           { ...mockSavedObject, id: 'monitor-1-id' },
           { ...mockSavedObject, id: 'monitor-2-id' },
         ],
+        per_page: 10,
+        page: 1,
       });
 
       const result = await handler({ context, request: mockRequest });
@@ -553,13 +567,45 @@ describe('getMonitorByServiceName', () => {
       expect(result.suggestions[0].data[0].payload.name).toBe('Monitor 1');
       expect(result.suggestions[1].data[0].payload.name).toBe('Monitor 2');
     });
+
+    it('should skip monitors with saved object errors', async () => {
+      const context: SuggestionContext = {
+        'service.name': mockServiceNames,
+        spaceId: mockSpaceId,
+      };
+
+      mockSearch.mockResolvedValue(mockAggregationResponse);
+      mockMonitorConfigRepositoryFind.mockResolvedValue({
+        total: 1,
+        saved_objects: [
+          {
+            ...mockSavedObject,
+            error: { error: 'Not found', message: 'Saved object not found', statusCode: 404 },
+          },
+        ],
+        per_page: 10,
+        page: 1,
+      });
+
+      const result = await handler({ context, request: mockRequest });
+
+      expect(result.suggestions).toEqual([]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'No related saved object found for config_id test-config-id - possible deleted config, old run etc.'
+      );
+    });
   });
 
   describe('error handling', () => {
     let handler: any;
 
     beforeEach(() => {
-      const suggestionType = getMonitorByServiceName(mockCoreStart, mockLogger, mockLocatorClient);
+      const suggestionType = getMonitors(
+        mockCoreStart,
+        mockLogger,
+        encryptedSavedObjects,
+        mockLocatorClient
+      );
       handler = suggestionType.handlers.syntheticMonitor.handler;
     });
 
@@ -577,18 +623,39 @@ describe('getMonitorByServiceName', () => {
       );
     });
 
-    it('should handle saved objects bulk get errors', async () => {
+    it('should handle MonitorConfigRepository.find errors', async () => {
       const context: SuggestionContext = {
         'service.name': mockServiceNames,
         spaceId: mockSpaceId,
       };
 
       mockSearch.mockResolvedValue(mockAggregationResponse);
-      const bulkGetError = new Error('Saved objects error');
-      mockBulkGet.mockRejectedValue(bulkGetError);
+      const repositoryError = new Error('Repository error');
+      mockMonitorConfigRepositoryFind.mockRejectedValue(repositoryError);
 
-      await expect(handler({ context, request: mockRequest })).rejects.toThrow(
-        'Saved objects error'
+      await expect(handler({ context, request: mockRequest })).rejects.toThrow('Repository error');
+    });
+
+    it('should handle missing locator gracefully', async () => {
+      const suggestionTypeWithoutLocator = getMonitors(
+        mockCoreStart,
+        mockLogger,
+        encryptedSavedObjects
+      );
+      const handlerWithoutLocator = suggestionTypeWithoutLocator.handlers.syntheticMonitor.handler;
+
+      const context: SuggestionContext = {
+        'service.name': mockServiceNames,
+        spaceId: mockSpaceId,
+      };
+
+      mockSearch.mockResolvedValue(mockAggregationResponse);
+
+      const result = await handlerWithoutLocator({ context, request: mockRequest });
+
+      expect(result.suggestions).toEqual([]);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'No URL found for monitor Test Monitor with service Test Service'
       );
     });
   });
