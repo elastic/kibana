@@ -9,7 +9,9 @@ import type TestAgent from 'supertest/lib/agent';
 import expect from '@kbn/expect';
 import {
   ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_LIST_DESCRIPTION,
   ENDPOINT_LIST_ID,
+  ENDPOINT_LIST_NAME,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -39,12 +41,22 @@ export default function ({ getService }: FtrProviderContext) {
         listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID
       ): Buffer => {
         const generator = new ExceptionsListItemGenerator();
-        const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
+        let listInfo: { id: string; name: string; description: string } | undefined = Object.values(
+          ENDPOINT_ARTIFACT_LISTS
+        ).find((listDefinition) => {
           return listDefinition.id === listId;
         });
 
         if (!listInfo) {
-          throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
+          if (listId === ENDPOINT_LIST_ID) {
+            listInfo = {
+              id: listId,
+              name: ENDPOINT_LIST_NAME,
+              description: ENDPOINT_LIST_DESCRIPTION,
+            };
+          } else {
+            throw new Error(`Unknown listId: ${listId}. Unable to generate exception list item.`);
+          }
         }
 
         const createItem = () => {
