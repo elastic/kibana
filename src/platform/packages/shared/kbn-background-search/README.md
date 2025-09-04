@@ -7,7 +7,7 @@ A small shared package that exposes helpers and a UI callout for Kibana's backgr
 ## Exports
 
 - BackgroundSearchCallout: React component
-  - Renders a small callout when a restored/background-loading session is active (respecting the feature flag).
+  - Renders a small callout when a restored session is active (respecting the feature flag).
 - getBackgroundSearchState$(): Observable<SearchSessionState> | undefined
   - Getter for the wired session state observable.
 - initBackgroundSearch(params: { state$: Observable<SearchSessionState>, enabled: boolean })

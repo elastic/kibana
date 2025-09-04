@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { BackgroundSearchRestoredCallout } from './src/components';
-export { initBackgroundSearch } from './src/services';
+export * from './background_search_service';

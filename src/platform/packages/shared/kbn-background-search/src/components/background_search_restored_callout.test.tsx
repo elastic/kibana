@@ -8,18 +8,15 @@
  */
 import React from 'react';
 import { act, cleanup, screen } from '@testing-library/react';
-import { BackgroundSearchRestoredCallout } from './background_search_restored_callout';
+import { BackgroundSearchRestoredCallout } from '.';
 import { BehaviorSubject } from 'rxjs';
-import {
-  getBackgroundSearchState$,
-  isBackgroundSearchEnabled,
-} from '../services/background_search_service';
+import { getBackgroundSearchState$, isBackgroundSearchEnabled } from '../services';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 
 const PART_OF_CALLOUT_MSG = /You are viewing cached data/;
 
-jest.mock('../services/background_search_service', () => ({
+jest.mock('../services', () => ({
   getBackgroundSearchState$: jest.fn(),
   isBackgroundSearchEnabled: jest.fn(),
 }));
@@ -47,32 +44,52 @@ describe('BackgroundSearchRestoredCallout', () => {
     expect(screen.queryByText(PART_OF_CALLOUT_MSG)).not.toBeInTheDocument();
   });
 
+  it('does not render if state$ is not available', () => {
+    (getBackgroundSearchState$ as jest.Mock).mockReturnValue(undefined);
+
+    renderWithI18n(<BackgroundSearchRestoredCallout />);
+
+    expect(screen.queryByText(PART_OF_CALLOUT_MSG)).not.toBeInTheDocument();
+  });
+
   it('renders when session state becomes Restored', async () => {
     renderWithI18n(<BackgroundSearchRestoredCallout />);
 
-    expect(screen.queryByText(PART_OF_CALLOUT_MSG)).toBeNull();
+    expect(screen.queryByText(PART_OF_CALLOUT_MSG)).not.toBeInTheDocument();
 
     act(() => subject.next(SearchSessionState.Restored));
     expect(await screen.findByText(PART_OF_CALLOUT_MSG)).toBeVisible();
   });
 
-  it('is visible for BackgroundLoading and remains visible for Restored', async () => {
+  it('is visible after Restored state and stays visible until becomes other than BackgroundLoading or Restored', async () => {
     renderWithI18n(<BackgroundSearchRestoredCallout />);
+
+    act(() => subject.next(SearchSessionState.BackgroundLoading));
+    expect(screen.queryByText(PART_OF_CALLOUT_MSG)).not.toBeInTheDocument();
+
+    act(() => subject.next(SearchSessionState.Restored));
+    expect(await screen.findByText(PART_OF_CALLOUT_MSG)).toBeVisible();
 
     act(() => subject.next(SearchSessionState.BackgroundLoading));
     expect(await screen.findByText(PART_OF_CALLOUT_MSG)).toBeVisible();
 
     act(() => subject.next(SearchSessionState.Restored));
     expect(await screen.findByText(PART_OF_CALLOUT_MSG)).toBeVisible();
+
+    act(() => subject.next(SearchSessionState.Loading));
+    expect(screen.queryByText(PART_OF_CALLOUT_MSG)).not.toBeInTheDocument();
   });
 
-  it('disappear if the session state was Restored and switched to other state', async () => {
+  it('shows again after being hidden when Restored state appears again', async () => {
     renderWithI18n(<BackgroundSearchRestoredCallout />);
 
     act(() => subject.next(SearchSessionState.Restored));
-    expect(await screen.findByText(PART_OF_CALLOUT_MSG)).toBeInTheDocument();
+    expect(await screen.findByText(PART_OF_CALLOUT_MSG)).toBeVisible();
 
-    act(() => subject.next(SearchSessionState.BackgroundCompleted));
+    act(() => subject.next(SearchSessionState.Loading));
     expect(screen.queryByText(PART_OF_CALLOUT_MSG)).not.toBeInTheDocument();
+
+    act(() => subject.next(SearchSessionState.Restored));
+    expect(await screen.findByText(PART_OF_CALLOUT_MSG)).toBeVisible();
   });
 });

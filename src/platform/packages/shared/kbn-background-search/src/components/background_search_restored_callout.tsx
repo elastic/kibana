@@ -9,26 +9,32 @@
 
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { type Observable, map, distinctUntilChanged, of } from 'rxjs';
+import { type Observable, distinctUntilChanged, of, scan } from 'rxjs';
+import { css } from '@emotion/react';
 import { EuiCallOut, EuiText, EuiPanel } from '@elastic/eui';
-import { SearchSessionState } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  getBackgroundSearchState$,
-  isBackgroundSearchEnabled,
-} from '../services/background_search_service';
+import { SearchSessionState } from '@kbn/data-plugin/public';
+import { getBackgroundSearchState$, isBackgroundSearchEnabled } from '../services';
+
+const STICKY_STATES = new Set<SearchSessionState>([
+  SearchSessionState.Restored,
+  SearchSessionState.BackgroundLoading,
+]);
 
 export function BackgroundSearchRestoredCallout() {
   const state$ = getBackgroundSearchState$();
 
   const show$ = state$
     ? (state$ as Observable<SearchSessionState>).pipe(
-        map((s) => s === SearchSessionState.Restored || s === SearchSessionState.BackgroundLoading),
+        scan<SearchSessionState, boolean>((visible, s) => {
+          if (!visible) return s === SearchSessionState.Restored;
+          return STICKY_STATES.has(s);
+        }, false),
         distinctUntilChanged()
       )
     : of(false);
 
-  const showCallout = useObservable<boolean>(show$, false);
+  const showCallout = useObservable(show$, false);
 
   if (!isBackgroundSearchEnabled() || !showCallout) return null;
 
@@ -36,9 +42,12 @@ export function BackgroundSearchRestoredCallout() {
     <EuiPanel
       borderRadius="none"
       color="transparent"
+      css={css`
+        position: 'relative';
+      `}
+      data-test-subj="backgroundSearchRestoredCallout"
       hasShadow={false}
       paddingSize="s"
-      style={{ position: 'relative' }}
     >
       <EuiCallOut size="s">
         <EuiText size="xs">
