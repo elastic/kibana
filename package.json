@@ -1091,7 +1091,7 @@
     "byte-size": "^9.0.1",
     "cacheable-lookup": "6",
     "camelcase-keys": "7.0.2",
-    "canvg": "^3.0.9",
+    "canvg": "^3.0.11",
     "chalk": "^4.1.0",
     "cheerio": "^1.0.0-rc.12",
     "chroma-js": "^2.1.0",
