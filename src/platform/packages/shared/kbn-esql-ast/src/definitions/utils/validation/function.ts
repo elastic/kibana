@@ -153,11 +153,21 @@ class FunctionValidator {
     }
 
     // Validate column arguments
-    const columnMessages = this.fn.args.flat().flatMap((arg) => {
-      if (isColumn(arg) || isIdentifier(arg)) {
-        return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
+    const columnsToValidate = [];
+    const flatArgs = this.fn.args.flat();
+    for (let i = 0; i < flatArgs.length; i++) {
+      const arg = flatArgs[i];
+      if (
+        (isColumn(arg) || isIdentifier(arg)) &&
+        !(this.definition.name === '=' && i === 0) && // don't validate left-hand side of assignment
+        !(this.definition.name === 'as' && i === 1) // don't validate right-hand side of AS
+      ) {
+        columnsToValidate.push(arg);
       }
-      return [];
+    }
+
+    const columnMessages = columnsToValidate.flatMap((arg) => {
+      return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
     });
 
     // uniqBy is used to cover a special case in ENRICH where an implicit assignment is possible
