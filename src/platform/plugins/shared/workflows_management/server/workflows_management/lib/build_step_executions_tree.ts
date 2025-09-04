@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { StepListTreeItem } from '@kbn/workflows/graph';
 import { convertToWorkflowGraph, getNestedStepsFromGraph } from '@kbn/workflows/graph';
@@ -21,9 +21,9 @@ interface StepExecutionTreeItem extends StepListTreeItem {
 export function buildStepExecutionsTree(
   workflowDefinition: WorkflowYaml,
   workflowExecutionStatus: ExecutionStatus,
-  stepExecutions: EsWorkflowStepExecution[]
+  stepExecutions: WorkflowStepExecutionDto[]
 ): StepListTreeItem[] {
-  const stepExecutionMap = new Map<string, EsWorkflowStepExecution[]>();
+  const stepExecutionMap = new Map<string, WorkflowStepExecutionDto[]>();
   for (const stepExecution of stepExecutions) {
     if (stepExecutionMap.has(stepExecution.stepId)) {
       stepExecutionMap.get(stepExecution.stepId)?.push(stepExecution);
@@ -50,7 +50,7 @@ function transformWorkflowDefinitionToStepListTree(
 function enrichStepListTreeWithStepExecutions(
   treeItems: StepExecutionTreeItem[] | StepListTreeItem[],
   wfExecutionStatus: ExecutionStatus,
-  stepExecutionMap: Map<string, EsWorkflowStepExecution[]>,
+  stepExecutionMap: Map<string, WorkflowStepExecutionDto[]>,
   parentId: string | null
 ): StepExecutionTreeItem[] {
   return treeItems

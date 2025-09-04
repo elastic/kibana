@@ -28,6 +28,7 @@ export type {
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,
   WorkflowExecutionLogModel,
+  WorkflowStepExecutionDto,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,

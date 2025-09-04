@@ -80,12 +80,14 @@ export interface EsWorkflowStepExecution {
   executionTimeMs?: number;
   topologicalIndex: number;
   executionIndex: number;
-  parentId?: string;
+  parentId?: string | null;
   error?: string | null;
   output?: Record<string, any> | null;
   input?: Record<string, any> | null;
   state?: Record<string, any>;
 }
+
+export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
 
 export interface WorkflowExecutionHistoryModel {
   id: string;

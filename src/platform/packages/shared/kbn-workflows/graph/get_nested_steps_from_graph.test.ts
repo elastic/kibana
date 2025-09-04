@@ -28,46 +28,58 @@ describe('getNestedStepsFromGraph', () => {
         },
       },
       {
-        name: 'foreach-1',
-        type: 'foreach',
-        foreach: '["item1", "item2", "item3"]',
+        name: 'outer-if',
+        type: 'if',
         steps: [
           {
-            name: 'inner-http-1',
-            type: 'http',
-          },
-          {
-            name: 'inner-if-1',
-            type: 'if',
-            condition: 'a:b',
+            name: 'foreach-1',
+            type: 'foreach',
+            foreach: '["item1", "item2", "item3"]',
             steps: [
               {
-                name: 'inner-foreach-1',
-                type: 'foreach',
-                foreach: '["item1", "item2", "item3"]',
+                name: 'inner-http-1',
+                type: 'http',
+              },
+              {
+                name: 'inner-if-1',
+                type: 'if',
+                condition: 'a:b',
                 steps: [
                   {
-                    name: 'inner-inner-http-2',
+                    name: 'inner-foreach-1',
+                    type: 'foreach',
+                    foreach: '["item1", "item2", "item3"]',
+                    steps: [
+                      {
+                        name: 'inner-inner-inner-http-1',
+                        type: 'http',
+                      },
+                      {
+                        name: 'inner-inner-inner-http-2',
+                        type: 'http',
+                      },
+                    ],
+                  },
+                  {
+                    name: 'inner-inner-http-1',
                     type: 'http',
                   },
                 ],
               },
-              {
-                name: 'inner-http-2',
-                type: 'http',
-              },
             ],
           },
         ],
-      },
-      {
-        name: 'http-3',
-        type: 'http',
-        with: {
-          url: 'https://example.com',
-          method: 'GET',
-          headers: {},
-        },
+        else: [
+          {
+            name: 'http-3',
+            type: 'http',
+            with: {
+              url: 'https://example.com',
+              method: 'GET',
+              headers: {},
+            },
+          },
+        ],
       },
     ],
   };
@@ -82,50 +94,131 @@ describe('getNestedStepsFromGraph', () => {
         children: [],
       },
       {
-        stepId: 'foreach-1',
-        stepType: 'enter-foreach',
+        stepId: 'outer-if',
+        stepType: 'enter-if',
         executionIndex: 0,
         children: [
           {
-            stepId: 'inner-http-1',
-            stepType: 'http',
+            stepId: 'foreach-1',
+            stepType: 'enter-foreach',
             executionIndex: 0,
-            children: [],
-          },
-          {
-            stepId: 'inner-if-1',
-            stepType: 'enter-if',
-            executionIndex: 1,
             children: [
               {
-                stepId: 'inner-foreach-1',
-                stepType: 'enter-foreach',
+                stepId: 'inner-http-1',
+                stepType: 'http',
                 executionIndex: 0,
+                children: [],
+              },
+              {
+                stepId: 'inner-if-1',
+                stepType: 'enter-if',
+                executionIndex: 1,
                 children: [
                   {
-                    stepId: 'inner-inner-http-2',
-                    stepType: 'http',
+                    stepId: 'inner-foreach-1',
+                    stepType: 'enter-foreach',
                     executionIndex: 0,
+                    children: [
+                      {
+                        stepId: 'inner-inner-inner-http-1',
+                        stepType: 'http',
+                        executionIndex: 0,
+                        children: [],
+                      },
+                      {
+                        stepId: 'inner-inner-inner-http-2',
+                        stepType: 'http',
+                        executionIndex: 1,
+                        children: [],
+                      },
+                    ],
+                  },
+                  {
+                    stepId: 'inner-inner-http-1',
+                    stepType: 'http',
+                    executionIndex: 1,
                     children: [],
                   },
                 ],
               },
-              {
-                stepId: 'inner-http-2',
-                stepType: 'http',
-                executionIndex: 1,
-                children: [],
-              },
             ],
+          },
+          {
+            stepId: 'http-3',
+            stepType: 'http',
+            executionIndex: 1,
+            children: [],
           },
         ],
       },
-      {
-        stepId: 'http-3',
-        stepType: 'http',
-        executionIndex: 0,
-        children: [],
-      },
     ]);
+  });
+  it('should return tree with two children and, if-step having three children', () => {
+    const definition: WorkflowYaml = {
+      version: '1',
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [],
+      steps: [
+        {
+          name: 'console-step',
+          type: 'console',
+          with: {
+            message: 'Hello from root steps!',
+          },
+        },
+        {
+          name: 'if-step',
+          type: 'if',
+          steps: [
+            {
+              name: 'inner-console-step',
+              type: 'console',
+              with: {
+                message: 'Hello from within if true branch step!',
+              },
+            },
+            {
+              name: 'foreach-step',
+              type: 'foreach',
+              foreach: 'item',
+              steps: [
+                {
+                  name: 'inner-inner-console-step',
+                  type: 'console',
+                  with: {
+                    message: 'Hello from within foreach step!',
+                  },
+                },
+              ],
+            },
+          ],
+          else: [
+            {
+              name: 'else-console-step',
+              type: 'console',
+              with: {
+                message: 'Hello from within if false branch step!',
+              },
+            },
+          ],
+        },
+      ],
+      inputs: [],
+    };
+    const graph = convertToWorkflowGraph(definition);
+    const nestedSteps = getNestedStepsFromGraph(graph);
+    expect(nestedSteps.length).toBe(2);
+    expect(nestedSteps[0]).toEqual({
+      stepId: 'console-step',
+      stepType: 'console',
+      executionIndex: 0,
+      children: [],
+    });
+    expect(nestedSteps[1]).toEqual(
+      expect.objectContaining({
+        stepId: 'if-step',
+      })
+    );
   });
 });
