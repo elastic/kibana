@@ -16,31 +16,26 @@ export const GraphNodeSchema = z.object({
 });
 export type GraphNode = z.infer<typeof GraphNodeSchema>;
 
-export const ExecutionGraphNodeSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  configuration: z.any(),
-});
-
-export type ExecutionGraphNode = z.infer<typeof ExecutionGraphNodeSchema>;
-
-export const AtomicGraphNodeSchema = z.object({
+export const AtomicGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('atomic'),
+  stepId: z.string(),
   configuration: z.any(),
 });
 export type AtomicGraphNode = z.infer<typeof AtomicGraphNodeSchema>;
 
-export const WaitGraphNodeSchema = z.object({
+export const WaitGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('wait'),
+  stepId: z.string(),
   configuration: WaitStepSchema,
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
 
-export const HttpGraphNodeSchema = z.object({
+export const HttpGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('http'),
+  stepId: z.string(),
   configuration: HttpStepSchema,
 });
 export type HttpGraphNode = z.infer<typeof HttpGraphNodeSchema>;
