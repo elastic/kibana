@@ -10,7 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
-import { EuiSpacer, useResizeObserver } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import useWindowSize from 'react-use/lib/useWindowSize';
@@ -68,6 +68,7 @@ export function ContentFrameworkTable({
   onAddColumn,
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
+  const { euiTheme } = useEuiTheme();
   const {
     fieldsMetadata: { useFieldsMetadata },
     fieldFormats,
@@ -153,13 +154,15 @@ export function ContentFrameworkTable({
         return (
           <>
             <EuiSpacer size="s" />
-            {fieldConfig.name}
+            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold }}>
+              {fieldConfig.name}
+            </EuiText>
           </>
         );
       }
       return fieldConfig.valueCellContent;
     },
-    [rows, fields]
+    [rows, fields, euiTheme.font.weight]
   );
 
   const cellPopoverRenderer = useCallback(
