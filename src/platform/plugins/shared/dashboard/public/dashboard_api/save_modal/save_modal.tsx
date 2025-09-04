@@ -65,7 +65,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       newCopyOnSave,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
-    }) => {
+    }) =>
       onSave({
         newTitle,
         newDescription,
@@ -74,8 +74,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
         newTags: selectedTags,
-      });
-    },
+      }),
     [onSave, persistSelectedTimeInterval, selectedTags]
   );
 
