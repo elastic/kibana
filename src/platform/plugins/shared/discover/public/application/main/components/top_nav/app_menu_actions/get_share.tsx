@@ -173,8 +173,8 @@ export const getShareAppMenuItem = ({
     },
   ];
 
-  if (hasIntegrations) {
-    menuItems.unshift({
+  if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
+    menuItems.push({
       id: AppMenuActionId.export,
       type: AppMenuActionType.secondary,
       controlProps: {

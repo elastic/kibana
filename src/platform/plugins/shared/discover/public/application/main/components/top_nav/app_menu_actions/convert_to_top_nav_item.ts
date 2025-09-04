@@ -48,6 +48,7 @@ export function convertAppMenuItemToTopNavItem({
         services,
       });
     },
+
     ...(appMenuItem.type === AppMenuActionType.primary
       ? { iconType: appMenuItem.controlProps.iconType, iconOnly: true }
       : {}),
