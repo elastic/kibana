@@ -131,6 +131,7 @@ export const getAlertsAppMenuItem = ({
   return {
     id: AppMenuActionId.alerts,
     type: AppMenuActionType.secondary,
+    order: 8000,
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
       defaultMessage: 'Alerts',
     }),

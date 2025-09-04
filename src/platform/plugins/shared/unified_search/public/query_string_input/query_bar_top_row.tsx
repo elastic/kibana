@@ -64,19 +64,19 @@ import type {
 export const strings = {
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
-      defaultMessage: 'Needs updating',
+      defaultMessage: 'Run with changes',
     }),
   getUpdateButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.updateButton', {
-      defaultMessage: 'Update',
+      defaultMessage: 'Run',
     }),
   getRefreshQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
-      defaultMessage: 'Refresh query',
+      defaultMessage: 'Run query',
     }),
   getRefreshButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refreshButton', {
-      defaultMessage: 'Refresh',
+      defaultMessage: 'Run',
     }),
   getCancelQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
@@ -676,7 +676,7 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
+      const iconDirty = 'playFilled';
       const labelDirty = Boolean(isQueryLangSelected)
         ? strings.getRunQueryLabel()
         : strings.getNeedsUpdatingLabel();
@@ -732,14 +732,15 @@ export const QueryBarTopRow = React.memo(
           {props.isLoading && propsOnCancel && renderCancelButton()}
           {(!props.isLoading || !propsOnCancel) && (
             <EuiSuperUpdateButton
-              iconType={props.isDirty ? iconDirty : 'refresh'}
+              iconType={props.isDirty ? iconDirty : 'playFilled'}
+              iconSize="s"
               iconOnly={submitButtonIconOnly}
               aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
               isDisabled={isDateRangeInvalid || props.isDisabled}
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
               size="s"
-              color={props.isDirty ? 'success' : 'text'}
+              color={props.isDirty ? 'success' : 'primary'}
               fill={false}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"

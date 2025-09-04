@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
-import type { EuiBreadcrumb, EuiToolTipProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiHorizontalRule,
@@ -37,7 +37,6 @@ import {
   getDashboardBreadcrumb,
   getDashboardTitle,
   topNavStrings,
-  unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
@@ -275,18 +274,6 @@ export function InternalDashboardTopNav({
 
   const badges = useMemo(() => {
     const allBadges: TopNavMenuProps['badges'] = [];
-    if (hasUnsavedChanges && viewMode === 'edit') {
-      allBadges.push({
-        'data-test-subj': 'dashboardUnsavedChangesBadge',
-        badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
-        title: '',
-        color: '#F6E58D',
-        toolTipProps: {
-          content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
-          position: 'bottom',
-        } as EuiToolTipProps,
-      });
-    }
 
     const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {

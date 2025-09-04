@@ -131,7 +131,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
         size="s"
         fullWidth={props.isMobileMenu}
         {...commonButtonProps}
-        fill={props.fill ?? true}
+        fill={props.fill ?? false}
       >
         <ButtonContainer />
       </EuiButton>

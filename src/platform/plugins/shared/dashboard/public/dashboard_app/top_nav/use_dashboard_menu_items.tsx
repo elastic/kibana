@@ -153,17 +153,20 @@ export const useDashboardMenuItems = ({
       quickSave: {
         ...topNavStrings.quickSave,
         id: 'quick-save',
-        iconType: 'save',
+        // iconType: 'save',
         emphasize: true,
+        fill: Boolean(hasUnsavedChanges),
+        color: hasUnsavedChanges ? 'primary' : 'text',
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !hasUnsavedChanges,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
       interactiveSave: {
         disableButton: disableTopNav,
-        emphasize: !Boolean(lastSavedId),
+        emphasize: false,
+        fill: false,
+        color: 'text',
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
         run: dashboardInteractiveSave,
@@ -191,8 +194,8 @@ export const useDashboardMenuItems = ({
       share: {
         ...topNavStrings.share,
         id: 'share',
-        iconType: 'share',
-        iconOnly: true,
+        // iconType: 'share',
+        iconOnly: false,
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
         run: showShare,
@@ -201,8 +204,8 @@ export const useDashboardMenuItems = ({
       export: {
         ...topNavStrings.export,
         id: 'export',
-        iconType: 'download',
-        iconOnly: true,
+        // iconType: 'download',
+        iconOnly: false,
         testId: 'exportTopNavButton',
         disableButton: disableTopNav,
         run: (anchorElement) => showShare(anchorElement, true),
@@ -285,9 +288,9 @@ export const useDashboardMenuItems = ({
       ...labsMenuItem,
       menuItems.fullScreen,
       ...duplicateMenuItem,
-      ...mayberesetChangesMenuItem,
       ...shareMenuItem,
       ...editMenuItem,
+      ...mayberesetChangesMenuItem,
     ];
   }, [
     isLabsEnabled,
@@ -321,16 +324,17 @@ export const useDashboardMenuItems = ({
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
       }
-
-      editModeItems.push(menuItems.quickSave);
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
 
+    // Always include Save in Edit mode
+    editModeItems.push(menuItems.quickSave);
+
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
 
     // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+    editModeTopNavConfigItems.splice(-2, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [

@@ -33,7 +33,7 @@ export const TopNavMenuItems = ({
   config,
   className,
   popoverBreakpoints = POPOVER_BREAKPOINTS,
-  gutterSize = 'xs',
+  gutterSize = 'xxs',
 }: TopNavMenuItemsProps) => {
   const isMobileMenu = useIsWithinBreakpoints(popoverBreakpoints);
   const [isMorePopoverOpen, setIsMorePopoverOpen] = useState(false);
