@@ -11,10 +11,20 @@ import type {
   MetricsExperiencePluginStart,
   MetricsExperienceClient,
 } from '@kbn/metrics-experience-plugin/public';
+import { createRegExpPatternFrom } from '@kbn/data-view-utils';
+import { containsIndexPattern } from '../../utils';
 
+// metricbeat-*, metrics-*, metric*
+const DEFAULT_ALLOWED_METRICS_BASE_PATTERNS = ['metric', 'metrics'];
 export interface MetricsContextService {
   getMetricsExperienceClient(): MetricsExperienceClient | undefined;
+  containsMetricsIndexPattern(indexPattern: string): boolean;
 }
+
+const DEFAULT_ALLOWED_METRICS_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
+  DEFAULT_ALLOWED_METRICS_BASE_PATTERNS,
+  'data'
+);
 
 export interface MetricsContextServiceDeps {
   metricsExperience?: MetricsExperiencePluginStart;
@@ -24,12 +34,23 @@ export const createMetricsContextService = async ({
   metricsExperience,
 }: MetricsContextServiceDeps): Promise<MetricsContextService> => {
   if (!metricsExperience) {
-    return {
-      getMetricsExperienceClient: () => undefined,
-    };
+    return getMetricsContextService({ metricsExperienceClient: undefined });
   }
 
+  return getMetricsContextService({
+    metricsExperienceClient: metricsExperience.metricsExperienceClient,
+  });
+};
+
+const getMetricsContextService = ({
+  metricsExperienceClient,
+}: {
+  metricsExperienceClient: MetricsExperienceClient | undefined;
+}) => {
   return {
-    getMetricsExperienceClient: () => metricsExperience.metricsExperienceClient,
+    getMetricsExperienceClient: () => metricsExperienceClient,
+    containsMetricsIndexPattern: containsIndexPattern([
+      DEFAULT_ALLOWED_METRICS_BASE_PATTERNS_REGEXP,
+    ]),
   };
 };
