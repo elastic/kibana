@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiTitle, EuiButton } from '@elastic/eui';
 
-import { useUserProfile } from '@kbn/content-management-user-profiles';
 import type { Services } from '../services';
 import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
@@ -61,9 +60,6 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
-  const authorId = item?.accessControl?.owner || item.createdBy;
-  const query = useUserProfile(authorId as string);
-  const authorName = query.data?.user.username;
 
   const defaultReadonlyReasons = new Map<string, string>([
     [
@@ -84,8 +80,8 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       'access_control',
       i18n.translate('contentManagement.contentEditor.metadataForm.accessControlTooltip', {
         defaultMessage:
-          "You don't have permissions to edit this {entityName}. Contact {authorName} or an admin to change it.",
-        values: { authorName: authorName || 'the author', entityName },
+          "You don't have permissions to edit this {entityName}. Contact the author to change it.",
+        values: { entityName },
       }),
     ],
   ]);

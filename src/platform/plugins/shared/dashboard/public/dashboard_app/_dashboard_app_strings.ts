@@ -197,12 +197,10 @@ export const topNavStrings = {
     description: i18n.translate('dashboard.topNave.editConfigDescription', {
       defaultMessage: 'Switch to edit mode',
     }),
-    readOnlyTooltip: (authorName: string | null) =>
-      i18n.translate('dashboard.topNave.editButtonTooltip.readOnly', {
-        defaultMessage:
-          "You don't have permission to edit this dashboard. Contact {authorName} or an admin to change it.",
-        values: { authorName: authorName || 'the author' },
-      }),
+    readOnlyTooltip: i18n.translate('dashboard.topNave.editButtonTooltip.readOnly', {
+      defaultMessage:
+        "You don't have permission to edit this dashboard. Contact the author to change it.",
+    }),
     managedDashboardTooltip: i18n.translate('dashboard.editButtonTooltip.managed', {
       defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
     }),

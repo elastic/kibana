@@ -35,7 +35,6 @@ describe('Access Mode Container', () => {
     (useAccessControl as jest.Mock).mockReturnValue({
       canManageAccessControl: true,
       isInEditAccessMode: true,
-      authorName: 'Test User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
@@ -54,7 +53,6 @@ describe('Access Mode Container', () => {
     (useAccessControl as jest.Mock).mockReturnValue({
       canManageAccessControl: true,
       isInEditAccessMode: true,
-      authorName: 'Test User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
@@ -74,7 +72,6 @@ describe('Access Mode Container', () => {
     (useAccessControl as jest.Mock).mockReturnValue({
       canManageAccessControl: false,
       isInEditAccessMode: true,
-      authorName: null,
     });
 
     await act(async () => {
@@ -94,7 +91,6 @@ describe('Access Mode Container', () => {
     (useAccessControl as jest.Mock).mockReturnValue({
       canManageAccessControl: false,
       isInEditAccessMode: true,
-      authorName: 'Other User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id2', accessMode: 'default' };
@@ -116,7 +112,6 @@ describe('Access Mode Container', () => {
     (useAccessControl as jest.Mock).mockReturnValue({
       canManageAccessControl: false,
       isInEditAccessMode: true,
-      authorName: null,
     });
 
     await act(async () => {
@@ -136,7 +131,6 @@ describe('Access Mode Container', () => {
     (useAccessControl as jest.Mock).mockReturnValue({
       canManageAccessControl: false,
       isInEditAccessMode: true,
-      authorName: 'Other User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id2', accessMode: 'default' };
@@ -158,7 +152,6 @@ describe('Access Mode Container', () => {
     (useAccessControl as jest.Mock).mockReturnValue({
       canManageAccessControl: true,
       isInEditAccessMode: true,
-      authorName: 'Test User',
     });
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };

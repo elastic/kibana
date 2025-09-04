@@ -16,10 +16,6 @@ jest.mock('../access_control/check_global_manage_control_privilege', () => ({
   checkGlobalManageControlPrivilege: jest.fn(),
 }));
 
-jest.mock('../access_control/get_bulk_author_names', () => ({
-  getBulkAuthorNames: jest.fn(),
-}));
-
 jest.mock('../access_control/is_dashboard_in_edit_access_mode', () => ({
   isDashboardInEditAccessMode: jest.fn(),
 }));
@@ -29,14 +25,12 @@ jest.mock('../access_control/check_user_access_control', () => ({
 }));
 
 import { checkGlobalManageControlPrivilege } from '../access_control/check_global_manage_control_privilege';
-import { getBulkAuthorNames } from '../access_control/get_bulk_author_names';
 import { isDashboardInEditAccessMode } from '../access_control/is_dashboard_in_edit_access_mode';
 import { checkUserAccessControl } from '../access_control/check_user_access_control';
 
 describe('useAccessControl', () => {
   let mockGetCurrentUser: jest.Mock;
   let mockCheckGlobalManageControlPrivilege: jest.Mock;
-  let mockGetBulkAuthorNames: jest.Mock;
   let mockIsDashboardInEditAccessMode: jest.Mock;
   let mockCheckUserAccessControl: jest.Mock;
 
@@ -49,12 +43,10 @@ describe('useAccessControl', () => {
     });
 
     mockCheckGlobalManageControlPrivilege = checkGlobalManageControlPrivilege as jest.Mock;
-    mockGetBulkAuthorNames = getBulkAuthorNames as jest.Mock;
     mockIsDashboardInEditAccessMode = isDashboardInEditAccessMode as jest.Mock;
     mockCheckUserAccessControl = checkUserAccessControl as jest.Mock;
 
     mockCheckGlobalManageControlPrivilege.mockResolvedValue(false);
-    mockGetBulkAuthorNames.mockResolvedValue([{ id: 'user-id', username: 'Test User' }]);
     mockIsDashboardInEditAccessMode.mockReturnValue(true);
     mockCheckUserAccessControl.mockReturnValue(true);
 
@@ -82,7 +74,6 @@ describe('useAccessControl', () => {
 
     await waitFor(() => {
       expect(result.current.canManageAccessControl).toBe(true);
-      expect(result.current.authorName).toBe('Test User');
     });
 
     expect(mockIsDashboardInEditAccessMode).toHaveBeenCalledWith(undefined);
@@ -133,34 +124,6 @@ describe('useAccessControl', () => {
     expect(mockCheckGlobalManageControlPrivilege).toHaveBeenCalled();
   });
 
-  it('returns authorName when available', async () => {
-    mockGetBulkAuthorNames.mockResolvedValue([{ id: 'author-id', username: 'Author Name' }]);
-
-    const accessControl: SavedObjectAccessControl = { owner: 'author-id', accessMode: 'default' };
-
-    const { result } = renderHook(() => useAccessControl({ accessControl, createdBy: 'user-id' }));
-
-    await waitFor(() => {
-      expect(result.current.authorName).toBe('Author Name');
-    });
-
-    expect(mockGetBulkAuthorNames).toHaveBeenCalledWith(['author-id']);
-  });
-
-  it('falls back to createdBy when no accessControl owner is available', async () => {
-    mockGetBulkAuthorNames.mockResolvedValue([{ id: 'creator-id', username: 'Creator Name' }]);
-
-    const { result } = renderHook(() =>
-      useAccessControl({ accessControl: undefined, createdBy: 'creator-id' })
-    );
-
-    await waitFor(() => {
-      expect(result.current.authorName).toBe('Creator Name');
-    });
-
-    expect(mockGetBulkAuthorNames).toHaveBeenCalledWith(['creator-id']);
-  });
-
   it('returns correct values when accessMode is "default"', async () => {
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
 
@@ -195,17 +158,5 @@ describe('useAccessControl', () => {
     });
 
     expect(mockIsDashboardInEditAccessMode).toHaveBeenCalledWith(accessControl);
-  });
-
-  it('handles getBulkAuthorNames failure gracefully', async () => {
-    mockGetBulkAuthorNames.mockResolvedValue([]);
-
-    const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
-
-    const { result } = renderHook(() => useAccessControl({ accessControl, createdBy: 'user-id' }));
-
-    await waitFor(() => {
-      expect(result.current.authorName).toBe(undefined);
-    });
   });
 });

@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { coreServices } from '../../services/kibana_services';
 import { checkGlobalManageControlPrivilege } from '../access_control/check_global_manage_control_privilege';
-import { getBulkAuthorNames } from '../access_control/get_bulk_author_names';
 import { isDashboardInEditAccessMode } from '../access_control/is_dashboard_in_edit_access_mode';
 import { checkUserAccessControl } from '../access_control/check_user_access_control';
 
@@ -23,7 +22,6 @@ interface UseAccessControl {
 export const useAccessControl = ({ accessControl, createdBy }: UseAccessControl) => {
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
   const [isInEditAccessMode, setIsInEditAccessMode] = useState(false);
-  const [authorName, setAuthorName] = useState<string | null>(null);
 
   useEffect(() => {
     const isInEditMode = isDashboardInEditAccessMode(accessControl);
@@ -45,18 +43,8 @@ export const useAccessControl = ({ accessControl, createdBy }: UseAccessControl)
     checkUserPrivileges();
   }, [createdBy, accessControl]);
 
-  useEffect(() => {
-    const getAuthorName = async () => {
-      const author = await getBulkAuthorNames([accessControl?.owner || createdBy]);
-      setAuthorName(author[0]?.username);
-    };
-
-    getAuthorName();
-  }, [createdBy, accessControl?.owner]);
-
   return {
     canManageAccessControl,
     isInEditAccessMode,
-    authorName,
   };
 };

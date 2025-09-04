@@ -53,7 +53,7 @@ interface Props {
 }
 
 export const AccessModeContainer = ({ onChangeAccessMode, accessControl, createdBy }: Props) => {
-  const { canManageAccessControl, isInEditAccessMode, authorName } = useAccessControl({
+  const { canManageAccessControl, isInEditAccessMode } = useAccessControl({
     accessControl,
     createdBy,
   });
@@ -125,17 +125,13 @@ export const AccessModeContainer = ({ onChangeAccessMode, accessControl, created
                       content={
                         <FormattedMessage
                           id="dashboard.accessControl.accessMode.container.description.tooltipContent"
-                          defaultMessage="Only {authorName} and admins can edit permissions."
-                          values={{ authorName: authorName || 'the author' }}
+                          defaultMessage="Only the dashboard author can edit permissions."
                         />
                       }
                       aria-label={i18n.translate(
                         'dashboard.accessControl.accessMode.container.description.tooltipAriaLabel',
                         {
-                          defaultMessage: 'Only {authorName} and admins can edit permissions.',
-                          values: {
-                            authorName: authorName || 'the author',
-                          },
+                          defaultMessage: 'Only the dashboard author can edit permissions.',
                         }
                       )}
                       position="bottom"

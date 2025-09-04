@@ -52,7 +52,7 @@ export const useDashboardMenuItems = ({
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
-  const { canManageAccessControl, isInEditAccessMode, authorName } = useAccessControl({
+  const { canManageAccessControl, isInEditAccessMode } = useAccessControl({
     accessControl,
     createdBy: dashboardApi.createdBy,
   });
@@ -177,8 +177,8 @@ export const useDashboardMenuItems = ({
     if (isInEditAccessMode || canManageAccessControl) {
       return undefined;
     }
-    return topNavStrings.edit.readOnlyTooltip(authorName);
-  }, [isInEditAccessMode, canManageAccessControl, authorName, dashboardApi.isManaged]);
+    return topNavStrings.edit.readOnlyTooltip;
+  }, [isInEditAccessMode, canManageAccessControl, dashboardApi.isManaged]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.
