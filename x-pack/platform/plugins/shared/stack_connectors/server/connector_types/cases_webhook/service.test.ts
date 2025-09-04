@@ -197,7 +197,7 @@ describe('Cases webhook service', () => {
       });
     });
 
-    it('adds the secret headers to the basic headers authentication', () => {
+    it('adds the secret headers correctly', () => {
       createExternalService(
         actionId,
         {
@@ -220,6 +220,32 @@ describe('Cases webhook service', () => {
           'content-type': 'application/json',
           foo: 'bar',
           secretKey: 'secretValue',
+        },
+      });
+    });
+
+    it('secretHeaders should override configHeaders when keys overlap', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { Authorization: 'secretAuthorizationValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          Authorization: 'secretAuthorizationValue',
+          'content-type': 'application/json',
+          foo: 'bar',
         },
       });
     });

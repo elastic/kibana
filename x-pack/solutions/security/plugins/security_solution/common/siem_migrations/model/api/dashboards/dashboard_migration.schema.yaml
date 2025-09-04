@@ -94,6 +94,86 @@ paths:
         200:
           description: Indicates dashboards have been added to the migration successfully.
 
+  /internal/siem_migrations/dashboards/{migration_id}/start:
+    post:
+      summary: Starts a dashboard migration
+      operationId: StartDashboardsMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Starts a SIEM dashboards migration using the migration id provided
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to start
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - settings
+              properties:
+                settings:
+                  $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTaskExecutionSettings'
+                  description: Settings applicable to current dashboard migration task execution.
+                langsmith_options:
+                  $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
+                retry:
+                  $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationRetryFilter'
+                  description: The optional indicator to retry the dashboard translation based on this filter criteria.
+      responses:
+        200:
+          description: Indicates the migration start request has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - started
+                properties:
+                  started:
+                    type: boolean
+                    description: Indicates the migration has been started. `false` means the migration does not need to be started.
+        204:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/dashboards/{migration_id}/stop:
+    post:
+      summary: Stops an existing dashboard migration
+      operationId: StopDashboardsMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Stops a running SIEM dashboards migration using the migration id provided
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to stop
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates migration task stop has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - stopped
+                properties:
+                  stopped:
+                    type: boolean
+                    description: Indicates the migration has been stopped.
+        204:
+          description: Indicates the migration id was not found running.
 
   /internal/siem_migrations/dashboards/{migration_id}/stats:
     get:

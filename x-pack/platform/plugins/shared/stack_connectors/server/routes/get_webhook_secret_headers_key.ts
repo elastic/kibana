@@ -15,26 +15,24 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 
-import type { PluginStartContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 
 export interface ConnectorsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  actions: ActionsPluginSetupContract;
+  actions: ActionsPluginStartContract;
 }
 
 export interface ConnectorAttributes {
   secrets?: {
     secretHeaders?: Array<{ key: string; value: string; type: string }>;
   };
+  actionTypeId: string;
 }
-
-const querySchema = schema.object({
-  connectorId: schema.string(),
-});
 
 export const getWebhookSecretHeadersKeyRoute = (
   router: IRouter,
@@ -43,7 +41,7 @@ export const getWebhookSecretHeadersKeyRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_secret_headers`,
+      path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/{id}/secret_headers`,
       security: {
         authz: {
           enabled: false,
@@ -52,7 +50,9 @@ export const getWebhookSecretHeadersKeyRoute = (
         },
       },
       validate: {
-        query: querySchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
       },
       options: {
         access: 'internal',
@@ -60,36 +60,34 @@ export const getWebhookSecretHeadersKeyRoute = (
     },
     async (
       ctx: RequestHandlerContext,
-      req: KibanaRequest<unknown, { connectorId: string }, unknown>,
+      req: KibanaRequest<{ id: string }, unknown, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> => {
-      const { connectorId } = req.query;
+      const { id } = req.params;
 
-      const [, { encryptedSavedObjects }] = await getStartServices();
+      const [, { encryptedSavedObjects, actions }] = await getStartServices();
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+      const connector = await actionsClient.get({ id });
 
+      if (!['.webhook', '.cases-webhook'].includes(connector.actionTypeId)) {
+        return res.badRequest({
+          body: { message: 'Connector must be a webhook or cases webhook' },
+        });
+      }
       const encryptedClient = encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['action'],
+        includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
       });
 
       const decryptedConnector =
         await encryptedClient.getDecryptedAsInternalUser<ConnectorAttributes>(
-          'action',
-          connectorId
+          ACTION_SAVED_OBJECT_TYPE,
+          id
         );
 
-      /*
-        - in the encrypted connector the older secret headers are replaced by the new one
-        - if we have a secret header: 'secretKey' : 'secretValue' and we want o add another one 
-          'secretKeyUpdate' : 'secretValueUpdate' -> in the secrets.secretHeaders we will have:
-            - 'secretKeyUpdate' : 'secretValueUpdate'
-        */
-
-      console.log('decryptedConnector: ', decryptedConnector.attributes);
       const secretHeaders = decryptedConnector.attributes.secrets?.secretHeaders || [];
 
       const secretHeadersArray = Object.keys(secretHeaders).map((key) => ({
         key,
-        value: '', // always empty
       }));
 
       return res.ok({ body: { secretHeaders: secretHeadersArray } });

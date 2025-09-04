@@ -389,7 +389,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'test')
         .send({
           params: {
-            body: 'headers',
+            body: 'success_config_secret_headers',
           },
         })
         .expect(200);
