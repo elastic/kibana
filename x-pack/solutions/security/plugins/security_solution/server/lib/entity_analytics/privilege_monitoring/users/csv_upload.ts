@@ -50,7 +50,7 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
 
     // Step 1: Validate file size by reading stream chunks
     let totalBytesRead = 0;
-    const chunks: Buffer[] = [];
+    const fileChunks: Buffer[] = [];
 
     for await (const chunk of stream) {
       totalBytesRead += chunk.length;
@@ -73,29 +73,31 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
         };
       }
 
-      chunks.push(chunk);
+      fileChunks.push(chunk);
     }
 
-    const fileBuffer = Buffer.concat(chunks);
+    const fileBuffer = Buffer.concat(fileChunks);
     dataClient.log('info', `[${uploadId}] File size validated: ${totalBytesRead} bytes`);
 
     await checkAndInitPrivilegedMonitoringResources();
 
     // Step 2: Parse CSV and collect usernames first
-    const stream1 = Readable.from(fileBuffer);
-    const csvStream1 = Papa.parse(Papa.NODE_STREAM_INPUT, {
+    const usernameCollectionStream = Readable.from(fileBuffer);
+    const usernameCollectionCsvParser = Papa.parse(Papa.NODE_STREAM_INPUT, {
       header: false,
       dynamicTyping: true,
       skipEmptyLines: true,
     });
 
-    const batches1 = Readable.from(stream1.pipe(csvStream1))
+    const usernameCollectionBatches = Readable.from(
+      usernameCollectionStream.pipe(usernameCollectionCsvParser)
+    )
       .pipe(privilegedUserParserTransform())
       .pipe(batchPartitions(100));
 
     // Collect all CSV usernames for soft-delete logic
     const csvUsernames = new Set<string>();
-    for await (const batch of batches1) {
+    for await (const batch of usernameCollectionBatches) {
       // batch is an array of Either<BulkProcessingError, BulkPrivMonUser> from batchPartitions
       batch.forEach((userEither: Either<BulkProcessingError, BulkPrivMonUser>) => {
         if (isRight(userEither)) {
@@ -108,18 +110,18 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
     dataClient.log('info', `[${uploadId}] CSV contains ${totalCsvUsers} unique users`);
 
     // Step 3: Process CSV users with username uniqueness checking
-    const stream2 = Readable.from(fileBuffer);
-    const csvStream2 = Papa.parse(Papa.NODE_STREAM_INPUT, {
+    const userProcessingStream = Readable.from(fileBuffer);
+    const userProcessingCsvParser = Papa.parse(Papa.NODE_STREAM_INPUT, {
       header: false,
       dynamicTyping: true,
       skipEmptyLines: true,
     });
 
-    const batches2 = Readable.from(stream2.pipe(csvStream2))
+    const userProcessingBatches = Readable.from(userProcessingStream.pipe(userProcessingCsvParser))
       .pipe(privilegedUserParserTransform())
       .pipe(batchPartitions(100));
 
-    const results: BulkProcessingResults = {
+    const processingResults: BulkProcessingResults = {
       users: [],
       errors: [],
       failed: 0,
@@ -127,8 +129,8 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
     };
 
     // Process each batch with username uniqueness checking
-    for await (const batch of batches2) {
-      const batchResults: BulkProcessingResults = {
+    for await (const batch of userProcessingBatches) {
+      const currentBatchResults: BulkProcessingResults = {
         users: [],
         errors: [],
         failed: 0,
@@ -139,18 +141,18 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       for (const userEither of batch) {
         if (!isRight(userEither)) {
           // Handle parsing errors
-          batchResults.errors.push({
+          currentBatchResults.errors.push({
             message: 'Failed to parse user from CSV',
             username: userEither.left.username,
             index: userEither.left.index,
           });
-          batchResults.failed++;
+          currentBatchResults.failed++;
         } else {
-          const csvUser = userEither.right as BulkPrivMonUser;
+          const parsedCsvUser = userEither.right as BulkPrivMonUser;
 
           try {
             // Check if user already exists by username
-            const existingUser = await findUserByUsername(esClient, index, csvUser.username);
+            const existingUser = await findUserByUsername(esClient, index, parsedCsvUser.username);
 
             if (existingUser) {
               // User exists - update with CSV source
@@ -159,54 +161,61 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
                 index,
                 existingUser,
                 'csv',
-                adaptBulkUserToHelperFormat(csvUser),
+                adaptBulkUserToHelperFormat(parsedCsvUser),
                 async () => existingUser // get function returns the existing user
               );
 
-              batchResults.users.push(adaptHelperResponseToBulkFormat(updatedUser, csvUser.index));
-              batchResults.successful++;
+              currentBatchResults.users.push(
+                adaptHelperResponseToBulkFormat(updatedUser, parsedCsvUser.index)
+              );
+              currentBatchResults.successful++;
 
-              dataClient.log('debug', `[${uploadId}] Updated existing user: ${csvUser.username}`);
+              dataClient.log(
+                'debug',
+                `[${uploadId}] Updated existing user: ${parsedCsvUser.username}`
+              );
             } else {
               // User doesn't exist - create new user
               const newUser = await createUserDocument(
                 esClient,
                 index,
-                adaptBulkUserToHelperFormat(csvUser),
+                adaptBulkUserToHelperFormat(parsedCsvUser),
                 'csv',
-                async () => ({ user: { name: csvUser.username, is_privileged: true } }) // return newly created user format
+                async () => ({ user: { name: parsedCsvUser.username, is_privileged: true } }) // return newly created user format
               );
 
-              batchResults.users.push(adaptHelperResponseToBulkFormat(newUser, csvUser.index));
-              batchResults.successful++;
+              currentBatchResults.users.push(
+                adaptHelperResponseToBulkFormat(newUser, parsedCsvUser.index)
+              );
+              currentBatchResults.successful++;
 
-              dataClient.log('debug', `[${uploadId}] Created new user: ${csvUser.username}`);
+              dataClient.log('debug', `[${uploadId}] Created new user: ${parsedCsvUser.username}`);
             }
           } catch (error) {
             dataClient.log(
               'error',
-              `[${uploadId}] Failed to process user ${csvUser.username}: ${error.message}`
+              `[${uploadId}] Failed to process user ${parsedCsvUser.username}: ${error.message}`
             );
 
-            batchResults.errors.push({
+            currentBatchResults.errors.push({
               message: `Failed to process user: ${error.message}`,
-              username: csvUser.username,
-              index: csvUser.index,
+              username: parsedCsvUser.username,
+              index: parsedCsvUser.index,
             });
-            batchResults.failed++;
+            currentBatchResults.failed++;
           }
         }
       }
 
       // Accumulate batch results
-      results.users.push(...batchResults.users);
-      results.errors.push(...batchResults.errors);
-      results.failed += batchResults.failed;
-      results.successful += batchResults.successful;
+      processingResults.users.push(...currentBatchResults.users);
+      processingResults.errors.push(...currentBatchResults.errors);
+      processingResults.failed += currentBatchResults.failed;
+      processingResults.successful += currentBatchResults.successful;
 
       dataClient.log(
         'debug',
-        `[${uploadId}] Processed batch: ${batchResults.successful} successful, ${batchResults.failed} failed`
+        `[${uploadId}] Processed batch: ${currentBatchResults.successful} successful, ${currentBatchResults.failed} failed`
       );
     }
 
@@ -214,7 +223,7 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
     const softDeleteResults = await softDeleteUsersNotInCsv(Array.from(csvUsernames), uploadId);
 
     const finalStats = {
-      errors: results.errors.concat(
+      errors: processingResults.errors.concat(
         softDeleteResults.errors.map((error: { message: string; username?: string }) => ({
           message: error.message,
           username: error.username || null,
@@ -222,11 +231,11 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
         }))
       ),
       stats: {
-        failed: results.failed + softDeleteResults.failed,
-        successful: results.successful + softDeleteResults.successful,
+        failed: processingResults.failed + softDeleteResults.failed,
+        successful: processingResults.successful + softDeleteResults.successful,
         total:
-          results.failed +
-          results.successful +
+          processingResults.failed +
+          processingResults.successful +
           softDeleteResults.failed +
           softDeleteResults.successful,
       },
@@ -243,7 +252,7 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
    * Soft-delete users that are currently privileged but not in the CSV
    */
   const softDeleteUsersNotInCsv = async (csvUsernames: string[], uploadId: string) => {
-    const results = {
+    const softDeleteResults = {
       errors: [] as Array<{ message: string; username?: string }>,
       failed: 0,
       successful: 0,
@@ -269,11 +278,11 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       );
 
       // Soft-delete each user
-      for (const hit of usersToSoftDelete.hits.hits) {
+      for (const userHit of usersToSoftDelete.hits.hits) {
         try {
           await esClient.update({
             index,
-            id: hit._id || '',
+            id: userHit._id || '',
             refresh: 'wait_for',
             doc: {
               user: {
@@ -281,27 +290,27 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
               },
             },
           });
-          results.successful++;
+          softDeleteResults.successful++;
           dataClient.log(
             'debug',
-            `[${uploadId}] Soft-deleted user: ${(hit._source as MonitoredUserDoc)?.user?.name}`
+            `[${uploadId}] Soft-deleted user: ${(userHit._source as MonitoredUserDoc)?.user?.name}`
           );
         } catch (error) {
-          results.errors.push({
+          softDeleteResults.errors.push({
             message: `Failed to soft-delete user: ${error.message}`,
-            username: (hit._source as MonitoredUserDoc)?.user?.name,
+            username: (userHit._source as MonitoredUserDoc)?.user?.name,
           });
-          results.failed++;
+          softDeleteResults.failed++;
         }
       }
     } catch (error) {
-      results.errors.push({
+      softDeleteResults.errors.push({
         message: `Failed to query users for soft-delete: ${error.message}`,
       });
-      results.failed++;
+      softDeleteResults.failed++;
     }
 
-    return results;
+    return softDeleteResults;
   };
 
   /**
