@@ -9,7 +9,7 @@ import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { casesSchemaV5 } from '../schemas';
 
 /**
- * Adds the incremental id to the cases SO.
+ * Adds the incremental_id.keyword field to the cases SO.
  */
 export const modelVersion4: SavedObjectsModelVersion = {
   changes: [

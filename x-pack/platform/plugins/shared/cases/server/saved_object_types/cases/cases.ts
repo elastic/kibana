@@ -17,7 +17,7 @@ import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';
-import { modelVersion1, modelVersion2, modelVersion3 } from './model_versions';
+import { modelVersion1, modelVersion2, modelVersion3, modelVersion4 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import { modelVersion4 } from './model_versions/model_version_4';
 
