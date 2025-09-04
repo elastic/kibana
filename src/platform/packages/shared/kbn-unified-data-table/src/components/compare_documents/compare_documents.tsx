@@ -22,7 +22,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import type { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';

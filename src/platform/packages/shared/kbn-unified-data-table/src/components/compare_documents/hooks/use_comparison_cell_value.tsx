@@ -18,8 +18,8 @@ import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import type { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
-  AdditionalFieldGroups,
   getAllFallbackFields,
   getAssociatedSmartFieldsAsString,
   SmartFieldFallbackTooltip,
