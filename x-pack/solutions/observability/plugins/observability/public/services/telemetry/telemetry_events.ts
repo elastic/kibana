@@ -46,14 +46,14 @@ const alertAddedToCase: TelemetryEvent = {
     from: {
       type: 'keyword' as const,
       _meta: {
-        description: 'from which the alert was added to the case',
+        description: 'From which the alert was added',
         optional: false,
       },
     },
     rule_type_id: {
       type: 'keyword' as const,
       _meta: {
-        description: 'Rule type ID of the alert being added to the case',
+        description: 'Rule type id',
         optional: false,
       },
     },
@@ -65,7 +65,7 @@ const linkedDashboardView: TelemetryEvent = {
     rule_type_id: {
       type: 'keyword' as const,
       _meta: {
-        description: 'Rule type id of the rule that triggered the alert',
+        description: 'Rule type id',
         optional: false,
       },
     },
