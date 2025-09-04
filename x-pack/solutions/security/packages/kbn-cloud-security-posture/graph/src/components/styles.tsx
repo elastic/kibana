@@ -49,8 +49,9 @@ export const ExpandPopoverListItem = (
       'iconType' | 'label' | 'onClick' | 'disabled' | 'showToolTip' | 'toolTipText' | 'toolTipProps'
     >
 ) => {
-  const { iconType, label, onClick, disabled, showToolTip, toolTipText, toolTipProps, ...rest } = props;
-  
+  const { iconType, label, onClick, disabled, showToolTip, toolTipText, toolTipProps, ...rest } =
+    props;
+
   return (
     <EuiListGroupItem
       {...rest}
