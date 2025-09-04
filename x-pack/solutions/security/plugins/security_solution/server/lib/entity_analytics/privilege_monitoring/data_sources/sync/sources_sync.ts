@@ -11,7 +11,7 @@ import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
 import type { MonitoringEntitySourceType } from '../../types';
 
-type Processor<T = void> = (source: MonitoringEntitySource) => Promise<T>;
+type Processor = (source: MonitoringEntitySource) => Promise<void>;
 
 export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
@@ -34,9 +34,12 @@ export const createSourcesSyncService = (dataClient: PrivilegeMonitoringDataClie
       dataClient.log('debug', `No ${sourceType} monitoring sources found. Skipping sync.`);
       return;
     }
-    for (const s of sources) {
-      await process(s); // process each source
-    }
+    const results = await Promise.allSettled(sources.map((s) => process(s)));
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        dataClient.log('warn', `Source processing failed: ${String(result.reason)}`);
+      }
+    });
   };
 
   return {
