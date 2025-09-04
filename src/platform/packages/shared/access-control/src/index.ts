@@ -9,4 +9,8 @@
 
 export { registerAccessControl } from './register_access_control';
 export { AccessControlClient, type AccessControlClientPublic } from './access_control_client';
-export type { CheckGlobalPrivilegeResponse } from './types';
+export type {
+  CheckGlobalPrivilegeResponse,
+  ChangeAccesModeParams,
+  ChangeAccessModeResponse,
+} from './types';
