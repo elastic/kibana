@@ -11,19 +11,17 @@ import React, { useMemo, useCallback } from 'react';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
 import { useDimensionsQuery } from '../../hooks';
+import { ClearAllSection } from './clear_all_section';
 
 interface ValuesFilterProps {
   selectedDimensions: string[];
@@ -56,7 +54,6 @@ export const ValuesSelector = ({
     from: timeRange?.from,
     to: timeRange?.to,
   });
-  const { euiTheme } = useEuiTheme();
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
     const groupedValues = new Map<string, string[]>();
@@ -129,39 +126,19 @@ export const ValuesSelector = ({
 
   const popoverContentBelowSearch = useMemo(() => {
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="s"
-            color="subdued"
-            css={css`
-              padding: ${euiTheme.size.s};
-            `}
-          >
-            <FormattedMessage
-              id="metricsExperience.valuesSelector.selectedStatusMessage"
-              defaultMessage="{count, plural, one {# value selected} other {# values selected}}"
-              values={{ count: selectedValues?.length }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {selectedValues?.length > 0 && (
-            <EuiButtonEmpty size="s" flush="both" onClick={clearValuesSelection}>
-              {i18n.translate('metricsExperience.valuesSelector.clearSelectionButtonLabel', {
-                defaultMessage: 'Clear selection',
-              })}
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ClearAllSection
+        selectedOptionsLength={selectedValues.length}
+        onClearAllAction={clearValuesSelection}
+        selectedOptionsMessage={i18n.translate(
+          'metricsExperience.valuesSelector.selectedStatusMessage',
+          {
+            defaultMessage: '{count, plural, one {# value selected} other {# values selected}}',
+            values: { count: selectedValues.length },
+          }
+        )}
+      />
     );
-  }, [euiTheme.size.s, selectedValues?.length, clearValuesSelection]);
+  }, [selectedValues.length, clearValuesSelection]);
 
   if (error) {
     return (

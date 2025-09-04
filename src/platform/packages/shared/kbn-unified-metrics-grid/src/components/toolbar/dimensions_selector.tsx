@@ -9,17 +9,10 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
+import { ClearAllSection } from './clear_all_section';
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -37,7 +30,6 @@ export const DimensionsSelector = ({
   onChange,
   clearDimensionSelection,
 }: DimensionsFilterProps) => {
-  const { euiTheme } = useEuiTheme();
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
     const dimensionMap = new Map<string, { name: string; type: string; description?: string }>();
@@ -130,39 +122,20 @@ export const DimensionsSelector = ({
 
   const popoverContentBelowSearch = useMemo(() => {
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="s"
-            color="subdued"
-            css={css`
-              padding: ${euiTheme.size.s};
-            `}
-          >
-            <FormattedMessage
-              id="metricsExperience.dimensionsSelector.selectedStatusMessage"
-              defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
-              values={{ count: selectedDimensions?.length }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {selectedDimensions?.length > 0 && (
-            <EuiButtonEmpty size="s" flush="both" onClick={clearDimensionSelection}>
-              {i18n.translate('metricsExperience.dimensionsSelector.clearSelectionButtonLabel', {
-                defaultMessage: 'Clear selection',
-              })}
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ClearAllSection
+        selectedOptionsLength={selectedDimensions.length}
+        onClearAllAction={clearDimensionSelection}
+        selectedOptionsMessage={i18n.translate(
+          'metricsExperience.dimensionsSelector.selectedStatusMessage',
+          {
+            defaultMessage:
+              '{count, plural, one {# dimension selected} other {# dimensions selected}}',
+            values: { count: selectedDimensions.length },
+          }
+        )}
+      />
     );
-  }, [clearDimensionSelection, euiTheme.size.s, selectedDimensions?.length]);
+  }, [clearDimensionSelection, selectedDimensions.length]);
 
   return (
     <ToolbarSelector
