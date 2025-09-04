@@ -90,12 +90,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   // updates so using `useEffect` is the right thing to do here to not get errors
   // related to React lifecycle methods.
   useEffect(() => {
-    const anomalyTimelineService = new AnomalyTimelineService(
-      timefilter,
-      uiSettings,
-      mlResultsService,
-      mlApi
-    );
+    const anomalyTimelineService = new AnomalyTimelineService(timefilter, uiSettings, mlApi);
 
     const anomalyExplorerCommonStateService = new AnomalyExplorerCommonStateService(
       anomalyExplorerUrlStateService,

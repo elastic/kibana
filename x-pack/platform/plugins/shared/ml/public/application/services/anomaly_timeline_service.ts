@@ -22,7 +22,7 @@ import type {
   ViewBySwimLaneData,
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
-import type { MlResultsService } from './results_service';
+import { mlResultsServiceProvider, type MlResultsService } from './results_service';
 import { shouldIncludePointByScore } from '../util/anomaly_score_utils';
 
 /**
@@ -31,13 +31,14 @@ import { shouldIncludePointByScore } from '../util/anomaly_score_utils';
 export class AnomalyTimelineService {
   private timeBuckets: TimeBuckets;
   private _customTimeRange: TimeRange | undefined;
+  private mlResultsService: MlResultsService;
 
   constructor(
     private timeFilter: TimefilterContract,
     uiSettings: IUiSettingsClient,
-    private mlResultsService: MlResultsService,
     private mlApi: MlApi
   ) {
+    this.mlResultsService = mlResultsServiceProvider(mlApi);
     this.timeBuckets = new TimeBuckets({
       'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
       'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
