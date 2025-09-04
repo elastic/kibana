@@ -17,8 +17,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const legacyAlertMappings = mappingFromFieldMap(legacyAlertFieldMap, 'strict');
   const ecsMappings = mappingFromFieldMap(ecsFieldMap, 'strict');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/224484
-  describe.skip('install alerts as data resources', () => {
+  describe('install alerts as data resources', () => {
     it('should install common alerts as data resources on startup', async () => {
       const ilmPolicyName = '.alerts-ilm-policy';
       const frameworkComponentTemplateName = '.alerts-framework-mappings';
