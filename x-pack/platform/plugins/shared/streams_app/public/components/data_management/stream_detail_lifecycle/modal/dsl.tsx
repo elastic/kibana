@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { Streams, IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isDslLifecycle } from '@kbn/streams-schema';
 import {
@@ -51,10 +51,20 @@ export function DslField({ definition, isDisabled, value, setLifecycle }: Props)
       timeUnits[0]
   );
   const [retentionValue, setRetentionValue] = useState(
-    (existingRetention && existingRetention.value?.toString()) || '1'
+    (existingRetention && existingRetention.value?.toString()) || '90'
   );
   const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
   const invalidRetention = useMemo(() => isInvalidRetention(retentionValue), [retentionValue]);
+
+  useEffect(() => {
+    if (!invalidRetention && retentionValue && selectedUnit.value) {
+      setLifecycle({
+        dsl: {
+          data_retention: `${Number(retentionValue)}${selectedUnit.value}`,
+        },
+      });
+    }
+  }, [retentionValue, selectedUnit.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -63,11 +73,6 @@ export function DslField({ definition, isDisabled, value, setLifecycle }: Props)
         value={retentionValue}
         onChange={(e) => {
           setRetentionValue(e.target.value);
-          setLifecycle({
-            dsl: {
-              data_retention: `${Number(retentionValue)}${selectedUnit.value}`,
-            },
-          });
         }}
         disabled={isDisabled}
         fullWidth
@@ -99,11 +104,6 @@ export function DslField({ definition, isDisabled, value, setLifecycle }: Props)
                   onClick={() => {
                     closeUnitMenu();
                     setSelectedUnit(unit);
-                    setLifecycle({
-                      dsl: {
-                        data_retention: `${Number(retentionValue)}${selectedUnit.value}`,
-                      },
-                    });
                   }}
                 >
                   {unit.name}

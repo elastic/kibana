@@ -58,9 +58,10 @@ export function EditLifecycleModal({
   const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(
     isIlmLifecycle(definition.effective_lifecycle)
       ? 'ilm'
-      : isDslLifecycle(definition.effective_lifecycle)
-      ? 'custom'
-      : 'forever'
+      : isDslLifecycle(definition.effective_lifecycle) &&
+        !definition.effective_lifecycle.dsl.data_retention
+      ? 'forever'
+      : 'custom'
   );
   const [lifecycle, setLifecycle] = useState<IngestStreamLifecycle>(
     definition.effective_lifecycle as IngestStreamLifecycle
