@@ -54,7 +54,7 @@ describe('parseTestFlags', () => {
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
-      'invalid --serverless, expected one of "es", "oblt", "security"'
+      'invalid --serverless, expected one of "es", "oblt", "oblt-logs-essentials", "security"'
     );
   });
 
