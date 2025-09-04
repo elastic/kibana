@@ -20,8 +20,12 @@ import {
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateLatestIndexTemplateId,
+  generateHistoryIndexTemplateId,
+  generateResetIndexTemplateId,
   generateLatestIngestPipelineId,
   generateLatestTransformId,
+  generateHistoryILMPolicyId,
+  generateResetILMPolicyId,
 } from './helpers/generate_component_id';
 import { generateLatestTransform } from './transform/generate_latest_transform';
 import { entityDefinition as mockEntityDefinition } from './helpers/fixtures/entity_definition';
@@ -31,8 +35,12 @@ import { EntityIdConflict } from './errors/entity_id_conflict_error';
 const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
+    { type: 'template', id: generateHistoryIndexTemplateId(definition) },
+    { type: 'template', id: generateResetIndexTemplateId(definition) },
     { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
     { type: 'transform', id: generateLatestTransformId(definition) },
+    { type: 'ilm_policy', id: generateResetILMPolicyId(definition) },
+    { type: 'ilm_policy', id: generateHistoryILMPolicyId(definition) },
   ];
 };
 
@@ -62,10 +70,20 @@ const assertHasCreatedDefinition = (
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(3);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
     })
   );
 
@@ -81,6 +99,18 @@ const assertHasCreatedDefinition = (
 
   expect(esClient.transform.putTransform).toBeCalledTimes(1);
   expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
+
+  expect(esClient.ilm.putLifecycle).toBeCalledTimes(2);
+  expect(esClient.ilm.putLifecycle).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_ilm_policy`,
+    })
+  );
+  expect(esClient.ilm.putLifecycle).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_ilm_policy`,
+    })
+  );
 };
 
 const assertHasUpgradedDefinition = (
@@ -100,10 +130,20 @@ const assertHasUpgradedDefinition = (
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(3);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
     })
   );
 
@@ -119,6 +159,18 @@ const assertHasUpgradedDefinition = (
 
   expect(esClient.transform.putTransform).toBeCalledTimes(1);
   expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
+
+  expect(esClient.ilm.putLifecycle).toBeCalledTimes(2);
+  expect(esClient.ilm.putLifecycle).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_reset_${definition.id}_ilm_policy`,
+    })
+  );
+  expect(esClient.ilm.putLifecycle).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_ilm_policy`,
+    })
+  );
 };
 
 const assertHasDeletedDefinition = (
@@ -136,10 +188,36 @@ const assertHasDeletedDefinition = (
     { ignore: [404] }
   );
 
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(3);
   expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
     {
       name: generateLatestIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateResetIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: generateHistoryIndexTemplateId(definition),
+    },
+    { ignore: [404] }
+  );
+
+  expect(esClient.ilm.deleteLifecycle).toBeCalledTimes(2);
+  expect(esClient.ilm.deleteLifecycle).toBeCalledWith(
+    {
+      name: `entities_v1_history_${definition.id}_ilm_policy`,
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.ilm.deleteLifecycle).toBeCalledWith(
+    {
+      name: `entities_v1_reset_${definition.id}_ilm_policy`,
     },
     { ignore: [404] }
   );
