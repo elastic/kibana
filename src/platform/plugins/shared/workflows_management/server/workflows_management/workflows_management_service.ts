@@ -127,12 +127,22 @@ export class WorkflowsService {
     }
 
     try {
-      const document = await this.workflowStorage.getClient().get({ id });
-      if (!document._source) {
+      const response = await this.workflowStorage.getClient().search({
+        query: {
+          bool: {
+            must: [{ term: { _id: id } }, { term: { spaceId } }],
+          },
+        },
+        size: 1,
+        track_total_hits: false,
+      });
+
+      if (response.hits.hits.length === 0) {
         return null;
       }
 
-      return this.transformStorageDocumentToWorkflowDto(id, document._source);
+      const document = response.hits.hits[0];
+      return this.transformStorageDocumentToWorkflowDto(document._id!, document._source!);
     } catch (error) {
       if (error.statusCode === 404) {
         return null;
@@ -168,6 +178,7 @@ export class WorkflowsService {
       definition: workflowToCreate.definition,
       createdBy: authenticatedUser,
       lastUpdatedBy: authenticatedUser,
+      spaceId,
       valid: true,
       deleted_at: null,
       created_at: now,
@@ -204,7 +215,22 @@ export class WorkflowsService {
     }
 
     try {
-      const existingDocument = await this.workflowStorage.getClient().get({ id });
+      // First check if the workflow exists and belongs to the correct space
+      const searchResponse = await this.workflowStorage.getClient().search({
+        query: {
+          bool: {
+            must: [{ term: { _id: id } }, { term: { spaceId } }],
+          },
+        },
+        size: 1,
+        track_total_hits: false,
+      });
+
+      if (searchResponse.hits.hits.length === 0) {
+        throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
+      }
+
+      const existingDocument = searchResponse.hits.hits[0];
       if (!existingDocument._source) {
         throw new Error(`Workflow with id ${id} not found`);
       }
@@ -260,8 +286,19 @@ export class WorkflowsService {
     // Soft delete by setting deleted_at timestamp
     for (const id of ids) {
       try {
-        const existingDocument = await this.workflowStorage.getClient().get({ id });
-        if (existingDocument._source) {
+        // Check if workflow exists and belongs to the correct space
+        const searchResponse = await this.workflowStorage.getClient().search({
+          query: {
+            bool: {
+              must: [{ term: { _id: id } }, { term: { spaceId } }],
+            },
+          },
+          size: 1,
+          track_total_hits: false,
+        });
+
+        if (searchResponse.hits.hits.length > 0) {
+          const existingDocument = searchResponse.hits.hits[0];
           const updatedData = {
             ...existingDocument._source,
             deleted_at: now,
@@ -291,6 +328,9 @@ export class WorkflowsService {
     const from = (page - 1) * limit;
 
     const must: any[] = [];
+
+    // Filter by spaceId
+    must.push({ term: { spaceId } });
 
     // Exclude soft-deleted workflows
     must.push({
@@ -371,6 +411,7 @@ export class WorkflowsService {
       track_total_hits: true,
       query: {
         bool: {
+          must: [{ term: { spaceId } }],
           must_not: {
             exists: { field: 'deleted_at' },
           },
@@ -490,6 +531,7 @@ export class WorkflowsService {
       track_total_hits: true,
       query: {
         bool: {
+          must: [{ term: { spaceId } }],
           must_not: {
             exists: { field: 'deleted_at' },
           },

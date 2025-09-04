@@ -30,6 +30,7 @@ describe('WorkflowsService', () => {
       definition: { name: 'Test Workflow', enabled: true },
       createdBy: 'test-user',
       lastUpdatedBy: 'test-user',
+      spaceId: 'default',
       deleted_at: null,
       valid: true,
       created_at: '2023-01-01T00:00:00.000Z',
@@ -197,6 +198,7 @@ describe('WorkflowsService', () => {
         query: {
           bool: {
             must: [
+              { term: { spaceId: 'default' } },
               {
                 bool: {
                   must_not: {
@@ -232,6 +234,7 @@ describe('WorkflowsService', () => {
         query: {
           bool: {
             must: [
+              { term: { spaceId: 'default' } },
               {
                 bool: {
                   must_not: {
@@ -268,6 +271,7 @@ describe('WorkflowsService', () => {
         query: {
           bool: {
             must: [
+              { term: { spaceId: 'default' } },
               {
                 bool: {
                   must_not: {
@@ -321,6 +325,7 @@ describe('WorkflowsService', () => {
             yaml: 'name: New Workflow\nenabled: true\ndefinition:\n  triggers: []',
             createdBy: 'system',
             lastUpdatedBy: 'system',
+            spaceId: 'default',
           }),
           refresh: 'wait_for',
           require_alias: true,
@@ -348,12 +353,10 @@ describe('WorkflowsService', () => {
           allow_no_indices: true,
           query: {
             bool: {
-              filter: [{ term: { _id: 'test-workflow-id' } }],
+              must: [{ term: { _id: 'test-workflow-id' } }, { term: { spaceId: 'default' } }],
             },
           },
           size: 1,
-          terminate_after: 1,
-          track_total_hits: false,
         })
       );
       expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -414,6 +417,7 @@ describe('WorkflowsService', () => {
         allow_no_indices: true,
         query: {
           bool: {
+            must: [{ term: { spaceId: 'default' } }],
             must_not: {
               exists: { field: 'deleted_at' },
             },
@@ -467,6 +471,7 @@ describe('WorkflowsService', () => {
         allow_no_indices: true,
         query: {
           bool: {
+            must: [{ term: { spaceId: 'default' } }],
             must_not: {
               exists: { field: 'deleted_at' },
             },

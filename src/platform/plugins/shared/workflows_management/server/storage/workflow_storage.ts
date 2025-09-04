@@ -41,6 +41,7 @@ const storageSettings = {
       definition: types.object({ enabled: false }),
       createdBy: types.keyword({}),
       lastUpdatedBy: types.keyword({}),
+      spaceId: types.keyword({}),
       deleted_at: types.date({}),
       valid: types.boolean({}),
       created_at: types.date({}),
@@ -58,6 +59,7 @@ export interface WorkflowProperties {
   definition: WorkflowYaml | null;
   createdBy: string;
   lastUpdatedBy: string;
+  spaceId: string;
   deleted_at: Date | null;
   valid: boolean;
   created_at: string;
