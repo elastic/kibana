@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateEntitiesPriorityUpdateIndexTemplateConfig(definition) should generate a valid index template for custom definition 1`] = `
+Object {
+  "_meta": Object {
+    "description": "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the priority updates dataset",
+    "ecs_version": "8.0.0",
+    "managed": true,
+    "managed_by": "elastic_entity_model",
+  },
+  "composed_of": Array [
+    "ecs@mappings",
+    "entities_v1_latest_base",
+    "admin-console-services-priority-update@platform",
+    "admin-console-services-priority-update@custom",
+  ],
+  "ignore_missing_component_templates": Array [
+    "admin-console-services-priority-update@platform",
+    "admin-console-services-priority-update@custom",
+  ],
+  "index_patterns": Array [
+    ".entities.v1.priority_updates.admin-console-services",
+  ],
+  "name": "entities_v1_priority_updates_admin-console-services_index_template",
+  "priority": 200,
+  "template": Object {
+    "settings": Object {
+      "index": Object {
+        "codec": "best_compression",
+      },
+    },
+  },
+}
+`;
