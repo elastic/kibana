@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useMemo, useState, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
@@ -365,23 +365,30 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     // Stabilized processChanged callback with minimal dependencies
     const processChanged = useCallback(
-      (updatedFormValues: ArtifactFormComponentProps['item']) => {
-        const updatedValidationResult: ValidationResult = validateValues(updatedFormValues);
+      (updatedFormValues?: ArtifactFormComponentProps['item']) => {
+        const updatedItem = updatedFormValues
+          ? {
+            ...item,
+            ...updatedFormValues,
+          }
+          : item;
+
+        const updatedValidationResult: ValidationResult = validateValues(updatedItem);
         setValidationResult(updatedValidationResult);
 
         onChange({
-          item: updatedFormValues,
+          item: updatedItem,
           isValid: updatedValidationResult.isValid && conditionsState.areValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'trusted application',
-                })
-              )
+              i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                defaultMessage: 'trusted application',
+              })
+            )
             : undefined,
         });
       },
-      [conditionsState.areValid, onChange]
+      [conditionsState.areValid, item, onChange]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
@@ -607,10 +614,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               ...prev,
               hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
             }));
-            return; // moved from line 615, but causes an infinite loop
+            return;
           }
-          console.log('3');
-          // bug here --> need to do processChanged for validation to kick in when user removes the last entry
         }
 
         // Batch all condition state updates
@@ -628,19 +633,18 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedItem: ArtifactFormComponentProps['item'] =
           arg.exceptionItems[0] !== undefined
             ? ({
-                ...arg.exceptionItems[0],
-                name: currentItem?.name ?? '',
-                description: currentItem?.description ?? '',
-                comments: currentItem?.comments ?? [],
-                os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
-                tags: currentItem?.tags ?? [],
-                meta: currentItem.meta,
-              } as ArtifactFormComponentProps['item'])
+              ...arg.exceptionItems[0],
+              name: currentItem?.name ?? '',
+              description: currentItem?.description ?? '',
+              comments: currentItem?.comments ?? [],
+              os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
+              tags: currentItem?.tags ?? [],
+              meta: currentItem.meta,
+            } as ArtifactFormComponentProps['item'])
             : {
-                ...currentItem,
-                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
-              };
-
+              ...currentItem,
+              entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+            };
         processChanged(updatedItem);
         if (!hasFormChanged) {
           setHasFormChanged(true);
@@ -674,6 +678,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         }),
       [autocompleteSuggestions, getTestId, http, indexPatterns, trustedApp, handleOnBuilderChange]
     );
+
+    useEffect(() => {
+      processChanged();
+    }, [processChanged]);
 
     if (isIndexPatternLoading || !trustedApp) {
       return <Loader size="xl" />;
