@@ -30,6 +30,10 @@ const testMap = [
     'src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx',
     'alertsUIShared',
   ],
+  [
+    'src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metric_flyout/metrics_insights_flyout.tsx',
+    'metricsExperience',
+  ],
 ];
 
 describe('Get i18n Identifier for file', () => {
