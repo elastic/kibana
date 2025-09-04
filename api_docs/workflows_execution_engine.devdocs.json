@@ -56,7 +56,7 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", context: Record<string, any>) => Promise<void>"
+            ", context: Record<string, any>) => Promise<ExecuteWorkflowResponse>"
           ],
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
           "deprecated": false,

@@ -1079,7 +1079,21 @@ export class CstToAstConverter {
   }
 
   private fromJoinTarget(ctx: cst.JoinTargetContext): ast.ESQLSource | ast.ESQLIdentifier {
-    return this.toSource(ctx._index);
+    if (ctx._index) {
+      return this.toSource(ctx._index);
+    } else {
+      return Builder.expression.source.node(
+        {
+          sourceType: 'index',
+          name: '',
+        },
+        {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: true,
+          text: ctx?.getText(),
+        }
+      );
+    }
   }
 
   // ------------------------------------------------------------- CHANGE_POINT
@@ -2073,7 +2087,10 @@ export class CstToAstConverter {
         throw new Error(`Unexpected node type: ${(node as ast.ESQLProperNode).type} in toColumn`);
       }
     } else if (ctx instanceof cst.QualifiedNameContext) {
-      const list = ctx.identifierOrParameter_list();
+      // TODO: new grammar also introduced here bracketed syntax.
+      // See: https://github.com/elastic/kibana/pull/233585/files#diff-cecb7eac6ebaa167a4c232db56b2912984308749e8b79092c7802230bca7dff5R156-R158
+      const fieldNameCtx = ctx._name ?? ctx.fieldName();
+      const list = fieldNameCtx ? fieldNameCtx.identifierOrParameter_list() : [];
 
       for (const item of list) {
         if (item instanceof cst.IdentifierOrParameterContext) {
@@ -2116,7 +2133,10 @@ export class CstToAstConverter {
     ctx: cst.QualifiedNamePatternContext
   ): ast.ESQLColumn | ast.ESQLParam | ast.ESQLIdentifier {
     const args: ast.ESQLColumn['args'] = [];
-    const patterns = ctx.identifierPattern_list();
+    // TODO: new grammar also introduced here bracketed syntax.
+    // See: https://github.com/elastic/kibana/pull/233585/files#diff-cecb7eac6ebaa167a4c232db56b2912984308749e8b79092c7802230bca7dff5R165-R167
+    const fieldNamePatternCtx = ctx._name ?? ctx.fieldNamePattern();
+    const patterns = fieldNamePatternCtx ? fieldNamePatternCtx.identifierPattern_list() : [];
 
     // Special case: a single parameter is returned as a param literal
     if (patterns.length === 1) {
@@ -2384,7 +2404,7 @@ export class CstToAstConverter {
     if (keyCtx && valueCtx) {
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
 
-      const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+      const value = this.fromConstant(valueCtx.constant()) as ast.ESQLAstExpression;
 
       const entry = Builder.expression.entry(key, value, {
         location: getPosition(ctx.start, ctx.stop),
