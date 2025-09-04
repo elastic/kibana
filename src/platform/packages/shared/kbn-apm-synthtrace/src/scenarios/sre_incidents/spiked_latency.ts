@@ -7,14 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * SCENARIO: Spiked Latency
+ * Simulates a service with intermittent and constant high-latency transactions.
+ *
+ * THE STORY:
+ * The `spikey-frontend` and `spikey-backend` services have several endpoints.
+ * One endpoint, `/always-spike`, is always slow, while another, `/sometimes-spike`,
+ * is intermittently slow, providing data to test anomaly detection.
+ *
+ * ROOT CAUSE:
+ * The application code contains inefficient operations for the
+ * `/always-spike` and `/sometimes-spike` endpoints.
+ *
+ * TROUBLESHOOTING PATH (OBSERVABILITY UI):
+ * 1. Start in the APM UI for the 'spikey-frontend' service.
+ * 2. Observe the high average latency, but notice that the p95 or p99 latency
+ *    is significantly higher, suggesting outliers.
+ * 3. Go to the "Transactions" tab and sort by "Impact" or "Latency". This will
+ *    immediately highlight the '/always-spike' and '/sometimes-spike' transactions.
+ * 4. Click on the '/sometimes-spike' transaction and view its latency distribution
+ *    chart to see the bimodal distribution of fast and slow requests.
+ *
+ * TROUBLESHOOTING PATH (PLATFORM TOOLS):
+ * 1. Start in Discover with the 'traces-apm-*' data view, filtering for
+ *    'service.name: "spikey-frontend"'.
+ * 2. Add the 'transaction.name' and 'transaction.duration.us' fields to the
+ *    document table. Sort by 'transaction.duration.us' in descending order.
+ * 3. This immediately reveals that the '/always-spike' and '/sometimes-spike'
+ *    transactions are the slowest by a large margin.
+ * 4. To analyze the intermittent issue, add a filter for
+ *    'transaction.name: "/sometimes-spike"'. Create a Lens Histogram of the
+ *    'transaction.duration.us' field. This will clearly show a bimodal
+ *    distribution, with a small peak for fast requests and a large peak for
+ *    slow requests, confirming the intermittent nature of the problem.
+ *
+ * AI ASSISTANT QUESTIONS:
+ * - "Which transactions in the spikey-frontend service are the slowest?"
+ * - "Is there a latency anomaly in the spikey-backend service?"
+ * - "Show me the latency distribution for the 'GET /sometimes-spike' transaction."
+ */
+
 import { random } from 'lodash';
 import type { ApmFields, Instance, LogDocument } from '@kbn/apm-synthtrace-client';
 import { apm, log, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
-import type { Scenario } from '../cli/scenario';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { withClient } from '../lib/utils/with_client';
-import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
+import type { Scenario } from '../../cli/scenario';
+import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
+import { withClient } from '../../lib/utils/with_client';
+import { parseLogsScenarioOpts } from '../helpers/logs_scenario_opts_parser';
+import { IndexTemplateName } from '../../lib/logs/custom_logsdb_index_templates';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const alwaysSpikeTransactionName = 'GET /always-spike';
