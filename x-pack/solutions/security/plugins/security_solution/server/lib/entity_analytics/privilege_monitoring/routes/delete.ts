@@ -10,21 +10,26 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { DeleteEntityEngineRequestQuery } from '../../../../../common/api/entity_analytics';
-import type { DeleteMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/delete.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
+import {
+  DeleteEntityEngineRequestQuery,
+  type DeleteMonitoringEngineResponse,
+} from '../../../../../common/api/entity_analytics';
+import {
+  API_VERSIONS,
+  APP_ID,
+  MONITORING_ENGINE_DELETE_URL,
+} from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createEngineCrudService } from '../engine/crud_service';
 
 export const deletePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  logger: Logger
 ) => {
   router.versioned
     .delete({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/engine/delete',
+      path: MONITORING_ENGINE_DELETE_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

@@ -40,8 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  // Failing: See https://github.com/elastic/kibana/issues/230153
-  describe.skip('Processing Simulation', () => {
+  describe('Processing Simulation', () => {
     const TEST_TIMESTAMP = '2025-01-01T00:00:10.000Z';
     const TEST_MESSAGE = `${TEST_TIMESTAMP} error test`;
     const TEST_HOST = 'test-host';
