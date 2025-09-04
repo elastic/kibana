@@ -20,7 +20,7 @@ import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
-import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_rules_callout';
 import { AddElasticRulesButton } from '../../components/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';

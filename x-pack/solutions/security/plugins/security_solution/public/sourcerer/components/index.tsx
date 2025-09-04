@@ -122,6 +122,9 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
 
 SourcererPopover.displayName = 'SourcererPopover';
 
+/**
+ * @deprecated Use security_solution/public/data_view_manager/components/data_view_picker instead
+ */
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
