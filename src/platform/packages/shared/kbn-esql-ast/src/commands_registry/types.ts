@@ -214,6 +214,11 @@ export enum Location {
   RENAME = 'rename',
 
   /**
+   * In the RERANK command
+   */
+  RERANK = 'rerank',
+
+  /**
    * In the JOIN command (used only for AS)
    */
   JOIN = 'join',
@@ -244,6 +249,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  rerank: Location.RERANK,
 };
 
 /**
