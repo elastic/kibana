@@ -325,6 +325,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: 'A Group stream',
                     group: {
+                      metadata: {},
                       tags: [],
                       members: [unmanagedStreamName],
                     },
