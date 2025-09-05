@@ -194,6 +194,7 @@ function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Gra
 
   graph.setNode(enterThenBranchNode.id, enterThenBranchNode);
   graph.setEdge(enterConditionNodeId, enterThenBranchNode.id);
+
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen(${enterConditionNodeId})`,
     type: 'exit-condition-branch',
