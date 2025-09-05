@@ -10,6 +10,7 @@ import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types'
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ReindexService } from '@kbn/reindex-service-plugin/public';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -52,11 +53,16 @@ interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
 }
 
-// Temporary hack to provide the uiMetricService instance to this file.
+// Temporary hack to provide the uiMetricService and reindexService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
 let uiMetricService: UiMetricService;
 export const setUiMetricService = (_uiMetricService: UiMetricService) => {
   uiMetricService = _uiMetricService;
+};
+
+let reindexService: ReindexService;
+export const setReindexService = (_reindexService: ReindexService) => {
+  reindexService = _reindexService;
 };
 // End hack
 
@@ -484,10 +490,11 @@ export function useLoadInferenceEndpoints() {
 }
 
 export const convertToLookupIndex = async (sourceIndexName: string, lookupIndexName: string) => {
-  // Placeholder until reindex API is ready
-  return sendRequest({
-    path: `${API_BASE_PATH}/reindex`,
-    method: 'post',
-    body: JSON.stringify({ sourceIndexName, lookupIndexName }),
+  await reindexService.startReindex({
+    indexName: sourceIndexName,
+    newIndexName: lookupIndexName,
+    settings: {
+      mode: 'lookup',
+    },
   });
 };

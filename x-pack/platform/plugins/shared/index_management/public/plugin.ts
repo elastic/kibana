@@ -116,7 +116,7 @@ export class IndexMgmtUIPlugin
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    const { fleet, usageCollection, management, cloud } = plugins;
+    const { fleet, usageCollection, management, cloud, reindexService } = plugins;
 
     this.capabilities$.subscribe((capabilities) => {
       const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -143,6 +143,7 @@ export class IndexMgmtUIPlugin
               config: this.config,
               cloud,
               canUseSyntheticSource: this.canUseSyntheticSource,
+              reindexService,
             });
           },
         });
@@ -170,6 +171,7 @@ export class IndexMgmtUIPlugin
           config: this.config,
           cloud,
           canUseSyntheticSource: this.canUseSyntheticSource,
+          reindexService,
         });
       },
       locator: this.locator,
@@ -181,7 +183,8 @@ export class IndexMgmtUIPlugin
     plugins: StartDependencies,
     deps: { history: ScopedHistory<unknown> }
   ) {
-    const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+    const { fleet, usageCollection, cloud, share, console, ml, licensing, reindexService } =
+      plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
     const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -206,6 +209,7 @@ export class IndexMgmtUIPlugin
         console,
         ml,
         licensing,
+        reindexService,
       },
       services: {
         extensionsService: this.extensionsService,
