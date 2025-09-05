@@ -20,7 +20,7 @@ export class ExitConditionBranchNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    const successors = this.workflowGraph.getNodeSuccessors(this.step.id);
+    const successors = this.workflowGraph.getDirectSuccessors(this.step.id);
 
     if (successors.length !== 1) {
       throw new Error(

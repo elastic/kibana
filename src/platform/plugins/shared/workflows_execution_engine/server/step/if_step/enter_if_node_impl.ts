@@ -28,7 +28,7 @@ export class EnterIfNodeImpl implements StepImplementation {
   public async run(): Promise<void> {
     this.wfExecutionRuntimeManager.enterScope();
     await this.wfExecutionRuntimeManager.startStep(this.step.id);
-    const successors: any[] = this.workflowGraph.getNodeSuccessors(this.step.id);
+    const successors: any[] = this.workflowGraph.getDirectSuccessors(this.step.id);
 
     if (successors.some((node) => node.type !== 'enter-condition-branch')) {
       throw new Error(

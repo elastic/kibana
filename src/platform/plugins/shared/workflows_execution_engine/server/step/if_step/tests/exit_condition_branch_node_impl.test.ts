@@ -18,11 +18,11 @@ describe('ExitConditionBranchNodeImpl', () => {
   let workflowGraphMock: WorkflowGraph;
   let impl: ExitConditionBranchNodeImpl;
   let goToStep: jest.Mock<any, any, any>;
-  let getNodeSuccessors: jest.Mock<any, any, any>;
+  let getDirectSuccessors: jest.Mock<any, any, any>;
 
   beforeEach(() => {
     goToStep = jest.fn();
-    getNodeSuccessors = jest.fn();
+    getDirectSuccessors = jest.fn();
     step = {
       id: 'testStep',
       type: 'exit-condition-branch',
@@ -31,12 +31,13 @@ describe('ExitConditionBranchNodeImpl', () => {
     wfExecutionRuntimeManagerMock = {
       goToStep,
     } as any;
+
     workflowGraphMock = {
-      getNodeSuccessors,
+      getDirectSuccessors,
     } as any;
     impl = new ExitConditionBranchNodeImpl(step, workflowGraphMock, wfExecutionRuntimeManagerMock);
 
-    getNodeSuccessors.mockReturnValue([
+    getDirectSuccessors.mockReturnValue([
       {
         id: 'exitIfNode',
         type: 'exit-if',
@@ -45,7 +46,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if there are multiple successors', async () => {
-    getNodeSuccessors.mockReturnValue([
+    getDirectSuccessors.mockReturnValue([
       { id: 'exitIfNode1', type: 'exit-if' },
       { id: 'exitIfNode2', type: 'exit-if' },
     ]);
@@ -56,7 +57,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if no successors', async () => {
-    getNodeSuccessors.mockReturnValue([]);
+    getDirectSuccessors.mockReturnValue([]);
 
     await expect(impl.run()).rejects.toThrow(
       `ExitConditionBranchNode with id ${step.id} must have exactly one successor, but found 0.`
@@ -64,7 +65,7 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if successor is not exit-if', async () => {
-    getNodeSuccessors.mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
+    getDirectSuccessors.mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
       `ExitConditionBranchNode with id ${step.id} must have an exit-if successor, but found some-other-type with id someOtherNode.`
     );

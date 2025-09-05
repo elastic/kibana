@@ -36,12 +36,12 @@ export class WorkflowGraph {
     throw new Error('Not implemented yet');
   }
 
-  public getNodeSuccessors(nodeId: string): GraphNode[] {
+  public getDirectSuccessors(nodeId: string): GraphNode[] {
     const successors = this.graph!.successors(nodeId) || [];
     return successors.map((id) => this.graph!.node(id) as unknown as GraphNode);
   }
 
-  public getAllPredecessorNodes(nodeId: string): GraphNode[] {
+  public getAllPredecessors(nodeId: string): GraphNode[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
       if (visited.has(predNodeId)) {
