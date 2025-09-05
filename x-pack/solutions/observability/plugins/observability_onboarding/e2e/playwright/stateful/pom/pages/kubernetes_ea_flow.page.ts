@@ -14,6 +14,7 @@ export class KubernetesEAFlowPage {
   private readonly kubernetesAgentExploreDataActionLink: Locator;
   private readonly codeBlock: Locator;
   private readonly copyToClipboardButton: Locator;
+  private readonly logsDataReceivedIndicator: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -28,6 +29,10 @@ export class KubernetesEAFlowPage {
     this.copyToClipboardButton = this.page.getByTestId(
       'observabilityOnboardingCopyToClipboardButton'
     );
+    // logs essentials mode 
+    this.logsDataReceivedIndicator = this.page
+      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
+      .getByText(/logs.*ready|data.*ready|ready.*explore/i);
   }
 
   public async assertVisibilityCodeBlock() {
@@ -42,6 +47,13 @@ export class KubernetesEAFlowPage {
     await expect(
       this.receivedDataIndicatorKubernetes,
       'Received data indicator should be visible'
+    ).toBeVisible();
+  }
+
+  public async assertLogsDataReceivedIndicator() {
+    await expect(
+      this.logsDataReceivedIndicator,
+      'Logs data received indicator should be visible'
     ).toBeVisible();
   }
 

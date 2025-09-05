@@ -53,30 +53,7 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
     await otelHostFlowPage.clickHostsOverviewCTA();
     await hostsOverviewPage.assertCpuPercentageNotEmpty();
   } else {
-    await page.waitForTimeout(5000); // Give the UI time to render
-    
-    const logsExplorationOptions = [
-      page.getByTestId('obltOnboardingExploreLogs'),
-      page.getByText('Explore logs'),
-      page.getByText('View logs'),
-      page.getByTestId('observabilityOnboardingLogsExploration')
-    ];
-    
-    let foundLogsOption = false;
-    for (const option of logsExplorationOptions) {
-      try {
-        await option.waitFor({ timeout: 5000 });
-        await option.click();
-        foundLogsOption = true;
-        break;
-      } catch {
-        // Continue to next option
-      }
-    }
-    
-    if (!foundLogsOption) {
-      const successIndicator = page.getByText(/data.*ready|successfully|complete/i);
-      await expect(successIndicator).toBeVisible({ timeout: 10000 });
-    }
+    await otelHostFlowPage.assertLogsExplorationButtonVisible();
+    await otelHostFlowPage.clickLogsExplorationCTA();
   }
 });

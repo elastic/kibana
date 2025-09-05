@@ -59,7 +59,8 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
   const hostDetailsPage = new HostDetailsPage(await page.waitForEvent('popup'));
 
   if (!isLogsEssentialsMode) {
-    // Skip metrics in logs essentials tier
     await hostDetailsPage.assertCpuPercentageNotEmpty();
+  } else {
+    await autoDetectFlowPage.assertLogsDataReceivedIndicator();
   }
 });

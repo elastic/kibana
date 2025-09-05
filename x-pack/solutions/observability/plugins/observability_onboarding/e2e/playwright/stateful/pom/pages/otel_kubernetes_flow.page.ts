@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import type { Page, BrowserContext } from '@playwright/test';
+import { expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
 
 export class OtelKubernetesFlowPage {
   page: Page;
   context: BrowserContext;
 
+  private readonly exploreLogsButton: Locator;
+
   constructor(page: Page, context: BrowserContext) {
     this.page = page;
     this.context = context;
+
+    this.exploreLogsButton = this.page.getByTestId('obltOnboardingExploreLogs');
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -76,5 +80,9 @@ export class OtelKubernetesFlowPage {
     } else {
       throw new Error('Service inventory URL not found');
     }
+  }
+
+  public async assertLogsExplorationButtonVisible() {
+    await expect(this.exploreLogsButton, 'Logs exploration button should be visible').toBeVisible();
   }
 }

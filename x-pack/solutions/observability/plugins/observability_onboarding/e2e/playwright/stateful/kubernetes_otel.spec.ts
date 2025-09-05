@@ -82,10 +82,11 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
    */
   await page.waitForTimeout(5 * 60000);
 
+  const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
+    await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
+  );
+  
   if (!isLogsEssentialsMode) {
-    const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
-      await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
-    );
     await otelKubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
 
     const apmServiceInventoryPage = new ApmServiceInventoryPage(
@@ -99,9 +100,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    await page.waitForTimeout(5000); // Give the UI time to render
-    
-    const logsExploreButton = page.getByText('Explore logs');
-    await expect(logsExploreButton).toBeVisible({ timeout: 10000 });
+    // In logs essentials mode, validate logs exploration button is visible
+    await otelKubernetesFlowPage.assertLogsExplorationButtonVisible();
   }
 });
