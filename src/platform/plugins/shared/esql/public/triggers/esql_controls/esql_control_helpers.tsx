@@ -14,7 +14,6 @@ import type { ESQLVariableType } from '@kbn/esql-types';
 import { type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { ESQLControlsFlyout } from './control_flyout';
 
 interface Context {
   queryString: string;
@@ -46,6 +45,7 @@ export function openESQLControlFlyout({
     core,
     parentApi: search,
     loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+      const { ESQLControlsFlyout } = await import('./control_flyout');
       return (
         <ESQLControlsFlyout
           ariaLabelledBy={ariaLabelledBy}
