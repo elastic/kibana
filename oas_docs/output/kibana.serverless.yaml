@@ -23854,7 +23854,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a failed call.
+          description: Indicates a bad request call.
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
@@ -23979,7 +23979,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a failed call.
+          description: Indicates a bad request call.
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
