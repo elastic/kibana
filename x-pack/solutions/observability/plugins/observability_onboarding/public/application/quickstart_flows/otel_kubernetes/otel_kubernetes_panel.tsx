@@ -37,14 +37,17 @@ import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
-
-const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.6.3';
-const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
+import { buildInstallStackCommand } from './build_install_stack_command';
+import {
+  CLUSTER_OVERVIEW_DASHBOARD_ID,
+  OTEL_HELM_CHARTS_REPO,
+  OTEL_STACK_NAMESPACE,
+} from './constants';
+import { buildValuesFileUrl } from './build_values_file_url';
 
 export const OtelKubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8sOtel', {
+    text: i18n.translate('xpack.observability.autoDetectPanel.breadcrumbs.k8sOtel', {
       defaultMessage: 'Kubernetes: OpenTelemetry',
     }),
   });
@@ -53,9 +56,10 @@ export const OtelKubernetesPanel: React.FC = () => {
   const {
     services: {
       share,
-      context: { isServerless },
+      context: { isServerless, isCloud },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
@@ -75,34 +79,31 @@ export const OtelKubernetesPanel: React.FC = () => {
     }
   }, [data, onPageReady]);
 
-  const ingestEndpointUrl = isServerless ? data?.managedOtlpServiceUrl : data?.elasticsearchUrl;
-
   if (error) {
     return (
       <EmptyPrompt onboardingFlowType="kubernetes_otel" error={error} onRetryClick={refetch} />
     );
   }
 
-  const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
-  const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
-  const valuesFileName =
-    !isServerless || metricsOnboardingEnabled ? 'values.yaml' : 'logs-values.yaml';
-
-  const otelKubeStackValuesFileUrl = data
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/${valuesFileName}`
-    : '';
-  const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
+  const otelKubeStackValuesFileUrl = data
+    ? buildValuesFileUrl({
+        isServerless,
+        isCloud,
+        metricsOnboardingEnabled,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+      })
+    : undefined;
   const installStackCommand = data
-    ? `kubectl create namespace ${namespace}
-kubectl create secret generic elastic-secret-otel \\
-  --namespace ${namespace} \\
-  --from-literal=${elasticEndpointVarName}='${ingestEndpointUrl}' \\
-  --from-literal=elastic_api_key='${data.apiKeyEncoded}'
-helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
-  --namespace ${namespace} \\
-  --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'`
+    ? buildInstallStackCommand({
+        isServerless,
+        isCloud,
+        metricsOnboardingEnabled,
+        managedOtlpEndpointUrl: data.managedOtlpServiceUrl,
+        elasticsearchUrl: data.elasticsearchUrl,
+        apiKeyEncoded: data.apiKeyEncoded,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+      })
     : undefined;
 
   return (
@@ -111,7 +112,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
         steps={[
           {
             title: i18n.translate(
-              'xpack.observability_onboarding.otelKubernetesPanel.addRepositoryStepTitle',
+              'xpack.observability.otelKubernetesPanel.addRepositoryStepTitle',
               {
                 defaultMessage: 'Add the OpenTelemetry repository to Helm',
               }
@@ -130,17 +131,14 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
             ),
           },
           {
-            title: i18n.translate(
-              'xpack.observability_onboarding.otelKubernetesPanel.installStackStepTitle',
-              {
-                defaultMessage: 'Install the OpenTelemetry Operator',
-              }
-            ),
+            title: i18n.translate('xpack.observability.otelKubernetesPanel.installStackStepTitle', {
+              defaultMessage: 'Install the OpenTelemetry Operator',
+            }),
             children: installStackCommand ? (
               <>
                 <p>
                   <FormattedMessage
-                    id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
+                    id="xpack.observability.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
                     defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. Compatible with Helm up to version 3.18.4. For automatic certificate renewal, we recommend installing the {link}, and customize the values.yaml file before the installation as described {doc}."
                     values={{
                       link: (
@@ -150,7 +148,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                           data-test-subj="observabilityOnboardingOtelKubernetesPanelCertManagerLink"
                         >
                           {i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.certmanagerLinkLabel',
+                            'xpack.observability.otelKubernetesPanel.certmanagerLinkLabel',
                             { defaultMessage: 'cert-manager' }
                           )}
                         </EuiLink>
@@ -162,7 +160,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                           data-test-subj="observabilityOnboardingOtelKubernetesPanelCertManagerDocsLink"
                         >
                           {i18n.translate(
-                            'xpack.observability_onboarding.otelKubernetesPanel.certmanagerDocsLinkLabel',
+                            'xpack.observability.otelKubernetesPanel.certmanagerDocsLinkLabel',
                             { defaultMessage: 'in our documentation' }
                           )}
                         </EuiLink>
@@ -171,7 +169,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                   />{' '}
                   <EuiIconTip
                     content={i18n.translate(
-                      'xpack.observability_onboarding.otelKubernetesPanel.helmsAutogeneratedTLSCertificatesTextLabel',
+                      'xpack.observability.otelKubernetesPanel.helmsAutogeneratedTLSCertificatesTextLabel',
                       {
                         defaultMessage:
                           "Helm's autogenerated TLS certificates have a default expiration period of 365 days. These certificates are not renewed automatically unless the release is manually updated. Enabling cert-manager allows for automatic certificate renewal.",
@@ -202,7 +200,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                       data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
                     >
                       {i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileButtonEmptyLabel',
+                        'xpack.observability.otelKubernetesPanel.downloadValuesFileButtonEmptyLabel',
                         { defaultMessage: 'Download values file' }
                       )}
                     </EuiButtonEmpty>
@@ -217,7 +215,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
             ? [
                 {
                   title: i18n.translate(
-                    'xpack.observability_onboarding.otelKubernetesPanel.instrumentApplicationStepTitle',
+                    'xpack.observability.otelKubernetesPanel.instrumentApplicationStepTitle',
                     {
                       defaultMessage: 'Instrument your application (optional)',
                     }
@@ -226,7 +224,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                     <>
                       <p>
                         {i18n.translate(
-                          'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
+                          'xpack.observability.otelKubernetesPanel.theOperatorAutomatesTheLabel',
                           {
                             defaultMessage:
                               'The Operator automates the injection of auto-instrumentation libraries into the annotated pods for some languages.',
@@ -236,7 +234,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                       <EuiSpacer />
                       <EuiButtonGroup
                         legend={i18n.translate(
-                          'xpack.observability_onboarding.otelKubernetesPanel.selectProgrammingLanguageLegend',
+                          'xpack.observability.otelKubernetesPanel.selectProgrammingLanguageLegend',
                           {
                             defaultMessage: 'Select a programming language',
                           }
@@ -272,17 +270,16 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                           font-weight: ${theme.euiTheme.font.weight.bold};
                         `}
                       >
-                        {i18n.translate(
-                          'xpack.observability_onboarding.otelKubernetesPanel.step3a.title',
-                          { defaultMessage: '3(a) - Start with one of these annotations methods:' }
-                        )}
+                        {i18n.translate('xpack.observability.otelKubernetesPanel.step3a.title', {
+                          defaultMessage: '3(a) - Start with one of these annotations methods:',
+                        })}
                       </p>
                       <EuiSpacer />
                       <EuiAccordion
                         id={'otelKubernetesAccordionSingleDeployment'}
                         paddingSize="s"
                         buttonContent={i18n.translate(
-                          'xpack.observability_onboarding.otelKubernetesPanel.annotation.deployment',
+                          'xpack.observability.otelKubernetesPanel.annotation.deployment',
                           {
                             defaultMessage:
                               'Annotate specific deployment Pods modifying its manifest',
@@ -299,7 +296,7 @@ spec:
   template:
     metadata:
       annotations:
-        instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
+        instrumentation.opentelemetry.io/inject-${idSelected}: "${OTEL_STACK_NAMESPACE}/elastic-instrumentation"
       ...
     spec:
       containers:
@@ -313,7 +310,7 @@ spec:
                         id={'otelKubernetesAccordionAllResources'}
                         paddingSize="s"
                         buttonContent={i18n.translate(
-                          'xpack.observability_onboarding.otelKubernetesPanel.annotation.resources',
+                          'xpack.observability.otelKubernetesPanel.annotation.resources',
                           { defaultMessage: 'Annotate all resources in a namespace' }
                         )}
                       >
@@ -323,7 +320,7 @@ spec:
                           isCopyable={true}
                           data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
                         >
-                          {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"`}
+                          {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
                         </EuiCodeBlock>
                       </EuiAccordion>
                       <EuiSpacer />
@@ -332,13 +329,10 @@ spec:
                           font-weight: ${theme.euiTheme.font.weight.bold};
                         `}
                       >
-                        {i18n.translate(
-                          'xpack.observability_onboarding.otelKubernetesPanel.step3b.title',
-                          {
-                            defaultMessage:
-                              '3(b) - Restart deployment and ensure the annotations are applied and the auto-instrumentation library is injected:',
-                          }
-                        )}
+                        {i18n.translate('xpack.observability.otelKubernetesPanel.step3b.title', {
+                          defaultMessage:
+                            '3(b) - Restart deployment and ensure the annotations are applied and the auto-instrumentation library is injected:',
+                        })}
                       </p>
                       <EuiSpacer />
                       <EuiCodeBlock
@@ -354,7 +348,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                       <EuiSpacer />
                       <p>
                         <FormattedMessage
-                          id="xpack.observability_onboarding.otelKubernetesPanel.forOtherLanguagesThatLabel"
+                          id="xpack.observability.otelKubernetesPanel.forOtherLanguagesThatLabel"
                           defaultMessage="For other languages where auto-instrumentation is not available, {link}"
                           values={{
                             link: (
@@ -364,7 +358,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                                 target="_blank"
                               >
                                 {i18n.translate(
-                                  'xpack.observability_onboarding.otelKubernetesPanel.referToTheDocumentationLinkLabel',
+                                  'xpack.observability.otelKubernetesPanel.referToTheDocumentationLinkLabel',
                                   { defaultMessage: 'refer to the documentation' }
                                 )}
                               </EuiLink>
@@ -378,24 +372,21 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
               ]
             : []),
           {
-            title: i18n.translate(
-              'xpack.observability_onboarding.otelKubernetesPanel.monitorStepTitle',
-              {
-                defaultMessage: 'Visualize your data',
-              }
-            ),
+            title: i18n.translate('xpack.observability.otelKubernetesPanel.monitorStepTitle', {
+              defaultMessage: 'Visualize your data',
+            }),
             children: data ? (
               <>
                 <p>
                   {metricsOnboardingEnabled && (
                     <FormattedMessage
-                      id="xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
+                      id="xpack.observability.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
                       defaultMessage="Analyze your Kubernetes cluster’s health and monitor your container workloads."
                     />
                   )}
                   {!metricsOnboardingEnabled && (
                     <FormattedMessage
-                      id="xpack.observability_onboarding.logsEssentials.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
+                      id="xpack.observability.logsEssentials.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
                       defaultMessage="After running the previous command, come back and view your data."
                     />
                   )}
@@ -414,13 +405,13 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                           {
                             id: CLUSTER_OVERVIEW_DASHBOARD_ID,
                             title: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
+                              'xpack.observability.otelKubernetesPanel.monitoringCluster',
                               {
                                 defaultMessage: 'Check your Kubernetes cluster health:',
                               }
                             ),
                             label: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
+                              'xpack.observability.otelKubernetesPanel.exploreDashboard',
                               {
                                 defaultMessage: 'Explore Kubernetes Cluster Dashboard',
                               }
@@ -433,13 +424,13 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                           {
                             id: 'services',
                             title: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.servicesTitle',
+                              'xpack.observability.otelKubernetesPanel.servicesTitle',
                               {
                                 defaultMessage: 'Check your application services:',
                               }
                             ),
                             label: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
+                              'xpack.observability.otelKubernetesPanel.servicesLabel',
                               {
                                 defaultMessage: 'Explore Service inventory',
                               }
@@ -451,13 +442,13 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                           {
                             id: 'logs',
                             title: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
+                              'xpack.observability.otelKubernetesPanel.logsTitle',
                               {
                                 defaultMessage: 'View and analyze your logs:',
                               }
                             ),
                             label: i18n.translate(
-                              'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
+                              'xpack.observability.otelKubernetesPanel.logsLabel',
                               {
                                 defaultMessage: 'Explore logs',
                               }

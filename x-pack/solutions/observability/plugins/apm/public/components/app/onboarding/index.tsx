@@ -29,7 +29,7 @@ export function Onboarding() {
   const [agentStatusLoading, setAgentStatusLoading] = useState(false);
   const { services } = useKibana<ApmPluginStartDeps>();
   const { config } = useApmPluginContext();
-  const { docLinks, observabilityShared } = services;
+  const { docLinks, observabilityShared, observability } = services;
   const guideLink =
     docLinks?.links.kibana.guide || 'https://www.elastic.co/guide/en/kibana/current/index.html';
 
@@ -96,13 +96,22 @@ export function Onboarding() {
           checkAgentStatus,
           agentStatus,
           agentStatusLoading,
+          managedOtlpServiceUrl: observability.config.managedOtlpServiceUrl,
         },
         apiKeyLoading,
         agentApiKey,
         createAgentKey
       )
     );
-  }, [agentApiKey, baseUrl, config, apiKeyLoading, agentStatus, agentStatusLoading]);
+  }, [
+    agentApiKey,
+    baseUrl,
+    config,
+    apiKeyLoading,
+    agentStatus,
+    agentStatusLoading,
+    observability.config.managedOtlpServiceUrl,
+  ]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (

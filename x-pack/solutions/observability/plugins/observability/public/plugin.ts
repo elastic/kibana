@@ -121,6 +121,7 @@ export interface ConfigSchema {
       enabled: boolean;
     };
   };
+  managedOtlpServiceUrl: string;
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
