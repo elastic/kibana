@@ -329,7 +329,7 @@ export const useBulkRemoveFromCaseActions = ({
             disableOnQuery: true,
             disabledLabel: REMOVE_FROM_CASE,
             onClick: (alerts?: TimelineItem[]) => {
-              if (alerts) {
+              if (alerts?.length) {
                 removeAlertModal.open({
                   alertId: alerts.map((alert) => alert._id),
                   caseId,
