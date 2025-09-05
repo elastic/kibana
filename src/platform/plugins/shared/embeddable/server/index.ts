@@ -12,6 +12,7 @@ import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 export type { EmbeddableSetup, EmbeddableStart };
 
 export type { EmbeddableRegistryDefinition } from './types';
+export type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
 export type {
   EmbeddableStateWithType,
