@@ -6,22 +6,23 @@
  */
 
 import * as rt from 'io-ts';
-import { dataStreamRT, degradedFieldRT, timeRangeRT } from './common';
+import { dataStreamRT, streamRT, degradedFieldRT, timeRangeRT } from './common';
 
-export const urlSchemaRT = rt.exact(
-  rt.intersection([
-    rt.type({
-      dataStream: dataStreamRT,
-    }),
-    rt.partial({
-      v: rt.literal(1),
-      timeRange: timeRangeRT,
-      breakdownField: rt.string,
-      degradedFields: degradedFieldRT,
-      expandedDegradedField: rt.string,
-      showCurrentQualityIssues: rt.boolean,
-    }),
-  ])
-);
+export const urlSchemaRT = (isStream: boolean) =>
+  rt.exact(
+    rt.intersection([
+      rt.type({
+        dataStream: isStream ? dataStreamRT : streamRT,
+      }),
+      rt.partial({
+        v: rt.literal(1),
+        timeRange: timeRangeRT,
+        breakdownField: rt.string,
+        degradedFields: degradedFieldRT,
+        expandedDegradedField: rt.string,
+        showCurrentQualityIssues: rt.boolean,
+      }),
+    ])
+  );
 
-export type UrlSchema = rt.TypeOf<typeof urlSchemaRT>;
+export type UrlSchema = rt.TypeOf<ReturnType<typeof urlSchemaRT>>;
