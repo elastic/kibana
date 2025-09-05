@@ -64,5 +64,16 @@ export const globalSetup = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   synthtraceFixture,
-  apiServicesFixture
+  apiServicesFixture,
+  // Auto-authenticate with admin role during global setup to pre-create ES security indexes
+  {
+    autoSamlAuthAdmin: [
+      async ({ samlAuth }, use) => {
+        // Automatically authenticate with admin role during setup
+        await samlAuth.session.getApiCredentialsForRole('admin');
+        await use();
+      },
+      { scope: 'worker', auto: true },
+    ],
+  }
 );
