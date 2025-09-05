@@ -21,15 +21,15 @@ const COLORS = {
 const DEFAULTS = {
   WARN_THRESHOLD: 300,
   MAX_TESTS_SHOWN: 10,
-  CI_MULTIPLIER: 3.5,   // Realistic CI slowdown factor
+  CI_MULTIPLIER: 3.5, // Realistic CI slowdown factor
 };
 
 // Context-aware thresholds for different test types (LOCAL development values)
 const TEST_THRESHOLDS = {
-  ENZYME_STYLE: 100,    // Mocked, shallow renders
-  RTL: 300,            // Full renders
-  INTEGRATION: 500,     // Cross-component interactions
-  DEFAULT: 300,         // Fallback threshold
+  ENZYME_STYLE: 100, // Mocked, shallow renders
+  RTL: 300, // Full renders
+  INTEGRATION: 500, // Cross-component interactions
+  DEFAULT: 300, // Fallback threshold
 };
 
 /**
@@ -146,38 +146,48 @@ class SlowTestReporter extends BaseReporter {
   _detectTestType(result, filePath) {
     const testContent = result.fullName.toLowerCase();
     const fileName = filePath.toLowerCase();
-    
+
     // Check for integration test patterns
     if (fileName.includes('integration') || testContent.includes('integration')) {
       return 'INTEGRATION';
     }
-    
+
     // Check for Enzyme patterns
-    if (testContent.includes('shallow') || testContent.includes('mount') ||
-        fileName.includes('enzyme') || testContent.includes('wrapper')) {
+    if (
+      testContent.includes('shallow') ||
+      testContent.includes('mount') ||
+      fileName.includes('enzyme') ||
+      testContent.includes('wrapper')
+    ) {
       return 'ENZYME_STYLE';
     }
-    
+
     // Check for RTL patterns (covers RTL testing approaches)
-    if (testContent.includes('render') || testContent.includes('screen') ||
-        fileName.includes('rtl') || testContent.includes('getby') ||
-        testContent.includes('click') || testContent.includes('type') ||
-        testContent.includes('submit') || testContent.includes('user')) {
+    if (
+      testContent.includes('render') ||
+      testContent.includes('screen') ||
+      fileName.includes('rtl') ||
+      testContent.includes('getby') ||
+      testContent.includes('click') ||
+      testContent.includes('type') ||
+      testContent.includes('submit') ||
+      testContent.includes('user')
+    ) {
       return 'RTL';
     }
-    
+
     return 'DEFAULT';
   }
 
   _getThresholdForTest(result, filePath) {
     const testType = this._detectTestType(result, filePath);
     let baseThreshold = TEST_THRESHOLDS[testType] || TEST_THRESHOLDS.DEFAULT;
-    
+
     // Apply CI multiplier if in CI environment
     if (this._isCI) {
       baseThreshold = Math.round(baseThreshold * DEFAULTS.CI_MULTIPLIER);
     }
-    
+
     return baseThreshold;
   }
 
@@ -188,27 +198,35 @@ class SlowTestReporter extends BaseReporter {
 
   _logContextWarnings() {
     const warnings = [];
-    
+
     if (this._isProfiling) {
       warnings.push('🔍 PROFILING MODE: Running with cold cache and CI-optimized thresholds');
     } else if (!this._isColdCache) {
       warnings.push('⚠️  Running with warm cache - results may not reflect CI performance');
     }
-    
+
     if (this._isCI && !this._isProfiling) {
-      warnings.push(`ℹ️  CI environment detected - thresholds adjusted by ${DEFAULTS.CI_MULTIPLIER}x`);
+      warnings.push(
+        `ℹ️  CI environment detected - thresholds adjusted by ${DEFAULTS.CI_MULTIPLIER}x`
+      );
     }
-    
+
     // Show threshold breakdown for profiling mode
     if (this._isProfiling) {
       const multiplier = this._isCI ? DEFAULTS.CI_MULTIPLIER : 1;
-      warnings.push(`📊 Thresholds: Enzyme(${Math.round(TEST_THRESHOLDS.ENZYME_STYLE * multiplier)}ms) RTL(${Math.round(TEST_THRESHOLDS.RTL * multiplier)}ms) Integration(${Math.round(TEST_THRESHOLDS.INTEGRATION * multiplier)}ms) Default(${Math.round(TEST_THRESHOLDS.DEFAULT * multiplier)}ms)`);
+      warnings.push(
+        `📊 Thresholds: Enzyme(${Math.round(
+          TEST_THRESHOLDS.ENZYME_STYLE * multiplier
+        )}ms) RTL(${Math.round(TEST_THRESHOLDS.RTL * multiplier)}ms) Integration(${Math.round(
+          TEST_THRESHOLDS.INTEGRATION * multiplier
+        )}ms) Default(${Math.round(TEST_THRESHOLDS.DEFAULT * multiplier)}ms)`
+      );
     }
-    
-    warnings.forEach(warning => {
+
+    warnings.forEach((warning) => {
       this.log(this._colorText(`  ${warning}`, COLORS.YELLOW));
     });
-    
+
     if (warnings.length > 0) {
       this.log('');
     }

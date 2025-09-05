@@ -164,26 +164,26 @@ export function runJest(configName = 'jest.config.js') {
   // Handle --profile flag
   if (argv.profile) {
     log.info('🔍 Running Jest in profiling mode with enhanced slow test detection');
-    
+
     // Set profiling environment variable
     process.env.JEST_PROFILING = 'true';
-    
+
     // Note: We intentionally don't set CI=true here because we want to use
     // local thresholds for profiling to catch performance issues accurately
-    
+
     // Remove --profile flag from process.argv since Jest doesn't recognize it
     const profileIndex = process.argv.indexOf('--profile');
     if (profileIndex !== -1) {
       process.argv.splice(profileIndex, 1);
     }
-    
+
     // Add profiling-specific Jest arguments
     const profilingArgs = [
-      '--no-cache',           // Disable Jest cache for cold runs
-      '--no-watchman',        // Disable Watchman for consistent timing
-      '--verbose',            // Show individual test results with timing
-      '--runInBand',          // Run tests serially for consistent timing
-      '--forceExit',          // Ensure clean exit
+      '--no-cache', // Disable Jest cache for cold runs
+      '--no-watchman', // Disable Watchman for consistent timing
+      '--verbose', // Show individual test results with timing
+      '--runInBand', // Run tests serially for consistent timing
+      '--forceExit', // Ensure clean exit
     ];
 
     // Ensure verbose output is shown
@@ -191,24 +191,24 @@ export function runJest(configName = 'jest.config.js') {
       // Make sure we get detailed test output
       process.env.FORCE_COLOR = '1';
     }
-    
+
     // Add profiling args that aren't already present
-    profilingArgs.forEach(arg => {
+    profilingArgs.forEach((arg) => {
       if (!process.argv.includes(arg)) {
         process.argv.push(arg);
       }
     });
-    
+
     // Remove conflicting flags
     const conflictingFlags = ['--watch', '--watchAll'];
-    conflictingFlags.forEach(flag => {
+    conflictingFlags.forEach((flag) => {
       const index = process.argv.indexOf(flag);
       if (index !== -1) {
         process.argv.splice(index, 1);
         log.info(`🚫 Removed ${flag} flag (incompatible with profiling mode)`);
       }
     });
-    
+
     log.info('📊 Profiling mode: Cold cache, serial execution, CI thresholds enabled');
   }
 
