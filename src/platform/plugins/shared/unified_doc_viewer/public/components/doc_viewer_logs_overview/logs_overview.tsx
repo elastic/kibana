@@ -10,7 +10,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getLogDocumentOverview } from '@kbn/discover-utils';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeature,
@@ -107,7 +107,6 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             doc={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
           />
-          <EuiHorizontalRule margin="xs" />
           <LogsOverviewHighlights
             formattedDoc={parsedDoc}
             doc={hit}
