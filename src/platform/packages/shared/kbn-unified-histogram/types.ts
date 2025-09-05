@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -19,7 +19,7 @@ import type {
   LensEmbeddableInput,
   Suggestion,
 } from '@kbn/lens-plugin/public';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Subject } from 'rxjs';
@@ -28,6 +28,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
+import type { UseRequestParamsResult } from './hooks/use_request_params';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -52,6 +53,7 @@ export interface UnifiedHistogramServices {
   storage: Storage;
   expressions: ExpressionsStart;
   capabilities: Capabilities;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /**
@@ -196,7 +198,7 @@ export interface ChartSectionProps {
   /**
    * Required services
    */
-  services?: UnifiedHistogramServices;
+  services: UnifiedHistogramServices;
   /**
    * The abort controller to use for requests
    */
@@ -209,10 +211,7 @@ export interface ChartSectionProps {
    * The current query
    */
   query?: Query | AggregateQuery;
-  /**
-   * The current time range
-   */
-  getTimeRange: () => TimeRange;
+
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */
@@ -234,6 +233,16 @@ export interface ChartSectionProps {
    * @returns The toggle action elements
    */
   renderToggleActions: () => React.ReactElement | undefined;
+
+  /**
+   * The request parameters for the chart
+   */
+  requestParams: UseRequestParamsResult;
+
+  /**
+   * Observable for fetching the histogram data
+   */
+  input$: UnifiedHistogramInput$;
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover

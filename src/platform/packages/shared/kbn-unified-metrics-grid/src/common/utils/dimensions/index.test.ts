@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { categorizeDimensions, sortDimensions } from './dimension_utils';
+import { categorizeDimensions, sortDimensions } from '.';
 
 describe('dimension_utils', () => {
   const dimensions = [
