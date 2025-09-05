@@ -1899,7 +1899,7 @@
     "find-cypress-specs": "^1.41.4",
     "fix-esm": "^1.0.1",
     "form-data": "^4.0.4",
-    "geckodriver": "^6.0.0",
+    "geckodriver": "^6.0.1",
     "gulp-brotli": "^3.0.0",
     "gulp-postcss": "^10.0.0",
     "gulp-terser": "^2.1.0",
