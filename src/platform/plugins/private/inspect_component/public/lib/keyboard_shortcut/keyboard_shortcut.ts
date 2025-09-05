@@ -36,5 +36,4 @@ export const isMac = (): boolean =>
  * Check if Escape key was pressed.
  * @return {boolean} 'true' if Escape key was pressed, 'false' otherwise.
  */
-export const isEscapeKey = (event: KeyboardEvent): boolean =>
-  event.key === 'Escape' || event.key === 'Esc';
+  event.key === 'Escape';
