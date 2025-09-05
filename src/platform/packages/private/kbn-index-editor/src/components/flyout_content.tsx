@@ -14,6 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiToolTip,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
@@ -25,6 +27,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
+import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
 import { isPlaceholderColumn } from '../utils';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
@@ -87,14 +90,37 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           <EuiFlyoutHeader hasBorder>
             <IndexName />
             <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="indexEditor.flyout.headerDescription"
-                defaultMessage={
-                  'Lookup indices can be created manually, by uploading data from a file or through the Elasticsearch API.'
-                }
-              />
-            </EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="indexEditor.flyout.headerDescription"
+                    defaultMessage={
+                      'Lookup indices can be created manually, by uploading data from a file or through the Elasticsearch API.'
+                    }
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  title={i18n.translate('indexEditor.flyout.experimentalLabel.title', {
+                    defaultMessage: 'Technical preview',
+                  })}
+                  content={i18n.translate('indexEditor.flyout.experimentalLabel.content', {
+                    defaultMessage: 'Lookup index editor is currently on Technical preview.',
+                  })}
+                >
+                  <EuiBetaBadge
+                    label=""
+                    iconType="beaker"
+                    size="s"
+                    css={css`
+                      vertical-align: middle;
+                    `}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlyoutHeader>
 
           <ErrorCallout />
