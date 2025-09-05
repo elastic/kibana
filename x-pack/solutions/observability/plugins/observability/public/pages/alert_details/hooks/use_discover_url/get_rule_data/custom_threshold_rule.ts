@@ -30,9 +30,9 @@ export const getCustomThresholdRuleData = ({ rule }: { rule: Rule }) => {
   const filters = ruleParams.criteria
     .flatMap(({ metrics }) =>
       metrics.map((metric) => {
-        return metric.filter
+        return metric.filter && dataViewId
           ? buildCustomFilter(
-              dataViewId!,
+              dataViewId,
               toElasticsearchQuery(fromKueryExpression(metric.filter)),
               true,
               false,
