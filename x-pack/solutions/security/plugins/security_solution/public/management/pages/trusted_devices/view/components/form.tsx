@@ -284,7 +284,7 @@ const ConditionsSection = memo<{
 ConditionsSection.displayName = 'ConditionsSection';
 
 const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
-  const commonFields = [
+  const allFields = [
     {
       value: TrustedDeviceConditionEntryField.DEVICE_ID,
       inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
@@ -296,10 +296,6 @@ const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
     {
       value: TrustedDeviceConditionEntryField.HOST,
       inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
-    },
-    {
-      value: TrustedDeviceConditionEntryField.DEVICE_ID,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
     },
     {
       value: TrustedDeviceConditionEntryField.MANUFACTURER,
@@ -315,17 +311,16 @@ const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
     },
   ];
 
+  // Add USERNAME field only if it's available for the selected OS
   if (isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)) {
-    return [
-      ...commonFields,
-      {
-        value: TrustedDeviceConditionEntryField.USERNAME,
-        inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
-      },
-    ];
+    allFields.push({
+      value: TrustedDeviceConditionEntryField.USERNAME,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
+    });
   }
 
-  return commonFields;
+  // Keep alphabetical order
+  return allFields.sort((a, b) => a.inputDisplay.localeCompare(b.inputDisplay));
 };
 
 const OPERATOR_OPTIONS = [
@@ -475,15 +470,15 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         setHasUserSelectedOs(true);
         setHasFormChanged(true);
 
-        let fieldToUse = currentEntry?.field || TrustedDeviceConditionEntryField.USERNAME;
+        let fieldToUse = currentEntry?.field || TrustedDeviceConditionEntryField.DEVICE_ID;
         let shouldResetValue = false;
 
-        // If current field is USERNAME but USERNAME is not available for new OS selection, reset to HOST
+        // If current field is USERNAME but USERNAME is not available for new OS selection, reset to DEVICE_ID
         if (
           fieldToUse === TrustedDeviceConditionEntryField.USERNAME &&
           !isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)
         ) {
-          fieldToUse = TrustedDeviceConditionEntryField.HOST;
+          fieldToUse = TrustedDeviceConditionEntryField.DEVICE_ID;
           shouldResetValue = true;
         }
 
