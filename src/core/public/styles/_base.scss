@@ -30,5 +30,5 @@
 // POC: Numeric font style overrides
 body {
   font-variant-numeric: tabular-nums slashed-zero !important;
-  font-feature-settings: 'ss01','ss07' !important;
+  font-feature-settings: 'ss07', 'cv02', 'cv09' !important;
 }
