@@ -9,27 +9,42 @@ import {
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
-  EuiSelect,
+  EuiSuperSelect,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
+  EuiToken,
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EsqlToolFieldType } from '@kbn/onechat-common';
-import { capitalize } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import type { FieldArrayWithId, FieldError } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
 import { i18nMessages } from '../i18n';
-import type { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import { EsqlParamSource, type EsqlToolFormData } from '../types/tool_form_types';
+
+const FIELD_TYPE_TOKEN_MAP: Record<EsqlToolFieldType, string> = {
+  [EsqlToolFieldType.TEXT]: 'tokenString',
+  [EsqlToolFieldType.KEYWORD]: 'tokenKeyword',
+  [EsqlToolFieldType.LONG]: 'tokenNumber',
+  [EsqlToolFieldType.INTEGER]: 'tokenNumber',
+  [EsqlToolFieldType.DOUBLE]: 'tokenNumber',
+  [EsqlToolFieldType.FLOAT]: 'tokenNumber',
+  [EsqlToolFieldType.BOOLEAN]: 'tokenBoolean',
+  [EsqlToolFieldType.DATE]: 'tokenDate',
+  [EsqlToolFieldType.OBJECT]: 'tokenObject',
+  [EsqlToolFieldType.NESTED]: 'tokenNested',
+};
 
 interface EsqlParamRowProps {
   index: number;
-  paramField: FieldArrayWithId<OnechatEsqlToolFormData, 'params', 'id'>;
+  paramField: FieldArrayWithId<EsqlToolFormData, 'params', 'id'>;
   removeParamField: (index: number) => void;
 }
 
@@ -40,7 +55,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const { control, formState } = useFormContext<OnechatEsqlToolFormData>();
+  const { control, formState, setValue } = useFormContext<EsqlToolFormData>();
   const { errors, isSubmitted } = formState;
 
   const { triggerEsqlParamWarnings, triggerEsqlParamFieldsValidation } = useEsqlParamsValidation();
@@ -50,9 +65,9 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
     triggerEsqlParamWarnings();
   }, [triggerEsqlParamFieldsValidation, triggerEsqlParamWarnings]);
 
-  const warning = useWatch({
+  const [warning, source] = useWatch({
     control,
-    name: `params.${index}.warning`,
+    name: [`params.${index}.warning`, `params.${index}.source`],
   });
 
   const paramErrors = errors.params?.[index];
@@ -75,23 +90,28 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
       `}
     >
       <EuiTableRowCell>
-        {!isMobile && errorMessages ? (
-          <EuiIconTip
-            content={errorMessages}
-            type="errorFilled"
-            color={euiTheme.colors.danger}
-            size="m"
-          />
-        ) : (
-          warning && (
+        {!isMobile &&
+          ((errorMessages && (
             <EuiIconTip
-              content={warning}
-              type="warningFilled"
-              color={euiTheme.colors.warning}
+              content={errorMessages}
+              type="errorFilled"
+              color={euiTheme.colors.danger}
               size="m"
             />
-          )
-        )}
+          )) ||
+            (warning && (
+              <EuiIconTip
+                content={warning}
+                type="warningFilled"
+                color={euiTheme.colors.warning}
+                size="m"
+              />
+            )) ||
+            (source === EsqlParamSource.Inferred ? (
+              <EuiIcon type="sparkles" color="subdued" size="m" />
+            ) : (
+              <EuiIcon type="documentEdit" color="subdued" size="m" />
+            )))}
       </EuiTableRowCell>
       <EuiTableRowCell
         textOnly={false}
@@ -117,6 +137,9 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
                 onBlur={handleValidation}
                 onChange={(event) => {
                   onChange(event);
+                  if (source === EsqlParamSource.Inferred) {
+                    setValue(`params.${index}.source`, EsqlParamSource.Custom);
+                  }
                   if (isSubmitted) {
                     handleValidation();
                   }
@@ -180,14 +203,31 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           name={`params.${index}.type`}
           render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
             <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiSelect
+              <EuiSuperSelect
                 compressed
                 fullWidth
+                popoverProps={{
+                  panelMinWidth: 150,
+                  zIndex: (euiTheme.levels.header as number) - 1, // ensure the popover doesn't render on top of the bottom bar
+                }}
                 options={Object.values(EsqlToolFieldType).map((option) => ({
                   value: option,
-                  text: capitalize(option),
+                  inputDisplay: (
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiToken
+                          iconType={FIELD_TYPE_TOKEN_MAP[option]}
+                          css={css`
+                            width: ${euiTheme.size.m};
+                            height: ${euiTheme.size.m};
+                          `}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>{option}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  ),
                 }))}
-                inputRef={ref}
+                valueOfSelected={field.value}
                 isInvalid={invalid}
                 {...field}
               />
