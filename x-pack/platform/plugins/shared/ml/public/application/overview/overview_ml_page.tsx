@@ -113,7 +113,12 @@ export const MLOverviewCard = ({
 export const OverviewPage: FC = () => {
   const [user, setUser] = useState<GetUserProfileResponse | undefined>();
   const {
-    services: { docLinks, uiSettings, userProfile },
+    services: {
+      docLinks,
+      uiSettings,
+      userProfile,
+      application: { capabilities },
+    },
   } = useMlKibana();
   const { colorMode } = useEuiTheme();
   const isDarkTheme = colorMode === 'DARK';
@@ -131,6 +136,7 @@ export const OverviewPage: FC = () => {
     'overview'
   );
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
+  const canUploadFile = useMemo(() => Boolean(capabilities.fileUpload.show), [capabilities]);
 
   useEffect(
     function loadUserName() {
@@ -416,7 +422,7 @@ export const OverviewPage: FC = () => {
                 })}
               </h2>
             </EuiTitle>
-            <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} />
+            <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} canUploadFile={canUploadFile} />
           </EuiFlexGroup>
         </EuiFlexGroup>
         <HelpMenu docLink={helpLink} />

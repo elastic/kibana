@@ -67,7 +67,8 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'securitySolutionAssistant',
                 'securitySolutionAttackDiscovery',
                 'securitySolutionSiemMigrations',
-                'dataQuality'
+                'dataQuality',
+                'fileUpload'
               )
             );
             break;

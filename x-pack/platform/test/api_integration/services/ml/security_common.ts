@@ -71,7 +71,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       kibana: [
         {
           base: [],
-          feature: { ml: ['all'], savedObjectsManagement: ['all'] },
+          feature: { ml: ['all'], savedObjectsManagement: ['all'], fileUpload: ['all'] },
           spaces: ['default'],
         },
       ],
@@ -82,7 +82,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       kibana: [
         {
           base: [],
-          feature: { ml: ['all'], savedObjectsManagement: ['all'] },
+          feature: { ml: ['all'], savedObjectsManagement: ['all'], fileUpload: ['all'] },
           spaces: ['default', 'space1'],
         },
       ],
@@ -103,7 +103,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       kibana: [
         {
           base: [],
-          feature: { ml: ['read'], savedObjectsManagement: ['read'] },
+          feature: { ml: ['read'], savedObjectsManagement: ['read'], fileUpload: ['all'] },
           spaces: ['default'],
         },
       ],
@@ -114,7 +114,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       kibana: [
         {
           base: [],
-          feature: { ml: ['read'], savedObjectsManagement: ['read'] },
+          feature: { ml: ['read'], savedObjectsManagement: ['read'], fileUpload: ['all'] },
           spaces: ['default', 'space1'],
         },
       ],
@@ -180,6 +180,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
             advancedSettings: ['all'],
             indexPatterns: ['all'],
             generalCasesV3: ['all'],
+            fileUpload: ['all'],
           },
           spaces: ['*'],
         },

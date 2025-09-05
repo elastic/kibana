@@ -78,6 +78,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // (easier to say: all "proper" Kibana features are enabled)
             const exceptions = [
               'ml_file_data_visualizer',
+              'fileUpload',
               'monitoring',
               'enterpriseSearchAnalytics',
               'enterpriseSearchApplications',
