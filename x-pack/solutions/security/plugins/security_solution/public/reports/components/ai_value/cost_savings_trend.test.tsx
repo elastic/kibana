@@ -15,6 +15,20 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
 }));
 
+// Mock useKibana
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      uiSettings: {
+        get: jest.fn(() => 'mock-connector-id'),
+      },
+      inference: {
+        // Mock inference service if needed
+      },
+    },
+  }),
+}));
+
 const defaultProps = {
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',

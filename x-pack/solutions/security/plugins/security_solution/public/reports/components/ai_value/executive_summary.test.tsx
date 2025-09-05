@@ -17,13 +17,20 @@ jest.mock('./time_saved', () => ({ TimeSaved: () => <div data-test-subj="mockTim
 jest.mock('./compare_percentage', () => ({
   ComparePercentage: () => <div data-test-subj="mockComparePercentage" />,
 }));
+jest.mock('./filtering_rate', () => ({
+  FilteringRate: () => <div data-test-subj="mockFilteringRate" />,
+}));
 jest.mock('../../../common/components/user_profiles/use_get_current_user_profile', () => ({
   useGetCurrentUserProfile: () => ({
     data: { user: { full_name: 'Test User', username: 'testuser' } },
   }),
 }));
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
+  VisualizationEmbeddable: () => <div data-test-subj="mockVisualizationEmbeddable" />,
+}));
 
 const defaultProps = {
+  attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
   from: '2023-01-01T00:00:00Z',
   to: '2023-01-31T23:59:59Z',
   hasAttackDiscoveries: true,
@@ -69,13 +76,10 @@ describe('ExecutiveSummary', () => {
     render(<ExecutiveSummary {...defaultProps} />);
     expect(screen.getByTestId('executiveSummaryMessage').textContent).toContain('$1,000');
     expect(screen.getByTestId('executiveSummaryMessage').textContent).toContain('10');
-    expect(screen.getByTestId('executiveSummaryStatsList')).toBeInTheDocument();
-    expect(screen.getByTestId('executiveSummaryCostSavingsStat').textContent).toContain('$1,000');
-    expect(screen.getByTestId('executiveSummaryAlertFilteringStat').textContent).toContain('50%');
-    expect(screen.getByTestId('executiveSummaryHoursSavedStat').textContent).toContain('10');
-    expect(screen.getByTestId('executiveSummaryThreatsDetectedStat').textContent).toContain(
-      '66.7% increase in real threats detected, improving detection coverage. '
-    );
+    expect(screen.getByTestId('executiveSummarySideStats')).toBeInTheDocument();
+    expect(screen.getByTestId('mockCostSavings')).toBeInTheDocument();
+    expect(screen.getByTestId('mockTimeSaved')).toBeInTheDocument();
+    expect(screen.getByTestId('mockFilteringRate')).toBeInTheDocument();
   });
 
   it('renders side stats when hasAttackDiscoveries is true', () => {
