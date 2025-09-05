@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLAstRerankCommand, ESQLMap, ESQLSingleAstItem } from '../../../types';
-import { isAssignment, isFunctionExpression } from '../../../ast/is';
+import { isAssignment } from '../../../ast/is';
+import {
+  extractValidExpressionRoot,
+  getBinaryExpressionOperand,
+} from '../../../definitions/utils/expressions';
 
 export type RhsBooleanState = 'after-assignment' | 'within' | 'complete' | 'none';
 
@@ -22,12 +26,10 @@ export enum CaretPosition {
   RERANK_KEYWORD, // After RERANK: can be target field assignment or query
   RERANK_AFTER_TARGET_FIELD, // After potential target field: suggest assignment operator
   RERANK_AFTER_TARGET_ASSIGNMENT, // After "target_field ="
-  SUGGEST_ON_KEYWORD, // Should suggest "ON"
-  ON_AFTER_FIELD_LIST, // After "ON": suggest field names
-  ON_AFTER_FIELD_ASSIGNMENT, // After "field =" in field list: suggest expressions/functions
+  ON_KEYWORD, // Should suggest "ON"
+  ON_WITHIN_FIELD_LIST, // After "ON": suggest field names
   ON_AFTER_FIELD_COMPLETE, // After complete field: suggest continuations (comma, WITH, pipe, assignment)
   WITHIN_BOOLEAN_EXPRESSION, // Inside booleanExpression: suggest operators (>, <, ==, etc.)
-  BOOLEAN_EXPRESSION_COMPLETE, // Complete booleanExpression: suggest continuations (AND, OR, comma, WITH, pipe)
   WITHIN_MAP_EXPRESSION, // After "WITH": suggest a json of params
   AFTER_COMMAND, // Command is complete, suggest pipe
 }
@@ -52,40 +54,26 @@ export function getPosition(innerText: string, command: ESQLCommand): RerankPosi
   }
 
   if (OnMap) {
-    // Check for incomplete field assignment first: "ON my_field = "
-    if (hasIncompleteFieldAssignment(rerankCommand) || isAfterFieldAssignment(innerText)) {
-      return { position: CaretPosition.ON_AFTER_FIELD_ASSIGNMENT };
-    }
-
-    // Follow EVAL pattern: treat RHS as within-expression; autocomplete decides completeness
     const lastField = rerankCommand.fields?.[rerankCommand.fields.length - 1];
 
     if (lastField && isAssignment(lastField)) {
-      // WHERE pattern: extract RHS for boolean expression
-      const expressionRoot = Array.isArray(lastField.args[1])
-        ? (lastField.args[1][0] as ESQLSingleAstItem)
-        : lastField.args[1];
+      const rhs = getBinaryExpressionOperand(lastField, 'right');
 
-      if (expressionRoot) {
-        return {
-          position: CaretPosition.WITHIN_BOOLEAN_EXPRESSION,
-          // Extract the boolean expression's AST root
-          // This context is crucial to offering 'AND/OR' after a complete expression or values after an operator
-          context: { expressionRoot },
-        };
-      }
+      return {
+        position: CaretPosition.WITHIN_BOOLEAN_EXPRESSION,
+        context: { expressionRoot: extractValidExpressionRoot(rhs) },
+      };
     }
+
     if (isAfterCompleteFieldWithSpace(innerText)) {
       return { position: CaretPosition.ON_AFTER_FIELD_COMPLETE };
     }
 
-    return { position: CaretPosition.ON_AFTER_FIELD_LIST };
+    return { position: CaretPosition.ON_WITHIN_FIELD_LIST };
   }
 
-  const queryComplete = !!(rerankCommand.query && !rerankCommand.query.incomplete);
-
-  if (queryComplete) {
-    return { position: CaretPosition.SUGGEST_ON_KEYWORD };
+  if (!!(rerankCommand.query && !rerankCommand.query.incomplete)) {
+    return { position: CaretPosition.ON_KEYWORD };
   }
 
   // Check targetField (only if query is not complete)
@@ -99,37 +87,6 @@ export function getPosition(innerText: string, command: ESQLCommand): RerankPosi
   }
 
   return { position: CaretPosition.RERANK_KEYWORD };
-}
-
-function hasIncompleteFieldAssignment(command: ESQLAstRerankCommand): boolean {
-  try {
-    const lastField = command.fields?.[command.fields.length - 1];
-
-    if (!lastField || !isFunctionExpression(lastField)) {
-      return false;
-    }
-
-    if (!isAssignment(lastField) || !Array.isArray(lastField.args)) {
-      return false;
-    }
-
-    const rhs = lastField.args[1];
-
-    return (
-      rhs === undefined ||
-      (Array.isArray(rhs) && rhs.length === 0) ||
-      (!Array.isArray(rhs) && !!rhs?.incomplete)
-    );
-  } catch {
-    return false;
-  }
-}
-
-// WWhen the RHS is mssing, the CTS does not include ASSING(=).
-// The Ast cannot see "field =" inside the ON clause yet.
-// Use a regex on raw text ti detect the incomplete assignment and drive suggestions.
-function isAfterFieldAssignment(text: string): boolean {
-  return /\bon\s+.*\w+\s*=\s*$/i.test(text);
 }
 
 // AST does not encode trailing whitespace/caret after fields: we rely on regex

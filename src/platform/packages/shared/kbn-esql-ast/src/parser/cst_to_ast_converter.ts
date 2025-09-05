@@ -1425,17 +1425,28 @@ export class CstToAstConverter {
       }
 
       // 1) field assignment: <col> = <booleanExpression>
-      if (ctx.ASSIGN() && ctx.booleanExpression()) {
+      if (ctx.ASSIGN()) {
         const left = this.toColumn(qualifiedNameCtx);
-        const right = this.collectBooleanExpression(ctx.booleanExpression());
         const assignment = this.createFunction(
           ctx.ASSIGN().getText(),
           ctx,
           undefined,
           'binary-expression'
         ) as ast.ESQLBinaryExpression;
-        assignment.args.push(left, right);
-        assignment.location = this.computeLocationExtends(assignment);
+
+        if (ctx.booleanExpression()) {
+          const right = this.collectBooleanExpression(ctx.booleanExpression());
+          assignment.args.push(left, right);
+          assignment.location = this.computeLocationExtends(assignment);
+        } else {
+          // to detect "ON field ="  (incomplete assignment) we create a new node in the AST
+          assignment.args.push(left, []);
+          assignment.incomplete = true;
+          assignment.location = {
+            min: left.location.min,
+            max: ctx.ASSIGN()!.symbol.stop,
+          };
+        }
 
         return assignment;
       }
