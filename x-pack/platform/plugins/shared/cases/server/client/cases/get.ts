@@ -151,7 +151,7 @@ export const getCasesByAlertID = async (
 };
 
 const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
-  stats.get(id) ?? { alerts: 0, userComments: 0 };
+  stats.get(id) ?? { alerts: 0, userComments: 0, events: 0 };
 
 /**
  * The parameters for retrieving a case

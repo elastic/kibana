@@ -854,8 +854,8 @@ describe('update', () => {
       });
 
       const caseCommentsStats = new Map();
-      caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2 });
-      caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4 });
+      caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2, events: 0 });
+      caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4, events: 0 });
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         caseCommentsStats
       );
