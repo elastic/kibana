@@ -1666,6 +1666,8 @@
       "@kbn/reporting-public/*": ["src/platform/packages/private/kbn-reporting/public/*"],
       "@kbn/reporting-server": ["src/platform/packages/private/kbn-reporting/server"],
       "@kbn/reporting-server/*": ["src/platform/packages/private/kbn-reporting/server/*"],
+      "@kbn/reporting-test-routes": ["x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes"],
+      "@kbn/reporting-test-routes/*": ["x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/*"],
       "@kbn/resizable-layout": ["src/platform/packages/shared/kbn-resizable-layout"],
       "@kbn/resizable-layout/*": ["src/platform/packages/shared/kbn-resizable-layout/*"],
       "@kbn/resizable-layout-examples-plugin": ["examples/resizable_layout_examples"],
