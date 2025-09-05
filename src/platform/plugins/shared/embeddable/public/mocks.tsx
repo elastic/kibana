@@ -60,6 +60,8 @@ const createStartContract = (): Start => {
     getTransforms: jest.fn(),
     hasTransforms: jest.fn(),
     getEnhancement: jest.fn(),
+    transformEnhancementsIn: jest.fn(),
+    transformEnhancementsOut: jest.fn(),
   };
   return startContract;
 };

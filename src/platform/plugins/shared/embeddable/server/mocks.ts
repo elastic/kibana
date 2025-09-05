@@ -21,4 +21,6 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   ...createEmbeddablePersistableStateServiceMock(),
   getTransforms: jest.fn(),
+  transformEnhancementsIn: jest.fn(),
+  transformEnhancementsOut: jest.fn(),
 });
