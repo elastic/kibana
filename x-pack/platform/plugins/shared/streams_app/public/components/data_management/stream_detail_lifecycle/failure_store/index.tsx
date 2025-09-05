@@ -29,7 +29,10 @@ export const StreamDetailFailureStore = ({
 
   const {
     failure_store: failureStore,
-    privileges: { failure_store: failureStorePrivilege },
+    privileges: {
+      read_failure_store: readFailureStorePrivilege,
+      manage_failure_store: manageFailureStorePrivilege,
+    },
   } = definition;
 
   const closeModal = () => {
@@ -66,9 +69,9 @@ export const StreamDetailFailureStore = ({
 
   return (
     <>
-      {failureStorePrivilege && failureStore && (
+      {readFailureStorePrivilege && failureStore && (
         <>
-          {isFailureStoreModalOpen && (
+          {isFailureStoreModalOpen && manageFailureStorePrivilege && (
             <FailureStoreModal
               onCloseModal={closeModal}
               onSaveModal={handleSaveModal}

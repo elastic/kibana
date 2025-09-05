@@ -518,6 +518,7 @@ export class StreamsClient {
               'manage_data_stream_lifecycle',
               'manage_ilm',
               'read_failure_store',
+              'manage_failure_store',
             ],
           },
         ],
@@ -532,7 +533,8 @@ export class StreamsClient {
         privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
       text_structure: privileges.cluster.monitor_text_structure,
-      failure_store: privileges.index[name].read_failure_store,
+      read_failure_store: privileges.index[name].read_failure_store,
+      manage_failure_store: privileges.index[name].manage_failure_store,
     };
   }
 

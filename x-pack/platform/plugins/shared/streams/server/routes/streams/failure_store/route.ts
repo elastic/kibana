@@ -85,7 +85,7 @@ export const updateFailureStoreRoute = createServerRoute({
 
     // Check if user has failure store read privileges
     const privileges = await streamsClient.getPrivileges(name);
-    if (!privileges.failure_store) {
+    if (!privileges.manage_failure_store) {
       throw new SecurityError('Insufficient privileges to update failure store configuration');
     }
 

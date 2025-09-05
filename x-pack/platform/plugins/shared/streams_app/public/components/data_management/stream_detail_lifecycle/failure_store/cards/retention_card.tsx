@@ -20,7 +20,10 @@ export const RetentionCard = ({
 }) => {
   const { href } = useFailureStoreRedirectLink({ definition });
 
-  const { failure_store: failureStore } = definition;
+  const {
+    failure_store: failureStore,
+    privileges: { manage_failure_store: manageFailureStorePrivilege },
+  } = definition;
   if (!failureStore || !failureStore.retentionPeriod) {
     return null;
   }
@@ -64,22 +67,26 @@ export const RetentionCard = ({
     }
   );
 
-  const actions = [
-    {
-      iconType: 'pencil',
-      ariaLabel: editFailureStore,
-      tooltip: editFailureStore,
-      onClick: () => openModal(true),
-      'data-test-subj': 'streamFailureStoreEditRetention',
-    },
-    {
+  const getActions = () => {
+    const actions = [];
+    if (manageFailureStorePrivilege) {
+      actions.push({
+        iconType: 'pencil',
+        ariaLabel: editFailureStore,
+        tooltip: editFailureStore,
+        onClick: () => openModal(true),
+        'data-test-subj': 'streamFailureStoreEditRetention',
+      });
+    }
+    actions.push({
       iconType: 'discoverApp',
       ariaLabel: viewInDiscover,
       tooltip: viewInDiscover,
       href,
       'data-test-subj': 'streamFailureStoreViewInDiscover',
-    },
-  ];
+    });
+    return actions;
+  };
 
   const metric = [
     {
@@ -89,5 +96,5 @@ export const RetentionCard = ({
     },
   ];
 
-  return <BaseMetricCard title={title} actions={actions} metrics={metric} />;
+  return <BaseMetricCard title={title} actions={getActions()} metrics={metric} />;
 };
