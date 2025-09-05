@@ -380,6 +380,10 @@ export const dashboardCreateOptionsSchema = schema.object({
   initialNamespaces: schema.maybe(createOptionsSchemas.initialNamespaces),
 });
 
+export const dashboardCreateSchema = schema
+  .object(searchResultsAttributes)
+  .extends(dashboardAdditionalAttributes);
+
 export const dashboardUpdateOptionsSchema = schema.object({
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
@@ -562,7 +566,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: dashboardCreateOptionsSchema,
       },
       data: {
-        schema: dashboardAttributesSchemaRequest,
+        schema: dashboardCreateSchema,
       },
     },
     out: {
