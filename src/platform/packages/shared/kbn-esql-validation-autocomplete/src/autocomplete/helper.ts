@@ -8,7 +8,8 @@
  */
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { type ESQLCommand, BasicPrettyPrinter, Builder, EDITOR_MARKER } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, EDITOR_MARKER } from '@kbn/esql-ast';
+import { expandEvals } from '../shared/expand_evals';
 
 /**
  * This function is used to build the query that will be used to compute the
@@ -25,11 +26,11 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
   const lastCommand = commands[commands.length - 1];
   if (lastCommand && lastCommand.name === 'fork' && lastCommand.args.length > 0) {
     /**
-     * This translates the current fork command branch into a simpler but equivalent
+     * This flattens the current fork branch into a simpler but equivalent
      * query that is compatible with the existing field computation/caching strategy.
      *
      * The intuition here is that if the cursor is within a fork branch, the
-     * previous context is equivalent to a query without the FORK command.:
+     * previous context is equivalent to a query without the FORK command:
      *
      * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
      * Simplified:     FROM lolz | EVAL foo = 1 | EVAL baz = 3
@@ -54,13 +55,8 @@ export function getQueryForFields(queryString: string, root: ESQLAstQueryExpress
        * Original query: FROM lolz | EVAL foo = 1, bar = foo + 1, baz = bar + 1, /
        * Simplified:     FROM lolz | EVAL foo = 1 | EVAL bar = foo + 1 | EVAL baz = bar + 1
        */
-      const individualEvalCommands: ESQLCommand[] = [];
-      for (const expression of lastCommand.args) {
-        individualEvalCommands.push(Builder.command({ name: 'eval', args: [expression] }));
-      }
-      const newCommands = commands
-        .slice(0, -1)
-        .concat(endsWithComma ? individualEvalCommands : individualEvalCommands.slice(0, -1));
+      const expanded = expandEvals(commands);
+      const newCommands = expanded.slice(0, endsWithComma ? undefined : -1);
       return BasicPrettyPrinter.print({ ...root, commands: newCommands });
     }
   }

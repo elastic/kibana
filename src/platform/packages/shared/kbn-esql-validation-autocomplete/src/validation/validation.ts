@@ -27,6 +27,7 @@ import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getQueryForFields } from '../autocomplete/helper';
 import { getColumnsByTypeHelper } from '../shared/resources_helpers';
+import { expandEvals } from '../shared/expand_evals';
 
 /**
  * ES|QL validation public API
@@ -288,37 +289,6 @@ function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
   }
 
   return subsequences.map((subsequence) => Builder.expression.query(subsequence));
-}
-
-/**
- * Expands EVAL commands into separate commands for each expression.
- *
- * E.g. `EVAL 1 + 2, 3 + 4` becomes `EVAL 1 + 2 | EVAL 3 + 4`
- *
- * This is logically equivalent and makes validation and field existence detection much easier.
- *
- * @param commands The list of commands to expand.
- * @returns The expanded list of commands.
- */
-function expandEvals(commands: ESQLCommand[]): ESQLCommand[] {
-  const expanded: ESQLCommand[] = [];
-  for (const command of commands) {
-    if (command.name.toLowerCase() === 'eval') {
-      // treat each expression within EVAL as a separate EVAL command
-      for (const arg of command.args) {
-        expanded.push(
-          Builder.command({
-            name: 'eval',
-            args: [arg],
-            location: command.location,
-          })
-        );
-      }
-    } else {
-      expanded.push(command);
-    }
-  }
-  return expanded;
 }
 
 /**
