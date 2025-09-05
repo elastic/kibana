@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const monacoEditor = getService('monacoEditor');
   const retry = getService('retry');
-  const find = getService('find');
+  const toasts = getService('toasts');
 
   const { common, unifiedFieldList, discover } = getPageObjects([
     'common',
@@ -64,8 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'the toast appears indicating that the search session is saved',
           async () => {
-            const element = await find.byButtonText('Check its progress here');
-            return !!element;
+            const count = await toasts.getCount();
+            return count > 0;
           }
         );
       });
@@ -83,8 +83,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'the toast appears indicating that the search session is saved',
           async () => {
-            const element = await find.byButtonText('Check its progress here');
-            return !!element;
+            const count = await toasts.getCount();
+            return count > 0;
           }
         );
         await discover.waitUntilSearchingHasFinished();
@@ -110,8 +110,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'the toast appears indicating that the search session is saved',
           async () => {
-            const element = await find.byButtonText('Check its progress here');
-            return !!element;
+            const count = await toasts.getCount();
+            return count > 0;
           }
         );
       });
