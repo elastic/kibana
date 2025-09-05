@@ -93,7 +93,7 @@ export interface SearchServiceSetupDependencies {
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
   share: SharePluginStart;
@@ -230,7 +230,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     coreStart: CoreStart,
     {
       fieldFormats,
-      indexPatterns,
+      dataViews,
       inspector,
       screenshotMode,
       scriptedFieldsEnabled,
@@ -246,7 +246,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
-    const aggs = this.aggsService.start({ fieldFormats, dataViews: indexPatterns });
+    const aggs = this.aggsService.start({ fieldFormats, dataViews });
 
     const warningsServices = {
       inspector,
@@ -258,7 +258,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      dataViews: indexPatterns,
+      dataViews,
       onResponse: (request, response, options) => {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
@@ -349,7 +349,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
-      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
+      searchSource: this.searchSourceService.start(dataViews, searchSourceDependencies),
     };
   }
 

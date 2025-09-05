@@ -153,7 +153,7 @@ export class DataPublicPlugin
 
     const search = this.searchService.start(core, {
       fieldFormats,
-      indexPatterns: dataViews,
+      dataViews,
       inspector,
       screenshotMode,
       share,

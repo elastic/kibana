@@ -48,10 +48,10 @@ export function getFunctionDefinition({
       { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
     ) {
       return defer(async () => {
-        const [{ aggs, indexPatterns, searchSource, getNow }, { handleEsaggsRequest }] =
+        const [{ aggs, dataViews, searchSource, getNow }, { handleEsaggsRequest }] =
           await Promise.all([getStartDependencies(), import('../../../common/search/expressions')]);
 
-        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const indexPattern = await dataViews.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
           args.aggs?.map((agg) => agg.value) ?? [],
@@ -114,7 +114,7 @@ export function getEsaggs({
       const { search, nowProvider } = self;
       return {
         aggs: search.aggs,
-        indexPatterns: dataViews,
+        dataViews,
         searchSource: search.searchSource,
         getNow: () => nowProvider.get(),
       };
