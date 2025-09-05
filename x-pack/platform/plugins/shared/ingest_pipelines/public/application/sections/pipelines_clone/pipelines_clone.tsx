@@ -32,8 +32,8 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
   if (!window.location.pathname.endsWith(sourceName)) {
     // Context:
 
-    // When we client-side react-router/history navigate to this edit page from pipelines list,
-    // we double encode the pathname part like this: history.push('/<basename>/edit/' + encodeURIComponent(encodeURIComponent('<sourceName>')))
+    // When we client-side react-router/history navigate to this clone page from pipelines list,
+    // we double encode the pathname part like this: history.push('/<basename>/create/' + encodeURIComponent(encodeURIComponent('<sourceName>')))
 
     // Why? Because if we encode it once, history lib will automatically decode it upon loading the page
     // incorrectly mangling the resulting pipeline name, due to a bug in history library
