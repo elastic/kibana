@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -193,9 +194,20 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       <KibanaPageTemplate>
         <KibanaPageTemplate.Header
           pageTitle={
-            [ToolFormMode.View, ToolFormMode.Edit].includes(mode)
-              ? tool?.id
-              : labels.tools.newToolTitle
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {[ToolFormMode.View, ToolFormMode.Edit].includes(mode)
+                  ? tool?.id
+                  : labels.tools.newToolTitle}
+              </EuiFlexItem>
+              {tool?.readonly && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" iconType="lock">
+                    {labels.tools.readOnlyBadge}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           }
           css={css`
             background-color: ${euiTheme.colors.backgroundBasePlain};

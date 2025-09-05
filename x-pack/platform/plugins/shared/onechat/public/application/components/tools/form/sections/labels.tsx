@@ -55,7 +55,7 @@ export const Labels = ({ mode }: LabelsProps) => {
           name="labels"
           render={({ field: { value, onChange, ref, ...field }, fieldState: { invalid } }) => (
             <EuiComboBox
-              placeholder={i18nMessages.toolLabels.form.placeholder}
+              placeholder={!isReadOnly ? i18nMessages.toolLabels.form.placeholder : undefined}
               options={tags.map((tag: string) => ({ label: tag }))}
               selectedOptions={value.map((tag: string) => ({ label: tag }))}
               onChange={(selectedOptions) => {

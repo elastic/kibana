@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { ToolType } from '@kbn/onechat-common';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EditTool } from '../components/tools/edit_tool';
@@ -48,11 +47,5 @@ export const OnechatToolDetailsPage = () => {
     return;
   }
 
-  switch (tool.type) {
-    case ToolType.esql:
-    case ToolType.index_search:
-      return <EditTool />;
-    case ToolType.builtin:
-      return <ViewTool />;
-  }
+  return tool.readonly ? <ViewTool /> : <EditTool />;
 };
