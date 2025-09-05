@@ -25,6 +25,8 @@ interface Props {
   onSetDefaultRoute?: (event: MouseEvent) => void;
   /** Callback function to invoke when the user wants to change their default route button is changed */
   onChangeDefaultRoute?: (event: MouseEvent) => void;
+  onHideSolutionsSection: (hide: boolean) => void;
+  hideSolutionsSection: boolean;
 }
 
 export const OverviewPageFooter: FC<Props> = ({
@@ -32,6 +34,8 @@ export const OverviewPageFooter: FC<Props> = ({
   path,
   onSetDefaultRoute,
   onChangeDefaultRoute,
+  onHideSolutionsSection,
+  hideSolutionsSection,
 }) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
@@ -69,6 +73,19 @@ export const OverviewPageFooter: FC<Props> = ({
           defaultMessage="Display a different page on log in"
         />
       </EuiButtonEmpty>
+      {hideSolutionsSection && (
+        <EuiButtonEmpty
+          size="s"
+          iconType="eye"
+          onClick={() => onHideSolutionsSection(false)}
+          style={{ marginLeft: 8 }}
+          data-test-subj="unhideSolutionsSectionButton"
+        >
+          {i18n.translate('kibana-react.pageFooter.unhideSolutionsSection', {
+            defaultMessage: 'Unhide solutions section',
+          })}
+        </EuiButtonEmpty>
+      )}
     </RedirectAppLinks>
   ) : (
     <EuiButtonEmpty
@@ -97,7 +114,7 @@ export const OverviewPageFooter: FC<Props> = ({
 
   return (
     // Note: Using KibanaPageTemplate.Section instead of EuiPageTemplate causes Jest failures and bundle size issues
-    <EuiPageTemplate.Section component="footer" className="kbnOverviewPageFooter">
+    <EuiPageTemplate.Section component="footer" className="kbnOverviewPageFooter" grow={false}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <div>{defaultRouteButton}</div>

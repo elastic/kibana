@@ -14,6 +14,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
   link: string;
   label: string;
   id: string;
+  lastAccessed?: number; // I don't need this to call, but need to show that this is available somewhere
 }
 
 /**

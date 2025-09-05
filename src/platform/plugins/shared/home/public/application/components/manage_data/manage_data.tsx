@@ -46,6 +46,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
         paddingSize="xl"
         aria-labelledby="homeDataManage__title"
         data-test-subj="homeDataManage"
+        grow={false}
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={1}>

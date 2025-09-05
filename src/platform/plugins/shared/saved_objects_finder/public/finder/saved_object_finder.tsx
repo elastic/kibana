@@ -51,6 +51,7 @@ export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttribut
   getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
   showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
+  getEditUrl(savedObject: SavedObjectCommon<T>): string;
   /** @deprecated doesn't do anything, the full object is returned **/
   includeFields?: string[];
 }
@@ -59,6 +60,7 @@ export interface SavedObjectFinderItem extends SavedObjectCommon {
   title: string | null;
   name: string | null;
   simple: SavedObjectCommon<FinderAttributes>;
+  editUrl: string | null;
 }
 
 interface SavedObjectFinderState {
@@ -80,15 +82,18 @@ interface BaseSavedObjectFinder {
     id: SavedObjectCommon['id'],
     type: SavedObjectCommon['type'],
     name: string,
-    savedObject: SavedObjectCommon
+    savedObject: SavedObjectCommon,
+    editUrl: string | null
   ) => void;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
+  showSearch?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
+  initialTag?: string;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -137,16 +142,28 @@ class SavedObjectFinderUiClass extends React.Component<
 
     const types = visibleTypes ?? Object.keys(metaDataMap);
 
-    const response = await contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
-      contentTypes: types.map((type) => ({ contentTypeId: type })),
-      query: {
-        text: queryText ? `${queryText}*` : undefined,
-        ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
-        limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
-      },
+    // dashboard can't be retrieved with mSearch, so we're firing separate search requests per type
+    const responses = await Promise.all(
+      types.map(
+        async (contentTypeId: string) =>
+          await contentClient.search<SavedObjectCommon<FinderAttributes>>({
+            contentTypeId,
+            query: {
+              text: queryText ? `${queryText}*` : undefined,
+              ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+              limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
+            },
+          })
+      )
+    );
+
+    const hits: SavedObjectFinderItem[] = [];
+
+    responses.forEach((response) => {
+      hits.push(...response.hits);
     });
 
-    const savedObjects = response.hits
+    const savedObjects = hits
       .map((savedObject) => {
         const {
           attributes: { name, title, description },
@@ -160,6 +177,7 @@ class SavedObjectFinderUiClass extends React.Component<
           name: nameToUse,
           simple: savedObject,
           description,
+          editUrl: metaDataMap[savedObject.type]?.getEditUrl?.(savedObject) ?? null,
         };
       })
       .filter((savedObject) => {
@@ -190,7 +208,7 @@ class SavedObjectFinderUiClass extends React.Component<
     this.state = {
       items: [],
       isFetchingItems: false,
-      query: Query.parse(''),
+      query: Query.parse(props.initialTag ? `tag:("${props.initialTag}")` : ''),
     };
   }
 
@@ -202,6 +220,23 @@ class SavedObjectFinderUiClass extends React.Component<
   public componentDidMount() {
     this.isComponentMounted = true;
     this.fetchItems();
+  }
+
+  public componentDidUpdate(
+    prevProps: SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>
+  ) {
+    if (this.props.initialTag && prevProps.initialTag !== this.props.initialTag) {
+      const newQueryString = `tag:(${this.props.initialTag})`;
+
+      if (this.state.query.text !== newQueryString) {
+        this.setState(
+          {
+            query: Query.parse(`tag:("${this.props.initialTag}")`),
+          },
+          this.fetchItems
+        );
+      }
+    }
   }
 
   private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
@@ -259,9 +294,12 @@ class SavedObjectFinderUiClass extends React.Component<
             },
             'data-test-subj': 'savedObjectFinderType',
             render: (_, item) => {
+              if (!item) return null;
               const currentSavedObjectMetaData = savedObjectMetaData.find(
                 (metaData) => metaData.type === item.type
               )!;
+
+              console.log({ item });
               const iconType = (
                 currentSavedObjectMetaData ||
                 ({
@@ -309,7 +347,7 @@ class SavedObjectFinderUiClass extends React.Component<
               onClick={
                 onChoose
                   ? () => {
-                      onChoose(item.id, item.type, fullName, item.simple);
+                      onChoose(item.id, item.type, fullName, item.simple, item?.editUrl);
                     }
                   : undefined
               }
@@ -379,6 +417,7 @@ class SavedObjectFinderUiClass extends React.Component<
         schema: {
           recognizedFields: ['type', 'tag'],
         },
+        hidden: !this.props.showSearch,
       },
       filters: this.props.showFilter
         ? [
@@ -407,7 +446,7 @@ class SavedObjectFinderUiClass extends React.Component<
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
             message={this.props.noItemsMessage}
-            search={search}
+            search={this.props.showSearch ? search : undefined}
             pagination={pagination}
             sorting={!!this.state.query?.text ? undefined : sorting}
             onTableChange={onTableChange}
