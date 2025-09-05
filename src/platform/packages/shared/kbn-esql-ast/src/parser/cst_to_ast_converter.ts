@@ -2388,20 +2388,30 @@ export class CstToAstConverter {
     const valueCtx = ctx._value;
 
     if (keyCtx && valueCtx) {
+      let value: ast.ESQLAstExpression | undefined;
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
-      const nestedMapCtx = valueCtx.mapExpression();
+      const constantCtx = valueCtx.constant();
 
-      const value = nestedMapCtx
-        ? this.fromMapExpression(nestedMapCtx)
-        : (this.fromConstant(valueCtx.constant()) as ast.ESQLAstExpression);
+      if (constantCtx) {
+        value = this.fromConstant(constantCtx) as ast.ESQLAstExpression;
+      }
 
-      const entry = Builder.expression.entry(key, value, {
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception),
-      });
+      const mapExpressionCtx = valueCtx.mapExpression();
 
-      return entry;
+      if (mapExpressionCtx) {
+        value = this.fromMapExpression(mapExpressionCtx);
+      }
+
+      if (value) {
+        const entry = Builder.expression.entry(key, value, {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+        });
+
+        return entry;
+      }
     }
+    return undefined;
   }
 
   // ----------------------------------------------------- constant expressions
