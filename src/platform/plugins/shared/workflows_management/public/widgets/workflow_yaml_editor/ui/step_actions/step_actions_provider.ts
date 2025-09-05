@@ -12,7 +12,6 @@ import type { CSSProperties } from 'react';
 import { debounce } from 'lodash';
 import { monaco } from '@kbn/monaco';
 import { isPair, isScalar, visit, isMap } from 'yaml';
-import type { HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import type YAML from 'yaml';
 import { getMonacoRangeFromYamlNode } from '../../lib/utils';
 
@@ -142,10 +141,6 @@ export function findElasticsearchStepAtPosition(
 }
 
 export interface StepActionsProviderOptions {
-  http: HttpSetup;
-  notifications: NotificationsSetup;
-  esHost?: string;
-  kibanaHost?: string;
   getYamlDocument: () => YAML.Document | null;
 }
 
@@ -343,7 +338,7 @@ export class StepActionsProvider {
     this.setEditorActionsCss({
       position: 'absolute',
       top: `${top}px`,
-      left: `${left}px`,
+      right: `12px`,
       display: 'flex',
       zIndex: 1000,
       background: 'rgba(255, 255, 255, 0.95)',

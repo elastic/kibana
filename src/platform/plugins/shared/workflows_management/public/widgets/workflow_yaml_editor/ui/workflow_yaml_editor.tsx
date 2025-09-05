@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable no-console */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +33,8 @@ import {
 } from '../lib/utils';
 import type { YamlValidationError } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+import { StepActionsProvider } from './step_actions/step_actions_provider';
+import { StepActions } from './step_actions/step_actions';
 
 const getTriggerNodes = (
   yamlDocument: YAML.Document
@@ -130,6 +133,7 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchema]);
 
   const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
+  const yamlDocumentRef = useRef<YAML.Document | null>(null);
   const highlightStepDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const stepExecutionsDecorationCollectionRef =
@@ -137,6 +141,8 @@ export const WorkflowYAMLEditor = ({
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const stepActionsProviderRef = useRef<StepActionsProvider | null>(null);
+  const disposablesRef = useRef<monaco.IDisposable[]>([]);
+  const [editorActionsCss, setEditorActionsCss] = useState<React.CSSProperties>({});
 
   const {
     error: errorValidating,
@@ -159,9 +165,12 @@ export const WorkflowYAMLEditor = ({
       validateVariables(editorRef.current);
       try {
         const value = model.getValue();
-        setYamlDocument(YAML.parseDocument(value ?? ''));
+        const parsedDocument = YAML.parseDocument(value ?? '');
+        setYamlDocument(parsedDocument);
+        yamlDocumentRef.current = parsedDocument;
       } catch (error) {
         setYamlDocument(null);
+        yamlDocumentRef.current = null;
       }
     }
   }, [validateVariables]);
@@ -197,24 +206,13 @@ export const WorkflowYAMLEditor = ({
 
   // Initialize actions provider after YAML document is ready
   useEffect(() => {
-    if (
-      isEditorMounted &&
-      editorRef.current &&
-      yamlDocument &&
-      http &&
-      notifications &&
-      !elasticsearchStepActionsProviderRef.current
-    ) {
+    if (isEditorMounted && editorRef.current && yamlDocument && !stepActionsProviderRef.current) {
       console.log('WorkflowYAMLEditor: Late initializing actions provider with YAML document');
 
-      elasticsearchStepActionsProviderRef.current = new ElasticsearchStepActionsProvider(
+      stepActionsProviderRef.current = new StepActionsProvider(
         editorRef.current,
         setEditorActionsCss,
         {
-          http,
-          notifications: notifications as any,
-          esHost,
-          kibanaHost: kibanaHost || window.location.origin,
           getYamlDocument: () => yamlDocumentRef.current,
         }
       );
@@ -458,6 +456,14 @@ export const WorkflowYAMLEditor = ({
     const editor = editorRef.current;
     return () => {
       editor?.dispose();
+      // Dispose of Monaco providers
+      disposablesRef.current.forEach((disposable) => disposable.dispose());
+      disposablesRef.current = [];
+
+      // Dispose of decorations and actions provider
+      // stepActionsProviderRef.current?.clear();
+      stepActionsProviderRef.current?.dispose();
+      stepActionsProviderRef.current = null;
     };
   }, []);
 
@@ -481,6 +487,22 @@ export const WorkflowYAMLEditor = ({
   return (
     <div css={styles.container}>
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
+      {/* Floating Elasticsearch step actions */}
+      {stepActionsProviderRef.current && (
+        <EuiFlexGroup
+          className="elasticsearch-step-actions"
+          gutterSize="xs"
+          responsive={false}
+          style={editorActionsCss}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <EuiFlexItem grow={false}>
+            <StepActions provider={stepActionsProviderRef.current} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
       <div
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
       >
