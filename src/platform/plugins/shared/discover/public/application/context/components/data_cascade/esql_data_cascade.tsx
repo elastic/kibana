@@ -68,6 +68,7 @@ const ESQLDataCascadeLeafCell = React.memo(
     const [visibleColumns, setVisibleColumns] = useState(
       queryMeta.groupByFields.map((group) => group.field)
     );
+    const [sampleSize, setSampleSize] = useState(cellData.length);
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -90,7 +91,7 @@ const ESQLDataCascadeLeafCell = React.memo(
     );
 
     return (
-      <EuiPanel>
+      <EuiPanel paddingSize="s">
         <UnifiedDataTable
           showColumnTokens
           enableInTableSearch
@@ -101,7 +102,7 @@ const ESQLDataCascadeLeafCell = React.memo(
           showTimeCol={false}
           onSetColumns={setVisibleColumns}
           sort={[]}
-          sampleSizeState={cellData.length}
+          sampleSizeState={sampleSize}
           services={{
             theme,
             data,
@@ -113,6 +114,16 @@ const ESQLDataCascadeLeafCell = React.memo(
           ariaLabelledBy="data-cascade-leaf-cell"
           isPaginationEnabled={false}
           renderCustomToolbar={renderCustomToolbarWithElements}
+          onUpdateDataGridDensity={() => {
+            /* No-op for now */
+          }}
+          onUpdateRowHeight={() => {
+            /* No-op for now */
+          }}
+          onUpdateHeaderRowHeight={() => {
+            /* No-op for now */
+          }}
+          onUpdateSampleSize={setSampleSize}
         />
       </EuiPanel>
     );
@@ -231,6 +242,7 @@ export const ESQLDataCascade = ({
   return (
     <div css={styles.wrapper}>
       <DataCascade<ESQLDataGroupNode>
+        size="s"
         data={initialData.map((datum) => ({
           id: datum.id,
           ...datum.flattened,
@@ -270,13 +282,14 @@ export const ESQLDataCascade = ({
               // maybe use operator to determine what meta component to render
               return (
                 <EuiText size="s" textAlign="right">
-                  <p>
+                  <p css={styles.textBadge}>
                     <FormattedMessage
                       id="discover.esql_data_cascade.grouping.function"
-                      defaultMessage="{identifier} <badge>{identifierValue}</badge>"
+                      defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
                       values={{
                         identifier,
                         identifierValue: row.original[identifier] as string,
+                        bold: (chunks) => <b>{chunks}</b>,
                         badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
                       }}
                     />
@@ -286,7 +299,13 @@ export const ESQLDataCascade = ({
             })
           }
           rowHeaderActions={({ row }) => [
-            <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
+            <EuiButtonEmpty
+              size="s"
+              color="text"
+              iconSide="right"
+              iconType="arrowDown"
+              flush="right"
+            >
               <FormattedMessage
                 id="discover.esql_data_cascade.row.action.take_action"
                 defaultMessage="Take Action"
