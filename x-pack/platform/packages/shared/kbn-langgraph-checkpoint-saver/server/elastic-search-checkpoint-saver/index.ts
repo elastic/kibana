@@ -163,6 +163,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       query: {
         bool: {
           must: [
+            // todo(@KDKHD): fix this query to remove the duplicate should clauses. Ensure both tests and the elastic assistant work.
             {
               bool: {
                 should: [
@@ -413,9 +414,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         type,
       };
 
-      this.logger.debug(
-        `Indexing write operation for checkpoint ${checkpointId}: ${JSON.stringify(doc)}`
-      );
+      this.logger.debug(`Indexing write operation for checkpoint ${checkpointId}`);
 
       return [
         {
@@ -428,10 +427,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       ];
     });
 
-    this.logger.debug(
-      `Bulk operations for checkpoint ${checkpointId}: ${JSON.stringify(operations)}`
-    );
-
     const result = await this.client.bulk({
       operations,
       refresh: this.refreshPolicy,
@@ -439,19 +434,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     });
 
     if (result.errors) {
-      this.logger.error(
-        `Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result.errors)}`
-      );
+      this.logger.error(`Failed to index writes for checkpoint ${checkpointId}`);
 
-      if (result.errors) {
-        this.logger.error(
-          `Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`
-        );
-
-        throw new Error(
-          `Failed to index writes for checkpoint ${checkpointId}: ${JSON.stringify(result)}`
-        );
-      }
+      throw new Error(`Failed to index writes for checkpoint ${checkpointId}`);
     }
   }
 }

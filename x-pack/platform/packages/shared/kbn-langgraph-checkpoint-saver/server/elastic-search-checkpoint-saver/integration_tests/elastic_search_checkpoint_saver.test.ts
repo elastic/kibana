@@ -85,6 +85,7 @@ describe('ElasticSearchSaver', () => {
       index: checkpointIndexName,
       mappings: {
         properties: {
+          // TODO(@KDKHD) Replace this field map with the one from ElasticSearchSaver.
           '@timestamp': { type: 'date' },
           thread_id: { type: 'keyword' },
           checkpoint_ns: { type: 'keyword' },
@@ -103,6 +104,7 @@ describe('ElasticSearchSaver', () => {
       index: checkpointWritesIndexName,
       mappings: {
         properties: {
+          // TODO(@KDKHD) Replace this field map with the one from ElasticSearchSaver.
           '@timestamp': { type: 'date' },
           thread_id: { type: 'keyword' },
           checkpoint_ns: { type: 'keyword' },
