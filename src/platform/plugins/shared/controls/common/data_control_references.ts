@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
+
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -16,12 +18,10 @@ const REFERENCE_NAME_PREFIX = 'controlGroup_';
 export function extractReferences(
   state: DataControlState,
   referenceNameSuffix: string
-): { state: DataControlState; references?: Reference[] } {
-  console.log('extractReferences!!!');
-
+): { state: Omit<DataControlState, 'dataViewId'>; references?: Reference[] } {
   if (!state.id) return { state: { ...state } };
   return {
-    state: { ...state },
+    state: { ...omit(state, 'dataViewId') },
     references: [
       {
         name: getReferenceName(state.id, referenceNameSuffix),
@@ -33,12 +33,11 @@ export function extractReferences(
 }
 
 export function injectReferences(
-  state: DataControlState,
+  state: Omit<DataControlState, 'dataViewId'>,
   references: Reference[] = []
 ): DataControlState {
-  console.log('injectReferences!!!');
-
   const deserializedState = {
+    dataViewId: '',
     ...state,
   };
   (references ?? []).forEach((reference) => {

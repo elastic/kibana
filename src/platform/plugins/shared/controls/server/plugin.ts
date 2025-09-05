@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -33,6 +33,8 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     embeddable.registerTransforms(OPTIONS_LIST_CONTROL, transforms);
 
     embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
+    embeddable.registerTransforms(RANGE_SLIDER_CONTROL, transforms);
+
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(esqlStaticControlPersistableStateServiceFactory());
     setupOptionsListClusterSettingsRoute(core);

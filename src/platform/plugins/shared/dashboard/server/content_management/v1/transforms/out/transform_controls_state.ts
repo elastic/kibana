@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow, omit } from 'lodash';
+import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
@@ -22,26 +22,16 @@ export const transformControlsState: (
   serializedControlState: string,
   references: Reference[]
 ) => ControlsGroupState['controls'] = (serializedControlState, references) => {
-  const result = flow(
+  const state = flow(
     JSON.parse,
     transformControlObjectToArray,
-    dropControlDisplayProperties,
     transformControlProperties
   )(serializedControlState);
-  return injectControlReferences(result, references);
+  return injectControlReferences(state, references);
 };
 
 export function transformControlObjectToArray(controls: Record<string, SerializableRecord>) {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
-}
-
-/**
- * With controls as a panel, the `width` and `grow` attributes are no longer relavant
- */
-export function dropControlDisplayProperties(controls: SerializableRecord[]) {
-  return controls.map((control) => {
-    return { ...omit(control, ['width', 'grow']) };
-  });
 }
 
 export function transformControlProperties(
@@ -49,10 +39,13 @@ export function transformControlProperties(
 ): ControlsGroupState['controls'] {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
-    .map(({ explicitInput, id, type }) => {
+    .map(({ explicitInput, id, type, grow, width }) => {
+      console.log({ explicitInput });
       return {
         id,
         type,
+        grow,
+        width,
         ...(explicitInput as SerializableRecord),
       };
     }) as ControlsGroupState['controls'];

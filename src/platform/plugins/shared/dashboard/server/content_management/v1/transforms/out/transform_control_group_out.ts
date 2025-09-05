@@ -9,20 +9,23 @@
 
 import { flow } from 'lodash';
 
+import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
 
 export const transformControlGroupOut: (
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
+  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
+  references: Reference[]
 ) => ControlsGroupState = flow(transformControlGroupProperties);
 
-function transformControlGroupProperties({
-  panelsJSON,
-}: Required<NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>>): ControlsGroupState {
+function transformControlGroupProperties(
+  { panelsJSON }: Required<NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>>,
+  references: Reference[]
+): ControlsGroupState {
   return {
-    controls: panelsJSON ? transformControlsState(panelsJSON) : [],
+    controls: panelsJSON ? transformControlsState(panelsJSON, references) : [],
   };
 }
 

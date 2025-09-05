@@ -26,11 +26,11 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      let transformedControlState;
+      let transformedControlState = controlState;
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState);
-          transformedControlState = transformed.state;
+          transformedControlState = { ...controlState, ...transformed.state }; // spreading keeps types happy
           references = [...references, ...(transformed.references ?? [])];
         }
       } catch (transformInError) {
@@ -40,12 +40,15 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
         );
       }
 
+      const { width, grow, ...rest } = transformedControlState;
       return [
         id,
         {
           order: index,
           type,
-          explicitInput: { id, ...omit(transformedControlState, ['order', 'type', 'dataViewId']) },
+          width,
+          grow,
+          explicitInput: { id, ...omit(rest, ['type']) },
         },
       ];
     })

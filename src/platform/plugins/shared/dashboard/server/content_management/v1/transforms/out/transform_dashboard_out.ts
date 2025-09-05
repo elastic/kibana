@@ -46,13 +46,9 @@ export function transformDashboardOut(
 
   let controlGroupOut;
   if (controlGroupInput) {
-    controlGroupOut = {
-      controls: transformControlGroupOut(controlGroupInput).controls.map((control) => {
-        return injectControlReferences(control.id!, control, references ?? []);
-      }),
-    };
+    controlGroupOut = transformControlGroupOut(controlGroupInput, references ?? []);
   }
-  console.log('HERE!', controlGroupOut);
+
   return {
     ...(controlGroupOut && { controlGroupInput: controlGroupOut }),
     ...(description && { description }),
@@ -72,33 +68,5 @@ export function transformDashboardOut(
     ...(timeTo && { timeTo }),
     title,
     ...(version && { version }),
-  };
-}
-
-const injectControlReferences = (
-  id: string,
-  state: Omit<ControlsGroupState['controls'][number], 'dataViewId'>,
-  references: Reference[]
-): ControlsGroupState['controls'][number] => {
-  const deserializedState = {
-    dataViewId: '',
-    ...state,
-  };
-  references.forEach((reference) => {
-    const referenceName = reference.name;
-    const { controlId } = parseReferenceName(referenceName);
-    if (controlId === id) deserializedState.dataViewId = reference.id;
-  });
-  return deserializedState;
-};
-
-const REFERENCE_NAME_PREFIX = 'controlGroup_';
-
-export function parseReferenceName(referenceName: string) {
-  return {
-    controlId: referenceName.substring(
-      REFERENCE_NAME_PREFIX.length,
-      referenceName.lastIndexOf(':')
-    ),
   };
 }
