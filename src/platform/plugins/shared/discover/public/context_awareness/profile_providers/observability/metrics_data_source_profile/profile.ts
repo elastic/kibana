@@ -44,14 +44,10 @@ export const createMetricsDataSourceProfileProvider = (
       return { isMatch: false };
     }
 
-    const signal = AbortSignal.timeout(10_000);
     try {
-      const { indexPatternMetadata } = await metricsClient.getIndexPatternMetadata(
-        {
-          indexPattern,
-        },
-        signal
-      );
+      const { indexPatternMetadata } = await metricsClient.getIndexPatternMetadata({
+        indexPattern,
+      });
 
       return {
         isMatch: Object.values(indexPatternMetadata).some((meta) => meta.hasTimeSeriesFields),

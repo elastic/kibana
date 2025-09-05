@@ -42,7 +42,7 @@ export const createMetricsContextService = async ({
   });
 };
 
-const getMetricsContextService = ({
+export const getMetricsContextService = ({
   metricsExperienceClient,
 }: {
   metricsExperienceClient: MetricsExperienceClient | undefined;
