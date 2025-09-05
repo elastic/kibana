@@ -28,6 +28,7 @@
       "unifiedSearch",
       "unifiedDocViewer",
       "dashboard",
+      "alerting",
     ],
     "optionalPlugins": ["observabilityAIAssistant"],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"],

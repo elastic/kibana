@@ -15,9 +15,9 @@ import { StreamDetailReferencesView } from '../../stream_detail_references_view/
 import { LinkedDashboardsView } from './linked_dashboards_view';
 import { GroupStreamDetailView } from './group_stream_detail_view';
 
-const groupStreamManagementSubTabs = ['overview', 'dashboards', 'references'] as const;
+const groupStreamManagementSubTabs = ['overview', 'dashboards', 'references', 'rules'] as const;
 
-type GroupStreamManagementSubTab = (typeof groupStreamManagementSubTabs)[number];
+export type GroupStreamManagementSubTab = (typeof groupStreamManagementSubTabs)[number];
 
 function isValidManagementSubTab(value: string): value is GroupStreamManagementSubTab {
   return groupStreamManagementSubTabs.includes(value as GroupStreamManagementSubTab);
@@ -57,6 +57,12 @@ export function GroupStreamDetailManagement({
       content: <LinkedDashboardsView definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
+      }),
+    },
+    rules: {
+      content: <>Rules</>,
+      label: i18n.translate('xpack.streams.streamDetailView.rulesTab', {
+        defaultMessage: 'Rules',
       }),
     },
   };

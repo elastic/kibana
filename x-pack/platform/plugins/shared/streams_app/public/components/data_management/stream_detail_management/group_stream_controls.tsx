@@ -18,8 +18,10 @@ import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import type { GroupStreamModificationFlyoutTabId } from '../../group_stream_modification_flyout/group_stream_modification_flyout';
 import { GroupStreamModificationFlyout } from '../../group_stream_modification_flyout/group_stream_modification_flyout';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import type { GroupStreamManagementSubTab } from './group';
 
 export function GroupStreamControls() {
   const router = useStreamsAppRouter();
@@ -61,7 +63,8 @@ export function GroupStreamControls() {
             notifications={core.notifications}
             existingStream={definition.stream as Streams.GroupStream.Definition}
             existingDashboards={definition.dashboards}
-            startingTab={path.tab === 'dashboards' ? 'dashboards' : 'overview'}
+            existingRules={definition.rules}
+            startingTab={startingTabFromPath(path.tab as GroupStreamManagementSubTab)}
           />
         </StreamsAppContextProvider>,
         core
@@ -140,4 +143,8 @@ export function GroupStreamControls() {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function startingTabFromPath(tab: GroupStreamManagementSubTab): GroupStreamModificationFlyoutTabId {
+  return tab === 'overview' || tab === 'references' ? 'overview' : tab;
 }

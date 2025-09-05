@@ -25,8 +25,9 @@ import { useKibana } from '../../hooks/use_kibana';
 import { DashboardsTab } from './dashboards_tab';
 import { OverviewTab } from './overview_tab';
 import type { GroupStreamFormData } from './types';
+import { RulesTab } from './rules_tab';
 
-type GroupStreamModificationFlyoutTabId = 'overview' | 'dashboards';
+export type GroupStreamModificationFlyoutTabId = 'overview' | 'dashboards' | 'rules';
 interface GroupStreamModificationFlyoutTab {
   id: GroupStreamModificationFlyoutTabId;
   name: string;
@@ -40,6 +41,7 @@ export function GroupStreamModificationFlyout({
   refresh,
   existingStream,
   existingDashboards,
+  existingRules,
   startingTab = 'overview',
 }: {
   startingTab?: GroupStreamModificationFlyoutTabId;
@@ -49,8 +51,10 @@ export function GroupStreamModificationFlyout({
   refresh: () => void;
   existingStream?: Streams.GroupStream.Definition;
   existingDashboards?: string[];
+  existingRules?: string[];
 }) {
   const {
+    core: { http },
     dependencies: {
       start: { dashboard: dashboardStart },
     },
@@ -67,6 +71,7 @@ export function GroupStreamModificationFlyout({
         label: member,
       })) ?? [],
     dashboards: [],
+    rules: [],
   });
 
   useEffect(() => {
@@ -89,6 +94,39 @@ export function GroupStreamModificationFlyout({
     enrichDashboards();
   }, [existingDashboards, dashboardStart]);
 
+  useEffect(() => {
+    if (!existingRules) {
+      return;
+    }
+
+    const enrichRules = async () => {
+      const result: { data: Array<{ id: string; name: string }> } = await http.get(
+        '/api/alerting/rules/_find',
+        {
+          query: {
+            page: 1,
+            per_page: 10000,
+            search: '',
+            search_fields: 'name',
+          },
+        }
+      );
+      const rulesMap = result.data.reduce<Record<string, string>>((acc, rule) => {
+        acc[rule.id] = rule.name;
+        return acc;
+      }, {});
+
+      setFormData((prevData) => ({
+        ...prevData,
+        rules: existingRules
+          .map((ruleId) => (rulesMap[ruleId] ? { id: ruleId, name: rulesMap[ruleId] } : undefined))
+          .filter(Boolean) as Array<{ id: string; name: string }>,
+      }));
+    };
+
+    enrichRules();
+  }, [existingRules, http]);
+
   async function modifyGroupStream() {
     let streamBaseData: any = {};
     if (existingStream) {
@@ -105,11 +143,11 @@ export function GroupStreamModificationFlyout({
         params: {
           path: { name: formData.name },
           body: {
-            rules: [],
             slos: [],
             queries: [],
-            ...streamBaseData,
+            ...streamBaseData, // I can remove this once I do SLOs since queries don't make sense for Group streams
             dashboards: formData.dashboards.map((dashboard) => dashboard.id),
+            rules: formData.rules.map((rule) => rule.id),
             stream: {
               description: formData.description,
               group: {
@@ -166,12 +204,20 @@ export function GroupStreamModificationFlyout({
         />
       ),
     },
+    // Maybe these can use a single generic component?
     {
       id: 'dashboards',
       name: i18n.translate('xpack.streams.groupStreamModificationFlyout.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),
       content: <DashboardsTab formData={formData} setFormData={setFormData} />,
+    },
+    {
+      id: 'rules',
+      name: i18n.translate('xpack.streams.groupStreamModificationFlyout.rulesTabLabel', {
+        defaultMessage: 'Rules',
+      }),
+      content: <RulesTab formData={formData} setFormData={setFormData} />,
     },
   ];
 

@@ -14,6 +14,7 @@ export interface GroupStreamFormData {
   tags: EuiComboBoxOptionOption[];
   members: EuiComboBoxOptionOption[];
   dashboards: { id: string; title: string }[];
+  rules: { id: string; name: string }[];
 }
 
 export interface TabProps {
