@@ -22,35 +22,43 @@ import type { VisualizationTablesWithMeta } from '../../../common/components/vis
 import { DEFAULT_AI_CONNECTOR } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
+import { licenseService } from '../../../common/hooks/use_license';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
+import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
 
 interface Props {
-  from: string;
-  to: string;
-  minutesPerAlert: number;
-  analystHourlyRate: number;
   lensResponse: VisualizationTablesWithMeta | null;
 }
 
-export const CostSavingsKeyInsight: React.FC<Props> = ({
-  minutesPerAlert,
-  analystHourlyRate,
-  from,
-  to,
-  lensResponse,
-}) => {
+export const CostSavingsKeyInsight: React.FC<Props> = ({ lensResponse }) => {
   const {
     euiTheme: { size },
   } = useEuiTheme();
 
-  const { inference, uiSettings } = useKibana().services;
+  const { http, notifications, inference, uiSettings } = useKibana().services;
   const connectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
   const [insightResult, setInsightResult] = useState<string>('');
 
+  const hasEnterpriseLicence = licenseService.isEnterprise();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+  const prompts = useFindCostSavingsPrompts({
+    context: {
+      isAssistantEnabled:
+        hasEnterpriseLicence && (isAssistantEnabled ?? false) && (hasAssistantPrivilege ?? false),
+      httpFetch: http.fetch,
+      toasts: notifications.toasts,
+    },
+    params: {
+      prompt_group_id: 'aiForSoc',
+      prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
+    },
+  });
+
   useEffect(() => {
     const fetchInsight = async () => {
-      if (lensResponse && connectorId) {
+      if (lensResponse && connectorId && prompts !== null) {
         try {
-          const prompt = getPrompt(JSON.stringify(lensResponse));
+          const prompt = getPrompt(JSON.stringify(lensResponse), prompts);
           const result = await inference.chatComplete({
             connectorId,
             messages: [{ role: MessageRole.User, content: prompt }],
@@ -63,7 +71,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({
     };
 
     fetchInsight();
-  }, [connectorId, lensResponse, inference]);
+  }, [connectorId, lensResponse, inference, prompts]);
   return (
     <div
       data-test-subj="alertProcessingKeyInsightsContainer"
@@ -117,26 +125,14 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({
   );
 };
 
-const getPrompt = (result: string) => {
-  const prompt = `You are given Elasticsearch Lens aggregation results showing cost savings over time:
+const getPrompt = (result: string, prompts: { part1: string; part2: string }) => {
+  const prompt = `${prompts.part1}
 
 \`\`\`
 ${result}
 \`\`\`
 
-Generate a concise bulleted summary in HTML markup. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
-
-\`\`\`
-<ul>
-  <li>Between July 18 and August 18, daily cost savings <strong>averaged around $135K</strong></li>
-  <li>The lowest point, <strong>just above $70K</strong>, occurred in early August.</li>
-  <li><strong>Peaks near $160K</strong> appeared in late July and mid-August.</li>
-  <li>After a mid-period decline, savings steadily recovered and grew toward the end of the month.</li>
-  <li>At this pace, projected annual savings <strong>exceed $48M</strong>, confirming strong and predictable ROI.</li>
-</ul>
-\`\`\`
-
-Respond only with the <ul>...</ul> markup. Do not include any explanation or extra text.`;
+${prompts.part2}`;
 
   return prompt;
 };

@@ -107,13 +107,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
             max-width: ${isSmall ? 'auto' : '300px'};
           `}
         >
-          <CostSavingsKeyInsight
-            analystHourlyRate={analystHourlyRate}
-            minutesPerAlert={minutesPerAlert}
-            from={from}
-            to={to}
-            lensResponse={lensResponse}
-          />
+          <CostSavingsKeyInsight lensResponse={lensResponse} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
