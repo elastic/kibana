@@ -31,10 +31,10 @@ const i18nMessages = {
     }),
     formatError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.formatError', {
       defaultMessage:
-        'Name must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, and underscores.',
+        'Tool ID must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, and underscores.',
     }),
     tooLongError: i18n.translate('xpack.onechat.tools.newTool.validation.name.tooLongError', {
-      defaultMessage: 'Name must be at most {max} characters',
+      defaultMessage: 'Tool ID must be at most {max} characters',
       values: { max: toolIdMaxLength },
     }),
     reservedError: (toolId: string) =>

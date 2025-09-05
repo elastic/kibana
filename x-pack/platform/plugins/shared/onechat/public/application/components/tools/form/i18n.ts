@@ -105,7 +105,8 @@ export const i18nMessages = {
           defaultMessage: 'Tool ID',
         }),
         helpText: i18n.translate('xpack.onechat.tools.newTool.form.toolIdHelpText', {
-          defaultMessage: 'Must be lowercase with no spaces.',
+          defaultMessage:
+            'Tool ID must start and end with a letter or number, and can only contain lowercase letters, numbers, dots, and underscores.',
         }),
       },
       description: {
