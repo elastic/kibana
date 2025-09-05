@@ -24,27 +24,31 @@ export const NoData: React.FC<NoDataProps> = ({
   refetchText,
   onRefetch,
   testString,
-}) => (
-  <CenteredEmptyPrompt
-    title={<h2>{titleText}</h2>}
-    titleSize="m"
-    body={<p>{bodyText}</p>}
-    actions={
-      refetchText && onRefetch ? (
-        <EuiButton
-          data-test-subj="infraNoDataButton"
-          iconType="refresh"
-          color="primary"
-          fill
-          onClick={onRefetch}
-        >
-          {refetchText}
-        </EuiButton>
-      ) : null
-    }
-    data-test-subj={testString}
-  />
-);
+}) => {
+  const showRefetchButton = refetchText && onRefetch;
+
+  return (
+    <CenteredEmptyPrompt
+      title={<h2>{titleText}</h2>}
+      titleSize="m"
+      body={<p>{bodyText}</p>}
+      actions={
+        showRefetchButton ? (
+          <EuiButton
+            data-test-subj="infraNoDataButton"
+            iconType="refresh"
+            color="primary"
+            fill
+            onClick={onRefetch}
+          >
+            {refetchText}
+          </EuiButton>
+        ) : null
+      }
+      data-test-subj={testString}
+    />
+  );
+};
 
 const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
