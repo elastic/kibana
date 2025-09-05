@@ -383,4 +383,20 @@ describe('map expression', () => {
 
     expect(errors.length > 0).toBe(true);
   });
+
+  describe('malformed', () => {
+    it('report errors for incomplete field values', () => {
+      const query = 'ROW FN(1, { "foo":';
+      const { errors } = Parser.parse(query);
+
+      expect(errors.length > 0).toBe(true);
+    });
+
+    it('report errors for incomplete field values - 2', () => {
+      const query = 'ROW FN(1, { "foo"';
+      const { errors } = Parser.parse(query);
+
+      expect(errors.length > 0).toBe(true);
+    });
+  });
 });

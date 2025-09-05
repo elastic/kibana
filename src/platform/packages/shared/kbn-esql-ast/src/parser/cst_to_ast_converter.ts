@@ -2373,8 +2373,13 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
+
       if (entry) {
         map.entries.push(entry);
+
+        if (entry.incomplete) {
+          map.incomplete = true;
+        }
       } else {
         map.incomplete = true;
       }
@@ -2390,6 +2395,11 @@ export class CstToAstConverter {
     if (keyCtx && valueCtx) {
       let value: ast.ESQLAstExpression | undefined;
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
+
+      if (!key) {
+        return undefined;
+      }
+
       const constantCtx = valueCtx.constant();
 
       if (constantCtx) {
@@ -2400,6 +2410,11 @@ export class CstToAstConverter {
 
       if (mapExpressionCtx) {
         value = this.fromMapExpression(mapExpressionCtx);
+      }
+
+      if (!value) {
+        value = this.fromParserRuleToUnknown(valueCtx);
+        value.incomplete = true;
       }
 
       if (value) {
