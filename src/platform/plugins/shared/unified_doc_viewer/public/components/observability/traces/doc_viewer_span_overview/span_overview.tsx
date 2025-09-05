@@ -27,6 +27,7 @@ import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { SpanLinks } from '../components/span_links';
+import { Errors } from '../components/errors';
 import { Trace } from '../components/trace';
 import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
@@ -163,6 +164,15 @@ export function SpanOverview({
               <EuiFlexItem>
                 <EuiSpacer size="m" />
                 <SpanLinks traceId={traceId} docId={spanId} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSpacer size="m" />
+                <Errors
+                  traceId={traceId}
+                  spanId={spanId}
+                  transactionId={transactionId}
+                  serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiSpacer size="m" />
