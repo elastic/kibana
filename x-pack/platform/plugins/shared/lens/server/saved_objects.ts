@@ -15,7 +15,6 @@ import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import type { CustomVisualizationMigrations } from './migrations/types';
 import { lensItemAttributesSchemaV0 } from './content_management/v0';
-import { LENS_ITEM_VERSION as LENS_ITEM_VERSION_V1 } from './content_management/v1';
 
 /**
  * Extending V0 Lens attributes schema to match existing. Adds loose `version` property.
@@ -58,15 +57,12 @@ export function setupSavedObjects(
         customVisualizationMigrations
       ),
     modelVersions: {
-      [LENS_ITEM_VERSION_V1]: {
+      [1]: {
         changes: [
           {
+            // needed to trigger change from dynamic strict to dynamic false
             type: 'mappings_addition',
-            addedMappings: {
-              version: {
-                type: 'integer',
-              },
-            },
+            addedMappings: {},
           },
         ],
         schemas: {
@@ -86,9 +82,6 @@ export function setupSavedObjects(
         },
         visualizationType: {
           type: 'keyword',
-        },
-        version: {
-          type: 'integer',
         },
         state: {
           dynamic: false,
