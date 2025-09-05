@@ -5,10 +5,12 @@
     "types": [
       "jest",
       "node",
+      "react"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
