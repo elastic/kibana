@@ -1527,31 +1527,39 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           appContextService.getExperimentalFeatures().enablePackageRollback &&
           packagePolicy.package &&
           oldPackagePolicy.package &&
-          semverGt(packagePolicy.package.version, oldPackagePolicy.package.version)
+          semverGt(packagePolicy.package.version, oldPackagePolicy.package.version) &&
+          !packagePolicyUpdate.is_managed
         ) {
-          logger.debug(
-            `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
+          // checking is_managed flag on agent policy, it is not always set on package policy
+          const agentPolicies = await agentPolicyService.getByIds(
+            soClient,
+            packagePolicy.policy_ids
           );
-          const currentPackagePolicySO = await soClient.get<PackagePolicySOAttributes>(
-            savedObjectType,
-            id
-          );
-          const previousRevisionSO = {
-            ...currentPackagePolicySO,
-            id: `${id}:prev`,
-            attributes: {
-              ...currentPackagePolicySO.attributes,
-              latest_revision: false,
-            },
-          };
-          try {
-            await soClient.get<PackagePolicySOAttributes>(savedObjectType, `${id}:prev`);
-            previousPolicyRevisionsToUpdate.push(previousRevisionSO);
-          } catch (error) {
-            if (error.output.statusCode === 404) {
-              previousPolicyRevisionsToCreate.push(previousRevisionSO);
-            } else {
-              throw error;
+          if (!agentPolicies.some((policy) => policy.is_managed)) {
+            logger.debug(
+              `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
+            );
+            const currentPackagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+              savedObjectType,
+              id
+            );
+            const previousRevisionSO = {
+              ...currentPackagePolicySO,
+              id: `${id}:prev`,
+              attributes: {
+                ...currentPackagePolicySO.attributes,
+                latest_revision: false,
+              },
+            };
+            try {
+              await soClient.get<PackagePolicySOAttributes>(savedObjectType, `${id}:prev`);
+              previousPolicyRevisionsToUpdate.push(previousRevisionSO);
+            } catch (error) {
+              if (error.output.statusCode === 404) {
+                previousPolicyRevisionsToCreate.push(previousRevisionSO);
+              } else {
+                throw error;
+              }
             }
           }
         }
