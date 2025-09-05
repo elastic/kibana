@@ -5,7 +5,6 @@
     "name": "Sample alerting rule template",
     "tags": ["Testing"],
     "ruleTypeId": "apm.anomaly",
-    "consumer": "alerts",
     "schedule": {
       "interval": "1m"
     },
