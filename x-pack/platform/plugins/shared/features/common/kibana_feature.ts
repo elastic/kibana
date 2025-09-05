@@ -249,10 +249,6 @@ export class KibanaFeature {
     return this.config.reserved;
   }
 
-  public get scope() {
-    return this.config.scope;
-  }
-
   public toRaw() {
     return { ...this.config } as KibanaFeatureConfig;
   }
