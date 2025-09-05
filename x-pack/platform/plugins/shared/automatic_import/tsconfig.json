@@ -45,6 +45,8 @@
     "@kbn/zod",
     "@kbn/tooling-log",
     "@kbn/ai-assistant-icon",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/inference-plugin",
+    "@kbn/inference-langchain"
   ]
 }
