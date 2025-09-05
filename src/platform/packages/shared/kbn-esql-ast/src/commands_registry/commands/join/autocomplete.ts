@@ -55,6 +55,7 @@ export async function autocomplete(
           ({
             label: mnemonic,
             text: mnemonic + ' $0',
+            asSnippet: true,
             detail: description,
             kind: 'Keyword',
             sortText: `${i}-MNEMONIC`,
