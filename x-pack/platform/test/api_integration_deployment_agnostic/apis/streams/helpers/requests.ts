@@ -171,6 +171,30 @@ export async function linkDashboard(
   expect(response.status).to.be(200);
 }
 
+export async function linkRule(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  id: string
+) {
+  const response = await apiClient.fetch('PUT /api/streams/{name}/rules/{ruleId} 2023-10-31', {
+    params: { path: { name: stream, ruleId: id } },
+  });
+
+  expect(response.status).to.be(200);
+}
+
+export async function unlinkRule(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  id: string
+) {
+  const response = await apiClient.fetch('DELETE /api/streams/{name}/rules/{ruleId} 2023-10-31', {
+    params: { path: { name: stream, ruleId: id } },
+  });
+
+  expect(response.status).to.be(200);
+}
+
 export async function exportContent(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
