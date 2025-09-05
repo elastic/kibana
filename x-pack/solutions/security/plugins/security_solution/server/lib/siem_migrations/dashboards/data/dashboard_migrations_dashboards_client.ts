@@ -75,10 +75,9 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
     const operations = updates.flatMap((update) => [
       { update: { _index: index, _id: update.id } },
       {
-          ...Object.fromEntries(Object.entries(update).filter(([key]) => key !== 'id')),
-          updated_by: profileId,
-          updated_at: updatedAt,
-        },
+        ...Object.fromEntries(Object.entries(update).filter(([key]) => key !== 'id')),
+        updated_by: profileId,
+        updated_at: updatedAt,
       },
     ]);
 
