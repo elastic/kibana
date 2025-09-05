@@ -8,6 +8,7 @@
  */
 
 export type {
+  GraphNode,
   AtomicGraphNode,
   HttpGraphNode,
   HttpGraphNodeSchema,
@@ -28,4 +29,16 @@ export type {
   ExitRetryNode,
   EnterContinueNode,
   ExitContinueNode,
+  EnterTryBlockNodeSchema,
+  EnterTryBlockNode,
+  ExitTryBlockNodeSchema,
+  ExitTryBlockNode,
+  EnterNormalPathNodeSchema,
+  EnterNormalPathNode,
+  ExitNormalPathNodeSchema,
+  ExitNormalPathNode,
+  EnterFallbackPathNodeSchema,
+  EnterFallbackPathNode,
+  ExitFallbackPathNodeSchema,
+  ExitFallbackPathNode,
 } from './nodes/on_failure_nodes';
