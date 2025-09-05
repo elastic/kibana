@@ -13,9 +13,9 @@ import type {
 import { getDefaultDashboardMigrationDoc } from './dashboard_mocks';
 
 const SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN = `.kibana-siem-dashboard-migrations`;
-const MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-migrations-default`;
-const DASHBOARDS_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-dashboards-default`;
-const RESOURCES_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-resources-default`;
+export const DASHBOARD_MIGRATIONS_MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-migrations-default`;
+export const DASHBOARD_MIGRATIONS_DASHBOARDS_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-dashboards-default`;
+export const DASHBOARD_MIGRATIONS_RESOURCES_INDEX_PATTERN = `${SIEM_MIGRATIONS_DASHBOARDS_BASE_INDEX_PATTERN}-resources-default`;
 
 export const getDashboardMigrationsFromES = async ({
   es,
@@ -25,7 +25,7 @@ export const getDashboardMigrationsFromES = async ({
   migrationId: string;
 }) => {
   return await es.search({
-    index: MIGRATIONS_INDEX_PATTERN,
+    index: DASHBOARD_MIGRATIONS_MIGRATIONS_INDEX_PATTERN,
     query: {
       terms: {
         _id: [migrationId],
@@ -42,7 +42,7 @@ export const getDashboardsPerMigrationFromES = async ({
   migrationId: string;
 }) => {
   return await es.search<DashboardMigrationDashboard>({
-    index: DASHBOARDS_INDEX_PATTERN,
+    index: DASHBOARD_MIGRATIONS_DASHBOARDS_INDEX_PATTERN,
     size: 10000,
     query: {
       term: {
@@ -60,7 +60,7 @@ export const getDashboardResourcesPerMigrationFromES = async ({
   migrationId: string;
 }) => {
   return await es.search({
-    index: RESOURCES_INDEX_PATTERN,
+    index: DASHBOARD_MIGRATIONS_RESOURCES_INDEX_PATTERN,
     size: 10000,
     query: {
       term: {
@@ -72,10 +72,15 @@ export const getDashboardResourcesPerMigrationFromES = async ({
 
 export const deleteAllDashboardMigrations = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: [MIGRATIONS_INDEX_PATTERN, DASHBOARDS_INDEX_PATTERN, RESOURCES_INDEX_PATTERN],
+    index: [
+      DASHBOARD_MIGRATIONS_MIGRATIONS_INDEX_PATTERN,
+      DASHBOARD_MIGRATIONS_DASHBOARDS_INDEX_PATTERN,
+      DASHBOARD_MIGRATIONS_RESOURCES_INDEX_PATTERN,
+    ],
     query: {
       match_all: {},
     },
+    conflicts: 'proceed',
     ignore_unavailable: true,
     refresh: true,
   });

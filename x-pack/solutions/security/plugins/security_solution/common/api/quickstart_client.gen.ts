@@ -398,6 +398,7 @@ import type {
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
   GetAllDashboardMigrationsStatsResponse,
+  DeleteDashboardMigrationRequestParamsInput,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
   GetDashboardMigrationDashboardsRequestQueryInput,
@@ -913,6 +914,21 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Deletes a SIEM dashboards migration using the migration id provided
+   */
+  async deleteDashboardMigration(props: DeleteDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteDashboardMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async deleteEntityEngine(props: DeleteEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngine`);
     return this.kbnClient
@@ -1106,7 +1122,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Download a file from an endpoint. 
+    * Download a file from an endpoint.
 > info
 > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
 > {`file_id`} = {`action_id`}`.`{`agent_id`}
@@ -2122,14 +2138,14 @@ finalize it.
   /**
     * Install and update all Elastic prebuilt detection rules and Timelines.
 
-This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic.
 When you call this endpoint, it will:
 - Install any new prebuilt detection rules that are not currently installed in your system.
 - Update any existing prebuilt detection rules that have been modified or improved by Elastic.
 - Install any new prebuilt Timelines that are not currently installed in your system.
 - Update any existing prebuilt Timelines that have been modified or improved by Elastic.
 
-This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+This ensures that your detection engine is always up-to-date with the latest rules and Timelines,
 providing you with the most current and effective threat detection capabilities.
 
     */
@@ -2287,7 +2303,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   /**
     * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
 The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
 > warn
 > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -2443,7 +2459,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
+    * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
 
 This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
 
@@ -3057,6 +3073,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface DeleteDashboardMigrationProps {
+  params: DeleteDashboardMigrationRequestParamsInput;
 }
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
