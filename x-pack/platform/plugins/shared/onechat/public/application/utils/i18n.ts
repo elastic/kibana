@@ -40,14 +40,8 @@ export const labels = {
 
     // Table columns and labels
     toolIdLabel: i18n.translate('xpack.onechat.tools.idLabel', { defaultMessage: 'ID' }),
-    typeLabel: i18n.translate('xpack.onechat.tools.typeLabel', { defaultMessage: 'Type' }),
     tagsLabel: i18n.translate('xpack.onechat.tools.tagsLabel', { defaultMessage: 'Labels' }),
     toolsLabel: i18n.translate('xpack.onechat.tools.toolsLabel', { defaultMessage: 'Tools' }),
-
-    // Tool types
-    esqlLabel: i18n.translate('xpack.onechat.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
-    builtinLabel: i18n.translate('xpack.onechat.tools.builtinLabel', { defaultMessage: 'System' }),
-    searchLabel: i18n.translate('xpack.onechat.tools.searchLabel', { defaultMessage: 'Search' }),
 
     // Actions
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
