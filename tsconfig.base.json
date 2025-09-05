@@ -2196,6 +2196,8 @@
       "@kbn/ts-type-check-cli/*": ["packages/kbn-ts-type-check-cli/*"],
       "@kbn/typed-react-router-config": ["src/platform/packages/shared/kbn-typed-react-router-config"],
       "@kbn/typed-react-router-config/*": ["src/platform/packages/shared/kbn-typed-react-router-config/*"],
+      "@kbn/ui-actions": ["src/platform/packages/shared/ui-actions/actions"],
+      "@kbn/ui-actions/*": ["src/platform/packages/shared/ui-actions/actions/*"],
       "@kbn/ui-actions-browser": ["src/platform/packages/shared/kbn-ui-actions-browser"],
       "@kbn/ui-actions-browser/*": ["src/platform/packages/shared/kbn-ui-actions-browser/*"],
       "@kbn/ui-actions-enhanced-examples-plugin": ["x-pack/examples/ui_actions_enhanced_examples"],

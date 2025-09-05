@@ -8389,7 +8389,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-actions-react@link:src/platform/packages/shared/ui-actions/react":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-actions-triggers@link:src/platform/packages/shared/ui-actions/triggers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-actions@link:src/platform/packages/shared/ui-actions/actions":
   version "0.0.0"
   uid ""
 
