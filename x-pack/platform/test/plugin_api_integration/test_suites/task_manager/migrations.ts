@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type {
@@ -19,7 +19,6 @@ import type { RuleTaskState, WrappedLifecycleRuleState } from '@kbn/alerting-sta
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
-  const log = getService('log');
   const retry = getService('retry');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -208,7 +207,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
             for (const alert of Object.values(state.alertInstances || {})) {
               const uuid = alert?.meta?.uuid || 'uuid-is-missing';
-              log.info(`alert ${JSON.stringify(alert)}`);
               expect(uuid).to.match(/^.{8}-.{4}-.{4}-.{4}-.{12}$/);
               expect(uuids.has(uuid)).to.be(false);
               uuids.add(uuid);
@@ -259,7 +257,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
           for (const [id, alert] of Object.entries(state.alertInstances || {})) {
             const uuid = alert?.meta?.uuid || 'uuid-is-missing';
-            log.info(`alert ${JSON.stringify(alert)}`);
             expect(uuid).to.be(wrappedUUIDs.get(id));
           }
 

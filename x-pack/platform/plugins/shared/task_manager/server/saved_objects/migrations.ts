@@ -68,9 +68,6 @@ function executeMigrationWithErrorHandling(
     context: SavedObjectMigrationContext
   ) => {
     try {
-      context.log.info(
-        `savedObject ${version} migration starting for task instance ${JSON.stringify(doc)}`
-      );
       return migrationFunc(doc, context);
     } catch (ex) {
       context.log.error<TaskInstanceLogMeta>(
