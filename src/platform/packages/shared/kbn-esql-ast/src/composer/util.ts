@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isBooleanLiteral, isCommand } from '../ast/is';
 import { Builder } from '../builder';
 import { ParameterHole } from './parameter_hole';
+import type { ESQLCommand } from '../types';
+import type { ComposerQuery } from './composer_query';
 import type { ComposerQueryTagHole, ParameterShorthandHole } from './types';
 
 /**
@@ -39,6 +42,12 @@ const isParameterShorthand = (hole: unknown): hole is ParameterShorthandHole => 
     return true;
   }
   return false;
+};
+
+export const composerQuerySymbol = Symbol('isComposerQuery');
+
+const isComposerQuery = (hole: unknown): hole is ComposerQuery => {
+  return !!hole && typeof hole === 'object' && composerQuerySymbol in hole;
 };
 
 export const processTemplateHoles = (
@@ -83,10 +92,41 @@ export const processTemplateHoles = (
 
       holes[i] = param;
       params.set(name!, value);
+    } else if (isComposerQuery(hole)) {
+      holes[i] = hole.ast;
     }
   }
 
   return {
     params,
   };
+};
+
+const isNopCommand = (command: unknown): boolean => {
+  if (!isCommand(command)) return false;
+
+  const args = command.args;
+
+  if (!args || args.length !== 1) return false;
+
+  const arg = args[0];
+
+  if (isBooleanLiteral(arg) && arg.value === 'TRUE') {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * It is possible to insert `... | WHERE TRUE | ...` *nop* commands into the
+ * query stream when building it conditionally. The `WHERE TRUE` command does
+ * nothing, Elasticsearch simply removes them. However, it is cleaner to remove
+ * them in the AST before sending the query to Elasticsearch. This function
+ * removes all *nop* commands from the command list.
+ *
+ * @param commands The list of commands to process.
+ */
+export const removeNopCommands = (commands: ESQLCommand[]): ESQLCommand[] => {
+  return commands.filter((command) => !isNopCommand(command));
 };
