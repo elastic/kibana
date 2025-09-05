@@ -23833,6 +23833,7 @@ paths:
                     - created_at
                     - updated_at
                 type: array
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
@@ -23853,6 +23854,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Indicates a failed call.
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
@@ -23956,6 +23958,7 @@ paths:
                   - packagePolicyCount
                   - created_at
                   - updated_at
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
@@ -23976,6 +23979,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Indicates a failed call.
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
