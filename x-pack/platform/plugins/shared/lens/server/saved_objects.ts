@@ -41,6 +41,7 @@ export function setupSavedObjects(
         customVisualizationMigrations
       ),
     mappings: {
+      dynamic: false,
       properties: {
         title: {
           type: 'text',
