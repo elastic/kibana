@@ -28,10 +28,12 @@ test('Fleet Elastic Agent enrollment flow', async ({ page, fleetAgentsOverviewPa
   await fleetAgentsOverviewPage.selectEnrollInFleet();
 
   await fleetAgentsOverviewPage.assertVisibilityCodeBlock();
-  await fleetAgentsOverviewPage.scrollToCodeBlockCopyButton();
   await fleetAgentsOverviewPage.copyToClipboard();
 
   const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
   fs.writeFileSync(outputPath, clipboardData);
+
+  await fleetAgentsOverviewPage.assertAgentEnrolled();
+  await fleetAgentsOverviewPage.assertIncomingDataConfirmed();
 });

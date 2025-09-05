@@ -16,6 +16,8 @@ export class FleetAgentsOverviewPage {
   private readonly enrollInFleetRadioButton: Locator;
   private readonly enrollmentCodeBlock: Locator;
   private readonly enrollmentCopyButton: Locator;
+  private readonly confirmedAgentEnrollmentCallout: Locator;
+  private readonly incomingDataConfirmedCallout: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -26,6 +28,8 @@ export class FleetAgentsOverviewPage {
     this.enrollInFleetRadioButton = this.page.getByTestId('agentFlyoutManagedRadioButtons');
     this.enrollmentCodeBlock = this.page.getByTestId('enrollmentInstructionsCodeBlock');
     this.enrollmentCopyButton = this.page.getByTestId('euiCodeBlockCopy');
+    this.confirmedAgentEnrollmentCallout = this.page.getByTestId('ConfirmAgentEnrollmentCallOut');
+    this.incomingDataConfirmedCallout = this.page.getByTestId('IncomingDataConfirmedCallOut');
   }
 
   public async clickAddAgentCTA() {
@@ -51,11 +55,21 @@ export class FleetAgentsOverviewPage {
     await expect(this.enrollmentCodeBlock, 'Code block should be visible').toBeVisible();
   }
 
-  public async scrollToCodeBlockCopyButton() {
-    await this.enrollmentCopyButton.scrollIntoViewIfNeeded();
-  }
-
   public async copyToClipboard() {
     await this.enrollmentCopyButton.click();
+  }
+
+  public async assertAgentEnrolled() {
+    await expect(
+      this.confirmedAgentEnrollmentCallout,
+      'Confirmed agent enrollment callout should be visible'
+    ).toBeVisible({ timeout: 60_000 * 3 });
+  }
+
+  public async assertIncomingDataConfirmed() {
+    await expect(
+      this.incomingDataConfirmedCallout,
+      'Incoming data confirmed callout should be visible'
+    ).toBeVisible({ timeout: 60_000 * 5 });
   }
 }
