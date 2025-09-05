@@ -179,11 +179,8 @@ export const getAlertProcessingDonutAttributes: MyGetLensAttributes = ({
           },
           sourceFilters: [],
           timeFieldName: '@timestamp',
-          title: '.alerts-security.alerts-default',
+          title: `.alerts-security.alerts-${spaceId}`,
         },
-      },
-      uiState: {
-        'vis.legendOpen': false,
       },
     },
     references: [],
