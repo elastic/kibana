@@ -36,6 +36,7 @@ describe('transformBuiltInFormData', () => {
         },
         required: ['query'],
       },
+      readonly: true,
     };
 
     mockFormData = {
