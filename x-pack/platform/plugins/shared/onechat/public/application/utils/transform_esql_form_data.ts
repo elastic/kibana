@@ -41,6 +41,7 @@ export const transformFormDataToEsqlTool = (data: OnechatEsqlToolFormData): Esql
   return {
     id: data.name,
     description: data.description,
+    readonly: false,
     configuration: {
       query: data.esql,
       params: data.params
@@ -66,7 +67,7 @@ export const transformFormDataToEsqlTool = (data: OnechatEsqlToolFormData): Esql
 export const transformEsqlFormDataForCreate = (
   data: OnechatEsqlToolFormData
 ): CreateToolPayload => {
-  return transformFormDataToEsqlTool(data);
+  return omit(transformFormDataToEsqlTool(data), ['readonly']);
 };
 
 /**
@@ -77,5 +78,5 @@ export const transformEsqlFormDataForCreate = (
 export const transformEsqlFormDataForUpdate = (
   data: OnechatEsqlToolFormData
 ): UpdateToolPayload => {
-  return omit(transformFormDataToEsqlTool(data), ['id', 'type']);
+  return omit(transformFormDataToEsqlTool(data), ['id', 'type', 'readonly']);
 };

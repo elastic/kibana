@@ -20,7 +20,7 @@ export function SvlSearchNavigationServiceProvider({
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
         // Wait for the side nav, since the landing page will sometimes redirect to index management now
-        await testSubjects.existOrFail('svlSearchSideNav', { timeout: 2000 });
+        await testSubjects.existOrFail('~svlSearchSideNav', { timeout: 2000 });
       });
     },
     async navigateToGettingStartedPage() {

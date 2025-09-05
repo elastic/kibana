@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
 import { Group, Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
@@ -75,12 +76,17 @@ const upsertGroupRoute = createServerRoute({
       group: Group.right,
     }),
   }),
-  handler: async ({ params, request, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients, context }) => {
     const { streamsClient, assetClient } = await getScopedClients({
       request,
     });
 
-    if (!(await streamsClient.isStreamsEnabled())) {
+    const core = await context.core;
+    const groupStreamsEnabled = await core.uiSettings.client.get(
+      OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
+    );
+
+    if (!groupStreamsEnabled) {
       throw badData('Streams are not enabled for Group streams.');
     }
 
@@ -99,6 +105,10 @@ const upsertGroupRoute = createServerRoute({
       .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
       .map((asset) => asset[ASSET_UUID]);
 
+    const rules = assets
+      .filter((asset) => asset[ASSET_TYPE] === 'rule')
+      .map((asset) => asset[ASSET_UUID]);
+
     const queries = assets
       .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
       .map((asset) => asset.query);
@@ -112,6 +122,7 @@ const upsertGroupRoute = createServerRoute({
         group,
       },
       queries,
+      rules,
     };
 
     return await streamsClient.upsertStream({

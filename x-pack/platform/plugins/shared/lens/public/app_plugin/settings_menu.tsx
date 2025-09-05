@@ -44,14 +44,13 @@ export function SettingsMenu({
   const dispatch = useLensDispatch();
 
   const toggleAutoApply = useCallback(() => {
-    onClose();
     writeToStorage(
       new Storage(localStorage),
       AUTO_APPLY_DISABLED_STORAGE_KEY,
       String(autoApplyEnabled)
     );
     dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
-  }, [dispatch, autoApplyEnabled, onClose]);
+  }, [dispatch, autoApplyEnabled]);
 
   return (
     <EuiWrappingPopover

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { get, isObject } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
+import { set } from '@kbn/safer-lodash-set';
+import type { Condition } from '@kbn/streamlang';
+import { isNeverCondition } from '@kbn/streamlang';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
@@ -25,10 +29,9 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
   }
   // Rename unwired to classic
   if (
-    typeof migratedDefinition.ingest === 'object' &&
-    migratedDefinition.ingest &&
+    isObject(migratedDefinition.ingest) &&
     'unwired' in migratedDefinition.ingest &&
-    typeof migratedDefinition.ingest.unwired === 'object'
+    isObject(migratedDefinition.ingest.unwired)
   ) {
     migratedDefinition = {
       ...migratedDefinition,
@@ -45,8 +48,7 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
 
   // Migrate routing "if" Condition to Streamlang
   if (
-    migratedDefinition.ingest &&
-    typeof migratedDefinition.ingest === 'object' &&
+    isObject(migratedDefinition.ingest) &&
     'wired' in migratedDefinition.ingest &&
     (migratedDefinition.ingest as { wired?: unknown }).wired &&
     typeof (migratedDefinition.ingest as { wired?: any }).wired === 'object' &&
@@ -64,6 +66,62 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     Array.isArray((migratedDefinition.ingest as { processing?: unknown }).processing)
   ) {
     migratedDefinition = migrateOldProcessingArrayToStreamlang(migratedDefinition);
+    hasBeenMigrated = true;
+  }
+
+  // Migrate routing definitions to include status field
+  if (
+    isObject(migratedDefinition.ingest) &&
+    'wired' in migratedDefinition.ingest &&
+    isObject(migratedDefinition.ingest.wired) &&
+    Array.isArray((migratedDefinition.ingest as { wired?: any }).wired.routing) &&
+    (migratedDefinition.ingest as { wired?: any }).wired.routing.some(
+      (route: any) => !('status' in route)
+    )
+  ) {
+    const routings = get(migratedDefinition, 'ingest.wired.routing', []) as Array<
+      Record<string, unknown>
+    >;
+
+    const migratedRouting = routings.map((route) => {
+      // If route doesn't have status field, add it based on the condition
+      if (!('status' in route) && 'where' in route) {
+        const isDisabledCondition = isNeverCondition(route.where as Condition);
+
+        return {
+          ...route,
+          where: isDisabledCondition ? { always: {} } : route.where,
+          status: isDisabledCondition ? 'disabled' : 'enabled',
+        };
+      }
+      return route;
+    });
+
+    set(migratedDefinition, 'ingest.wired.routing', migratedRouting);
+    hasBeenMigrated = true;
+  }
+
+  // Add metadata to Group stream if missing
+  if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      group: {
+        ...migratedDefinition.group,
+        metadata: {},
+      },
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Add tags to Group stream if missing
+  if (isObject(migratedDefinition.group) && !('tags' in migratedDefinition.group)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      group: {
+        ...migratedDefinition.group,
+        tags: [],
+      },
+    };
     hasBeenMigrated = true;
   }
 

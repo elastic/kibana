@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 import type { LlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
@@ -57,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const statusBadgeText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseStatus'
       );
-      expect(statusBadgeText).to.be(InferenceModelState.NOT_INSTALLED);
+      expect(statusBadgeText).to.be('Not installed');
       const buttonText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseUpdateModelButton'
       );
@@ -111,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const statusBadgeText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseStatus'
       );
-      expect(statusBadgeText).to.be(InferenceModelState.MODEL_PENDING_DEPLOYMENT);
+      expect(statusBadgeText).to.be('Model pending deployment...');
     });
   });
 }

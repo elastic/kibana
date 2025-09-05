@@ -141,13 +141,38 @@ addTool(server, myNewTool);
 
 By following these steps, you can successfully add and register a new tool to the MCP dev server, making it available for use.
 
-## `code_search` Tool
+# Available Tools
 
-The `code_search` tool performs a semantic search of the Kibana codebase using a unified Elasticsearch index. This tool is ideal for a "chain of investigation" approach to exploring the codebase.
+The following tools are available in the MCP Dev Server.
 
-### Index Setup
+## `code_search`
 
-Before using the `code_search` tool, you must set up the Elasticsearch index using the [semantic-code-search-indexer](https://github.com/elastic/semantic-code-search-indexer). Follow the instructions in the indexer's README to clone, configure, and build the tool.
+Performs a semantic search of the Kibana codebase using a unified Elasticsearch index. This tool is ideal for a "chain of investigation" approach to exploring the codebase.
+
+### Parameters
+- `query` (string, optional): The semantic query string to search for.
+- `kql` (string, optional): The KQL filter to apply to the search.
+- `size` (number, optional, default: 20): The number of results to return.
+- `page` (number, optional, default: 1): The page of results to return.
+
+## `get_distinct_values`
+
+Retrieves all unique values for a specified field from the code search index. Can be filtered with an optional KQL query.
+
+### Parameters
+- `field` (enum): The field for which to retrieve distinct values. Can be 'type', 'language', 'kind', 'filePath', or 'imports'.
+- `kql` (string, optional): An optional KQL filter to apply before aggregating.
+
+## `find_usages`
+
+Analyzes a code symbol's usage across the entire codebase and generates a rich, categorized report. Use this tool to quickly understand a symbol's architectural role, differentiate between its definition, execution sites, and type declarations, and discover where it is referenced in tests and documentation. This is a primary tool for high-level code intelligence and analysis.
+
+### Parameters
+- `symbol` (string): The symbol to find usages for.
+
+## Index Setup
+
+Before using the search-related tools, you must set up the Elasticsearch index using the [semantic-code-search-indexer](https://github.com/elastic/semantic-code-search-indexer). Follow the instructions in the indexer's README to clone, configure, and build the tool.
 
 Once the indexer is set up, run the following command from the `semantic-code-search-indexer` directory to index the Kibana codebase:
 
@@ -155,61 +180,9 @@ Once the indexer is set up, run the following command from the `semantic-code-se
 npm run index -- --clean ../kibana
 ```
 
-### "Chain of Investigation" Example: How to set up a server route repository
+## Running the Server with Search Tools
 
-Here is an example of how to use the `code_search` tool to investigate how to set up a server route repository in Kibana.
-
-**1. Broad Search:** Start with a broad query to find the most relevant files.
-
-```
-code_search("server route repository")
-```
-
-The top hit from this search is the `README.md` file for the `@kbn/server-route-repository` package. This is the perfect place to start, as it provides a high-level overview of the feature.
-
-**2. Read the Documentation:** Read the `README.md` file to get a high-level understanding of the feature and how to use it. The `README.md` mentions three key functions: `createServerRouteFactory`, `registerRoutes`, and `createRepositoryClient`.
-
-**3. Investigate `createServerRouteFactory`:** Based on the `README.md`, the next logical step is to investigate the `createServerRouteFactory` function, as it's the entry point for creating routes.
-
-```
-code_search("createServerRouteFactory")
-```
-
-The search results confirm that this is the correct starting point and show the source code for the function.
-
-**4. Investigate `registerRoutes`:** The `README.md` also mentions that after creating routes, you need to register them using `registerRoutes`. This is the next logical step in our investigation.
-
-```
-code_search("registerRoutes")
-```
-
-The search results for `registerRoutes` confirm that it's the function used to register the route repository with the Kibana server.
-
-**5. Investigate `createRepositoryClient`:** The final piece of the puzzle is the client-side implementation. The `README.md` mentions `createRepositoryClient` for this purpose.
-
-```
-code_search("createRepositoryClient")
-```
-
-The search results for `createRepositoryClient` confirm that it's the correct function for creating a typed client on the browser.
-
-### How effective is the `code_search` tool for accomplishing this?
-
-The `code_search` tool was extremely effective. It was the key to providing accurate and comprehensive answers.
-
-Here's a breakdown of why it worked so well for this "chain of investigation":
-
-1.  **It Found the "Source of Truth" Immediately:** My first query, "server route repository," led me directly to the `README.md` file for the `@kbn/server-route-repository` package. In a large codebase like Kibana, finding the primary documentation for a specific feature is often the biggest challenge. The semantic search understood the concept and prioritized the documentation, which was the perfect starting point.
-
-2.  **It Enabled a Top-Down Approach:** Instead of starting with low-level code and trying to piece together the bigger picture, I could start with the high-level explanation in the `README.md`. This document contained clear explanations and code examples for the exact questions you asked: how to use the client, how to implement an API, and how to add dependencies.
-
-3.  **It Provided Contextual Clues:** Even the other search results that I didn't use directly were valuable. They showed me related test files and type definitions, confirming that `@kbn/server-route-repository` was indeed the central package for this functionality.
-
-Without the `code_search` tool, I would have had to rely on file-based searches (`grep` or `find`), which would have been much slower and less precise. I would have gotten many irrelevant results and would have had to manually read through numerous files to find the same information. The semantic search cut through the noise and took me straight to the most relevant information.
-
-## Running the Server with `code_search`
-
-To use the `code_search` tool, you need to configure the MCP Dev Server to connect to your Elasticsearch instance. This is done by setting the following environment variables:
+To use the search tools, you need to configure the MCP Dev Server to connect to your Elasticsearch instance. This is done by setting the following environment variables:
 
 | Variable | Description | Default |
 | --- | --- | --- |

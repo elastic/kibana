@@ -7,7 +7,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { useSendMessage } from '../context/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
@@ -38,7 +37,7 @@ const useConversation = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
-  return conversation?.agent_id ?? oneChatDefaultAgentId;
+  return conversation?.agent_id;
 };
 
 export const useConversationTitle = () => {
@@ -62,6 +61,17 @@ export const useConversationRounds = () => {
   }, [conversation?.rounds, error, pendingMessage]);
 
   return conversationRounds;
+};
+
+// Returns a flattened list of all steps across all rounds.
+// CAUTION: This uses `conversationRounds.length` as useMemo key to prevent re-renders during streaming. This will return stale data for the last round. It will only contain the complete set of steps up until the previous round.
+export const useStepsFromPrevRounds = () => {
+  const conversationRounds = useConversationRounds();
+
+  return useMemo(() => {
+    return conversationRounds.flatMap(({ steps }) => steps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationRounds.length]); // only depend on length to avoid re-renders during streaming
 };
 
 export const useHasActiveConversation = () => {

@@ -8,3 +8,4 @@
  */
 
 export * from './value_formatters';
+export * from './dimension_utils';

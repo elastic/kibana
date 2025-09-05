@@ -22,7 +22,7 @@ import type { IESSource } from '../sources/es_source';
 import type { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
-  private readonly _source: IESSource;
+  private readonly _source: IVectorSource & Pick<IESSource, 'getIndexPattern'>;
 
   constructor({
     fieldName,
@@ -30,7 +30,7 @@ export class ESDocField extends AbstractField implements IField {
     origin,
   }: {
     fieldName: string;
-    source: IESSource;
+    source: IVectorSource & Pick<IESSource, 'getIndexPattern'>;
     origin: FIELD_ORIGIN;
   }) {
     super({ fieldName, origin });

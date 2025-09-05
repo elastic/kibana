@@ -6,18 +6,18 @@
  */
 
 import Papa from 'papaparse';
+import type { SiemMigrationResourceData } from '../../../../../../common/siem_migrations/model/common.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
-import type { RuleMigrationResourceData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemRuleMigrationsClient } from '../../siem_rule_migrations_service';
 
-interface LookupWithData extends RuleMigrationResourceData {
+interface LookupWithData extends SiemMigrationResourceData {
   data: object[] | null;
 }
 
 export const processLookups = async (
-  resources: RuleMigrationResourceData[],
+  resources: SiemMigrationResourceData[],
   ruleMigrationsClient: SiemRuleMigrationsClient
-): Promise<RuleMigrationResourceData[]> => {
+): Promise<SiemMigrationResourceData[]> => {
   const lookupsData: Record<string, LookupWithData> = {};
 
   resources.forEach((resource) => {
@@ -30,7 +30,7 @@ export const processLookups = async (
     }
   });
 
-  const lookups: RuleMigrationResourceData[] = [];
+  const lookups: SiemMigrationResourceData[] = [];
   const result = await initPromisePool({
     concurrency: 10,
     items: Object.entries(lookupsData),

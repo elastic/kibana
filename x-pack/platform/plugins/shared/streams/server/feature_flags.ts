@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_ENABLE_STREAMS_UI,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
 } from '@kbn/management-settings-ids';
 import type { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
@@ -60,6 +61,24 @@ export function registerFeatureFlags(
         values: {
           streamsLink: `<a href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams">Streams UI</href>`,
         },
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+    },
+  });
+
+  core.uiSettings.register({
+    [OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.groupStreamsSettingsName', {
+        defaultMessage: 'Group streams',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.groupStreamsSettingsDescription', {
+        defaultMessage: 'Enable Group streams.',
       }),
       type: 'boolean',
       schema: schema.boolean(),

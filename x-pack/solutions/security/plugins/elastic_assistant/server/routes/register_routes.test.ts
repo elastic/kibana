@@ -6,17 +6,16 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 import { registerRoutes } from './register_routes';
 import { serverMock } from '../__mocks__/server';
 
 import { findAlertSummaryRoute } from './alert_summary/find_route';
-import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
-import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
-import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
-import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
-import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/get_attack_discovery_generations';
-import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/post_attack_discovery_generations_dismiss';
+import { postAttackDiscoveryRoute } from './attack_discovery/post/internal/post_attack_discovery';
+import { findAttackDiscoveriesRoute } from './attack_discovery/get/internal/find_attack_discoveries';
+import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/internal/get_attack_discovery_generations';
+import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/internal/post_attack_discovery_generations_dismiss';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
@@ -54,21 +53,17 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { suggestUsersRoute } from './users/suggest';
 
 jest.mock('./alert_summary/find_route');
 const findAlertSummaryRouteMock = findAlertSummaryRoute as jest.Mock;
-jest.mock('./attack_discovery/post/cancel/cancel_attack_discovery');
-const cancelAttackDiscoveryRouteMock = cancelAttackDiscoveryRoute as jest.Mock;
-jest.mock('./attack_discovery/get/get_attack_discovery');
-const getAttackDiscoveryRouteMock = getAttackDiscoveryRoute as jest.Mock;
-jest.mock('./attack_discovery/post/post_attack_discovery');
+jest.mock('./attack_discovery/post/internal/post_attack_discovery');
 const postAttackDiscoveryRouteMock = postAttackDiscoveryRoute as jest.Mock;
-jest.mock('./attack_discovery/get/find_attack_discoveries');
+jest.mock('./attack_discovery/get/internal/find_attack_discoveries');
 const findAttackDiscoveriesRouteMock = findAttackDiscoveriesRoute as jest.Mock;
-jest.mock('./attack_discovery/get/get_attack_discovery_generations');
+jest.mock('./attack_discovery/get/internal/get_attack_discovery_generations');
 const getAttackDiscoveryGenerationsRouteMock = getAttackDiscoveryGenerationsRoute as jest.Mock;
-jest.mock('./attack_discovery/post/post_attack_discovery_generations_dismiss');
+jest.mock('./attack_discovery/post/internal/post_attack_discovery_generations_dismiss');
 const postAttackDiscoveryGenerationsDismissRouteMock =
   postAttackDiscoveryGenerationsDismissRoute as jest.Mock;
 jest.mock('./user_conversations/create_route');
@@ -139,6 +134,8 @@ jest.mock('./attack_discovery/schedules/disable');
 const disableAttackDiscoverySchedulesRouteMock = disableAttackDiscoverySchedulesRoute as jest.Mock;
 jest.mock('./attack_discovery/schedules/enable');
 const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as jest.Mock;
+jest.mock('./users/suggest');
+const suggestUsersRouteMock = suggestUsersRoute as jest.Mock;
 
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
@@ -152,10 +149,6 @@ describe('registerRoutes', () => {
     registerRoutes(server.router, loggerMock, config);
   });
 
-  it('should call `cancelAttackDiscoveryRouteMock`', () => {
-    expect(cancelAttackDiscoveryRouteMock).toHaveBeenCalledWith(server.router);
-  });
-
   it('should call `findAttackDiscoveriesRouteMock`', () => {
     expect(findAttackDiscoveriesRouteMock).toHaveBeenCalledWith(server.router);
   });
@@ -166,10 +159,6 @@ describe('registerRoutes', () => {
 
   it('should call `postAttackDiscoveryGenerationsDismissRouteMock`', () => {
     expect(postAttackDiscoveryGenerationsDismissRouteMock).toHaveBeenCalledWith(server.router);
-  });
-
-  it('should call `getAttackDiscoveryRouteMock`', () => {
-    expect(getAttackDiscoveryRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `postAttackDiscoveryRouteMock`', () => {
@@ -318,5 +307,9 @@ describe('registerRoutes', () => {
 
   it('should call `enableAttackDiscoverySchedulesRouteMock`', () => {
     expect(enableAttackDiscoverySchedulesRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `suggestUsersRouteMock`', () => {
+    expect(suggestUsersRouteMock).toHaveBeenCalledWith(server.router, loggerMock);
   });
 });

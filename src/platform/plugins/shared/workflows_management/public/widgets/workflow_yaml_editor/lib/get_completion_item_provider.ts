@@ -15,16 +15,16 @@ import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_g
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import {
-  MUSTACHE_REGEX_GLOBAL,
+  VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
-  UNFINISHED_MUSTACHE_REGEX_GLOBAL,
+  UNFINISHED_VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
 import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
-  matchType: 'at' | 'bracket-unfinished' | 'mustache-complete' | 'mustache-unfinished' | null;
+  matchType: 'at' | 'bracket-unfinished' | 'variable-complete' | 'variable-unfinished' | null;
   match: RegExpMatchArray | null;
 }
 
@@ -51,25 +51,25 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   }
 
   // Try unfinished mustache (e.g., "{{ consts.api" at end of line)
-  const unfinishedMatch = [...lineUpToCursor.matchAll(UNFINISHED_MUSTACHE_REGEX_GLOBAL)].pop();
+  const unfinishedMatch = [...lineUpToCursor.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)].pop();
   if (unfinishedMatch) {
     const fullKey = cleanKey(unfinishedMatch.groups?.key ?? '');
     return {
       fullKey,
       pathSegments: parsePath(fullKey),
-      matchType: 'mustache-unfinished',
+      matchType: 'variable-unfinished',
       match: unfinishedMatch,
     };
   }
 
   // Try complete mustache (e.g., "{{ consts.apiUrl }}")
-  const completeMatch = [...lineUpToCursor.matchAll(MUSTACHE_REGEX_GLOBAL)].pop();
+  const completeMatch = [...lineUpToCursor.matchAll(VARIABLE_REGEX_GLOBAL)].pop();
   if (completeMatch) {
     const fullKey = cleanKey(completeMatch.groups?.key ?? '');
     return {
       fullKey,
       pathSegments: parsePath(fullKey),
-      matchType: 'mustache-complete',
+      matchType: 'variable-complete',
       match: completeMatch,
     };
   }

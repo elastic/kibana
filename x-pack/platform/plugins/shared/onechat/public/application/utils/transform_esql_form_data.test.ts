@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { EsqlToolDefinition } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import type { CreateToolPayload } from '../../../common/http_api/tools';
@@ -35,6 +36,7 @@ describe('transformEsqlFormData', () => {
     mockTool = {
       id: 'my-test-tool',
       description: 'A tool for testing.',
+      readonly: false,
       configuration: {
         query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
         params: {
@@ -74,7 +76,7 @@ describe('transformEsqlFormData', () => {
         type: 'text',
       });
 
-      const expectedTool = mockTool;
+      const expectedTool = { ...mockTool };
       expectedTool.configuration.query = 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1';
       expectedTool.configuration.params = {
         param1: {
@@ -91,7 +93,7 @@ describe('transformEsqlFormData', () => {
 
   describe('transformEsqlFormDataForCreate', () => {
     it('should transform ES|QL form data to a create tool payload', () => {
-      const expectedPayload: CreateToolPayload = mockTool;
+      const expectedPayload: CreateToolPayload = omit(mockTool, ['readonly']);
 
       const result = transformEsqlFormDataForCreate(mockFormData);
       expect(result).toEqual(expectedPayload);
@@ -155,7 +157,7 @@ describe('transformEsqlFormData', () => {
   });
   describe('transformEsqlFormDataForUpdate', () => {
     it('should transform ES|QL form data to an update tool payload', () => {
-      const { id, type, ...toolWithoutIdAndType } = mockTool;
+      const toolWithoutIdAndType = omit(mockTool, ['id', 'type', 'readonly']);
 
       const result = transformEsqlFormDataForUpdate(mockFormData);
       expect(result).toEqual(toolWithoutIdAndType);

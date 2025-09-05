@@ -6,6 +6,7 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
+import moment from 'moment';
 import type {
   UserActionAction,
   CommentUserAction,
@@ -17,6 +18,7 @@ import type {
   CaseConnector,
   Attachment,
   ObservableType,
+  AlertAttachment,
 } from '../../common/types/domain';
 import {
   CaseSeverity,
@@ -49,6 +51,8 @@ import type {
   CasesSimilarResponseUI,
   ObservableUI,
   InternalFindCaseUserActions,
+  CaseSummary,
+  InferenceConnectors,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -348,6 +352,19 @@ export const basicCaseMetrics: SingleCaseMetrics = {
   },
 };
 
+export const mockCaseSummary: CaseSummary = {
+  content: 'case summary',
+  generatedAt: moment().toISOString(),
+};
+
+export const mockInferenceConnectors: InferenceConnectors = {
+  connectors: [
+    {
+      connectorId: 'connector-id',
+    },
+  ],
+};
+
 export const mockCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
@@ -400,9 +417,37 @@ export const basicCommentPatch: AttachmentUI = {
   },
 };
 
+export const alertCommentPatch = {
+  id: '56bf08d1-540d-33dr-b712-9ebface784r2',
+  version: 'test',
+  type: AttachmentType.alert,
+  alertId: [
+    '00cea26c-4396-49ad-8e80-e32146bf2ee6',
+    '8591828c-3e33-4588-a3b8-5dfcad22786e',
+    '920b1cbf-e6a8-4164-a83c-6ae52e5a60f2',
+    'd2a19346-5f1a-467b-9fd4-e8e1241a6786',
+  ],
+  index: [
+    '.internal.alerts-observability.slo.alerts-default-000001',
+    '.internal.alerts-observability.slo.alerts-default-000001',
+    '.internal.alerts-observability.slo.alerts-default-000001',
+    '.internal.alerts-observability.slo.alerts-default-000001',
+  ],
+  rule: {
+    id: '97bf08d1-540d-44b0-b712-9ebface5331d',
+    name: 'Ticket Price Burn Rate rule',
+  },
+  owner: 'observability',
+} as AlertAttachment;
+
 export const basicCaseCommentPatch = {
   ...basicCase,
   comments: [basicCommentPatch],
+};
+
+export const alertCaseCommentPatch = {
+  ...basicCase,
+  comments: [alertCommentPatch],
 };
 
 export const casesMetrics: CasesMetrics = {

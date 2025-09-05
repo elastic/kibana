@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
@@ -17,6 +17,12 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../../../..';
 import type { ResolveTimelineResponse } from '../../../../../common/api/timeline';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import {
+  getMockDataView,
+  getMockDataViewWithMatchedIndices,
+} from '../../../../data_view_manager/mocks/mock_data_view';
+import { withIndices } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');
@@ -34,7 +40,6 @@ jest.mock('../../../../common/components/link_to', () => {
     }),
   };
 });
-jest.mock('../../../../data_view_manager/hooks/use_data_view');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -96,6 +101,9 @@ const selectedTimeline: ResolveTimelineResponse = {
   },
 };
 
+// TODO: come back to this test later, no idea why it fails with the new picker, even when I mock all the hooks
+// probably depends on some weird timing or other non-deterministic behavior.
+// https://github.com/elastic/security-team/issues/11959
 describe('useRuleFromTimeline', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
   const setRuleQuery = jest.fn();
@@ -115,6 +123,8 @@ describe('useRuleFromTimeline', () => {
         selectedPatterns: ['awesome-*'],
         sourcererDataView: {},
       });
+
+      jest.mocked(useDataView).mockReturnValue(withIndices(['awesome-*'], 'custom-data-view-id'));
     });
 
     it('does not reset timeline sourcerer if it originally had same data view as the timeline used in the rule', async () => {
@@ -139,6 +149,17 @@ describe('useRuleFromTimeline', () => {
           dataViewId: 'custom-data-view-id',
           selectedPatterns: ['awesome-*'],
         });
+
+      const initialDataView = getMockDataView();
+      initialDataView.id = 'security-solution';
+
+      const customDataView = getMockDataViewWithMatchedIndices(['awesome-*']);
+      customDataView.id = 'custom-data-view-id';
+
+      jest
+        .mocked(useDataView)
+        .mockReturnValueOnce({ status: 'ready', dataView: initialDataView })
+        .mockReturnValue({ status: 'ready', dataView: customDataView });
     });
     it('if no timeline id in URL, loading: false and query not set', async () => {
       (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);

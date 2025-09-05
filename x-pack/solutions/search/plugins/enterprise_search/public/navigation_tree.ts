@@ -89,6 +89,13 @@ export const getNavigationTreeDefinition = ({
                   icon,
                   renderAs: 'home',
                   sideNavVersion: 'v2',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
+                    );
+                  },
                 },
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -140,10 +147,6 @@ export const getNavigationTreeDefinition = ({
                     {
                       breadcrumbStatus: 'hidden',
                       link: 'searchPlayground',
-                    },
-                    {
-                      link: 'enterpriseSearchContent:connectors',
-                      iconV2: 'link' /* TODO: review icon */,
                     },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {

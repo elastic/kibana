@@ -346,6 +346,72 @@ describe('getSavedSearch', () => {
     `);
   });
 
+  test('should initialize searchSource from tab if kibanaSavedObjectMeta only exists in tab', async () => {
+    getSavedSrch = jest.fn().mockReturnValue({
+      item: {
+        attributes: {
+          title: 'test3',
+          sort: [['order_date', 'desc']],
+          columns: ['_source'],
+          description: 'description',
+          grid: {},
+          hideChart: false,
+          sampleSize: 100,
+          tabs: [
+            {
+              id: 'tab_with_meta',
+              label: 'Tab With Meta',
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"query":"tab-query","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                sort: [['order_date', 'desc']],
+                columns: ['_source'],
+                grid: {},
+                hideChart: false,
+                sampleSize: 100,
+              },
+            },
+          ],
+        },
+        id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
+        type: 'search',
+        references: [
+          {
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+            type: 'index-pattern',
+          },
+        ],
+        namespaces: ['default'],
+      },
+      meta: {
+        outcome: 'exactMatch',
+      },
+    });
+
+    const savedSearch = await getSavedSearch(
+      'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
+      {
+        getSavedSrch,
+        searchSourceCreate,
+      },
+      true
+    );
+
+    expect(savedSearch.serializedSearchSource).toMatchInlineSnapshot(`
+      Object {
+        "filter": Array [],
+        "index": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+        "query": Object {
+          "language": "kuery",
+          "query": "tab-query",
+        },
+      }
+    `);
+  });
+
   it('should call savedObjectsTagging.ui.getTagIdsFromReferences', async () => {
     getSavedSrch = jest.fn().mockReturnValue({
       item: {

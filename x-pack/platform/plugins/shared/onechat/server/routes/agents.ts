@@ -119,6 +119,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
               id: schema.string(),
               name: schema.string(),
               description: schema.string(),
+              avatar_color: schema.maybe(schema.string()),
+              avatar_symbol: schema.maybe(schema.string()),
+              labels: schema.maybe(schema.arrayOf(schema.string())),
               configuration: schema.object({
                 instructions: schema.maybe(schema.string()),
                 tools: TOOL_SELECTION_SCHEMA,
@@ -161,6 +164,9 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
             body: schema.object({
               name: schema.maybe(schema.string()),
               description: schema.maybe(schema.string()),
+              avatar_color: schema.maybe(schema.string()),
+              avatar_symbol: schema.maybe(schema.string()),
+              labels: schema.maybe(schema.arrayOf(schema.string())),
               configuration: schema.maybe(
                 schema.object({
                   instructions: schema.maybe(schema.string()),

@@ -30,7 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testPlaygroundName = 'FTR Search Playground';
   const updatedPlaygroundName = 'Test Search Playground';
 
-  describe('Search Playground - Saved Playgrounds', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/231246
+  describe.skip('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
 
@@ -89,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         const { solutionNavigation } = pageObjects;
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'RAG Playground' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: testPlaygroundName,
         });

@@ -18,6 +18,12 @@ jest.mock('../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
+jest.mock('../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: () => ({
+    indexes: { apm: { traces: 'test-index' } },
+  }),
+}));
+
 jest.mock('rxjs', () => {
   const originalModule = jest.requireActual('rxjs');
   return {
@@ -52,7 +58,7 @@ beforeEach(() => {
 
 describe('useRootSpan hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <RootSpanProvider traceId="test-trace" transactionId="transaction-id" indexPattern="test-index">
+    <RootSpanProvider traceId="test-trace" transactionId="transaction-id">
       {children}
     </RootSpanProvider>
   );
@@ -96,9 +102,7 @@ describe('useRootSpan hook', () => {
 
   it('should update trace when OTEL data is fetched successfully', async () => {
     const newWrapper = ({ children }: { children: React.ReactNode }) => (
-      <RootSpanProvider traceId="test-trace" indexPattern="test-index">
-        {children}
-      </RootSpanProvider>
+      <RootSpanProvider traceId="test-trace">{children}</RootSpanProvider>
     );
 
     const transactionName = 'Test Trace';
@@ -149,9 +153,7 @@ describe('useRootSpan hook', () => {
 
   it('should set trace to null and stop loading when traceId is not provided', async () => {
     const wrapperWithoutTraceId = ({ children }: { children: React.ReactNode }) => (
-      <RootSpanProvider traceId={undefined} indexPattern="test-index">
-        {children}
-      </RootSpanProvider>
+      <RootSpanProvider traceId={undefined}>{children}</RootSpanProvider>
     );
 
     const { result } = renderHook(() => useRootSpanContext(), {

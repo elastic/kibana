@@ -418,18 +418,18 @@ describe('saved_playgrounds utils', () => {
     });
 
     it('should return error for empty name', () => {
-      expect(validatePlaygroundName('')).toBe('RAG Playground name is required');
+      expect(validatePlaygroundName('')).toBe('Playground name is required');
     });
 
     it('should return error for names longer than 100 characters', () => {
       const longName = 'a'.repeat(101);
       expect(validatePlaygroundName(longName)).toBe(
-        'RAG Playground name must be less than 100 characters'
+        'Playground name must be less than 100 characters'
       );
     });
 
     it('should handle whitespace-only names as empty', () => {
-      expect(validatePlaygroundName('   ')).toBe('RAG Playground name is required');
+      expect(validatePlaygroundName('   ')).toBe('Playground name is required');
     });
   });
 

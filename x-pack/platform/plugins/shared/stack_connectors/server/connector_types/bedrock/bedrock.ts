@@ -280,6 +280,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { body, model: reqModel, signal, timeout, raw }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', body);
     // set model on per request basis
     // Application Inference Profile IDs need to be encoded when using the API
     // Decode first to ensure an existing encoded value is not double encoded
@@ -327,6 +329,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { body, model: reqModel, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', body);
     // set model on per request basis
     // Application Inference Profile IDs need to be encoded when using the API
     // Decode first to ensure an existing encoded value is not double encoded

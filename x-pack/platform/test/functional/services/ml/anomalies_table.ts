@@ -124,6 +124,12 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       );
     },
 
+    async clickConfigureRulesButton(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.click('mlAnomaliesListRowActionConfigureRulesButton');
+      await testSubjects.existOrFail('mlRuleEditorFlyout');
+    },
+
     async assertAnomalyActionViewSeriesButtonEnabled(rowIndex: number, expectedValue: boolean) {
       await this.ensureAnomalyActionsMenuOpen(rowIndex);
       const isEnabled = await testSubjects.isEnabled('mlAnomaliesListRowActionViewSeriesButton');

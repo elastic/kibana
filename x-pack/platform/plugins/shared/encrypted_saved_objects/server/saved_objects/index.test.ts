@@ -12,15 +12,20 @@ import type {
 } from '@kbn/core/server';
 import {
   coreMock,
+  loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
+import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { ClientInstanciator } from '.';
-import { setupSavedObjects } from '.';
+import { createUnsupportedEncryptedTypeError, setupSavedObjects } from '.';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
+
+const mockLoggerFactory = loggingSystemMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
 
 describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;
@@ -29,6 +34,7 @@ describe('#setupSavedObjects', () => {
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
   let mockSavedObjectTypeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   let mockEncryptedSavedObjectsService: jest.Mocked<EncryptedSavedObjectsService>;
+
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
 
@@ -44,10 +50,12 @@ describe('#setupSavedObjects', () => {
     mockEncryptedSavedObjectsService = encryptedSavedObjectsServiceMock.createWithTypes([
       { type: 'known-type', attributesToEncrypt: new Set(['attrSecret']) },
     ]);
+
     setupContract = setupSavedObjects({
       service: mockEncryptedSavedObjectsService,
       savedObjects: coreSetupMock.savedObjects,
       getStartServices: coreSetupMock.getStartServices,
+      logger: mockLogger,
     });
   });
 
@@ -130,7 +138,7 @@ describe('#setupSavedObjects', () => {
       );
     });
 
-    it('does not call decryptAttributes if Saved Object type is not registered', async () => {
+    it('does not call decryptAttributes and throws if Saved Object type is not registered', async () => {
       const mockSavedObject: SavedObject = {
         id: 'some-id',
         type: 'not-known-type',
@@ -143,8 +151,11 @@ describe('#setupSavedObjects', () => {
         setupContract().getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
           namespace: 'some-ns',
         })
-      ).resolves.toEqual(mockSavedObject);
+      ).rejects.toThrowError(`Type 'not-known-type' is not registered as an encrypted type`);
 
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'getDecryptedAsInternalUser called with non-encrypted type: not-known-type'
+      );
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(0);
     });
   });
@@ -241,12 +252,13 @@ describe('#setupSavedObjects', () => {
       );
     });
 
-    it('does not call decryptAttributes if Saved Object type is not registered', async () => {
+    it('does not call decryptAttributes and includes type error if Saved Object type is not registered', async () => {
       const mockSavedObject: SavedObject = {
         id: 'some-id',
         type: 'not-known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        error: errorContent(createUnsupportedEncryptedTypeError('not-known-type')),
       };
       mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
         close: jest.fn(),
@@ -266,6 +278,9 @@ describe('#setupSavedObjects', () => {
         });
       }
 
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'createPointInTimeFinderDecryptedAsInternalUser called with non-encrypted types: not-known-type'
+      );
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(0);
     });
 

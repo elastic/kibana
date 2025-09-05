@@ -9,11 +9,9 @@ import type { Logger } from '@kbn/core/server';
 
 import { findSecurityAIPromptsRoute } from './security_ai_prompts/find_prompts';
 import { findAlertSummaryRoute } from './alert_summary/find_route';
-import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
-import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
-import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
-import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
-import { postAttackDiscoveryBulkRoute } from './attack_discovery/post/post_attack_discovery_bulk';
+import { findAttackDiscoveriesRoute } from './attack_discovery/get/internal/find_attack_discoveries';
+import { postAttackDiscoveryRoute } from './attack_discovery/post/internal/post_attack_discovery';
+import { postAttackDiscoveryBulkRoute } from './attack_discovery/post/internal/post_attack_discovery_bulk';
 import type { ElasticAssistantPluginRouter } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
@@ -43,8 +41,8 @@ import {
 } from './defend_insights';
 import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
-import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/get_attack_discovery_generations';
-import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/post_attack_discovery_generations_dismiss';
+import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/internal/get_attack_discovery_generations';
+import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/internal/post_attack_discovery_generations_dismiss';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
 import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
@@ -56,6 +54,7 @@ import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedul
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import type { ConfigSchema } from '../config_schema';
 import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
+import { suggestUsersRoute } from './users/suggest';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -103,6 +102,9 @@ export const registerRoutes = (
   getEvaluateRoute(router);
   postEvaluateRoute(router);
 
+  // Users
+  suggestUsersRoute(router, logger);
+
   // Prompts
   bulkPromptsRoute(router, logger);
   findPromptsRoute(router, logger);
@@ -119,9 +121,7 @@ export const registerRoutes = (
   postAttackDiscoveryBulkRoute(router);
   getAttackDiscoveryGenerationsRoute(router);
   postAttackDiscoveryGenerationsDismissRoute(router);
-  getAttackDiscoveryRoute(router);
   postAttackDiscoveryRoute(router);
-  cancelAttackDiscoveryRoute(router);
 
   // Attack Discovery Schedules
   createAttackDiscoverySchedulesRoute(router);

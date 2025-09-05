@@ -485,6 +485,11 @@ export type FieldSpec = DataViewFieldBase & {
   parentName?: string;
 
   defaultFormatter?: string;
+
+  /**
+   * Indicates whether the field is a metadata field.
+   */
+  metadata_field?: boolean;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

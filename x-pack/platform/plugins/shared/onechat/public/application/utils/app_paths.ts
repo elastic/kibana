@@ -18,6 +18,9 @@ export const appPaths = {
   },
   chat: {
     new: `/conversations/${newConversationId}`,
+    newWithAgent: ({ agentId }: { agentId: string }) => {
+      return `/conversations/${newConversationId}?agent_id=${agentId}`;
+    },
     conversation: ({ conversationId }: { conversationId: string }) => {
       return `/conversations/${conversationId}`;
     },

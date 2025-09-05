@@ -11,6 +11,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { getFilters } from '@kbn/securitysolution-list-utils';
 import type { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 import type {
   FetchListById,
@@ -27,7 +28,9 @@ export const getListById = async ({ id, http }: FetchListById) => {
     const filters = getFilters({
       filters: { list_id: id },
       namespaceTypes: ['single', 'agnostic'],
-      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+        (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id // todo: remove when removing endpoint exceptions from detections pages
+      ),
     });
     const namespaceTypes = ['single', 'agnostic'].join();
 

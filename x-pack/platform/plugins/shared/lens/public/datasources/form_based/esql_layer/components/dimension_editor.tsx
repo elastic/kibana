@@ -8,7 +8,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
@@ -176,8 +175,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       {props.dataSectionExtra && (
         <div
           style={{
-            paddingLeft: euiThemeVars.euiSize,
-            paddingRight: euiThemeVars.euiSize,
+            paddingLeft: euiTheme.size.base,
+            paddingRight: euiTheme.size.base,
           }}
         >
           {props.dataSectionExtra}

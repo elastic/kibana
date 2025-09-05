@@ -257,20 +257,3 @@ export const expectActionsFired = async ({
     expect(actionEvents.length).eql(expectedNumberOfActions);
   });
 };
-
-export const runSoon = async ({
-  id,
-  supertest,
-  retry,
-}: {
-  id: string;
-  supertest: SuperTestAgent;
-  retry: RetryService;
-}) => {
-  return retry.try(async () => {
-    await supertest
-      .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}/_run_soon`)
-      .set('kbn-xsrf', 'foo')
-      .expect(204);
-  });
-};

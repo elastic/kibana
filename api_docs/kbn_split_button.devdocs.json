@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/split-button",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/split-button",
+        "id": "def-common.SplitButton",
+        "type": "Function",
+        "tags": [],
+        "label": "SplitButton",
+        "description": [],
+        "signature": [
+          "({ isDisabled, disabled, isLoading, color, size, isSecondaryButtonLoading, secondaryButtonIcon, secondaryButtonAriaLabel, onSecondaryButtonClick, isMainButtonLoading, iconOnly, iconType, ...mainButtonProps }: SplitButtonProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/split-button",
+            "id": "def-common.SplitButton.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  // Common props\n  isDisabled = false,\n  disabled = false,\n  isLoading = false,\n  color = 'primary',\n  size = 'm',\n\n  // Secondary button props\n  isSecondaryButtonLoading = false,\n  secondaryButtonIcon,\n  secondaryButtonAriaLabel,\n  onSecondaryButtonClick,\n\n  // Primary button props\n  isMainButtonLoading = false,\n  iconOnly = false,\n  iconType,\n  ...mainButtonProps\n}",
+            "description": [],
+            "signature": [
+              "SplitButtonProps"
+            ],
+            "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -36,16 +36,12 @@ export const createDatasetQualityDetailsControllerFactory =
   }): Promise<DatasetQualityDetailsController> => {
     const initialContext = getContextFromPublicState(initialState);
 
-    const [dataStreamStatsClient, dataStreamDetailsClient] = await Promise.all([
-      dataStreamStatsService.getClient(),
-      dataStreamDetailsService.getClient(),
-    ]);
+    const dataStreamDetailsClient = await dataStreamDetailsService.getClient();
 
     const machine = createDatasetQualityDetailsControllerStateMachine({
       initialContext,
       plugins,
       toasts: core.notifications.toasts,
-      dataStreamStatsClient,
       dataStreamDetailsClient,
     });
 

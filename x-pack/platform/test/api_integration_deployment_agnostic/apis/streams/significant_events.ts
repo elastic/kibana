@@ -68,6 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           dashboards: [],
           queries: [],
+          rules: [],
         }).then((response) => expect(response).to.have.property('acknowledged', true));
         await alertingApi.deleteRules({ roleAuthc });
       });
@@ -77,6 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           dashboards: [],
           queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -103,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     where: {
                       always: {},
                     },
+                    status: 'enabled',
                   },
                 ],
               },
@@ -116,6 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -133,6 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       field: 'attributes.field',
                       lt: 15,
                     },
+                    status: 'enabled',
                   },
                   {
                     destination: 'logs.queries-test.child.second',
@@ -140,6 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       field: 'attributes.field',
                       gt: 15,
                     },
+                    status: 'enabled',
                   },
                 ],
               },
@@ -153,6 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -171,6 +178,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               kql: { query: 'message:"irrelevant"' },
             },
           ],
+          rules: [],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -196,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         dashboards: [],
         queries: [],
+        rules: [],
       };
 
       const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {

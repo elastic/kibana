@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { CombinedField } from '../../../../common/components/combined_fields';
 import { CombinedFieldsForm } from '../../../../common/components/combined_fields';
 

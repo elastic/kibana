@@ -12,6 +12,7 @@ import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
+  CUSTOM_SCRIPTS_ROUTE,
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
@@ -45,6 +46,7 @@ import type {
   ResponseActionUploadParameters,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
+  ResponseActionScriptsApiResponse,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -76,6 +78,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   >;
 
   scan: () => ActionDetailsApiResponse<ResponseActionScanOutputContent>;
+
+  fetchScriptList: () => ResponseActionScriptsApiResponse;
 
   runscript: () => ActionDetailsApiResponse<ResponseActionRunScriptOutputContent>;
 }>;
@@ -279,6 +283,16 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       });
 
       return { data: response };
+    },
+  },
+  {
+    id: 'fetchScriptList',
+    path: CUSTOM_SCRIPTS_ROUTE,
+    method: 'get',
+    handler: () => {
+      return {
+        data: [{ id: '1', name: 'Script 1', description: 'Test script 1' }],
+      };
     },
   },
   {

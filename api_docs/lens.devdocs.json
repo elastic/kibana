@@ -1577,7 +1577,13 @@
             "description": [],
             "signature": [
               "{ emptyAsNull?: boolean | undefined; format?: ",
-              "ValueFormatConfig",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueFormatConfig",
+                "text": "ValueFormatConfig"
+              },
               " | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/cardinality.tsx",
@@ -6118,7 +6124,13 @@
             "description": [],
             "signature": [
               "{ sortField: string; showArrayValues: boolean; format?: ",
-              "ValueFormatConfig",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueFormatConfig",
+                "text": "ValueFormatConfig"
+              },
               " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/last_value.tsx",
@@ -9091,7 +9103,13 @@
               "{ tinymathAst: string | ",
               "TinymathAST",
               "; format?: ",
-              "ValueFormatConfig",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueFormatConfig",
+                "text": "ValueFormatConfig"
+              },
               " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/formula/math.tsx",
@@ -9237,6 +9255,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.secondaryLabel",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.MetricVisualizationState.secondaryTrend",
             "type": "CompoundType",
             "tags": [],
@@ -9309,6 +9341,34 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.secondaryAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"center\" | \"left\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.primaryAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primaryAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"center\" | \"left\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.MetricVisualizationState.iconAlign",
             "type": "CompoundType",
             "tags": [],
@@ -9331,6 +9391,49 @@
             "signature": [
               "ValueFontMode",
               " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.titleWeight",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titleWeight",
+            "description": [],
+            "signature": [
+              "MetricFontWeight",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.primaryPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "primaryPosition",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.secondaryLabelPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryLabelPosition",
+            "description": [],
+            "signature": [
+              "\"after\" | \"before\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
@@ -9491,6 +9594,20 @@
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.applyColorTo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "applyColorTo",
+            "description": [],
+            "signature": [
+              "\"value\" | \"background\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9643,7 +9760,15 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ percentile: number; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+              "{ percentile: number; format?: ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueFormatConfig",
+                "text": "ValueFormatConfig"
+              },
+              " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/percentile.tsx",
             "deprecated": false,
@@ -9702,7 +9827,15 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ value: number; }"
+              "{ value: number; format?: ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueFormatConfig",
+                "text": "ValueFormatConfig"
+              },
+              " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/percentile_ranks.tsx",
             "deprecated": false,
@@ -9837,7 +9970,7 @@
               "MODES_TYPES",
               "; maxBars: number | \"auto\"; ranges: ",
               "RangeTypeLens",
-              "[]; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; includeEmptyRows?: boolean | undefined; parentFormat?: { id: string; params?: { id?: string | undefined; template?: string | undefined; replaceInfinity?: boolean | undefined; } | undefined; } | undefined; }"
+              "[]; format?: { id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined; includeEmptyRows?: boolean | undefined; parentFormat?: { id: string; params?: { id?: string | undefined; template?: string | undefined; replaceInfinity?: boolean | undefined; } | undefined; } | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/ranges/ranges.tsx",
             "deprecated": false,
@@ -10273,7 +10406,13 @@
             "description": [],
             "signature": [
               "{ value?: string | undefined; format?: ",
-              "ValueFormatConfig",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueFormatConfig",
+                "text": "ValueFormatConfig"
+              },
               " | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/static_value.tsx",
@@ -10974,7 +11113,13 @@
                 "text": "FieldBasedIndexPatternColumn"
               },
               " | undefined; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
-              "ValueFormatConfig",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.ValueFormatConfig",
+                "text": "ValueFormatConfig"
+              },
               " | undefined; parentFormat?: { id: string; } | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/terms/types.ts",
@@ -16017,7 +16162,13 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"average\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "ValueFormatConfig",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ValueFormatConfig",
+            "text": "ValueFormatConfig"
+          },
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
@@ -16096,7 +16247,13 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"count\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "ValueFormatConfig",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ValueFormatConfig",
+            "text": "ValueFormatConfig"
+          },
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/count.tsx",
@@ -24257,7 +24414,13 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"max\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "ValueFormatConfig",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ValueFormatConfig",
+            "text": "ValueFormatConfig"
+          },
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
@@ -24281,7 +24444,13 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"median\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "ValueFormatConfig",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ValueFormatConfig",
+            "text": "ValueFormatConfig"
+          },
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
@@ -24305,7 +24474,13 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"min\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "ValueFormatConfig",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ValueFormatConfig",
+            "text": "ValueFormatConfig"
+          },
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
@@ -24477,7 +24652,13 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"standard_deviation\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "ValueFormatConfig",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ValueFormatConfig",
+            "text": "ValueFormatConfig"
+          },
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
@@ -24501,7 +24682,13 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"sum\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "ValueFormatConfig",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.ValueFormatConfig",
+            "text": "ValueFormatConfig"
+          },
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/metrics.tsx",
@@ -26000,6 +26187,45 @@
             "description": [],
             "signature": [
               "PersistableFilterMeta"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-common.ValueFormatConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValueFormatConfig",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/lens/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.ValueFormatConfig.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.ValueFormatConfig.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ decimals: number; suffix?: string | undefined; compact?: boolean | undefined; pattern?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/common/types.ts",
             "deprecated": false,

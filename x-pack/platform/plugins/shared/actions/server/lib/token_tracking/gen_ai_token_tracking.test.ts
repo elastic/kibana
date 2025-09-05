@@ -459,6 +459,54 @@ describe('getGenAiTokenTracking', () => {
     );
   });
 
+  it('should return the total, prompt, and completion token counts when given a valid Inference stream response', async () => {
+    const actionTypeId = '.inference';
+    const mockReader = new IncomingMessage(new Socket());
+    const result = {
+      actionId: '123',
+      status: 'ok' as const,
+      data: mockReader,
+    };
+    const validatedParams = {
+      subAction: 'unified_completion_stream',
+      subActionParams: {
+        body: {
+          messages: [
+            {
+              role: 'user',
+              content: 'Sample message',
+            },
+          ],
+        },
+      },
+    };
+
+    const tokenTracking = await getGenAiTokenTracking({
+      actionTypeId,
+      logger,
+      result,
+      validatedParams,
+    });
+
+    expect(tokenTracking).toEqual({
+      total_tokens: 100,
+      prompt_tokens: 50,
+      completion_tokens: 50,
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+
+    expect(JSON.stringify(mockGetTokenCountFromInvokeStream.mock.calls[0][0].body)).toStrictEqual(
+      JSON.stringify({
+        messages: [
+          {
+            role: 'user',
+            content: 'Sample message',
+          },
+        ],
+      })
+    );
+  });
+
   it('should return the total, prompt, and completion token counts when given a valid Gemini response', async () => {
     const actionTypeId = '.gemini';
 

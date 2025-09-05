@@ -29,6 +29,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -133,7 +134,9 @@ export const SharedLists = React.memo(() => {
     http,
     namespaceTypes: ['single', 'agnostic'],
     notifications,
-    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+      (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+    ),
   });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],

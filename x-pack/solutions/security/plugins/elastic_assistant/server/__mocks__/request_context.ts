@@ -113,6 +113,11 @@ const createElasticAssistantRequestContextMock = (
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
     eventLogger: clients.eventLogger,
     eventLogIndex: '.kibana-event-log-*',
+    userProfile: {
+      suggest: jest.fn(),
+      getCurrent: jest.fn(),
+      bulkGet: jest.fn(),
+    },
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,

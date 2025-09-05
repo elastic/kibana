@@ -51,7 +51,7 @@
 
 .secLoginAssistanceMessage {
   // This tightens up the layout if message is present
-  margin-top: -($euiSizeXXL + $euiSizeS);
+  margin-top: -($euiSizeXL);
   padding: 0 $euiSize;
 
   img {

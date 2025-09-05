@@ -14,6 +14,8 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: '',
         group: {
+          metadata: {},
+          tags: [],
           members: [],
         },
       },
@@ -54,11 +56,14 @@ describe('GroupStream', () => {
           name: 'group-stream',
           description: '',
           group: {
+            metadata: {},
+            tags: [],
             members: [],
           },
         },
         dashboards: [],
         queries: [],
+        rules: [],
       },
     ])('is valid', (val) => {
       expect(GroupStream.GetResponse.is(val)).toBe(true);
@@ -104,9 +109,12 @@ describe('GroupStream', () => {
       {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           group: {
+            metadata: {},
+            tags: [],
             members: [],
           },
         },

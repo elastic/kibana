@@ -69,6 +69,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     [ExecutionStatus.FAILED]: euiTheme.colors.vis.euiColorVis6,
     [ExecutionStatus.CANCELLED]: euiTheme.colors.vis.euiColorVis8,
     [ExecutionStatus.PENDING]: euiTheme.colors.vis.euiColorVis1,
+    [ExecutionStatus.WAITING]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.WAITING_FOR_INPUT]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.RUNNING]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.SKIPPED]: euiTheme.colors.vis.euiColorVis1,

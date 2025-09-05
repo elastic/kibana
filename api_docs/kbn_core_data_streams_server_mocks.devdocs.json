@@ -1,0 +1,78 @@
+{
+  "id": "@kbn/core-data-streams-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-data-streams-server-mocks",
+        "id": "def-server.dataStreamServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "dataStreamServiceMock",
+        "description": [],
+        "path": "src/core/packages/data-streams/server-mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-data-streams-server-mocks",
+            "id": "def-server.dataStreamServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DataStreamsSetup",
+              ">"
+            ],
+            "path": "src/core/packages/data-streams/server-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-data-streams-server-mocks",
+            "id": "def-server.dataStreamServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "DataStreamsStart",
+              ">"
+            ],
+            "path": "src/core/packages/data-streams/server-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

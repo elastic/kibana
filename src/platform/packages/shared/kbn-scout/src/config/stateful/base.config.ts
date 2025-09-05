@@ -157,7 +157,7 @@ export const defaultConfig: ScoutServerConfig = {
           pattern: '[%date][%level][%logger] %message %meta',
         },
       })}`,
-      // x-pack/test/functional/config.base.js
+      // x-pack/platform/test/functional/config.base.ts
       '--status.allowAnonymous=true',
       '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
       '--xpack.maps.showMapsInspectorAdapter=true',
@@ -171,7 +171,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--server.restrictInternalApis=false',
       // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
-      // x-pack/test/api_integration/config.ts
+      // x-pack/platform/test/api_integration/config.ts
       '--xpack.security.session.idleTimeout=3600000', // 1 hour
       '--telemetry.optIn=true',
       '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds

@@ -6,8 +6,10 @@
  */
 
 import expect from 'expect';
-import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/list.gen';
-import type { CreateEntitySourceResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type {
+  ListPrivMonUsersResponse,
+  CreateEntitySourceResponse,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils } from './utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';

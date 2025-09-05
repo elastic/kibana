@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationStatus,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
@@ -215,10 +215,10 @@ export default ({ getService }: FtrProviderContext) => {
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const translationResult =
             index < 6
-              ? RuleTranslationResult.FULL
+              ? MigrationTranslationResult.FULL
               : index < 8
-              ? RuleTranslationResult.PARTIAL
-              : RuleTranslationResult.UNTRANSLATABLE;
+              ? MigrationTranslationResult.PARTIAL
+              : MigrationTranslationResult.UNTRANSLATABLE;
           return {
             migration_id: migrationId,
             translation_result: translationResult,
@@ -248,10 +248,10 @@ export default ({ getService }: FtrProviderContext) => {
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const translationResult =
             index < 4
-              ? RuleTranslationResult.FULL
+              ? MigrationTranslationResult.FULL
               : index < 8
-              ? RuleTranslationResult.PARTIAL
-              : RuleTranslationResult.UNTRANSLATABLE;
+              ? MigrationTranslationResult.PARTIAL
+              : MigrationTranslationResult.UNTRANSLATABLE;
           return {
             migration_id: migrationId,
             translation_result: translationResult,
@@ -281,10 +281,10 @@ export default ({ getService }: FtrProviderContext) => {
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const translationResult =
             index < 3
-              ? RuleTranslationResult.FULL
+              ? MigrationTranslationResult.FULL
               : index < 5
-              ? RuleTranslationResult.PARTIAL
-              : RuleTranslationResult.UNTRANSLATABLE;
+              ? MigrationTranslationResult.PARTIAL
+              : MigrationTranslationResult.UNTRANSLATABLE;
           return {
             migration_id: migrationId,
             translation_result: translationResult,
@@ -307,6 +307,34 @@ export default ({ getService }: FtrProviderContext) => {
           queryParams: { is_untranslatable: false },
         });
         expect(response.body.total).toEqual(5);
+      });
+
+      it('should fetch rules filtered by `missingIndex`', async () => {
+        const migrationId = uuidv4();
+        const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
+          const missingIndex = index < 4 ? true : false;
+          return {
+            migration_id: migrationId,
+            elastic_rule: {
+              query: missingIndex ? '[indexPattern]' : 'from logs-* | LIMIT 1',
+              title: 'Elastic rule',
+            },
+          };
+        };
+
+        const migrationRuleDocuments = getMigrationRuleDocuments(10, overrideCallback);
+        await createMigrationRules(es, migrationRuleDocuments);
+
+        let response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { is_missing_index: true },
+        });
+        expect(response.body.total).toEqual(4);
+
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+        });
+        expect(response.body.total).toEqual(10);
       });
     });
 
@@ -481,9 +509,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should fetch rules sorted by `translation_result`', async () => {
         const migrationId = uuidv4();
         const translationResults = [
-          RuleTranslationResult.UNTRANSLATABLE,
-          RuleTranslationResult.FULL,
-          RuleTranslationResult.PARTIAL,
+          MigrationTranslationResult.UNTRANSLATABLE,
+          MigrationTranslationResult.FULL,
+          MigrationTranslationResult.PARTIAL,
         ];
 
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
@@ -504,9 +532,9 @@ export default ({ getService }: FtrProviderContext) => {
           queryParams: { sort_field: 'translation_result', sort_direction: 'asc' },
         });
         expect(response.body.data.map((rule) => rule.translation_result)).toEqual([
-          RuleTranslationResult.UNTRANSLATABLE,
-          RuleTranslationResult.PARTIAL,
-          RuleTranslationResult.FULL,
+          MigrationTranslationResult.UNTRANSLATABLE,
+          MigrationTranslationResult.PARTIAL,
+          MigrationTranslationResult.FULL,
         ]);
 
         // fetch migration rules
@@ -515,9 +543,9 @@ export default ({ getService }: FtrProviderContext) => {
           queryParams: { sort_field: 'translation_result', sort_direction: 'desc' },
         });
         expect(response.body.data.map((rule) => rule.translation_result)).toEqual([
-          RuleTranslationResult.FULL,
-          RuleTranslationResult.PARTIAL,
-          RuleTranslationResult.UNTRANSLATABLE,
+          MigrationTranslationResult.FULL,
+          MigrationTranslationResult.PARTIAL,
+          MigrationTranslationResult.UNTRANSLATABLE,
         ]);
       });
 

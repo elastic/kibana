@@ -10,8 +10,9 @@ import {
   createQuantitativeCorrectnessEvaluators,
   type DefaultEvaluators,
   type KibanaPhoenixClient,
+  type EvaluationDataset,
+  createQuantitativeGroundednessEvaluator,
 } from '@kbn/evals';
-import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { OnechatEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
@@ -42,7 +43,7 @@ export function createEvaluateDataset({
   phoenixClient: KibanaPhoenixClient;
   chatClient: OnechatEvaluationChatClient;
 }): EvaluateDataset {
-  return async function evaluateEsqlDataset({
+  return async function evaluateDataset({
     dataset: { name, description, examples },
   }: {
     dataset: {
@@ -62,47 +63,36 @@ export function createEvaluateDataset({
         dataset,
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({
-            messages: input.question,
+            messages: [{ message: input.question }],
           });
 
-          // Running correctness evaluator as part of the task since quantitative correctness evaluators need its output
-          let correctnessAnalysis = null;
-          if (!response.errors?.length) {
-            const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
+          // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+          const [correctnessResult, groundednessResult] = await Promise.all([
+            evaluators.correctnessAnalysis().evaluate({
               input,
               expected: output,
               output: response,
               metadata,
-            });
-            correctnessAnalysis = correctnessResult.metadata;
-          }
+            }),
+            evaluators.groundednessAnalysis().evaluate({
+              input,
+              expected: output,
+              output: response,
+              metadata,
+            }),
+          ]);
+          const correctnessAnalysis = correctnessResult.metadata;
+          const groundednessAnalysis = groundednessResult.metadata;
 
           return {
             errors: response.errors,
             messages: response.messages,
             correctnessAnalysis,
+            groundednessAnalysis,
           };
         },
       },
-      [
-        {
-          name: 'Criteria',
-          kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators
-              .criteria([`The response contains the following information: ${expected.expected}`])
-              .evaluate({
-                input,
-                expected,
-                output,
-                metadata,
-              });
-
-            return result;
-          },
-        },
-        ...createQuantitativeCorrectnessEvaluators(),
-      ]
+      [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
     );
   };
 }

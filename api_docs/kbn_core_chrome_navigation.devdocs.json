@@ -11,7 +11,7 @@
         "label": "Navigation",
         "description": [],
         "signature": [
-          "({ activeItemId, isCollapsed: isCollapsedProp, items, logo, setWidth, }: ",
+          "({ activeItemId, isCollapsed: isCollapsedProp, items, logo, setWidth, ...rest }: ",
           "NavigationProps",
           ") => React.JSX.Element"
         ],
@@ -24,7 +24,7 @@
             "id": "def-public.Navigation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  activeItemId,\n  isCollapsed: isCollapsedProp,\n  items,\n  logo,\n  setWidth,\n}",
+            "label": "{\n  activeItemId,\n  isCollapsed: isCollapsedProp,\n  items,\n  logo,\n  setWidth,\n  ...rest\n}",
             "description": [],
             "signature": [
               "NavigationProps"
@@ -336,6 +336,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.NavigationProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "\nOptional data-test-subj attribute for testing purposes."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -586,6 +602,22 @@
             "label": "iconType",
             "description": [
               "\nThe logo type, e.g. `appObservability`, `appSecurity`, etc."
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.SideNavLogo.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "\nOptional data-test-subj attribute"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,

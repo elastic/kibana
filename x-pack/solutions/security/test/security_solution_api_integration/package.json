@@ -92,6 +92,13 @@
     "genai_ad_schedules:basic:server:ess": "npm run initialize-server:genai:basic_essentials attack_discovery/schedules ess",
     "genai_ad_schedules:basic:runner:ess": "npm run run-tests:genai:basic_essentials attack_discovery/schedules ess essEnv",
 
+    "genai_conversations:server:serverless": "npm run initialize-server:genai:trial_complete conversations serverless",
+    "genai_conversations:runner:serverless": "npm run run-tests:genai:trial_complete conversations serverless serverlessEnv",
+    "genai_conversations:qa:serverless": "npm run run-tests:genai:trial_complete conversations serverless qaPeriodicEnv",
+    "genai_conversations:qa:serverless:release": "npm run run-tests:genai:trial_complete conversations serverless qaEnv",
+    "genai_conversations:server:ess": "npm run initialize-server:genai:trial_complete conversations ess",
+    "genai_conversations:runner:ess": "npm run run-tests:genai:trial_complete conversations ess essEnv",
+
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
     "genai_kb_entries:qa:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaPeriodicEnv",

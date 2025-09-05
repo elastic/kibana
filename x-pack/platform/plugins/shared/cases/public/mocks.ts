@@ -25,6 +25,7 @@ const uiMock: jest.Mocked<CasesPublicStart['ui']> = {
 };
 
 export const openAddToExistingCaseModalMock = jest.fn();
+export const openRemoveAlertFromCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();
 export const isAddToCaseOpenMock = jest.fn();
 
@@ -36,6 +37,15 @@ const hooksMock: jest.Mocked<CasesPublicStart['hooks']> = {
     open: openAddToExistingCaseModalMock,
   })),
   useIsAddToCaseOpen: isAddToCaseOpenMock,
+  useRemoveAlertFromCaseModal: jest
+    .fn()
+    .mockImplementation((props: { caseId: string; alertId: string }) => ({
+      open: openRemoveAlertFromCaseModalMock,
+      close: jest.fn(),
+      onSuccess: jest.fn(),
+      onClose: jest.fn(),
+      ...props,
+    })),
 };
 
 const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {

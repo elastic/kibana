@@ -24,6 +24,7 @@ import type { InternalSecurityServiceStart } from '@kbn/core-security-server-int
 import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-server-internal';
 import type { PricingServiceStart } from '@kbn/core-pricing-server';
 import type { InternalCoreDiServiceStart } from '@kbn/core-di-internal';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 
 /**
  * @internal
@@ -46,4 +47,5 @@ export interface InternalCoreStart {
   userProfile: InternalUserProfileServiceStart;
   pricing: PricingServiceStart;
   injection: InternalCoreDiServiceStart;
+  dataStreams: DataStreamsStart;
 }

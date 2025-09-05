@@ -28,14 +28,16 @@ import {
   RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
   PrebuiltRuleVersion,
-  RuleMigrationResourceData,
-  RuleMigrationResourceType,
-  RuleMigrationResource,
-  RuleMigrationResourceBase,
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
-import { LangSmithOptions } from '../../common.gen';
+import {
+  LangSmithOptions,
+  SiemMigrationResourceData,
+  SiemMigrationResourceType,
+  SiemMigrationResource,
+  SiemMigrationResourceBase,
+} from '../../common.gen';
 
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.object({
@@ -143,7 +145,7 @@ export type GetRuleMigrationResourcesRequestQuery = z.infer<
   typeof GetRuleMigrationResourcesRequestQuery
 >;
 export const GetRuleMigrationResourcesRequestQuery = z.object({
-  type: RuleMigrationResourceType.optional(),
+  type: SiemMigrationResourceType.optional(),
   names: ArrayFromString(z.string()).optional(),
   from: z.coerce.number().optional(),
   size: z.coerce.number().optional(),
@@ -163,7 +165,7 @@ export type GetRuleMigrationResourcesRequestParamsInput = z.input<
 >;
 
 export type GetRuleMigrationResourcesResponse = z.infer<typeof GetRuleMigrationResourcesResponse>;
-export const GetRuleMigrationResourcesResponse = z.array(RuleMigrationResource);
+export const GetRuleMigrationResourcesResponse = z.array(SiemMigrationResource);
 
 export type GetRuleMigrationResourcesMissingRequestParams = z.infer<
   typeof GetRuleMigrationResourcesMissingRequestParams
@@ -181,7 +183,7 @@ export type GetRuleMigrationResourcesMissingRequestParamsInput = z.input<
 export type GetRuleMigrationResourcesMissingResponse = z.infer<
   typeof GetRuleMigrationResourcesMissingResponse
 >;
-export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResourceBase);
+export const GetRuleMigrationResourcesMissingResponse = z.array(SiemMigrationResourceBase);
 export type GetRuleMigrationRulesRequestQuery = z.infer<typeof GetRuleMigrationRulesRequestQuery>;
 export const GetRuleMigrationRulesRequestQuery = z.object({
   page: z.coerce.number().optional(),
@@ -196,6 +198,7 @@ export const GetRuleMigrationRulesRequestQuery = z.object({
   is_partially_translated: BooleanFromString.optional(),
   is_untranslatable: BooleanFromString.optional(),
   is_failed: BooleanFromString.optional(),
+  is_missing_index: BooleanFromString.optional(),
 });
 export type GetRuleMigrationRulesRequestQueryInput = z.input<
   typeof GetRuleMigrationRulesRequestQuery
@@ -408,7 +411,7 @@ export type UpsertRuleMigrationResourcesRequestParamsInput = z.input<
 export type UpsertRuleMigrationResourcesRequestBody = z.infer<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;
-export const UpsertRuleMigrationResourcesRequestBody = z.array(RuleMigrationResourceData);
+export const UpsertRuleMigrationResourcesRequestBody = z.array(SiemMigrationResourceData);
 export type UpsertRuleMigrationResourcesRequestBodyInput = z.input<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;

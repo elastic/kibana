@@ -1811,6 +1811,120 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.SpanLinkDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanLinkDetails",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinkDetails.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinkDetails.spanId",
+            "type": "string",
+            "tags": [],
+            "label": "spanId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinkDetails.details",
+            "type": "Object",
+            "tags": [],
+            "label": "details",
+            "description": [],
+            "signature": [
+              "{ agentName: ",
+              {
+                "pluginId": "@kbn/elastic-agent-utils",
+                "scope": "common",
+                "docId": "kibKbnElasticAgentUtilsPluginApi",
+                "section": "def-common.AgentName",
+                "text": "AgentName"
+              },
+              "; serviceName: string; duration: number; environment: string; transactionId?: string | undefined; spanName?: string | undefined; spanSubtype?: string | undefined; spanType?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.SpanLinks",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanLinks",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinks.outgoingSpanLinks",
+            "type": "Array",
+            "tags": [],
+            "label": "outgoingSpanLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.SpanLinkDetails",
+                "text": "SpanLinkDetails"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.SpanLinks.incomingSpanLinks",
+            "type": "Array",
+            "tags": [],
+            "label": "incomingSpanLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.SpanLinkDetails",
+                "text": "SpanLinkDetails"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.SpanRaw",
         "type": "Interface",
         "tags": [],

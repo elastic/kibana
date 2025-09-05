@@ -143,9 +143,9 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | string): void {
+  public setWorkflowError(error: Error | string | undefined): void {
     this.workflowExecutionState.updateWorkflowExecution({
-      error: String(error),
+      error: error ? String(error) : undefined,
     });
   }
 
@@ -156,6 +156,7 @@ export class WorkflowExecutionRuntimeManager {
       return undefined;
     }
     return {
+      input: latestStepExecution.input || {},
       output: latestStepExecution.output || {},
       error: latestStepExecution.error,
     };
@@ -176,6 +177,7 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.upsertStep({
       id: latestStepExecution.id,
       stepId: currentStep.id,
+      input: result.input,
       output: result.output,
       error: result.error,
     });
@@ -268,6 +270,7 @@ export class WorkflowExecutionRuntimeManager {
           executionTimeMs,
           error: startedStepExecution.error,
           output: startedStepExecution.output,
+          input: startedStepExecution.input,
         } as Partial<EsWorkflowStepExecution>;
 
         this.workflowExecutionState.upsertStep(stepExecutionUpdate);
@@ -293,7 +296,6 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         const startedStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-
         // if there is a last step execution, fail it
         // if not, create a new step execution with fail
         const stepExecutionId = startedStepExecution?.id || undefined;
@@ -348,11 +350,11 @@ export class WorkflowExecutionRuntimeManager {
         this.workflowExecutionState.upsertStep({
           id: latestStepExecution.id,
           stepId,
-          status: ExecutionStatus.WAITING_FOR_INPUT,
+          status: ExecutionStatus.WAITING,
         });
 
         this.workflowExecutionState.updateWorkflowExecution({
-          status: ExecutionStatus.WAITING_FOR_INPUT,
+          status: ExecutionStatus.WAITING,
         });
       }
     );
@@ -601,6 +603,7 @@ export class WorkflowExecutionRuntimeManager {
     const node = this.workflowExecutionGraph.node(stepId) as any;
     const stepName = node?.name || stepId;
     this.workflowLogger?.logInfo(`Step '${stepName}' started`, {
+      workflow: { step_id: stepId },
       event: { action: 'step-start', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'start'],
     });
@@ -611,6 +614,7 @@ export class WorkflowExecutionRuntimeManager {
     const stepName = node?.name || step.stepId;
     const isSuccess = step?.status === ExecutionStatus.COMPLETED;
     this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
+      workflow: { step_id: step.stepId },
       event: {
         action: 'step-complete',
         category: ['workflow', 'step'],

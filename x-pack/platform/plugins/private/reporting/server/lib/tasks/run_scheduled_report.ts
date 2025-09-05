@@ -62,7 +62,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           runAt,
           kibanaId: this.kibanaId!,
           kibanaName: this.kibanaName!,
-          queueTimeout: this.queueTimeout,
+          queueTimeout: this.getQueueTimeout().asMilliseconds(),
           scheduledReport,
           spaceId: reportSpaceId,
         })
@@ -82,7 +82,6 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     }
 
     return {
-      isLastAttempt: false,
       jobId: jobId!,
       report,
       task: report?.toReportTaskJSON(),
@@ -91,7 +90,11 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   protected getMaxAttempts() {
-    return undefined;
+    const maxAttempts = this.opts.config.capture.maxAttempts ?? 1;
+    return {
+      maxTaskAttempts: 1,
+      maxRetries: maxAttempts - 1,
+    };
   }
 
   protected async notify(
@@ -167,7 +170,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   public getTaskDefinition() {
-    const queueTimeout = this.getQueueTimeout();
+    const queueTimeout = this.getQueueTimeoutAsInterval();
     const maxConcurrency = this.getMaxConcurrency();
 
     return {

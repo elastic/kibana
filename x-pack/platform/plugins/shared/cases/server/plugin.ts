@@ -19,6 +19,8 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { APP_ID } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -152,7 +154,7 @@ export class CasePlugin
       router,
       routes: [
         ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
+        ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -281,6 +283,13 @@ export class CasePlugin
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
+        },
+        getInferenceClient: async (): Promise<InferenceClient | undefined> => {
+          const [, pluginsStart] = await core.getStartServices();
+          const inferenceClient = (
+            pluginsStart as { inference?: InferenceServerStart }
+          )?.inference?.getClient({ request });
+          return inferenceClient;
         },
       };
     };

@@ -41,7 +41,7 @@ export function buildMetricField({
     index,
     dimensions,
     type,
-    time_series_metric: typeInfo.time_series_metric,
+    instrument: typeInfo.time_series_metric,
     unit,
     description,
     display,

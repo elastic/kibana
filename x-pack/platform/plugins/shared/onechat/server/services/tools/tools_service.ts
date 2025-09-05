@@ -10,11 +10,11 @@ import type { Runner } from '@kbn/onechat-server';
 import {
   createBuiltinToolRegistry,
   registerBuiltinTools,
-  createBuiltInToolTypeDefinition,
+  createBuiltInToolSource,
   type BuiltinToolRegistry,
 } from './builtin';
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
-import { createEsqlToolTypeDefinition } from './esql';
+import { createPersistedToolSource } from './persisted';
 import { createToolRegistry } from './tool_registry';
 
 export interface ToolsServiceSetupDeps {
@@ -45,14 +45,14 @@ export class ToolsService {
 
   start({ getRunner, elasticsearch }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger } = this.setupDeps!;
-    const builtInToolType = createBuiltInToolTypeDefinition({ registry: this.builtinRegistry });
-    const esqlToolType = createEsqlToolTypeDefinition({ logger, elasticsearch });
+    const builtInToolSource = createBuiltInToolSource({ registry: this.builtinRegistry });
+    const persistedToolSource = createPersistedToolSource({ logger, elasticsearch });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       return createToolRegistry({
         getRunner,
         request,
-        typesDefinitions: [builtInToolType, esqlToolType],
+        toolSources: [builtInToolSource, persistedToolSource],
       });
     };
 

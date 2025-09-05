@@ -836,13 +836,7 @@
                     "text": "FrequentCompatibilityChangeAction"
                   },
                   "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.UiActionsService",
-                    "text": "UiActionsService"
-                  },
+                  "UiActionsService",
                   "; }"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
@@ -5878,9 +5872,9 @@
                 "section": "def-common.AlertStatus",
                 "text": "AlertStatus"
               },
-              " | undefined; schema?: ",
+              " | undefined; preferredSchema?: ",
               "DataSchemaFormat",
-              " | null | undefined; } | undefined"
+              " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,

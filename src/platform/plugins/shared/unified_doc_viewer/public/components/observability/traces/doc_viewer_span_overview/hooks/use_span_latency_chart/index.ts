@@ -79,7 +79,7 @@ const getSpanLatencyChart = ({
   });
 };
 
-interface SpanLatencyChartData {
+export interface SpanLatencyChartData {
   spanDistributionChartData: DurationDistributionChartData[];
   percentileThresholdValue?: number;
 }

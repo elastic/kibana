@@ -71,7 +71,6 @@ export interface AlertContextMeta {
   filter?: string;
   customMetrics?: SnapshotCustomMetricInput[];
   schema?: DataSchemaFormat;
-  hostOtelEnabled?: boolean;
 }
 
 type Criteria = InventoryMetricConditions[];
@@ -89,7 +88,6 @@ export type ExpressionsProps = Omit<
       accountId?: string;
       region?: string;
       schema?: DataSchemaFormat | null;
-      hostOtelEnabled?: boolean;
     },
     AlertContextMeta
   >,
@@ -112,7 +110,6 @@ export const defaultExpression = {
 
 export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { hostOtelEnabled = false } = metadata ?? {};
   const { source } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
@@ -321,7 +318,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
           </div>
         </EuiFlexGroup>
       </div>
-      {hostOtelEnabled && ruleParams.nodeType === 'host' && (
+      {ruleParams.nodeType === 'host' && (
         <div css={StyledExpressionCss}>
           <EuiFlexGroup css={StyledExpressionRowCss}>
             <div css={NonCollapsibleExpressionCss}>
