@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PLUGIN_ID = 'workflowsExecutionEngine';
-export const PLUGIN_NAME = 'Workflows Execution Engine';
+/**
+ * Prefix of the workflows system indices.
+ *
+ * The Kibana system user has the same permission on those indices than it has on Kibana system indices.
+ */
+export const workflowSystemIndexPrefix = '.workflows-';
 
-export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
+/**
+ * Helper function to define workflow system indices.
+ */
+export const workflowSystemIndex = (suffix: string): string => {
+  return `${workflowSystemIndexPrefix}${suffix}`;
+};

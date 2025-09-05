@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { estypes } from '@elastic/elasticsearch';
 
 interface SearchStepExecutionsParams {
   esClient: ElasticsearchClient;
@@ -33,16 +33,7 @@ export const searchStepExecutions = async ({
 
     const mustQueries: estypes.QueryDslQueryContainer[] = [
       { match: { workflowRunId: workflowExecutionId } },
-      {
-        bool: {
-          should: [
-            { term: { spaceId } },
-            // Backward compatibility for objects without spaceId
-            { bool: { must_not: { exists: { field: 'spaceId' } } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
+      { term: { spaceId } },
     ];
 
     if (additionalQuery) {
