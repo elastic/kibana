@@ -42,7 +42,7 @@ export const Basic: Story = {
     spanDuration: 1200,
     latencyChart: {
       data: {
-        spanDistributionChartData: mockSpanDistributionChartData,
+        distributionChartData: mockSpanDistributionChartData,
         percentileThresholdValue: 1000,
       },
       loading: false,
@@ -73,7 +73,7 @@ export const Error: Story = {
     spanDuration: 1200,
     latencyChart: {
       data: {
-        spanDistributionChartData: [],
+        distributionChartData: [],
       },
       loading: false,
       hasError: true,
