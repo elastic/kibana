@@ -172,7 +172,6 @@ export const DiscoverMainContent = ({
                 onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
                 isEsqlMode={isEsqlMode}
-                additionalFieldGroups={additionalFieldGroups}
               />
             </>
           ) : null}

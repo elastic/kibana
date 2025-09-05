@@ -36,7 +36,6 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
         isEsqlMode={props.isEsqlMode}
         query={query}
         filters={filters}
-        additionalFieldGroups={props.additionalFieldGroups}
       />
     );
   });
