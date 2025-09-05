@@ -24955,6 +24955,7 @@ paths:
                                 type: string
                               type: array
                             previous_version:
+                              nullable: true
                               type: string
                             type:
                               type: string
@@ -26161,6 +26162,7 @@ paths:
                               type: string
                             type: array
                           previous_version:
+                            nullable: true
                             type: string
                           type:
                             type: string
@@ -26810,6 +26812,7 @@ paths:
                               type: string
                             type: array
                           previous_version:
+                            nullable: true
                             type: string
                           type:
                             type: string
