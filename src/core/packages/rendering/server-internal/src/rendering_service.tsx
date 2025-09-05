@@ -258,13 +258,61 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
-    const locale = i18nLib.getLocale();
+    // Determine locale per-request (Accept-Language -> supported/available locale -> fallback)
+    const acceptLanguage = request.headers['accept-language'];
+    const parseAcceptLanguage = (header?: string | string[]) => {
+      if (!header) {
+        return [];
+      }
+
+      const rawValue = Array.isArray(header) ? header.join(',') : header;
+      const parts = rawValue.split(',').map((part) => part.trim());
+
+      return parts
+        .map((part) => {
+          const [tag, qPart] = part.split(';');
+          const q = qPart?.startsWith('q=') ? Number(qPart.slice(2)) : 1;
+          return { tag: tag.toLowerCase(), q: Number.isFinite(q) ? q : 0 };
+        })
+        .filter((x) => x.tag)
+        .sort((a, b) => b.q - a.q)
+        .map((x) => x.tag);
+    };
+
+    const canonicalize = (tag: string) => {
+      const parts = tag.split('-');
+
+      if (parts.length === 1) {
+        return parts[0].toLowerCase();
+      }
+
+      return `${parts[0].toLowerCase()}-${(parts[1] || '').toUpperCase()}`;
+    };
+
+    const negotiateLocale = (candidates: string[], fallback: string) => {
+      for (const candidate of candidates) {
+        if (!candidate) {
+          continue;
+        }
+
+        return canonicalize(candidate);
+      }
+      return canonicalize(fallback);
+    };
+
+    const requestedLocale = negotiateLocale(
+      parseAcceptLanguage(acceptLanguage),
+      i18nLib.getLocale()
+    );
+
     let translationsUrl: string;
+
     if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+      translationsUrl = `${staticAssetsHrefBase}/translations/${requestedLocale}.json`;
     } else {
+      // Keep compatibility path shape with hash segment for pre-existing caches.
       const translationHash = i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${requestedLocale}.json`;
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
@@ -275,7 +323,7 @@ export class RenderingService {
       hardenPrototypes: http.prototypeHardening,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      locale,
+      locale: requestedLocale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
