@@ -6,7 +6,10 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
+import {
+  MonitoringEngineComponentResourceEnum,
+  type MonitoringEngineDescriptor,
+} from '../../../../../common/api/entity_analytics';
 import { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
@@ -27,7 +30,7 @@ export const createEngineStatusService = (
 
   const get = descriptorClient.get.bind(descriptorClient);
 
-  const disable = async () => {
+  const disable = async (): Promise<MonitoringEngineDescriptor> => {
     dataClient.log('info', 'Disabling Privileged Monitoring Engine');
 
     // Check the current status of the engine
@@ -39,7 +42,6 @@ export const createEngineStatusService = (
       );
       return {
         status: currentEngineStatus.status,
-        error: null,
       };
     }
     if (!deps.taskManager) {
@@ -70,7 +72,6 @@ export const createEngineStatusService = (
       dataClient.log('info', 'Privileged Monitoring Engine disabled successfully');
       return {
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED,
-        error: null,
       };
     } catch (e) {
       const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;

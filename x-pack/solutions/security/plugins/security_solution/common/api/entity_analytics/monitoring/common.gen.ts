@@ -29,6 +29,11 @@ export const PrivilegeMonitoringEngineStatusEnum = PrivilegeMonitoringEngineStat
 export type MonitoringEngineDescriptor = z.infer<typeof MonitoringEngineDescriptor>;
 export const MonitoringEngineDescriptor = z.object({
   status: PrivilegeMonitoringEngineStatus,
+  error: z
+    .object({
+      message: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type MonitoringEngineComponentResource = z.infer<typeof MonitoringEngineComponentResource>;
