@@ -27,7 +27,7 @@ export const REPORTING_DATA_STREAM_COMPONENT_TEMPLATE = 'kibana-reporting@custom
 export const REPORTING_DATA_STREAM_INDEX_TEMPLATE = '.kibana-reporting';
 // Name of mapping meta field which contains the version of the index template
 // see: https://github.com/elastic/elasticsearch/pull/133846
-export const REPORTING_INDEX_TEMPLATE_META_FIELD = 'template_version';
+export const REPORTING_INDEX_TEMPLATE_MAPPING_META_FIELD = 'template_version';
 
 /*
  * Telemetry
