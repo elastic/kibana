@@ -252,7 +252,7 @@ export type ChartSectionConfiguration =
        */
       replaceDefaultChart: true;
       /**
-       * Prefix for the local storage key used to store the chart section state
+       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
        */
       localStorageKeyPrefix?: string;
       /**
