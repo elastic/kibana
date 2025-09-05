@@ -11,7 +11,6 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -80,17 +79,11 @@ export const Trace = ({ traceId, serviceName, docId, dataView }: TraceProps) => 
         description={sectionTip}
         actions={sectionActions}
       >
-        <div
-          css={css`
-            padding-inline: ${euiTheme.size.base};
-          `}
-        >
-          <EmbeddableRenderer // TODO check what might be happening with the content being hidden if there's no element above
-            type="APM_TRACE_WATERFALL_EMBEDDABLE"
-            getParentApi={getParentApi}
-            hidePanelChrome
-          />
-        </div>
+        <EmbeddableRenderer
+          type="APM_TRACE_WATERFALL_EMBEDDABLE"
+          getParentApi={getParentApi}
+          hidePanelChrome
+        />
       </ContentFrameworkSection>
 
       {showFullScreenWaterfall && (

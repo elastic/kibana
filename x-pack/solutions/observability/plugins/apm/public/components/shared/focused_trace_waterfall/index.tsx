@@ -65,7 +65,7 @@ function getTraceItems(items: NonNullable<FocusedTrace['traceItems']>) {
   return traceItems;
 }
 
-export function FocusedTraceWaterfall({ items, onErrorClick }: Props) {
+export function FocusedTraceWaterfall({ items, onErrorClick, isEmbeddable }: Props) {
   const reparentedItems = reparentDocumentToRoot(items.traceItems);
   const traceItems = reparentedItems ? getTraceItems(reparentedItems) : [];
 
@@ -76,6 +76,7 @@ export function FocusedTraceWaterfall({ items, onErrorClick }: Props) {
         showAccordion={false}
         highlightedTraceId={reparentedItems?.focusedTraceDoc.id}
         onErrorClick={onErrorClick}
+        isEmbeddable={isEmbeddable}
       />
       {reparentedItems ? (
         <>
