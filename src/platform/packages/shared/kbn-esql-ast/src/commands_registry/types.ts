@@ -251,6 +251,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
+  on: Location.WHERE,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,

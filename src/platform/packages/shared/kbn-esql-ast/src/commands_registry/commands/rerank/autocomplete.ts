@@ -8,7 +8,7 @@
  */
 import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
 import { getPosition, CaretPosition } from './utils';
@@ -16,12 +16,11 @@ import { getNewUserDefinedColumnSuggestion, onCompleteItem } from '../../complet
 import {
   handleFragment,
   columnExists,
-  getFieldsOrFunctionsSuggestions,
   suggestForExpression,
+  withinQuotes,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { isBooleanExpressionFinished } from '../../../definitions/utils/boolean_finishers';
 import {
   pipeCompleteItem,
   commaCompleteItem,
@@ -31,6 +30,7 @@ import {
   orCompleteItem,
 } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
 export async function autocomplete(
   query: string,
@@ -39,11 +39,12 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (!callbacks?.getByType) {
+  const innerText = query.substring(0, cursorPosition);
+
+  if (!callbacks?.getByType || withinQuotes(innerText)) {
     return [];
   }
 
-  const innerText = query.substring(0, cursorPosition);
   const { position, context: positionContext } = getPosition(innerText, command);
 
   const insideFunctionSuggestions = await getInsideFunctionsSuggestions(
@@ -72,11 +73,11 @@ export async function autocomplete(
       return createBasicConstants();
     }
 
-    case CaretPosition.SUGGEST_ON_KEYWORD: {
+    case CaretPosition.ON_KEYWORD: {
       return [onCompleteItem];
     }
 
-    case CaretPosition.ON_AFTER_FIELD_LIST: {
+    case CaretPosition.ON_WITHIN_FIELD_LIST: {
       return getContextualSuggestions({
         innerText,
         callbacks,
@@ -87,15 +88,6 @@ export async function autocomplete(
 
     case CaretPosition.ON_AFTER_FIELD_COMPLETE: {
       return buildNextActions({ includeAssign: true });
-    }
-
-    case CaretPosition.ON_AFTER_FIELD_ASSIGNMENT: {
-      return getContextualSuggestions({
-        innerText,
-        callbacks,
-        context,
-        suggestionType: 'field_assignment',
-      });
     }
 
     case CaretPosition.WITHIN_BOOLEAN_EXPRESSION: {
@@ -124,7 +116,7 @@ export async function autocomplete(
 }
 
 // ============================================================================
-// Centralized Suggestion Handler (following STATS pattern)
+// Suggestion Handlers
 // ============================================================================
 
 async function getContextualSuggestions({
@@ -137,8 +129,8 @@ async function getContextualSuggestions({
   innerText: string;
   callbacks?: ICommandCallbacks;
   context?: ICommandContext;
-  suggestionType: 'field_list' | 'field_assignment' | 'boolean_expression';
-  expressionRoot?: any;
+  suggestionType: 'field_list' | 'boolean_expression';
+  expressionRoot?: ESQLSingleAstItem;
 }): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -150,27 +142,20 @@ async function getContextualSuggestions({
         (await callbacks.getByType(['keyword', 'text', 'boolean', 'integer', 'double', 'long'])) ??
         [];
 
-      // catch ON
-      if (/\bon\s+[\s\S]*,\s*$/i.test(innerText)) {
-        return formatSuggestions(fieldSuggestions);
-      }
-
-      // catch ON + space
-      if (/\bon\s+$/i.test(innerText)) {
-        return formatSuggestions(fieldSuggestions);
-      }
-
       return handleFragment(
         innerText,
+        // check if fragment is completed
         (fragment) => !!columnExists(fragment, context),
+        // incomplete: get available fields suggestions
         (_: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldSuggestions.map((suggestion) => ({
             ...suggestion,
             text: `${suggestion.text}`,
-            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
           }));
         },
+        // complete: get next actions suggestions for completed field
         (fragment: string, rangeToReplace: { start: number; end: number }) => {
           const suggestions = buildNextActions({ includeAssign: true, withSpaces: true });
 
@@ -185,31 +170,15 @@ async function getContextualSuggestions({
       );
     }
 
-    case 'field_assignment': {
-      const suggestions = await getFieldsOrFunctionsSuggestions(
-        ['any'],
-        Location.WHERE,
-        callbacks.getByType,
-        {
-          functions: true,
-          fields: true,
-          userDefinedColumns: context?.userDefinedColumns,
-        },
-        {},
-        callbacks?.hasMinimumLicenseRequired,
-        context?.activeProduct
-      );
-
-      return formatSuggestions(suggestions);
-    }
-
     case 'boolean_expression': {
       if (expressionRoot) {
-        if (
-          isBooleanExpressionFinished(expressionRoot, innerText, context, {
-            traverseRightmost: true,
-          })
-        ) {
+        const expressionType = getExpressionType(
+          expressionRoot,
+          context?.fields,
+          context?.userDefinedColumns
+        );
+
+        if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
           return buildNextActions({ includeBinaryOperators: true });
         }
       }
@@ -229,6 +198,20 @@ async function getContextualSuggestions({
     default:
       return [];
   }
+}
+
+/**
+ * Handles suggestions within WITH map expressions
+ */
+function handleMapExpression(
+  innerText: string,
+  endpoints?: InferenceEndpointAutocompleteItem[]
+): ISuggestionItem[] {
+  const availableParameters = {
+    inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+  };
+
+  return getCommandMapExpressionSuggestions(innerText, availableParameters);
 }
 
 // ============================================================================
@@ -294,43 +277,15 @@ function buildNextActions(options?: {
     sortText: '04',
   });
 
+  // Add assignment operator to the next actions, after a field name (ON clause)
   if (includeAssign) {
     items.push({ ...assignCompletionItem, text: ' = ', sortText: '02' });
   }
 
+  // Add AND/OR operators to the next actions, after a boolean expression is completed
   if (includeBinaryOperators) {
     items.push({ ...andCompleteItem, sortText: '05' }, { ...orCompleteItem, sortText: '06' });
   }
 
   return items;
-}
-
-/**
- * Handles suggestions within WITH map expressions
- */
-function handleMapExpression(
-  innerText: string,
-  endpoints?: InferenceEndpointAutocompleteItem[]
-): ISuggestionItem[] {
-  const availableParameters = {
-    inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
-  };
-
-  return getCommandMapExpressionSuggestions(innerText, availableParameters);
-}
-
-/**
- * Unified suggestion formatter
- */
-function formatSuggestions(suggestions: ISuggestionItem[], withSpace = true): ISuggestionItem[] {
-  if (!withSpace) {
-    return suggestions;
-  }
-
-  return suggestions.map((suggestion) => ({
-    ...suggestion,
-    text: /\s$/.test(suggestion.text) ? suggestion.text : suggestion.text + ' ',
-    command:
-      suggestion.command ?? (TRIGGER_SUGGESTION_COMMAND as unknown as ISuggestionItem['command']),
-  }));
 }
