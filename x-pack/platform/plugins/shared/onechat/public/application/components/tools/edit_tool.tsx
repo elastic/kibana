@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useEditTool } from '../../../hooks/tools/use_edit_tools';
-import { EsqlTool } from './esql_tool';
-import { OnechatEsqlToolFormMode } from './form/esql_tool_form';
+import { useEditTool } from '../../hooks/tools/use_edit_tools';
+import { Tool } from './tool';
+import { ToolFormMode } from './form/tool_form';
 
-export const EditEsqlTool: React.FC = () => {
+export const EditTool: React.FC = () => {
   const { toolId } = useParams<{ toolId: string }>();
 
   const {
@@ -24,8 +24,8 @@ export const EditEsqlTool: React.FC = () => {
   });
 
   return (
-    <EsqlTool
-      mode={OnechatEsqlToolFormMode.Edit}
+    <Tool
+      mode={ToolFormMode.Edit}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
       tool={editingTool}
