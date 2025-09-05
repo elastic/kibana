@@ -189,7 +189,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     canManageSpaces,
     docLinks,
     application,
-    showDefaultLlmSetting
+    showDefaultLlmSetting,
   ]);
 
   async function handleSave() {
