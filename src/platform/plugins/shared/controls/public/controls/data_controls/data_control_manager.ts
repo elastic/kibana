@@ -68,7 +68,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   >(
     state,
     {
-      id: '', // TODO: Remove
+      id: controlId,
       dataViewId: '',
       fieldName: '',
       useGlobalFilters: true,

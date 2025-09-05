@@ -20,7 +20,7 @@ import {
 import { optionsListControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 
-export const controlWidthSchema = schema.oneOf(
+const controlWidthSchema = schema.oneOf(
   [
     schema.literal(CONTROL_WIDTH_SMALL),
     schema.literal(CONTROL_WIDTH_MEDIUM),

@@ -44,9 +44,9 @@ export function injectReferences(
   (references ?? []).forEach((reference) => {
     const referenceName = reference.name;
     const { controlId } = parseReferenceName(referenceName);
-    if (controlId === deserializedState.id) deserializedState.dataViewId = reference.id;
+    if (deserializedState.id === controlId) deserializedState.dataViewId = reference.id;
   });
-  return deserializedState;
+  return { ...deserializedState };
 }
 
 function getReferenceName(controlId: string, referenceNameSuffix: string) {

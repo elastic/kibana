@@ -81,6 +81,8 @@ function transformPanelProperties(
   try {
     if (transforms?.transformOut) {
       transformedPanelConfig = transforms.transformOut(panelConfig, references);
+      if (panelType === 'optionsListControl')
+        console.log('TRANSFORMED OUT', { transformedPanelConfig });
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError
