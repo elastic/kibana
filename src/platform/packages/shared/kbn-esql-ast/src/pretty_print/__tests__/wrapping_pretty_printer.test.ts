@@ -208,6 +208,91 @@ FROM index
         WITH {"inference_id": "model"}`);
     });
   });
+
+  describe('FORK', () => {
+    test('basic fork with simple subqueries', () => {
+      const { text } = reprint('FROM index | FORK ( KEEP a ) ( KEEP b )');
+
+      expect(text).toBe('FROM index | FORK (KEEP a) (KEEP b)');
+    });
+
+    test('fork with longer subqueries', () => {
+      const { text } = reprint(
+        'FROM index | FORK ( KEEP field1, field2, field3 | WHERE x > 100 ) ( DROP field4, field5 | LIMIT 50 )',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | FORK
+      (
+          KEEP field1, field2, field3
+        | WHERE x > 100
+      )
+      (
+          DROP field4, field5
+        | LIMIT 50
+      )`);
+    });
+
+    test('fork with multiple complex subqueries', () => {
+      const { text } = reprint(
+        'FROM index | FORK ( STATS count=COUNT() BY category | WHERE count > 10 | SORT count DESC ) ( KEEP name, value | WHERE value IS NOT NULL | LIMIT 100 )',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | FORK
+      (
+          STATS count = COUNT()
+          BY category
+        | WHERE count > 10
+        | SORT count DESC
+      )
+      (
+          KEEP name, value
+        | WHERE value IS NOT NULL
+        | LIMIT 100
+      )`);
+    });
+
+    test('fork with commands before and after it', () => {
+      const { text } = reprint(
+        'FROM index | DROP a | FORK ( KEEP field1 | WHERE x > 100 ) ( DROP field2 | LIMIT 50 ) | LIMIT 100',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | DROP a
+  | FORK
+      (
+          KEEP field1
+        | WHERE x > 100
+      )
+      (
+          DROP field2
+        | LIMIT 50
+      )
+  | LIMIT 100`);
+    });
+
+    test('fork with a very long command within', () => {
+      const { text } = reprint(
+        'FROM index | FORK ( WHERE x > 100 | KEEP field1, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd) (LIMIT 10)',
+        { multiline: true }
+      );
+
+      expect(text).toBe(`FROM index
+  | FORK
+      (
+          WHERE x > 100
+        | KEEP field1, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd, asd,
+            asd, asd, asd, asd, asd, asd, asd
+      )
+      (
+          LIMIT 10
+      )`);
+    });
+  });
 });
 
 describe('casing', () => {

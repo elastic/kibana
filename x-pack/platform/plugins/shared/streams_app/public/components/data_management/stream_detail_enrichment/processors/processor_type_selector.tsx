@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ProcessorType } from '@kbn/streamlang';
+import { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
 import type { ProcessorFormState } from '../types';
@@ -42,6 +43,9 @@ export const ProcessorTypeSelector = ({
   });
 
   const processorType = useWatch<{ action: ProcessorType }>({ name: 'action' });
+  const isWired = useStreamEnrichmentSelector((snapshot) =>
+    Streams.WiredStream.GetResponse.is(snapshot.context.definition)
+  );
 
   const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
@@ -54,6 +58,8 @@ export const ProcessorTypeSelector = ({
     reset(formState);
   };
 
+  const selectorOptions = React.useMemo(() => getProcessorTypeSelectorOptions(isWired), [isWired]);
+
   return (
     <EuiFormRow
       fullWidth
@@ -61,12 +67,12 @@ export const ProcessorTypeSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(core.docLinks)(processorType)}
+      helpText={getProcessorDescription(core.docLinks, isWired)(processorType)}
     >
       <EuiSuperSelect
         data-test-subj="streamsAppProcessorTypeSelector"
         disabled={disabled}
-        options={processorTypeSelectorOptions}
+        options={selectorOptions}
         isInvalid={fieldState.invalid}
         valueOfSelected={field.value}
         onChange={handleChange}
@@ -80,7 +86,7 @@ export const ProcessorTypeSelector = ({
   );
 };
 
-const availableProcessors: TAvailableProcessors = {
+const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors> = (isWired) => ({
   date: {
     type: 'date',
     inputDisplay: 'Date',
@@ -171,22 +177,29 @@ const availableProcessors: TAvailableProcessors = {
     },
   },
   ...configDrivenProcessors,
-  manual_ingest_pipeline: {
-    type: 'manual_ingest_pipeline',
-    inputDisplay: 'Manual pipeline configuration',
-    getDocUrl: () => (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
-        defaultMessage="Specify an array of ingest pipeline processors using JSON."
-      />
-    ),
-  },
-};
+  ...(isWired
+    ? {}
+    : {
+        manual_ingest_pipeline: {
+          type: 'manual_ingest_pipeline',
+          inputDisplay: 'Manual pipeline configuration',
+          getDocUrl: () => (
+            <FormattedMessage
+              id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
+              defaultMessage="Specify an array of ingest pipeline processors using JSON."
+            />
+          ),
+        },
+      }),
+});
 
-const getProcessorDescription = (docLinks: DocLinksStart) => (type: ProcessorType) => {
-  return availableProcessors[type].getDocUrl(docLinks);
-};
+const getProcessorDescription =
+  (docLinks: DocLinksStart, isWired: boolean) => (type: ProcessorType) => {
+    return getAvailableProcessors(isWired)[type]?.getDocUrl(docLinks);
+  };
 
-const processorTypeSelectorOptions = Object.values(availableProcessors).map(
-  ({ type, inputDisplay }) => ({ value: type, inputDisplay })
-);
+const getProcessorTypeSelectorOptions = (isWired: boolean) =>
+  Object.values(getAvailableProcessors(isWired)).map(({ type, inputDisplay }) => ({
+    value: type,
+    inputDisplay,
+  }));

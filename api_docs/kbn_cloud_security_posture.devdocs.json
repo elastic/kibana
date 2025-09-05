@@ -1362,12 +1362,10 @@
             "description": [],
             "signature": [
               "{ aws: ",
-              "CloudProviderConfig",
-              "; azure: ",
-              "CloudProviderConfig",
+              "AwsCloudProviderConfig",
               "; gcp: ",
               "CloudProviderConfig",
-              "; }"
+              "; azure: AzureProviderConfig; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
             "deprecated": false,
@@ -3092,36 +3090,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.AWS_ORGANIZATION_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "AWS_ORGANIZATION_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"organization-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.AWS_SINGLE_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "AWS_SINGLE_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"single-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps",
         "type": "Type",
         "tags": [],
@@ -3262,36 +3230,6 @@
           " & { id: \"findings-vulnerability-panel-preview\"; params: BaseVulnerabilityFlyoutProps & PreviewModeProps; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.GCP_ORGANIZATION_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "GCP_ORGANIZATION_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"organization-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.GCP_SINGLE_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "GCP_SINGLE_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"single-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

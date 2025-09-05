@@ -202,6 +202,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexTemplate: {
     alertSummary: string;
@@ -210,6 +212,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   aliases: {
     alertSummary: string;
@@ -218,6 +222,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexPatterns: {
     alertSummary: string;
@@ -226,6 +232,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   pipelines: {
     knowledgeBase: string;
