@@ -21,6 +21,15 @@ const COLORS = {
 const DEFAULTS = {
   WARN_THRESHOLD: 300,
   MAX_TESTS_SHOWN: 10,
+  CI_MULTIPLIER: 3.5,   // Realistic CI slowdown factor
+};
+
+// Context-aware thresholds for different test types (LOCAL development values)
+const TEST_THRESHOLDS = {
+  ENZYME_STYLE: 100,    // Mocked, shallow renders
+  RTL: 300,            // Full renders
+  INTEGRATION: 500,     // Cross-component interactions
+  DEFAULT: 300,         // Fallback threshold
 };
 
 /**
@@ -36,15 +45,20 @@ class SlowTestReporter extends BaseReporter {
       ...options,
     };
     this._slowTests = [];
+    this._isCI = Boolean(process.env.CI);
+    this._isProfiling = Boolean(process.env.JEST_PROFILING);
+    this._isColdCache = !globalConfig.watch && !globalConfig.watchman;
   }
 
   onTestResult(test, testResult) {
     const slowTests = testResult.testResults
-      .filter((result) => result.duration > this._options.warnOnSlowerThan)
+      .filter((result) => this._isTestSlow(result, testResult.testFilePath))
       .map((result) => ({
         duration: result.duration,
         fullName: result.fullName,
         filePath: testResult.testFilePath,
+        testType: this._detectTestType(result, testResult.testFilePath),
+        threshold: this._getThresholdForTest(result, testResult.testFilePath),
       }));
 
     this._slowTests.push(...slowTests);
@@ -55,6 +69,7 @@ class SlowTestReporter extends BaseReporter {
 
     this.log('');
     this._logWarningTitle();
+    this._logContextWarnings();
     this._logSlowTests();
     this.log('');
   }
@@ -62,7 +77,8 @@ class SlowTestReporter extends BaseReporter {
   _logWarningTitle() {
     const count = this._slowTests.length;
     const plural = count > 1 ? 's' : '';
-    const title = `⚠️  Found ${count} slow test${plural} (>${this._options.warnOnSlowerThan}ms):`;
+    const modeText = this._isProfiling ? ' [PROFILING MODE]' : '';
+    const title = `⚠️  Found ${count} slow test${plural} with context-aware thresholds${modeText}:`;
 
     this.log(this._colorText(title, `${COLORS.YELLOW}\x1b[1m`));
   }
@@ -125,6 +141,77 @@ class SlowTestReporter extends BaseReporter {
       return `${(ms / 1000).toFixed(1)} s`;
     }
     return `${ms} ms`;
+  }
+
+  _detectTestType(result, filePath) {
+    const testContent = result.fullName.toLowerCase();
+    const fileName = filePath.toLowerCase();
+    
+    // Check for integration test patterns
+    if (fileName.includes('integration') || testContent.includes('integration')) {
+      return 'INTEGRATION';
+    }
+    
+    // Check for Enzyme patterns
+    if (testContent.includes('shallow') || testContent.includes('mount') ||
+        fileName.includes('enzyme') || testContent.includes('wrapper')) {
+      return 'ENZYME_STYLE';
+    }
+    
+    // Check for RTL patterns (covers RTL testing approaches)
+    if (testContent.includes('render') || testContent.includes('screen') ||
+        fileName.includes('rtl') || testContent.includes('getby') ||
+        testContent.includes('click') || testContent.includes('type') ||
+        testContent.includes('submit') || testContent.includes('user')) {
+      return 'RTL';
+    }
+    
+    return 'DEFAULT';
+  }
+
+  _getThresholdForTest(result, filePath) {
+    const testType = this._detectTestType(result, filePath);
+    let baseThreshold = TEST_THRESHOLDS[testType] || TEST_THRESHOLDS.DEFAULT;
+    
+    // Apply CI multiplier if in CI environment
+    if (this._isCI) {
+      baseThreshold = Math.round(baseThreshold * DEFAULTS.CI_MULTIPLIER);
+    }
+    
+    return baseThreshold;
+  }
+
+  _isTestSlow(result, filePath) {
+    const threshold = this._getThresholdForTest(result, filePath);
+    return result.duration > threshold;
+  }
+
+  _logContextWarnings() {
+    const warnings = [];
+    
+    if (this._isProfiling) {
+      warnings.push('🔍 PROFILING MODE: Running with cold cache and CI-optimized thresholds');
+    } else if (!this._isColdCache) {
+      warnings.push('⚠️  Running with warm cache - results may not reflect CI performance');
+    }
+    
+    if (this._isCI && !this._isProfiling) {
+      warnings.push(`ℹ️  CI environment detected - thresholds adjusted by ${DEFAULTS.CI_MULTIPLIER}x`);
+    }
+    
+    // Show threshold breakdown for profiling mode
+    if (this._isProfiling) {
+      const multiplier = this._isCI ? DEFAULTS.CI_MULTIPLIER : 1;
+      warnings.push(`📊 Thresholds: Enzyme(${Math.round(TEST_THRESHOLDS.ENZYME_STYLE * multiplier)}ms) RTL(${Math.round(TEST_THRESHOLDS.RTL * multiplier)}ms) Integration(${Math.round(TEST_THRESHOLDS.INTEGRATION * multiplier)}ms) Default(${Math.round(TEST_THRESHOLDS.DEFAULT * multiplier)}ms)`);
+    }
+    
+    warnings.forEach(warning => {
+      this.log(this._colorText(`  ${warning}`, COLORS.YELLOW));
+    });
+    
+    if (warnings.length > 0) {
+      this.log('');
+    }
   }
 }
 
