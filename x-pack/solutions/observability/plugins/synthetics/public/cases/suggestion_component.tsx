@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { SuggestionChildrenProps } from '@kbn/cases-plugin/public';
 import type { OverviewStatusMetaData } from '../../common/runtime_types';
@@ -16,9 +16,8 @@ import {
   trendStatsBatch,
 } from '../apps/synthetics/state';
 import type { SyntheticsSuggestion } from '../../common/types';
-import { setFlyoutConfig, setOverviewPageStateAction } from '../apps/synthetics/state/overview';
+import { setOverviewPageStateAction } from '../apps/synthetics/state/overview';
 import { quietFetchOverviewStatusAction } from '../apps/synthetics/state/overview_status';
-import type { FlyoutParamProps } from '../apps/synthetics/components/monitors_page/overview/overview/types';
 
 const MonitorItem = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const dispatch = useDispatch();
@@ -61,16 +60,8 @@ const MonitorItem = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
       })
     );
   }, [dispatch, pageState]);
-  const setFlyoutConfigCallback = useCallback(
-    (params: FlyoutParamProps) => {
-      dispatch(setFlyoutConfig(params));
-    },
-    [dispatch]
-  );
 
-  return (
-    <MetricItem style={{ width: '100%' }} monitor={monitor} onClick={setFlyoutConfigCallback} />
-  );
+  return <MetricItem style={{ width: '100%' }} monitor={monitor} onClick={() => {}} />;
 };
 
 export function SyntheticsSuggestionChildren(props: SuggestionChildrenProps<SyntheticsSuggestion>) {
