@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { ContentFrameworkSectionProps } from '.';
 import { ContentFrameworkSection } from '.';
+import userEvent from '@testing-library/user-event';
 
 const defaultProps: ContentFrameworkSectionProps = {
   title: 'Test Section',
@@ -32,6 +33,7 @@ const defaultProps: ContentFrameworkSectionProps = {
   ],
   children: <div>Section children</div>,
   id: 'testSection',
+  'data-test-subj': 'testSection',
 };
 
 describe('ContentFrameworkSection', () => {
@@ -83,5 +85,13 @@ describe('ContentFrameworkSection', () => {
     expect(
       screen.queryByTestId('unifiedDocViewerSectionActionButton-fullScreen')
     ).not.toBeInTheDocument();
+  });
+
+  it('calls onToggle when the accordion is toggled', async () => {
+    const onToggle = jest.fn();
+    render(<ContentFrameworkSection {...defaultProps} onToggle={onToggle} forceState="open" />);
+    const toggleBtn = screen.getByText('Test Section');
+    await userEvent.click(toggleBtn);
+    expect(onToggle).toHaveBeenCalled();
   });
 });

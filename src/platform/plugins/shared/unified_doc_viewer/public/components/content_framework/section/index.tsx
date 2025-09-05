@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiAccordionProps, IconType } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -39,6 +39,8 @@ export interface ContentFrameworkSectionProps {
   actions?: Action[];
   children: React.ReactNode;
   'data-test-subj'?: string;
+  onToggle?: any;
+  forceState?: EuiAccordionProps['forceState'];
 }
 
 export function ContentFrameworkSection({
@@ -47,6 +49,8 @@ export function ContentFrameworkSection({
   description,
   actions,
   children,
+  onToggle,
+  forceState,
   'data-test-subj': accordionDataTestSubj,
 }: ContentFrameworkSectionProps) {
   const renderActions = () => (
@@ -87,6 +91,8 @@ export function ContentFrameworkSection({
       data-test-subj={accordionDataTestSubj}
       id={`sectionAccordion-${id}`}
       initialIsOpen
+      forceState={forceState}
+      onToggle={onToggle}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -104,7 +110,7 @@ export function ContentFrameworkSection({
       extraAction={
         actions?.length && (
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>{' '}
+            <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
           </EuiFlexGroup>
         )
       }
