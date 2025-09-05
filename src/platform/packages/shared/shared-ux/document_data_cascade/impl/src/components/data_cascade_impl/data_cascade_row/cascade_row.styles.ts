@@ -63,6 +63,7 @@ export const styles = (
     },
   }),
   rowInner: css({
+    width: '100%',
     position: 'relative',
     ...(isExpandedChildRow
       ? {
