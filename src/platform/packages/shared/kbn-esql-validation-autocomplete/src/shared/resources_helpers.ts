@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Builder, EDITOR_MARKER, EsqlQuery } from '@kbn/esql-ast';
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
@@ -15,7 +16,7 @@ import type {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from './types';
 import { getFieldsFromES, getCurrentQueryAvailableColumns } from './helpers';
-import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
+import { expandEvals } from './expand_evals';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -47,57 +48,81 @@ function getValueInsensitive(keyToCheck: string) {
  * @param queryText
  */
 async function cacheColumnsForQuery(
-  queryText: string,
+  query: ESQLAstQueryExpression,
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
-  policies: Map<string, ESQLPolicy>
+  policies: Map<string, ESQLPolicy>,
+  originalQueryText: string
 ) {
-  const existsInCache = checkCacheInsensitive(queryText);
+  const cacheKey = BasicPrettyPrinter.print(query);
+  const existsInCache = checkCacheInsensitive(cacheKey);
   if (existsInCache) {
     // this is already in the cache
     return;
   }
-  const queryTextWithoutLastPipe = removeLastPipe(queryText);
-  // retrieve the user defined fields from the query without an extra call
-  const fieldsAvailableAfterPreviousCommand = getValueInsensitive(queryTextWithoutLastPipe);
+
+  const fieldsAvailableAfterPreviousCommand = getValueInsensitive(
+    BasicPrettyPrinter.print({ ...query, commands: query.commands.slice(0, -1) })
+  );
+
   if (fieldsAvailableAfterPreviousCommand && fieldsAvailableAfterPreviousCommand?.length) {
-    const { root } = parse(queryText);
     const availableFields = await getCurrentQueryAvailableColumns(
-      queryText,
-      root.commands,
+      query.commands,
       fieldsAvailableAfterPreviousCommand,
       fetchFields,
-      policies
+      policies,
+      originalQueryText
     );
-    cache.set(queryText, availableFields);
+    cache.set(cacheKey, availableFields);
   }
 }
 
-export function getColumnsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
-  const getColumns = async () => {
+/**
+ * Efficiently computes the list of columns available after the given query
+ * and returns column querying utilities.
+ *
+ * @param root
+ * @param originalQueryText the text of the original query, used to infer column names from expressions
+ * @param resourceRetriever
+ * @returns
+ */
+export function getColumnsByTypeHelper(
+  query: ESQLAstQueryExpression,
+  originalQueryText: string,
+  resourceRetriever?: ESQLCallbacks
+) {
+  const queryForFields = getQueryForFields(originalQueryText, query);
+  const root = EsqlQuery.fromSrc(queryForFields).ast;
+
+  const cacheColumns = async () => {
     // in some cases (as in the case of ROW or SHOW) the query is not set
-    if (!queryText) {
+    if (!originalQueryText) {
       return;
     }
 
-    const getFields = async (query: string) => {
-      const cached = getValueInsensitive(query);
+    const getFields = async (queryToES: string) => {
+      const cached = getValueInsensitive(queryToES);
       if (cached) {
         return cached as ESQLFieldWithMetadata[];
       }
-      const fields = await getFieldsFromES(query, resourceRetriever);
-      cache.set(query, fields);
+      const fields = await getFieldsFromES(queryToES, resourceRetriever);
+      cache.set(queryToES, fields);
       return fields;
     };
 
-    const [sourceCommand, ...partialQueries] = processPipes(queryText);
-    getFields(sourceCommand);
+    const subqueries = [];
+    for (let i = 0; i < root.commands.length; i++) {
+      subqueries.push(Builder.expression.query(root.commands.slice(0, i + 1)));
+    }
+
+    // source command
+    getFields(BasicPrettyPrinter.print(subqueries[0]));
 
     const policies = (await resourceRetriever?.getPolicies?.()) ?? [];
     const policyMap = new Map(policies.map((p) => [p.name, p]));
 
     // build fields cache for every partial query
-    for (const query of partialQueries) {
-      await cacheColumnsForQuery(query, getFields, policyMap);
+    for (const subquery of subqueries.slice(1)) {
+      await cacheColumnsForQuery(subquery, getFields, policyMap, originalQueryText);
     }
   };
 
@@ -107,9 +132,8 @@ export function getColumnsByTypeHelper(queryText: string, resourceRetriever?: ES
       ignored: string[] = []
     ): Promise<ESQLColumnData[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
-      await getColumns();
-      const queryTextForCacheSearch = toSingleLine(queryText);
-      const cachedFields = getValueInsensitive(queryTextForCacheSearch);
+      await cacheColumns();
+      const cachedFields = getValueInsensitive(queryForFields);
       return (
         cachedFields?.filter(({ name, type }) => {
           const ts = Array.isArray(type) ? type : [type];
@@ -123,9 +147,8 @@ export function getColumnsByTypeHelper(queryText: string, resourceRetriever?: ES
       );
     },
     getColumnMap: async (): Promise<Map<string, ESQLColumnData>> => {
-      await getColumns();
-      const queryTextForCacheSearch = toSingleLine(queryText);
-      const cachedFields = getValueInsensitive(queryTextForCacheSearch);
+      await cacheColumns();
+      const cachedFields = getValueInsensitive(queryForFields);
       const cacheCopy = new Map<string, ESQLColumnData>();
       cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
       return cacheCopy;
@@ -153,4 +176,71 @@ export function getSourcesHelper(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     return (await resourceRetriever?.getSources?.()) || [];
   };
+}
+
+/**
+ * This function is used to build the query that will be used to compute the
+ * fields available at the final position. It is robust to final partial commands
+ * e.g. "FROM logs* | EVAL foo = 1 | EVAL "
+ *
+ * Generally, this is the user's query up to the end of the previous command, but there
+ * are special cases for multi-expression EVAL and FORK branches.
+ *
+ * @param queryString The original query string
+ * @param commands
+ * @returns
+ */
+export function getQueryForFields(queryString: string, root: ESQLAstQueryExpression): string {
+  const commands = root.commands;
+  const lastCommand = commands[commands.length - 1];
+  if (lastCommand && lastCommand.name === 'fork' && lastCommand.args.length > 0) {
+    /**
+     * This flattens the current fork branch into a simpler but equivalent
+     * query that is compatible with the existing field computation/caching strategy.
+     *
+     * The intuition here is that if the cursor is within a fork branch, the
+     * previous context is equivalent to a query without the FORK command:
+     *
+     * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
+     * Simplified:     FROM lolz | EVAL foo = 1 | EVAL baz = 3
+     */
+    const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
+    const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
+    return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+  }
+
+  if (lastCommand && lastCommand.name === 'eval') {
+    const endsWithComma = queryString.replace(EDITOR_MARKER, '').trim().endsWith(',');
+    if (lastCommand.args.length > 1 || endsWithComma) {
+      /**
+       * If we get here, we know that we have a multi-expression EVAL statement.
+       *
+       * e.g. EVAL foo = 1, bar = foo + 1, baz = bar + 1
+       *
+       * In order for this to work with the caching system which expects field availability to be
+       * delineated by pipes, we need to split the current EVAL command into an equivalent
+       * set of single-expression EVAL commands.
+       *
+       * Original query: FROM lolz | EVAL foo = 1, bar = foo + 1, baz = bar + 1, /
+       * Simplified:     FROM lolz | EVAL foo = 1 | EVAL bar = foo + 1 | EVAL baz = bar + 1
+       */
+      const expanded = expandEvals(commands);
+      const newCommands = expanded.slice(0, endsWithComma ? undefined : -1);
+      return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+    }
+  }
+
+  // If there is only one source command and it does not require fields, do not
+  // fetch fields, hence return an empty string.
+  return commands.length === 1 && ['row', 'show'].includes(commands[0].name)
+    ? ''
+    : buildQueryUntilPreviousCommand(root);
+}
+
+function buildQueryUntilPreviousCommand(root: ESQLAstQueryExpression) {
+  if (root.commands.length === 1) {
+    return BasicPrettyPrinter.print({ ...root.commands[0] });
+  } else {
+    return BasicPrettyPrinter.print({ ...root, commands: root.commands.slice(0, -1) });
+  }
 }

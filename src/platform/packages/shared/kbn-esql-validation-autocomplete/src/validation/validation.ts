@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
+import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
   ICommandCallbacks,
@@ -16,7 +16,6 @@ import type {
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
-import { getQueryForFields } from '../autocomplete/helper';
 import { getColumnsByTypeHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
@@ -115,8 +114,10 @@ async function validateAst(
     callbacks?.getJoinIndices?.(),
   ]);
 
+  const sourceQuery = queryString.split('|')[0];
   const sourceFields = await getColumnsByTypeHelper(
-    queryString.split('|')[0],
+    EsqlQuery.fromSrc(sourceQuery).ast,
+    sourceQuery,
     callbacks
   ).getColumnMap();
 
@@ -138,8 +139,7 @@ async function validateAst(
    */
   const subqueries = getSubqueriesToValidate(rootCommands);
   for (const subquery of subqueries) {
-    const queryForFields = getQueryForFields(BasicPrettyPrinter.print(subquery), subquery);
-    const { getColumnMap } = getColumnsByTypeHelper(queryForFields, callbacks);
+    const { getColumnMap } = getColumnsByTypeHelper(subquery, queryString, callbacks);
     const availableColumns = await getColumnMap();
 
     const references: ReferenceMaps = {

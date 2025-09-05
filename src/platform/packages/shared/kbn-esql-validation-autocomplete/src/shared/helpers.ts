@@ -106,11 +106,11 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
  * @returns a list of fields that are available for the current pipe
  */
 export async function getCurrentQueryAvailableColumns(
-  query: string,
   commands: ESQLAstCommand[],
   previousPipeFields: ESQLColumnData[],
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
-  policies: Map<string, ESQLPolicy>
+  policies: Map<string, ESQLPolicy>,
+  originalQueryText: string
 ) {
   const lastCommand = commands[commands.length - 1];
   const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
@@ -154,7 +154,7 @@ export async function getCurrentQueryAvailableColumns(
     return commandDef.methods.columnsAfter(
       lastCommand,
       previousPipeFields,
-      query,
+      originalQueryText,
       additionalFields
     );
   }

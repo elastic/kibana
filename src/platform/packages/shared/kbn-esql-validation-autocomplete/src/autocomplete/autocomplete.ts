@@ -7,37 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import {
+  ESQL_VARIABLES_PREFIX,
+  EsqlQuery,
+  esqlCommandRegistry,
+  getCommandAutocompleteDefinitions,
   parse,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLCommandOption,
   type ESQLFunction,
-  esqlCommandRegistry,
-  getCommandAutocompleteDefinitions,
-  ESQL_VARIABLES_PREFIX,
 } from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
-import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import {
-  getControlSuggestionIfSupported,
-  buildFieldsDefinitionsWithMetadata,
-} from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
+import {
+  buildFieldsDefinitionsWithMetadata,
+  getControlSuggestionIfSupported,
+} from '@kbn/esql-ast/src/definitions/utils';
+import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
-import { isSourceCommand } from '../shared/helpers';
 import { getAstContext } from '../shared/context';
+import { isSourceCommand } from '../shared/helpers';
 import { getColumnsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
-import { getQueryForFields } from './helper';
-import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 import { getCommandContext } from './get_command_context';
+import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 
 type GetColumnMapFn = () => Promise<Map<string, ESQLColumnData>>;
 
@@ -56,14 +56,12 @@ export async function suggest(
     return [];
   }
 
-  // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(correctedQuery, root);
-
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    queryForFields.replace(EDITOR_MARKER, ''),
-    resourceRetriever,
-    innerText
+    root,
+    innerText,
+    resourceRetriever
   );
+
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
@@ -112,9 +110,9 @@ export async function suggest(
         }
 
         const { getColumnsByType: getColumnsByTypeEmptyState } = getColumnsByTypeRetriever(
-          fromCommand,
-          resourceRetriever,
-          innerText
+          EsqlQuery.fromSrc(fromCommand).ast,
+          innerText,
+          resourceRetriever
         );
         const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? {
           recommendedQueries: [],
@@ -171,15 +169,15 @@ export async function suggest(
 }
 
 export function getColumnsByTypeRetriever(
-  queryForFields: string,
-  resourceRetriever?: ESQLCallbacks,
-  fullQuery?: string
+  query: ESQLAstQueryExpression,
+  queryText: string,
+  resourceRetriever?: ESQLCallbacks
 ): { getColumnsByType: GetColumnsByTypeFn; getColumnMap: GetColumnMapFn } {
-  const helpers = getColumnsByTypeHelper(queryForFields, resourceRetriever);
+  const helpers = getColumnsByTypeHelper(query, queryText, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
   const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
 
-  const queryString = fullQuery ?? queryForFields;
+  const queryString = queryText;
   const lastCharacterTyped = queryString[queryString.length - 1];
   const lastCharIsQuestionMark = lastCharacterTyped === ESQL_VARIABLES_PREFIX;
   return {
@@ -192,7 +190,7 @@ export function getColumnsByTypeRetriever(
         ...options,
         supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
-      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryForFields)) ?? {
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryText)) ?? {
         recommendedQueries: [],
         recommendedFields: [],
       };
