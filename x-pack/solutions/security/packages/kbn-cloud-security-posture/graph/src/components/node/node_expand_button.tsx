@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { StyledNodeExpandButton, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
+import { NodeExpandButtonContainer, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 import { GRAPH_NODE_EXPAND_BUTTON_ID } from '../test_ids';
 
@@ -37,7 +37,7 @@ export const NodeExpandButton = ({ x, y, color, onClick, ...props }: NodeExpandB
   );
 
   return (
-    <StyledNodeExpandButton x={x} y={y} className={isToggled ? 'toggled' : undefined} {...props}>
+    <NodeExpandButtonContainer x={x} y={y} className={isToggled ? 'toggled' : undefined} {...props}>
       <RoundEuiButtonIcon
         color={color ?? 'primary'}
         backgroundColor={euiTheme.colors.backgroundBasePlain}
@@ -47,7 +47,7 @@ export const NodeExpandButton = ({ x, y, color, onClick, ...props }: NodeExpandB
         aria-label="Open or close node actions"
         data-test-subj={GRAPH_NODE_EXPAND_BUTTON_ID}
       />
-    </StyledNodeExpandButton>
+    </NodeExpandButtonContainer>
   );
 };
 

@@ -251,7 +251,7 @@ interface NodeExpandButtonContainerProps extends CommonProps {
   y?: string;
 }
 
-export const StyledNodeExpandButton = styled.div<NodeExpandButtonContainerProps>`
+export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerProps>`
   appearance: none;
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
@@ -285,8 +285,8 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &,
-  ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
+  ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled) &,
+  ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
