@@ -38,7 +38,37 @@ export function isParentName(parent: string, descendant: string) {
 }
 
 export function shouldComposeTree(sortField: SortableField, query: string) {
-  return (!sortField || sortField === 'nameSortKey') && !query;
+  // Always allow tree mode for nameSortKey, even with a query
+  return !sortField || sortField === 'nameSortKey';
+}
+
+// Returns all streams that match the query or are ancestors of a match
+export function filterStreamsByQuery(
+  streams: ListStreamDetail[],
+  query: string
+): ListStreamDetail[] {
+  if (!query) return streams;
+  const lowerQuery = query.toLowerCase();
+  const nameToStream = new Map<string, ListStreamDetail>();
+  streams.forEach((s) => nameToStream.set(s.stream.name, s));
+
+  // Find all streams that match the query
+  const matching = streams.filter((s) => s.stream.name.toLowerCase().includes(lowerQuery));
+  const resultSet = new Map<string, ListStreamDetail>();
+  for (const stream of matching) {
+    // Add the match
+    resultSet.set(stream.stream.name, stream);
+    // Add all ancestors
+    const segments = stream.stream.name.split('.');
+    for (let i = 1; i < segments.length; ++i) {
+      const ancestorName = segments.slice(0, i).join('.');
+      const ancestor = nameToStream.get(ancestorName);
+      if (ancestor) {
+        resultSet.set(ancestorName, ancestor);
+      }
+    }
+  }
+  return Array.from(resultSet.values());
 }
 
 export function buildStreamRows(

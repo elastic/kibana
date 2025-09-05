@@ -20,7 +20,13 @@ import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
 import type { TableRow, SortableField } from './utils';
-import { buildStreamRows, asTrees, enrichStream, shouldComposeTree } from './utils';
+import {
+  buildStreamRows,
+  asTrees,
+  enrichStream,
+  shouldComposeTree,
+  filterStreamsByQuery,
+} from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -55,15 +61,22 @@ export function StreamsTreeTable({
     pageSize: 5,
   });
 
+  // Filter streams by query, including ancestors of matches
+  const filteredStreams = React.useMemo(
+    () =>
+      filterStreamsByQuery(
+        streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
+        searchQuery
+      ),
+    [streams, searchQuery]
+  );
+
   const enrichedStreams = React.useMemo(() => {
-    const ingestStreams = streams.filter((stream) =>
-      Streams.ingest.all.Definition.is(stream.stream)
-    );
     const streamList = shouldComposeTree(sortField, searchQuery)
-      ? asTrees(ingestStreams)
-      : ingestStreams;
+      ? asTrees(filteredStreams)
+      : filteredStreams;
     return streamList.map(enrichStream);
-  }, [sortField, searchQuery, streams]);
+  }, [sortField, searchQuery, filteredStreams]);
 
   // Helper: flatten tree, skipping children of collapsed nodes
   const flattenTreeWithCollapse = React.useCallback(
@@ -257,6 +270,7 @@ export function StreamsTreeTable({
         pageSizeOptions: [5, 50, 100],
         initialPageSize: 5,
       }}
+      executeQueryOptions={{ enabled: false }}
       search={{
         query: searchQuery,
         onChange: handleQueryChange,
