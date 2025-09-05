@@ -35,7 +35,7 @@ describe('assertValidUpdates', () => {
 
   it('should pass when there are no changes in the snapshots', () => {
     const from = loadSnapshot('baseline.json');
-    expect(() => assertValidUpdates({ log, from, to: from })).not.toThrow();
+    expect(() => assertValidUpdates({ log, from, to: from })).not.toThrowError();
     expect(log.info).toHaveBeenCalledWith(
       '✅ Current SO type definitions are compatible with the baseline'
     );
@@ -45,7 +45,7 @@ describe('assertValidUpdates', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('compatible_updates.json');
 
-    expect(() => assertValidUpdates({ log, from, to })).not.toThrow();
+    expect(() => assertValidUpdates({ log, from, to })).not.toThrowError();
     expect(log.info).toHaveBeenCalledWith(
       '✅ Current SO type definitions are compatible with the baseline'
     );
@@ -55,7 +55,7 @@ describe('assertValidUpdates', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('migrations_deleted.json');
 
-    expect(() => assertValidUpdates({ log, from, to })).toThrow(
+    expect(() => assertValidUpdates({ log, from, to })).toThrowError(
       `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
     );
   });
@@ -64,7 +64,7 @@ describe('assertValidUpdates', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('migrations_added.json');
 
-    expect(() => assertValidUpdates({ log, from, to })).toThrow(
+    expect(() => assertValidUpdates({ log, from, to })).toThrowError(
       `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
     );
   });
@@ -73,7 +73,7 @@ describe('assertValidUpdates', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('model_versions_deleted.json');
 
-    expect(() => assertValidUpdates({ log, from, to })).toThrow(
+    expect(() => assertValidUpdates({ log, from, to })).toThrowError(
       `❌ Some model versions have been deleted for SO type 'task'.`
     );
   });
@@ -81,8 +81,8 @@ describe('assertValidUpdates', () => {
   it('should throw if more than one new model version is defined', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('two_new_model_versions.json');
-    expect(() => assertValidUpdates({ log, from, to })).toThrow(
-      `❌ The SO type 'task' is defining two (or more) new model versions.`
+    expect(() => assertValidUpdates({ log, from, to })).toThrowError(
+      `❌ The SO type 'task' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#troubleshooting`
     );
   });
 
@@ -90,7 +90,7 @@ describe('assertValidUpdates', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('mutated_model_versions.json');
 
-    expect(() => assertValidUpdates({ log, from, to })).toThrow(
+    expect(() => assertValidUpdates({ log, from, to })).toThrowError(
       `❌ Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
     );
   });
@@ -99,7 +99,7 @@ describe('assertValidUpdates', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('non_consecutive_model_versions.json');
 
-    expect(() => assertValidUpdates({ log, from, to })).toThrow(
+    expect(() => assertValidUpdates({ log, from, to })).toThrowError(
       `❌ The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
     );
   });
@@ -108,7 +108,7 @@ describe('assertValidUpdates', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('mappings_updated_no_bump.json');
 
-    expect(() => assertValidUpdates({ log, from, to })).toThrow(
+    expect(() => assertValidUpdates({ log, from, to })).toThrowError(
       `❌ The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
     );
   });

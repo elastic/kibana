@@ -58,7 +58,9 @@ export function assertValidUpdates({
 
         // check that current changes don't define more than 1 new modelVersion
         if (infoAfter.modelVersions.length - infoBefore.modelVersions.length > 1) {
-          throw new Error(`❌ The SO type '${name}' is defining two (or more) new model versions.`);
+          throw new Error(
+            `❌ The SO type '${name}' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#troubleshooting`
+          );
         }
 
         // check that existing model versions have not been mutated
