@@ -29,7 +29,7 @@ export const DefaultAiConnectorSettingsContextProvider = ({
   toast,
   application,
   docLinks,
-  featureFlags
+  featureFlags,
 }: {
   children: React.ReactNode;
   toast: IToasts | undefined;
@@ -41,7 +41,7 @@ export const DefaultAiConnectorSettingsContextProvider = ({
     toast,
     application,
     docLinks,
-    featureFlags
+    featureFlags,
   });
   return (
     <DefaultAiConnectorSettingContext.Provider value={value}>
@@ -54,7 +54,7 @@ const DefaultAiConnector = ({
   toast,
   application,
   docLinks,
-  featureFlags
+  featureFlags,
 }: {
   toast: IToasts | undefined;
   application: ApplicationStart;
@@ -65,7 +65,7 @@ const DefaultAiConnector = ({
     toast,
     application,
     docLinks,
-    featureFlags
+    featureFlags,
   };
 };
 
