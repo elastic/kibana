@@ -238,6 +238,7 @@ export interface ChartSectionProps {
    */
   renderToggleActions: () => React.ReactElement | undefined;
 }
+
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover
  */
@@ -256,9 +257,9 @@ export type ChartSectionConfiguration =
        */
       localStorageKeyPrefix?: string;
       /**
-       * The initial chart section height
+       * The default chart section height
        */
-      initialTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
     }
   | {
       replaceDefaultChart: false;

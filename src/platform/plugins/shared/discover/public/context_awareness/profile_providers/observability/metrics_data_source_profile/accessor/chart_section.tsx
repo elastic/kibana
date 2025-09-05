@@ -26,5 +26,6 @@ export const createChartSection =
       ),
       replaceDefaultChart: !!metricsExperienceClient,
       localStorageKeyPrefix: 'discover:metricsExperience',
+      defaultTopPanelHeight: 'max-content',
     };
   };
