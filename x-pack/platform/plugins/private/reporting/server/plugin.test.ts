@@ -186,7 +186,6 @@ describe('Reporting Plugin', () => {
         name: 'Manage Scheduled Reports',
         description: 'View and manage scheduled reports for all users in this space.',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: {
@@ -212,7 +211,6 @@ describe('Reporting Plugin', () => {
         id: 'reporting',
         name: 'Reporting',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: { savedObject: { all: [], read: [] }, ui: [] },
@@ -224,7 +222,6 @@ describe('Reporting Plugin', () => {
         name: 'Manage Scheduled Reports',
         description: 'View and manage scheduled reports for all users in this space.',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: {
