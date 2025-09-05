@@ -13,6 +13,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,
@@ -20,7 +21,6 @@ import {
   getGcpInputVarsFields,
 } from '../utils';
 import {
-  ORGANIZATION_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../constants';
@@ -84,7 +84,7 @@ export const GcpCredentialsFormAgentless = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="securitySolutionPackages.cspIntegration.gcpCloudCredentials.cloudFormationSupportedMessage"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."
             />
           </EuiCallOut>
@@ -114,7 +114,7 @@ export const GcpCredentialsFormAgentless = ({
             href={cloudShellUrl}
           >
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForms.googleCloudShell.cloudCredentials.button"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.googleCloudShell.cloudCredentials.button"
               defaultMessage="Launch Google Cloud Shell"
             />
           </EuiButton>
