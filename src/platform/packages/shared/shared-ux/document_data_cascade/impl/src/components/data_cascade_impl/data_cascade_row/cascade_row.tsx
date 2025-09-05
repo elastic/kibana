@@ -50,6 +50,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   virtualRow,
   virtualRowStyle,
   enableRowSelection,
+  enableSecondaryExpansionAction,
 }: CascadeRowPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
   const actions = useDataCascadeActions<G, L>();
@@ -110,7 +111,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     });
   }, [onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns, actions, rowId]);
 
-  const onCascadeRowExpand = useCallback(() => {}, []);
+  const onCascadeSecondaryExpansion = useCallback(() => {}, []);
 
   useEffect(() => {
     // fetch the data for the sub-rows
@@ -163,21 +164,27 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
                     </EuiFlexItem>
                   )}
                 </React.Fragment>
+                <React.Fragment>
+                  {enableSecondaryExpansionAction && (
+                    <EuiFlexItem>
+                      <EuiButtonIcon
+                        color="text"
+                        iconType="expand"
+                        onClick={onCascadeSecondaryExpansion}
+                        aria-label={i18n.translate(
+                          'sharedUXPackages.dataCascade.expandRowButtonLabel',
+                          {
+                            defaultMessage: 'expand row',
+                          }
+                        )}
+                        data-test-subj={`expand-row-${rowId}-button`}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </React.Fragment>
                 <EuiFlexItem>
                   <EuiButtonIcon
-                    iconType="expand"
-                    onClick={onCascadeRowExpand}
-                    aria-label={i18n.translate(
-                      'sharedUXPackages.dataCascade.expandRowButtonLabel',
-                      {
-                        defaultMessage: 'expand row',
-                      }
-                    )}
-                    data-test-subj={`expand-row-${rowId}-button`}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonIcon
+                    color="text"
                     iconType={rowIsExpanded ? 'arrowUp' : 'arrowDown'}
                     onClick={rowToggleFn}
                     aria-label={i18n.translate(
