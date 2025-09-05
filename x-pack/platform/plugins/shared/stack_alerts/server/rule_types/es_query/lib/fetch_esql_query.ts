@@ -67,8 +67,6 @@ export async function fetchEsqlQuery({
         params: {
           query: query.query,
           filter: query.filter,
-          keep_alive: '10m',
-          wait_for_completion_timeout: '10s',
         },
       },
     });
