@@ -20330,7 +20330,8 @@
                   "type": "array"
                 }
               }
-            }
+            },
+            "description": "Indicates a successful call."
           },
           "400": {
             "content": {
@@ -20360,7 +20361,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Indicates a failed call."
           }
         },
         "summary": "Get cloud connectors",
@@ -20514,7 +20516,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Indicates a successful call."
           },
           "400": {
             "content": {
@@ -20544,7 +20547,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Indicates a failed call."
           }
         },
         "summary": "Create cloud connector",
