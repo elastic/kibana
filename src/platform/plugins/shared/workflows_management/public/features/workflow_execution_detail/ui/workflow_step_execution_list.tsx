@@ -23,6 +23,7 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { WorkflowStepExecutionListItem } from './workflow_step_execution_list_item';
+import { CancelExecutionButton } from './cancel_execution_button';
 
 export interface WorkflowStepExecutionListProps {
   execution: WorkflowExecutionDto | null;
@@ -100,24 +101,35 @@ export const WorkflowStepExecutionList = ({
   }
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      justifyContent="flexStart"
-      css={styles.container}
-    >
-      {execution.stepExecutions.map((stepExecution) => (
-        <WorkflowStepExecutionListItem
-          key={stepExecution.id}
-          stepExecution={stepExecution}
-          selected={stepExecution.id === selectedId}
-          onClick={() => onStepExecutionClick(stepExecution.id)}
-        />
-      ))}
-      <EuiButton onClick={onClose} css={styles.doneButton}>
-        <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
-      </EuiButton>
-    </EuiFlexGroup>
+    <>
+      {/* cancel workflow button */}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        justifyContent="flexStart"
+        css={styles.container}
+      >
+        {execution.stepExecutions.map((stepExecution) => (
+          <WorkflowStepExecutionListItem
+            key={stepExecution.id}
+            stepExecution={stepExecution}
+            selected={stepExecution.id === selectedId}
+            onClick={() => onStepExecutionClick(stepExecution.id)}
+          />
+        ))}
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          justifyContent="flexEnd"
+          css={styles.buttonsContainer}
+        >
+          <CancelExecutionButton execution={execution} />
+          <EuiButton onClick={onClose}>
+            <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </>
   );
 };
 
@@ -126,8 +138,7 @@ const componentStyles = {
     css({
       padding: euiTheme.size.s,
     }),
-  doneButton: css({
-    justifySelf: 'flex-end',
+  buttonsContainer: css({
     marginTop: 'auto',
   }),
 };
