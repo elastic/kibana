@@ -59,12 +59,12 @@ describe('EnterIfNodeImpl', () => {
     getNodeSuccessors.mockReturnValue([
       {
         id: 'thenNode',
-        type: 'enter-condition-branch',
+        type: 'enter-then-branch',
         condition: 'true',
       } as EnterConditionBranchNode,
       {
         id: 'elseNode',
-        type: 'enter-condition-branch',
+        type: 'enter-else-branch',
       } as EnterConditionBranchNode,
     ]);
   });
@@ -94,12 +94,12 @@ describe('EnterIfNodeImpl', () => {
       getNodeSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:alert',
         } as EnterConditionBranchNode,
         {
           id: 'elseNode',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
         } as EnterConditionBranchNode,
       ]);
     });
@@ -122,12 +122,12 @@ describe('EnterIfNodeImpl', () => {
       getNodeSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:rule',
         } as EnterConditionBranchNode,
         {
           id: 'elseNode',
-          type: 'enter-condition-branch',
+          type: 'enter-else-branch',
         } as EnterConditionBranchNode,
       ]);
     });
@@ -150,7 +150,7 @@ describe('EnterIfNodeImpl', () => {
       getNodeSuccessors.mockReturnValueOnce([
         {
           id: 'thenNode',
-          type: 'enter-condition-branch',
+          type: 'enter-then-branch',
           condition: 'event.type:rule',
         } as EnterConditionBranchNode,
       ]);
@@ -181,7 +181,7 @@ describe('EnterIfNodeImpl', () => {
     getNodeSuccessors.mockReturnValueOnce([
       {
         id: 'thenNode',
-        type: 'enter-condition-branch',
+        type: 'enter-then-branch',
         condition: 'invalid""condition',
       } as EnterConditionBranchNode,
     ]);
