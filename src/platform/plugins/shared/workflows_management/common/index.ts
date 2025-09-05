@@ -13,6 +13,5 @@ export const PLUGIN_NAME = 'Workflows';
 export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
 export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
-export { parseWorkflowYamlToJSON } from './lib/yaml_utils';
-export { WORKFLOW_ZOD_SCHEMA_LOOSE, WORKFLOW_ZOD_SCHEMA } from './schema';
+
 // DO NOT IMPORT MODULES HERE. Otherwise it will inflate the initial plugin bundle size.
