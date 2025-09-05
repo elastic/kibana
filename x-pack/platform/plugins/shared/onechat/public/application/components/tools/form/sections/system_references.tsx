@@ -93,6 +93,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
             <EuiFieldText
               disabled={isToolIdDisabled}
+              placeholder="namespace.tool_name (e.g., acme.financial.search)"
               readOnly={isReadOnly}
               {...field}
               inputRef={ref}
