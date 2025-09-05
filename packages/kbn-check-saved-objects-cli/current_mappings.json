@@ -289,6 +289,26 @@
       }
     }
   },
+  "alerting_rule_template": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "ruleTypeId": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
   "api_key_pending_invalidation": {
     "properties": {
       "apiKeyId": {
