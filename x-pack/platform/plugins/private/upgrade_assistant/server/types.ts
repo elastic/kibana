@@ -9,7 +9,7 @@ import type { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type SemVer from 'semver/classes/semver';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { handleEsError } from './shared_imports';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 
