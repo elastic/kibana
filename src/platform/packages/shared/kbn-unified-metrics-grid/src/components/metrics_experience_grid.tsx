@@ -20,15 +20,18 @@ import {
   setCurrentPage,
   selectCurrentPage,
   selectValueFilters,
+  selectIsFullscreen,
   setDimensions,
   setValueFilters,
   selectDimensions,
+  toggleFullscreen,
 } from '../store/slices';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { DimensionsSelector } from './toolbar/dimensions_selector';
 import { ValuesSelector } from './toolbar/values_selector';
 import { useMetricFieldsQuery } from '../hooks';
+import { FullScreenWrapper } from './fullscreen_wrapper/fullscreen_wrapper';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -42,6 +45,7 @@ export const MetricsExperienceGrid = ({
   const currentPage = useAppSelector(selectCurrentPage);
   const dimensions = useAppSelector(selectDimensions);
   const valueFilters = useAppSelector(selectValueFilters);
+  const isFullscreen = useAppSelector(selectIsFullscreen);
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
 
   const timeRange = useMemo(() => getTimeRange(), [getTimeRange]);
@@ -95,12 +99,18 @@ export const MetricsExperienceGrid = ({
       'data-test-subj': 'metricsExperienceToolbarSearch',
     },
     {
-      iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Full screen',
-      }),
+      iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
+      label: isFullscreen
+        ? i18n.translate('metricsExperience.fullScreenExitButton', {
+            defaultMessage: 'Exit fullscreen',
+          })
+        : i18n.translate('metricsExperience.fullScreenButton', {
+            defaultMessage: 'Enter fullscreen',
+          }),
 
-      onClick: () => {},
+      onClick: () => {
+        dispatch(toggleFullscreen());
+      },
       'data-test-subj': 'metricsExperienceToolbarFullScreen',
     },
   ];
@@ -179,39 +189,41 @@ export const MetricsExperienceGrid = ({
   };
 
   return (
-    <ChartSectionTemplate
-      id="unifiedMetricsExperienceGridPanel"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        leftSide: rightSideComponents,
-        rightSide: actions,
-      }}
-    >
-      <section
-        tabIndex={-1}
-        data-test-subj="unifiedMetricsExperienceRendered"
-        css={css`
-          ${histogramCss || ''}
-          height: 100%;
-          overflow: hidden;
-        `}
+    <FullScreenWrapper isFullscreen={isFullscreen} dataTestSubj="metricsExperienceGrid">
+      <ChartSectionTemplate
+        id="metricsExperienceGridPanel"
+        toolbarCss={chartToolbarCss}
+        toolbar={{
+          leftSide: rightSideComponents,
+          rightSide: actions,
+        }}
       >
-        <MetricsGrid
-          fields={currentFields}
-          timeRange={timeRange}
-          loading={loading}
-          filters={filters}
-          dimensions={dimensions}
-          pivotOn="metric"
-          columns={columns}
-        />
+        <section
+          tabIndex={-1}
+          data-test-subj="metricsExperienceRendered"
+          css={css`
+            ${histogramCss || ''}
+            height: 100%;
+            overflow: hidden;
+          `}
+        >
+          <MetricsGrid
+            fields={currentFields}
+            timeRange={timeRange}
+            loading={loading}
+            filters={filters}
+            dimensions={dimensions}
+            pivotOn="metric"
+            columns={columns}
+          />
 
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
-      </section>
-    </ChartSectionTemplate>
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        </section>
+      </ChartSectionTemplate>
+    </FullScreenWrapper>
   );
 };
