@@ -32,6 +32,8 @@ jest.mock('../../../lib/get_inspected_element_data', () => ({
 }));
 
 jest.mock('../../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
+  isKeyboardShortcut: jest.fn(),
+  isMac: jest.fn(),
   isEscapeKey: jest.fn(),
 }));
 
