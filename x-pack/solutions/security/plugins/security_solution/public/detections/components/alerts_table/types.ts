@@ -9,7 +9,6 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
-import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
