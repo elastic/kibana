@@ -127,6 +127,7 @@ export const InstallationInfoSchema = schema.object({
       error: schema.maybe(schema.string()),
     })
   ),
+  previous_version: schema.maybe(schema.string()),
 });
 
 const PackageIconSchema = schema.object({
