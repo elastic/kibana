@@ -861,7 +861,7 @@ export class IndexUpdateService {
     ];
 
     if (!operations.length) {
-      // northing to send
+      // nothing to send
       throw new Error('empty operations');
     }
 
@@ -968,11 +968,11 @@ export class IndexUpdateService {
 
   public exit() {
     const hasUnsavedChanges = this._hasUnsavedChanges$.getValue();
-    const unnsavedColumns = this._pendingColumnsToBeSaved$
+    const unsavedColumns = this._pendingColumnsToBeSaved$
       .getValue()
       .filter((col) => !isPlaceholderColumn(col.name));
 
-    if (hasUnsavedChanges || unnsavedColumns.length > 0) {
+    if (hasUnsavedChanges || unsavedColumns.length > 0) {
       this.setExitAttemptWithUnsavedChanges(true);
     } else {
       this.destroy();
