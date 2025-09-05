@@ -46,6 +46,14 @@ describe('SettingsTab', () => {
     });
     useKibanaMock.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockImplementation((flag) => {
+            if (flag === 'aiAssistant.defaultLlmSettingEnabled') {
+              return true;
+            }
+            return false;
+          }),
+        },
         application: {
           getUrlForApp: getUrlForAppMock,
           capabilities: {
