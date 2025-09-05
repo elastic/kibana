@@ -15,6 +15,7 @@ import {
   EuiInMemoryTable,
   useEuiTheme,
   EuiHighlight,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -142,6 +143,36 @@ export function StreamsTreeTable({
     });
   };
 
+  // Compute all expandable node names for expand/collapse all
+  const allExpandableNodeNames = React.useMemo(() => {
+    const names: string[] = [];
+    const collect = (rows: TableRow[]) => {
+      for (const row of rows) {
+        if (row.children && row.children.length > 0) {
+          names.push(row.stream.name);
+        }
+      }
+    };
+    collect(allRows);
+    return names;
+  }, [allRows]);
+
+  // Determine if all are expanded or not
+  const allExpanded = allExpandableNodeNames.every((name) => !collapsed.has(name));
+  const hasExpandable = allExpandableNodeNames.length > 0;
+
+  const handleExpandCollapseAll = () => {
+    setCollapsed((prev) => {
+      if (allExpanded) {
+        // Collapse all
+        return new Set(allExpandableNodeNames);
+      } else {
+        // Expand all
+        return new Set();
+      }
+    });
+  };
+
   const sorting = {
     sort: {
       field: sortField,
@@ -153,6 +184,34 @@ export function StreamsTreeTable({
   React.useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [streams, searchQuery, sortField, sortDirection]);
+
+  // Expand/Collapse all button for the search bar
+  const expandCollapseAllButton =
+    shouldComposeTree(sortField, searchQuery) && hasExpandable ? (
+      <EuiButtonEmpty
+        size="xs"
+        iconType={allExpanded ? 'arrowDown' : 'arrowRight'}
+        onClick={handleExpandCollapseAll}
+        data-test-subj="streamsAppExpandCollapseAllButton"
+        aria-label={
+          allExpanded
+            ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+                defaultMessage: 'Collapse all',
+              })
+            : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+                defaultMessage: 'Expand all',
+              })
+        }
+      >
+        {allExpanded
+          ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+              defaultMessage: 'Collapse all',
+            })
+          : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+              defaultMessage: 'Expand all',
+            })}
+      </EuiButtonEmpty>
+    ) : null;
 
   return (
     <EuiInMemoryTable<TableRow>
@@ -278,7 +337,12 @@ export function StreamsTreeTable({
           incremental: true,
           'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
         },
-        toolsRight: <StreamsAppSearchBar showDatePicker />,
+        toolsRight: (
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            {expandCollapseAllButton}
+            <StreamsAppSearchBar showDatePicker />
+          </EuiFlexGroup>
+        ),
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />
