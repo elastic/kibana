@@ -95,7 +95,8 @@ export function getColumnsByTypeHelper(
 
   const cacheColumns = async () => {
     // in some cases (as in the case of ROW or SHOW) the query is not set
-    if (!originalQueryText) {
+    // TODO consider having source commands including ROW use columnsAfter methods like any other command
+    if (!queryForFields) {
       return;
     }
 
@@ -112,10 +113,6 @@ export function getColumnsByTypeHelper(
     const subqueries = [];
     for (let i = 0; i < root.commands.length; i++) {
       subqueries.push(Builder.expression.query(root.commands.slice(0, i + 1)));
-    }
-
-    if (!subqueries.length) {
-      return;
     }
 
     // source command
