@@ -36,4 +36,8 @@ export const esqlCascadeStyles = ({ euiTheme }: { euiTheme: EuiThemeShape }) => 
       clipPath: 'unset',
     },
   }),
+
+  textBadge: css({
+    textAlign: 'center',
+  }),
 });
