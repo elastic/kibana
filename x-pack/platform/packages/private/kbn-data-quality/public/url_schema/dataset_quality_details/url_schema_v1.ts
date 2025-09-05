@@ -52,5 +52,5 @@ const stateFromUrlSchemaRT = new rt.Type<
   getUrlValueFromState
 );
 
-export const stateFromUntrustedUrlRT = (isStream: boolean) =>
+export const stateFromUntrustedUrlRT = (isStream: boolean = false) =>
   datasetQualityDetailsUrlSchemaV1.urlSchemaRT(isStream).pipe(stateFromUrlSchemaRT);

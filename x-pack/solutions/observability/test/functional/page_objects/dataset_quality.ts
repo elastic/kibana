@@ -221,7 +221,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async navigateToDetails(pageState: datasetQualityDetailsUrlSchemaV1.UrlSchema) {
       const queryStringParams = querystring.stringify({
         [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
-          datasetQualityDetailsUrlSchemaV1.urlSchemaRT.encode({
+          datasetQualityDetailsUrlSchemaV1.urlSchemaRT(false).encode({
             ...defaultDetailsPageState,
             ...pageState,
           })
@@ -243,7 +243,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async navigateToDetailsV2(pageState: datasetQualityDetailsUrlSchemaV2.UrlSchema) {
       const queryStringParams = querystring.stringify({
         [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
-          datasetQualityDetailsUrlSchemaV2.urlSchemaRT.encode({
+          datasetQualityDetailsUrlSchemaV2.urlSchemaRT(false).encode({
             ...defaultDetailsPageStateV2,
             ...pageState,
           })
