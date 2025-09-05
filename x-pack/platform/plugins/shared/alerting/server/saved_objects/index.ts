@@ -217,7 +217,7 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: false,
+    hidden: true,
     namespaceType: 'multiple-isolated',
     management: {
       importableAndExportable: true,
