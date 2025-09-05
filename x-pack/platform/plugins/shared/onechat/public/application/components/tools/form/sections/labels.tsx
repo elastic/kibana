@@ -47,7 +47,6 @@ export const Labels = ({ mode }: LabelsProps) => {
           ) : undefined
         }
         isInvalid={!!errors.labels}
-        helpText={i18nMessages.toolLabels.form.helpText}
         error={errors.labels?.message}
       >
         <Controller

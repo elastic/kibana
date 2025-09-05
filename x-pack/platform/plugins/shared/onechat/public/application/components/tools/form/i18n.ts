@@ -136,9 +136,6 @@ export const i18nMessages = {
       label: i18n.translate('xpack.onechat.tools.newTool.labels.formLabel', {
         defaultMessage: 'Labels',
       }),
-      helpText: i18n.translate('xpack.onechat.tools.newTool.labels.formHelpText', {
-        defaultMessage: 'Some labels may automatically be added by Elastic.',
-      }),
       placeholder: i18n.translate('xpack.onechat.tools.newTool.labels.formPlaceholder', {
         defaultMessage: 'Add or create labels',
       }),
