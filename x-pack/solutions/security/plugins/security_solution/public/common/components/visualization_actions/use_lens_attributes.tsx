@@ -57,15 +57,20 @@ export const useLensAttributes = ({
     ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
 
-  let selectedPatterns;
-
-  if (signalIndexName) {
-    selectedPatterns = [signalIndexName];
-  } else if (newDataViewPickerEnabled) {
-    selectedPatterns = experimentalSelectedPatterns;
-  } else {
-    selectedPatterns = oldSelectedPatterns;
-  }
+  const selectedPatterns = useMemo(() => {
+    if (signalIndexName) {
+      return [signalIndexName];
+    } else if (newDataViewPickerEnabled) {
+      return experimentalSelectedPatterns;
+    } else {
+      return oldSelectedPatterns;
+    }
+  }, [
+    experimentalSelectedPatterns,
+    newDataViewPickerEnabled,
+    oldSelectedPatterns,
+    signalIndexName,
+  ]);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(

@@ -147,8 +147,8 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         donutTextWrapperStyles={donutTextWrapperStyles}
       >
         <LensEmbeddable
-          signalIndexName={signalIndexName}
           {...lensProps}
+          signalIndexName={signalIndexName}
           id={id}
           onLoad={onEmbeddableLoad}
         />
@@ -158,8 +158,8 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
 
   return (
     <LensEmbeddable
-      signalIndexName={signalIndexName}
       {...lensProps}
+      signalIndexName={signalIndexName}
       id={id}
       onLoad={onEmbeddableLoad}
     />
