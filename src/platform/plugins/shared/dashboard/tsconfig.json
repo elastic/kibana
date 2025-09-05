@@ -101,8 +101,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/content-management-access-control-public",
     "@kbn/content-management-access-control-server",
-    "@kbn/security-plugin",
-    "@kbn/user-profile-components",
   ],
   "exclude": ["target/**/*"]
 }
