@@ -44,7 +44,7 @@ run(
       },
       help: `
         --fix              If the current mappings differ from the mappings in the file, update the current_mappings.json file
-        --override              If the current mappings differ from the mappings in the file, update the current_mappings.json file
+        --override         If the current mappings differ from the mappings in the file, update the current_mappings.json file
         --no-verify        Don't run any validation, just update the current_mappings.json file.
         --task             Specify which task(s) to run (compatibility | mapping-addition)
       `,

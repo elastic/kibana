@@ -4292,7 +4292,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/check-mappings-update-cli@link:packages/kbn-check-mappings-update-cli":
+"@kbn/check-saved-objects-cli@link:packages/kbn-check-saved-objects-cli":
   version "0.0.0"
   uid ""
 
@@ -7361,10 +7361,6 @@
   uid ""
 
 "@kbn/saved-object-test-plugin@link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin":
-  version "0.0.0"
-  uid ""
-
-"@kbn/saved-object-types@link:packages/kbn-saved-object-types":
   version "0.0.0"
   uid ""
 

@@ -14,6 +14,15 @@ import { compareFieldLists, type CompareResult } from './compare_type_field_list
 import { readCurrentFields, writeCurrentFields } from './current_fields';
 import { extractFieldListsFromPlugins } from './extract_field_lists_from_plugins';
 
+/**
+ * Checks that any new fields that are defined in the MV are also defined in the mappings, and viceversa.
+ *
+ * To do so, it:
+ * - Reads the upstream fields from `current_fields.json`
+ * - Obtains the types + fields for the current code level.
+ *   - It does that by starting ES + Kibana, and obtanining types + fields from the typeRegistry.
+ *   - See packages/kbn-check-saved-objects-cli/src/mappings_additions/extract_field_lists_from_plugins_worker.ts
+ */
 export const runModelVersionMappingAdditionsChecks = async ({
   fix,
   override,

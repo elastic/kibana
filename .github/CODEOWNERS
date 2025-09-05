@@ -46,8 +46,8 @@ examples/v8_profiler_examples @elastic/response-ops
 examples/workflows @elastic/workflows-eng
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
-packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
+packages/kbn-check-saved-objects-cli @elastic/kibana-core
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
@@ -87,7 +87,6 @@ packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-saved-object-types @elastic/kibana-core
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team

@@ -49,8 +49,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Core team to review the SO type changes.
-  // The number of types in the hashMap should never be reduced, it can only increase.
-  // Removing saved object types is forbidden after 8.8.
   it('detecting migration related changes in registered types', () => {
     const allTypes = typeRegistry.getAllTypes();
 

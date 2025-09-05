@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-saved-object-types'],
-};
+require('../src/setup_node_env');
+require('@kbn/check-saved-objects-cli').checkSavedObjects(process.argv[2] === 'fix');

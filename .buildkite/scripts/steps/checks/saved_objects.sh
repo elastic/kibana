@@ -4,8 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo --- Check Mappings Update
-cmd="node scripts/check_mappings_update"
+echo --- Check Saved Objects changes
+cmd="node scripts/check_saved_objects"
 if is_pr && ! is_auto_commit_disabled; then
   cmd="$cmd --fix"
 fi
