@@ -21,7 +21,20 @@ test('Fleet Elastic Agent enrollment flow', async ({ page, fleetAgentsOverviewPa
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
   await fleetAgentsOverviewPage.clickAddAgentCTA();
-  await fleetAgentsOverviewPage.clickCreatePolicy();
+
+  /**
+   * createNewAgentPolicyLink only exists if there are prior existing agent policies,
+   * clicking it will give us the createPolicyButton to create a new agent policy.
+   * We would expect first runs of this test in new environments to have no prior agent policies.
+   * For second run retries in the same environment, we click the link to allow for new agent policy creation.
+   */
+
+  await Promise.race([
+    await fleetAgentsOverviewPage.waitForCreatePolicyButton(),
+    await fleetAgentsOverviewPage.clickCreateNewAgentPolicyLink(),
+  ]);
+
+  await fleetAgentsOverviewPage.clickCreatePolicyButton();
 
   await fleetAgentsOverviewPage.assertAgentPolicyCreated();
 

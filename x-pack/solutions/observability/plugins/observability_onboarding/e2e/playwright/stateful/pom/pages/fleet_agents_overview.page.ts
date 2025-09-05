@@ -11,6 +11,7 @@ export class FleetAgentsOverviewPage {
   page: Page;
 
   private readonly addAgentCTA: Locator;
+  private readonly createNewAgentPolicyLink: Locator;
   private readonly createPolicyButton: Locator;
   private readonly agentPolicyDescription: Locator;
   private readonly enrollInFleetRadioButton: Locator;
@@ -23,6 +24,7 @@ export class FleetAgentsOverviewPage {
     this.page = page;
 
     this.addAgentCTA = this.page.getByTestId('addAgentButton');
+    this.createNewAgentPolicyLink = this.page.getByTestId('createNewAgentPolicyLink');
     this.createPolicyButton = this.page.getByTestId('createPolicyBtn');
     this.agentPolicyDescription = this.page.getByTestId('agentPolicyDescription');
     this.enrollInFleetRadioButton = this.page.getByTestId('agentFlyoutManagedRadioButtons');
@@ -36,7 +38,15 @@ export class FleetAgentsOverviewPage {
     await this.addAgentCTA.click();
   }
 
-  public async clickCreatePolicy() {
+  public async clickCreateNewAgentPolicyLink() {
+    await this.createNewAgentPolicyLink.click();
+  }
+
+  public async waitForCreatePolicyButton() {
+    await this.createPolicyButton.waitFor({ state: 'visible' });
+  }
+
+  public async clickCreatePolicyButton() {
     await this.createPolicyButton.click();
   }
 
