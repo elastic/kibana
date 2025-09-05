@@ -16,6 +16,7 @@ import {
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 
+import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
 import {
   TECHNICAL_PREVIEW_TOOLTIP,
@@ -61,12 +62,21 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     expectedCount,
   });
 
+  const insightTypes = useMemo<DefendInsightType[]>(
+    () =>
+      defendInsightsPolicyResponseFailureEnabled
+        ? ['incompatible_antivirus', 'policy_response_failure']
+        : ['incompatible_antivirus'],
+    [defendInsightsPolicyResponseFailureEnabled]
+  );
+
   const {
     data: latestScan,
     isLoading: isLoadingLatestScan,
     refetch: refetchLatestScan,
   } = useFetchLatestScan({
     endpointId,
+    insightTypes,
     isPolling: isScanButtonDisabled,
     onSuccess: setExpectedCount,
     onInsightGenerationFailure,
@@ -141,9 +151,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         endpointId,
         actionTypeId,
         connectorId,
-        insightTypes: defendInsightsPolicyResponseFailureEnabled
-          ? ['incompatible_antivirus', 'policy_response_failure']
-          : ['incompatible_antivirus'],
+        insightTypes,
       });
     },
     [
@@ -153,7 +161,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       triggerScan,
       endpointId,
       setExpectedCount,
-      defendInsightsPolicyResponseFailureEnabled,
+      insightTypes,
     ]
   );
 

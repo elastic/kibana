@@ -69,6 +69,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -107,6 +108,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -151,6 +153,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -180,6 +183,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -200,6 +204,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -232,6 +237,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -254,6 +260,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -289,6 +296,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -324,6 +332,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -362,6 +371,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -400,6 +410,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })

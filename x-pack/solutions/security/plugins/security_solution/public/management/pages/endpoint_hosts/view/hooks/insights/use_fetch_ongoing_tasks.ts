@@ -9,6 +9,7 @@ import {
   API_VERSIONS,
   DEFEND_INSIGHTS,
   type DefendInsightsResponse,
+  type DefendInsightType,
   DefendInsightStatusEnum,
 } from '@kbn/elastic-assistant-common';
 import { WORKFLOW_INSIGHTS } from '../../translations';
@@ -18,6 +19,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/
 interface UseFetchOngoingScansConfig {
   isPolling: boolean;
   endpointId: string;
+  insightTypes: DefendInsightType[];
   onSuccess: (expectedCount: number) => void;
   onInsightGenerationFailure: () => void;
 }
@@ -25,6 +27,7 @@ interface UseFetchOngoingScansConfig {
 export const useFetchLatestScan = ({
   isPolling,
   endpointId,
+  insightTypes,
   onSuccess,
   onInsightGenerationFailure,
 }: UseFetchOngoingScansConfig) => {
@@ -35,7 +38,7 @@ export const useFetchLatestScan = ({
   );
 
   return useQuery<{ hasRunning: boolean }, { body?: { error: string } }, { hasRunning: boolean }>(
-    [`fetchOngoingTasks-${endpointId}`, defendInsightsPolicyResponseFailureEnabled],
+    [`fetchOngoingTasks-${endpointId}`, insightTypes, defendInsightsPolicyResponseFailureEnabled],
     async () => {
       try {
         const makeSingleQuery = async (): Promise<DefendInsightsResponse[]> => {
@@ -50,8 +53,6 @@ export const useFetchLatestScan = ({
         };
 
         const makeMultiTypeQueries = async (): Promise<DefendInsightsResponse[]> => {
-          const insightTypes = ['incompatible_antivirus', 'policy_response_failure'];
-
           const queries = insightTypes.map((type) =>
             http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
               version: API_VERSIONS.internal.v1,
