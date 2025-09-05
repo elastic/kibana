@@ -61,6 +61,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     isAssistantEnabled: true,
     isAssistantVisible: true,
     isAssistantManagementEnabled: true,
+    isAssistantConversationSummarizationEnabled: true,
   };
   const queryClient = new QueryClient({
     defaultOptions: {

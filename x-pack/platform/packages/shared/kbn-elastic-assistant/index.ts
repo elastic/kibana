@@ -195,6 +195,8 @@ export interface UseAssistantAvailability {
   isAssistantVisible: boolean;
   // When true, user has `All` privilege for `Management > AI Assistant`
   isAssistantManagementEnabled: boolean;
+  // When true, user has access to conversation summarization feature
+  isAssistantConversationSummarizationEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)

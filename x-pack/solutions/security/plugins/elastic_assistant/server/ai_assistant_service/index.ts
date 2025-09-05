@@ -127,6 +127,7 @@ export class AIAssistantService {
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
+  private isConversationSummarizationEnabled: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -198,6 +199,14 @@ export class AIAssistantService {
 
   public setIsProductDocumentationInProgress(isInProgress: boolean) {
     this.isProductDocumentationInProgress = isInProgress;
+  }
+
+  public getIsConversationSummarizationEnabled() {
+    return this.isConversationSummarizationEnabled;
+  }
+
+  public setIsConversationSummarizationEnabled(isEnabled: boolean) {
+    this.isConversationSummarizationEnabled = isEnabled;
   }
 
   private createDataStream: CreateDataStream = ({
