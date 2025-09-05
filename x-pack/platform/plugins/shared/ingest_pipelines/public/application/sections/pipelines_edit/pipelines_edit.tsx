@@ -84,7 +84,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     // Context:
 
     // When we client-side react-router/history navigate to this edit page from pipelines list,
-    // we double encode the pathname part like this: history.push('/<basename>/edit/' + encodeURIComponent(encodeURIComponent('<sourceName>')))
+    // we double encode the pathname part like this: history.push('/<basename>/edit/' + encodeURIComponent(encodeURIComponent('<name>')))
 
     // Why? Because if we encode it once, history lib will automatically decode it upon loading the page
     // incorrectly mangling the resulting pipeline name, due to a bug in history library

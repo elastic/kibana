@@ -36,7 +36,7 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
     // because URLSearchParams.get('name') will automatically decode pipeline name
     // so a single encode is enough.
     return new URLSearchParams(history.location.search);
-  }, [history.location]);
+  }, [history.location.search]);
 
   const formDefaultValue = useMemo(() => {
     if (sourcePipeline) {
