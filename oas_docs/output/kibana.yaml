@@ -13997,8 +13997,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
-          description: OK
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Successfully cancelled the response action
       summary: Cancel a response action
       tags:
         - Security Endpoint Management API
@@ -82419,41 +82419,49 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
-    Security_Endpoint_Management_API_AlertIds:
-      description: A list of alerts `id`s.
-      items:
-        format: nonempty
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
     Security_Endpoint_Management_API_CancelRouteRequestBody:
-      example:
-        comment: Action no longer needed due to resolved incident
-        id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
       type: object
       properties:
-        comment:
-          description: Optional comment explaining the reason for canceling the action
-          example: Action no longer needed due to resolved incident
-          type: string
-        id:
-          description: The unique identifier of the response action to cancel. This should be the internal Kibana action ID, not the external system's action ID.
+        action_id:
+          description: ID of the response action to cancel
           example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
           minLength: 1
           type: string
+        agent_type:
+          default: endpoint
+          description: The agent type to target for the action
+          enum:
+            - endpoint
+            - sentinel_one
+            - crowdstrike
+            - microsoft_defender_endpoint
+          type: string
+        alert_ids:
+          description: If defined, any case associated with the given IDs will be updated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        case_ids:
+          description: Case IDs to be updated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        comment:
+          description: Optional comment explaining the reason for canceling the action
+          type: string
+        endpoint_ids:
+          description: A list of endpoint IDs whose hosts will be isolated
+          items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
       required:
-        - id
-    Security_Endpoint_Management_API_CaseIds:
-      description: Case IDs to be updated (cannot contain empty strings)
-      example:
-        - case-id-1
-        - case-id-2
-      items:
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
+        - action_id
     Security_Endpoint_Management_API_CloudFileScriptParameters:
       type: object
       properties:
