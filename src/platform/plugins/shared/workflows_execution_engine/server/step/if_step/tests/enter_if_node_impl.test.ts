@@ -170,10 +170,10 @@ describe('EnterIfNodeImpl', () => {
     });
   });
 
-  it('should throw an error if successors are not enter-condition-branch', async () => {
+  it('should throw an error if successors are not enter-then-branch or enter-else-branch', async () => {
     getNodeSuccessors.mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `EnterIfNode with id ${step.id} must have only 'enter-condition-branch' successors, but found: some-other-type.`
+      `EnterIfNode with id ${step.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
     );
   });
 

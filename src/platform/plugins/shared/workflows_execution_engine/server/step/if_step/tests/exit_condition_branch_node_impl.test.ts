@@ -23,7 +23,7 @@ describe('ExitConditionBranchNodeImpl', () => {
     getNodeSuccessors = jest.fn();
     step = {
       id: 'testStep',
-      type: 'exit-condition-branch',
+      type: 'exit-then-branch',
       startNodeId: 'startBranchNode',
     };
     wfExecutionRuntimeManagerMock = {
