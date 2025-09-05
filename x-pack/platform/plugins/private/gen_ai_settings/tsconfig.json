@@ -28,7 +28,6 @@
     "@kbn/management-settings-field-definition",
     "@kbn/react-kibana-context-theme",
     "@kbn/licensing-plugin",
-    "@kbn/gen-ai-settings-plugin"
   ],
   "exclude": ["target/**/*"]
 }
