@@ -637,7 +637,6 @@ describe('convertToWorkflowGraph', () => {
           id: 'testForeachStep',
           type: 'enter-foreach',
           exitNodeId: 'exitForeach(testForeachStep)',
-          itemNodeIds: ['firstTestForeachConnectorStep', 'secondTestForeachConnectorStep'],
           configuration: {
             foreach: '["item1", "item2", "item3"]',
             name: 'testForeachStep',
