@@ -10,14 +10,13 @@ import { EuiButton, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import * as i18n from './translations';
 import {
-  CLOSING_REASON_ISSUE_RESOLVED,
-  CLOSING_REASON_ACCEPTABLE_RISK,
-  CLOSING_REASON_EXPECTED_ACTIVITY,
-  CLOSING_REASON_LOW_SEVERITY,
   CLOSING_REASON_DUPLICATE,
   CLOSING_REASON_FALSE_POSITIVE,
-  CLOSING_REASON_FURTHER_INVESTIGATION_REQUIRED,
   CLOSING_REASON_CLOSE_WITHOUT_REASON,
+  CLOSING_REASON_TRUE_POSITIVE,
+  CLOSING_REASON_BENIGN_POSITIVE,
+  CLOSING_REASON_AUTOMATED_CLOSURE,
+  CLOSING_REASON_OTHER,
 } from '../../../../../common/translations';
 import { AlertClosingReasonValues } from '../../../../../common/constants';
 import type { AlertClosingReason } from '../../../../../common/constants';
@@ -26,16 +25,13 @@ const closingReasons: EuiSelectableOption<{
   key?: AlertClosingReason;
 }>[] = [
   { label: CLOSING_REASON_CLOSE_WITHOUT_REASON, key: undefined },
-  { label: CLOSING_REASON_ISSUE_RESOLVED, key: AlertClosingReasonValues.issue_resolved },
-  { label: CLOSING_REASON_ACCEPTABLE_RISK, key: AlertClosingReasonValues.acceptable_risk },
-  { label: CLOSING_REASON_EXPECTED_ACTIVITY, key: AlertClosingReasonValues.expected_activity },
-  { label: CLOSING_REASON_LOW_SEVERITY, key: AlertClosingReasonValues.low_severity },
+
   { label: CLOSING_REASON_DUPLICATE, key: AlertClosingReasonValues.duplicate },
   { label: CLOSING_REASON_FALSE_POSITIVE, key: AlertClosingReasonValues.false_positive },
-  {
-    label: CLOSING_REASON_FURTHER_INVESTIGATION_REQUIRED,
-    key: AlertClosingReasonValues.investigation_required,
-  },
+  { label: CLOSING_REASON_TRUE_POSITIVE, key: AlertClosingReasonValues.true_positive },
+  { label: CLOSING_REASON_BENIGN_POSITIVE, key: AlertClosingReasonValues.benign_positive },
+  { label: CLOSING_REASON_AUTOMATED_CLOSURE, key: AlertClosingReasonValues.automated_closure },
+  { label: CLOSING_REASON_OTHER, key: AlertClosingReasonValues.other },
 ];
 
 interface BulkAlertClosingReasonComponentProps {
@@ -62,7 +58,10 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
       <EuiSelectable
         options={options}
         onChange={(updatedOptions) => setOptions(updatedOptions)}
-        singleSelection
+        singleSelection="always"
+        // This should be "full" but for some reason it's not working properly
+        // height={'full'}
+        height={options.length * 32}
       >
         {(list) => list}
       </EuiSelectable>

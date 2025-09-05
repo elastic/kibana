@@ -559,12 +559,11 @@ export const PROMOTION_RULE_TAGS = [
 
 export const AlertClosingReasonSchema = z.enum([
   'false_positive',
-  'issue_resolved',
-  'acceptable_risk',
-  'expected_activity',
-  'low_severity',
   'duplicate',
-  'investigation_required',
+  'true_positive',
+  'benign_positive',
+  'automated_closure',
+  'other',
 ]);
 export type AlertClosingReason = z.infer<typeof AlertClosingReasonSchema>;
 export const AlertClosingReasonValues = AlertClosingReasonSchema.enum;
