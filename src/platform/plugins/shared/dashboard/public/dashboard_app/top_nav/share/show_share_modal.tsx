@@ -29,10 +29,19 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { AccessModeContainer } from '../../access_control/access_mode_container';
+import {
+  AccessModeContainer,
+  type AccessControlClient,
+} from '@kbn/content-management-access-control-public';
+
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { dataService, shareService, coreServices } from '../../../services/kibana_services';
+import {
+  dataService,
+  shareService,
+  coreServices,
+  spacesService,
+} from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
@@ -50,6 +59,7 @@ export interface ShowShareModalProps {
   canSave: boolean;
   accessControl?: SavedObjectAccessControl;
   createdBy?: string;
+  accessControlClient: AccessControlClient;
   saveDashboard: () => Promise<SaveDashboardReturn | undefined>;
   changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
 }
@@ -71,6 +81,7 @@ export function ShowShareModal({
   canSave,
   accessControl,
   createdBy,
+  accessControlClient,
   saveDashboard,
   changeAccessMode,
 }: ShowShareModalProps) {
@@ -330,7 +341,10 @@ export function ShowShareModal({
         <AccessModeContainer
           accessControl={accessControl}
           createdBy={createdBy}
+          getActiveSpace={spacesService?.getActiveSpace}
+          getCurrentUser={coreServices.userProfile.getCurrent}
           onChangeAccessMode={handleChangeAccessMode}
+          accessControlClient={accessControlClient}
         />
       ),
     },

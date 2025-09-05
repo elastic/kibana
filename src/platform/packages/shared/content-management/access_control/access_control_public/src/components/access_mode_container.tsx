@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ChangeEvent, useState, useEffect, useMemo } from 'react';
+import React, { type ChangeEvent, useState, useEffect } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -22,8 +22,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { getAccessControlClient } from './get_access_control_client';
-import { coreServices, spacesService } from '../../services/kibana_services';
+import type { Space } from '@kbn/spaces-plugin/common';
+import type { GetUserProfileResponse } from '@kbn/security-plugin/common';
+import type { UserProfileData } from '@kbn/user-profile-components';
+import type { AccessControlClient } from '../access_control_client';
 
 const selectOptions = [
   {
@@ -48,27 +50,36 @@ const selectOptions = [
 
 interface Props {
   onChangeAccessMode: (value: SavedObjectAccessControl['accessMode']) => Promise<void> | void;
+  getActiveSpace?: () => Promise<Space>;
+  getCurrentUser: () => Promise<GetUserProfileResponse<UserProfileData>>;
+  accessControlClient: AccessControlClient;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
 }
 
-export const AccessModeContainer = ({ onChangeAccessMode, accessControl, createdBy }: Props) => {
+export const AccessModeContainer = ({
+  onChangeAccessMode,
+  getActiveSpace,
+  getCurrentUser,
+  accessControlClient,
+  accessControl,
+  createdBy,
+}: Props) => {
   const [spaceName, setSpaceName] = useState('');
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
-  const client = useMemo(() => getAccessControlClient(), []);
-  const isInEditAccessMode = client.isInEditAccessMode(accessControl);
+  const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
 
   useEffect(() => {
-    spacesService?.getActiveSpace().then((activeSpace) => {
+    getActiveSpace?.().then((activeSpace) => {
       setSpaceName(activeSpace.name);
     });
-  }, []);
+  }, [getActiveSpace]);
 
   useEffect(() => {
     const getCanManage = async () => {
-      const user = await coreServices?.userProfile.getCurrent();
-      const canManage = await client.canManageAccessControl({
+      const user = await getCurrentUser();
+      const canManage = await accessControlClient.canManageAccessControl({
         accessControl,
         createdBy,
         uid: user?.uid,
@@ -77,7 +88,7 @@ export const AccessModeContainer = ({ onChangeAccessMode, accessControl, created
     };
 
     getCanManage();
-  }, [accessControl, createdBy, client]);
+  }, [accessControl, createdBy, accessControlClient, getCurrentUser]);
 
   const selectId = useGeneratedHtmlId({ prefix: 'accessControlSelect' });
 

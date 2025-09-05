@@ -8,6 +8,7 @@
  */
 
 export { AccessControlClient } from './access_control_client';
+export { AccessModeContainer } from './components';
 export type {
   CheckGlobalPrivilegeResponse,
   ChangeAccesModeParameters,

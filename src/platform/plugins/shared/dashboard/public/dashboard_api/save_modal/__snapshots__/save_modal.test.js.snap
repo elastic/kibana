@@ -50,6 +50,48 @@ exports[`renders DashboardSaveModal 1`] = `
           size="l"
         />
         <AccessModeContainer
+          accessControlClient={
+            AccessControlClient {
+              "deps": Object {
+                "contentTypeId": "dashboard",
+                "http": Object {
+                  "addLoadingCountSource": [MockFunction],
+                  "anonymousPaths": Object {
+                    "isAnonymous": [MockFunction],
+                    "register": [MockFunction],
+                  },
+                  "basePath": BasePath {
+                    "assetsHrefBase": "",
+                    "basePath": "",
+                    "get": [Function],
+                    "prepend": [Function],
+                    "publicBaseUrl": undefined,
+                    "remove": [Function],
+                    "serverBasePath": "",
+                  },
+                  "delete": [MockFunction],
+                  "externalUrl": Object {
+                    "isInternalUrl": [MockFunction],
+                    "validateUrl": [MockFunction],
+                  },
+                  "fetch": [MockFunction],
+                  "get": [MockFunction],
+                  "getLoadingCount$": [MockFunction],
+                  "head": [MockFunction],
+                  "intercept": [MockFunction],
+                  "options": [MockFunction],
+                  "patch": [MockFunction],
+                  "post": [MockFunction],
+                  "put": [MockFunction],
+                  "staticAssets": Object {
+                    "getPluginAssetHref": [MockFunction],
+                  },
+                },
+              },
+            }
+          }
+          getActiveSpace={[MockFunction]}
+          getCurrentUser={[MockFunction]}
           onChangeAccessMode={[Function]}
         />
       </React.Fragment>

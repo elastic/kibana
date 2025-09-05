@@ -36,7 +36,7 @@ export const useDashboardMenuItems = ({
   showResetChange?: boolean;
 }) => {
   const isMounted = useMountedState();
-  const client = useMemo(() => getAccessControlClient(), []);
+  const accessControlClient = useMemo(() => getAccessControlClient(), []);
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
 
@@ -53,12 +53,12 @@ export const useDashboardMenuItems = ({
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
-  const isInEditAccessMode = client.isInEditAccessMode(accessControl);
+  const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
 
   useEffect(() => {
     const getAcccessControl = async () => {
       const user = await coreServices?.userProfile.getCurrent();
-      const canManage = await client.canManageAccessControl({
+      const canManage = await accessControlClient.canManageAccessControl({
         accessControl,
         createdBy: dashboardApi.createdBy,
         uid: user?.uid,
@@ -67,7 +67,7 @@ export const useDashboardMenuItems = ({
     };
 
     getAcccessControl();
-  }, [accessControl, dashboardApi.createdBy, client]);
+  }, [accessControl, dashboardApi.createdBy, accessControlClient]);
 
   const isEditButtonDisabled = useMemo(() => {
     if (disableTopNav) return true;
@@ -158,6 +158,7 @@ export const useDashboardMenuItems = ({
         canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
         accessControl,
         createdBy: dashboardApi.createdBy,
+        accessControlClient,
         saveDashboard: saveFromShareModal,
         changeAccessMode: dashboardApi.changeAccessMode,
       });
@@ -172,6 +173,7 @@ export const useDashboardMenuItems = ({
       saveFromShareModal,
       dashboardApi.changeAccessMode,
       dashboardApi.createdBy,
+      accessControlClient,
     ]
   );
 

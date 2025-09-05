@@ -8,6 +8,7 @@
  */
 
 export { AccessControlClient } from './src';
+export { AccessModeContainer } from './src';
 export type {
   CheckGlobalPrivilegeResponse,
   ChangeAccesModeParameters,

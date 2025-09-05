@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 
 import {
   EuiFlexGroup,
@@ -22,8 +22,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { AccessModeContainer } from '../../dashboard_app/access_control/access_mode_container';
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import { AccessModeContainer } from '@kbn/content-management-access-control-public';
+import { getAccessControlClient } from '../../dashboard_app/access_control/get_access_control_client';
+
+import {
+  coreServices,
+  savedObjectsTaggingService,
+  spacesService,
+} from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
 interface DashboardSaveModalProps {
@@ -68,6 +74,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   timeRestore,
   accessControl,
 }) => {
+  const accessControlClient = useMemo(() => getAccessControlClient(), []);
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
   const [selectedAccessMode, setSelectedAccessMode] = React.useState(
@@ -147,11 +154,20 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
           <AccessModeContainer
             accessControl={accessControl}
             onChangeAccessMode={setSelectedAccessMode}
+            getActiveSpace={spacesService?.getActiveSpace}
+            getCurrentUser={coreServices.userProfile.getCurrent}
+            accessControlClient={accessControlClient}
           />
         </Fragment>
       </Fragment>
     );
-  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave, accessControl]);
+  }, [
+    persistSelectedTimeInterval,
+    selectedTags,
+    showStoreTimeOnSave,
+    accessControl,
+    accessControlClient,
+  ]);
 
   return (
     <SavedObjectSaveModal

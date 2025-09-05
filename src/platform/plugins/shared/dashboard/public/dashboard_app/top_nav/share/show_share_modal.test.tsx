@@ -12,6 +12,8 @@ import type { DashboardLocatorParams } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
+import type { AccessControlClient } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {
@@ -71,6 +73,10 @@ describe('ShowShareModal', () => {
     canSave: true,
     saveDashboard: jest.fn(),
     changeAccessMode: jest.fn(),
+    accessControlClient: {} as AccessControlClient,
+    accessControl: {} as SavedObjectAccessControl,
+    getCurrentUser: jest.fn().mockResolvedValue({} as { uid: string }),
+    getActiveSpace: jest.fn().mockResolvedValue({ name: 'default' }),
   };
 
   it('locatorParams is missing all unsaved state when none is given', () => {

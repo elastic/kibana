@@ -11,48 +11,51 @@ import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { AccessModeContainer } from './access_mode_container';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { spacesService } from '../../services/kibana_services';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { act, waitFor, screen } from '@testing-library/react';
 
-jest.mock('./get_access_control_client', () => ({
-  getAccessControlClient: jest.fn(),
-}));
-
-import { getAccessControlClient } from './get_access_control_client';
-
 describe('Access Mode Container', () => {
-  const mockClient = {
+  const mockAccessControlClient = {
     canManageAccessControl: jest.fn(),
     isInEditAccessMode: jest.fn(),
     checkGlobalPrivilege: jest.fn(),
     changeAccessMode: jest.fn(),
     checkUserAccessControl: jest.fn(),
-  };
+  } as any;
+
+  const mockGetActiveSpace = jest.fn();
+  const mockGetCurrentUser = jest.fn();
 
   beforeAll(() => {
-    (spacesService as SpacesApi).getActiveSpace = jest.fn().mockResolvedValue({
+    mockGetActiveSpace.mockResolvedValue({
       name: 'Default Space',
     });
 
-    // Mock the getAccessControlClient function to return our mock client
-    (getAccessControlClient as jest.Mock).mockReturnValue(mockClient);
+    mockGetCurrentUser.mockResolvedValue({
+      uid: 'user-id',
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
+  // Helper function to create common props
+  const getDefaultProps = (accessControl?: Partial<SavedObjectAccessControl>) => ({
+    onChangeAccessMode: jest.fn(),
+    accessControl,
+    getCurrentUser: mockGetCurrentUser,
+    accessControlClient: mockAccessControlClient,
+    getActiveSpace: mockGetActiveSpace,
+  });
+
   it('should render access mode container', async () => {
-    mockClient.canManageAccessControl.mockResolvedValue(true);
-    mockClient.isInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
 
     await act(async () => {
-      renderWithI18n(
-        <AccessModeContainer onChangeAccessMode={jest.fn()} accessControl={accessControl} />
-      );
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
     const container = screen.getByTestId('dashboardAccessModeContainer');
@@ -60,15 +63,13 @@ describe('Access Mode Container', () => {
   });
 
   it('should render access mode select when current user can manage access control', async () => {
-    mockClient.canManageAccessControl.mockResolvedValue(true);
-    mockClient.isInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
 
     await act(async () => {
-      renderWithI18n(
-        <AccessModeContainer onChangeAccessMode={jest.fn()} accessControl={accessControl} />
-      );
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
     const select = screen.getByTestId('dashboardAccessModeSelect');
@@ -77,13 +78,11 @@ describe('Access Mode Container', () => {
   });
 
   it('should not render access mode select when accessControl is undefined', async () => {
-    mockClient.canManageAccessControl.mockResolvedValue(false);
-    mockClient.isInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(false);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
 
     await act(async () => {
-      renderWithI18n(
-        <AccessModeContainer onChangeAccessMode={jest.fn()} accessControl={undefined} />
-      );
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(undefined)} />);
     });
 
     const select = screen.queryByTestId('dashboardAccessModeSelect');
@@ -94,15 +93,13 @@ describe('Access Mode Container', () => {
   });
 
   it('should not render access mode select when current user cannot manage access control', async () => {
-    mockClient.canManageAccessControl.mockResolvedValue(false);
-    mockClient.isInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(false);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id2', accessMode: 'default' };
 
     await act(async () => {
-      renderWithI18n(
-        <AccessModeContainer onChangeAccessMode={jest.fn()} accessControl={accessControl} />
-      );
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
     const select = screen.queryByTestId('dashboardAccessModeSelect');
@@ -113,13 +110,11 @@ describe('Access Mode Container', () => {
   });
 
   it('should render space name', async () => {
-    mockClient.canManageAccessControl.mockResolvedValue(false);
-    mockClient.isInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(false);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
 
     await act(async () => {
-      renderWithI18n(
-        <AccessModeContainer onChangeAccessMode={jest.fn()} accessControl={undefined} />
-      );
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(undefined)} />);
     });
 
     const spaceName = screen.getByText(/Default Space/i);
@@ -130,15 +125,13 @@ describe('Access Mode Container', () => {
   });
 
   it('should render description tooltip when current user cannot manage access control', async () => {
-    mockClient.canManageAccessControl.mockResolvedValue(false);
-    mockClient.isInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(false);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id2', accessMode: 'default' };
 
     await act(async () => {
-      renderWithI18n(
-        <AccessModeContainer onChangeAccessMode={jest.fn()} accessControl={accessControl} />
-      );
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
     const tooltip = screen.getByTestId('dashboardAccessModeContainerDescriptionTooltip');
@@ -149,15 +142,13 @@ describe('Access Mode Container', () => {
   });
 
   it('should not render description tooltip when current user can manage access control', async () => {
-    mockClient.canManageAccessControl.mockResolvedValue(true);
-    mockClient.isInEditAccessMode.mockReturnValue(true);
+    mockAccessControlClient.canManageAccessControl.mockResolvedValue(true);
+    mockAccessControlClient.isInEditAccessMode.mockReturnValue(true);
 
     const accessControl: SavedObjectAccessControl = { owner: 'user-id', accessMode: 'default' };
 
     await act(async () => {
-      renderWithI18n(
-        <AccessModeContainer onChangeAccessMode={jest.fn()} accessControl={accessControl} />
-      );
+      renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
     const tooltip = screen.queryByTestId('dashboardAccessModeContainerDescriptionTooltip');
