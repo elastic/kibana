@@ -21953,6 +21953,9 @@
                                 },
                                 "type": "array"
                               },
+                              "previous_version": {
+                                "type": "string"
+                              },
                               "type": {
                                 "type": "string"
                               },
@@ -24106,6 +24109,9 @@
                               },
                               "type": "array"
                             },
+                            "previous_version": {
+                              "type": "string"
+                            },
                             "type": {
                               "type": "string"
                             },
@@ -25053,6 +25059,9 @@
                                 "type": "string"
                               },
                               "type": "array"
+                            },
+                            "previous_version": {
+                              "type": "string"
                             },
                             "type": {
                               "type": "string"
