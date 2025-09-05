@@ -19,6 +19,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -46,6 +47,7 @@ export interface UnifiedDocViewerStartDeps {
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
+  discoverShared: DiscoverSharedPublicStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -99,7 +101,7 @@ export class UnifiedDocViewerPublicPlugin
       uiSettings,
       notifications: { toasts },
     } = core;
-    const { data, fieldFormats, fieldsMetadata, share } = deps;
+    const { data, fieldFormats, fieldsMetadata, share, discoverShared } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
@@ -115,6 +117,7 @@ export class UnifiedDocViewerPublicPlugin
       unifiedDocViewer,
       share,
       core,
+      discoverShared,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

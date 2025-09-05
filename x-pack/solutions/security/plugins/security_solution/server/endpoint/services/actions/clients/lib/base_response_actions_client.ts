@@ -58,7 +58,6 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
@@ -86,6 +85,7 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
+  ResponseActionScriptsApiResponse,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -1047,7 +1047,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   public async getCustomScripts(
     options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
-  ): Promise<CustomScriptsResponse> {
+  ): Promise<ResponseActionScriptsApiResponse> {
     throw new ResponseActionsNotSupportedError('getCustomScripts');
   }
 

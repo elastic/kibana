@@ -1,0 +1,49 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/ui-shared-deps-src'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/ui-shared-deps-src'
+  description: Moon project for @kbn/ui-shared-deps-src
+  channel: ''
+  owner: '@elastic/kibana-operations'
+  metadata:
+    sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.js'
+    - '!src/entry.js'
+    - '!**/*.config.js'
+    - '!target/**/*'
+dependsOn:
+  - '@kbn/ui-shared-deps-npm'
+tasks:
+  build-webpack:
+    command: yarn
+    args:
+      - build
+    deps:
+      - '^:build-webpack'
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
+  watch-webpack:
+    type: run
+    options:
+      persistent: true
+    command: yarn
+    args:
+      - build
+      - --watch
+    deps:
+      - '^:build-webpack'
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src

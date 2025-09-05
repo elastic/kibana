@@ -44,9 +44,7 @@ export const createChatModel = async ({
     esClient,
     logger,
   });
-  const actionsClient = await actions.getActionsClientWithRequest(request);
-  const connector = await getConnectorById({ connectorId, actionsClient });
-
+  const connector = await getConnectorById({ connectorId, actions, request });
   return new InferenceChatModel({
     ...chatModelOptions,
     chatComplete: client.chatComplete,

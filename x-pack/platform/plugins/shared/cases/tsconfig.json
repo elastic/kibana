@@ -98,7 +98,10 @@
     "@kbn/zod",
     "@kbn/inference-common",
     "@kbn/licensing-types",
-    "@kbn/object-utils"
+    "@kbn/object-utils",
+    "@kbn/inference-plugin",
+    "@kbn/licensing-types",
+    "@kbn/cases-ai"
   ],
   "exclude": ["target/**/*"]
 }

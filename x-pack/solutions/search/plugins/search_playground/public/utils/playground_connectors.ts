@@ -144,3 +144,11 @@ export async function parsePlaygroundConnectors(
   }
   return playgroundConnectors;
 }
+
+export function isElasticConnector(connector: PlaygroundConnector): boolean {
+  return (
+    isInferenceActionConnector(connector) &&
+    connector.isPreconfigured &&
+    connector.config.provider === 'elastic'
+  );
+}

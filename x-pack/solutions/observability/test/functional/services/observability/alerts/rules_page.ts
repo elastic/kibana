@@ -13,6 +13,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
+  const retry = getService('retry');
 
   const getManageRulesPageHref = async () => {
     const manageRulesPageButton = await testSubjects.find('manageRulesPageButton');
@@ -21,9 +22,13 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
 
   const clickCreateRuleButton = async () => {
     await testSubjects.existOrFail('createRuleButton');
+    await retry.waitFor(
+      'Create Rule button is enabled',
+      async () => await testSubjects.isEnabled('createRuleButton')
+    );
     const createRuleButton = await testSubjects.find('createRuleButton');
     log.debug(`clicking on ${await createRuleButton.getAttribute('innerText')}`);
-    return await createRuleButton.click();
+    return createRuleButton.click();
   };
 
   const clickRuleStatusDropDownMenu = async () => testSubjects.click('statusDropdown');

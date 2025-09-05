@@ -16,7 +16,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -26,13 +25,7 @@ export interface WorkflowsPluginSetup {
   management: WorkflowsManagementApi;
 }
 
-export interface WorkflowsPluginStart {
-  runWorkflow(
-    workflow: WorkflowExecutionEngineModel,
-    spaceId: string,
-    params: Record<string, any>
-  ): Promise<string>;
-}
+export type WorkflowsPluginStart = Record<string, never>;
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
   taskManager: TaskManagerStartContract;

@@ -39,7 +39,8 @@
       "home",
       "taskManager",
       "usageCollection",
-      "serverless"
+      "serverless",
+      "inference"
     ],
     "requiredBundles": [
       "esUiShared",

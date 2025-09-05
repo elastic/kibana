@@ -17,8 +17,8 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
+import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
 import type { EnrichedDeprecationInfo, ReindexAction } from '../../../../../../common/types';
-import { ReindexStatus } from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useIndexContext } from './context';

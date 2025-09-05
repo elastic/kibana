@@ -64,7 +64,6 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'searchSynonyms',
                 'searchQueryRules',
                 'searchInferenceEndpoints',
-                'guidedOnboardingFeature',
                 'securitySolutionAssistant',
                 'securitySolutionAttackDiscovery',
                 'securitySolutionSiemMigrations',
