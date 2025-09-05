@@ -20,6 +20,7 @@ import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
 import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 import type { EmbeddableTransforms } from '../common';
+import { EnhancementsRegistry } from '../common/enhancements/registry';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -84,4 +85,6 @@ export interface EmbeddableStart {
   getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
   hasTransforms: (type: string) => boolean;
   getEnhancement: (enhancementId: string) => PersistableState;
+  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
+  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
 }

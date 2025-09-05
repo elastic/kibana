@@ -8,8 +8,6 @@
  */
 
 import { EnhancementsRegistry } from './registry';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { Reference } from '@kbn/content-management-utils';
 
 describe('enhancements registry', () => {
   const registry = new EnhancementsRegistry();
@@ -17,22 +15,19 @@ describe('enhancements registry', () => {
   beforeAll(() => {
     registry.registerEnhancement({
       id: 'testEnhancement',
-      extract: (state: SerializableRecord) => ({
+      extract: jest.fn().mockReturnValue({
         state: {
           linkedRefName: 'ref1',
         },
         references: [
           {
             type: 'testRefType',
-            id: (state as { linkedId: string }).linkedId,
+            id: '1234',
             name: 'ref1',
           },
         ],
       }),
-      inject: (state: SerializableRecord, references: Reference[]) => {
-        const ref = references.find(({ name }) => name === state.linkedRefName);
-        return ref ? { linkedId: ref.id } : state;
-      },
+      inject: jest.fn().mockReturnValue({ linkedId: '1234' }),
     });
   });
 
