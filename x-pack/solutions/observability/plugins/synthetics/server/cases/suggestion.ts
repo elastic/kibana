@@ -13,7 +13,6 @@ import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/sugge
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { SYNTHETICS_SUGGESTION_COMPONENT_ID } from '../../common/constants/cases';
 import type {
   EncryptedSyntheticsMonitorAttributes,
@@ -194,19 +193,13 @@ export function getMonitors(
           });
 
           const suggestions = monitorsOverviewMetaData.flatMap((monitor) => {
-            const monitorSpaceId =
-              monitor.spaces?.includes(ALL_SPACES_ID) ||
-              !monitor.spaces ||
-              monitor.spaces.length === 0
-                ? {}
-                : { spaceId: monitor.spaces[0] };
-
             const url = locator?.getRedirectUrl(
               {
                 configId: monitor.configId,
                 locationId: monitor.locationId,
+                tabId: 'history',
               },
-              monitorSpaceId
+              { spaceId }
             );
 
             if (!url) {
