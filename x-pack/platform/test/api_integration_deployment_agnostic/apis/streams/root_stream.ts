@@ -188,7 +188,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '@timestamp': '2024-01-01T00:00:20.000Z',
         message: 'test',
       };
-      const response = await indexDocument(esClient, 'logs.gcpcloud', doc);
+      const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
       // @ts-expect-error failure_store is not in the types, but in the actual response
       expect(response.failure_store).to.be('used');
     });
