@@ -12,6 +12,7 @@ import type {
   CoreSetup,
   CoreStart,
   CustomHttpResponseOptions,
+  IClusterClient,
   ICustomClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
@@ -77,7 +78,7 @@ export class MonitoringPlugin
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  private cluster = {} as IClusterClient | ICustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -167,7 +168,7 @@ export class MonitoringPlugin
     };
   }
 
-  init(cluster: ICustomClusterClient, coreStart: CoreStart) {
+  init(cluster: IClusterClient, coreStart: CoreStart) {
     const config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
     const coreSetup = this.coreSetup!;
     const plugins = this.setupPlugins!;
@@ -211,11 +212,7 @@ export class MonitoringPlugin
 
   start(coreStart: CoreStart, { licensing }: PluginsStart) {
     const config = this.config!;
-    this.cluster = instantiateClient(
-      config.ui.elasticsearch,
-      this.log,
-      coreStart.elasticsearch.createClient
-    );
+    this.cluster = instantiateClient(config.ui.elasticsearch, this.log, coreStart.elasticsearch);
 
     this.init(this.cluster, coreStart);
 
@@ -259,7 +256,7 @@ export class MonitoringPlugin
   }
 
   stop() {
-    if (this.cluster && this.cluster.close) {
+    if (this.cluster && 'close' in this.cluster) {
       this.cluster.close().catch(() => {});
     }
     if (this.licenseService && this.licenseService.stop) {
@@ -318,7 +315,7 @@ export class MonitoringPlugin
   getLegacyShim(
     config: MonitoringConfig,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
-    cluster: ICustomClusterClient,
+    cluster: IClusterClient,
     setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;

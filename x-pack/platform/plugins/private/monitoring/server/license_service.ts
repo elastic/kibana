@@ -6,7 +6,6 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { ICustomClusterClient } from '@kbn/core/server';
 import type { ILicense, LicenseFeature } from '@kbn/licensing-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { Logger } from '@kbn/core/server';
@@ -15,7 +14,7 @@ import type { MonitoringLicenseService } from './types';
 
 interface SetupDeps {
   licensing: LicensingPluginStart;
-  monitoringClient: ICustomClusterClient;
+  monitoringClient: IClusterClient;
   config: MonitoringConfig;
   log: Logger;
 }
