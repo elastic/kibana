@@ -45,7 +45,10 @@ export const JsonEditor = () => {
         }
         const invalidProcessor = value.find((processor) => {
           const processorType = Object.keys(processor)[0];
-          return !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType);
+          return (
+            processorType &&
+            !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType)
+          );
         });
         if (invalidProcessor) {
           return i18n.translate(
@@ -61,6 +64,18 @@ export const JsonEditor = () => {
       },
     },
   });
+
+  /**
+   * To have the editor properly handle the set xjson language
+   * we need to avoid the continuos parsing/serialization of the editor value
+   * using a parallel state always setting a string make the editor format well the content.
+   */
+  const [value, setValue] = React.useState(() => serializeXJson(field.value));
+
+  const handleChange = (newValue: string) => {
+    setValue(newValue);
+    field.onChange(deserializeJson(newValue));
+  };
 
   return (
     <EuiFormRow
@@ -100,8 +115,8 @@ export const JsonEditor = () => {
     >
       <div ref={containerRef} style={{ width: '100%', height: 200, overflow: 'hidden' }}>
         <CodeEditor
-          value={serializeXJson(field.value, '[]')}
-          onChange={(value) => field.onChange(deserializeJson(value))}
+          value={value}
+          onChange={handleChange}
           languageId="xjson"
           height={200}
           aria-label={i18n.translate(
@@ -110,6 +125,9 @@ export const JsonEditor = () => {
           )}
           editorDidMount={setupResizeChecker}
           editorWillUnmount={destroyResizeChecker}
+          options={{
+            wordWrap: 'on',
+          }}
         />
       </div>
     </EuiFormRow>
