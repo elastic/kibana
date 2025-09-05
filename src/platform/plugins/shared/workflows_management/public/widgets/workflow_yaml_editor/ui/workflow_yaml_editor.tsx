@@ -136,6 +136,7 @@ export const WorkflowYAMLEditor = ({
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const alertTriggerDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const stepActionsProviderRef = useRef<StepActionsProvider | null>(null);
 
   const {
     error: errorValidating,
@@ -193,6 +194,33 @@ export const WorkflowYAMLEditor = ({
       changeSideEffects();
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
+
+  // Initialize actions provider after YAML document is ready
+  useEffect(() => {
+    if (
+      isEditorMounted &&
+      editorRef.current &&
+      yamlDocument &&
+      http &&
+      notifications &&
+      !elasticsearchStepActionsProviderRef.current
+    ) {
+      console.log('WorkflowYAMLEditor: Late initializing actions provider with YAML document');
+
+      elasticsearchStepActionsProviderRef.current = new ElasticsearchStepActionsProvider(
+        editorRef.current,
+        setEditorActionsCss,
+        {
+          http,
+          notifications: notifications as any,
+          esHost,
+          kibanaHost: kibanaHost || window.location.origin,
+          getYamlDocument: () => yamlDocumentRef.current,
+        }
+      );
+      console.log('WorkflowYAMLEditor: Late actions provider created');
+    }
+  }, [isEditorMounted, yamlDocument]); // Removed changing dependencies
 
   useEffect(() => {
     const model = editorRef.current?.getModel() ?? null;
