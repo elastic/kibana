@@ -90,16 +90,17 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     [isDefaultSourcerer, scope, selectDataView, updateUrlParam]
   );
 
-  const handleCreateNewDataView = useMemo(() => {
-    return (newDataView: DataView) => {
+  const handleCreateNewDataView = useCallback(
+    (newDataView: DataView) => {
       if (!newDataView.id) {
         return;
       }
 
       dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
       handleChangeDataView(newDataView.id, newDataView.getIndexPattern());
-    };
-  }, [dispatch, handleChangeDataView]);
+    },
+    [dispatch, handleChangeDataView]
+  );
 
   const editField = useCallback(
     async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
