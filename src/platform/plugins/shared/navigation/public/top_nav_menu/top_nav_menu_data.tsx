@@ -30,6 +30,9 @@ export interface TopNavMenuData {
   iconType?: string;
   iconSide?: EuiButtonProps['iconSide'];
   iconOnly?: boolean;
+  // Optional explicit icon display for iconOnly buttons
+  // If not provided, icon-only buttons fall back to emphasize + fill mapping
+  iconDisplay?: 'base' | 'fill' | 'empty';
   target?: string;
   href?: string;
   intl?: InjectedIntl;

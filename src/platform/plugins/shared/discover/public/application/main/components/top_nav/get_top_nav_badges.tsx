@@ -46,14 +46,14 @@ export const getTopNavBadges = ({
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
 
-  if (services.spaces) {
-    entries.push({
-      badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
-        defaultMessage: 'Check out context-aware Discover',
-      }),
-      renderCustomBadge: ({ badgeText }) => <SolutionsViewBadge badgeText={badgeText} />,
-    });
-  }
+  // if (services.spaces) {
+  //   entries.push({
+  //     badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
+  //       defaultMessage: 'Check out context-aware Discover',
+  //     }),
+  //     renderCustomBadge: ({ badgeText }) => <SolutionsViewBadge badgeText={badgeText} />,
+  //   });
+  // }
 
   if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
     entries.push(
