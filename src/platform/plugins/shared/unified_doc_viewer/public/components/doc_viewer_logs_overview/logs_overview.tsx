@@ -9,7 +9,7 @@
 
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { getLogDocumentOverview } from '@kbn/discover-utils';
+import { TRACE_ID_FIELD, getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ObservabilityLogsAIAssistantFeature,
@@ -126,9 +126,9 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
                 dataView={dataView}
               />
             )}
-            {parsedDoc['trace.id'] ? (
+            {parsedDoc[TRACE_ID_FIELD] ? (
               <TraceWaterfall
-                traceId={parsedDoc['trace.id']}
+                traceId={parsedDoc[TRACE_ID_FIELD]}
                 docId={parsedDoc['transaction.id'] || parsedDoc['span.id']}
                 serviceName={parsedDoc['service.name']}
                 dataView={dataView}
