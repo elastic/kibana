@@ -92,12 +92,14 @@ export default ({ getService }: FtrProviderContext): void => {
     ): Promise<BulkEditActionResponse> => {
       const {
         body: { data: prebuiltRules },
-      } = await securitySolutionApi.findRules({
-        query: {
-          filter: 'alert.attributes.params.immutable: true',
-          per_page: PREBUILT_RULE_ASSETS.length,
-        },
-      });
+      } = await securitySolutionApi
+        .findRules({
+          query: {
+            filter: 'alert.attributes.params.immutable: true',
+            per_page: PREBUILT_RULE_ASSETS.length,
+          },
+        })
+        .expect(200);
 
       const { body: bulkEditResponse } = await securitySolutionApi
         .performRulesBulkAction({
@@ -122,256 +124,225 @@ export default ({ getService }: FtrProviderContext): void => {
       return bulkEditResponse;
     };
 
-    it(`applies "${BulkActionEditTypeEnum.add_tags}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
+    const testCustomizationViaBulkEditing = ({ hasBaseVersion }: { hasBaseVersion: boolean }) => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
+        await installPrebuiltRules(es, supertest);
 
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.add_tags,
-        value: ['new-tag'],
+        if (!hasBaseVersion) {
+          // Remove the prebuilt rule asset so that the base version is no longer available
+          await deleteAllPrebuiltRuleAssets(es, log);
+        }
       });
 
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            tags: ['existing-tag-1', 'existing-tag-2', 'new-tag'],
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            tags: ['existing-tag-1', 'existing-tag-2', 'new-tag'],
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            tags: ['existing-tag-1', 'existing-tag-2', 'new-tag'],
-          }),
-        ])
-      );
+      it(`applies "${BulkActionEditTypeEnum.add_tags}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.add_tags,
+          value: ['new-tag'],
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              tags: ['existing-tag-1', 'existing-tag-2', 'new-tag'],
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              tags: ['existing-tag-1', 'existing-tag-2', 'new-tag'],
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              tags: ['existing-tag-1', 'existing-tag-2', 'new-tag'],
+            }),
+          ])
+        );
+      });
+
+      it(`applies "${BulkActionEditTypeEnum.set_tags}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.set_tags,
+          value: ['new-tag'],
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              tags: ['new-tag'],
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              tags: ['new-tag'],
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              tags: ['new-tag'],
+            }),
+          ])
+        );
+      });
+
+      it(`applies "${BulkActionEditTypeEnum.delete_tags}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.delete_tags,
+          value: ['existing-tag-1'],
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              tags: ['existing-tag-2'],
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              tags: ['existing-tag-2'],
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              tags: ['existing-tag-2'],
+            }),
+          ])
+        );
+      });
+
+      it(`applies "${BulkActionEditTypeEnum.delete_index_patterns}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.delete_index_patterns,
+          value: ['existing-index-pattern-1'],
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              index: ['existing-index-pattern-2'],
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              index: ['existing-index-pattern-2'],
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              index: ['existing-index-pattern-2'],
+            }),
+          ])
+        );
+      });
+
+      it(`applies "${BulkActionEditTypeEnum.add_index_patterns}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.add_index_patterns,
+          value: ['test-*'],
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
+            }),
+          ])
+        );
+      });
+
+      it(`applies "${BulkActionEditTypeEnum.set_index_patterns}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.set_index_patterns,
+          value: ['test-*'],
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              index: ['test-*'],
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              index: ['test-*'],
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              index: ['test-*'],
+            }),
+          ])
+        );
+      });
+
+      it(`applies "${BulkActionEditTypeEnum.set_timeline}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.set_timeline,
+          value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              timeline_id: 'mock-id',
+              timeline_title: 'mock-title',
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              timeline_id: 'mock-id',
+              timeline_title: 'mock-title',
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              timeline_id: 'mock-id',
+              timeline_title: 'mock-title',
+            }),
+          ])
+        );
+      });
+
+      it(`applies "${BulkActionEditTypeEnum.set_schedule}" bulk edit action to prebuilt rules`, async () => {
+        const bulkResponse = await performBulkEditOnPrebuiltRules({
+          type: BulkActionEditTypeEnum.set_schedule,
+          value: { interval: '1m', lookback: '1m' },
+        });
+
+        expect(bulkResponse.attributes.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: QUERY_PREBUILT_RULE_ID,
+              interval: '1m',
+              from: 'now-120s',
+              to: 'now',
+            }),
+            expect.objectContaining({
+              rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
+              interval: '1m',
+              from: 'now-120s',
+              to: 'now',
+            }),
+            expect.objectContaining({
+              rule_id: EQL_PREBUILT_RULE_ID,
+              interval: '1m',
+              from: 'now-120s',
+              to: 'now',
+            }),
+          ])
+        );
+      });
+    };
+
+    describe('when base version is available', () => {
+      testCustomizationViaBulkEditing({ hasBaseVersion: false });
     });
 
-    it(`applies "${BulkActionEditTypeEnum.set_tags}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.set_tags,
-        value: ['new-tag'],
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            tags: ['new-tag'],
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            tags: ['new-tag'],
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            tags: ['new-tag'],
-          }),
-        ])
-      );
-    });
-
-    it(`applies "${BulkActionEditTypeEnum.delete_tags}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.delete_tags,
-        value: ['existing-tag-1'],
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            tags: ['existing-tag-2'],
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            tags: ['existing-tag-2'],
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            tags: ['existing-tag-2'],
-          }),
-        ])
-      );
-    });
-
-    it(`applies "${BulkActionEditTypeEnum.delete_index_patterns}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.delete_index_patterns,
-        value: ['existing-index-pattern-1'],
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-2'],
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-2'],
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-2'],
-          }),
-        ])
-      );
-    });
-
-    it(`applies "${BulkActionEditTypeEnum.add_index_patterns}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.add_index_patterns,
-        value: ['test-*'],
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-          }),
-        ])
-      );
-    });
-
-    it(`applies "${BulkActionEditTypeEnum.add_index_patterns}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.add_index_patterns,
-        value: ['test-*'],
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            index: ['existing-index-pattern-1', 'existing-index-pattern-2', 'test-*'],
-          }),
-        ])
-      );
-    });
-
-    it(`applies "${BulkActionEditTypeEnum.set_index_patterns}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.set_index_patterns,
-        value: ['test-*'],
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            index: ['test-*'],
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            index: ['test-*'],
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            index: ['test-*'],
-          }),
-        ])
-      );
-    });
-
-    it(`applies "${BulkActionEditTypeEnum.set_timeline}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.set_timeline,
-        value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            timeline_id: 'mock-id',
-            timeline_title: 'mock-title',
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            timeline_id: 'mock-id',
-            timeline_title: 'mock-title',
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            timeline_id: 'mock-id',
-            timeline_title: 'mock-title',
-          }),
-        ])
-      );
-    });
-
-    it(`applies "${BulkActionEditTypeEnum.set_schedule}" bulk edit action to prebuilt rules`, async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, PREBUILT_RULE_ASSETS);
-      await installPrebuiltRules(es, supertest);
-
-      const bulkResponse = await performBulkEditOnPrebuiltRules({
-        type: BulkActionEditTypeEnum.set_schedule,
-        value: { interval: '1m', lookback: '1m' },
-      });
-
-      expect(bulkResponse.attributes.results.updated).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            rule_id: QUERY_PREBUILT_RULE_ID,
-            interval: '1m',
-            from: 'now-120s',
-            to: 'now',
-          }),
-          expect.objectContaining({
-            rule_id: SAVED_QUERY_PREBUILT_RULE_ID,
-            interval: '1m',
-            from: 'now-120s',
-            to: 'now',
-          }),
-          expect.objectContaining({
-            rule_id: EQL_PREBUILT_RULE_ID,
-            interval: '1m',
-            from: 'now-120s',
-            to: 'now',
-          }),
-        ])
-      );
+    describe('when base version is missing', () => {
+      testCustomizationViaBulkEditing({ hasBaseVersion: false });
     });
   });
 };
