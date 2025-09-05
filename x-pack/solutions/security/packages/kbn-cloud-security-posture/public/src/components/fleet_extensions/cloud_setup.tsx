@@ -90,7 +90,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       config,
       defaultProviderType,
       getCloudSetupProviderByInputType,
-      cloudConnectorEnabledVersion,
+      showSelectedProviderCloudConnectors,
     } = useCloudSetup();
     const {
       input,
@@ -101,7 +101,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       shouldRenderAgentlessSelector,
       isServerless,
       hasInvalidRequiredVars,
-      showCloudConnectors,
     } = useLoadCloudSetup({
       newPolicy,
       updatePolicy,
@@ -112,12 +111,10 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       isAgentlessEnabled,
       defaultSetupTechnology,
       cloud,
-      uiSettings,
       templateName,
       defaultProviderType,
       config,
       getCloudSetupProviderByInputType,
-      cloudConnectorEnabledVersion,
     });
 
     const namespaceSupportEnabled = config.namespaceSupportEnabled;
@@ -241,7 +238,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                       value === SetupTechnology.AGENTLESS,
                       selectedProvider,
                       packageInfo,
-                      showCloudConnectors,
+                      showSelectedProviderCloudConnectors,
                       templateName
                     )
                   ),
@@ -260,8 +257,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             isEditPage={isEditPage}
             setupTechnology={setupTechnology}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
-            showCloudConnectors={showCloudConnectors}
-            cloud={cloud}
           />
         )}
         {selectedProvider === AWS_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
@@ -341,7 +336,13 @@ export const CloudSetup = memo<CloudSetupProps>(
     uiSettings,
   }: CloudSetupProps) => {
     return (
-      <CloudSetupProvider config={configuration}>
+      <CloudSetupProvider
+        config={configuration}
+        cloud={cloud}
+        uiSettings={uiSettings}
+        packagePolicy={newPolicy}
+        packageInfo={packageInfo}
+      >
         <CloudIntegrationSetup
           cloud={cloud}
           defaultSetupTechnology={defaultSetupTechnology}

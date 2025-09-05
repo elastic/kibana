@@ -54,12 +54,12 @@ export const CloudAssetInventoryPolicyTemplateForm =
         ),
         overviewPath: `https://ela.st/cloud-asset-discovery-overview`,
         getStartedPath: `https://ela.st/cloud-asset-discovery-get-started`,
-        cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS,
         showCloudTemplates: true,
         providers: {
           aws: {
             type: CLOUDBEAT_AWS,
             enableOrganization: true,
+            cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS,
             getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-aws.html`,
             inputFieldMapping: {
               access_key_id: 'aws.access_key_id',

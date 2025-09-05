@@ -4,16 +4,120 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
+import semverGte from 'semver/functions/gte';
+import type { CloudSetup } from '@kbn/cloud-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   GCP_PROVIDER_TEST_SUBJ,
   AZURE_PROVIDER_TEST_SUBJ,
+  AWS_SINGLE_ACCOUNT,
+  GCP_SINGLE_ACCOUNT,
+  AZURE_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { CloudProviderConfig, CloudProviders } from '../types';
-import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
+import {
+  AWS_PROVIDER,
+  GCP_PROVIDER,
+  AZURE_PROVIDER,
+  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+  ProviderAccountTypeInputNames,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+} from '../constants';
 import { CloudSetupContext } from '../cloud_setup_context';
+import { getSelectedInput, getTemplateUrlFromPackageInfo } from '../utils';
+
+interface GetCloudConnectorRemoteRoleTemplateParams {
+  input: NewPackagePolicyInput;
+  cloud: Pick<
+    CloudSetup,
+    | 'isCloudEnabled'
+    | 'cloudId'
+    | 'cloudHost'
+    | 'deploymentUrl'
+    | 'serverless'
+    | 'isServerlessEnabled'
+  >;
+  packageInfo: PackageInfo;
+  templateName: string;
+  provider: CloudProviders;
+}
+
+const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
+  if (!cloudHost) return undefined;
+  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
+  return match;
+};
+
+const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  const match = url.match(/\/deployments\/([^/?#]+)/);
+  return match?.[1];
+};
+
+const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+  if (!cloudId) return undefined;
+
+  const base64Part = cloudId.split(':')[1];
+  const decoded = atob(base64Part);
+  const [, , kibanaComponentId] = decoded.split('$');
+
+  return kibanaComponentId || undefined;
+};
+
+const getCloudConnectorRemoteRoleTemplate = ({
+  input,
+  cloud,
+  packageInfo,
+  templateName,
+  provider,
+}: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
+  let elasticResourceId: string | undefined;
+
+  // TODO change the ProviderAccountTypeInputNames to use the CloudProviders type
+  const typedProvider = provider as CloudProviders;
+
+  const defaultAccountType =
+    provider === AWS_PROVIDER
+      ? AWS_SINGLE_ACCOUNT
+      : provider === GCP_PROVIDER
+      ? GCP_SINGLE_ACCOUNT
+      : AZURE_SINGLE_ACCOUNT;
+
+  const accountType =
+    input?.streams?.[0]?.vars?.[ProviderAccountTypeInputNames[typedProvider]]?.value ??
+    defaultAccountType;
+
+  const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+
+  if (!hostProvider || hostProvider !== provider) return undefined;
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    elasticResourceId = cloud.serverless.projectId;
+  }
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    elasticResourceId = kibanaComponentId;
+  }
+
+  if (!elasticResourceId) return undefined;
+
+  return getTemplateUrlFromPackageInfo(
+    packageInfo,
+    templateName,
+    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+  )
+    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
+};
 
 interface ICloudSetupProviderOptions {
   type: CloudProviders;
@@ -29,6 +133,10 @@ export function useCloudSetup() {
   }
 
   const config = context.config;
+  const cloud = context.cloud;
+  const uiSettings = context.uiSettings;
+  const newPolicy = context.packagePolicy;
+  const packageInfo = context.packageInfo;
 
   const getCloudSetupProviders = React.useCallback(
     (): CloudProviders[] => Object.keys(config.providers) as CloudProviders[],
@@ -82,6 +190,27 @@ export function useCloudSetup() {
     ],
     []
   );
+  const cloudConnectorsFeatureEnabled =
+    uiSettings.get<boolean>(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+
+  const selectedInput = getSelectedInput(newPolicy.inputs, config.defaultProvider);
+  const selectedProvider = getCloudSetupProviderByInputType(selectedInput.type);
+  const selectedProviderCloudConnectorEnabledVersion =
+    config.providers[selectedProvider].cloudConnectorEnabledVersion;
+
+  const selectedProviderCloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
+    input: selectedInput,
+    cloud,
+    packageInfo,
+    templateName: config.policyTemplate,
+    provider: selectedProvider,
+  });
+
+  const showSelectedProviderCloudConnectors =
+    cloudConnectorsFeatureEnabled &&
+    !!selectedProviderCloudConnectorEnabledVersion &&
+    !!selectedProviderCloudConnectorRemoteRoleTemplate &&
+    semverGte(packageInfo.version, selectedProviderCloudConnectorEnabledVersion);
 
   const getCloudSetupTemplateInputOptions = React.useCallback(
     () =>
@@ -119,11 +248,12 @@ export function useCloudSetup() {
     [config.providers]
   );
 
-  return React.useMemo(
+  return useMemo(
     () => ({
       getCloudSetupProviderByInputType,
       config,
-      cloudConnectorEnabledVersion: config.cloudConnectorEnabledVersion,
+      selectedProviderCloudConnectorRemoteRoleTemplate,
+      showSelectedProviderCloudConnectors,
       showCloudTemplates: config.showCloudTemplates,
       defaultProvider: config.defaultProvider,
       defaultProviderType: config.providers[config.defaultProvider].type,
@@ -145,10 +275,12 @@ export function useCloudSetup() {
       templateName: config.policyTemplate,
     }),
     [
-      config,
       getCloudSetupProviderByInputType,
-      getCloudSetupTemplateInputOptions,
+      config,
+      selectedProviderCloudConnectorRemoteRoleTemplate,
+      showSelectedProviderCloudConnectors,
       getProviderDetails,
+      getCloudSetupTemplateInputOptions,
     ]
   );
 }

@@ -16,11 +16,7 @@ import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { AWS_SINGLE_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import {
-  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
-  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   AWS_CREDENTIALS_TYPE,
   AZURE_CREDENTIALS_TYPE,
   GCP_CREDENTIALS_TYPE,
@@ -39,8 +35,19 @@ import type {
   GcpFields,
   GcpInputFields,
   GetAwsCredentialTypeConfigParams,
-  GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
+
+export const getSelectedInput = (options: NewPackagePolicyInput[], defaultProviderType: string) => {
+  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
+  // Initial state when all inputs are disabled is to choose the default provider type
+  const selectedInput =
+    options.find((i) => i.enabled) || options.find((i) => i.type === defaultProviderType);
+
+  if (!selectedInput) {
+    throw new Error('Failed to determine selected input');
+  }
+  return selectedInput;
+};
 
 const buildPolicyInput = (
   input: NewPackagePolicyInput,
@@ -457,28 +464,6 @@ export const hasErrors = (validationResults: PackagePolicyValidationResults | un
   return errors.length;
 };
 
-const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
-  if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
-  return match;
-};
-
-const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
-  if (!url) return undefined;
-  const match = url.match(/\/deployments\/([^/?#]+)/);
-  return match?.[1];
-};
-
-const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
-  if (!cloudId) return undefined;
-
-  const base64Part = cloudId.split(':')[1];
-  const decoded = atob(base64Part);
-  const [, , kibanaComponentId] = decoded.split('$');
-
-  return kibanaComponentId || undefined;
-};
-
 export const getTemplateUrlFromPackageInfo = (
   packageInfo: PackageInfo | undefined,
   integrationType: string,
@@ -497,42 +482,6 @@ export const getTemplateUrlFromPackageInfo = (
     }, '');
     return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;
   }
-};
-
-export const getCloudConnectorRemoteRoleTemplate = ({
-  input,
-  cloud,
-  packageInfo,
-  templateName,
-}: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  let elasticResourceId: string | undefined;
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
-
-  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  if (!provider || provider !== AWS_PROVIDER) return undefined;
-
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
-
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    elasticResourceId = cloud.serverless.projectId;
-  }
-
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    elasticResourceId = kibanaComponentId;
-  }
-
-  if (!elasticResourceId) return undefined;
-
-  return getTemplateUrlFromPackageInfo(
-    packageInfo,
-    templateName,
-    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
-  )
-    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 export const getCloudCredentialVarsConfig = ({

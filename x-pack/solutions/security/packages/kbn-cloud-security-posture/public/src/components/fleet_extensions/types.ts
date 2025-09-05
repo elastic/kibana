@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/public/types';
-import type {
-  NewPackagePolicy,
-  NewPackagePolicyInput,
-  PackageInfo,
-} from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type {
   AWS_ORGANIZATION_ACCOUNT,
@@ -18,6 +13,7 @@ import type {
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+
 import type {
   AWS_SETUP_FORMAT,
   AZURE_SETUP_FORMAT,
@@ -33,6 +29,7 @@ export interface CloudProviderConfig {
   enableOrganization?: boolean;
   getStartedPath: string;
   enabled?: boolean;
+  cloudConnectorEnabledVersion?: string;
 }
 
 export type AwsInputs =
@@ -65,7 +62,6 @@ export interface CloudSetupConfig {
   namespaceSupportEnabled?: boolean;
   overviewPath: string;
   getStartedPath: string;
-  cloudConnectorEnabledVersion: string;
   showCloudTemplates: boolean;
   providers: {
     aws: AwsCloudProviderConfig;
@@ -83,21 +79,6 @@ export type UpdatePolicy = ({
   isValid?: boolean;
   isExtensionLoaded?: boolean;
 }) => void;
-
-export interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyInput;
-  cloud: Pick<
-    CloudSetup,
-    | 'isCloudEnabled'
-    | 'cloudId'
-    | 'cloudHost'
-    | 'deploymentUrl'
-    | 'serverless'
-    | 'isServerlessEnabled'
-  >;
-  packageInfo: PackageInfo;
-  templateName: string;
-}
 
 export interface GetAwsCredentialTypeConfigParams {
   setupTechnology: SetupTechnology | undefined;
