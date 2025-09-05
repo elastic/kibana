@@ -58,7 +58,7 @@ export type SimulationEvent =
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
+  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
