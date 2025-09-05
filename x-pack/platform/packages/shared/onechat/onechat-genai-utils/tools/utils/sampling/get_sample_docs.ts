@@ -22,7 +22,7 @@ export interface SampleDoc {
  */
 export const getSampleDocs = async ({
   index,
-  size = 1000,
+  size = 100,
   esClient,
 }: {
   index: string | string[];
