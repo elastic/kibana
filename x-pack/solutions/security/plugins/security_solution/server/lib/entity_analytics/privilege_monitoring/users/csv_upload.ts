@@ -265,7 +265,7 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
         query: {
           bool: {
             must: [{ term: { 'user.is_privileged': true } }],
-            must_not: [{ terms: { 'user.name': csvUsernames } }],
+            must_not: [{ terms: { 'user.name.keyword': csvUsernames } }],
           },
         },
         size: 10000, // Reasonable limit
