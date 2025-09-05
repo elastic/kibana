@@ -19,6 +19,7 @@ import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';
 import { modelVersion1, modelVersion2, modelVersion3 } from './model_versions';
 import { handleImport } from '../import_export/import';
+import { modelVersion4 } from './model_versions/model_version_4';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
@@ -241,6 +242,11 @@ export const createCaseSavedObjectType = (
       },
       incremental_id: {
         type: 'unsigned_long',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
       },
     },
   },
@@ -249,6 +255,7 @@ export const createCaseSavedObjectType = (
     1: modelVersion1,
     2: modelVersion2,
     3: modelVersion3,
+    4: modelVersion4,
   },
   management: {
     importableAndExportable: true,
