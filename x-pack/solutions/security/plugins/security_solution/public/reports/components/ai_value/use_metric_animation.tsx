@@ -27,59 +27,12 @@ export const useMetricAnimation = ({
   const observerRef = useRef<MutationObserver | null>(null);
 
   useEffect(() => {
-    if (hasAnimatedRef.current) {
-      return;
-    }
+    // Reset the animation flag for each render
+    hasAnimatedRef.current = false;
 
     let elementFound = false;
     let animationStarted = false;
-
-    // First, check if the element already exists
-    const checkExistingElement = () => {
-      const existingElement = document.querySelector(selector) as HTMLElement;
-      if (existingElement && !elementFound && !animationStarted) {
-        elementFound = true;
-        startAnimation(existingElement);
-        return true;
-      }
-      return false;
-    };
-
-    // Check immediately
-    if (checkExistingElement()) {
-      return;
-    }
-
-    // Set up a mutation observer to catch new elements as they're added
-    const observer = new MutationObserver((mutations) => {
-      if (animationStarted) return;
-
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            const element = node as Element;
-            const targetElement = element.querySelector(selector) as HTMLElement;
-            if (targetElement && !elementFound) {
-              elementFound = true;
-              startAnimation(targetElement);
-            }
-            // Also check if the node itself is the target
-            if (element.matches && element.matches(selector) && !elementFound) {
-              elementFound = true;
-              startAnimation(element as HTMLElement);
-            }
-          }
-        });
-      });
-    });
-
-    // Start observing
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    observerRef.current = observer;
+    let observer: MutationObserver | null = null;
 
     const startAnimation = (element: HTMLElement) => {
       if (animationStarted) return;
@@ -92,7 +45,9 @@ export const useMetricAnimation = ({
       const numericValue = parseFloat(originalText.replace(/[^0-9.-]/g, ''));
 
       if (isNaN(numericValue)) {
-        observer.disconnect();
+        if (observer) {
+          observer.disconnect();
+        }
         return;
       }
 
@@ -131,13 +86,62 @@ export const useMetricAnimation = ({
           // Restore opacity
           element.style.opacity = '';
 
-          observer.disconnect();
+          if (observer) {
+            observer.disconnect();
+          }
           hasAnimatedRef.current = true;
         }, animationDurationMs);
 
         animationRef.current = selection;
       }, 100); // 100ms delay to ensure element is fully styled
     };
+
+    // First, check if the element already exists
+    const checkExistingElement = () => {
+      const existingElement = document.querySelector(selector) as HTMLElement;
+      if (existingElement && !elementFound && !animationStarted) {
+        elementFound = true;
+        startAnimation(existingElement);
+        return true;
+      }
+      return false;
+    };
+
+    // Check immediately
+    if (checkExistingElement()) {
+      return;
+    }
+
+    // Set up a mutation observer to catch new elements as they're added
+    observer = new MutationObserver((mutations) => {
+      if (animationStarted) return;
+
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const element = node as Element;
+            const targetElement = element.querySelector(selector) as HTMLElement;
+            if (targetElement && !elementFound) {
+              elementFound = true;
+              startAnimation(targetElement);
+            }
+            // Also check if the node itself is the target
+            if (element.matches && element.matches(selector) && !elementFound) {
+              elementFound = true;
+              startAnimation(element as HTMLElement);
+            }
+          }
+        });
+      });
+    });
+
+    // Start observing
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    observerRef.current = observer;
 
     // Fallback: check for existing element after a short delay
     const fallbackTimeout = setTimeout(() => {
