@@ -220,41 +220,16 @@ const getRoboto = (url: string): FontFace => {
 };
 
 export const Fonts: FunctionComponent<Props> = ({ url }) => {
-  const sansFont = getInter(url);
-  const codeFont = getRoboto(url);
-
   /* eslint-disable react/no-danger */
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: `
-        ${[sansFont, codeFont]
-          .flatMap(({ family, variants }) =>
-            variants.map(({ style, weight, format, sources, unicodeRange }) => {
-              const src = sources
-                .map((source) =>
-                  source.startsWith(url)
-                    ? `url('${source}') format('${format || source.split('.').pop()}')`
-                    : `local('${source}')`
-                )
-                .join(', ');
-
-              return `
-        @font-face {
-          font-family: '${family}';
-          font-style: ${style};
-          font-weight: ${weight};
-          src: ${src};${
-                unicodeRange
-                  ? `
-          unicode-range: ${unicodeRange};`
-                  : ''
-              }
-        }`;
-            })
-          )
-          .join('\n')}
-      `,
+        __html: `@font-face {
+  font-family: 'InterWOFF2';
+  src: url('https://rsms.me/inter/font-files/Inter-Regular.woff2?v=4.1') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}`,
       }}
     />
   );
