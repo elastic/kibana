@@ -81,7 +81,7 @@ describe('Trusted devices form', () => {
       description: '',
       // start with Windows to let the component normalize to [Windows, Mac] for create mode
       os_types: [OperatingSystem.WINDOWS],
-      entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', '')],
+      entries: [createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
       meta: { temporaryUuid: 'td-1111' },
@@ -277,11 +277,13 @@ describe('Trusted devices form', () => {
       ).map((button) => button.textContent?.trim());
 
       expect(options).toEqual([
-        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
-        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
       ]);
     });
 

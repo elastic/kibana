@@ -236,7 +236,7 @@ const ConditionsSection = memo<{
             <EuiFormRow label="Field">
               <EuiSuperSelect
                 options={FIELD_OPTIONS}
-                valueOfSelected={currentEntry.field || TrustedDeviceConditionEntryField.USERNAME}
+                valueOfSelected={currentEntry.field || TrustedDeviceConditionEntryField.DEVICE_ID}
                 onChange={handleFieldChange}
                 data-test-subj={getTestId('fieldSelect')}
                 disabled={disabled}
@@ -274,24 +274,32 @@ ConditionsSection.displayName = 'ConditionsSection';
 
 const FIELD_OPTIONS = [
   {
-    value: TrustedDeviceConditionEntryField.USERNAME,
-    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
+    value: TrustedDeviceConditionEntryField.DEVICE_ID,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+  },
+  {
+    value: TrustedDeviceConditionEntryField.DEVICE_TYPE,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
   },
   {
     value: TrustedDeviceConditionEntryField.HOST,
     inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
   },
   {
-    value: TrustedDeviceConditionEntryField.DEVICE_ID,
-    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
-  },
-  {
     value: TrustedDeviceConditionEntryField.MANUFACTURER,
     inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
   },
   {
+    value: TrustedDeviceConditionEntryField.MANUFACTURER_ID,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
+  },
+  {
     value: TrustedDeviceConditionEntryField.PRODUCT_ID,
     inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+  },
+  {
+    value: TrustedDeviceConditionEntryField.USERNAME,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
   },
 ];
 
@@ -446,7 +454,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           os_types: osTypes,
           entries: [
             {
-              field: TrustedDeviceConditionEntryField.USERNAME,
+              field: TrustedDeviceConditionEntryField.DEVICE_ID,
               operator: 'included' as const,
               type: 'match' as const,
               value: '',
@@ -466,7 +474,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const updateConditionField = useCallback(
       (updates: Record<string, string>) => {
         const currentEntry = currentItem.entries?.[0] || {
-          field: TrustedDeviceConditionEntryField.USERNAME,
+          field: TrustedDeviceConditionEntryField.DEVICE_ID,
           operator: 'included',
           type: 'match',
           value: '',
@@ -531,7 +539,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         return entry;
       }
       return {
-        field: TrustedDeviceConditionEntryField.USERNAME,
+        field: TrustedDeviceConditionEntryField.DEVICE_ID,
         operator: 'included' as const,
         type: 'match' as const,
         value: '',

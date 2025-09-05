@@ -25,9 +25,11 @@ export enum ConditionEntryField {
 export enum TrustedDeviceConditionEntryField {
   USERNAME = 'user.name',
   HOST = 'host.name',
-  DEVICE_ID = 'device.id',
-  MANUFACTURER = 'device.manufacturer',
-  PRODUCT_ID = 'device.model.identifier',
+  DEVICE_ID = 'device.serial_number',
+  MANUFACTURER = 'device.vendor_name',
+  PRODUCT_ID = 'device.product_id',
+  DEVICE_TYPE = 'device.device_type',
+  MANUFACTURER_ID = 'device.vendor_id',
 }
 
 export enum EntryFieldType {

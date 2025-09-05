@@ -28,6 +28,8 @@ const TrustedDeviceFieldSchema = schema.oneOf([
   schema.literal(TrustedDeviceConditionEntryField.DEVICE_ID),
   schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER),
   schema.literal(TrustedDeviceConditionEntryField.PRODUCT_ID),
+  schema.literal(TrustedDeviceConditionEntryField.DEVICE_TYPE),
+  schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER_ID),
 ]);
 
 const TrustedDeviceEntrySchema = schema.object({
