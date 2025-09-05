@@ -90,7 +90,8 @@
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/presentation-util",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

@@ -11,7 +11,7 @@ import { uniqBy } from 'lodash';
 import type { Defer } from '@kbn/kibana-utils-plugin/public';
 import { defer as createDefer } from '@kbn/kibana-utils-plugin/public';
 import type { Trigger } from '@kbn/ui-actions-triggers';
-import type { Action } from '../actions';
+import type { Action } from '@kbn/ui-actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 
 interface ExecuteActionTask {

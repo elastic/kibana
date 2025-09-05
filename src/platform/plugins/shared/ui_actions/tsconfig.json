@@ -16,7 +16,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/std",
     "@kbn/ui-actions-triggers",
-    "@kbn/ui-actions-browser",
+    "@kbn/ui-actions",
   ],
   "exclude": [
     "target/**/*",

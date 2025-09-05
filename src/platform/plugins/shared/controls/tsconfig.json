@@ -44,7 +44,8 @@
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/presentation-util",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

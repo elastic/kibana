@@ -110,6 +110,7 @@
     "@kbn/licensing-types",
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
+    "@kbn/ui-actions",
     "@kbn/dashboards-selector",
     "@kbn/ui-actions-triggers",
   ]

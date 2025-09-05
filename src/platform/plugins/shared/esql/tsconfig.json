@@ -35,7 +35,8 @@
     "@kbn/esql-ast",
     "@kbn/presentation-util",
     "@kbn/content-management-plugin",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": [
     "target/**/*",

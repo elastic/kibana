@@ -8365,10 +8365,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-browser@link:src/platform/packages/shared/kbn-ui-actions-browser":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ui-actions-enhanced-examples-plugin@link:x-pack/examples/ui_actions_enhanced_examples":
   version "0.0.0"
   uid ""
@@ -8386,10 +8382,6 @@
   uid ""
 
 "@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-react@link:src/platform/packages/shared/ui-actions/react":
   version "0.0.0"
   uid ""
 

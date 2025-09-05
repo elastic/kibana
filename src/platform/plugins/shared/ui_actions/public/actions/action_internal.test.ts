@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionDefinition } from './action';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { ActionInternal } from './action_internal';
 
 const defaultActionDef: ActionDefinition = {

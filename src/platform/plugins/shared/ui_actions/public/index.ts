@@ -18,14 +18,8 @@ export type {
   UiActionsPublicSetup as UiActionsSetup,
   UiActionsPublicStart as UiActionsStart,
 } from './plugin';
-export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { createAction, IncompatibleActionError } from './actions';
+export type { Action, ActionDefinition as UiActionsActionDefinition } from '@kbn/ui-actions';
 export { buildContextMenuForActions } from './context_menu';
-// export type {
-//   Presentable as UiActionsPresentable,
-//   PresentableGroup as UiActionsPresentableGroup,
-//   PresentableGrouping as UiActionsPresentableGrouping,
-// } from '@kbn/ui-actions-browser/src/types';
 export type { VisualizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,
@@ -37,4 +31,4 @@ export type {
   ActionExecutionMeta,
   ActionMenuItemProps,
   FrequentCompatibilityChangeAction,
-} from './actions';
+} from '@kbn/ui-actions';

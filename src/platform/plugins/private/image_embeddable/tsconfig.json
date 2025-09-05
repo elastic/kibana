@@ -24,7 +24,8 @@
     "@kbn/presentation-publishing",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-util",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

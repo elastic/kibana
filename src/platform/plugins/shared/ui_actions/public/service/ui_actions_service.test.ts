@@ -8,8 +8,8 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import type { ActionDefinition } from '../actions';
-import { ActionInternal } from '../actions';
+import type { ActionDefinition } from '@kbn/ui-actions';
+import { ActionInternal } from '../actions/action_internal';
 import { createHelloWorldAction } from '../tests/test_samples';
 import type { TriggerRegistry, ActionRegistry } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';

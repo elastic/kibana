@@ -8,8 +8,8 @@
  */
 
 import { defaultTrigger } from '@kbn/ui-actions-triggers';
-import type { ActionExecutionContext } from '..';
-import { createAction } from '..';
+import type { ActionExecutionContext } from './action';
+import { createAction } from './create_action';
 
 const sayHelloAction = createAction<{ amICompatible: boolean }>({
   id: 'test',

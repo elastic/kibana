@@ -10,7 +10,7 @@
 import type * as React from 'react';
 import type { Presentable, PresentableGrouping } from '@kbn/ui-actions';
 import { i18n } from '@kbn/i18n';
-import type { Action, ActionDefinition, ActionMenuItemProps } from './action';
+import type { Action, ActionDefinition, ActionMenuItemProps } from '@kbn/ui-actions';
 import { getNotifications } from '../services';
 
 /**

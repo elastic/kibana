@@ -119,7 +119,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/licensing-types",
     "@kbn/content-management-plugin",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

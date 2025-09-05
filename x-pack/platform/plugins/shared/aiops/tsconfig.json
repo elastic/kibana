@@ -81,6 +81,7 @@
     "@kbn/presentation-util",
     "@kbn/licensing-types",
     "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions",
   ],
   "exclude": [
     "target/**/*",

@@ -126,6 +126,7 @@
     "@kbn/core-http-server",
     "@kbn/presentation-util",
     "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions",
   ],
   "exclude": ["target/**/*"]
 }

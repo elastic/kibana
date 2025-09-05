@@ -259,5 +259,6 @@
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
     "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions",
   ]
 }

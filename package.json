@@ -1057,7 +1057,6 @@
     "@kbn/try-in-console": "link:src/platform/packages/shared/kbn-try-in-console",
     "@kbn/typed-react-router-config": "link:src/platform/packages/shared/kbn-typed-react-router-config",
     "@kbn/ui-actions": "link:src/platform/packages/shared/ui-actions/actions",
-    "@kbn/ui-actions-browser": "link:src/platform/packages/shared/kbn-ui-actions-browser",
     "@kbn/ui-actions-enhanced-examples-plugin": "link:x-pack/examples/ui_actions_enhanced_examples",
     "@kbn/ui-actions-enhanced-plugin": "link:src/platform/plugins/shared/ui_actions_enhanced",
     "@kbn/ui-actions-examples-plugin": "link:examples/ui_action_examples",

@@ -129,7 +129,7 @@
     "telemetry": ["src/platform/plugins/shared/telemetry", "src/platform/plugins/shared/telemetry_management_section"],
     "timelion": ["src/platform/plugins/private/vis_types/timelion"],
     "tryInConsole": "src/platform/packages/shared/kbn-try-in-console/",
-    "uiActions": ["src/platform/plugins/shared/ui_actions", "src/platform/packages/shared/kbn-ui-actions-browser"],
+    "uiActions": "src/platform/plugins/shared/ui_actions",
     "uiActionsEnhanced": "src/platform/plugins/shared/ui_actions_enhanced",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/platform/plugins/shared/usage_collection",

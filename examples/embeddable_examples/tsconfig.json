@@ -45,5 +45,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/config-schema",
     "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions",
   ]
 }

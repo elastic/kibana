@@ -53,6 +53,7 @@
     "@kbn/aiops-utils",
     "@kbn/esql-ast",
     "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions",
   ],
   "exclude": [
     "target/**/*",
