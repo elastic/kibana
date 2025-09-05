@@ -122,6 +122,7 @@ describe('ClassicStream', () => {
             default: '30d',
           },
         },
+        rules: [],
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
       expect(ClassicStream.GetResponse.is(val)).toBe(true);
@@ -167,6 +168,7 @@ describe('ClassicStream', () => {
       {
         dashboards: [],
         queries: [],
+        rules: [],
         stream: {
           description: '',
           ingest: {

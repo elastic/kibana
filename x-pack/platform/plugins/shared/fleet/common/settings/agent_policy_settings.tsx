@@ -191,7 +191,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     title: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalTitle',
       {
-        defaultMessage: 'Agent logging number of files',
+        defaultMessage: 'Agent logging file rotation interval',
       }
     ),
     description: (
