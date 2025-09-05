@@ -2034,6 +2034,8 @@
       "@kbn/shared-ux-tabbed-modal/*": ["src/platform/packages/shared/shared-ux/modal/tabbed/*"],
       "@kbn/shared-ux-table-persist": ["src/platform/packages/shared/shared-ux/table_persist"],
       "@kbn/shared-ux-table-persist/*": ["src/platform/packages/shared/shared-ux/table_persist/*"],
+      "@kbn/shared-ux-toolbar-selector": ["src/platform/packages/shared/shared-ux/toolbar_selector"],
+      "@kbn/shared-ux-toolbar-selector/*": ["src/platform/packages/shared/shared-ux/toolbar_selector/*"],
       "@kbn/shared-ux-utility": ["src/platform/packages/shared/kbn-shared-ux-utility"],
       "@kbn/shared-ux-utility/*": ["src/platform/packages/shared/kbn-shared-ux-utility/*"],
       "@kbn/slo-plugin": ["x-pack/solutions/observability/plugins/slo"],
