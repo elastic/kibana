@@ -53,6 +53,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
   const services = useDiscoverServicesWithObservabilityCues();
   const [isDismissed, setIsDismissed] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
+  const [modalOrigin, setModalOrigin] = useState<'main' | 'flyout' | null>(null);
 
   // Demo state is now passed as props from DiscoverLayout
 
@@ -67,10 +68,11 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
     const urlParams = new URLSearchParams(window.location.search);
     const showTour = urlParams.get('showObservabilityTour');
 
-    if (showTour === 'true' && !services.shouldShowObservabilityCues) {
+    if ((showTour === 'main' || showTour === 'flyout') && !services.shouldShowObservabilityCues) {
       // Check if user has dismissed this modal before
       const hasDismissed = localStorage.getItem(STORAGE_KEY) === '1';
       if (!hasDismissed) {
+        setModalOrigin(showTour as 'main' | 'flyout');
         setShowTourModal(true);
       }
       // Clean up the URL parameter after showing the modal
@@ -130,7 +132,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
 
       // Add URL parameter to trigger tour modal after reload
       const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set('showObservabilityTour', 'true');
+      currentUrl.searchParams.set('showObservabilityTour', 'main');
 
       // Navigate to the new URL to trigger the tour modal
       window.location.href = currentUrl.toString();
@@ -152,8 +154,8 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
     setIsDismissed(true);
   }, []);
 
-  // Highlights data for the tour modal (generic APM content)
-  const highlights = useMemo(
+  // Highlights data (main cue variant includes navigation bullet)
+  const mainHighlights = useMemo(
     () => [
       {
         id: 'overview',
@@ -175,6 +177,27 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
         blurb: 'Get more from your data with workflow-based navigation.',
         image: services.addBasePath('/plugins/discover/assets/highlight-nav.png'),
         alt: 'Observability view with workflow-based navigation.',
+      },
+    ],
+    [services.addBasePath]
+  );
+
+  // Flyout cue variant (omit navigation bullet)
+  const flyoutHighlights = useMemo(
+    () => [
+      {
+        id: 'overview',
+        title: 'APM overview at a glance',
+        blurb: 'See performance metrics, error rates, and service dependencies in one place.',
+        image: services.addBasePath('/plugins/discover/assets/highlight-span.png'),
+        alt: 'Observability view with APM overview dashboard.',
+      },
+      {
+        id: 'alerts',
+        title: 'Proactive monitoring and alerts',
+        blurb: 'Set up alerts for performance thresholds and get notified of issues early.',
+        image: services.addBasePath('/plugins/discover/assets/highlight-pivot.png'),
+        alt: 'Observability view with alerting and monitoring dashboards.',
       },
     ],
     [services.addBasePath]
@@ -327,7 +350,7 @@ export const MainPageObservabilityCue: React.FC<MainPageObservabilityCueProps> =
         onClose={() => setShowTourModal(false)}
         title="Discover more with APM"
         subtitle="Explore these APM-focused enhancements in Observability:"
-        highlights={highlights}
+        highlights={modalOrigin === 'flyout' ? flyoutHighlights : mainHighlights}
         storageKey={STORAGE_KEY}
         testSubj="obsMainPageModalCloseBtn"
       />

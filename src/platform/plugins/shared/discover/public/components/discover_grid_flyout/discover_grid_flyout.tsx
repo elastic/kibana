@@ -167,7 +167,7 @@ export function DiscoverGridFlyout({
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set('showObservabilityTour', 'true');
+      currentUrl.searchParams.set('showObservabilityTour', 'flyout');
       window.location.href = currentUrl.toString();
     } catch (error) {
       const currentSpace = await services.spaces?.getActiveSpace();

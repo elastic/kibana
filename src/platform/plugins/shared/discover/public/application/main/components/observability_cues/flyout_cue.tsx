@@ -116,7 +116,7 @@ export const FlyoutCue: React.FC<FlyoutCueProps> = ({
 
       // Add URL parameter to trigger tour modal after reload
       const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set('showObservabilityTour', 'true');
+      currentUrl.searchParams.set('showObservabilityTour', 'flyout');
 
       // Navigate to the new URL to trigger the tour modal
       window.location.href = currentUrl.toString();
