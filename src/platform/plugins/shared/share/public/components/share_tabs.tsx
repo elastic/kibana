@@ -24,8 +24,7 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareContext();
 
-  const { objectTypeMeta, onClose, shareMenuItems, anchorElement, objectType, sharingData } =
-    shareContext;
+  const { objectTypeMeta, onClose, shareMenuItems, anchorElement, sharingData } = shareContext;
 
   const tabs: Array<IModalTabDeclaration<any>> = [];
 
@@ -42,8 +41,7 @@ export const ShareMenuTabs = () => {
     tabs.push(embedTab);
   }
 
-  const showAccessModeContainer =
-    objectType === 'dashboard' && Boolean(sharingData?.accessModeContainer);
+  const showAccessModeContainer = Boolean(sharingData?.accessModeContainer);
 
   return Boolean(tabs.length) ? (
     <TabbedModal
