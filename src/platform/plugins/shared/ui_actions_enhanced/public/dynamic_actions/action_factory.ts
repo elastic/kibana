@@ -13,10 +13,8 @@ import type {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
 } from '@kbn/kibana-utils-plugin/common';
-import type {
-  UiActionsPresentable as Presentable,
-  ActionMenuItemProps,
-} from '@kbn/ui-actions-plugin/public';
+import type { ActionMenuItemProps } from '@kbn/ui-actions-plugin/public';
+import type { Presentable } from '@kbn/ui-actions';
 import type { Configurable } from '@kbn/kibana-utils-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';

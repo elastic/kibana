@@ -10,8 +10,8 @@
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-triggers';
 import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import { type TracksOverlays } from '@kbn/presentation-util';
-import type { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
 import { addPanelMenuTrigger } from '@kbn/ui-actions-triggers';
+import type { PresentableGroup } from '@kbn/ui-actions';
 import type { HasAppContext } from '@kbn/presentation-publishing';
 import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';

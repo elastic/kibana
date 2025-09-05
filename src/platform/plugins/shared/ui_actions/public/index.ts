@@ -21,11 +21,11 @@ export type {
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
 export { ActionInternal, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export type {
-  Presentable as UiActionsPresentable,
-  PresentableGroup as UiActionsPresentableGroup,
-  PresentableGrouping as UiActionsPresentableGrouping,
-} from '@kbn/ui-actions-browser/src/types';
+// export type {
+//   Presentable as UiActionsPresentable,
+//   PresentableGroup as UiActionsPresentableGroup,
+//   PresentableGrouping as UiActionsPresentableGrouping,
+// } from '@kbn/ui-actions-browser/src/types';
 export type { VisualizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,

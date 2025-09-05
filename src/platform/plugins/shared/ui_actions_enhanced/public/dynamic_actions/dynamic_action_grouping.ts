@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsPresentableGrouping as PresentableGrouping } from '@kbn/ui-actions-plugin/public';
+import type { PresentableGrouping } from '@kbn/ui-actions';
 
 export const dynamicActionGrouping: PresentableGrouping<EmbeddableApiContext> = [
   {
