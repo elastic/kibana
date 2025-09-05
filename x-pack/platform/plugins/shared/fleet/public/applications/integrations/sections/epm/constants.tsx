@@ -124,6 +124,9 @@ export const AssetTitleMap: Record<
   view: i18n.translate('xpack.fleet.epm.assetTitles.views', {
     defaultMessage: 'Views',
   }),
+  knowledge_base: i18n.translate('xpack.fleet.epm.assetTitles.knowledgeBase', {
+    defaultMessage: 'Knowledge base',
+  }),
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {

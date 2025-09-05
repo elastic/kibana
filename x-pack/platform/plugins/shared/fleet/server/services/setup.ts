@@ -69,6 +69,7 @@ import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_co
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
+import { initializeKnowledgeBaseIndex } from './epm/packages/knowledge_base_index';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -279,6 +280,13 @@ async function createSetupSideEffects(
   logger.debug('Create CCS index patterns for remote clusters');
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
+
+  logger.debug('Initializing knowledge base index (async)');
+  // Initialize knowledge base index asynchronously after main setup is complete
+  // This ensures ES permissions and indices are properly set up before trying to index documents
+  initializeKnowledgeBaseIndex(esClient).catch((error) => {
+    logger.warn('Knowledge base index initialization failed', error);
+  });
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,

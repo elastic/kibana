@@ -185,6 +185,7 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         ilm_policy: [],
         data_stream_ilm_policy: [],
         ml_model: [],
+        knowledge_base: [],
       },
     },
     status: 'not_installed',
