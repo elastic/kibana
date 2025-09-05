@@ -7,11 +7,11 @@
 
 import { merge } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
+import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/monitoring/users/common.gen';
 import type {
   CreatePrivMonUserRequestBody,
   CreatePrivMonUserResponse,
-} from '../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
+} from '../../../../../common/api/entity_analytics/monitoring/users/create.gen';
 import type { PrivMonUserSource } from '../types';
 
 /**

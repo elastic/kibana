@@ -15,7 +15,7 @@ import { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { createPrivilegedUsersCrudService } from './privileged_users_crud';
 
 import type { PrivilegeMonitoringGlobalDependencies } from '../engine/data_client';
-import type { CreatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
+import type { CreatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/monitoring/users/create.gen';
 import type { PrivMonUserSource } from '../types';
 
 // Mock the helper functions

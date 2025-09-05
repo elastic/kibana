@@ -16,7 +16,7 @@ import { batchPartitions } from '../../shared/streams/batching';
 import { createPrivmonIndexService } from '../engine/elasticsearch/indices';
 import type { BulkProcessingResults, BulkProcessingError, BulkPrivMonUser } from './bulk/types';
 import { findUserByUsername, createUserDocument, updateUserWithSource } from './utils';
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
+import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/monitoring/users/common.gen';
 
 export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps, index } = dataClient;
