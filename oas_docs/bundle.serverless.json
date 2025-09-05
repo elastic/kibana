@@ -20362,7 +20362,7 @@
                 }
               }
             },
-            "description": "Indicates a failed call."
+            "description": "Indicates a bad request call."
           }
         },
         "summary": "Get cloud connectors",
@@ -20548,7 +20548,7 @@
                 }
               }
             },
-            "description": "Indicates a failed call."
+            "description": "Indicates a bad request call."
           }
         },
         "summary": "Create cloud connector",
