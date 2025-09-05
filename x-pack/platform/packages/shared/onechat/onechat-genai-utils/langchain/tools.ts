@@ -54,7 +54,7 @@ export const toolsToLangchain = async ({
 };
 
 export const sanitizeToolId = (toolId: string): string => {
-  return toolId.replace(/[^a-zA-Z0-9_-]/g, '');
+  return toolId.replace('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
 };
 
 /**
@@ -98,13 +98,14 @@ export const toolToLangchain = ({
         return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e}`);
+        logger.debug(e.stack);
 
         const errorToolReturn: RunToolReturn = {
           runId: tool.id,
           results: [
             {
               type: ToolResultType.error,
-              data: { message: e.message, stack: e.stack },
+              data: { message: e.message },
             },
           ],
         };
@@ -116,6 +117,7 @@ export const toolToLangchain = ({
       name: toolId ?? tool.id,
       schema: tool.schema,
       description: tool.description,
+      verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',
       metadata: {
         toolId: tool.id,

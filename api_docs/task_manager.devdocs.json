@@ -1045,6 +1045,20 @@
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunContext.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

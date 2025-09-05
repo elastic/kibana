@@ -16,11 +16,11 @@ import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { AWS_SINGLE_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-  AWS_SINGLE_ACCOUNT,
   AWS_CREDENTIALS_TYPE,
   AZURE_CREDENTIALS_TYPE,
   GCP_CREDENTIALS_TYPE,
@@ -238,20 +238,26 @@ export const getDefaultCloudCredentialsType = (
 export const gcpField: GcpInputFields = {
   fields: {
     'gcp.organization_id': {
-      label: i18n.translate('securitySolutionPackages.gcpIntegration.organizationIdFieldLabel', {
-        defaultMessage: 'Organization ID',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationIdFieldLabel',
+        {
+          defaultMessage: 'Organization ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.project_id': {
-      label: i18n.translate('securitySolutionPackages.gcpIntegration.projectidFieldLabel', {
-        defaultMessage: 'Project ID',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.projectidFieldLabel',
+        {
+          defaultMessage: 'Project ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.credentials.file': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialFileText',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialFileText',
         {
           defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
         }
@@ -260,7 +266,7 @@ export const gcpField: GcpInputFields = {
     },
     'gcp.credentials.json': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialJSONText',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialJSONText',
         {
           defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
         }
@@ -270,7 +276,7 @@ export const gcpField: GcpInputFields = {
     },
     'gcp.credentials.type': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialSelectBoxTitle',
         {
           defaultMessage: 'Credential',
         }

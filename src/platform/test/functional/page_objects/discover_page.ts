@@ -235,6 +235,10 @@ export class DiscoverPageObject extends FtrService {
       `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
 
+    await this.retry.waitFor('the dropdown to close', async () => {
+      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
+    });
+
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
         'unifiedHistogramBreakdownSelectorButton'
@@ -418,8 +422,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {
-    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
-    await fieldSearch.type(name);
+    await this.retry.waitForWithTimeout('field search input value', 5000, async () => {
+      const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+      await fieldSearch.clearValue();
+      await fieldSearch.type(name);
+      return (await fieldSearch.getAttribute('value')) === name;
+    });
   }
 
   public async openFilterByFieldTypeInDocViewer() {

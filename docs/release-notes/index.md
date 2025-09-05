@@ -21,13 +21,47 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+% FEATURES, ENHANCEMENTS, FIXES
+% Paste in index.md
+
+## 9.1.3 [kibana-9.1.3-release-notes]
+
+:::{important}
+The 9.1.3 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Fixes [kibana-9.1.3-fixes]
+
+**Alerting**:
+* Fixes an issue that prevents reports from showing in the Reporting UI when they're created in a non-default {{kib}} space with a dash in its name [#230876]({{kib-pull}}230876).
+
+**Dashboards and Visualizations**:
+* Fixes an issue in Lens that caused color mapping changes to render as gray [#231563]({{kib-pull}}231563).
+* Fixes broken references that occured when you returned to an unsaved dashboard with reference panels [#231517]({{kib-pull}}231517).
+
+**Data ingestion and Fleet**:
+* Fixes the `deployment_modes` evaluation for policy templates when creating a package policy. When deploying in agentless mode, this prevents the acceptance of inputs from policy templates that are not opted into the agentless mode at the template level [#231679]({{kib-pull}}231679).
+
+**Discover**:
+* Disables sorting for JSON-like fields in ES|QL mode [#231289]({{kib-pull}}231289).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes a bug where the schedule interval of the cleanup task for unused URLs wouldn't update if the `share.url_expiration.duration` changed [#231883]({{kib-pull}}231883).
+* Updates the built-in `reporting_user` role to leverage a new  `reporting_user` reserved privilege [#231533]({{kib-pull}}231533).
+
 ## 9.1.2 [kibana-9.1.2-release-notes]
 
 
 ### Fixes [kibana-9.1.2-fixes]
 
 **Alerting**:
-* Fixes an issue that prevents reports from showing in the Reporting UI when they're created in a non-default {{kib}} space [#230876]({{kib-pull}}230876).
+* Fixes an issue that prevents reports from showing in the Reporting UI when they're created in a non-default {{kib}} space with a dash in its name [#230876]({{kib-pull}}230876).
 
 **Data ingestion and Fleet**:
 * Fixes validation for `text` and `password` inputs in the package policy editor [#229932]({{kib-pull}}229932).
@@ -337,6 +371,25 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console [#224708]({{kib-pull}}224708).
 * Fixes an issue preventing solution navigation submenu items from being displayed when the navigation is collapsed [#227705]({{kib-pull}}227705).
 
+## 9.0.6 [kibana-9.0.6-release-notes]
+
+:::{important}
+The 9.0.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.0.6-features-enhancements]
+
+**Dashboards and Visualizations**:
+* Improves usability of dashboards when zooming up to 400% [#228978]({{kib-pull}}228978).
+
+### Fixes [kibana-9.0.6-fixes]
+
+**Kibana platform**:
+* Fixes the breadcrumb to include a link to the home page when browsing pages from the **{{es}}** section of the navigation [#230270]({{kib-pull}}230270).
+* Updates the built-in `reporting_user` role to leverage a new  `reporting_user` reserved privilege [#231533]({{kib-pull}}231533).
+
+**Search**:
+* Fixes an incorrect link in the **Build** breadcrumb when navigating to the **Connectors** and **{{es}} indices** pages [#232504]({{kib-pull}}232504).
 
 ## 9.0.5 [kibana-9.0.5-release-notes]
 

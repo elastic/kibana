@@ -17,7 +17,7 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { GlobalFlyout } from '../../../public/shared_imports';
-import type { AppDependencies } from '../../../public/types';
+import type { RootComponentDependencies } from '../../../public/types';
 import { getAppContextMock } from './app_context.mock';
 import { init as initHttpRequests } from './http_requests';
 
@@ -38,7 +38,7 @@ export const WithAppDependencies =
     apiService.setup(httpSetup, new ReindexService(httpSetup));
     breadcrumbService.setup(() => '');
 
-    const appContextMock = getAppContextMock(kibanaVersion) as unknown as AppDependencies;
+    const appContextMock = getAppContextMock(kibanaVersion) as unknown as RootComponentDependencies;
 
     return (
       <AuthorizationContext.Provider

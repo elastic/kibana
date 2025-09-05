@@ -6,14 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  indexDocument,
-  putStream,
-  disableStreams,
-  enableStreams,
-  forkStream,
-} from './helpers/requests';
+import { putStream, disableStreams, enableStreams, forkStream } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
@@ -21,10 +16,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
+  const status = 'enabled' as RoutingStatus;
 
-  // Failing: See https://github.com/elastic/kibana/issues/231906
-  // Failing: See https://github.com/elastic/kibana/issues/231905
-  describe.skip('conflicts', function () {
+  describe('conflicts', function () {
     describe('concurrency handling', function () {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -44,6 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'resource.attributes.host.name',
             eq: 'routeme',
           },
+          status,
         };
         const stream2 = {
           stream: {
@@ -53,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             field: 'resource.attributes.host.name',
             eq: 'routeme2',
           },
+          status,
         };
         const responses = await Promise.allSettled([
           forkStream(apiClient, 'logs', stream1),
@@ -78,55 +74,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
         await enableStreams(apiClient);
-        const doc = {
-          message: '2023-01-01T00:00:10.000Z error test',
-        };
-        const response = await indexDocument(esClient, 'logs.existingindex', doc);
-        expect(response.result).to.eql('created');
-        // set up index template for logs.existingstream
-        await esClient.indices.putIndexTemplate({
-          name: 'logs.existingstream',
-          index_patterns: ['logs.existingstream*'],
-          data_stream: {},
-          template: {
-            mappings: {
-              properties: {
-                message: { type: 'text' },
-              },
-            },
-          },
-        });
-        // create data stream logs.existingstream
-        await esClient.indices.createDataStream({ name: 'logs.existingstream' });
       });
 
       after(async () => {
-        await esClient.indices.delete({ index: 'logs.existingindex' });
-        await esClient.indices.deleteDataStream({ name: 'logs.existingstream' });
-        await esClient.indices.deleteIndexTemplate({ name: 'logs.existingstream' });
         await disableStreams(apiClient);
-      });
-
-      it('should not allow to create a wired stream with the same name as an existing index', async () => {
-        const stream = {
-          stream: { name: 'logs.existingindex' },
-          where: {
-            field: 'resource.attributes.host.name',
-            eq: 'routeme',
-          },
-        };
-        await forkStream(apiClient, 'logs', stream, 400);
-      });
-
-      it('should not allow to create a wired stream with the same name as an existing data stream', async () => {
-        const stream = {
-          stream: { name: 'logs.existingstream' },
-          where: {
-            field: 'resource.attributes.host.name',
-            eq: 'routeme',
-          },
-        };
-        await forkStream(apiClient, 'logs', stream, 409);
       });
 
       it('should not treat a half-created wired stream as conflict', async () => {
@@ -164,6 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             queries: [],
             dashboards: [],
+            rules: [],
           },
           500
         );
@@ -204,6 +156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             queries: [],
             dashboards: [],
+            rules: [],
           },
           200
         );

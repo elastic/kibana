@@ -21,8 +21,7 @@ import {
   KSPM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-common/constants';
 import { useParams } from 'react-router-dom';
-import type { CloudSetupConfig } from '@kbn/cloud-security-posture';
-import { CloudSetup } from '@kbn/cloud-security-posture';
+import { CloudSetup, type CloudSetupConfig } from '@kbn/cloud-security-posture';
 import { i18n } from '@kbn/i18n';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
