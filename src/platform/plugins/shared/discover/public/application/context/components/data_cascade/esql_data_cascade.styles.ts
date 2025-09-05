@@ -17,5 +17,23 @@ export const esqlCascadeStyles = ({ euiTheme }: { euiTheme: EuiThemeShape }) => 
     height: '100%',
     width: '100%',
     padding: euiTheme.size.s,
+
+    // EUI Data Grid uses fixed positioning to render
+    // full screen mode, and since data cascade rows have a transform applied on them
+    // the full screen grid ends up being constrained to the bounds of the row,
+    // see https://www.w3.org/TR/css-transforms-1/#transform-rendering.
+    // So whilst the fullscreen mode is active we remove the transform
+    // on the row to ensure the full screen grid can take up the entire screen.
+    '&:has(.euiDataGrid--fullScreen) *:not(.euiDataGrid--fullScreen *)': {
+      transform: 'none !important',
+    },
+
+    // This is also required because we clip the rendered content
+    // in the cascade grid cells to have rounded corners
+    // but in full screen mode we want to disable that clipping,
+    // so that content can extend to the full width of the screen
+    '&:has(.euiDataGrid--fullScreen) [role="gridcell"] *:not(.euiDataGrid--fullScreen *)': {
+      clipPath: 'unset',
+    },
   }),
 });
