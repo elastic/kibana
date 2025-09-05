@@ -80,7 +80,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             values: { retention: lifecycle.dsl.data_retention },
           })}
         >
-          {duration.toLocaleLowerCase()}
+          {duration.toLowerCase()}
         </span>
       );
     }
