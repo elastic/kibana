@@ -48,7 +48,7 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;
   pollForSignalIndex?: () => void;
-  sourcererDataView: DataViewSpec | undefined;
+  sourcererDataView: DataViewSpec | DataView | undefined; // TODO remove DataViewSpec type when we remove the newDataViewPickerEnabled feature flag
   timelineId?: string;
   dataTestSubj?: string;
   hideFilterBar?: boolean;
@@ -315,6 +315,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       }
 
       if (sourcererDataView != null) {
+        if (sourcererDataView instanceof DataView) {
+          return [sourcererDataView];
+        }
+
         return [new DataView({ spec: sourcererDataView, fieldFormats })];
       } else {
         return null;
