@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import { APP_ID, SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type {
   MutableKibanaFeatureConfig,
@@ -29,6 +29,13 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
             addEndpointExceptionsToMinimalReadAndMinimalAll,
             addEndpointExceptionsToReadAndAll,
           ],
+          // On ESS, there has been no Endpoint Exceptions sub-feature privilege, but was included in security 'read' and 'all',
+          // as well as in security 'minimal_read' and 'minimal_all'.
+          // Using api privileges below provides the required backwards compatibility.
+          privileges: {
+            all: { api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`] },
+            read: { api: [`${APP_ID}-showEndpointExceptions`] },
+          },
         },
       },
       siemV2: {
@@ -45,6 +52,10 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
             addEndpointExceptionsToMinimalReadAndMinimalAll,
             addEndpointExceptionsToReadAndAll,
           ],
+          privileges: {
+            all: { api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`] },
+            read: { api: [`${APP_ID}-showEndpointExceptions`] },
+          },
         },
       },
       siemV3: {
@@ -54,6 +65,10 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
             addEndpointExceptionsToMinimalReadAndMinimalAll,
             addEndpointExceptionsToReadAndAll,
           ],
+          privileges: {
+            all: { api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`] },
+            read: { api: [`${APP_ID}-showEndpointExceptions`] },
+          },
         },
       },
     },

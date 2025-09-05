@@ -27,6 +27,13 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
             enableSecuritySubfeaturesToggle,
             addEndpointExceptionsToReadAndAll,
           ],
+          // On Serverless, endpoint exception was a sub-feature privilege, but was included in security 'read' and 'all'.
+          // Using `includeIn` here will provide backwards compatibility, without adding endpoint exceptions api privileges
+          // to security 'minimal_read' and 'minimal_all'.
+          subFeaturesPrivileges: [
+            { id: 'endpoint_exceptions_all', includeIn: 'all' },
+            { id: 'endpoint_exceptions_read', includeIn: 'read' },
+          ],
         },
       },
       siemV2: {
@@ -41,6 +48,10 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
             enableSecuritySubfeaturesToggle,
             addEndpointExceptionsToReadAndAll,
           ],
+          subFeaturesPrivileges: [
+            { id: 'endpoint_exceptions_all', includeIn: 'all' },
+            { id: 'endpoint_exceptions_read', includeIn: 'read' },
+          ],
         },
       },
       siemV3: {
@@ -48,6 +59,10 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
           featureConfigModifiers: [
             enableSecuritySubfeaturesToggle,
             addEndpointExceptionsToReadAndAll,
+          ],
+          subFeaturesPrivileges: [
+            { id: 'endpoint_exceptions_all', includeIn: 'all' },
+            { id: 'endpoint_exceptions_read', includeIn: 'read' },
           ],
         },
       },
