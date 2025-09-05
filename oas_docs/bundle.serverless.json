@@ -21954,6 +21954,7 @@
                                 "type": "array"
                               },
                               "previous_version": {
+                                "nullable": true,
                                 "type": "string"
                               },
                               "type": {
@@ -24110,6 +24111,7 @@
                               "type": "array"
                             },
                             "previous_version": {
+                              "nullable": true,
                               "type": "string"
                             },
                             "type": {
@@ -25061,6 +25063,7 @@
                               "type": "array"
                             },
                             "previous_version": {
+                              "nullable": true,
                               "type": "string"
                             },
                             "type": {
