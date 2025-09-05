@@ -11,7 +11,6 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useEuiTheme } from '@elastic/eui';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
@@ -40,7 +39,6 @@ export interface TraceProps {
 
 export const Trace = ({ traceId, serviceName, docId, dataView }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
-  const { euiTheme } = useEuiTheme();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();

@@ -28,6 +28,35 @@ jest.mock('../../../../content_framework/chart', () => ({
   ),
 }));
 
+jest.mock('../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: () => ({
+    indexes: { apm: { traces: 'test-index' } },
+  }),
+}));
+
+jest.mock('../../../../../plugin', () => ({
+  getUnifiedDocViewerServices: () => ({
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            getAbsoluteTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+          },
+        },
+      },
+    },
+    share: {
+      url: {
+        locators: {
+          get: jest.fn(() => ({
+            getRedirectUrl: jest.fn(() => 'http://discover-url'),
+          })),
+        },
+      },
+    },
+  }),
+}));
+
 jest.mock('../../hooks/use_latency_chart', () => ({
   useLatencyChart: jest.fn(),
 }));

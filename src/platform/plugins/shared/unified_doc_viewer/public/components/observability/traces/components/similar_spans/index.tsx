@@ -19,7 +19,7 @@ import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { getEsqlQuery } from './get_esql_query';
 
-const title = i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
+const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {
   defaultMessage: 'Similar spans',
 });
 const latencyTitle = i18n.translate(
@@ -91,7 +91,7 @@ export function SimilarSpans({
     <ContentFrameworkSection
       id="similarSpans"
       data-test-subj="docViewerSimilarSpansSection"
-      title={title}
+      title={sectionTitle}
       actions={sectionActions}
     >
       <ContentFrameworkChart
