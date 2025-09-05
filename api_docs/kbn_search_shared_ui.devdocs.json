@@ -138,21 +138,6 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.SEARCH_HOMEPAGE_INGESTION_CTA_FEATURE_FLAG",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_HOMEPAGE_INGESTION_CTA_FEATURE_FLAG",
-        "description": [],
-        "signature": [
-          "\"searchSolution.homepage.ingestionCTA\""
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.WORKFLOW_LOCALSTORAGE_KEY",
         "type": "string",
         "tags": [],

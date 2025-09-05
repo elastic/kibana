@@ -25,7 +25,16 @@ import {
   ExitConditionBranchNodeImpl,
   ExitIfNodeImpl,
 } from './if_step';
-import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
+import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
+import {
+  EnterTryBlockNodeImpl,
+  ExitTryBlockNodeImpl,
+  EnterNormalPathNodeImpl,
+  ExitNormalPathNodeImpl,
+  EnterFallbackPathNodeImpl,
+  ExitFallbackPathNodeImpl,
+} from './on_failure/fallback-step';
 import { WaitStepImpl } from './wait_step/wait_step';
 
 export class StepFactory {
@@ -66,6 +75,22 @@ export class StepFactory {
         );
       case 'exit-retry':
         return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'enter-continue':
+        return new EnterContinueNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'exit-continue':
+        return new ExitContinueNodeImpl(this.workflowRuntime);
+      case 'enter-try-block':
+        return new EnterTryBlockNodeImpl(step as any, this.workflowRuntime);
+      case 'exit-try-block':
+        return new ExitTryBlockNodeImpl(step as any, this.workflowRuntime);
+      case 'enter-normal-path':
+        return new EnterNormalPathNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+      case 'enter-fallback-path':
+        return new EnterFallbackPathNodeImpl(this.workflowRuntime);
+      case 'exit-normal-path':
+        return new ExitNormalPathNodeImpl(step as any, this.workflowRuntime);
+      case 'exit-fallback-path':
+        return new ExitFallbackPathNodeImpl(step as any, this.workflowRuntime);
       case 'enter-if':
         return new EnterIfNodeImpl(
           step as any,

@@ -40,7 +40,7 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 10290
   discoverShared: 2322
-  elasticAssistant: 294308
+  elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 18810
   embeddableAlertsTable: 6596
@@ -81,6 +81,7 @@ pageLoadAssetSize:
   infra: 56302
   ingestPipelines: 17866
   inputControlVis: 9842
+  inspectComponent: 4900
   inspector: 18000
   interactiveSetup: 42153
   intercepts: 19011
@@ -122,7 +123,7 @@ pageLoadAssetSize:
   productDocBase: 3058
   productIntercept: 9860
   profiling: 20716
-  reindexService: 2781
+  reindexService: 3601
   remoteClusters: 10170
   reporting: 58600
   rollup: 12709
@@ -200,4 +201,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 5773
+  workflowsManagement: 6200

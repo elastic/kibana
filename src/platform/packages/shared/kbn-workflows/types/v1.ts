@@ -33,6 +33,7 @@ export interface EsWorkflowExecution {
   status: ExecutionStatus;
   context: Record<string, any>;
   workflowDefinition: WorkflowYaml;
+  yaml: string;
   currentNodeId?: string; // The node currently being executed
   stack: string[];
   createdAt: string;
@@ -40,6 +41,9 @@ export interface EsWorkflowExecution {
   createdBy: string;
   startedAt: string;
   finishedAt: string;
+  cancelRequested: boolean;
+  cancelledAt?: string;
+  cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   traceId?: string; // APM trace ID for observability
@@ -104,9 +108,10 @@ export interface WorkflowExecutionDto {
   stepExecutions: EsWorkflowStepExecution[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  yaml: string;
 }
 
-export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions'>;
+export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions' | 'yaml'>;
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
@@ -134,6 +139,7 @@ export const EsWorkflowSchema = z.object({
   definition: WorkflowSchema,
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
+  valid: z.boolean().readonly(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
@@ -176,6 +182,7 @@ export interface UpdatedWorkflowResponseDto {
   id: string;
   lastUpdatedAt: Date;
   lastUpdatedBy: string | undefined;
+  valid: boolean;
 }
 
 export interface WorkflowDetailDto {
@@ -187,8 +194,9 @@ export interface WorkflowDetailDto {
   createdBy: string;
   lastUpdatedAt: Date;
   lastUpdatedBy: string;
-  definition: WorkflowYaml;
+  definition: WorkflowYaml | null;
   yaml: string;
+  valid: boolean;
 }
 
 export interface WorkflowListItemDto {
@@ -200,6 +208,7 @@ export interface WorkflowListItemDto {
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];
+  valid: boolean;
 }
 
 export interface WorkflowListDto {
@@ -213,7 +222,7 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
+  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
   isTestRun?: boolean;
 }
 
