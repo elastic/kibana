@@ -19,13 +19,16 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const kibanaServer = getService('kibanaServer');
-  const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const es = getService('es');
   const retry = getService('retry');
   const spaces = getService('spaces');
-  const customSpace = 'privmontestspace';
   const supertest = getService('supertest');
+
+  const customSpace = 'privmontestspace';
+
+  const privMonUtils = PrivMonUtils(getService);
+  const privMonUtilsCustomSpace = PrivMonUtils(getService, customSpace);
 
   const createUserIndex = async (indexName: string) =>
     es.indices.create({
@@ -128,8 +131,8 @@ export default ({ getService }: FtrProviderContext) => {
         // Initialize engines for both default and custom spaces
         await enablePrivmonSetting(kibanaServer);
         await enablePrivmonSetting(kibanaServer, customSpace);
-        await api.initMonitoringEngine();
-        await api.initMonitoringEngine(customSpace);
+        await privMonUtils.initPrivMonEngine();
+        await privMonUtilsCustomSpace.initPrivMonEngine();
       });
 
       after(async () => {
@@ -157,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
         log.info('Disabling privilege monitoring engine in custom space');
 
         // Re-initialize for this test since previous test disabled it
-        await api.initMonitoringEngine(customSpace);
+        await privMonUtils.initPrivMonEngine();
         const res = await api.disableMonitoringEngine(customSpace);
 
         if (res.status !== 200) {
@@ -205,10 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should handle complete init-disable-reinit cycle', async () => {
         // Initialize engine
         log.info('Initializing privilege monitoring engine');
-        const initRes = await api.initMonitoringEngine();
-        expect(initRes.status).toBe(200);
-        expect(initRes.body.status).toBe('started');
-
+        await privMonUtils.initPrivMonEngine();
         const soStatus = await getPrivMonSoStatus();
         expect(soStatus.saved_objects[0].attributes.status).toBe('started');
 
@@ -232,18 +232,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Re-initialize after disable
         log.info('Initializing privilege monitoring engine after disable');
-        const initResAfterDisable = await api.initMonitoringEngine();
-        expect(initResAfterDisable.status).toBe(200);
-        expect(initResAfterDisable.body.status).toBe('started');
+        await privMonUtils.initPrivMonEngine();
 
         const soStatusOnInitAfterDisable = await getPrivMonSoStatus();
         expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).toBe('started');
 
         // Test re-initializing (should be idempotent)
         log.info('Re-initializing privilege monitoring engine after disable');
-        const reInitRes = await api.initMonitoringEngine();
-        expect(reInitRes.status).toBe(200);
-        expect(reInitRes.body.status).toBe('started');
+        await privMonUtils.initPrivMonEngine();
 
         const soStatusAfterReInit = await getPrivMonSoStatus();
         expect(soStatusAfterReInit.saved_objects[0].attributes.status).toBe('started');
@@ -269,9 +265,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should handle complete init-disable-reinit cycle in custom space', async () => {
         // Initialize engine in custom space
         log.info('Initializing privilege monitoring engine in custom space');
-        const initRes = await api.initMonitoringEngine(customSpace);
-        expect(initRes.status).toBe(200);
-        expect(initRes.body.status).toBe('started');
+        await privMonUtilsCustomSpace.initPrivMonEngine();
 
         const soStatus = await getPrivMonSoStatus(customSpace);
         expect(soStatus.saved_objects[0].attributes.status).toBe('started');
@@ -296,18 +290,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Re-initialize after disable
         log.info('Initializing privilege monitoring engine after disable in custom space');
-        const initResAfterDisable = await api.initMonitoringEngine(customSpace);
-        expect(initResAfterDisable.status).toBe(200);
-        expect(initResAfterDisable.body.status).toBe('started');
+        await privMonUtilsCustomSpace.initPrivMonEngine();
 
         const soStatusOnInitAfterDisable = await getPrivMonSoStatus(customSpace);
         expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).toBe('started');
 
         // Test re-initializing (should be idempotent)
         log.info('Re-initializing privilege monitoring engine after disable in custom space');
-        const reInitRes = await api.initMonitoringEngine(customSpace);
-        expect(reInitRes.status).toBe(200);
-        expect(reInitRes.body.status).toBe('started');
+        await privMonUtilsCustomSpace.initPrivMonEngine();
 
         const soStatusAfterReInit = await getPrivMonSoStatus(customSpace);
         expect(soStatusAfterReInit.saved_objects[0].attributes.status).toBe('started');
@@ -352,30 +342,16 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to be called multiple times', async () => {
         log.info(`Initializing Privilege Monitoring engine`);
-        const res1 = await api.initMonitoringEngine();
-
-        if (res1.status !== 200) {
-          log.error(`Failed to initialize engine`);
-          log.error(JSON.stringify(res1.body));
-        }
-
-        expect(res1.status).toEqual(200);
-
+        await privMonUtils.initPrivMonEngine();
         log.info(`Re-initializing Privilege Monitoring engine`);
-        const res2 = await api.initMonitoringEngine();
-        if (res2.status !== 200) {
-          log.error(`Failed to re-initialize engine`);
-          log.error(JSON.stringify(res2.body));
-        }
-
-        expect(res2.status).toEqual(200);
+        await privMonUtils.initPrivMonEngine();
       });
     });
 
     describe('schedule now', () => {
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
-        await api.initMonitoringEngine();
+        await privMonUtils.initPrivMonEngine();
       });
       afterEach(async () => {
         await disablePrivmonSetting(kibanaServer);
