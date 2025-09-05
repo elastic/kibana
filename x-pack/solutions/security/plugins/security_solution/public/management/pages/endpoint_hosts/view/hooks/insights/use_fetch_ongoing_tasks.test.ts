@@ -25,17 +25,10 @@ jest.mock('../../../../../../common/lib/kibana', () => ({
   }),
 }));
 
-jest.mock('../../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn(),
 }));
 
-const mockUseIsExperimentalFeatureEnabled = jest.requireMock(
-  '../../../../../../common/hooks/use_experimental_features'
-).useIsExperimentalFeatureEnabled;
 const mockUseQuery = jest.requireMock('@tanstack/react-query').useQuery;
 
 describe('useFetchLatestScan', () => {
@@ -52,9 +45,8 @@ describe('useFetchLatestScan', () => {
     });
   });
 
-  describe('feature flag OFF - single query', () => {
-    it('should make single query without type parameter', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  describe('single insight type', () => {
+    it('should make single query with size parameter', async () => {
       mockHttpGet.mockResolvedValue({
         data: [
           {
@@ -84,20 +76,23 @@ describe('useFetchLatestScan', () => {
         query: {
           endpoint_ids: ['endpoint-1'],
           size: 1,
-          // No type parameter
         },
       });
       expect(mockOnSuccess).toHaveBeenCalledWith(2);
     });
   });
 
-  describe('feature flag ON - parallel queries', () => {
-    it('should make parallel queries for both insight types', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  describe('multiple insight types', () => {
+    it('should make single query with size parameter for multiple types', async () => {
       mockHttpGet.mockResolvedValue({
         data: [
           {
-            id: 'test-insight',
+            id: 'test-insight-1',
+            status: DefendInsightStatusEnum.succeeded,
+            insights: [{ group: 'test', events: [{}] }],
+          },
+          {
+            id: 'test-insight-2',
             status: DefendInsightStatusEnum.succeeded,
             insights: [{ group: 'test', events: [{}] }],
           },
@@ -117,28 +112,18 @@ describe('useFetchLatestScan', () => {
       // Wait for async operations to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(mockHttpGet).toHaveBeenCalledTimes(2);
+      expect(mockHttpGet).toHaveBeenCalledTimes(1);
       expect(mockHttpGet).toHaveBeenCalledWith(DEFEND_INSIGHTS, {
         version: API_VERSIONS.internal.v1,
         query: {
           endpoint_ids: ['endpoint-1'],
-          size: 1,
-          type: 'incompatible_antivirus',
+          size: 2,
         },
       });
-      expect(mockHttpGet).toHaveBeenCalledWith(DEFEND_INSIGHTS, {
-        version: API_VERSIONS.internal.v1,
-        query: {
-          endpoint_ids: ['endpoint-1'],
-          size: 1,
-          type: 'policy_response_failure',
-        },
-      });
-      expect(mockOnSuccess).toHaveBeenCalledWith(2); // 1 event from each query
+      expect(mockOnSuccess).toHaveBeenCalledWith(2); // 1 event from each insight
     });
 
     it('should continue polling when insights are running', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       mockHttpGet.mockResolvedValue({
         data: [
           {
@@ -167,7 +152,6 @@ describe('useFetchLatestScan', () => {
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
     });
     it('should call onInsightGenerationFailure when insights fail', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       mockHttpGet.mockResolvedValue({
         data: [
           {
@@ -197,7 +181,6 @@ describe('useFetchLatestScan', () => {
     });
 
     it('should call onSuccess with 0 when no insights found', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       mockHttpGet.mockResolvedValue({ data: [] });
 
       renderHook(() =>
@@ -219,19 +202,8 @@ describe('useFetchLatestScan', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle partial failures in multi-type queries gracefully', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockHttpGet
-        .mockResolvedValueOnce({
-          data: [
-            {
-              id: 'test-insight-1',
-              status: DefendInsightStatusEnum.succeeded,
-              insights: [{ group: 'test', events: [{}, {}] }],
-            },
-          ],
-        })
-        .mockRejectedValueOnce(new Error('Second query failed'));
+    it('should handle query failures gracefully', async () => {
+      mockHttpGet.mockRejectedValue(new Error('Query failed'));
 
       renderHook(() =>
         useFetchLatestScan({
@@ -245,38 +217,21 @@ describe('useFetchLatestScan', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(mockHttpGet).toHaveBeenCalledTimes(2);
-      expect(mockOnSuccess).toHaveBeenCalledWith(2);
-      expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
-    });
-
-    it('should handle all queries failing in multi-type mode', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockHttpGet
-        .mockRejectedValueOnce(new Error('Query 1 failed'))
-        .mockRejectedValueOnce(new Error('Query 2 failed'));
-
-      renderHook(() =>
-        useFetchLatestScan({
-          isPolling: false,
-          endpointId: 'endpoint-1',
-          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
-          onSuccess: mockOnSuccess,
-          onInsightGenerationFailure: mockOnInsightGenerationFailure,
-        })
-      );
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      expect(mockHttpGet).toHaveBeenCalledTimes(2);
-      expect(mockOnSuccess).toHaveBeenCalledWith(0);
+      expect(mockHttpGet).toHaveBeenCalledTimes(1);
+      expect(mockHttpGet).toHaveBeenCalledWith(DEFEND_INSIGHTS, {
+        version: API_VERSIONS.internal.v1,
+        query: {
+          endpoint_ids: ['endpoint-1'],
+          size: 2,
+        },
+      });
+      expect(mockOnSuccess).not.toHaveBeenCalled();
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
     });
   });
 
   describe('Event Count Calculation Edge Cases', () => {
     it('should handle insights without events properly', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       mockHttpGet.mockResolvedValue({
         data: [
           {
@@ -309,7 +264,6 @@ describe('useFetchLatestScan', () => {
     });
 
     it('should correctly sum events across multiple insights', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       mockHttpGet.mockResolvedValue({
         data: [
           {
@@ -346,26 +300,20 @@ describe('useFetchLatestScan', () => {
 
   describe('Mixed Status Scenarios', () => {
     it('should handle mixed insight statuses correctly - running takes precedence', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockHttpGet
-        .mockResolvedValueOnce({
-          data: [
-            {
-              id: 'running-insight',
-              status: DefendInsightStatusEnum.running,
-              insights: [{ group: 'test', events: [{}] }],
-            },
-          ],
-        })
-        .mockResolvedValueOnce({
-          data: [
-            {
-              id: 'succeeded-insight',
-              status: DefendInsightStatusEnum.succeeded,
-              insights: [{ group: 'test', events: [{}] }],
-            },
-          ],
-        });
+      mockHttpGet.mockResolvedValue({
+        data: [
+          {
+            id: 'running-insight',
+            status: DefendInsightStatusEnum.running,
+            insights: [{ group: 'test', events: [{}] }],
+          },
+          {
+            id: 'succeeded-insight',
+            status: DefendInsightStatusEnum.succeeded,
+            insights: [{ group: 'test', events: [{}] }],
+          },
+        ],
+      });
 
       renderHook(() =>
         useFetchLatestScan({
@@ -379,32 +327,34 @@ describe('useFetchLatestScan', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
+      expect(mockHttpGet).toHaveBeenCalledTimes(1);
+      expect(mockHttpGet).toHaveBeenCalledWith(DEFEND_INSIGHTS, {
+        version: API_VERSIONS.internal.v1,
+        query: {
+          endpoint_ids: ['endpoint-1'],
+          size: 2,
+        },
+      });
       expect(mockOnSuccess).not.toHaveBeenCalled();
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
     });
 
     it('should handle failed status with running status - failed takes precedence', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockHttpGet
-        .mockResolvedValueOnce({
-          data: [
-            {
-              id: 'failed-insight',
-              status: DefendInsightStatusEnum.failed,
-              failureReason: 'Test failure',
-              insights: [],
-            },
-          ],
-        })
-        .mockResolvedValueOnce({
-          data: [
-            {
-              id: 'running-insight',
-              status: DefendInsightStatusEnum.running,
-              insights: [],
-            },
-          ],
-        });
+      mockHttpGet.mockResolvedValue({
+        data: [
+          {
+            id: 'failed-insight',
+            status: DefendInsightStatusEnum.failed,
+            failureReason: 'Test failure',
+            insights: [],
+          },
+          {
+            id: 'running-insight',
+            status: DefendInsightStatusEnum.running,
+            insights: [],
+          },
+        ],
+      });
 
       renderHook(() =>
         useFetchLatestScan({
@@ -418,6 +368,14 @@ describe('useFetchLatestScan', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
+      expect(mockHttpGet).toHaveBeenCalledTimes(1);
+      expect(mockHttpGet).toHaveBeenCalledWith(DEFEND_INSIGHTS, {
+        version: API_VERSIONS.internal.v1,
+        query: {
+          endpoint_ids: ['endpoint-1'],
+          size: 2,
+        },
+      });
       expect(mockOnInsightGenerationFailure).toHaveBeenCalled();
       expect(mockOnSuccess).not.toHaveBeenCalled();
     });

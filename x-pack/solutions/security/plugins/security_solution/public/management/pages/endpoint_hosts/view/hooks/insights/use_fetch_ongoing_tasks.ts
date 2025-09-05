@@ -14,7 +14,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 interface UseFetchOngoingScansConfig {
   isPolling: boolean;
@@ -33,52 +32,20 @@ export const useFetchLatestScan = ({
 }: UseFetchOngoingScansConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
-  const defendInsightsPolicyResponseFailureEnabled = useIsExperimentalFeatureEnabled(
-    'defendInsightsPolicyResponseFailure'
-  );
 
   return useQuery<{ hasRunning: boolean }, { body?: { error: string } }, { hasRunning: boolean }>(
-    [`fetchOngoingTasks-${endpointId}`, insightTypes, defendInsightsPolicyResponseFailureEnabled],
+    [`fetchOngoingTasks-${endpointId}`, insightTypes.length],
     async () => {
       try {
-        const makeSingleQuery = async (): Promise<DefendInsightsResponse[]> => {
-          const response = await http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
-            version: API_VERSIONS.internal.v1,
-            query: {
-              endpoint_ids: [endpointId],
-              size: 1,
-            },
-          });
-          return response.data;
-        };
+        const response = await http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
+          version: API_VERSIONS.internal.v1,
+          query: {
+            endpoint_ids: [endpointId],
+            size: insightTypes.length,
+          },
+        });
 
-        const makeMultiTypeQueries = async (): Promise<DefendInsightsResponse[]> => {
-          const queries = insightTypes.map((type) =>
-            http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
-              version: API_VERSIONS.internal.v1,
-              query: {
-                endpoint_ids: [endpointId],
-                size: 1,
-                type, // Query for specific insight type
-              },
-            })
-          );
-
-          const results = await Promise.allSettled(queries);
-
-          return results
-            .filter(
-              (result): result is PromiseFulfilledResult<{ data: DefendInsightsResponse[] }> =>
-                result.status === 'fulfilled'
-            )
-            .flatMap((result) => result.value.data);
-        };
-
-        const fetchInsights = defendInsightsPolicyResponseFailureEnabled
-          ? makeMultiTypeQueries
-          : makeSingleQuery;
-
-        const insights = await fetchInsights();
+        const insights = response.data;
 
         const processQueryResults = (insightResults: DefendInsightsResponse[]) => {
           if (!insightResults.length) {
