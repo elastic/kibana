@@ -23,7 +23,7 @@ import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
@@ -205,11 +205,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [indexUpdateService]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" css={{ overflow: 'hidden', height: '100%' }}>
+    <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
         <RowColumnCreator dataTableRef={dataTableRef} />
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
         <UnifiedDataTable
           ref={dataTableRef}
           customGridColumnsConfiguration={customGridColumnsConfiguration}
@@ -260,7 +260,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             }
           `}
         />
-        <EuiSpacer size="l" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

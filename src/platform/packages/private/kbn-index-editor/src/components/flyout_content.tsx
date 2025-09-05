@@ -133,7 +133,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             `}
           >
             <FileDropzone noResults={noResults}>
-              <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
                 <EuiFlexItem grow={false}>
                   <QueryBar />
                 </EuiFlexItem>
