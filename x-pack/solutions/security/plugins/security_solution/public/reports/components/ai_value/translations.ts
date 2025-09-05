@@ -434,7 +434,7 @@ export const EXECUTIVE_SUMMARY_MAIN_TEXT = ({
 }) =>
   i18n.translate('xpack.securitySolution.reports.aiValue.executiveSummaryMainText', {
     defaultMessage:
-      ' over the last {timeRange} days — significantly increasing threat detection coverage. These results are based on automating alert triage, using an average review time of {minutesPerAlert} minutes per alert and a {analystRate}/hour analyst rate.',
+      ' over the last {timeRange} days — significantly increasing threat detection coverage. These results are based on automating alert triage, using an average review time of {minutesPerAlert} minutes per alert and a ${analystRate}/hour analyst rate.',
     values: {
       timeRange,
       minutesPerAlert,
