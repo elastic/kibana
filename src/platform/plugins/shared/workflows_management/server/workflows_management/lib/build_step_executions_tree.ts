@@ -8,100 +8,58 @@
  */
 
 import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import type { StepListTreeItem } from '@kbn/workflows/graph';
-import { convertToWorkflowGraph, getNestedStepsFromGraph } from '@kbn/workflows/graph';
-
-interface StepExecutionTreeItem extends StepListTreeItem {
-  status: ExecutionStatus;
-  stepExecutionId: string | null;
-  children: StepExecutionTreeItem[];
-}
+import type { ExecutionStatus } from '@kbn/workflows';
+import type { StepExecutionTreeItem } from '@kbn/workflows';
+import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
 export function buildStepExecutionsTree(
   workflowDefinition: WorkflowYaml,
   workflowExecutionStatus: ExecutionStatus,
   stepExecutions: WorkflowStepExecutionDto[]
-): StepListTreeItem[] {
-  const stepExecutionMap = new Map<string, WorkflowStepExecutionDto[]>();
+): StepExecutionTreeItem[] {
+  const stepMap = new Map<string, StepExecutionTreeItem>();
+  const roots: StepExecutionTreeItem[] = [];
+  const workflowExecutionGraph = convertToWorkflowGraph(workflowDefinition);
+
+  // add all steps to the map
   for (const stepExecution of stepExecutions) {
-    if (stepExecutionMap.has(stepExecution.stepId)) {
-      stepExecutionMap.get(stepExecution.stepId)?.push(stepExecution);
+    const lastPart = stepExecution.path[stepExecution.path.length - 1];
+    if (lastPart === 'true' || lastPart === 'false' || !isNaN(parseInt(lastPart, 10))) {
+      stepMap.set(stepExecution.path.join('.'), {
+        stepId: stepExecution.path.slice(-2).join(':'),
+        stepType: lastPart,
+        executionIndex: stepExecution.executionIndex,
+        stepExecutionId: null,
+        status: null,
+        children: [],
+      });
+    }
+    const path = [...stepExecution.path, stepExecution.stepId].join('.');
+    stepMap.set(path, {
+      stepId: stepExecution.stepId,
+      stepType: workflowExecutionGraph.node(stepExecution.stepId)?.type,
+      executionIndex: stepExecution.executionIndex,
+      stepExecutionId: stepExecution.id,
+      status: stepExecution.status,
+      children: [],
+    });
+  }
+
+  for (const [path, item] of stepMap.entries()) {
+    if (path.split('.').length === 1) {
+      roots.push(item);
     } else {
-      stepExecutionMap.set(stepExecution.stepId, [stepExecution]);
+      const parentPath = path.split('.').slice(0, -1).join('.');
+      const parent = stepMap.get(parentPath);
+      if (parent) {
+        parent.children.push(item);
+      } else {
+        throw new Error(`No parent found for ${path}`);
+      }
     }
   }
-  const stepListTree = transformWorkflowDefinitionToStepListTree(workflowDefinition);
-  return enrichStepListTreeWithStepExecutions(
-    stepListTree,
-    workflowExecutionStatus,
-    stepExecutionMap,
-    null
-  );
-}
 
-function transformWorkflowDefinitionToStepListTree(
-  workflowDefinition: WorkflowYaml
-): StepListTreeItem[] {
-  const workflowExecutionGraph = convertToWorkflowGraph(workflowDefinition);
-  return getNestedStepsFromGraph(workflowExecutionGraph);
-}
+  // TODO: add skipped steps from workflowExecutionGraph
 
-function enrichStepListTreeWithStepExecutions(
-  treeItems: StepExecutionTreeItem[] | StepListTreeItem[],
-  wfExecutionStatus: ExecutionStatus,
-  stepExecutionMap: Map<string, WorkflowStepExecutionDto[]>,
-  parentId: string | null
-): StepExecutionTreeItem[] {
-  return treeItems
-    .map((item) => {
-      let stepExecutions = stepExecutionMap.get(item.stepId) ?? [];
-      if (parentId) {
-        stepExecutions = stepExecutions.filter(
-          (stepExecution) => stepExecution.parentId === parentId
-        );
-      }
-      if (!stepExecutions.length) {
-        // return [];
-        const mockStatus =
-          wfExecutionStatus === ExecutionStatus.PENDING ||
-          wfExecutionStatus === ExecutionStatus.WAITING ||
-          wfExecutionStatus === ExecutionStatus.RUNNING
-            ? ExecutionStatus.PENDING
-            : ExecutionStatus.SKIPPED;
-        return [
-          {
-            ...item,
-            executionIndex: item.executionIndex,
-            status: mockStatus,
-            stepExecutionId: null,
-            children:
-              item.children.length > 0
-                ? enrichStepListTreeWithStepExecutions(
-                    item.children,
-                    wfExecutionStatus,
-                    stepExecutionMap,
-                    null
-                  )
-                : [],
-          },
-        ];
-      }
-      return stepExecutions.map((stepExecution) => ({
-        ...item,
-        status: stepExecution.status,
-        stepExecutionId: stepExecution.id,
-        children:
-          item.children.length > 0
-            ? enrichStepListTreeWithStepExecutions(
-                item.children,
-                wfExecutionStatus,
-                stepExecutionMap,
-                stepExecution.id
-              )
-            : [],
-      }));
-    })
-    .flat()
-    .sort((a, b) => a.executionIndex - b.executionIndex);
+  return roots;
 }

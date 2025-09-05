@@ -65,119 +65,80 @@ describe('buildStepExecutionsTree', () => {
       ],
       inputs: [],
     };
+    const mockCommonProps = {
+      workflowRunId: '1',
+      workflowId: '1',
+      startedAt: '2021-01-01T00:00:00Z',
+      completedAt: '2021-01-01T00:00:00Z',
+      executionTimeMs: 1000,
+      error: null,
+      output: null,
+      input: null,
+    };
     const workflowExecutionStatus = ExecutionStatus.COMPLETED;
     const stepExecutions: WorkflowStepExecutionDto[] = [
       {
         id: '1',
         stepId: 'console-step',
-        workflowRunId: '1',
-        workflowId: '1',
         status: ExecutionStatus.COMPLETED,
-        startedAt: '2021-01-01T00:00:00Z',
-        completedAt: '2021-01-01T00:00:00Z',
-        executionTimeMs: 1000,
         topologicalIndex: 0,
         executionIndex: 0,
-        parentId: null,
-        error: null,
-        output: null,
-        input: null,
+        path: [],
+        ...mockCommonProps,
       },
       {
         id: '2',
         stepId: 'if-step',
-        workflowRunId: '1',
-        workflowId: '1',
         status: ExecutionStatus.COMPLETED,
-        startedAt: '2021-01-01T00:00:00Z',
-        completedAt: '2021-01-01T00:00:00Z',
-        executionTimeMs: 1000,
         topologicalIndex: 0,
         executionIndex: 0,
-        parentId: null,
-        error: null,
-        output: null,
-        input: null,
+        path: [],
+        ...mockCommonProps,
       },
       {
         id: '3',
         stepId: 'inner-console-step',
-        workflowRunId: '1',
-        workflowId: '1',
         status: ExecutionStatus.COMPLETED,
-        startedAt: '2021-01-01T00:00:00Z',
-        completedAt: '2021-01-01T00:00:00Z',
-        executionTimeMs: 1000,
         topologicalIndex: 0,
         executionIndex: 0,
-        parentId: '2',
-        error: null,
-        output: null,
-        input: null,
+        path: ['if-step', 'true'],
+        ...mockCommonProps,
       },
       {
         id: '4',
         stepId: 'foreach-step',
-        workflowRunId: '1',
-        workflowId: '1',
         status: ExecutionStatus.RUNNING,
-        startedAt: '2021-01-01T00:00:00Z',
-        completedAt: '2021-01-01T00:00:00Z',
-        executionTimeMs: 1000,
         topologicalIndex: 0,
         executionIndex: 0,
-        parentId: '2',
-        error: null,
-        output: null,
-        input: null,
+        path: ['if-step', 'true'],
+        ...mockCommonProps,
       },
       {
         id: '5',
         stepId: 'inner-inner-console-step',
-        workflowRunId: '1',
-        workflowId: '1',
         status: ExecutionStatus.COMPLETED,
-        parentId: '4',
-        startedAt: '2021-01-01T00:00:00Z',
-        completedAt: '2021-01-01T00:00:00Z',
-        executionTimeMs: 1000,
+        path: ['if-step', 'true', 'foreach-step', '0'],
         topologicalIndex: 0,
         executionIndex: 0,
-        error: null,
-        output: null,
-        input: null,
+        ...mockCommonProps,
       },
       {
         id: '6',
         stepId: 'inner-inner-console-step',
-        workflowRunId: '1',
-        workflowId: '1',
         status: ExecutionStatus.COMPLETED,
-        parentId: '4',
-        startedAt: '2021-01-01T00:00:00Z',
-        completedAt: '2021-01-01T00:00:00Z',
-        executionTimeMs: 1000,
+        path: ['if-step', 'true', 'foreach-step', '1'],
         topologicalIndex: 0,
         executionIndex: 1,
-        error: null,
-        output: null,
-        input: null,
+        ...mockCommonProps,
       },
       {
         id: '7',
         stepId: 'inner-inner-console-step',
-        workflowRunId: '1',
-        workflowId: '1',
         status: ExecutionStatus.FAILED,
-        parentId: '4',
-        startedAt: '2021-01-01T00:00:00Z',
-        completedAt: '2021-01-01T00:00:00Z',
-        executionTimeMs: 1000,
+        path: ['if-step', 'true', 'foreach-step', '2'],
         topologicalIndex: 0,
         executionIndex: 2,
-        error: null,
-        output: null,
-        input: null,
+        ...mockCommonProps,
       },
     ];
     const stepExecutionsTree = buildStepExecutionsTree(
@@ -196,15 +157,58 @@ describe('buildStepExecutionsTree', () => {
         stepId: 'if-step',
       })
     );
-    expect(stepExecutionsTree[1].children.length).toBe(3);
+    expect(stepExecutionsTree[1].children.length).toBe(1);
     expect(stepExecutionsTree[1].children[0]).toEqual(
+      expect.objectContaining({
+        stepId: 'if-step:true',
+      })
+    );
+    expect(stepExecutionsTree[1].children[0].children.length).toBe(2);
+    expect(stepExecutionsTree[1].children[0].children[0]).toEqual(
       expect.objectContaining({
         stepId: 'inner-console-step',
       })
     );
-    expect(stepExecutionsTree[1].children[1]).toEqual(
+    expect(stepExecutionsTree[1].children[0].children[1]).toEqual(
       expect.objectContaining({
-        stepId: 'else-console-step',
+        stepId: 'foreach-step',
+      })
+    );
+    expect(stepExecutionsTree[1].children[0].children[1].children.length).toBe(3);
+    expect(stepExecutionsTree[1].children[0].children[1].children[0]).toEqual(
+      expect.objectContaining({
+        stepId: 'foreach-step:0',
+      })
+    );
+    expect(stepExecutionsTree[1].children[0].children[1].children[0].children.length).toBe(1);
+    expect(stepExecutionsTree[1].children[0].children[1].children[0].children[0]).toEqual(
+      expect.objectContaining({
+        stepId: 'inner-inner-console-step',
+        executionIndex: 0,
+      })
+    );
+    expect(stepExecutionsTree[1].children[0].children[1].children[1]).toEqual(
+      expect.objectContaining({
+        stepId: 'foreach-step:1',
+      })
+    );
+    expect(stepExecutionsTree[1].children[0].children[1].children[1].children.length).toBe(1);
+    expect(stepExecutionsTree[1].children[0].children[1].children[1].children[0]).toEqual(
+      expect.objectContaining({
+        stepId: 'inner-inner-console-step',
+        executionIndex: 1,
+      })
+    );
+    expect(stepExecutionsTree[1].children[0].children[1].children[2]).toEqual(
+      expect.objectContaining({
+        stepId: 'foreach-step:2',
+      })
+    );
+    expect(stepExecutionsTree[1].children[0].children[1].children[2].children.length).toBe(1);
+    expect(stepExecutionsTree[1].children[0].children[1].children[2].children[0]).toEqual(
+      expect.objectContaining({
+        stepId: 'inner-inner-console-step',
+        executionIndex: 2,
       })
     );
   });

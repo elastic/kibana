@@ -80,7 +80,7 @@ export interface EsWorkflowStepExecution {
   executionTimeMs?: number;
   topologicalIndex: number;
   executionIndex: number;
-  parentId?: string | null;
+  path: string[];
   error?: string | null;
   output?: Record<string, any> | null;
   input?: Record<string, any> | null;
@@ -117,7 +117,7 @@ export interface StepListTreeItem {
 }
 
 export interface StepExecutionTreeItem extends StepListTreeItem {
-  status: ExecutionStatus;
+  status: ExecutionStatus | null;
   stepExecutionId: string | null;
   children: StepExecutionTreeItem[];
 }
