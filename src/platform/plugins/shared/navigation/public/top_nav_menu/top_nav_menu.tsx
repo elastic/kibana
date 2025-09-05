@@ -93,6 +93,23 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
           button:last-child {
             margin-right: 0;
           }
+          /* Split button styling: Save + Save-more flush */
+          .dscSplitSaveLeft {
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            margin-right: 0 !important;
+          }
+          .dscSplitSaveRight {
+            border-left: none !important;
+            border-top-left-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+            /* Overlap the EuiHeaderLinks gutter (xxs) */
+            margin-left: -4px !important;
+          }
+          /* When unsaved changes are present, leave a 1px visual gap */
+          .dscSplitSaveRight.dscSplitSaveRight--hasChanges {
+            margin-left: -3px !important;
+          }
         `}
         popoverBreakpoints={props.popoverBreakpoints}
         gutterSize={gutterSize}
