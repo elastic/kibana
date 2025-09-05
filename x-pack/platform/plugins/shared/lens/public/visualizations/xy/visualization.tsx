@@ -62,14 +62,11 @@ import type {
   AnnotationGroups,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+import type { State, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import {
-  type State,
-  type XYLayerConfig,
-  type XYDataLayerConfig,
-  type SeriesType,
-  visualizationSubtypes,
   visualizationTypes,
-} from './types';
+  visualizationSubtypes,
+} from '../../../common/visualizations/xy_visualization';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,

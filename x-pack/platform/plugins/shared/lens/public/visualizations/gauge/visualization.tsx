@@ -35,9 +35,13 @@ import type {
   UserMessage,
   Visualization,
 } from '../../types';
+import {
+  visualizationTypes,
+  LENS_GAUGE_ID,
+} from '../../../common/visualizations/gauge_visualization';
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
-import { GROUP_ID, LENS_GAUGE_ID } from './constants';
+import { GROUP_ID } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
@@ -172,26 +176,8 @@ export const getGaugeVisualization = ({
   getVisualizationTypeId() {
     return this.id;
   },
-  visualizationTypes: [
-    {
-      id: LENS_GAUGE_ID,
-      icon: IconChartGauge,
-      label: i18n.translate('xpack.lens.gauge.label', {
-        defaultMessage: 'Gauge',
-      }),
-      sortPriority: 7,
-      description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
-        defaultMessage: 'Show progress to a goal in linear or arced style.',
-      }),
-      subtypes: [
-        GaugeShapes.HORIZONTAL_BULLET,
-        GaugeShapes.VERTICAL_BULLET,
-        GaugeShapes.SEMI_CIRCLE,
-        GaugeShapes.ARC,
-        GaugeShapes.CIRCLE,
-      ],
-    },
-  ],
+  visualizationTypes,
+
   getLayerIds(state) {
     return [state.layerId];
   },

@@ -65,7 +65,7 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { ChartType } from '@kbn/visualization-utils';
+import type { ChartType, LensVisualizationType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -109,7 +109,6 @@ import {
 import type { FormatFactory } from '../common/types';
 import type {
   Visualization,
-  VisualizationType,
   EditorFrameSetup,
   LensTopNavMenuEntryGenerator,
   VisualizeEditorContext,
@@ -117,6 +116,7 @@ import type {
   DatasourceMap,
   VisualizationMap,
 } from './types';
+import type { VisualizationType } from '../common/types';
 import { lensVisTypeAlias } from './vis_type_alias';
 import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
 import type {
@@ -288,6 +288,7 @@ export type LensSuggestionsApi = (
   dataViews: DataView,
   excludedVisualizations?: string[],
   preferredChartType?: ChartType,
+  preferredVisualizationId?: LensVisualizationType,
   preferredVisAttributes?: TypedLensByValueInput['attributes']
 ) => Suggestion[] | undefined;
 
@@ -793,6 +794,7 @@ export class LensPlugin {
             dataView,
             excludedVisualizations,
             preferredChartType,
+            preferredVisualizationId,
             preferredVisAttributes
           ) => {
             return suggestionsApi({
@@ -802,6 +804,7 @@ export class LensPlugin {
               dataView,
               excludedVisualizations,
               preferredChartType,
+              preferredVisualizationId,
               preferredVisAttributes,
             });
           },

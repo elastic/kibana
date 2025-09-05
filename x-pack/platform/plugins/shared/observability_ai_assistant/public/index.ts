@@ -60,6 +60,7 @@ export {
 export {
   VisualizeESQLUserIntention,
   VISUALIZE_ESQL_USER_INTENTIONS,
+  LegacyVisualizeESQLUserIntention,
 } from '../common/functions/visualize_esql';
 
 export {

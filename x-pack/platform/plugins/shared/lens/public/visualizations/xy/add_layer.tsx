@@ -25,7 +25,7 @@ import type { AddLayerFunction, VisualizationLayerDescription } from '../../type
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
 import type { SeriesType, XYState } from './types';
-import { visualizationTypes } from './types';
+import { visualizationTypes } from '../../../common/visualizations/xy_visualization';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';

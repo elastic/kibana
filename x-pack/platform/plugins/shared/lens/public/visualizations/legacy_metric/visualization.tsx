@@ -35,6 +35,7 @@ import { MetricToolbar } from './metric_config_panel';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
 import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
 import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
+import { visualizationTypes } from '../../../common/visualizations/legacy_metric_visualization';
 
 interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;
@@ -163,20 +164,7 @@ export const getLegacyMetricVisualization = ({
   getVisualizationTypeId() {
     return this.id;
   },
-  visualizationTypes: [
-    {
-      id: 'lnsLegacyMetric',
-      icon: IconChartMetric,
-      label: i18n.translate('xpack.lens.legacyMetric.label', {
-        defaultMessage: 'Legacy Metric',
-      }),
-      isDeprecated: true,
-      sortPriority: 100,
-      description: i18n.translate('xpack.lens.legacyMetric.visualizationDescription', {
-        defaultMessage: 'Present individual key metrics or KPIs.',
-      }),
-    },
-  ],
+  visualizationTypes,
   hideFromChartSwitch(frame: FramePublicAPI) {
     return Object.values(frame.datasourceLayers).some(
       (datasource) => datasource && datasource.datasourceId === 'textBased'

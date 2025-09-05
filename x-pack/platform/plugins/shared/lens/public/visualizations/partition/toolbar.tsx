@@ -23,7 +23,7 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PartitionChartsMeta } from './partition_charts_meta';
+import { PartitionChartsMeta } from '../../../common/visualizations/partition/partition_charts_meta';
 import type { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
 import { EmptySizeRatios } from '../../../common/types';
 import { LegendDisplay, NumberDisplay } from '../../../common/constants';

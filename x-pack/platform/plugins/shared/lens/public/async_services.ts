@@ -61,3 +61,4 @@ export { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 
 export { deserializeState } from './react_embeddable/helper';
 export * from './react_embeddable/lens_embeddable';
+export { visualizationSubtypes } from '../common/visualizations/xy_visualization';

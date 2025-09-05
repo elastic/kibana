@@ -13,8 +13,6 @@ import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { LayerType } from '../../../common/types';
 
-export const LENS_GAUGE_ID = 'lnsGauge';
-
 export const GROUP_ID = {
   METRIC: 'metric',
   MIN: 'min',

@@ -56,6 +56,10 @@ import {
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
+import {
+  visualizationLabel,
+  visualizationTypes,
+} from '../../../common/visualizations/datatable_visualization';
 import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
 
@@ -72,10 +76,6 @@ export interface DatatableVisualizationState {
   density?: DataGridDensity;
 }
 
-const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
-  defaultMessage: 'Table',
-});
-
 export const getDatatableVisualization = ({
   paletteService,
   kibanaTheme,
@@ -87,17 +87,7 @@ export const getDatatableVisualization = ({
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
-  visualizationTypes: [
-    {
-      id: 'lnsDatatable',
-      icon: IconChartDatatable,
-      label: visualizationLabel,
-      sortPriority: 5,
-      description: i18n.translate('xpack.lens.datatable.visualizationDescription', {
-        defaultMessage: 'Organize data in structured rows and columns.',
-      }),
-    },
-  ],
+  visualizationTypes,
 
   getVisualizationTypeId() {
     return this.id;

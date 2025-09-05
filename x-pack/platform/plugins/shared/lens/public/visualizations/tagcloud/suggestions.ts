@@ -9,8 +9,9 @@ import { partition } from 'lodash';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
-import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
+import { DEFAULT_STATE } from './constants';
 import { getColorMappingDefaults } from '../../utils';
+import { TAGCLOUD_LABEL } from '../../../common/visualizations/tagcloud_visualization';
 
 export function getSuggestions({
   table,

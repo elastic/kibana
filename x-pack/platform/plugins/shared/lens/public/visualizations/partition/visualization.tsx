@@ -44,7 +44,10 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
-import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
+import {
+  PartitionChartsMeta,
+  visualizationTypes,
+} from '../../../common/visualizations/partition/partition_charts_meta';
 import { PieToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';

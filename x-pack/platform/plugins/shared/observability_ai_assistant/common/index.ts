@@ -17,6 +17,7 @@ export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
   VisualizeESQLUserIntention,
+  LegacyVisualizeESQLUserIntention,
 } from './functions/visualize_esql';
 
 export type {

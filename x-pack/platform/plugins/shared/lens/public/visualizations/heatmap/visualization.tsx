@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import { IconChartHeatmap } from '@kbn/chart-icons';
 import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -40,6 +39,7 @@ import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { FormBasedPersistedState } from '../..';
 import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
+import { visualizationTypes } from '../../../common/visualizations/heatmap_visualization';
 
 interface HeatmapVisualizationDeps {
   paletteService: PaletteRegistry;
@@ -113,19 +113,7 @@ export const getHeatmapVisualization = ({
   getVisualizationTypeId(state) {
     return state.shape;
   },
-  visualizationTypes: [
-    {
-      id: 'heatmap',
-      icon: IconChartHeatmap,
-      label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
-        defaultMessage: 'Heat map',
-      }),
-      sortPriority: 8,
-      description: i18n.translate('xpack.lens.heatmap.visualizationDescription', {
-        defaultMessage: 'Show density or distribution across two dimensions.',
-      }),
-    },
-  ],
+  visualizationTypes,
 
   getLayerIds(state) {
     return [state.layerId];

@@ -7,6 +7,7 @@
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
 import type { Position } from '@elastic/charts';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
 import type { ColorMode } from '@kbn/charts-plugin/common';
@@ -115,4 +116,42 @@ export interface ValueFormatConfig {
     fromUnit?: string;
     toUnit?: string;
   };
+}
+/**
+ * A visualization type advertised to the user in the chart switcher
+ */
+export interface VisualizationType {
+  /**
+   * Unique id of the visualization type within the visualization defining it
+   */
+  id: string;
+  /**
+   * Icon used in the chart switcher
+   */
+  icon: IconType;
+  /**
+   * Visible label used in the chart switcher and above the workspace panel in collapsed state
+   */
+  label: string;
+  description: string;
+  /**
+   * Optional label used in visualization type search if chart switcher is expanded and for tooltips
+   */
+  fullLabel?: string;
+  /**
+   * Priority of the visualization for sorting in chart switch
+   * Lower number means higher priority (aka top of list).
+   *
+   */
+  sortPriority: number;
+  /**
+   * Indicates if visualization is in the experimental stage.
+   */
+  showExperimentalBadge?: boolean;
+  /**
+   * Indicates if visualization is deprecated.
+   */
+  isDeprecated?: boolean;
+  subtypes?: string[];
+  getCompatibleSubtype?: (seriesType?: string) => string | undefined;
 }

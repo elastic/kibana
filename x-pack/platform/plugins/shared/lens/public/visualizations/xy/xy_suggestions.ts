@@ -19,7 +19,8 @@ import type {
 } from '../../types';
 import { getColorMappingDefaults } from '../../utils';
 import type { State, XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
-import { visualizationSubtypes, defaultSeriesType } from './types';
+import { defaultSeriesType } from './types';
+import { visualizationSubtypes } from '../../../common/visualizations/xy_visualization';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
