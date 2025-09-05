@@ -302,6 +302,10 @@ export class WrappingPrettyPrinter {
     let remainingCurrentLine = inp.remaining;
     let oneArgumentPerLine = false;
 
+    if (ctx.node.name === 'fork') {
+      oneArgumentPerLine = true;
+    }
+
     for (const child of children(ctx.node)) {
       if (getPrettyPrintStats(child).hasLineBreakingDecorations) {
         oneArgumentPerLine = true;
@@ -385,9 +389,13 @@ export class WrappingPrettyPrinter {
           remaining: this.opts.wrap - indent.length,
           suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
         });
-        const separator = isFirstArg ? '' : '\n';
         const indentation = arg.indented ? '' : indent;
-        txt += separator + indentation + arg.txt;
+        let formattedArg = arg.txt;
+        if (args[i].type === 'query') {
+          formattedArg = `(\n${this.opts.tab.repeat(2)}${formattedArg}\n${indentation})`;
+        }
+        const separator = isFirstArg ? '' : '\n';
+        txt += separator + indentation + formattedArg;
         lines++;
       }
     }
@@ -733,9 +741,10 @@ export class WrappingPrettyPrinter {
       return { txt, lines: args.lines /* add options lines count */ };
     })
 
-    .on('visitQuery', (ctx) => {
+    .on('visitQuery', (ctx, inp: Input): Output => {
       const opts = this.opts;
-      const indent = opts.indent ?? '';
+      const indent = inp?.indent ?? opts.indent ?? '';
+      const remaining = inp?.remaining ?? opts.wrap;
       const commands = ctx.node.commands;
       const commandCount = commands.length;
 
@@ -750,20 +759,21 @@ export class WrappingPrettyPrinter {
 
       if (!multiline) {
         const oneLine = indent + BasicPrettyPrinter.print(ctx.node, opts);
-        if (oneLine.length <= opts.wrap) {
-          return oneLine;
+        if (oneLine.length <= remaining) {
+          return { txt: oneLine };
         } else {
           multiline = true;
         }
       }
 
+      // Regular top-level query formatting
       let text = indent;
       const pipedCommandIndent = `${indent}${opts.pipeTab ?? '  '}`;
       const cmdSeparator = multiline ? `${pipedCommandIndent}| ` : ' | ';
       let i = 0;
       let prevOut: Output | undefined;
 
-      for (const out of ctx.visitCommands({ indent, remaining: opts.wrap - indent.length })) {
+      for (const out of ctx.visitCommands({ indent, remaining: remaining - indent.length })) {
         const isFirstCommand = i === 0;
         const isSecondCommand = i === 1;
 
@@ -794,10 +804,10 @@ export class WrappingPrettyPrinter {
         prevOut = out;
       }
 
-      return text;
+      return { txt: text };
     });
 
   public print(query: ESQLAstQueryExpression) {
-    return this.visitor.visitQuery(query, undefined);
+    return this.visitor.visitQuery(query, undefined).txt;
   }
 }
