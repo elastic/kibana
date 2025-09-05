@@ -45,7 +45,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
 
   // Apply animation to the metric value
   useMetricAnimation({
-    animationDurationMs: 2000,
+    animationDurationMs: 1500,
     selector: '.echMetricText__value',
   });
 

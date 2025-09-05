@@ -19,7 +19,7 @@ interface UseMetricAnimationProps {
  * Prevents flash by immediately hiding elements and using mutation observer
  */
 export const useMetricAnimation = ({
-  animationDurationMs = 2000,
+  animationDurationMs = 1500,
   selector = '.echMetricText__value',
 }: UseMetricAnimationProps) => {
   const animationRef = useRef<d3.Selection<HTMLElement> | null>(null);
