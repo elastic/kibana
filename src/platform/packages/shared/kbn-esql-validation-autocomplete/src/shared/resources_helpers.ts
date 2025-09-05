@@ -114,6 +114,10 @@ export function getColumnsByTypeHelper(
       subqueries.push(Builder.expression.query(root.commands.slice(0, i + 1)));
     }
 
+    if (!subqueries.length) {
+      return;
+    }
+
     // source command
     getFields(BasicPrettyPrinter.print(subqueries[0]));
 

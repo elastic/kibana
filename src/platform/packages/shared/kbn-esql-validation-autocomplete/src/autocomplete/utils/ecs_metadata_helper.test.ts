@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
+import { type ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ECSMetadata, enrichFieldsWithECSInfo } from './ecs_metadata_helper';
 
 describe('enrichFieldsWithECSInfo', () => {
@@ -58,9 +59,10 @@ describe('enrichFieldsWithECSInfo', () => {
         name: 'ecs.field',
         type: 'text',
         isEcs: true,
+        userDefined: false,
       },
-      { name: 'ecs.fakeBooleanField', type: 'boolean' },
-      { name: 'field2', type: 'double' },
+      { name: 'ecs.fakeBooleanField', type: 'boolean', isEcs: true, userDefined: false },
+      { name: 'field2', type: 'double', isEcs: false, userDefined: false },
     ]);
   });
 
@@ -90,14 +92,15 @@ describe('enrichFieldsWithECSInfo', () => {
       fieldsMetadataCache.fields as ECSMetadata
     );
 
-    expect(result).toEqual([
-      { name: 'ecs.version', type: 'keyword', isEcs: true },
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'ecs.version', type: 'keyword', isEcs: true, userDefined: false },
       {
         name: 'ecs.version.keyword',
         type: 'keyword',
         isEcs: true,
+        userDefined: false,
       },
-      { name: 'field2', type: 'double' },
+      { name: 'field2', type: 'double', userDefined: false },
     ]);
   });
 });
