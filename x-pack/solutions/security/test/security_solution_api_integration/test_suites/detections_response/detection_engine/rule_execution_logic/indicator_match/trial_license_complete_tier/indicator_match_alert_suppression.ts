@@ -1239,7 +1239,7 @@ export default ({ getService }: FtrProviderContext) => {
         // rule should correctly go through them and suppress
         // that can be an issue when search results returning in desc order
         // this test is added to verify suppression works fine for this cases
-        it.only('should suppress alerts on large number of documents, more than 9,000', async () => {
+        it('should suppress alerts on large number of documents, more than 9,000', async () => {
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1253,10 +1253,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           await indexGeneratedSourceDocuments({
             docsCount: 60000,
-            interval: [firstTimestamp, '2020-10-28T05:45:50.000Z'],
-            seed: (index, _, timestamp) => ({
+            seed: (index) => ({
               id,
-              '@timestamp': timestamp,
+              '@timestamp': new Date('2020-10-28T05:45:00.000Z').getTime() - index,
               host: {
                 name: `host-${index}`,
               },
@@ -1266,10 +1265,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           await indexGeneratedSourceDocuments({
             docsCount: 60000,
-            interval: [secondTimestamp, '2020-10-28T06:20:50.000Z'],
-            seed: (index, _, timestamp) => ({
+            seed: (index) => ({
               id,
-              '@timestamp': timestamp,
+              '@timestamp': new Date('2020-10-28T06:20:00.000Z').getTime() - index,
               host: {
                 name: `host-${index}`,
               },
