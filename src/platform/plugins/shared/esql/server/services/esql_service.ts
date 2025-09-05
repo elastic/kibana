@@ -45,12 +45,13 @@ export class EsqlService {
     const sources = (await client.indices.resolveIndex({
       name: sourcesToQuery,
       expand_wildcards: 'open',
+      querystring: {
+        mode,
+      },
     })) as ResolveIndexResponse;
 
     sources.indices?.forEach((index) => {
-      if (index.mode === mode) {
-        indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
-      }
+      indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
     });
 
     const crossClusterCommonIndices = remoteClusters
