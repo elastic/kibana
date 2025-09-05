@@ -16,6 +16,7 @@ import { CellActions } from '../../shared/components/cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { EditHighlightedFieldsButton } from './highlighted_fields_button';
+import { EVENT_SOURCE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 export interface HighlightedFieldsTableRow {
   /**
@@ -93,6 +94,11 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               scopeId={description.scopeId}
               showPreview={true}
               ancestorsIndexName={description.ancestorsIndexName}
+              displayValuesLimit={
+                (description?.originalField ?? description.field) === EVENT_SOURCE_FIELD_NAME
+                  ? 2
+                  : undefined
+              }
             />
           </CellActions>
         ) : (
@@ -100,6 +106,11 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
             values={description.values}
             field={description.field}
             originalField={description.originalField}
+            displayValuesLimit={
+              (description?.originalField ?? description.field) === EVENT_SOURCE_FIELD_NAME
+                ? 2
+                : undefined
+            }
           />
         )}
       </>
