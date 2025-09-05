@@ -75,6 +75,7 @@ const mockSavedObjectAttributes = {
   tags: ['tag1', 'tag2'],
   maintenance_windows: [],
   project_id: 'test-project',
+  spaces: [mockSpaceId],
 };
 
 const mockSavedObject = {
@@ -413,7 +414,7 @@ describe('getMonitors', () => {
         tags: ['tag1', 'tag2'],
         maintenanceWindows: [],
         timestamp: '2024-01-01T00:00:00.000Z',
-        spaces: 'default',
+        spaces: ['default'],
         locationLabel: 'US East',
         locationId: 'us-east-1',
         urls: 'https://example.com',

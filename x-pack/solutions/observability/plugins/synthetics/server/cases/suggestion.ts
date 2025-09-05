@@ -13,6 +13,7 @@ import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain/sugge
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { SYNTHETICS_SUGGESTION_COMPONENT_ID } from '../../common/constants/cases';
 import type {
   EncryptedSyntheticsMonitorAttributes,
@@ -182,7 +183,7 @@ export function getMonitors(
                   tags: relatedSavedObjectAttr.tags ?? [],
                   maintenanceWindows: relatedSavedObjectAttr.maintenance_windows ?? [],
                   timestamp: source['@timestamp'],
-                  spaces: source.meta.space_id,
+                  spaces: relatedSavedObjectAttr.spaces,
                   locationLabel: source.observer.geo.name,
                   locationId: source.observer.name,
                   urls: source.url.full,
@@ -193,11 +194,21 @@ export function getMonitors(
           });
 
           const suggestions = monitorsOverviewMetaData.flatMap((monitor) => {
-            const url = locator?.getRedirectUrl({
-              configId: monitor.configId,
-              locationId: monitor.locationId,
-              spaceId: monitor.spaces ?? [],
-            });
+            const monitorSpaceId =
+              monitor.spaces?.includes(ALL_SPACES_ID) ||
+              !monitor.spaces ||
+              monitor.spaces.length === 0
+                ? {}
+                : { spaceId: monitor.spaces[0] };
+
+            const url = locator?.getRedirectUrl(
+              {
+                configId: monitor.configId,
+                locationId: monitor.locationId,
+              },
+              monitorSpaceId
+            );
+
             if (!url) {
               logger.error(
                 `No URL found for monitor ${monitor.name} with service ${monitor.service.name}`
