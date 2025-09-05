@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import { selectTabRuntimeState, useCurrentTabSelector } from '../../state_management/redux';
 import type { UseUnifiedHistogramOptions } from './use_discover_histogram';
@@ -16,21 +16,31 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 
 export const useUnifiedHistogramRuntimeState = (stateContainer: DiscoverStateContainer) => {
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
-  const [options, setOptions] = useState<UseUnifiedHistogramOptions>({});
-
-  const updateTopPanelHeight = useLatest(() => {
-    const layoutProps$ = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      currentTabId
-    ).unifiedHistogramLayoutProps$;
-
-    const layoutProps = { ...layoutProps$.getValue(), topPanelHeight: undefined };
-
-    layoutProps$.next(layoutProps);
-    setOptions({ initialLayoutProps: layoutProps });
+  const [options, setOptions] = useState<UseUnifiedHistogramOptions>({
+    initialLayoutProps: undefined,
   });
 
-  useMemo(() => {
+  const [layoutProps$] = useState(
+    () =>
+      selectTabRuntimeState(stateContainer.runtimeStateManager, currentTabId)
+        .unifiedHistogramLayoutProps$
+  );
+
+  const updateTopPanelHeight = useLatest(() => {
+    layoutProps$.next({ ...layoutProps$.getValue(), topPanelHeight: undefined });
+  });
+
+  useEffect(() => {
+    const subscription = layoutProps$.subscribe((newLayoutProps) => {
+      setOptions((prevState) => ({
+        initialLayoutProps: { ...(prevState.initialLayoutProps ?? {}), ...newLayoutProps },
+      }));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [layoutProps$]);
+
+  useEffect(() => {
     updateTopPanelHeight.current();
   }, [updateTopPanelHeight]);
 

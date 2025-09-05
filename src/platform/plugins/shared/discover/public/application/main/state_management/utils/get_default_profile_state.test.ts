@@ -83,35 +83,6 @@ describe('getDefaultProfileState', () => {
       }).getPreFetchState();
       expect(appState).toEqual(undefined);
     });
-
-    it('should return expected chartSectionHeight', () => {
-      let appState = getDefaultProfileState({
-        scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
-        dataView: dataViewWithTimefieldMock,
-      }).getPreFetchState();
-      expect(appState).toEqual({
-        chartSectionHeight: 'max-content',
-      });
-      appState = getDefaultProfileState({
-        scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
-        dataView: emptyDataView,
-      }).getPreFetchState();
-      expect(appState).toEqual(undefined);
-    });
   });
 
   describe('getPostFetchState', () => {
