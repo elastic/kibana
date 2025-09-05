@@ -242,25 +242,27 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
             </>
           )}
         </KibanaPageTemplate.Section>
-        {!isViewMode && (
-          <KibanaPageTemplate.BottomBar
-            css={css`
-              z-index: ${euiTheme.levels.header};
-            `}
-            paddingSize="m"
-            restrictWidth={false}
-            position="fixed"
-            usePortal
-          >
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <KibanaPageTemplate.BottomBar
+          css={css`
+            z-index: ${euiTheme.levels.header};
+          `}
+          paddingSize="m"
+          restrictWidth={false}
+          position="fixed"
+          usePortal
+        >
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            {!isViewMode && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty size="s" iconType="cross" onClick={handleCancel}>
                   {labels.tools.cancelButtonLabel}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {mode === ToolFormMode.Edit ? testButton : saveAndTestButton}
-              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              {mode === ToolFormMode.Create ? saveAndTestButton : testButton}
+            </EuiFlexItem>
+            {!isViewMode && (
               <EuiFlexItem grow={false}>
                 {Object.keys(errors).length > 0 ? (
                   <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>
@@ -270,9 +272,9 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                   saveButton
                 )}
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </KibanaPageTemplate.BottomBar>
-        )}
+            )}
+          </EuiFlexGroup>
+        </KibanaPageTemplate.BottomBar>
       </KibanaPageTemplate>
     </FormProvider>
   );
