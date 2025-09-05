@@ -125,7 +125,7 @@ const installDashboards = async (
             id: result.item?.id || '',
             title: dashboard.original_dashboard.title,
             description: dashboard.original_dashboard.description,
-            data: dashboard.original_dashboard.data,
+            data: result.item?.data ?? dashboard.elastic_dashboard.data,
           },
         });
       } catch (error) {
