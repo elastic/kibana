@@ -76,6 +76,7 @@ export default {
       iconType: LOGO.type,
     },
     setWidth: () => {},
+    solutionId: 'oblt',
   },
 } as Meta<PropsAndArgs>;
 
@@ -219,6 +220,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               items={props.items}
               logo={props.logo}
               setWidth={setNavigationWidth}
+              solutionId={props.solutionId}
             />
           }
           sidebar={
