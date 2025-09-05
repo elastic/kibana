@@ -142,12 +142,12 @@ export function ContentFrameworkSection({
       >
         <>
           <EuiSpacer size="s" />
-          <EuiPanel hasBorder={true} hasShadow={false}>
+          <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
             {children}
           </EuiPanel>
         </>
       </EuiAccordion>
-      {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : null}
+      {!isAccordionExpanded ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="s" />}
     </>
   );
 }
