@@ -19,9 +19,6 @@ export const ruleTemplateMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    consumer: {
-      type: 'keyword',
-    },
     ruleTypeId: {
       type: 'keyword',
     },

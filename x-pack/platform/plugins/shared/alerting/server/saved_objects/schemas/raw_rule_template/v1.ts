@@ -13,7 +13,6 @@ export const rawRuleTemplateSchema = schema.object({
   name: rawRuleSchema.getPropSchemas().name,
   tags: rawRuleSchema.getPropSchemas().tags,
   ruleTypeId: rawRuleSchema.getPropSchemas().alertTypeId,
-  consumer: rawRuleSchema.getPropSchemas().consumer,
   schedule: rawRuleSchema.getPropSchemas().schedule,
   flapping: rawRuleSchema.getPropSchemas().flapping,
   alertDelay: rawRuleSchema.getPropSchemas().alertDelay,
