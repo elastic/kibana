@@ -6,16 +6,20 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { SideNavVersion } from '@kbn/core-chrome-browser/src/project_navigation';
 import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
-export const createRulesNavigationTree = (): NodeDefinition => ({
+export const createRulesNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: SideNavVersion } = { sideNavVersion: 'v1' }
+): NodeDefinition => ({
   id: SecurityGroupName.rules,
   title: SecurityLinkGroup[SecurityGroupName.rules].title,
   iconV2: 'list',
   renderAs: 'panelOpener',
+  sideNavVersion,
   children: [
     {
       title: i18nStrings.rules.management.title,
@@ -43,6 +47,7 @@ export const createRulesNavigationTree = (): NodeDefinition => ({
         {
           id: SecurityPageName.cloudSecurityPostureBenchmarks,
           link: securityLink(SecurityPageName.cloudSecurityPostureBenchmarks),
+          sideNavVersion: 'v1',
         },
         {
           id: SecurityPageName.exceptions,

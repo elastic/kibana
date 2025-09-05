@@ -6,14 +6,18 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { SideNavVersion } from '@kbn/core-chrome-browser/src/project_navigation';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const createCasesNavigationTree = (): NodeDefinition => ({
+export const createCasesNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: SideNavVersion } = { sideNavVersion: 'v1' }
+): NodeDefinition => ({
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),
   renderAs: 'item',
-  iconV2: 'casesApp',
+  iconV2: 'folderClosed',
+  sideNavVersion,
   children: [
     {
       id: SecurityPageName.caseCreate,

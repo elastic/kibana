@@ -6,14 +6,20 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { SideNavVersion } from '@kbn/core-chrome-browser/src/project_navigation';
 import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
+export const createEntityAnalyticsNavigationTree = ({
+  sideNavVersion,
+}: {
+  sideNavVersion: SideNavVersion;
+}): NodeDefinition => ({
   id: SecurityGroupName.entityAnalytics,
   title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
   renderAs: 'panelOpener',
+  sideNavVersion,
   children: [
     {
       id: SecurityPageName.entityAnalyticsOverview,
