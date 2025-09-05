@@ -80,9 +80,5 @@ const filterButtonStyles = {
       '> *:not(:last-of-type)': {
         borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
       },
-      '& .euiButtonIcon': {
-        inlineSize: euiTheme.size.xl,
-        blockSize: euiTheme.size.xl,
-      },
     }),
 };
