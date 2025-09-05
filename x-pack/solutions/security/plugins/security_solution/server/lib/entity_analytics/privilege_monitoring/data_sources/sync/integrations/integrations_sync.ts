@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/monitoring';
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
 import { createSourcesSyncService } from '../sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
@@ -22,7 +23,7 @@ export const createIntegrationsSyncService = (dataClient: PrivilegeMonitoringDat
     await sourcesSyncService.syncBySourceType({
       soClient,
       sourceType: 'entity_analytics_integration',
-      process: async (source) => {
+      process: async (source: MonitoringEntitySource) => {
         // process each integration source
         await updateDetectionService.updateDetection(source);
         // await deletionDetectionService.deletionDetection(source);

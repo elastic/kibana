@@ -234,7 +234,7 @@ const runPrivilegeMonitoringTask = async ({
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
-    await dataSourcesService.syncAllSources(soClient); // dataclient - feature flags undefined
+    await dataSourcesService.syncAllSources(soClient);
   } catch (e) {
     logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }
