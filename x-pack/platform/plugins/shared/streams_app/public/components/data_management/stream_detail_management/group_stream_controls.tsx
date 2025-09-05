@@ -64,6 +64,7 @@ export function GroupStreamControls() {
             existingStream={definition.stream as Streams.GroupStream.Definition}
             existingDashboards={definition.dashboards}
             existingRules={definition.rules}
+            existingSlos={definition.slos}
             startingTab={startingTabFromPath(path.tab as GroupStreamManagementSubTab)}
           />
         </StreamsAppContextProvider>,

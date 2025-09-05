@@ -15,7 +15,13 @@ import { StreamDetailReferencesView } from '../../stream_detail_references_view/
 import { LinkedDashboardsView } from './linked_dashboards_view';
 import { GroupStreamDetailView } from './group_stream_detail_view';
 
-const groupStreamManagementSubTabs = ['overview', 'dashboards', 'references', 'rules'] as const;
+const groupStreamManagementSubTabs = [
+  'overview',
+  'references',
+  'dashboards',
+  'rules',
+  'slos',
+] as const;
 
 export type GroupStreamManagementSubTab = (typeof groupStreamManagementSubTabs)[number];
 
@@ -63,6 +69,12 @@ export function GroupStreamDetailManagement({
       content: <>Rules</>,
       label: i18n.translate('xpack.streams.streamDetailView.rulesTab', {
         defaultMessage: 'Rules',
+      }),
+    },
+    slos: {
+      content: <>SLOs</>,
+      label: i18n.translate('xpack.streams.streamDetailView.slosTab', {
+        defaultMessage: 'SLOs',
       }),
     },
   };

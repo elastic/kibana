@@ -26,8 +26,9 @@ import { DashboardsTab } from './dashboards_tab';
 import { OverviewTab } from './overview_tab';
 import type { GroupStreamFormData } from './types';
 import { RulesTab } from './rules_tab';
+import { SlosTab } from './slos_tab';
 
-export type GroupStreamModificationFlyoutTabId = 'overview' | 'dashboards' | 'rules';
+export type GroupStreamModificationFlyoutTabId = 'overview' | 'dashboards' | 'rules' | 'slos';
 interface GroupStreamModificationFlyoutTab {
   id: GroupStreamModificationFlyoutTabId;
   name: string;
@@ -42,6 +43,7 @@ export function GroupStreamModificationFlyout({
   existingStream,
   existingDashboards,
   existingRules,
+  existingSlos,
   startingTab = 'overview',
 }: {
   startingTab?: GroupStreamModificationFlyoutTabId;
@@ -50,8 +52,10 @@ export function GroupStreamModificationFlyout({
   streamsList?: Array<{ stream: Streams.all.Definition }>;
   refresh: () => void;
   existingStream?: Streams.GroupStream.Definition;
+  // I can collapse this to existing assets instead
   existingDashboards?: string[];
   existingRules?: string[];
+  existingSlos?: string[];
 }) {
   const {
     core: { http },
@@ -72,6 +76,7 @@ export function GroupStreamModificationFlyout({
       })) ?? [],
     dashboards: [],
     rules: [],
+    slos: [],
   });
 
   useEffect(() => {
@@ -127,27 +132,45 @@ export function GroupStreamModificationFlyout({
     enrichRules();
   }, [existingRules, http]);
 
-  async function modifyGroupStream() {
-    let streamBaseData: any = {};
-    if (existingStream) {
-      streamBaseData = await client.fetch('GET /api/streams/{name} 2023-10-31', {
-        params: {
-          path: { name: formData.name },
-        },
-        signal,
-      });
+  useEffect(() => {
+    if (!existingSlos) {
+      return;
     }
 
+    const enrichSlos = async () => {
+      // WARN: Streams plugin doesn't depend on SLO plugin
+      const response: { results: Array<{ id: string; name: string }> } = await http.get(
+        '/api/observability/slos',
+        {
+          query: {
+            page: 1,
+            perPage: 5000,
+          },
+        }
+      );
+
+      const slosMap = response.results.reduce<Record<string, string>>((acc, slo) => {
+        acc[slo.id] = slo.name;
+        return acc;
+      }, {});
+
+      setFormData((prevData) => ({
+        ...prevData,
+        slos: existingSlos
+          .map((sloId) => (slosMap[sloId] ? { id: sloId, name: slosMap[sloId] } : undefined))
+          .filter(Boolean) as Array<{ id: string; name: string }>,
+      }));
+    };
+
+    enrichSlos();
+  }, [existingSlos, http]);
+
+  async function modifyGroupStream() {
     client
       .fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: formData.name },
           body: {
-            slos: [],
-            queries: [],
-            ...streamBaseData, // I can remove this once I do SLOs since queries don't make sense for Group streams
-            dashboards: formData.dashboards.map((dashboard) => dashboard.id),
-            rules: formData.rules.map((rule) => rule.id),
             stream: {
               description: formData.description,
               group: {
@@ -156,6 +179,10 @@ export function GroupStreamModificationFlyout({
                 members: formData.members.map((opt) => opt.label),
               },
             },
+            dashboards: formData.dashboards.map((dashboard) => dashboard.id),
+            rules: formData.rules.map((rule) => rule.id),
+            slos: formData.slos.map((slo) => slo.id),
+            queries: [],
           },
         },
         signal,
@@ -218,6 +245,13 @@ export function GroupStreamModificationFlyout({
         defaultMessage: 'Rules',
       }),
       content: <RulesTab formData={formData} setFormData={setFormData} />,
+    },
+    {
+      id: 'slos',
+      name: i18n.translate('xpack.streams.groupStreamModificationFlyout.slosTabLabel', {
+        defaultMessage: 'SLOs',
+      }),
+      content: <SlosTab formData={formData} setFormData={setFormData} />,
     },
   ];
 

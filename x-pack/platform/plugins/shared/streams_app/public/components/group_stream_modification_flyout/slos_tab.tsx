@@ -11,30 +11,30 @@ import React, { useEffect, useState } from 'react';
 import type { TabProps } from './types';
 import { useKibana } from '../../hooks/use_kibana';
 
-export function RulesTab({ formData, setFormData }: TabProps) {
+export function SlosTab({ formData, setFormData }: TabProps) {
   const {
     core: { http },
   } = useKibana();
 
   const [query, setQuery] = useState('');
-  const [foundRules, setFoundRules] = useState<Array<{ name: string; id: string }>>([]);
+  const [foundSlos, setFoundSlos] = useState<Array<{ name: string; id: string }>>([]);
 
-  const fetchRules = React.useCallback(
+  const fetchSlos = React.useCallback(
     async (search: string = '') => {
-      const response: { data: Array<{ id: string; name: string }> } = await http.get(
-        '/api/alerting/rules/_find',
+      // WARN: Streams plugin doesn't depend on SLO plugin
+      const response: { results: Array<{ id: string; name: string }> } = await http.get(
+        '/api/observability/slos',
         {
           query: {
             page: 1,
-            per_page: 10000,
-            search,
-            search_fields: 'name',
+            perPage: 5000,
+            kqlQuery: search,
           },
         }
       );
 
-      setFoundRules(
-        response.data.map((rule: { id: string; name: string }) => ({
+      setFoundSlos(
+        response.results.map((rule: { id: string; name: string }) => ({
           id: rule.id,
           name: rule.name,
         }))
@@ -44,24 +44,24 @@ export function RulesTab({ formData, setFormData }: TabProps) {
   );
 
   useEffect(() => {
-    fetchRules();
-  }, [fetchRules]);
+    fetchSlos();
+  }, [fetchSlos]);
 
   const handleQueryChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
-    fetchRules(event.target.value);
+    fetchSlos(event.target.value);
   };
 
   const onSelectionChange = (newSelectedItems: { id: string; name: string }[]) => {
     setFormData({
       ...formData,
-      rules: newSelectedItems,
+      slos: newSelectedItems,
     });
   };
 
-  const availableRules = foundRules.filter((rule) => {
-    const matchesQuery = query === '' || rule.name.toLowerCase().includes(query.toLowerCase());
-    const alreadySelected = formData.rules.some((item) => item.id === rule.id);
+  const availableSlos = foundSlos.filter((slo) => {
+    const matchesQuery = query === '' || slo.name.toLowerCase().includes(query.toLowerCase());
+    const alreadySelected = formData.slos.some((item) => item.id === slo.id);
     return matchesQuery && !alreadySelected;
   });
 
@@ -69,76 +69,73 @@ export function RulesTab({ formData, setFormData }: TabProps) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          {i18n.translate('xpack.streams.groupStreamModificationFlyout.selectedRulesLabel', {
+          {i18n.translate('xpack.streams.groupStreamModificationFlyout.selectedSlosLabel', {
             defaultMessage: 'Selected',
           })}
           <EuiSpacer size="m" />
-          {formData.rules.length === 0
-            ? i18n.translate('xpack.streams.groupStreamModificationFlyout.noSelectedRulesLabel', {
-                defaultMessage: 'No rules selected',
+          {formData.slos.length === 0
+            ? i18n.translate('xpack.streams.groupStreamModificationFlyout.noSelectedSlosLabel', {
+                defaultMessage: 'No SLOs selected',
               })
-            : formData.rules.map((rule) => (
-                <EuiFlexGroup key={rule.id} gutterSize="s" alignItems="center">
+            : formData.slos.map((slo) => (
+                <EuiFlexGroup key={slo.id} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
                       iconType="cross"
                       color="danger"
                       aria-label={i18n.translate(
-                        'xpack.streams.groupStreamModificationFlyout.removeRuleButtonLabel',
+                        'xpack.streams.groupStreamModificationFlyout.removeSloButtonLabel',
                         { defaultMessage: 'Remove' }
                       )}
                       onClick={() => {
-                        const newSelected = formData.rules.filter((d) => d.id !== rule.id);
+                        const newSelected = formData.slos.filter((d) => d.id !== slo.id);
                         onSelectionChange(newSelected);
                       }}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={1}>{rule.name}</EuiFlexItem>
+                  <EuiFlexItem grow={1}>{slo.name}</EuiFlexItem>
                 </EuiFlexGroup>
               ))}
         </EuiFlexItem>
 
         <EuiFlexItem>
-          {i18n.translate('xpack.streams.groupStreamModificationFlyout.availableRulesLabel', {
+          {i18n.translate('xpack.streams.groupStreamModificationFlyout.availableSlosLabel', {
             defaultMessage: 'Available',
           })}
           <EuiSpacer size="m" />
           <EuiFieldText
             placeholder={i18n.translate(
-              'xpack.streams.groupStreamModificationFlyout.ruleFilterPlaceholder',
+              'xpack.streams.groupStreamModificationFlyout.sloFilterPlaceholder',
               { defaultMessage: 'Filter by name...' }
             )}
             value={query}
             onChange={handleQueryChange}
           />
           <EuiSpacer size="m" />
-          {availableRules.length === 0
+          {availableSlos.length === 0
             ? query
-              ? i18n.translate('xpack.streams.groupStreamModificationFlyout.noRulesFoundLabel', {
-                  defaultMessage: 'No rules found',
+              ? i18n.translate('xpack.streams.groupStreamModificationFlyout.noSlosFoundLabel', {
+                  defaultMessage: 'No SLOs found',
                 })
-              : i18n.translate(
-                  'xpack.streams.groupStreamModificationFlyout.noAvailableRulesLabel',
-                  {
-                    defaultMessage: 'No available rules',
-                  }
-                )
-            : availableRules.map((rule) => (
-                <React.Fragment key={rule.id}>
+              : i18n.translate('xpack.streams.groupStreamModificationFlyout.noAvailableSlosLabel', {
+                  defaultMessage: 'No available SLOs',
+                })
+            : availableSlos.map((slo) => (
+                <React.Fragment key={slo.id}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
                         iconType="plusInCircle"
                         aria-label={i18n.translate(
-                          'xpack.streams.groupStreamModificationFlyout.addRuleButtonLabel',
+                          'xpack.streams.groupStreamModificationFlyout.addSloButtonLabel',
                           { defaultMessage: 'Add' }
                         )}
                         onClick={() => {
-                          onSelectionChange([...formData.rules, rule]);
+                          onSelectionChange([...formData.slos, slo]);
                         }}
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem grow={1}>{rule.name}</EuiFlexItem>
+                    <EuiFlexItem grow={1}>{slo.name}</EuiFlexItem>
                   </EuiFlexGroup>
                   <EuiSpacer size="m" />
                 </React.Fragment>
