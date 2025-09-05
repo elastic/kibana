@@ -132,6 +132,7 @@ export function EditLifecycleModal({
                     setLifecycle({ inherit: {} });
                     setIsInherit(!isInherit);
                   }}
+                  data-test-subj="inheritDataRetentionSwitch"
                 />
               </EuiFlexItem>
             </>
