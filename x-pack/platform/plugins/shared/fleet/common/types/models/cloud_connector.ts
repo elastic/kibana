@@ -6,7 +6,7 @@
  */
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
-export interface CloudConnectorSecretVarValue {
+export interface CloudConnectorSecretReference {
   isSecretRef: boolean;
   id: string;
 }
@@ -17,8 +17,10 @@ export interface CloudConnectorRoleArn {
 }
 
 export interface CloudConnectorSecretVar {
+  // Password is a special type that indicates showing a secret reference on Fleet UI.
+  // Secret references are stored in the .fleet-secrets index but Cloud Connector stores the secret reference instead of the secret data.
   type?: 'password';
-  value: CloudConnectorSecretVarValue;
+  value: CloudConnectorSecretReference;
   frozen?: boolean;
 }
 
