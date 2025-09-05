@@ -56,6 +56,7 @@ export const interceptTriggerRecordSavedObject: SavedObjectsType<InterceptTrigge
     dynamic: false,
     properties: interceptTriggerProperties,
   },
+  migrations: {},
   modelVersions: {
     1: {
       changes: [],
