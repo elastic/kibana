@@ -9,11 +9,15 @@ components:
     MonitoringEngineDescriptor:
       type: object
       required:
-        - type
         - status
       properties:
         status:
           $ref: "#/components/schemas/PrivilegeMonitoringEngineStatus"
+        error:
+          type: object
+          properties:
+            message:
+              type: string
 
     PrivilegeMonitoringEngineStatus:
       type: string
