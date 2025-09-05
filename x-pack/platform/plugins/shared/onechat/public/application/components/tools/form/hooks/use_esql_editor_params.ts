@@ -7,7 +7,7 @@
 
 import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import { useEffect } from 'react';
-import type { OnechatEsqlParam } from '../types/esql_tool_form_types';
+import type { EsqlParam } from '../types/tool_form_types';
 
 const SOURCE_NAME = 'esql-param-validator';
 const COMMAND_ID = 'esql.addParam';
@@ -19,7 +19,7 @@ const highlightMissingParams = ({
   params,
 }: {
   model: monaco.editor.ITextModel;
-  params: OnechatEsqlParam[];
+  params: EsqlParam[];
 }) => {
   const definedParams = new Set(params.map((param) => param.name));
   const paramMatches = model.getValue().matchAll(PARAM_REGEX);
@@ -52,7 +52,7 @@ const setupSyntaxHighlighting = ({
   params,
 }: {
   model: monaco.editor.ITextModel;
-  params: OnechatEsqlParam[];
+  params: EsqlParam[];
 }): monaco.IDisposable => {
   if (model.getLanguageId() !== ESQL_LANG_ID) {
     return {
@@ -69,11 +69,7 @@ const setupSyntaxHighlighting = ({
   };
 };
 
-const setupCompletionProvider = ({
-  params,
-}: {
-  params: OnechatEsqlParam[];
-}): monaco.IDisposable => {
+const setupCompletionProvider = ({ params }: { params: EsqlParam[] }): monaco.IDisposable => {
   return monaco.languages.registerCompletionItemProvider(ESQL_LANG_ID, {
     triggerCharacters: ['?'],
     provideCompletionItems: (
@@ -144,7 +140,7 @@ const setupCompletionProvider = ({
 };
 
 export interface UseEsqlEditorParamsProps {
-  params: OnechatEsqlParam[];
+  params: EsqlParam[];
   addParam: (name: string) => void;
 }
 
