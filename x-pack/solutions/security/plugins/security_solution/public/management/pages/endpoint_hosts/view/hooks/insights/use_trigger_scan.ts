@@ -9,7 +9,6 @@ import { useMutation } from '@tanstack/react-query';
 import type { DefendInsightsResponse, DefendInsightType } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 
@@ -26,27 +25,17 @@ interface UseTriggerScanConfig {
 
 export const useTriggerScan = ({ onSuccess }: UseTriggerScanConfig) => {
   const { http } = useKibana().services;
-  const defendInsightsPolicyResponseFailureEnabled = useIsExperimentalFeatureEnabled(
-    'defendInsightsPolicyResponseFailure'
-  );
   const toasts = useToasts();
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
   return useMutation<DefendInsightsResponse[], { body?: { error: string } }, UseTriggerScanPayload>(
     async ({ endpointId, connectorId, actionTypeId, insightTypes }: UseTriggerScanPayload) => {
-      const enabledTypes = insightTypes.filter((type) => {
-        if (type === 'policy_response_failure' && !defendInsightsPolicyResponseFailureEnabled) {
-          return false;
-        }
-        return true;
-      });
-
-      if (enabledTypes.length === 0) {
+      if (insightTypes.length === 0) {
         return [];
       }
 
-      const scanPromises = enabledTypes.map((insightType) =>
+      const scanPromises = insightTypes.map((insightType) =>
         http.post<DefendInsightsResponse>(DEFEND_INSIGHTS, {
           version: API_VERSIONS.internal.v1,
           body: JSON.stringify({

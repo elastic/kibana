@@ -21,10 +21,6 @@ jest.mock('../../../../../../common/lib/kibana', () => ({
   }),
 }));
 
-jest.mock('../../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
 jest.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
   () => ({
@@ -36,9 +32,6 @@ jest.mock('@tanstack/react-query', () => ({
   useMutation: jest.fn(),
 }));
 
-const mockUseIsExperimentalFeatureEnabled = jest.requireMock(
-  '../../../../../../common/hooks/use_experimental_features'
-).useIsExperimentalFeatureEnabled;
 const mockUseMutation = jest.requireMock('@tanstack/react-query').useMutation;
 
 describe('useTriggerScan', () => {
@@ -61,9 +54,8 @@ describe('useTriggerScan', () => {
     });
   });
 
-  describe('feature flag OFF - filters policy_response_failure', () => {
-    it('should only trigger incompatible_antivirus scan when FF is OFF', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  describe('basic functionality', () => {
+    it('should trigger scan for single insight type', async () => {
       mockHttpPost.mockResolvedValue({ id: 'scan-result' });
 
       const { result } = renderHook(() => useTriggerScan({ onSuccess: mockOnSuccess }));
@@ -73,11 +65,10 @@ describe('useTriggerScan', () => {
           endpointId: 'endpoint-1',
           connectorId: 'connector-1',
           actionTypeId: 'action-1',
-          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+          insightTypes: ['incompatible_antivirus'],
         });
       });
 
-      // Should only make one POST call for incompatible_antivirus
       expect(mockHttpPost).toHaveBeenCalledTimes(1);
       expect(mockHttpPost).toHaveBeenCalledWith(DEFEND_INSIGHTS, {
         version: API_VERSIONS.internal.v1,
@@ -95,9 +86,7 @@ describe('useTriggerScan', () => {
       });
     });
 
-    it('should return empty array when only policy_response_failure requested and FF is OFF', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
+    it('should return empty array when no insight types provided', async () => {
       const { result } = renderHook(() => useTriggerScan({ onSuccess: mockOnSuccess }));
 
       const scanResult = await act(async () => {
@@ -105,7 +94,7 @@ describe('useTriggerScan', () => {
           endpointId: 'endpoint-1',
           connectorId: 'connector-1',
           actionTypeId: 'action-1',
-          insightTypes: ['policy_response_failure'],
+          insightTypes: [],
         });
       });
 
@@ -114,9 +103,8 @@ describe('useTriggerScan', () => {
     });
   });
 
-  describe('feature flag ON - allows all insight types', () => {
-    it('should trigger parallel scans for both insight types when FF is ON', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  describe('multiple insight types', () => {
+    it('should trigger parallel scans for all provided insight types', async () => {
       mockHttpPost.mockResolvedValue({ id: 'scan-result' });
 
       const { result } = renderHook(() => useTriggerScan({ onSuccess: mockOnSuccess }));
@@ -165,7 +153,6 @@ describe('useTriggerScan', () => {
 
   describe('error handling', () => {
     it('should handle partial scan failures gracefully', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       mockHttpPost
         .mockResolvedValueOnce({ id: 'success-result' })
         .mockRejectedValueOnce(new Error('Network error'));
