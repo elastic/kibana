@@ -20657,7 +20657,7 @@ gcp-metadata@^6.1.0:
     gaxios "^6.0.0"
     json-bigint "^1.0.0"
 
-geckodriver@^6.0.0:
+geckodriver@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-6.0.1.tgz#19ec4ce36502c6d497da824dcbe194b15f23027c"
   integrity sha512-mtr5j+Bvc1QfaAsFTt3cbjOGvUihCQNP2/FqhUcIWoujjtO/SY0DVPU7Zsj2dukP2KmPMTUCqRyNP21dhBsA5Q==
