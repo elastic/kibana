@@ -231,7 +231,7 @@ function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Gra
   };
   const enterThenBranchNode: EnterConditionBranchNode = {
     id: `enterThen(${enterConditionNodeId})`,
-    type: 'enter-condition-branch',
+    type: 'enter-then-branch',
     condition: ifElseStep.condition,
   };
 
@@ -240,7 +240,7 @@ function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Gra
 
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen(${enterConditionNodeId})`,
-    type: 'exit-condition-branch',
+    type: 'exit-then-branch',
     startNodeId: enterThenBranchNode.id,
   };
   const thenGraph = createStepsSequence(trueSteps, context);
@@ -251,13 +251,13 @@ function createIfGraph(ifStep: IfStep, context: GraphBuildContext): graphlib.Gra
   if (falseSteps?.length > 0) {
     const enterElseBranchNode: EnterConditionBranchNode = {
       id: `enterElse(${enterConditionNodeId})`,
-      type: 'enter-condition-branch',
+      type: 'enter-else-branch',
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
     const exitElseBranchNode: ExitConditionBranchNode = {
       id: `exitElse(${enterConditionNodeId})`,
-      type: 'exit-condition-branch',
+      type: 'exit-else-branch',
       startNodeId: enterElseBranchNode.id,
     };
     const elseGraph = createStepsSequence(falseSteps, context);
