@@ -138,8 +138,6 @@ export const AgentsList: React.FC = () => {
           showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
-          // Don't display clone action for default agent
-          available: (agent) => agent.id !== oneChatDefaultAgentId,
         },
         {
           // Have to use a custom action to display the danger color
