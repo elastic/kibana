@@ -600,7 +600,11 @@ describe('#create', () => {
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
 
-    expect(actualSpace).toEqual({ ...expectedReturnedSpace, solution: 'es' });
+    expect(actualSpace).toEqual({
+      ...expectedReturnedSpace,
+      disabledFeatures: ['feature_2', 'feature_3'], // Added dynamically because solution is 'es',
+      solution: 'es',
+    });
 
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
       type: 'space',
