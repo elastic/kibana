@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerAccessControl } from './src';
-export { AccessControlClient, type AccessControlClientPublic } from './src';
+export { AccessControlClient } from './src';
 export type {
   CheckGlobalPrivilegeResponse,
   ChangeAccesModeParameters,

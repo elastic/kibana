@@ -29,7 +29,7 @@ import { registerContentInsights } from '@kbn/content-management-content-insight
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { registerAccessControl } from '@kbn/access-control';
+import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,

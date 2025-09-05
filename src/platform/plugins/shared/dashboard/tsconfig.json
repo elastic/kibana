@@ -3,7 +3,15 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "*.ts",
+    ".storybook/**/*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../packages/shared/content-management/access_control/access_control_public/src/components/access_mode_container.tsx",
+    "../../../packages/shared/content-management/access_control/access_control_public/src/components/access_mode_container.test.tsx"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",

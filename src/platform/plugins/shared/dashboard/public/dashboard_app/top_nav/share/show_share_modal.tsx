@@ -29,6 +29,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import { AccessModeContainer } from '../../access_control/access_mode_container';
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService, coreServices } from '../../../services/kibana_services';
@@ -37,7 +38,6 @@ import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
 import type { SaveDashboardReturn } from '../../../services/dashboard_content_management_service/types';
-import { AccessModeContainer } from '../../access_control/access_mode_container';
 
 const showFilterBarId = 'showFilterBar';
 

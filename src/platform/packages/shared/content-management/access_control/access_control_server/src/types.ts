@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/access-control'],
-};
+import type { CoreSetup } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+
+export interface CheckGlobalAccessControlPrivilegeDependencies {
+  http: CoreSetup['http'];
+  getStartServices: () => Promise<{
+    security?: SecurityPluginStart;
+  }>;
+}

@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { schema } from '@kbn/config-schema';
-
-export interface CheckGlobalAccessControlPrivilegeDependencies {
-  http: CoreSetup['http'];
-  getStartServices: () => Promise<{
-    security?: SecurityPluginStart;
-  }>;
-}
+import type { CheckGlobalAccessControlPrivilegeDependencies } from './types';
 
 export const registerAccessControl = async ({
   http,

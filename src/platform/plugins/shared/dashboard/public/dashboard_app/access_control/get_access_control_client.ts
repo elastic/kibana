@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AccessControlClient } from '@kbn/access-control';
+import { AccessControlClient } from '@kbn/content-management-access-control-public';
 import { CONTENT_ID } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
 
