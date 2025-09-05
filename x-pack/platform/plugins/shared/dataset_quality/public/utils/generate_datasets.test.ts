@@ -116,6 +116,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
         docsInTimeRange: 102,
         quality: 'degraded',
@@ -143,6 +144,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
         docsInTimeRange: 100,
         quality: 'poor',
@@ -183,6 +185,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
         docsInTimeRange: 2,
         quality: 'poor',
@@ -210,6 +213,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
         docsInTimeRange: 0,
         quality: 'good',
@@ -381,6 +385,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
         quality: 'good',
         docsInTimeRange: 100,
@@ -408,6 +413,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
         quality: 'good',
         docsInTimeRange: 100,
@@ -456,6 +462,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
           canReadFailureStore: true,
+          canManageFailureStore: true,
         },
         quality: 'good',
         totalDocs: 100,
