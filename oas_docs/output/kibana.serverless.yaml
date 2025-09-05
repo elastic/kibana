@@ -62262,7 +62262,6 @@ components:
               type: string
           required:
             - type
-            - content
       description: Interrupt that requests user to provide text input
     Security_AI_Assistant_API_InterruptResumeValue:
       description: Union of the interrupt resume values
