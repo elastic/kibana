@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -50,7 +50,7 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { type AdditionalFieldGroups, useQuerySubscriber } from '@kbn/unified-field-list';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
@@ -104,14 +104,12 @@ function DiscoverDocumentsComponent({
   onAddFilter,
   stateContainer,
   onFieldEdited,
-  additionalFieldGroups,
 }: {
   viewModeToggle: React.ReactElement | undefined;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
-  additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
 }) {
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
@@ -491,7 +489,6 @@ function DiscoverDocumentsComponent({
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
-            additionalFieldGroups={additionalFieldGroups}
             externalCustomRenderers={cellRenderers}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
