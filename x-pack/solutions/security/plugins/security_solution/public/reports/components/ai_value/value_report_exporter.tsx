@@ -20,14 +20,9 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
 
   const toasts = useToasts();
   const uiAdjuster = useCallback((eRef: HTMLDivElement) => {
-    const exportButton = eRef.querySelector('.exportPdfButton');
     const valueReportSettings = eRef.querySelector('.valueReportSettings');
 
     const adjustUI = () => {
-      if (exportButton) {
-        exportButton.setAttribute('data-original-style', exportButton.getAttribute('style') || '');
-        (exportButton as HTMLElement).style.display = 'none';
-      }
       if (valueReportSettings) {
         valueReportSettings.setAttribute(
           'data-original-style',
@@ -38,14 +33,6 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
     };
 
     const restoreUI = () => {
-      if (exportButton) {
-        const original = exportButton.getAttribute('data-original-style');
-        if (original) {
-          exportButton.setAttribute('style', original);
-        } else {
-          exportButton.removeAttribute('style');
-        }
-      }
       if (valueReportSettings) {
         const original = valueReportSettings.getAttribute('data-original-style');
         if (original) {

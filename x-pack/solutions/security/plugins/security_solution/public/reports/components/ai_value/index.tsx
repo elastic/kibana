@@ -56,9 +56,11 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
 
   // TODO loading state UI
   return isLoading ? null : (
-    <span
+    <div
       css={css`
         background: ${colors.backgroundBaseSubdued};
+        width: 100%;
+        min-height: 100%;
       `}
     >
       <ExecutiveSummary
@@ -98,6 +100,6 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
         analystHourlyRate={analystHourlyRate}
         minutesPerAlert={minutesPerAlert}
       />
-    </span>
+    </div>
   );
 };
