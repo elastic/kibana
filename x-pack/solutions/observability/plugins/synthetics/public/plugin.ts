@@ -40,7 +40,7 @@ import type {
 } from '@kbn/observability-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -69,11 +69,13 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SyntheticsSuggestion } from '../common/types';
+
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
-import { locators } from './apps/locators';
+import { locators } from '../common/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 import {
   SYNTHETICS_MONITORS_EMBEDDABLE,
@@ -95,6 +97,7 @@ export interface ClientPluginsSetup {
   embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
   uiActions: UiActionsSetup;
+  cases: CasesPublicSetup;
 }
 
 export interface ClientPluginsStart {
@@ -233,6 +236,14 @@ export class SyntheticsPlugin
     });
 
     registerSyntheticsEmbeddables(coreSetup, plugins);
+
+    if (plugins.cases?.attachmentFramework) {
+      import('./cases/suggestion_definition').then(({ syntheticsSuggestionDefinition }) => {
+        plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
+          syntheticsSuggestionDefinition
+        );
+      });
+    }
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {

@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export type * from './synthetics_monitor';
-export type * from './monitor_validation';
-export type * from './default_alerts';
-export type * from './overview';
-export type * from './cases';
+export const SYNTHETICS_SUGGESTION_COMPONENT_ID = 'synthetics';

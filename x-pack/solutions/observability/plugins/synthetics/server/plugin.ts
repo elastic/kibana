@@ -31,6 +31,9 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { getMonitors } from './cases/suggestion';
+import type { SyntheticsSuggestion } from '../common/types';
+import { locators } from '../common/locators';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -48,7 +51,9 @@ export class Plugin implements PluginType {
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
-
+    locators.forEach((locator) => {
+      plugins.share.url.locators.create(locator);
+    });
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -97,6 +102,18 @@ export class Plugin implements PluginType {
       this.syntheticsMonitorClient
     );
 
+    core
+      .getStartServices()
+      .then(([coreStart, pluginsStart]) => {
+        const encryptedSavedObjects = (pluginsStart as SyntheticsPluginsStartDependencies)
+          .encryptedSavedObjects;
+        plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
+          getMonitors(coreStart, this.logger, encryptedSavedObjects, plugins.share.url.locators)
+        );
+      })
+      .catch((error) => {
+        this.logger.error('Failed to register synthetics suggestion', error);
+      });
     return {};
   }
 
