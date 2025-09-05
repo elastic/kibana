@@ -63,6 +63,22 @@ describe('isNativeFunctionCallingSupported', () => {
       expect(isNativeFunctionCallingSupported(connector)).toBe(false);
     });
 
+    it('returns true for "Other" provider when enableNativeFunctionCalling is true', () => {
+      const connector = createConnector({
+        type: InferenceConnectorType.OpenAI,
+        config: { apiProvider: OpenAiProviderType.Other, enableNativeFunctionCalling: true },
+      });
+      expect(isNativeFunctionCallingSupported(connector)).toBe(true);
+    });
+
+    it('returns false for "Other" provider when enableNativeFunctionCalling is false', () => {
+      const connector = createConnector({
+        type: InferenceConnectorType.OpenAI,
+        config: { apiProvider: OpenAiProviderType.Other, enableNativeFunctionCalling: false },
+      });
+      expect(isNativeFunctionCallingSupported(connector)).toBe(false);
+    });
+
     it('returns true if the config is not exposed', () => {
       const connector = createConnector({
         type: InferenceConnectorType.OpenAI,

@@ -9,19 +9,19 @@ This plugin provides an app based on the `LogsExplorer` component from the `logs
 #### FTR Server
 
 ```
-yarn test:ftr:server --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts
 ```
 
 #### FTR Runner
 
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/test/functional/apps/observability_logs_explorer/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/index.ts
 ```
 
 #### Running Individual Tests
 
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/test/functional/apps/observability_logs_explorer/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/config.ts --include ./x-pack/solutions/observability/test/functional/apps/observability_logs_explorer/$1
 ```
 
 ### Serverless
