@@ -13,6 +13,7 @@ import type { StepFactory } from './step/step_factory';
 import type { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import type { StepErrorCatcher } from './step/step_base';
+import type { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 
 /**
  * Executes a workflow by continuously processing its steps until completion.
@@ -39,24 +40,69 @@ import type { StepErrorCatcher } from './step/step_base';
  */
 export async function workflowExecutionLoop(
   workflowRuntime: WorkflowExecutionRuntimeManager,
+  workflowExecutionState: WorkflowExecutionState,
   workflowLogger: WorkflowEventLogger,
   nodesFactory: StepFactory,
   workflowGraph: WorkflowGraph
 ) {
   while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    const currentNode = workflowRuntime.getCurrentStep();
-    const step = nodesFactory.create(currentNode as any);
-
-    try {
-      await step.run();
-    } catch (error) {
-      workflowRuntime.setWorkflowError(error);
-    } finally {
-      await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
-      await workflowRuntime.saveState(); // Ensure state is updated after each step
-      await workflowLogger.flushEvents();
+    if (
+      workflowRuntime.getWorkflowExecution().cancelRequested ||
+      workflowRuntime.getWorkflowExecution().status === ExecutionStatus.CANCELLED
+    ) {
+      await markWorkflowCancelled(workflowExecutionState);
+      break;
     }
+
+    await runStep(workflowRuntime, nodesFactory, workflowLogger, workflowGraph);
+    await workflowLogger.flushEvents();
   }
+}
+
+async function runStep(
+  workflowRuntime: WorkflowExecutionRuntimeManager,
+  nodesFactory: StepFactory,
+  workflowLogger: WorkflowEventLogger,
+  workflowGraph: WorkflowGraph
+): Promise<void> {
+  const currentNode = workflowRuntime.getCurrentStep();
+  const step = nodesFactory.create(currentNode as any);
+
+  try {
+    await step.run();
+  } catch (error) {
+    workflowRuntime.setWorkflowError(error);
+  } finally {
+    await catchError(workflowRuntime, workflowLogger, nodesFactory, workflowGraph);
+    await workflowRuntime.saveState(); // Ensure state is updated after each step
+  }
+}
+
+async function markWorkflowCancelled(
+  workflowExecutionState: WorkflowExecutionState
+): Promise<void> {
+  const inProgressSteps = workflowExecutionState
+    .getAllStepExecutions()
+    .filter((stepExecution) =>
+      [
+        ExecutionStatus.RUNNING,
+        ExecutionStatus.WAITING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.PENDING,
+      ].includes(stepExecution.status)
+    );
+
+  inProgressSteps.forEach((runningStep) =>
+    workflowExecutionState.upsertStep({
+      id: runningStep.id,
+      status: ExecutionStatus.CANCELLED,
+    })
+  );
+  workflowExecutionState.updateWorkflowExecution({
+    status: ExecutionStatus.CANCELLED,
+  });
+
+  await workflowExecutionState.flush();
 }
 
 /**

@@ -35,6 +35,8 @@ export interface WorkflowsExecutionEnginePluginStart {
     stepId: string,
     stepInputs: Record<string, any>
   ): Promise<ExecuteWorkflowStepResponse>;
+
+  cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

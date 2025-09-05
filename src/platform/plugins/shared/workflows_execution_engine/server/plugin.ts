@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -85,21 +86,27 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const { workflowRuntime, workflowLogger, nodesFactory, workflowExecutionGraph } =
-                await createContainer(
-                  workflowRunId,
-                  spaceId,
-                  actions,
-                  taskManager,
-                  esClient,
-                  logger,
-                  config,
-                  workflowExecutionRepository
-                );
+              const {
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory,
+                workflowExecutionGraph,
+              } = await createContainer(
+                workflowRunId,
+                spaceId,
+                actions,
+                taskManager,
+                esClient,
+                logger,
+                config,
+                workflowExecutionRepository
+              );
               await workflowRuntime.start();
 
               await workflowExecutionLoop(
                 workflowRuntime,
+                workflowExecutionState,
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph
@@ -131,21 +138,27 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-              const { workflowRuntime, workflowLogger, nodesFactory, workflowExecutionGraph } =
-                await createContainer(
-                  workflowRunId,
-                  spaceId,
-                  actions,
-                  taskManager,
-                  esClient,
-                  logger,
-                  config,
-                  workflowExecutionRepository
-                );
+              const {
+                workflowRuntime,
+                workflowExecutionState,
+                workflowLogger,
+                nodesFactory,
+                workflowExecutionGraph,
+              } = await createContainer(
+                workflowRunId,
+                spaceId,
+                actions,
+                taskManager,
+                esClient,
+                logger,
+                config,
+                workflowExecutionRepository
+              );
               await workflowRuntime.resume();
 
               await workflowExecutionLoop(
                 workflowRuntime,
+                workflowExecutionState,
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph
@@ -268,9 +281,49 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
+    const cancelWorkflowExecution = async (workflowExecutionId: string, spaceId: string) => {
+      const esClient = core.elasticsearch.client.asInternalUser as Client;
+      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowExecutionId,
+        spaceId
+      );
+
+      if (!workflowExecution) {
+        throw new WorkflowExecutionNotFoundError(workflowExecutionId);
+      }
+
+      if (
+        [ExecutionStatus.CANCELLED, ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
+          workflowExecution.status
+        )
+      ) {
+        // Already in a terminal state or being canceled
+        return;
+      }
+
+      // Request cancellation
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowExecution.id,
+        cancelRequested: true,
+        cancelledAt: new Date().toISOString(),
+        cancelledBy: 'system', // TODO: set user if available
+      });
+
+      if (
+        [ExecutionStatus.WAITING, ExecutionStatus.WAITING_FOR_INPUT].includes(
+          workflowExecution.status
+        )
+      ) {
+        // TODO: handle WAITING states
+        // It should clean up resume tasks, etc
+      }
+    };
+
     return {
       executeWorkflow,
       executeWorkflowStep,
+      cancelWorkflowExecution,
     };
   }
 
@@ -361,6 +414,7 @@ async function createContainer(
   return {
     workflowExecutionGraph,
     workflowRuntime,
+    workflowExecutionState,
     contextManager,
     connectorExecutor,
     workflowLogger,
