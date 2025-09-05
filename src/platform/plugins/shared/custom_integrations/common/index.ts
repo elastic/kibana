@@ -20,6 +20,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   advanced_analytics_ueba: { title: 'Advanced Analytics (UEBA)', parent_id: 'security' },
   analytics_engine: { title: 'Analytics Engine', parent_id: 'observability' },
   application_observability: { title: 'Application', parent_id: 'observability' },
+  asset_inventory: { title: 'Asset Inventory', parent_id: 'security' },
   auditd: { title: 'AuditD', parent_id: 'security' },
   authentication: { title: 'Authentication', parent_id: 'security' },
   aws: { title: 'AWS', parent_id: undefined },
