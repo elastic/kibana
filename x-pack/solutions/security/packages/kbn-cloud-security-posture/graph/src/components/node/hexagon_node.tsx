@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeContainer,
@@ -17,6 +17,8 @@ import {
   NodeButton,
   HandleStyleOverride,
   useNodeFillColor,
+  styleEntityNodeMiddleShape,
+  styleEntityNodeBottomShape,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { HexagonHoverShape, HexagonShape } from './shapes/hexagon_shape';
@@ -83,11 +85,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={{
-                transform: 'scale(0.8) translateY(16px)',
-                transformOrigin: 'center',
-                stroke: transparentize(strokeColor, 0.3),
-              }}
+              css={styleEntityNodeMiddleShape(strokeColor)}
             />
           )}
           {showStackedShape(count) && (
@@ -95,11 +93,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={{
-                transform: 'scale(0.9) translateY(7px)',
-                transformOrigin: 'center',
-                stroke: transparentize(strokeColor, 0.5),
-              }}
+              css={styleEntityNodeBottomShape(strokeColor)}
             />
           )}
           <HexagonShape fill={fillColor} stroke={strokeColor} />

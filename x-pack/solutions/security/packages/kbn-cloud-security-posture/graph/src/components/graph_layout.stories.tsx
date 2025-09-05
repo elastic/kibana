@@ -972,7 +972,7 @@ export const SingleAndGroupNodes: Story = {
         countryCodes: ['US', 'IT'],
       },
       {
-        id: 'a(rect2)-b(rect3)',
+        id: 'a(rect2)-b(rect3)-label(1)',
         source: 'rect2',
         target: 'rect3',
         label: 'Rectangle Group Label 1',
@@ -983,7 +983,7 @@ export const SingleAndGroupNodes: Story = {
         countryCodes: ['US', 'IT'],
       },
       {
-        id: 'a(rect2)-b(rect3)',
+        id: 'a(rect2)-b(rect3)-label(2)',
         source: 'rect2',
         target: 'rect3',
         label: 'Rectangle Group Label 2',
@@ -1035,7 +1035,7 @@ export const SingleAndGroupNodes: Story = {
         countryCodes: ['US', 'IT'],
       },
       {
-        id: 'a(pent2)-b(pent3)',
+        id: 'a(pent2)-b(pent3)-label(1)',
         source: 'pent2',
         target: 'pent3',
         label: 'Pentagon Group Label 1',
@@ -1046,7 +1046,7 @@ export const SingleAndGroupNodes: Story = {
         countryCodes: ['US', 'IT'],
       },
       {
-        id: 'a(pent2)-b(pent3)',
+        id: 'a(pent2)-b(pent3)-label(2)',
         source: 'pent2',
         target: 'pent3',
         label: 'Pentagon Group Label 2',
@@ -1057,7 +1057,7 @@ export const SingleAndGroupNodes: Story = {
         countryCodes: ['US', 'IT'],
       },
       {
-        id: 'a(pent2)-b(pent3)',
+        id: 'a(pent2)-b(pent3)-label(3)',
         source: 'pent2',
         target: 'pent3',
         label: 'Pentagon Group Label 3',

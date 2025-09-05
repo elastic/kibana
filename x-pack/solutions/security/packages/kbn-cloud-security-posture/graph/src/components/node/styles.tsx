@@ -18,6 +18,7 @@ import {
   EuiText,
   useEuiBackgroundColor,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import { css } from '@emotion/react';
@@ -207,7 +208,10 @@ export const NodeShapeSvg = styled.svg<{ shadow?: string; yPosDelta?: number }>`
   left: 50%;
   z-index: 1;
 
-  ${({ yPosDelta }) => `transform: translate(-50%, calc(-50% + ${yPosDelta || 0}px));`}
+  ${({ yPosDelta }) => {
+    const delta = typeof yPosDelta === 'number' ? yPosDelta : 0;
+    return `transform: translate(-50%, calc(-50% + ${delta}px));`;
+  }}
 
   ${({ shadow }) => `
     /* Apply shadow when node is selected */
@@ -426,4 +430,20 @@ export const ToolTipButton = (props: PropsWithChildren) => {
       type="button"
     />
   );
+};
+
+export const styleEntityNodeMiddleShape = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.9) translateY(7px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.5),
+  };
+};
+
+export const styleEntityNodeBottomShape = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.8) translateY(16px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.3),
+  };
 };
