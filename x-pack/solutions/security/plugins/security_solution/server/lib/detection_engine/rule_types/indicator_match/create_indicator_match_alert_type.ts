@@ -59,7 +59,7 @@ export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRulePar
     producer: SERVER_APP_ID,
     solution: 'security',
     async executor(execOptions) {
-      const { sharedParams, services, state } = execOptions;
+      const { sharedParams, services, state, logger } = execOptions;
 
       const wrapSuppressedHits = (
         events: SignalSourceHit[],
@@ -72,7 +72,7 @@ export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRulePar
         });
 
       const result = await indicatorMatchExecutor({
-        sharedParams,
+        sharedParams: { ...sharedParams, logger },
         services,
         eventsTelemetry: sharedParams.eventsTelemetry,
         wrapSuppressedHits,
