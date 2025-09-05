@@ -13,6 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { AppMenuActionType } from '@kbn/discover-utils';
 import {
   AppMenuRegistry,
   type AppMenuItemPrimary,
@@ -25,6 +26,8 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
+import { onSaveSearch } from './on_save_search';
+import { runAppMenuPopoverAction } from './app_menu_actions/run_app_menu_action';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
@@ -59,6 +62,7 @@ export const useTopNavLinks = ({
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
   hasShareIntegration,
+  hasUnsavedChanges,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -69,6 +73,7 @@ export const useTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
+  hasUnsavedChanges: boolean;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -273,8 +278,8 @@ export const useTopNavLinks = ({
           defaultMessage: 'Save session',
         }),
         testId: 'discoverSaveButton',
-        fill: false,
-        color: 'text',
+        fill: Boolean(hasUnsavedChanges),
+        color: hasUnsavedChanges ? 'primary' : 'text',
         emphasize: true,
         run: (anchorElement: HTMLElement) => {
           onSaveDiscoverSession({
@@ -287,6 +292,75 @@ export const useTopNavLinks = ({
         },
       };
       entries.push(saveSearch);
+
+      // Always add an adjacent icon-only primary button that opens a small popover
+      // with "Save as" and "Revert changes". When there are no unsaved changes,
+      // the submenu items are disabled.
+      const saveMoreMenu: TopNavMenuData = {
+        id: 'save-more',
+        label: i18n.translate('discover.localMenu.saveMoreLabel', {
+          defaultMessage: 'More save actions',
+        }),
+        testId: 'discoverSaveMoreButton',
+        emphasize: true,
+        fill: Boolean(hasUnsavedChanges),
+        color: hasUnsavedChanges ? 'primary' : 'text',
+        iconOnly: true,
+        iconType: 'arrowDown',
+        iconDisplay: hasUnsavedChanges ? 'fill' : 'base',
+        run: (anchorElement: HTMLElement) => {
+          runAppMenuPopoverAction({
+            appMenuItem: {
+              id: 'save-more-submenu',
+              type: AppMenuActionType.secondary,
+              label: i18n.translate('discover.localMenu.saveMoreSubmenuLabel', {
+                defaultMessage: 'Save options',
+              }),
+              actions: [
+                {
+                  id: 'save-as',
+                  type: AppMenuActionType.secondary,
+                  controlProps: {
+                    label: i18n.translate('discover.localMenu.saveAsTitle', {
+                      defaultMessage: 'Save as',
+                    }),
+                    testId: 'discoverSaveAsFromMore',
+                    disableButton: !hasUnsavedChanges,
+                    onClick: async ({ onFinishAction }) => {
+                      await onSaveSearch({
+                        initialCopyOnSave: true,
+                        savedSearch: state.savedSearchState.getState(),
+                        services,
+                        state,
+                        onClose: onFinishAction,
+                      });
+                    },
+                  },
+                },
+                {
+                  id: 'revert-changes',
+                  type: AppMenuActionType.secondary,
+                  controlProps: {
+                    label: i18n.translate('discover.localMenu.revertChangesTitle', {
+                      defaultMessage: 'Revert changes',
+                    }),
+                    testId: 'discoverRevertChangesFromMore',
+                    disableButton: !hasUnsavedChanges,
+                    onClick: async ({ onFinishAction }) => {
+                      await state.actions.undoSavedSearchChanges();
+                      onFinishAction();
+                    },
+                  },
+                },
+              ],
+            },
+            anchorElement,
+            services,
+            anchorPosition: 'leftUp',
+          });
+        },
+      };
+      entries.push(saveMoreMenu);
     }
 
     return entries;
@@ -296,8 +370,9 @@ export const useTopNavLinks = ({
     defaultMenu?.saveItem?.disabled,
     isEsqlMode,
     dataView,
+    state,
     shouldShowESQLToDataViewTransitionModal,
     dispatch,
-    state,
+    hasUnsavedChanges,
   ]);
 };

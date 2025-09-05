@@ -23,6 +23,7 @@ import {
   EuiContextMenuItem,
   EuiHorizontalRule,
   EuiWrappingPopover,
+  type EuiPopoverAnchorPosition,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -44,12 +45,14 @@ interface AppMenuActionsMenuPopoverProps {
   anchorElement: HTMLElement;
   services: DiscoverServices;
   onClose: () => void;
+  anchorPosition?: EuiPopoverAnchorPosition;
 }
 
 export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps> = ({
   appMenuItem,
   anchorElement,
   onClose: originalOnClose,
+  anchorPosition = 'downRight',
 }) => {
   const [nestedContent, setNestedContent] = useState<React.ReactNode>();
 
@@ -108,6 +111,7 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
         closePopover={onClose}
         isOpen={!nestedContent}
         panelPaddingSize="none"
+        anchorPosition={anchorPosition}
       >
         <EuiContextMenuPanel items={items} />
       </EuiWrappingPopover>
@@ -128,10 +132,12 @@ export function runAppMenuPopoverAction({
   appMenuItem,
   anchorElement,
   services,
+  anchorPosition,
 }: {
   appMenuItem: AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom;
   anchorElement: HTMLElement;
   services: DiscoverServices;
+  anchorPosition?: EuiPopoverAnchorPosition;
 }) {
   if (isOpen) {
     cleanup();
@@ -149,6 +155,7 @@ export function runAppMenuPopoverAction({
           anchorElement={anchorElement}
           services={services}
           onClose={cleanup}
+          anchorPosition={anchorPosition}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

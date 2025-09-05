@@ -121,7 +121,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
           size="s"
           {...omit(commonButtonProps, 'iconSide')}
           iconType={props.iconType}
-          display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
+          display={props.iconDisplay ?? (props.emphasize && (props.fill ?? true) ? 'fill' : 'base')}
           aria-label={upperFirst(props.label || props.id!)}
         />
       )
