@@ -27,8 +27,7 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
 } from '@kbn/apm-types';
-import { EuiPanel, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiPanel } from '@elastic/eui';
 import { Duration } from '@kbn/apm-ui-shared';
 import { ContentFrameworkTable } from '../../../../content_framework';
 import { isTransaction } from '../../helpers';
@@ -71,7 +70,6 @@ export interface AboutProps
 }
 
 export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: AboutProps) => {
-  const { euiTheme } = useEuiTheme();
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
   const traceRootSpan = useTraceRootSpanContext();
@@ -101,23 +99,16 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
-      <div
-        css={css`
-          margin-top: calc(${euiTheme.base * -1.5}px);
-          margin-bottom: calc(${euiTheme.base * -2.25}px);
-        `}
-      >
-        <ContentFrameworkTable
-          fieldNames={isSpan ? spanFieldNames : transactionFieldNames}
-          id={'aboutTable'}
-          fieldConfigurations={aboutFieldConfigurations}
-          dataView={dataView}
-          hit={hit}
-          filter={filter}
-          onAddColumn={onAddColumn}
-          onRemoveColumn={onRemoveColumn}
-        />
-      </div>
+      <ContentFrameworkTable
+        fieldNames={isSpan ? spanFieldNames : transactionFieldNames}
+        id={'aboutTable'}
+        fieldConfigurations={aboutFieldConfigurations}
+        dataView={dataView}
+        hit={hit}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
     </EuiPanel>
   );
 };

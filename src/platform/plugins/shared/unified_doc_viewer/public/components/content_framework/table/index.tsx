@@ -196,6 +196,7 @@ export function ContentFrameworkTable({
         .euiDataGridRow:last-of-type .euiDataGridRowCell {
           border-bottom: none;
         }
+        margin-top: calc(${euiTheme.base * -1.5}px);
       `}
     >
       <TableGrid

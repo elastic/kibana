@@ -314,8 +314,11 @@ const componentStyles = {
   hideDataGridHeader: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
     return css({
-      '.euiDataGridHeader': { height: `calc(${euiTheme.size.base} * 1.25)` },
+      '.euiDataGridHeader': { height: `calc(${euiTheme.size.base} * 1.5)` },
       '.euiDataGridHeaderCell': { display: 'none' },
+      '.euiDataGrid__virtualized': {
+        height: 'auto !important',
+      },
     });
   },
 };
