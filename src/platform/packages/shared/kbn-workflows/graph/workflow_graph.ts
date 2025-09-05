@@ -41,7 +41,7 @@ export class WorkflowGraph {
     return successors.map((id) => this.graph!.node(id) as unknown as GraphNode);
   }
 
-  public getAllPredecessors(nodeId: string): GraphNode[] {
+  public getAllPredecessorNodes(nodeId: string): GraphNode[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
       if (visited.has(predNodeId)) {
