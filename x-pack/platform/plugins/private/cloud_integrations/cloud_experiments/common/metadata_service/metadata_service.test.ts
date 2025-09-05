@@ -49,6 +49,8 @@ describe('MetadataService', () => {
     product_tier: 'my-product-tier',
     organizationKey: 'organization-id',
     is_elastic_staff: true,
+    experience_level: 'intermediate',
+    trial_intent: 'learn_kibana',
   };
 
   const multiContextFormat = {
@@ -66,10 +68,31 @@ describe('MetadataService', () => {
     organization: {
       key: 'organization-id',
       is_elastic_staff: true,
+      experience_level: 'intermediate',
+      trial_intent: 'learn_kibana',
     },
   };
 
   describe('setup', () => {
+    test('omits experience_level and trial_intent when not present in initialMetadata', async () => {
+      const metadataWithoutExperienceIntent = {
+        ...initialMetadata,
+      };
+      // @ts-expect-error intentionally omitting fields to test behavior
+      delete (metadataWithoutExperienceIntent as any).experience_level;
+      // @ts-expect-error intentionally omitting fields to test behavior
+      delete (metadataWithoutExperienceIntent as any).trial_intent;
+
+      metadataService.setup(metadataWithoutExperienceIntent as any);
+      await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual({
+        ...multiContextFormat,
+        organization: {
+          key: 'organization-id',
+          is_elastic_staff: true,
+          // experience_level and trial_intent omitted
+        },
+      });
+    });
     test('emits the initial metadata', async () => {
       metadataService.setup(initialMetadata);
       await expect(firstValueFrom(metadataService.userMetadata$)).resolves.toStrictEqual(

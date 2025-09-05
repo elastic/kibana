@@ -91,6 +91,16 @@ export interface FlatMetadata {
    * @group Organization Static Values
    */
   is_elastic_staff?: boolean;
+  /**
+   * The experience level associated with the Elastic Cloud Organization.
+   * @group Organization Static Values
+   */
+  experience_level?: string;
+  /**
+   * The trial intent associated with the Elastic Cloud Organization.
+   * @group Organization Static Values
+   */
+  trial_intent?: string;
 
   // Dynamic/calculated values
   /**
@@ -156,6 +166,8 @@ export class MetadataService {
             organization: removeUndefined({
               key: metadata.organizationKey,
               is_elastic_staff: metadata.is_elastic_staff,
+              experience_level: metadata.experience_level,
+              trial_intent: metadata.trial_intent,
               in_trial: metadata.in_trial,
               trial_end_date: metadata.trial_end_date,
             }),

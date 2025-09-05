@@ -82,6 +82,8 @@ const configSchema = schema.object({
   projects_url: offeringBasedSchema({ serverless: schema.string({ defaultValue: '/projects/' }) }),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
+  experience_level: schema.maybe(schema.string()),
+  trial_intent: schema.maybe(schema.string()),
   onboarding: schema.maybe(
     schema.object({
       default_solution: schema.maybe(schema.string()),
@@ -127,6 +129,8 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     projects_url: true,
     trial_end_date: true,
     is_elastic_staff_owned: true,
+    experience_level: true,
+    trial_intent: true,
     serverless: {
       project_id: true,
       project_name: true,

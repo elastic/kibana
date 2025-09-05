@@ -99,6 +99,8 @@ describe('Cloud Experiments server plugin', () => {
           trial_end_date: expect.any(Date),
           in_trial: false,
           is_elastic_staff: true,
+          experience_level: expect.any(String),
+          trial_intent: expect.any(String),
         },
       });
     });
@@ -159,6 +161,10 @@ describe('Cloud Experiments server plugin', () => {
           kind: 'multi',
           kibana: expect.objectContaining({
             has_data: true,
+          }),
+          organization: expect.objectContaining({
+            experience_level: expect.any(String),
+            trial_intent: expect.any(String),
           }),
         })
       );
