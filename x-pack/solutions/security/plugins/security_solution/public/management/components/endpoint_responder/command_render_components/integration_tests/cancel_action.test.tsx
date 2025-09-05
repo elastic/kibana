@@ -215,8 +215,9 @@ describe('When using cancel action from response actions console', () => {
 
     it('should show appropriate error when cancel API fails', async () => {
       const deferred = getDeferred();
-      apiMocks.responseProvider.cancel.mockReturnValue(deferred.promise as any);
-
+      apiMocks.responseProvider.cancel.mockReturnValue(
+        deferred.promise as unknown as ReturnType<typeof apiMocks.responseProvider.cancel>
+      );
       await render('microsoft_defender_endpoint');
 
       await enterConsoleCommand(renderResult, user, 'cancel --action="action-123-456-789"');
