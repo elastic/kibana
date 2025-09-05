@@ -302,7 +302,7 @@ export async function getEntityStoreSnapshotTaskState({
  * @param d - The date snapshot task started
  * @returns d - 1 day
  */
-function rewindToYesterday(d: Date): Date {
+export function rewindToYesterday(d: Date): Date {
   const yesterday = new Date(d);
   yesterday.setUTCHours(0, 0, 0, 0);
   yesterday.setUTCSeconds(d.getUTCSeconds() - 60);
