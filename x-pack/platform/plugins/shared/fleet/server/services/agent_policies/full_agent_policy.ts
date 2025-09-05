@@ -44,6 +44,7 @@ import {
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
@@ -319,6 +320,22 @@ export async function getFullAgentPolicy(
         packagePoliciesByOutputId[outputId].length > 0
       ) {
         Object.assign(permissions, dataPermissionsByOutputId[outputId]);
+      }
+
+      // Add logs-* permissions for outputs with write_to_streams enabled
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+      if (originalOutput?.write_to_logs_streams) {
+        const streamsPermissions = {
+          _write_to_logs_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+              },
+            ],
+          },
+        };
+        Object.assign(permissions, streamsPermissions);
       }
 
       outputPermissions[outputId] = permissions;

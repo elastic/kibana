@@ -285,6 +285,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           auditLogger: coreStart.security.audit.asScoped(request),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
+          experimentalFeatures: options.config.experimentalFeatures,
         });
       }),
       getMonitoringEntitySourceDataClient: memoize(() => {
