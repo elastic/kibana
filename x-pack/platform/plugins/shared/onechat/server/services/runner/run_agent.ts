@@ -71,7 +71,6 @@ export const runAgent = async ({
   });
 
   return {
-    runId: manager.context.runId,
     result: agentResult.result,
   };
 };

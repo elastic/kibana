@@ -11091,10 +11091,10 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.MetricVisConfiguration.secondaryPrefix",
+            "id": "def-common.MetricVisConfiguration.secondaryLabel",
             "type": "string",
             "tags": [],
-            "label": "secondaryPrefix",
+            "label": "secondaryLabel",
             "description": [],
             "signature": [
               "string | undefined"

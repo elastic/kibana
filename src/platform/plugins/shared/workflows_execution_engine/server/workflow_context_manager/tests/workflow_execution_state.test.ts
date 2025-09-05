@@ -154,6 +154,12 @@ describe('WorkflowExecutionState', () => {
   });
 
   describe('flush', () => {
+    beforeEach(() => {
+      workflowExecutionRepository.getWorkflowExecutionById = jest
+        .fn()
+        .mockResolvedValue({} as EsWorkflowExecution);
+    });
+
     it('should flush workflow execution changes', async () => {
       const updatedWorkflowExecution = {
         id: 'test-workflow-execution-id',
@@ -169,6 +175,20 @@ describe('WorkflowExecutionState', () => {
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         updatedWorkflowExecution
+      );
+    });
+
+    it('should flush workflow execution changes with execution id even if execution id is not in change', async () => {
+      const updatedWorkflowExecution = {} as EsWorkflowExecution;
+
+      underTest.updateWorkflowExecution(updatedWorkflowExecution);
+
+      await underTest.flush();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-execution-id',
+        })
       );
     });
 
@@ -188,12 +208,10 @@ describe('WorkflowExecutionState', () => {
       expect(stepExecutionRepository.createStepExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           id: mockUuid,
-          workflowRunId: 'test-workflow-execution-id',
-          workflowId: 'test-workflow-id',
           stepId: 'test-step-execution-id',
           status: ExecutionStatus.RUNNING,
           startedAt: '2025-08-05T20:00:00.000Z',
-        })
+        } as EsWorkflowStepExecution)
       );
     });
 
@@ -221,19 +239,17 @@ describe('WorkflowExecutionState', () => {
       await underTest.flush();
 
       expect(stepExecutionRepository.updateStepExecutions).toHaveBeenCalledWith([
-        expect.objectContaining({
+        {
           id: fakeUuid,
-          workflowRunId: 'test-workflow-execution-id',
-          workflowId: 'test-workflow-id',
           stepId: 'test-step-execution-id',
           status: ExecutionStatus.COMPLETED,
           completedAt: '2025-08-05T20:01:00.000Z',
           executionTimeMs: 60000,
-        }),
+        } as EsWorkflowStepExecution,
       ]);
     });
 
-    it('should be able to create step executions that changed multiple times', async () => {
+    it('should be able to create step executions that changed multiple times by merging changes', async () => {
       // create initial step execution
       const fakeUuid = 'fake-uuid-1';
       jest.requireMock('uuid').v4.mockImplementationOnce(() => fakeUuid);
@@ -249,7 +265,7 @@ describe('WorkflowExecutionState', () => {
         stepId: 'test-step-execution-id',
         status: ExecutionStatus.COMPLETED,
         completedAt: '2025-08-05T20:01:00.000Z',
-        executionTimeMs: 60000,
+        executionTimeMs: 2000,
       } as EsWorkflowStepExecution);
 
       await underTest.flush();
@@ -257,13 +273,12 @@ describe('WorkflowExecutionState', () => {
       expect(stepExecutionRepository.createStepExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           id: fakeUuid,
-          workflowRunId: 'test-workflow-execution-id',
-          workflowId: 'test-workflow-id',
           stepId: 'test-step-execution-id',
           status: ExecutionStatus.COMPLETED,
           completedAt: '2025-08-05T20:01:00.000Z',
-          executionTimeMs: 60000,
-        })
+          startedAt: '2025-08-05T20:00:00.000Z',
+          executionTimeMs: 2000,
+        } as EsWorkflowStepExecution)
       );
     });
 
@@ -311,6 +326,31 @@ describe('WorkflowExecutionState', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
       expect(stepExecutionRepository.createStepExecution).toHaveBeenCalledTimes(2); // create the first step execution and the second one
       expect(stepExecutionRepository.updateStepExecutions).toHaveBeenCalledTimes(1);
+    });
+
+    it('should sync workflow execution with latest from repository', async () => {
+      workflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue({
+        id: 'test-workflow-execution-id',
+        status: ExecutionStatus.CANCELLED,
+        cancelledAt: '2025-08-05T20:02:00.000Z',
+        cancelledBy: 'user-123',
+      } as EsWorkflowExecution);
+      underTest.updateWorkflowExecution({
+        status: ExecutionStatus.SKIPPED,
+      });
+
+      await underTest.flush();
+
+      expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+        'test-workflow-execution-id',
+        undefined
+      );
+      expect(underTest.getWorkflowExecution()).toEqual({
+        id: 'test-workflow-execution-id',
+        status: ExecutionStatus.CANCELLED,
+        cancelledAt: '2025-08-05T20:02:00.000Z',
+        cancelledBy: 'user-123',
+      } as EsWorkflowExecution);
     });
   });
 

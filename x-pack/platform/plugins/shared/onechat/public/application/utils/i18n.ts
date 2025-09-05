@@ -21,19 +21,18 @@ export const labels = {
     newToolButton: i18n.translate('xpack.onechat.tools.newToolButton', {
       defaultMessage: 'New tool',
     }),
-
-    newEsqlToolTitle: i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
-      defaultMessage: 'New ES|QL tool',
+    newToolTitle: i18n.translate('xpack.onechat.tools.newToolTitle', {
+      defaultMessage: 'Create a new tool',
     }),
-    editEsqlToolTitle: i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
-      defaultMessage: 'Edit ES|QL tool',
+    readOnlyBadge: i18n.translate('xpack.onechat.tools.readOnlyBadge', {
+      defaultMessage: 'Read only',
     }),
 
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
-    clearButtonLabel: i18n.translate('xpack.onechat.tools.clearButtonLabel', {
-      defaultMessage: 'Clear',
+    cancelButtonLabel: i18n.translate('xpack.onechat.tools.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
     }),
     saveButtonTooltip: i18n.translate('xpack.onechat.tools.saveButtonTooltip', {
       defaultMessage: 'Resolve all form errors to save.',
@@ -53,6 +52,9 @@ export const labels = {
     // Actions
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
       defaultMessage: 'Edit',
+    }),
+    viewToolButtonLabel: i18n.translate('xpack.onechat.tools.viewToolButtonLabel', {
+      defaultMessage: 'View',
     }),
     deleteToolButtonLabel: i18n.translate('xpack.onechat.tools.deleteToolButtonLabel', {
       defaultMessage: 'Delete',

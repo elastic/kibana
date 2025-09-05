@@ -63,7 +63,6 @@ export const runTool = async <TParams = Record<string, unknown>>({
   );
 
   return {
-    runId: manager.context.runId,
     ...toolReturn,
   };
 };

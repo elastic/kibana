@@ -667,41 +667,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.isBuiltInToolId",
-        "type": "Function",
-        "tags": [],
-        "label": "isBuiltInToolId",
-        "description": [
-          "\nCheck if the given ID is a built-in ID (starting with `.`)"
-        ],
-        "signature": [
-          "(id: string) => boolean"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.isBuiltInToolId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.isByIdsToolSelection",
         "type": "Function",
         "tags": [],
@@ -900,6 +865,41 @@
               "<string, any>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isInProtectedNamespace",
+        "type": "Function",
+        "tags": [],
+        "label": "isInProtectedNamespace",
+        "description": [
+          "\nChecks if the provided tool name belongs to a protected namespace."
+        ],
+        "signature": [
+          "(toolName: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isInProtectedNamespace.$1",
+            "type": "string",
+            "tags": [],
+            "label": "toolName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1284,7 +1284,7 @@
         "tags": [],
         "label": "isReservedToolId",
         "description": [
-          "\nCheck if the given ID is a reserved ID\nAtm this only checks for built-in IDs, but it will check for MCP and such later."
+          "\nCheck if the given ID is a reserved ID\nAtm this only checks for `new` because that's a value we're using for url paths on the UI."
         ],
         "signature": [
           "(id: string) => boolean"
@@ -1672,6 +1672,61 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.validateToolId",
+        "type": "Function",
+        "tags": [],
+        "label": "validateToolId",
+        "description": [
+          "\nValidate that a tool id has the right format,\nreturning an error message if it fails the validation,\nand undefined otherwise.\n"
+        ],
+        "signature": [
+          "({ toolId, builtIn, }: { toolId: string; builtIn: boolean; }) => string | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.validateToolId.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  toolId,\n  builtIn,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-common",
+                "id": "def-common.validateToolId.$1.toolId",
+                "type": "string",
+                "tags": [],
+                "label": "toolId",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/onechat-common",
+                "id": "def-common.validateToolId.$1.builtIn",
+                "type": "boolean",
+                "tags": [],
+                "label": "builtIn",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -3107,12 +3162,25 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ToolDefinition.readonly",
+            "type": "boolean",
+            "tags": [],
+            "label": "readonly",
+            "description": [
+              "\nIndicate whether this tool is editable by users or not."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ToolDefinition.tags",
             "type": "Array",
             "tags": [],
             "label": "tags",
             "description": [
-              "\nOptional list of tags attached to this tool.\nFor built-in tools, this is specified during registration."
+              "\nOptional list of tags attached to this tool."
             ],
             "signature": [
               "string[]"
@@ -3455,21 +3523,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.builtInToolIdPrefix",
-        "type": "string",
-        "tags": [],
-        "label": "builtInToolIdPrefix",
-        "description": [],
-        "signature": [
-          "\".\""
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ChatAgentEvent",
         "type": "Type",
         "tags": [],
@@ -3730,7 +3783,7 @@
         "label": "defaultAgentToolIds",
         "description": [],
         "signature": [
-          "(\".search\" | \".list_indices\" | \".get_index_mapping\" | \".get_document_by_id\")[]"
+          "string[]"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,
@@ -4170,6 +4223,23 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.protectedNamespaces",
+        "type": "Array",
+        "tags": [],
+        "label": "protectedNamespaces",
+        "description": [
+          "\nList of protected namespaces which can only be used by internal tools."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ReasoningEvent",
         "type": "Type",
         "tags": [],
@@ -4361,6 +4431,21 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.toolIdMaxLength",
+        "type": "number",
+        "tags": [],
+        "label": "toolIdMaxLength",
+        "description": [],
+        "signature": [
+          "64"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ToolResult",
         "type": "Type",
         "tags": [],
@@ -4500,49 +4585,17 @@
     "objects": [
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.builtinTags",
+        "id": "def-common.internalNamespaces",
         "type": "Object",
         "tags": [],
-        "label": "builtinTags",
+        "label": "internalNamespaces",
         "description": [
-          "\nCommon set of tags used for platform tools."
+          "\nList of internally used namespaces\nNote: those are not necessarily all protected."
         ],
         "signature": [
-          "{ readonly retrieval: \"retrieval\"; }"
+          "{ readonly platformCore: \"platform.core\"; }"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.builtinToolIds",
-        "type": "Object",
-        "tags": [],
-        "label": "builtinToolIds",
-        "description": [
-          "\nIds of built-in onechat tools"
-        ],
-        "signature": [
-          "{ readonly indexExplorer: \".index_explorer\"; readonly search: \".search\"; readonly listIndices: \".list_indices\"; readonly getIndexMapping: \".get_index_mapping\"; readonly getDocumentById: \".get_document_by_id\"; readonly generateEsql: \".generate_esql\"; readonly executeEsql: \".execute_esql\"; }"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.idRegexp",
-        "type": "Object",
-        "tags": [],
-        "label": "idRegexp",
-        "description": [],
-        "signature": [
-          "RegExp"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4923,6 +4976,38 @@
             ]
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.platformCoreTools",
+        "type": "Object",
+        "tags": [],
+        "label": "platformCoreTools",
+        "description": [
+          "\nIds of built-in onechat tools"
+        ],
+        "signature": [
+          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.toolIdRegexp",
+        "type": "Object",
+        "tags": [],
+        "label": "toolIdRegexp",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

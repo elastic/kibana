@@ -13,12 +13,12 @@ import { DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
-import type { SpanLatencyChartData } from '../../doc_viewer_span_overview/hooks/use_span_latency_chart';
+import type { LatencyChartData } from '../../doc_viewer_overview/hooks/use_latency_chart';
 
 export interface SimilarSpansProps {
   spanDuration: number;
   latencyChart: {
-    data: SpanLatencyChartData | null; // TODO move this interface
+    data: LatencyChartData | null;
     loading: boolean;
     hasError: boolean;
   };
@@ -49,10 +49,10 @@ export function SimilarSpans({
         esqlQuery={!latencyChart.hasError && esqlQuery ? esqlQuery : undefined}
       >
         <DurationDistributionChart
-          data={latencyChart.data?.spanDistributionChartData ?? []}
+          data={latencyChart.data?.distributionChartData ?? []}
           markerValue={latencyChart.data?.percentileThresholdValue ?? 0}
           markerCurrentEvent={spanDuration}
-          hasData={!!latencyChart.data?.spanDistributionChartData?.length}
+          hasData={!!latencyChart.data?.distributionChartData?.length}
           loading={latencyChart.loading}
           hasError={latencyChart.hasError}
           eventType={ProcessorEvent.span}
