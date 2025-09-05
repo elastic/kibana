@@ -14,6 +14,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { formatDuration } from '../../../shared/lib/format_duration';
+import { getStatusLabel } from '../../../shared/translations';
 
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
@@ -55,7 +56,12 @@ export function StepExecutionTreeItemLabel({
         ]}
       >
         {stepId}
-        {/* {executionIndex > 0 && <span css={styles.executionIndex}>{executionIndex + 1}</span>} */}
+        {status === ExecutionStatus.SKIPPED && (
+          <>
+            {' '}
+            <span>({getStatusLabel(status).toLowerCase()})</span>
+          </>
+        )}
       </EuiFlexItem>
       {executionTimeMs && (
         <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>

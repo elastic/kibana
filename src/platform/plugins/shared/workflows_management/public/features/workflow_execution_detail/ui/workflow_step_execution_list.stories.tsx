@@ -144,7 +144,6 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:01.245Z',
           executionTimeMs: 3779,
-          spaceId: 'default',
           path: [],
         },
         {
@@ -156,8 +155,10 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           executionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output:
-            '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
+          output: {
+            output:
+              '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
+          },
           input: {
             message:
               '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
@@ -183,7 +184,6 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:03.627Z',
           executionTimeMs: 456,
-          spaceId: 'default',
           path: [],
         },
         {
@@ -223,7 +223,6 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:14.522Z',
           executionTimeMs: 9289,
-          spaceId: 'default',
           path: [],
         },
         {
@@ -235,7 +234,9 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           executionIndex: 3,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output: 'Scarlett Johansson',
+          output: {
+            message: 'Scarlett Johansson',
+          },
           input: {
             message: 'Scarlett Johansson',
           },
@@ -252,7 +253,9 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           executionIndex: 2,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output: 'Leonardo DiCaprio',
+          output: {
+            message: 'Leonardo DiCaprio',
+          },
           input: {
             message: 'Leonardo DiCaprio',
           },
@@ -269,7 +272,9 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           executionIndex: 1,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output: 'Angelina Jolie',
+          output: {
+            message: 'Angelina Jolie',
+          },
           input: {
             message: 'Angelina Jolie',
           },
@@ -286,7 +291,9 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           executionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output: 'Brad Pitt',
+          output: {
+            message: 'Brad Pitt',
+          },
           input: {
             message: 'Brad Pitt',
           },
@@ -388,6 +395,124 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           completedAt: '2025-09-02T20:44:15.945Z',
           executionTimeMs: 392,
           path: [],
+        },
+      ],
+      stepExecutionsTree: [
+        {
+          stepId: 'analysis',
+          stepType: 'inference.completion',
+          executionIndex: 0,
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionId: '61d229be-d8d8-4af5-adeb-5454564bf000',
+          children: [],
+        },
+        {
+          stepId: 'debug_ai_response',
+          stepType: 'console',
+          executionIndex: 0,
+          status: ExecutionStatus.FAILED,
+          stepExecutionId: '6b035884-16ec-4df7-ac72-8de259b2e8a4',
+          children: [],
+        },
+        {
+          stepId: 'print-enter-dash',
+          stepType: 'slack',
+          executionIndex: 0,
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionId: '765f1b7a-34ed-4716-9418-175e2c8543f4',
+          children: [],
+        },
+        {
+          stepId: 'foreachstep',
+          stepType: 'foreach',
+          executionIndex: 0,
+          status: ExecutionStatus.RUNNING,
+          stepExecutionId: '58ecc47e-3a98-4b6e-b018-2b44b6e366a6',
+          children: [
+            {
+              stepId: 'foreachstep:0',
+              stepType: 'foreach',
+              executionIndex: 0,
+              status: ExecutionStatus.COMPLETED,
+              stepExecutionId: null,
+              children: [
+                {
+                  stepId: 'log-name-surname',
+                  stepType: 'console',
+                  executionIndex: 0,
+                  status: ExecutionStatus.COMPLETED,
+                  stepExecutionId: 'f71b2778-a92d-4d4d-a5e7-8cbf5c0794e4',
+                  children: [],
+                },
+                {
+                  stepId: 'slack_it',
+                  stepType: 'slack',
+                  executionIndex: 0,
+                  status: ExecutionStatus.COMPLETED,
+                  stepExecutionId: 'a44f84d1-0b7f-4aed-8060-b7ef12aa267c',
+                  children: [],
+                },
+              ],
+            },
+            {
+              stepId: 'foreachstep:1',
+              stepType: 'foreach',
+              executionIndex: 1,
+              status: ExecutionStatus.SKIPPED,
+              stepExecutionId: null,
+              children: [
+                {
+                  stepId: 'log-name-surname',
+                  stepType: 'console',
+                  executionIndex: 0,
+                  status: ExecutionStatus.SKIPPED,
+                  stepExecutionId: 'aedd1aff-54d2-4238-ba05-6f72a82d6613',
+                  children: [],
+                },
+                {
+                  stepId: 'slack_it',
+                  stepType: 'slack',
+                  executionIndex: 0,
+                  status: ExecutionStatus.SKIPPED,
+                  stepExecutionId: 'fe7786c2-95f4-49d6-9935-b1a897ed9390',
+                  children: [],
+                },
+              ],
+            },
+            {
+              stepId: 'foreachstep:2',
+              stepType: 'foreach',
+              executionIndex: 2,
+              status: ExecutionStatus.RUNNING,
+              stepExecutionId: null,
+              children: [
+                {
+                  stepId: 'log-name-surname',
+                  stepType: 'console',
+                  executionIndex: 0,
+                  status: ExecutionStatus.WAITING_FOR_INPUT,
+                  stepExecutionId: 'aedd1aff-54d2-4238-ba05-6f72a82d6613',
+                  children: [],
+                },
+                {
+                  stepId: 'slack_it',
+                  stepType: 'slack',
+                  executionIndex: 0,
+                  status: ExecutionStatus.PENDING,
+                  stepExecutionId: 'fe7786c2-95f4-49d6-9935-b1a897ed9390',
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          stepId: 'print-exit-dash',
+          stepType: 'slack',
+          executionIndex: 0,
+          status: ExecutionStatus.PENDING,
+          stepExecutionId: '16b8cb55-9946-4adb-b086-ebc37c60fa86',
+          children: [],
         },
       ],
     },

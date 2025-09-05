@@ -20,7 +20,6 @@ import {
   EuiText,
   EuiTabs,
   EuiTab,
-  useEuiTheme,
   EuiButtonIcon,
   EuiSkeletonText,
   EuiButtonEmpty,
@@ -29,8 +28,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { StatusBadge } from '../../../shared/ui';
 import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
@@ -39,7 +38,7 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 interface WorkflowStepExecutionFlyoutProps {
   workflowExecutionId: string;
   stepExecutionId: string;
-  stepExecution: EsWorkflowStepExecution | null;
+  stepExecution: WorkflowStepExecutionDto | null;
   isLoading: boolean;
   closeFlyout: () => void;
   goNext?: () => void;
@@ -57,7 +56,6 @@ export const WorkflowStepExecutionFlyout = ({
   setSelectedStepId,
   isLoading = false,
 }: WorkflowStepExecutionFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
   const getFormattedDateTime = useGetFormattedDateTime();
 
@@ -178,7 +176,10 @@ export const WorkflowStepExecutionFlyout = ({
               <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
               <EuiTitle size="m">
                 <h2 id={complicatedFlyoutTitleId} css={styles.title}>
-                  {getExecutionStatusIcon(euiTheme, stepExecution.status)}
+                  {/* <StepIcon
+                    stepType={stepExecution.stepType}
+                    executionStatus={stepExecution.status}
+                  /> */}
                   {stepExecution.stepId}
                 </h2>
               </EuiTitle>

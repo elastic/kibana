@@ -23,11 +23,12 @@ import {
 import { ExecutionStatus } from '@kbn/workflows';
 import React from 'react';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { TokenColor } from '@elastic/eui/src/components/token/token_types';
 import { getStatusLabel } from '../translations';
-
 interface ExecutionStatusColors {
   color: string;
   backgroundColor: string;
+  tokenColor: TokenColor | undefined;
 }
 
 const getExecutionStatusColorsMap = (
@@ -37,34 +38,42 @@ const getExecutionStatusColorsMap = (
     [ExecutionStatus.COMPLETED]: {
       color: euiTheme.colors.vis.euiColorVisSuccess0,
       backgroundColor: euiTheme.colors.backgroundBaseSuccess,
+      tokenColor: 'euiColorVis0' as const,
     },
     [ExecutionStatus.FAILED]: {
       color: euiTheme.colors.danger,
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      tokenColor: 'euiColorVis6' as const,
     },
     [ExecutionStatus.PENDING]: {
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: 'gray' as const,
     },
     [ExecutionStatus.RUNNING]: {
       color: euiTheme.colors.textSubdued,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      backgroundColor: euiTheme.colors.backgroundLightNeutral,
+      tokenColor: 'euiColorVis3' as const,
     },
     [ExecutionStatus.WAITING]: {
       color: euiTheme.colors.warning,
       backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      tokenColor: 'euiColorVis9' as const,
     },
     [ExecutionStatus.WAITING_FOR_INPUT]: {
       color: euiTheme.colors.warning,
       backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      tokenColor: 'euiColorVis9' as const,
     },
     [ExecutionStatus.CANCELLED]: {
       color: euiTheme.colors.danger,
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      tokenColor: 'gray',
     },
     [ExecutionStatus.SKIPPED]: {
       color: euiTheme.colors.textDisabled,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: 'gray',
     },
   };
 };
@@ -77,6 +86,7 @@ export const getExecutionStatusColors = (
     return {
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: euiTheme.colors.textDisabled,
     };
   }
   return getExecutionStatusColorsMap(euiTheme)[status];

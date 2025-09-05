@@ -21,15 +21,12 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   EuiTreeView,
-  EuiBeacon,
-  EuiToken,
   logicalCSS,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
-  ExecutionStatus,
   isDangerousStatus,
   type WorkflowExecutionDto,
   type StepExecutionTreeItem,
@@ -38,51 +35,8 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
-import { getStepIconType } from '../../../shared/ui/get_step_icon_type';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
-
-function StepIcon({
-  stepType,
-  executionStatus,
-}: {
-  stepType: string;
-  executionStatus: ExecutionStatus | null;
-}) {
-  const { euiTheme } = useEuiTheme();
-  if (executionStatus === ExecutionStatus.RUNNING) {
-    return <EuiLoadingSpinner size="m" />;
-  }
-  if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
-    return <EuiBeacon size={14} color="warning" />;
-  }
-  const iconType = getStepIconType(stepType);
-  if (iconType.startsWith('token')) {
-    return (
-      <EuiToken
-        iconType={iconType}
-        size="s"
-        // color={getExecutionStatusColors(euiTheme, executionStatus).backgroundColor}
-      />
-    );
-  }
-  return (
-    <EuiIcon
-      type={iconType}
-      size="m"
-      color={getExecutionStatusColors(euiTheme, executionStatus).color}
-      css={
-        // change fill and color of the icon for non-completed statuses, for multi-color logos
-        executionStatus !== ExecutionStatus.COMPLETED &&
-        css`
-          & * {
-            fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-            color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-          }
-        `
-      }
-    />
-  );
-}
+import { StepIcon } from '../../../shared/ui/step_icon';
 
 function getStepType(stepId: string, stepType: string) {
   if (stepId.split(':').length > 1) {
@@ -219,16 +173,16 @@ export const WorkflowStepExecutionList = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (!execution) {
+  } else if (!execution || !execution.stepExecutionsTree) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="play" size="l" />}
+        icon={<EuiIcon type="list" size="l" />}
         title={
           <h2>
             <FormattedMessage
               id="workflows.workflowStepExecutionList.noExecutionFound"
-              defaultMessage="No execution found"
+              defaultMessage="No step executions yet"
             />
           </h2>
         }
