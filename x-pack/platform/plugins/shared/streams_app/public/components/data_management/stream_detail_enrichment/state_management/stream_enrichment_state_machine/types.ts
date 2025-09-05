@@ -66,5 +66,4 @@ export type StreamEnrichmentEvent =
   | { type: 'processors.add'; processor?: StreamlangProcessorDefinition }
   | { type: 'processors.reorder'; from: number; to: number }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
-  | { type: 'url.sync' }
-  | { type: 'simulation.completed' };
+  | { type: 'url.sync' };
