@@ -89,11 +89,7 @@ describe('cancel authorization utilities', () => {
       ];
 
       unsupportedAgentTypes.forEach((agentType) => {
-        const result = canCancelResponseAction(
-          mockAuthz,
-          mockExperimentalFeatures,
-          agentType
-        );
+        const result = canCancelResponseAction(mockAuthz, mockExperimentalFeatures, agentType);
 
         expect(result).toBe(false);
       });
@@ -254,7 +250,8 @@ describe('cancel authorization utilities', () => {
 
         setup();
 
-        const agentType = name === 'unsupported agent type' ? 'endpoint' : 'microsoft_defender_endpoint';
+        const agentType =
+          name === 'unsupported agent type' ? 'endpoint' : 'microsoft_defender_endpoint';
         const result = canCancelResponseAction(
           mockAuthz,
           mockExperimentalFeatures,
