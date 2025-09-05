@@ -23,8 +23,8 @@ import {
   EuiContextMenuItem,
   EuiHorizontalRule,
   EuiWrappingPopover,
-  type EuiPopoverAnchorPosition,
 } from '@elastic/eui';
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -45,7 +45,7 @@ interface AppMenuActionsMenuPopoverProps {
   anchorElement: HTMLElement;
   services: DiscoverServices;
   onClose: () => void;
-  anchorPosition?: EuiPopoverAnchorPosition;
+  anchorPosition?: PopoverAnchorPosition;
 }
 
 export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps> = ({
@@ -137,7 +137,7 @@ export function runAppMenuPopoverAction({
   appMenuItem: AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom;
   anchorElement: HTMLElement;
   services: DiscoverServices;
-  anchorPosition?: EuiPopoverAnchorPosition;
+  anchorPosition?: PopoverAnchorPosition;
 }) {
   if (isOpen) {
     cleanup();
