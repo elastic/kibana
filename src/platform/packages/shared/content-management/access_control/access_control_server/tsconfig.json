@@ -14,11 +14,9 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-http-browser",
     "@kbn/core",
     "@kbn/security-plugin-types-server",
     "@kbn/core-saved-objects-common",
     "@kbn/config-schema",
-    "@kbn/core-saved-objects-api-server",
   ]
 }
