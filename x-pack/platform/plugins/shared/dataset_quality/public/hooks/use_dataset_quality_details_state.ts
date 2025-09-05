@@ -103,6 +103,11 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
   );
 
+  const canUserManageFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]
+      ?.canManageFailureStore
+  );
+
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
       ? state.context.dataStreamDetails
@@ -214,5 +219,6 @@ export const useDatasetQualityDetailsState = () => {
     isQualityIssueFlyoutOpen,
     defaultRetentionPeriod,
     customRetentionPeriod,
+    canUserManageFailureStore,
   };
 };
