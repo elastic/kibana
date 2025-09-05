@@ -108,11 +108,11 @@ export const createDashboardSavedObjectType = ({
       },
       controlGroupInput: {
         properties: {
-          controlStyle: { type: 'keyword', index: false, doc_values: false },
-          chainingSystem: { type: 'keyword', index: false, doc_values: false },
+          controlStyle: { type: 'keyword', index: false, doc_values: false }, // TODO: Remove
+          chainingSystem: { type: 'keyword', index: false, doc_values: false }, // TODO: Remove
           panelsJSON: { type: 'text', index: false },
-          showApplySelections: { type: 'boolean', index: false, doc_values: false },
-          ignoreParentSettingsJSON: { type: 'text', index: false },
+          showApplySelections: { type: 'boolean', index: false, doc_values: false }, // TODO: Remove
+          ignoreParentSettingsJSON: { type: 'text', index: false }, // TODO: Remove
         },
       },
       timeFrom: { type: 'keyword', index: false, doc_values: false },

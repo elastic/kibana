@@ -20,9 +20,7 @@ export {
   ACTION_EDIT_CONTROL,
 } from './actions/constants';
 
-export type { ControlGroupApi, ControlStateTransform } from './control_group/types';
-export type { DataControlApi, DataControlFactory } from './controls/data_controls/types';
-export type { DefaultControlApi } from './controls/types';
+export type { DataControlApi } from './controls/data_controls/types';
 export type { OptionsListControlApi } from './controls/data_controls/options_list_control/types';
 export type { RangesliderControlApi } from './controls/data_controls/range_slider/types';
 export type { ESQLControlApi } from './controls/esql_control/types';
@@ -34,14 +32,6 @@ export {
   type ControlGroupRendererApi,
   type ControlGroupRendererProps,
 } from './control_group/control_group_renderer';
-
-export type {
-  ControlGroupRuntimeState,
-  ControlPanelState,
-  ControlPanelsState,
-  DefaultDataControlState,
-} from '../common';
-export type { OptionsListControlState } from '../common/options_list';
 
 export { serializeRuntimeState } from './control_group/utils/serialize_runtime_state';
 

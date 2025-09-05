@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const REFERENCE_NAME_PREFIX = 'controlGroup_';
+export const OPTIONS_LIST_DEFAULT_SORT = {
+  by: '_count',
+  direction: 'desc',
+} as const;
 
-export function getReferenceName(controlId: string, referenceNameSuffix: string) {
-  return `${REFERENCE_NAME_PREFIX}${controlId}:${referenceNameSuffix}`;
-}
-
-export function parseReferenceName(referenceName: string) {
-  return {
-    controlId: referenceName.substring(
-      REFERENCE_NAME_PREFIX.length,
-      referenceName.lastIndexOf(':')
-    ),
-  };
-}
+export const DEFAULT_SEARCH_TECHNIQUE = 'prefix';

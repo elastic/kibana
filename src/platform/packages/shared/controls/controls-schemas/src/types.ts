@@ -8,17 +8,23 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { controlSchema, dataControlSchema } from './control_schema';
+import type { controlsGroupSchema } from './controls_group_schema';
 import type {
-  controlsGroupSchema,
-  labelPositionSchema,
-  ignoreParentSettingsSchema,
-} from './controls_group_schema';
-import type { controlSchema, controlWidthSchema } from './control_schema';
+  optionsListControlSchema,
+  optionsListDisplaySettingsSchema,
+  optionsListSearchTechniqueSchema,
+  optionsListSelectionSchema,
+  optionsListSortSchema,
+} from './options_list_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
-
-export type ControlsLabelPosition = TypeOf<typeof labelPositionSchema>;
-export type ControlsIgnoreParentSettings = TypeOf<typeof ignoreParentSettingsSchema>;
-
-export type ControlWidth = TypeOf<typeof controlWidthSchema>;
 export type ControlState = TypeOf<typeof controlSchema>;
+
+export type DataControlState = TypeOf<typeof dataControlSchema>;
+
+export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
+export type OptionsListControlState = TypeOf<typeof optionsListControlSchema>;
+export type OptionsListSearchTechnique = TypeOf<typeof optionsListSearchTechniqueSchema>;
+export type OptionsListSelection = TypeOf<typeof optionsListSelectionSchema>;
+export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;

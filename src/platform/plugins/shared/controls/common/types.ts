@@ -7,23 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlWidth } from '@kbn/controls-schemas';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 
 export type TimeSlice = [number, number];
 
-export interface DefaultControlState {
-  grow?: boolean;
-  width?: ControlWidth;
-}
+export type SerializedControlPanelState<ControlStateType extends object = object> =
+  SerializedTitles & ControlStateType;
 
-export interface SerializedControlState<ControlStateType extends object = object>
-  extends DefaultControlState {
-  type: string;
-  explicitInput: ControlStateType;
-}
-
-export interface DefaultDataControlState extends DefaultControlState {
+export interface DataControlState {
   dataViewId: string;
   fieldName: string;
   useGlobalFilters?: boolean;
 }
+
+export type SerializedDataControlState = SerializedControlPanelState<
+  Omit<DataControlState, 'dataViewId'>
+>;

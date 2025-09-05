@@ -8,78 +8,40 @@
  */
 
 import { flow } from 'lodash';
-import {
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_LABEL_POSITION,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '@kbn/controls-constants';
-import type {
-  ControlsGroupState,
-  ControlsLabelPosition,
-  ControlsIgnoreParentSettings,
-} from '@kbn/controls-schemas';
+
+import type { Reference } from '@kbn/content-management-utils';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
 
 export const transformControlGroupOut: (
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) => ControlsGroupState = flow(transformControlGroupSetDefaults, transformControlGroupProperties);
+  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
+  references: Reference[]
+) => ControlsGroupState = flow(transformControlGroupProperties);
 
-// TODO We may want to remove setting defaults in the future
-function transformControlGroupSetDefaults(
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) {
+function transformControlGroupProperties(
+  { panelsJSON }: Required<NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>>,
+  references: Reference[]
+): ControlsGroupState {
   return {
-    controlStyle: DEFAULT_CONTROLS_LABEL_POSITION,
-    showApplySelections: !DEFAULT_AUTO_APPLY_SELECTIONS,
-    ...controlGroupInput,
-  };
-}
-
-function transformControlGroupProperties({
-  controlStyle,
-  showApplySelections,
-  ignoreParentSettingsJSON,
-  panelsJSON,
-}: Required<NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>>): ControlsGroupState {
-  return {
-    labelPosition: controlStyle as ControlsLabelPosition,
-    autoApplySelections: !showApplySelections,
-    ignoreParentSettings: ignoreParentSettingsJSON
-      ? flow(
-          JSON.parse,
-          transformIgnoreParentSettingsSetDefaults,
-          transformIgnoreParentSettingsProperties
-        )(ignoreParentSettingsJSON)
-      : DEFAULT_IGNORE_PARENT_SETTINGS,
-    controls: panelsJSON ? transformControlsState(panelsJSON) : [],
-  };
-}
-
-// TODO We may want to remove setting defaults in the future
-function transformIgnoreParentSettingsSetDefaults(
-  ignoreParentSettings: ControlsIgnoreParentSettings
-): ControlsIgnoreParentSettings {
-  return {
-    ...DEFAULT_IGNORE_PARENT_SETTINGS,
-    ...ignoreParentSettings,
+    controls: panelsJSON ? transformControlsState(panelsJSON, references) : [],
   };
 }
 
 /**
- * Explicitly extract and provide the expected properties ignoring any unsupported
- * properties that may be in the saved object.
+ * TODO: Figure out how to send 'ignoreQuery' + 'ignoreFilters'  to the children and 'showApplySelections' to the dashboard
  */
-function transformIgnoreParentSettingsProperties({
-  ignoreFilters,
-  ignoreQuery,
-  ignoreTimerange,
-  ignoreValidations,
-}: ControlsIgnoreParentSettings): ControlsIgnoreParentSettings {
-  return {
-    ignoreFilters,
-    ignoreQuery,
-    ignoreTimerange,
-    ignoreValidations,
-  };
-}
+// function transformIgnoreParentSettingsProperties({a
+//   ignoreFilters,
+//   ignoreQuery,
+//   ignoreTimerange,
+//   ignoreValidations,
+// }: ControlsIgnoreParentSettings): ControlsIgnoreParentSettings {
+//   return {
+//     ignoreFilters,
+//     ignoreQuery,
+//     ignoreTimerange,
+//     ignoreValidations,
+//   };
+// }

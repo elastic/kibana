@@ -56,10 +56,15 @@ export const transformDashboardIn = async ({
     const { searchSourceJSON, references: searchSourceReferences } =
       transformSearchSourceIn(kibanaSavedObjectMeta);
 
+    const { controlsJSON, references: controlGroupReferences } =
+      transformControlGroupIn(controlGroupInput);
+
     const attributes = {
       ...rest,
-      ...(controlGroupInput && {
-        controlGroupInput: transformControlGroupIn(controlGroupInput),
+      ...(controlsJSON && {
+        controlGroupInput: {
+          panelsJSON: controlsJSON,
+        },
       }),
       ...(options && {
         optionsJSON: JSON.stringify(options),
@@ -74,7 +79,12 @@ export const transformDashboardIn = async ({
     };
     return {
       attributes,
-      references: [...tagReferences, ...panelReferences, ...searchSourceReferences],
+      references: [
+        ...tagReferences,
+        ...panelReferences,
+        ...controlGroupReferences,
+        ...searchSourceReferences,
+      ],
       error: null,
     };
   } catch (e) {

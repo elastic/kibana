@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'react-fast-compare';
+
+import type { OptionsListControlState, OptionsListSelection } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import deepEqual from 'react-fast-compare';
-import type { OptionsListControlState } from '../../../../common/options_list';
-import type { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+
 import { OPTIONS_LIST_DEFAULT_SORT } from './constants';
 
 function areSelectedOptionsEqual(
