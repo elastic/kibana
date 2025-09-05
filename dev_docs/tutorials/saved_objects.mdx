@@ -125,8 +125,8 @@ Do not use field mappings like you would use data types for the columns of a SQL
 SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false`
  in any level of your mappings, Elasticsearch will accept and store any other fields even if they are not specified in your mappings.
 
-Never use `enabled: false` or `index: false` in your mappings. Elasticsearch does not support toggling these mapping options, so if
-your plugin ever needs to query the data, you will not be able to do so. Since these fields cannot be queried, they would require
+Never use `enabled: false` or `index: false` in your mappings. Elasticsearch does not support toggling these mapping options, so if 
+your plugin ever needs to query the data, you will not be able to do so. Since these fields cannot be queried, they would require 
 migrating to a new field and making associated code changes. Instead, use `dynamic: false` which provides the same flexibility while
 maintaining the future ability to query fields if necessary.
 
@@ -355,7 +355,6 @@ export const foo: SavedObjectsType = {
 
 [2] Set this to `true` to build your own HTTP API and have complete control over the route handler.
 
-
 ## Troubleshooting
 
 ### CI is failing for my PR
@@ -370,8 +369,6 @@ Please find your error in the list below, to understand what scenario your PR is
 ```
 **Problem:** Migration functions cannot be altered. The `migrations` property was deprecated in favor of `modelVersions`, but the existing `migrations` must be kept in order to allow importing old documents.
 **Solution:** Do not perform any modifications in the `migrations` property of your SO type. If you haven't modified the field, please check that your PR branch is up-to-date and consider updating.
-
-
 
 ```
 ❌ Some modelVersions have been updated for SO type '<soType>' after they were defined: 5.
