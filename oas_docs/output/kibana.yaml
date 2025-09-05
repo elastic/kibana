@@ -28757,6 +28757,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                            previous_version:
+                              type: string
                             type:
                               type: string
                             updated_at:
@@ -30010,6 +30012,8 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            type: string
                           type:
                             type: string
                           updated_at:
@@ -30677,6 +30681,8 @@ paths:
                             items:
                               type: string
                             type: array
+                          previous_version:
+                            type: string
                           type:
                             type: string
                           updated_at:
