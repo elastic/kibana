@@ -44,7 +44,15 @@ export const getStepIconType = (stepType: string) => {
       iconType = 'branch';
       break;
     case 'enter-foreach':
+    case 'foreach':
       iconType = 'refresh';
+      break;
+    case 'foreach-iteration':
+      iconType = 'tokenNumber';
+      break;
+    case 'true':
+    case 'false':
+      iconType = 'tokenBoolean';
       break;
     default:
       iconType = 'info';

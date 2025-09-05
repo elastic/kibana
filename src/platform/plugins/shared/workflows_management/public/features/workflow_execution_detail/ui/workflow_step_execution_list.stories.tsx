@@ -73,10 +73,6 @@ steps:
     connector-id: slacky
     with:
       message: '-------------------hellow-------'
-  - name: log-name-surname-1
-    type: console
-    with:
-      message: '{{ foreach.item.name }} {{ steps.foreachstep.item.surname}}'
   - name: foreachstep
     type: foreach
     foreach: steps.analysis.output.0.result
@@ -149,6 +145,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           completedAt: '2025-09-02T20:44:01.245Z',
           executionTimeMs: 3779,
           spaceId: 'default',
+          path: [],
         },
         {
           stepId: 'debug_ai_response',
@@ -167,6 +164,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:02.167Z',
           executionTimeMs: 25,
+          path: [],
         },
         {
           stepId: 'print-enter-dash',
@@ -186,23 +184,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           completedAt: '2025-09-02T20:44:03.627Z',
           executionTimeMs: 456,
           spaceId: 'default',
-        },
-        {
-          stepId: 'log-name-surname-1',
-          topologicalIndex: 3,
-          status: ExecutionStatus.FAILED,
-          startedAt: '2025-09-02T20:44:04.201Z',
-          id: '7c08bf0e-c78f-4b6e-8ef5-23863cb1923a',
-          executionIndex: 0,
-          workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
-          workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output: ' ',
-          input: {
-            message: ' ',
-          },
-          completedAt: '2025-09-02T20:44:04.229Z',
-          executionTimeMs: 28,
-          spaceId: 'default',
+          path: [],
         },
         {
           stepId: 'foreachstep',
@@ -242,6 +224,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           completedAt: '2025-09-02T20:44:14.522Z',
           executionTimeMs: 9289,
           spaceId: 'default',
+          path: [],
         },
         {
           stepId: 'log-name-surname',
@@ -258,6 +241,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:12.694Z',
           executionTimeMs: 96,
+          path: ['foreachstep', '0'],
         },
         {
           stepId: 'log-name-surname',
@@ -274,11 +258,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:10.491Z',
           executionTimeMs: 35,
+          path: ['foreachstep', '1'],
         },
         {
           stepId: 'log-name-surname',
           topologicalIndex: 5,
-          status: 'completed',
+          status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:08.396Z',
           id: 'e8739d72-5a1e-4a19-8382-a15ffaf12bb0',
           executionIndex: 1,
@@ -290,11 +275,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:08.423Z',
           executionTimeMs: 27,
+          path: ['foreachstep', '2'],
         },
         {
           stepId: 'log-name-surname',
           topologicalIndex: 5,
-          status: 'completed',
+          status: ExecutionStatus.FAILED,
           startedAt: '2025-09-02T20:44:06.265Z',
           id: '7e36c4c3-6d99-4d2f-a0b8-8229904ef0cf',
           executionIndex: 0,
@@ -306,11 +292,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:06.293Z',
           executionTimeMs: 28,
+          path: ['foreachstep', '3'],
         },
         {
           stepId: 'slack_it',
           topologicalIndex: 6,
-          status: 'completed',
+          status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:13.480Z',
           id: 'a44f84d1-0b7f-4aed-8060-b7ef12aa267c',
           executionIndex: 3,
@@ -324,11 +311,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:13.895Z',
           executionTimeMs: 415,
+          path: ['foreachstep', '0'],
         },
         {
           stepId: 'slack_it',
           topologicalIndex: 6,
-          status: 'completed',
+          status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:11.422Z',
           id: 'fe7786c2-95f4-49d6-9935-b1a897ed9390',
           executionIndex: 2,
@@ -342,11 +330,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:11.823Z',
           executionTimeMs: 401,
+          path: ['foreachstep', '1'],
         },
         {
           stepId: 'slack_it',
           topologicalIndex: 6,
-          status: 'completed',
+          status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:09.363Z',
           id: '57b14a10-93c6-471a-b9d2-d027cf340d31',
           executionIndex: 1,
@@ -360,11 +349,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:09.756Z',
           executionTimeMs: 393,
+          path: ['foreachstep', '2'],
         },
         {
           stepId: 'slack_it',
           topologicalIndex: 6,
-          status: 'completed',
+          status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:07.300Z',
           id: '4e76f94d-2092-41bb-9c07-171b9207de98',
           executionIndex: 0,
@@ -378,11 +368,12 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:07.692Z',
           executionTimeMs: 392,
+          path: ['foreachstep', '3'],
         },
         {
           stepId: 'print-exit-dash',
           topologicalIndex: 8,
-          status: 'completed',
+          status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:15.553Z',
           id: '16b8cb55-9946-4adb-b086-ebc37c60fa86',
           executionIndex: 0,
@@ -396,6 +387,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
           },
           completedAt: '2025-09-02T20:44:15.945Z',
           executionTimeMs: 392,
+          path: [],
         },
       ],
     },

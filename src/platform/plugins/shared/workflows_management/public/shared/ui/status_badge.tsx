@@ -69,7 +69,16 @@ const getExecutionStatusColorsMap = (
   };
 };
 
-export const getExecutionStatusColors = (euiTheme: EuiThemeComputed, status: ExecutionStatus) => {
+export const getExecutionStatusColors = (
+  euiTheme: EuiThemeComputed,
+  status: ExecutionStatus | null
+) => {
+  if (!status) {
+    return {
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    };
+  }
   return getExecutionStatusColorsMap(euiTheme)[status];
 };
 

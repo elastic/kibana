@@ -20,9 +20,10 @@ export function buildStepExecutionsTree(
   const stepMap = new Map<string, StepExecutionTreeItem>();
   const roots: StepExecutionTreeItem[] = [];
   const workflowExecutionGraph = convertToWorkflowGraph(workflowDefinition);
+  const sortedStepExecutions = stepExecutions.sort((a, b) => a.executionIndex - b.executionIndex);
 
   // add all steps to the map
-  for (const stepExecution of stepExecutions) {
+  for (const stepExecution of sortedStepExecutions) {
     const lastPart = stepExecution.path[stepExecution.path.length - 1];
     if (lastPart === 'true' || lastPart === 'false' || !isNaN(parseInt(lastPart, 10))) {
       stepMap.set(stepExecution.path.join('.'), {
@@ -37,7 +38,7 @@ export function buildStepExecutionsTree(
     const path = [...stepExecution.path, stepExecution.stepId].join('.');
     stepMap.set(path, {
       stepId: stepExecution.stepId,
-      stepType: workflowExecutionGraph.node(stepExecution.stepId)?.type,
+      stepType: workflowExecutionGraph.node(stepExecution.stepId)?.configuration?.type,
       executionIndex: stepExecution.executionIndex,
       stepExecutionId: stepExecution.id,
       status: stepExecution.status,

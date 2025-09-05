@@ -190,3 +190,15 @@ In 7.x, the UI supports types defined as part of the mappings for legacy index t
   }
 }
 ```
+
+## Storybook
+
+This plugin uses Storybook to develop and showcase stateless UI components in an isolated environment.
+
+To start the Storybook, run the following command:
+
+```
+yarn storybook index_management
+```
+
+This will launch the Storybook instance for this plugin, allowing you to view and interact with the components in your browser.

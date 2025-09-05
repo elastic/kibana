@@ -17,7 +17,7 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
-  status: ExecutionStatus;
+  status: ExecutionStatus | null;
   executionIndex: number;
   executionTimeMs: number | null;
   stepType: string;
@@ -33,8 +33,11 @@ export function StepExecutionTreeItemLabel({
   selected,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
-  const isDangerous = isDangerousStatus(status);
+  const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
+  if (stepId.split(':').length > 1) {
+    stepId = stepId.split(':')[1];
+  }
   return (
     <EuiFlexGroup
       alignItems="baseline"
@@ -52,7 +55,7 @@ export function StepExecutionTreeItemLabel({
         ]}
       >
         {stepId}
-        {executionIndex > 0 && <span css={styles.executionIndex}>{executionIndex + 1}</span>}
+        {/* {executionIndex > 0 && <span css={styles.executionIndex}>{executionIndex + 1}</span>} */}
       </EuiFlexItem>
       {executionTimeMs && (
         <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>

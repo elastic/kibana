@@ -22,13 +22,15 @@ import {
   useEuiTheme,
   EuiTreeView,
   EuiBeacon,
+  EuiToken,
+  logicalCSS,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   ExecutionStatus,
   isDangerousStatus,
-  type EsWorkflowStepExecution,
   type WorkflowExecutionDto,
   type StepExecutionTreeItem,
 } from '@kbn/workflows';
@@ -44,7 +46,7 @@ function StepIcon({
   executionStatus,
 }: {
   stepType: string;
-  executionStatus: ExecutionStatus;
+  executionStatus: ExecutionStatus | null;
 }) {
   const { euiTheme } = useEuiTheme();
   if (executionStatus === ExecutionStatus.RUNNING) {
@@ -53,9 +55,20 @@ function StepIcon({
   if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
     return <EuiBeacon size={14} color="warning" />;
   }
+  const iconType = getStepIconType(stepType);
+  if (iconType.startsWith('token')) {
+    return (
+      <EuiToken
+        iconType={iconType}
+        size="s"
+        // color={getExecutionStatusColors(euiTheme, executionStatus).backgroundColor}
+      />
+    );
+  }
   return (
     <EuiIcon
-      type={getStepIconType(stepType)}
+      type={iconType}
+      size="m"
       color={getExecutionStatusColors(euiTheme, executionStatus).color}
       css={
         // change fill and color of the icon for non-completed statuses, for multi-color logos
@@ -71,9 +84,20 @@ function StepIcon({
   );
 }
 
+function getStepType(stepId: string, stepType: string) {
+  if (stepId.split(':').length > 1) {
+    const index = stepId.split(':')[1];
+    if (!isNaN(parseInt(index, 10))) {
+      return 'foreach-iteration';
+    }
+    return index;
+  }
+  return stepType;
+}
+
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
-  stepExecutionMap: Map<string, EsWorkflowStepExecution>,
+  stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
   onClickHandler: (stepExecutionId: string) => void
@@ -84,20 +108,27 @@ function convertTreeToEuiTreeViewItems(
     return {
       ...item,
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      icon: <StepIcon stepType={item.stepType} executionStatus={item.status} />,
-      css: isDangerousStatus(item.status)
-        ? css`
-            &,
-            &:active,
-            &:focus {
-              background-color: ${getExecutionStatusColors(euiTheme, item.status).backgroundColor};
-            }
+      icon: (
+        <StepIcon
+          stepType={getStepType(item.stepId, item.stepType)}
+          executionStatus={item.status}
+        />
+      ),
+      css:
+        item.status && isDangerousStatus(item.status)
+          ? css`
+              &,
+              &:active,
+              &:focus {
+                background-color: ${getExecutionStatusColors(euiTheme, item.status)
+                  .backgroundColor};
+              }
 
-            &:hover {
-              background-color: ${euiTheme.colors.backgroundLightDanger};
-            }
-          `
-        : undefined,
+              &:hover {
+                background-color: ${euiTheme.colors.backgroundLightDanger};
+              }
+            `
+          : undefined,
       label: (
         <StepExecutionTreeItemLabel
           stepId={item.stepId}
@@ -121,9 +152,13 @@ function convertTreeToEuiTreeViewItems(
       callback:
         // TODO: for nodes with children, we don't want other onClick behavior besides expanding/collapsing
         () => {
-          onClickFn(item.stepExecutionId ?? '');
+          let toOpen = item.stepExecutionId;
+          if (!toOpen && item.children.length) {
+            toOpen = item.children[0].stepExecutionId;
+          }
+          onClickFn(toOpen ?? '');
           // string is expected by EuiTreeView for some reason
-          return item.stepExecutionId ?? '';
+          return toOpen ?? '';
         },
     };
   });
@@ -200,7 +235,7 @@ export const WorkflowStepExecutionList = ({
       />
     );
   } else if (execution.workflowDefinition) {
-    const stepExecutionMap = new Map<string, EsWorkflowStepExecution>();
+    const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
     for (const stepExecution of execution.stepExecutions) {
       stepExecutionMap.set(stepExecution.id, stepExecution);
     }
@@ -296,11 +331,59 @@ const componentStyles = {
     justifySelf: 'flex-end',
     flexShrink: 0,
   }),
-  treeViewContainer: css({
-    overflowY: 'auto',
-    '& .euiTreeView__nodeLabel': {
-      flexGrow: 1,
-      textAlign: 'left',
-    },
-  }),
+  treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
+    overflow-y: auto;
+
+    & .euiTreeView__nodeLabel {
+      flex-grow: 1;
+      text-align: left;
+    }
+    & .euiTreeView__nodeInner {
+      gap: 6px;
+      /* Absolutely position the horizontal tick connecting the item to the vertical line. */
+      position: relative;
+      padding-inline: ${euiTheme.size.s};
+
+      &::after {
+        position: absolute;
+        content: '';
+        ${logicalCSS('top', '14px')}
+        ${logicalCSS('left', 0)}
+        ${logicalCSS('width', euiTheme.size.s)}
+        ${logicalCSS('border-bottom', euiTheme.border.thin)}
+      }
+    }
+    & .euiTreeView {
+      // TODO: reduce padding to fit more nested levels in 300px sidebar?
+      padding-inline-start: ${euiTheme.size.m} !important;
+    }
+
+    & .euiTreeView__node {
+      position: relative;
+
+      /* Draw the vertical line to group an expanded item's child items together. */
+      &::after {
+        position: absolute;
+        content: '';
+        ${logicalCSS('vertical', 0)}
+        ${logicalCSS('left', 0)}
+        ${logicalCSS('border-left', euiTheme.border.thin)}
+      }
+
+      /* If this is actually the last item, we don't want the vertical line to stretch all the way down */
+      &:last-of-type::after {
+        ${logicalCSS('height', '14px')}
+      }
+    }
+
+    & > ul > li {
+      // for the first level of the tree, we don't want lines
+      &::after {
+        display: none;
+      }
+      & > .euiTreeView__nodeInner::after {
+        display: none;
+      }
+    }
+  `,
 };

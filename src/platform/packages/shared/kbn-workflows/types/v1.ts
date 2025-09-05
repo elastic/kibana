@@ -72,6 +72,9 @@ export interface EsWorkflowStepExecution {
   spaceId: string;
   id: string;
   stepId: string;
+
+  /** Current step's scope path */
+  path: string[];
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
@@ -80,7 +83,6 @@ export interface EsWorkflowStepExecution {
   executionTimeMs?: number;
   topologicalIndex: number;
   executionIndex: number;
-  path: string[];
   error?: string | null;
   output?: Record<string, any> | null;
   input?: Record<string, any> | null;
@@ -131,7 +133,7 @@ export interface WorkflowExecutionDto {
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
-  stepExecutions: EsWorkflowStepExecution[];
+  stepExecutions: WorkflowStepExecutionDto[];
   stepExecutionsTree: StepExecutionTreeItem[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
