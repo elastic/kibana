@@ -112,4 +112,16 @@ describe('RecurringScheduleForm', () => {
 
     expect(await screen.findByTestId('customRecurringScheduleIntervalInput')).toBeInTheDocument();
   });
+
+  it('renders hourly if frequency = hourly', async () => {
+    render(
+      <TestWrapper
+        iv={{ recurringSchedule: { frequency: Frequency.HOURLY, ends: RecurrenceEnd.NEVER } }}
+      >
+        <RecurringScheduleFormFields {...baseProps} />
+      </TestWrapper>
+    );
+
+    expect(await screen.findByText('Repeats every hour')).toBeInTheDocument();
+  });
 });

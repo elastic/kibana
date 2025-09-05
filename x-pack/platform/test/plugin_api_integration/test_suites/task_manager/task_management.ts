@@ -340,6 +340,50 @@ export default function ({ getService }: FtrProviderContext) {
       expect((await historyDocs()).length).to.eql(0);
     });
 
+    it('should schedule a task with rrule with hourly frequency', async () => {
+      const now = new Date();
+      const todayDay = now.getUTCDate();
+      const todayMonth = now.getUTCMonth();
+      // set a start date for 2 days from now
+      const startDate = moment(now).add(2, 'days').toDate();
+      const hourlyTask = await scheduleTask({
+        id: 'sample-recurring-task-id',
+        taskType: 'sampleRecurringTask',
+        schedule: {
+          rrule: {
+            dtstart: startDate.toISOString(),
+            freq: Frequency.HOURLY,
+            tzid: 'UTC',
+            interval: 4,
+            byminute: [27],
+          },
+        },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask(hourlyTask.id);
+        expect(task.status).to.be('idle');
+        const runAt = new Date(task.runAt);
+
+        const runAtDay = runAt.getUTCDate();
+        const runAtMonth = runAt.getUTCMonth();
+        if (todayMonth === runAtMonth) {
+          expect(runAtDay >= todayDay + 2).to.be(true);
+        } else if (todayMonth < runAtMonth) {
+          log.info(`todayMonth: ${todayMonth}, runAtMonth: ${runAtMonth}`);
+        } else {
+          throw new Error(
+            `Unexpected result: todayMonth:[${todayMonth}] > runAtMonth:[${runAtMonth}]`
+          );
+        }
+        expect(runAt.getUTCMinutes()).to.be(27);
+      });
+
+      // should not run immediately as the task is scheduled to run at 15:27 UTC
+      expect((await historyDocs()).length).to.eql(0);
+    });
+
     it('should not schedule a task with invalid rrule config', async () => {
       await supertest
         .post('/api/sample_tasks/schedule')
