@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EmbeddableTransforms, EnhancementsTransforms } from './types';
+import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 
-export type {
-  EmbeddableRegistryDefinition,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-} from '../server';
+export function getTransformIn(dynamicActionsStateManager?: PersistableState) {
+  function transformIn(state: unknown) {}
+  return transformIn;
+}

@@ -8,6 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { getEnhancementsTransforms } from './get_enhancements_transforms';
 
 export type EmbeddableTransforms<
   StoredState extends object = object,
@@ -19,3 +20,5 @@ export type EmbeddableTransforms<
     references?: Reference[];
   };
 };
+
+export type EnhancementsTransforms = ReturnType<typeof getEnhancementsTransforms>
