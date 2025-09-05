@@ -63,7 +63,14 @@ export async function fetchEsqlQuery({
   let response: EsqlTable;
   try {
     response = await asyncSearchClient.search({
-      request: { params: { query: query.query, filter: query.filter, keep_alive: '10m' } },
+      request: {
+        params: {
+          query: query.query,
+          filter: query.filter,
+          keep_alive: '10m',
+          wait_for_completion_timeout: '2s',
+        },
+      },
     });
   } catch (e) {
     if (e.message?.includes('verification_exception')) {
