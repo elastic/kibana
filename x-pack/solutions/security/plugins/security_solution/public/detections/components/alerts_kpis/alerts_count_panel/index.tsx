@@ -41,6 +41,9 @@ interface AlertsCountPanelProps {
   title?: React.ReactNode;
   isExpanded: boolean;
   setIsExpanded: (status: boolean) => void;
+  /**
+   * Indices to use when fetching the chart data
+   */
   signalIndexName: string | null;
 }
 const CHART_HEIGHT = 218; // px
