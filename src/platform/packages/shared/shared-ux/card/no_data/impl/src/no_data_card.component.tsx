@@ -92,7 +92,7 @@ export const NoDataCard = ({
             fill
             href={href}
             data-test-subj="noDataDefaultActionButton"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             {buttonText || defaultButtonText}
           </EuiButton>

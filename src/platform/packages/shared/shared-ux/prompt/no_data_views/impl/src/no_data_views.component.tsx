@@ -54,6 +54,7 @@ const PromptAddDataViews = ({
   return (
     <EuiPageTemplate.EmptyPrompt
       data-test-subj="noDataViewsPromptCreateDataView"
+      className="NoDataViewsPromptCreate"
       style={{ maxWidth: 400 }}
       title={
         <EuiTitle size="m">
@@ -124,6 +125,7 @@ const PromptTryEsql = ({
   return (
     <EuiPageTemplate.EmptyPrompt
       data-test-subj="noDataViewsTryESQL"
+      className="NoDataViewsPromptTryESQL"
       style={{ maxWidth: 400 }}
       title={
         <EuiTitle size="m">
@@ -207,8 +209,8 @@ export const NoDataViewsPrompt = ({
             }
 
             /* Final EmptyPrompt components */
-            [data-test-subj='noDataViewsPromptCreateDataView'],
-            [data-test-subj='noDataViewsTryESQL'] {
+            .NoDataViewsPromptCreateDataView,
+            .NoDataViewsPromptTryESQL {
               flex: 1 !important;
               display: flex !important;
               flex-direction: column !important;
