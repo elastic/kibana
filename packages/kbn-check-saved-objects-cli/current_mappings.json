@@ -292,9 +292,6 @@
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
-      "consumer": {
-        "type": "keyword"
-      },
       "name": {
         "fields": {
           "keyword": {

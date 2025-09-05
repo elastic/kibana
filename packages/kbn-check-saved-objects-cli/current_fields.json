@@ -87,7 +87,6 @@
     "updatedBy"
   ],
   "alerting_rule_template": [
-    "consumer",
     "name",
     "ruleTypeId",
     "tags"
