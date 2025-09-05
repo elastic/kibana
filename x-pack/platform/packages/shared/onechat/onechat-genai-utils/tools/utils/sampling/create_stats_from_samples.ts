@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
+import { orderBy, omit } from 'lodash';
 import type { SampleDoc } from './get_sample_docs';
 
 export interface SamplingStats {
@@ -16,8 +16,6 @@ export interface SamplingStats {
 }
 
 export interface FieldStats {
-  /** path of the field */
-  fieldPath: string;
   /** number of sampling documents having at least one value */
   filledDocCount: number;
   /** number of sampling documents not having any value */
@@ -54,23 +52,25 @@ export const createStatsFromSamples = ({ samples }: { samples: SampleDoc[] }): S
     });
   });
 
-  const fullStats = [...stats.entries()].map<FieldStats>(([fieldPath, fieldValues]) => {
-    return {
-      fieldPath,
-      filledDocCount: fieldValues.filled,
-      emptyDocCount: samples.length - fieldValues.filled,
-      values: orderBy(
-        [...fieldValues.values.entries()].map(([value, count]) => ({ value, count })),
-        ['count'],
-        ['desc']
-      ),
-    };
-  });
+  const fullStats = [...stats.entries()].map<FieldStats & { fieldPath: string }>(
+    ([fieldPath, fieldValues]) => {
+      return {
+        fieldPath,
+        filledDocCount: fieldValues.filled,
+        emptyDocCount: samples.length - fieldValues.filled,
+        values: orderBy(
+          [...fieldValues.values.entries()].map(([value, count]) => ({ value, count })),
+          ['count'],
+          ['desc']
+        ),
+      };
+    }
+  );
 
   return {
     sampleCount: samples.length,
     fieldStats: fullStats.reduce((record, entry) => {
-      record[entry.fieldPath] = entry;
+      record[entry.fieldPath] = omit(entry, ['fieldPath']);
       return record;
     }, {} as Record<string, FieldStats>),
   };

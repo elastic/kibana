@@ -34,7 +34,6 @@ describe('createStatsFromSamples', () => {
     expect(stats.sampleCount).toEqual(2);
     expect(stats.fieldStats).toEqual({
       bar: {
-        fieldPath: 'bar',
         emptyDocCount: 1,
         filledDocCount: 1,
         values: [
@@ -45,7 +44,6 @@ describe('createStatsFromSamples', () => {
         ],
       },
       foo: {
-        fieldPath: 'foo',
         emptyDocCount: 0,
         filledDocCount: 2,
         values: [
@@ -61,7 +59,6 @@ describe('createStatsFromSamples', () => {
       },
       hello: {
         emptyDocCount: 1,
-        fieldPath: 'hello',
         filledDocCount: 1,
         values: [
           {
@@ -90,7 +87,6 @@ describe('createStatsFromSamples', () => {
 
     expect(stats.fieldStats).toEqual({
       foo: {
-        fieldPath: 'foo',
         emptyDocCount: 0,
         filledDocCount: 3,
         values: [
