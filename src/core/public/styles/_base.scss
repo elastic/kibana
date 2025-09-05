@@ -28,7 +28,7 @@
 }
 
 // POC: Numeric font style overrides
-body {
+body, .euiDataGrid__content {
   font-variant-numeric: tabular-nums slashed-zero !important;
   font-feature-settings: 'ss07', 'cv02', 'cv09' !important;
 }
