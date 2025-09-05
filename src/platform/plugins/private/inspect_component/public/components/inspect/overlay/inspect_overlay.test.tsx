@@ -130,4 +130,21 @@ describe('InspectOverlay', () => {
       expect(setFlyoutOverlayRef).not.toHaveBeenCalled();
     });
   });
+
+  it('should close overlay when escape key is pressed', () => {
+    const setIsInspecting = jest.fn();
+
+    renderWithI18n(
+      <InspectOverlay
+        core={mockCoreStart}
+        setFlyoutOverlayRef={jest.fn()}
+        setIsInspecting={setIsInspecting}
+        branch={mockBranch}
+      />
+    );
+
+    fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
+
+    expect(setIsInspecting).toHaveBeenCalledWith(false);
+  });
 });
