@@ -12,7 +12,8 @@ import type { LinuxOs } from 'getos';
 import getosAsync from 'getos';
 import { promisify } from 'util';
 import type { Logger } from '@kbn/logging';
-import type { OpsOsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
+import type { MetricsCollector, OpsOsMetrics } from '@kbn/core-metrics-server';
+import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 const getos = promisify(getosAsync);
@@ -25,19 +26,21 @@ export interface OsMetricsCollectorOptions {
 
 export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
   private readonly cgroupCollector: OsCgroupMetricsCollector;
+  private readonly log: Logger;
 
   constructor(options: OsMetricsCollectorOptions) {
     this.cgroupCollector = new OsCgroupMetricsCollector({
       ...options,
       logger: options.logger.get('cgroup'),
     });
+    this.log = options.logger;
   }
 
   public async collect(): Promise<OpsOsMetrics> {
     const platform = os.platform();
     const load = os.loadavg();
 
-    const metrics: OpsOsMetrics = {
+    const osMetrics: OpsOsMetrics = {
       platform,
       platformRelease: `${platform}-${os.release()}`,
       load: {
@@ -55,10 +58,165 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
       ...(await this.cgroupCollector.collect()),
     };
 
-    return metrics;
+    return osMetrics;
   }
 
   public reset() {}
+
+  public registerMetrics() {
+    const meter = metrics.getMeter('kibana.os');
+
+    // https://opentelemetry.io/docs/specs/semconv/registry/attributes/os/#operating-system-attributes
+    const platform = os.platform();
+    const attributes: Attributes = {
+      'os.type': os.platform(),
+      'os.version': os.release(),
+    };
+    this.getDistroStats(platform)
+      .then(({ distroRelease }) => {
+        attributes['os.name'] = distroRelease;
+      })
+      .catch((err) => {
+        this.log.error(`Could not determine distro name due to error: [${err.toString()}]`);
+      });
+
+    // https://opentelemetry.io/docs/specs/semconv/system/system-metrics/
+    meter
+      .createObservableGauge('system.uptime', {
+        description: 'The time the system has been running.',
+        unit: 's',
+        valueType: ValueType.DOUBLE,
+      })
+      .addCallback((result) => {
+        result.observe(os.uptime(), attributes);
+      });
+
+    meter
+      .createObservableUpDownCounter('system.cpu.logical.count', {
+        description: 'The number of logical CPUs.',
+        unit: '1',
+        valueType: ValueType.INT,
+      })
+      .addCallback((result) => {
+        result.observe(os.cpus().length, attributes);
+      });
+
+    const load1m = meter.createObservableGauge('system.cpu.load.1m', {
+      description: 'The 1-minute load average.',
+      unit: '1',
+      valueType: ValueType.DOUBLE,
+    });
+    const load5m = meter.createObservableGauge('system.cpu.load.5m', {
+      description: 'The 5-minute load average.',
+      unit: '1',
+      valueType: ValueType.DOUBLE,
+    });
+    const load15m = meter.createObservableGauge('system.cpu.load.15m', {
+      description: 'The 15-minute load average.',
+      unit: '1',
+      valueType: ValueType.DOUBLE,
+    });
+
+    meter.addBatchObservableCallback(
+      (result) => {
+        const load = os.loadavg();
+        result.observe(load1m, load[0], attributes);
+        result.observe(load5m, load[1], attributes);
+        result.observe(load15m, load[2], attributes);
+      },
+      [load1m, load5m, load15m]
+    );
+
+    const memoryMetrics = {
+      limit: meter.createObservableUpDownCounter('system.memory.limit', {
+        description: 'Total virtual memory available in the system.',
+        unit: 'By',
+        valueType: ValueType.INT,
+      }),
+      usage: meter.createObservableUpDownCounter('system.memory.usage', {
+        description: 'Reports memory in use by state.',
+        unit: 'By',
+        valueType: ValueType.INT,
+      }),
+    };
+
+    meter.addBatchObservableCallback((result) => {
+      const limit = os.totalmem();
+      const free = os.freemem();
+      const used = limit - free;
+      result.observe(memoryMetrics.limit, limit, attributes);
+      result.observe(memoryMetrics.usage, used, { ...attributes, 'system.memory.state': 'used' });
+      result.observe(memoryMetrics.usage, used, { ...attributes, 'system.memory.state': 'free' });
+    }, Object.values(memoryMetrics));
+
+    const cgroupMetrics = {
+      accountingUsage: meter.createObservableGauge('system.cgroup.cpuacct.usage', {
+        description:
+          'The amount of time in nanoseconds that the cgroup has been scheduled in user mode.',
+        unit: 'ns',
+        valueType: ValueType.INT,
+      }),
+      cfsPeriod: meter.createObservableGauge('system.cgroup.cfs.period', {
+        description: 'OS CPU cgroup: the length of the cfs period in microseconds',
+        unit: 'us',
+        valueType: ValueType.INT,
+      }),
+      cfsQuota: meter.createObservableGauge('system.cgroup.cfs.quota', {
+        description: 'OS CPU cgroup: total available run-time within a cfs period in microseconds',
+        unit: 'us',
+        valueType: ValueType.INT,
+      }),
+      cfsElapsed: meter.createObservableGauge('system.cgroup.cfs.elapsed', {
+        description: 'OS CPU cgroup: number of cfs periods that elapsed',
+        unit: '1',
+        valueType: ValueType.INT,
+      }),
+      cfsThrottled: meter.createObservableGauge('system.cgroup.cfs.throttled', {
+        description: 'OS CPU cgroup: number of times the cgroup has been throttled',
+        unit: '1',
+        valueType: ValueType.INT,
+      }),
+      cgroupThrottled: meter.createObservableGauge('system.cgroup.throttled', {
+        description: 'OS CPU cgroup: number of times the cgroup has been throttled',
+        unit: '1',
+        valueType: ValueType.INT,
+      }),
+      // TODO: Continue here
+    };
+
+    meter.addBatchObservableCallback(async (result) => {
+      const collectedMetrics = await this.cgroupCollector.collect();
+      const cgroupAttributes = {
+        ...attributes,
+        'system.cgroup.name': collectedMetrics.cpuacct?.control_group,
+      };
+      result.observe(
+        cgroupMetrics.accountingUsage,
+        collectedMetrics.cpuacct?.usage_nanos ?? 0,
+        cgroupAttributes
+      );
+      result.observe(
+        cgroupMetrics.cfsPeriod,
+        collectedMetrics.cpu?.cfs_period_micros ?? 0,
+        cgroupAttributes
+      );
+      result.observe(
+        cgroupMetrics.cfsQuota,
+        collectedMetrics.cpu?.cfs_quota_micros ?? 0,
+        cgroupAttributes
+      );
+      result.observe(
+        cgroupMetrics.cfsElapsed,
+        collectedMetrics.cpu?.cfs_quota_micros ?? 0,
+        cgroupAttributes
+      );
+      result.observe(
+        cgroupMetrics.cfsThrottled,
+        collectedMetrics.cpu?.cfs_quota_micros ?? 0,
+        cgroupAttributes
+      );
+    }, Object.values(cgroupMetrics));
+  }
 
   private async getDistroStats(
     platform: string
