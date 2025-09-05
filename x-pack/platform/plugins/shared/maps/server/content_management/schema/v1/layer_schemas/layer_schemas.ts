@@ -54,7 +54,7 @@ const layerSchema = schema.object({
   label: schema.maybe(
     schema.string({
       meta: {
-        description: 'layer name displayed in UI',
+        description: 'Layer name displayed in UI',
       },
     })
   ),
