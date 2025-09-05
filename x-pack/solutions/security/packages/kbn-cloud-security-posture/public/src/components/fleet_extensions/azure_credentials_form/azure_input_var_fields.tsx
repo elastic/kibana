@@ -33,7 +33,7 @@ export const AzureInputVarFields = ({
 
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
         const invalidError = i18n.translate(
-          'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.',
           {
             defaultMessage: '{field} is required',
             values: {
