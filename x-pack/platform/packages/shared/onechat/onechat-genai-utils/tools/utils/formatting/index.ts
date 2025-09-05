@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { esqlResponseToJson, extractEsqlQueries } from './esql';
-export { flattenMapping, cleanupMapping, type MappingField } from './mappings';
-export { processFieldCapsResponse, type FieldListFromFieldCapsResponse } from './field_caps';
+export { generateXmlTree, type XmlNode, type XmlOptions, type XmlAttributes } from './xml';

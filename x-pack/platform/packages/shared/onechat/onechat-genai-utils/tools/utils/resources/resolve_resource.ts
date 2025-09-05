@@ -9,11 +9,14 @@ import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { EsResourceType } from '@kbn/onechat-common';
-import { getIndexMappings, getDataStreamMappings } from './get_mappings';
-import type { MappingField } from '../utils';
-import { processFieldCapsResponse, flattenMapping } from '../utils';
+import { getIndexMappings, getDataStreamMappings } from '../../steps/get_mappings';
+import type { MappingField } from '../mappings';
+import { flattenMapping } from '../mappings';
+import { processFieldCapsResponse } from '../field_caps';
 
 export interface ResolveResourceResponse {
+  /** name of the resource */
+  name: string;
   /** type of the resource*/
   type: EsResourceType;
   /** list of fields */
@@ -66,6 +69,7 @@ export const resolveResource = async ({
     const mappings = mappingRes[indexName].mappings;
     const fields = flattenMapping(mappings);
     return {
+      name: resourceName,
       type: EsResourceType.index,
       fields,
       description: mappings._meta?.description,
@@ -82,6 +86,7 @@ export const resolveResource = async ({
     const mappings = mappingRes[datastream].mappings;
     const fields = flattenMapping(mappings);
     return {
+      name: resourceName,
       type: EsResourceType.dataStream,
       fields,
       description: mappings._meta?.description,
@@ -99,6 +104,7 @@ export const resolveResource = async ({
     const { fields } = processFieldCapsResponse(fieldCapRes);
 
     return {
+      name: resourceName,
       type: EsResourceType.alias,
       fields,
     };
