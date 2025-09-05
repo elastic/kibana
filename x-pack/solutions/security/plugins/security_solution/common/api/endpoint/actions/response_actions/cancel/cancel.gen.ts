@@ -16,23 +16,47 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse } from '../../../model/schema/common.gen';
+import { ResponseActionCreateSuccessResponse } from '../../../model/schema/common.gen';
 
 export type CancelRouteRequestBody = z.infer<typeof CancelRouteRequestBody>;
-export const CancelRouteRequestBody = z.object({
-  /**
-   * The unique identifier of the response action to cancel. This should be the internal Kibana action ID, not the external system's action ID.
-   */
-  id: z.string().min(1),
-  /**
-   * Optional comment explaining the reason for canceling the action
-   */
-  comment: z.string().optional(),
-});
+export const CancelRouteRequestBody = z
+  .object({
+    /**
+     * A list of endpoint IDs whose hosts will be isolated
+     */
+    endpoint_ids: z.array(z.string().min(1)).min(1).optional(),
+    /**
+     * If defined, any case associated with the given IDs will be updated
+     */
+    alert_ids: z.array(z.string().min(1)).min(1).optional(),
+    /**
+     * Case IDs to be updated
+     */
+    case_ids: z.array(z.string().min(1)).min(1).optional(),
+    /**
+     * Optional comment explaining the reason for canceling the action
+     */
+    comment: z.string().optional(),
+    /**
+     * The agent type to target for the action
+     */
+    agent_type: z
+      .enum(['endpoint', 'sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])
+      .optional()
+      .default('endpoint'),
+  })
+  .merge(
+    z.object({
+      /**
+       * ID of the response action to cancel
+       */
+      action_id: z.string().min(1),
+    })
+  );
 
 export type CancelActionRequestBody = z.infer<typeof CancelActionRequestBody>;
 export const CancelActionRequestBody = CancelRouteRequestBody;
 export type CancelActionRequestBodyInput = z.input<typeof CancelActionRequestBody>;
 
 export type CancelActionResponse = z.infer<typeof CancelActionResponse>;
-export const CancelActionResponse = SuccessResponse;
+export const CancelActionResponse = ResponseActionCreateSuccessResponse;
