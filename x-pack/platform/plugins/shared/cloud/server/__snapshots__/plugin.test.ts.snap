@@ -24,8 +24,8 @@ Object {
   "organizationId": undefined,
   "projectsUrl": "https://cloud.elastic.co/projects/",
   "serverless": Object {
-    "organizationInTrial": undefined,
     "orchestratorTarget": undefined,
+    "organizationInTrial": undefined,
     "productTier": undefined,
     "projectId": undefined,
     "projectName": undefined,
