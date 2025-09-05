@@ -6,7 +6,7 @@
  */
 
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 type StreamPutItem = Streams.WiredStream.UpsertRequest & {
