@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLVariableType } from '@kbn/esql-types';
 import { type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
-import { untilPluginStartServicesReady } from '../../kibana_services';
-import { ESQLControlsFlyout } from './control_flyout';
+import { openLazyFlyout } from '@kbn/presentation-util';
 
 interface Context {
   queryString: string;
@@ -29,11 +26,9 @@ interface Context {
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
-  closeFlyout?: () => void;
-  ariaLabelledBy: string;
 }
 
-export async function loadESQLControlFlyout({
+export function openESQLControlFlyout({
   queryString,
   core,
   search,
@@ -44,19 +39,14 @@ export async function loadESQLControlFlyout({
   onCancelControl,
   cursorPosition,
   initialState,
-  closeFlyout = () => {},
-  ariaLabelledBy,
 }: Context) {
   const timeRange = timefilter.getTime();
-  const deps = await untilPluginStartServicesReady();
-
-  return (
-    <KibanaRenderContextProvider {...core}>
-      <KibanaContextProvider
-        services={{
-          ...deps,
-        }}
-      >
+  return openLazyFlyout({
+    core,
+    parentApi: search,
+    loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+      const { ESQLControlsFlyout } = await import('./control_flyout');
+      return (
         <ESQLControlsFlyout
           ariaLabelledBy={ariaLabelledBy}
           queryString={queryString}
@@ -70,7 +60,13 @@ export async function loadESQLControlFlyout({
           esqlVariables={esqlVariables}
           timeRange={timeRange}
         />
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
-  );
+      );
+    },
+    flyoutProps: {
+      'data-test-subj': 'create_esql_control_flyout',
+      isResizable: true,
+      maxWidth: 800,
+      triggerId: 'dashboard-controls-menu-button',
+    },
+  });
 }

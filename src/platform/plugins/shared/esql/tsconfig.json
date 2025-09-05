@@ -25,7 +25,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/monaco",
     "@kbn/search-types",
-    "@kbn/react-kibana-context-render",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/i18n-react",
     "@kbn/visualization-utils",
@@ -34,7 +33,9 @@
     "@kbn/projects-solutions-groups",
     "@kbn/esql-ast",
     "@kbn/presentation-util",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing"
   ],
   "exclude": [
     "target/**/*",

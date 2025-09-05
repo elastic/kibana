@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { ESQL_CONTROL, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 
@@ -34,7 +34,7 @@ export class ControlsPlugin
     registerOptionsListControl(embeddable);
     registerRangeSliderControl();
     registerTimeSliderControl();
-    registerESQLControl();
+    registerESQLControl(embeddable);
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {
@@ -43,6 +43,13 @@ export class ControlsPlugin
     registerActions(startPlugins.uiActions);
 
     startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
+      return {
+        placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
+        resizeSettings: { maxHeight: 2, minHeight: 2 },
+      };
+    });
+
+    startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
       return {
         placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
         resizeSettings: { maxHeight: 2, minHeight: 2 },

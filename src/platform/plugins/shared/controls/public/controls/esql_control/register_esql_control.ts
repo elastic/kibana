@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function registerESQLControl() {
-  // registerControlPanelType(ESQL_CONTROL, async () => {
-  //   const [{ getESQLControlFactory }] = await Promise.all([
-  //     import('../../controls_module'),
-  //     untilPluginStartServicesReady(),
-  //   ]);
-  //   return getESQLControlFactory();
-  // });
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { untilPluginStartServicesReady } from '../../services/kibana_services';
+
+export function registerESQLControl(embeddable: EmbeddableSetup) {
+  embeddable.registerReactEmbeddableFactory(ESQL_CONTROL, async () => {
+    const [{ getESQLControlFactory }] = await Promise.all([
+      import('../../controls_module'),
+      untilPluginStartServicesReady(),
+    ]);
+    return getESQLControlFactory();
+  });
 }

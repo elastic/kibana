@@ -64,7 +64,8 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -535,11 +536,10 @@ export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
 
-interface ESQLVariablesCompatibleDashboardApi {
+type ESQLVariablesCompatibleDashboardApi = PresentationContainer & {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
-}
+};
 
 export const isApiESQLVariablesCompatible = (
   api: unknown | null
@@ -547,7 +547,7 @@ export const isApiESQLVariablesCompatible = (
   return Boolean(
     api &&
       (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
+      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined &&
+      apiIsPresentationContainer(api)
   );
 };
