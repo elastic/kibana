@@ -10,6 +10,7 @@ import {
   createToolNotFoundError,
   createBadRequestError,
   createInternalError,
+  validateToolId,
 } from '@kbn/onechat-common';
 import type { Runner, RunToolReturn, ScopedRunnerRunToolsParams } from '@kbn/onechat-server';
 import type {
@@ -20,7 +21,7 @@ import type {
   ReadonlyToolTypeClient,
   ToolTypeClient,
 } from './tool_provider';
-import { toExecutableTool, ensureValidId } from './utils';
+import { toExecutableTool } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ToolListParams {
@@ -106,12 +107,15 @@ class ToolRegistryImpl implements ToolRegistry {
   }
 
   async create(createRequest: ToolCreateParams) {
-    const { type } = createRequest;
+    const { type, id: toolId } = createRequest;
 
-    ensureValidId(createRequest.id);
+    const validationError = validateToolId({ toolId, builtIn: false });
+    if (validationError) {
+      throw createBadRequestError(`Invalid tool id: "${toolId}": ${validationError}`);
+    }
 
-    if (await this.has(createRequest.id)) {
-      throw createBadRequestError(`Tool with id ${createRequest.id} already exists`);
+    if (await this.has(toolId)) {
+      throw createBadRequestError(`Tool with id ${toolId} already exists`);
     }
 
     const source = this.toolSources.find((t) => t.toolTypes.includes(type));
