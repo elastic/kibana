@@ -125,7 +125,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
           dataTestSubj="lens-metric-appearance-primary-metric-font-size-btn"
         />
       </AppearanceOptionGroup>
-      <EuiHorizontalRule margin="xs" />
+      <EuiHorizontalRule margin="m" />
       <AppearanceOptionGroup
         title={i18n.translate('xpack.lens.metric.appearancePopover.titleAndSubtitle.title', {
           defaultMessage: 'Title and subtitle',
@@ -171,7 +171,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
           dataTestSubj="lens-metric-appearance-title-and-subtitle-font-weight-btn"
         />
       </AppearanceOptionGroup>
-      <EuiHorizontalRule margin="xs" />
+      <EuiHorizontalRule margin="m" />
       <AppearanceOptionGroup
         title={i18n.translate('xpack.lens.metric.appearancePopover.secondaryMetric.title', {
           defaultMessage: 'Secondary metric',
@@ -194,7 +194,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
           dataTestSubj="lens-metric-appearance-secondary-metric-alignment-btn"
         />
       </AppearanceOptionGroup>
-      <EuiHorizontalRule margin="xs" />
+      <EuiHorizontalRule margin="m" />
       <AppearanceOptionGroup
         title={i18n.translate('xpack.lens.metric.appearancePopover.other.title', {
           defaultMessage: 'Other',
