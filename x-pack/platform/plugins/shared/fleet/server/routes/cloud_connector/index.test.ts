@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../../types';
-import type { CloudProvider } from '../../../common/types/models/cloud_connector';
+import type { CloudProvider, CloudConnectorSO } from '../../../common/types/models/cloud_connector';
 
 import { cloudConnectorService } from '../../services';
 
@@ -91,7 +91,7 @@ describe('Cloud Connector API', () => {
       });
 
       it('should accept valid AWS cloud provider', async () => {
-        const mockCloudConnector = {
+        const mockCloudConnector: CloudConnectorSO = {
           id: 'test-id',
           name: 'test-connector',
           cloudProvider: 'aws' as CloudProvider,
@@ -138,7 +138,7 @@ describe('Cloud Connector API', () => {
       });
 
       it('should handle valid query parameters', async () => {
-        const mockCloudConnectors = [
+        const mockCloudConnectors: CloudConnectorSO[] = [
           {
             id: 'test-id',
             name: 'test-connector',
@@ -170,7 +170,7 @@ describe('Cloud Connector API', () => {
 
   describe('CREATE Cloud Connector', () => {
     it('should create cloud connector successfully', async () => {
-      const mockCloudConnector = {
+      const mockCloudConnector: CloudConnectorSO = {
         id: 'test-id',
         name: 'test-connector',
         cloudProvider: 'aws' as CloudProvider,
@@ -246,13 +246,13 @@ describe('Cloud Connector API', () => {
 
   describe('GET Cloud Connectors', () => {
     it('should get cloud connectors list successfully', async () => {
-      const mockCloudConnectors = [
+      const mockCloudConnectors: CloudConnectorSO[] = [
         {
           id: 'connector-1',
           name: 'aws-connector',
           cloudProvider: 'aws' as CloudProvider,
           vars: {
-            role_arn: { value: 'arn:aws:iam::123:role/TestRole', type: 'text' },
+            role_arn: { value: 'arn:aws:iam::123:role/TestRole', type: 'text' as const },
             external_id: {
               value: { isSecretRef: true, id: 'secret-123' },
               type: 'password' as const,
@@ -286,7 +286,7 @@ describe('Cloud Connector API', () => {
     });
 
     it('should return empty list when no connectors exist', async () => {
-      const mockCloudConnectors: any[] = [];
+      const mockCloudConnectors: CloudConnectorSO[] = [];
 
       mockCloudConnectorService.getList.mockResolvedValue(mockCloudConnectors);
 

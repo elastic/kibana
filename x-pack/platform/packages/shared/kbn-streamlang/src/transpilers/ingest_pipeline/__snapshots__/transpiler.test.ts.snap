@@ -193,6 +193,14 @@ Object {
       },
     },
     Object {
+      "append": Object {
+        "field": "attributes.tags",
+        "value": Array [
+          "new_tag",
+        ],
+      },
+    },
+    Object {
       "set": Object {
         "field": "attributes.flag",
         "if": "

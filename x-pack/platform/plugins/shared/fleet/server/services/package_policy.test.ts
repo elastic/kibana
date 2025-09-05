@@ -567,7 +567,10 @@ describe('Package policy service', () => {
           name: 'test-connector',
           cloudProvider: 'aws',
           vars: {
-            role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
             external_id: {
               type: 'password',
               value: {
@@ -594,7 +597,7 @@ describe('Package policy service', () => {
 
           expect(result).toEqual(mockCloudConnector);
           expect(cloudConnectorService.create).toHaveBeenCalledWith(soClient, {
-            name: 'test-package-policy',
+            name: 'aws-cloud-connector: test-package-policy',
             vars: {
               role_arn: {
                 value: 'arn:aws:iam::123456789012:role/TestRole',
@@ -737,7 +740,7 @@ describe('Package policy service', () => {
         expect(result).toBeUndefined();
       });
 
-      it('should handle errors gracefully and return undefined', async () => {
+      it('should throw error when cloud connector creation fails', async () => {
         const soClient = createSavedObjectClientMock();
         const enrichedPackagePolicy = {
           name: 'test-package-policy',
@@ -755,6 +758,13 @@ describe('Package policy service', () => {
                     role_arn: {
                       value: 'arn:aws:iam::123456789012:role/TestRole',
                       type: 'text',
+                    },
+                    external_id: {
+                      value: {
+                        id: 'ABCDEFGHIJKLMNOPQRST',
+                        isSecretRef: true,
+                      },
+                      type: 'password',
                     },
                   },
                 },
@@ -780,13 +790,15 @@ describe('Package policy service', () => {
           .mockRejectedValue(new Error('Cloud connector creation failed'));
 
         try {
-          const result = await (packagePolicyService as any).createCloudConnectorForPackagePolicy(
-            soClient,
-            enrichedPackagePolicy,
-            agentPolicy
+          await expect(
+            (packagePolicyService as any).createCloudConnectorForPackagePolicy(
+              soClient,
+              enrichedPackagePolicy,
+              agentPolicy
+            )
+          ).rejects.toThrow(
+            'Error creating cloud connector in Fleet, Error: Cloud connector creation failed'
           );
-
-          expect(result).toBeUndefined();
         } finally {
           // Restore the original method
           cloudConnectorService.create = originalCreate;

@@ -110,6 +110,7 @@ describe('Workflows Connector', () => {
             workflowId: 'test-workflow-id',
             alerts: [],
             inputs: { test: 'data' },
+            spaceId: 'default',
           },
         },
         logger: mockLogger,
@@ -143,6 +144,7 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             alerts: [],
+            spaceId: 'default',
           },
         },
         logger: mockLogger,
@@ -173,6 +175,7 @@ describe('Workflows Connector', () => {
             workflowId: 'test-workflow-id',
             alerts: [{ _id: 'alert-1', _index: 'test-index' }],
             inputs: { test: 'data' },
+            spaceId: 'default',
           },
         },
         logger: mockLogger,

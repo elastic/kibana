@@ -54,6 +54,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             },
             400: {
               body: genericErrorResponse,
+              description: 'Indicates a bad request call.',
             },
           },
         },
@@ -90,9 +91,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               body: () => GetCloudConnectorsResponseSchema,
+              description: 'Indicates a successful call.',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Indicates a bad request call.',
             },
           },
         },

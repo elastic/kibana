@@ -36,14 +36,14 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector',
+            name: 'arn:aws:iam::123456789012:role/test-role',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
-                  id: 'test-external-id-12345678901234567890',
+                  id: 'test1234567890123456',
                   isSecretRef: true,
                 },
               },
@@ -52,41 +52,13 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.have.property('id');
-        expect(body.name).to.equal('test-aws-connector');
-        expect(body.cloudProvider).to.equal('aws');
-        expect(body.vars).to.have.property('role_arn');
-        expect(body.vars).to.have.property('external_id');
-        expect(body.packagePolicyCount).to.equal(0);
-        expect(body).to.have.property('created_at');
-        expect(body).to.have.property('updated_at');
-      });
-
-      it('should handle AWS external with aws.role_arn and aws.credentials.external_id format', async () => {
-        const { body } = await supertest
-          .post(`/api/fleet/cloud_connectors`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'test-aws-connector-alt-format',
-            cloudProvider: 'aws',
-            vars: {
-              'aws.role_arn': 'arn:aws:iam::123456789012:role/test-role-alt',
-              'aws.credentials.external_id': {
-                type: 'password',
-                value: {
-                  id: 'test-external-id-alt-12345678901234567890',
-                  isSecretRef: true,
-                },
-              },
-            },
-          })
-          .expect(200);
-
-        expect(body).to.have.property('id');
-        expect(body.name).to.equal('test-aws-connector-alt-format');
+        expect(body.name).to.equal('arn:aws:iam::123456789012:role/test-role');
         expect(body.cloudProvider).to.equal('aws');
         expect(body.vars).to.have.property('role_arn');
         expect(body.vars).to.have.property('external_id');
         expect(body.packagePolicyCount).to.equal(1);
+        expect(body).to.have.property('created_at');
+        expect(body).to.have.property('updated_at');
       });
 
       it('should return 400 when external_id is missing for AWS', async () => {
@@ -94,10 +66,10 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector-no-external-id',
+            name: 'arn:aws:iam::123456789012:role/test-role',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
             },
           })
           .expect(400);
@@ -108,13 +80,13 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector-no-role-arn',
+            name: 'arn:aws:iam::123456789012:role/test-role',
             cloudProvider: 'aws',
             vars: {
               external_id: {
                 type: 'password',
                 value: {
-                  id: 'test-external-id-12345678901234567890',
+                  id: 'test1234567890123456',
                   isSecretRef: true,
                 },
               },
@@ -130,11 +102,11 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
-                  id: 'test-external-id-12345678901234567890',
+                  id: 'test1234567890123456',
                   isSecretRef: true,
                 },
               },
@@ -150,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'test-connector',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
             },
           })
           .expect(400);
@@ -175,7 +147,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'test-connector',
             cloudProvider: 'invalid-provider',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
             },
           })
           .expect(400);
@@ -189,7 +161,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'test-aws-connector',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
@@ -210,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'test-aws-connector',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
@@ -231,7 +203,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'test-aws-connector',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
@@ -252,7 +224,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'test-aws-connector',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
@@ -270,10 +242,10 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector-mixed-case',
+            name: 'arn:aws:iam::123456789012:role/test-role',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
@@ -286,8 +258,8 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.have.property('id');
-        expect(body.name).to.equal('test-aws-connector-mixed-case');
-        expect(body.vars.external_id).to.have.property('id', 'aBcDeFgHiJkLmNoPqRsT');
+        expect(body.name).to.equal('arn:aws:iam::123456789012:role/test-role');
+        expect(body.vars.external_id.value).to.have.property('id', 'aBcDeFgHiJkLmNoPqRsT');
       });
     });
 
@@ -303,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'test-get-connector',
             cloudProvider: 'aws',
             vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
               external_id: {
                 type: 'password',
                 value: {
@@ -325,7 +297,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const connector = body.find((c: any) => c.id === createdConnectorId);
         expect(connector).to.be.an('object');
-        expect(connector.name).to.equal('test-get-connector');
+        expect(connector.name).to.equal('arn:aws:iam::123456789012:role/test-role');
         expect(connector.cloudProvider).to.equal('aws');
         expect(connector.vars).to.have.property('role_arn');
         expect(connector.vars).to.have.property('external_id');
@@ -335,8 +307,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return empty array when no connectors exist', async () => {
-        // Clean up existing connectors
-        await kibanaServer.savedObjects.cleanStandardList();
+        // Clean up all saved objects to ensure no connectors exist
+        await esArchiver.emptyKibanaIndex();
 
         const { body } = await supertest.get(`/api/fleet/cloud_connectors`).expect(200);
 
@@ -350,92 +322,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body).to.be.an('array');
-      });
-    });
-
-    describe('Cloud Connector with Package Policy Integration', () => {
-      it('should create cloud connector and associate with package policy', async () => {
-        // First create a cloud connector
-        const { body: cloudConnector } = await supertest
-          .post(`/api/fleet/cloud_connectors`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'test-integration-connector',
-            cloudProvider: 'aws',
-            vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
-              external_id: {
-                type: 'password',
-                value: {
-                  id: 'test-external-id-12345678901234567890',
-                  isSecretRef: true,
-                },
-              },
-            },
-          })
-          .expect(200);
-
-        expect(cloudConnector).to.have.property('id');
-        expect(cloudConnector.packagePolicyCount).to.equal(1);
-
-        // Verify the cloud connector was created with correct properties
-        expect(cloudConnector.name).to.equal('test-integration-connector');
-        expect(cloudConnector.cloudProvider).to.equal('aws');
-        expect(cloudConnector.vars).to.have.property('role_arn');
-        expect(cloudConnector.vars).to.have.property('external_id');
-      });
-
-      it('should handle cloud connector creation with package policy variables', async () => {
-        const { body } = await supertest
-          .post(`/api/fleet/cloud_connectors`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'test-package-policy-vars',
-            cloudProvider: 'aws',
-            vars: {
-              'aws.role_arn': 'arn:aws:iam::123456789012:role/test-role-policy',
-              'aws.credentials.external_id': {
-                type: 'password',
-                value: {
-                  id: 'test-external-id-policy-12345678901234567890',
-                  isSecretRef: true,
-                },
-              },
-            },
-          })
-          .expect(200);
-
-        expect(body).to.have.property('id');
-        expect(body.name).to.equal('test-package-policy-vars');
-        expect(body.cloudProvider).to.equal('aws');
-        expect(body.vars).to.have.property('role_arn');
-        expect(body.vars).to.have.property('external_id');
-        expect(body.packagePolicyCount).to.equal(1);
-      });
-    });
-
-    describe('Error handling', () => {
-      it('should return 500 when service throws error', async () => {
-        // This test would require mocking the service to throw an error
-        // In a real scenario, this would test database connection issues, etc.
-        await supertest
-          .post(`/api/fleet/cloud_connectors`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'test-error-connector',
-            cloudProvider: 'aws',
-            vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/test-role',
-              external_id: {
-                type: 'password',
-                value: {
-                  id: 'test-external-id-12345678901234567890',
-                  isSecretRef: true,
-                },
-              },
-            },
-          })
-          .expect(200); // This should succeed in normal conditions
       });
     });
   });

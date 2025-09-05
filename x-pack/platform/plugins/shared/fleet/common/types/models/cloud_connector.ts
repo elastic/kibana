@@ -4,38 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { PackagePolicyConfigRecordEntry } from './package_policy';
-
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
-export interface CloudConnectorSecretVarValue {
+export interface CloudConnectorSecretReference {
   isSecretRef: boolean;
   id: string;
 }
 
+export interface CloudConnectorRoleArn {
+  type?: 'text';
+  value: string;
+}
+
 export interface CloudConnectorSecretVar {
-  type: 'password';
-  value: CloudConnectorSecretVarValue;
+  // Password is a special type that indicates showing a secret reference on Fleet UI.
+  // Secret references are stored in the .fleet-secrets index but Cloud Connector stores the secret reference instead of the secret data.
+  type?: 'password';
+  value: CloudConnectorSecretReference;
   frozen?: boolean;
 }
 
-export type CloudConnectorVarsRecord = Record<
-  string,
-  PackagePolicyConfigRecordEntry | string | CloudConnectorSecretVar
->;
-
-// AWS-specific cloud connector variables
 export interface AwsCloudConnectorVars {
-  // AWS Role ARN variables
-  'aws.role_arn'?: PackagePolicyConfigRecordEntry | string;
-  role_arn?: PackagePolicyConfigRecordEntry | string;
-  // AWS credentials variables
-  'aws.credentials.external_id'?: CloudConnectorSecretVar;
-  external_id?: CloudConnectorSecretVar;
+  role_arn: CloudConnectorRoleArn;
+  external_id: CloudConnectorSecretVar;
 }
 
-export type CloudConnectorVars = AwsCloudConnectorVars;
+export interface CloudConnectorVars {
+  role_arn?: CloudConnectorRoleArn;
+  external_id?: CloudConnectorSecretVar;
+  // TODO: Add other cloud providers vars
+}
 
 export interface CloudConnectorSO {
   id: string;

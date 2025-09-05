@@ -107,7 +107,7 @@ export default function (providerContext: FtrProviderContext) {
         name: 'test-cloud-connector',
         cloudProvider: 'aws',
         vars: {
-          role_arn: 'arn:aws:iam::123456789012:role/test-role',
+          role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
           external_id: {
             type: 'password',
             value: {
@@ -133,7 +133,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'test-cloud-connector',
           cloudProvider: 'aws',
           vars: {
-            role_arn: 'arn:aws:iam::123456789012:role/test-role',
+            role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
             external_id: {
               type: 'password',
               value: {
