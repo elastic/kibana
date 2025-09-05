@@ -18,7 +18,7 @@ import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { EnhancementRegistryDefinition } from './enhancements/types';
+import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 import type { EmbeddableTransforms } from '../common';
 
 export interface EmbeddableSetupDependencies {
