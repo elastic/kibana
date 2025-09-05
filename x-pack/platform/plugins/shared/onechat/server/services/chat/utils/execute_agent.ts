@@ -18,6 +18,7 @@ export const executeAgent$ = ({
   nextInput,
   abortSignal,
   toolParameters,
+  defaultConnectorId,
 }: {
   agentId: string;
   request: KibanaRequest;
@@ -26,6 +27,7 @@ export const executeAgent$ = ({
   nextInput: RoundInput;
   abortSignal?: AbortSignal;
   toolParameters?: Record<string, any>;
+  defaultConnectorId?: string;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {
@@ -35,6 +37,7 @@ export const executeAgent$ = ({
             request,
             agentId,
             abortSignal,
+            defaultConnectorId,
             agentParams: {
               nextInput,
               conversation: conversation.rounds,

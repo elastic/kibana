@@ -64,7 +64,7 @@ export class OnechatPlugin
     return {};
   }
 
-  start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+  start({ http }: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
@@ -76,6 +76,7 @@ export class OnechatPlugin
       chatService,
       conversationsService,
       toolsService,
+      startDependencies,
       conversationSettingsService,
     };
 

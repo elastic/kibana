@@ -75,6 +75,17 @@ export const useConversationRounds = () => {
   return conversationRounds;
 };
 
+// Returns a flattened list of all steps across all rounds.
+// CAUTION: This uses `conversationRounds.length` as useMemo key to prevent re-renders during streaming. This will return stale data for the last round. It will only contain the complete set of steps up until the previous round.
+export const useStepsFromPrevRounds = () => {
+  const conversationRounds = useConversationRounds();
+
+  return useMemo(() => {
+    return conversationRounds.flatMap(({ steps }) => steps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationRounds.length]); // only depend on length to avoid re-renders during streaming
+};
+
 export const useHasActiveConversation = () => {
   const conversationId = useConversationId();
   const conversationRounds = useConversationRounds();

@@ -50,12 +50,12 @@ export const registerApp = ({
     ],
     async mount({ element, history }: AppMountParameters) {
       const { mountApp } = await import('./application');
-      const [coreStart, startPluginDeps] = await core.getStartServices();
+      const [coreStart, startDependencies] = await core.getStartServices();
 
       coreStart.chrome.docTitle.change(ONECHAT_TITLE);
       const services = getServices();
 
-      return mountApp({ core: coreStart, services, element, history, plugins: startPluginDeps });
+      return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
     },
   });
 };

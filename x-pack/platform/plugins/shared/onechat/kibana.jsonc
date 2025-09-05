@@ -9,7 +9,16 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "onechat"],
-    "requiredPlugins": ["inference", "features", "data", "esql", "kibanaUtils", "spaces"],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "esql",
+      "features",
+      "inference",
+      "kibanaUtils",
+      "lens",
+      "spaces"
+    ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"],
     "extraPublicDirs": []

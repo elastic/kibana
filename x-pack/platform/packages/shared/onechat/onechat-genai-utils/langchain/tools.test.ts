@@ -21,6 +21,7 @@ const createTool = (
     type: ToolType.builtin,
     description: '',
     configuration: {},
+    readonly: false,
     tags: [],
     schema: z.object({}),
     execute: jest.fn(),

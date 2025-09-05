@@ -95,7 +95,9 @@
     "@kbn/core-user-profile-common",
     "@kbn/core-analytics-server-mocks",
     "@kbn/core-security-server",
-    "@kbn/onechat-plugin"
+    "@kbn/onechat-plugin",
+    "@kbn/index-adapter",
+    "@kbn/langgraph-checkpoint-saver"
   ],
   "exclude": [
     "target/**/*",

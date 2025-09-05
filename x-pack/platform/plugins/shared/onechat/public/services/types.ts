@@ -6,6 +6,7 @@
  */
 
 import type React from 'react';
+import type { OnechatStartDependencies } from '../types';
 import type { AgentService } from './agents';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
@@ -45,4 +46,5 @@ export interface OnechatInternalService {
     setConversationSettings: (conversationSettings: ConversationSettings) => () => void;
     getConversationSettings$: () => any;
   };
+  startDependencies: OnechatStartDependencies;
 }

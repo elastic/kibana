@@ -54,7 +54,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} />
+        <ChatMessageText content={message} steps={steps} />
       </EuiFlexItem>
 
       {/* Render comment actions if available */}
