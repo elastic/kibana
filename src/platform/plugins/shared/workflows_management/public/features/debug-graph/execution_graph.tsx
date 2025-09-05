@@ -73,10 +73,6 @@ const ReactFlowWrapper: React.FC<{
       proOptions={{
         hideAttribution: true,
       }}
-      onError={(error) => {
-        // eslint-disable-next-line no-console
-        console.error('ReactFlow error:', error);
-      }}
     >
       <Background />
       <Controls />
