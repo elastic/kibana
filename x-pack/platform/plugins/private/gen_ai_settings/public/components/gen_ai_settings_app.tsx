@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiLink,
   useEuiTheme,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,9 +39,12 @@ interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
+  'aiAssistant.defaultLlmSettingEnabled' as const;
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, notifications } = services;
+  const { application, http, docLinks, notifications, featureFlags } = services;
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
@@ -199,6 +203,39 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     }
   }
 
+  const manageConnectorsButton = useMemo(() => {
+    return (
+      <EuiButton
+        iconType="popout"
+        iconSide="right"
+        data-test-subj="manageConnectorsLink"
+        onClick={() => {
+          application.navigateToApp('management', {
+            path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+            openInNewTab: true,
+          });
+        }}
+      >
+        {hasConnectorsAllPrivilege ? (
+          <FormattedMessage
+            id="genAiSettings.goToConnectorsButtonLabel"
+            defaultMessage="Manage connectors"
+          />
+        ) : (
+          <FormattedMessage
+            id="genAiSettings.viewConnectorsButtonLabel"
+            defaultMessage="View connectors"
+          />
+        )}
+      </EuiButton>
+    );
+  }, [application, hasConnectorsAllPrivilege]);
+
+  const showDefaultLlmSetting = featureFlags.getBooleanValue(
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+    false
+  );
+
   return (
     <>
       <div data-test-subj="genAiSettingsPage">
@@ -240,7 +277,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               <EuiFormRow fullWidth>
                 <EuiFlexGroup gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <DefaultAIConnector connectors={connectors} />
+                    {showDefaultLlmSetting ? (
+                      <DefaultAIConnector connectors={connectors} />
+                    ) : (
+                      manageConnectorsButton
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFormRow>
