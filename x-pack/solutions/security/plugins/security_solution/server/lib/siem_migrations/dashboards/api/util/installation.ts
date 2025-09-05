@@ -96,21 +96,24 @@ const installDashboards = async (
 
         // Parse the dashboard data (assuming it's JSON)
         const dashboardData = JSON.parse(dashboard.elastic_dashboard.data);
-
         const tags = [getVendorTag(dashboard.original_dashboard)];
+
         const { result } = await dashboardClient.create(
           {
             title: dashboard.original_dashboard.title,
             description: dashboard.original_dashboard.description,
             // Add other dashboard attributes as needed
-            ...dashboardData,
+            ...dashboardData.attributes,
           },
           {
             id: undefined, // Let the system generate an ID
             references: [
+              {
+                type: 'tag',
+                id: `Migration ID: ${dashboard.migration_id}`,
+              },
               // Add tag references if tags are provided
               ...(tags?.map((tagId) => ({
-                name: 'tag',
                 type: 'tag',
                 id: tagId,
               })) || []),
