@@ -70,12 +70,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           },
           {
             link: 'slo',
+            iconV2: 'visGauge',
           },
           {
             link: 'observabilityAIAssistant',
             title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
+            iconV2: 'sparkles',
           },
           ...(streamsAvailable
             ? [
@@ -99,6 +101,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
+            iconV2: 'submodule',
             children: [
               {
                 id: 'apm',
@@ -198,6 +201,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
+            iconV2: 'storage',
             renderAs: 'panelOpener',
             children: [
               {
@@ -256,6 +260,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
+            iconV2: 'machineLearningApp',
             children: [
               {
                 children: [
@@ -341,6 +346,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Other tools',
             }),
             renderAs: 'panelOpener',
+            iconV2: 'apps',
             children: [
               {
                 link: 'logs:anomalies',

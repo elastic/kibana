@@ -33,7 +33,7 @@ export const SideNavLogoComponent = ({
   // Force logoElastic for all solutions
   const forcedProps = {
     ...props,
-    iconType: 'logoElastic'
+    iconType: 'logoElastic',
   };
   const { euiTheme } = useEuiTheme();
 
@@ -66,7 +66,7 @@ export const SideNavLogoComponent = ({
         isTruncated={false}
         {...forcedProps}
       >
-        {label}
+        Elastic
       </MenuItem>
     </div>
   );
