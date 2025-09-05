@@ -14,7 +14,7 @@ import { Background, Controls, ReactFlow } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
-import { WorkflowGraphEdge, WorkflowGraphNode } from './nodes';
+import { ExecutionGraphEdge, ExecutionGraphNode } from './nodes';
 import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
 import { mainScopeNodes, secondaryScopeNodes, atomicNodes } from './nodes/types';
 
@@ -26,14 +26,14 @@ export interface ExecutionGraphProps {
 
 const nodeTypes = [...mainScopeNodes, ...secondaryScopeNodes, ...atomicNodes].reduce(
   (acc, nodeType) => {
-    acc[nodeType] = WorkflowGraphNode;
+    acc[nodeType] = ExecutionGraphNode;
     return acc;
   },
   {} as Record<string, React.FC<any>>
 );
 const edgeTypes = {
-  default: WorkflowGraphEdge,
-  workflowEdge: WorkflowGraphEdge,
+  default: ExecutionGraphEdge,
+  workflowEdge: ExecutionGraphEdge,
 };
 
 // Wrapper component to handle ReactFlow initialization timing

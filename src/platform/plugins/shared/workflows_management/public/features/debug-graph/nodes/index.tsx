@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowGraphEdge } from './workflow_edge';
-export { WorkflowGraphNode } from './workflow_node';
+export { ExecutionGraphEdge } from './execution_graph_edge';
+export { ExecutionGraphNode } from './execution_graph_node';
 export type { NodeType } from './types';

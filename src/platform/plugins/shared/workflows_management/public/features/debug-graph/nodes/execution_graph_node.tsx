@@ -17,7 +17,7 @@ import React from 'react';
 import type { NodeType } from './types';
 import { atomicNodes, mainScopeNodes, secondaryScopeNodes } from './types';
 
-interface WorkflowNodeData {
+interface WorkflowNodeData extends Record<string, any> {
   stepType: NodeType;
   label: string;
   step: WorkflowYaml['steps'][number];
@@ -73,8 +73,7 @@ const getNodeBackgroundColor = (nodeType: string, euiTheme: EuiThemeComputed) =>
   };
 };
 
-// @ts-expect-error - TODO: fix this
-export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
+export function ExecutionGraphNode(node: Node<WorkflowNodeData>) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup

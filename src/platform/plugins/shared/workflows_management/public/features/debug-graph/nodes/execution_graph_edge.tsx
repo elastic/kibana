@@ -10,7 +10,7 @@ import React from 'react';
 import type { EdgeProps } from '@xyflow/react';
 import { getSmoothStepPath } from '@xyflow/react';
 
-export function WorkflowGraphEdge({
+export function ExecutionGraphEdge({
   id,
   sourceX,
   sourceY,
