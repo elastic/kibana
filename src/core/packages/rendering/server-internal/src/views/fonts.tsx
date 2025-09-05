@@ -224,11 +224,14 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: `@font-face {
-  font-family: 'InterWOFF2';
-  src: url('https://rsms.me/inter/font-files/Inter-Regular.woff2?v=4.1') format('woff2');
-  font-weight: normal;
-  font-style: normal;
+        __html: `
+body {
+  @font-face {
+    font-family: 'Inter' !important;
+    src: url('https://rsms.me/inter/font-files/Inter-Regular.woff2?v=4.1') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
 }`,
       }}
     />
