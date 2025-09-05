@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
+  BaseStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -27,6 +28,22 @@ export interface ConnectorContract {
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   outputSchema: z.ZodType;
+  description?: string;
+}
+
+export interface InternalConnectorContract extends ConnectorContract {
+  /** HTTP method(s) for this API endpoint */
+  methods?: string[];
+  /** URL pattern(s) for this API endpoint */
+  patterns?: string[];
+  /** Whether this is an internal connector with hardcoded endpoint details */
+  isInternal?: boolean;
+  /** Parameter type metadata for proper request building */
+  parameterTypes?: {
+    pathParams?: string[];
+    urlParams?: string[];
+    bodyParams?: string[];
+  };
 }
 
 function generateStepSchemaForConnector(
@@ -53,6 +70,8 @@ function createRecursiveStepSchema(
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
+
+    // Create connector schemas with specific types for validation
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
@@ -65,7 +84,7 @@ function createRecursiveStepSchema(
       mergeSchema,
       WaitStepSchema,
       httpSchema,
-      ...connectorSchemas,
+      ...connectorSchemas, // Include them for validation
     ]);
   });
 
@@ -85,7 +104,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    settings: getWorkflowSettingsSchema(BaseStepSchema, loose).optional(), // Use BaseStepSchema to avoid circular reference
     steps: z.array(recursiveStepSchema),
   });
 }

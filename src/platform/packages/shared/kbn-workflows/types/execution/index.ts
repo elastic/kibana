@@ -14,6 +14,10 @@ export type {
   HttpGraphNodeSchema,
   WaitGraphNode,
   WaitGraphNodeSchema,
+  ElasticsearchGraphNode,
+  ElasticsearchGraphNodeSchema,
+  KibanaGraphNode,
+  KibanaGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,

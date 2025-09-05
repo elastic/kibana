@@ -77,7 +77,7 @@ export function getHighlightStepDecorations(
 export function getMonacoRangeFromYamlNode(
   model: monaco.editor.ITextModel,
   node: Node
-): monaco.IRange | null {
+): monaco.Range | null {
   const [startOffset, _, endOffset] = node.range ?? [];
   if (!startOffset || !endOffset) {
     return null;

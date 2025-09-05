@@ -14,4 +14,7 @@ export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
 export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
 
+// Export shared utilities that are needed by both server and client
+export { buildRequestFromConnector } from './elasticsearch_request_builder';
+
 // DO NOT IMPORT MODULES HERE. Otherwise it will inflate the initial plugin bundle size.
