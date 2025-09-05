@@ -100,8 +100,10 @@ export const Node: StoryObj<NodeViewModel> = {
   render: Template,
 };
 
-// Additional stories for comprehensive testing scenarios
-export const NodeColorVariants: StoryObj = {
+export const Colors: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => {
     const colorNodes = (['primary', 'danger', 'warning'] as const).map((color, index) => ({
       id: `color-${color}`,
@@ -115,7 +117,7 @@ export const NodeColorVariants: StoryObj = {
         interactive: true,
         shape: 'hexagon',
       },
-      position: { x: index * 150, y: 0 },
+      position: { x: index * 200, y: 0 },
     }));
 
     return (
@@ -130,69 +132,30 @@ export const NodeColorVariants: StoryObj = {
   },
 };
 
-export const NodeEdgeCases: StoryObj = {
+export const Shapes: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => {
-    const edgeCaseNodes = [
-      {
-        id: 'empty-node',
-        type: 'rectangle',
+    const shapes = (['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const).map(
+      (shape, index) => ({
+        id: `entity-${shape}`,
+        type: shape,
         data: {
-          id: 'empty-node',
-          interactive: true,
-          shape: 'rectangle',
-        },
-        position: { x: 0, y: 0 },
-      },
-      {
-        id: 'no-label-node',
-        type: 'ellipse',
-        data: {
-          id: 'no-label-with-tag',
-          tag: 'Host',
+          id: `entity-${shape}`,
+          label: `${shape} node`,
           color: 'primary',
+          icon: 'okta',
           interactive: true,
-          shape: 'ellipse',
+          shape,
         },
-        position: { x: 150, y: 0 },
-      },
-      {
-        id: 'many-ips-node',
-        type: 'pentagon',
-        data: {
-          id: 'many-ips-node',
-          label: 'Multi-IP Server',
-          tag: 'Server',
-          ips: Array.from({ length: 15 }, (_, i) => `192.168.1.${i + 1}`),
-          color: 'warning',
-          interactive: true,
-          shape: 'pentagon',
-        },
-        position: { x: 300, y: 0 },
-      },
-      {
-        id: 'count-zero-node',
-        type: 'diamond',
-        data: {
-          id: 'count-zero-node',
-          label: 'Zero Count',
-          tag: 'Process',
-          count: 0,
-          color: 'danger',
-          interactive: true,
-          shape: 'diamond',
-        },
-        position: { x: 450, y: 0 },
-      },
-    ];
+        position: { x: index * 200, y: 0 },
+      })
+    );
 
     return (
       <ThemeProvider theme={{ darkMode: false }}>
-        <ReactFlow
-          fitView
-          attributionPosition={undefined}
-          nodeTypes={nodeTypes}
-          nodes={edgeCaseNodes}
-        >
+        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={shapes}>
           <Controls />
           <Background />
         </ReactFlow>
@@ -202,7 +165,55 @@ export const NodeEdgeCases: StoryObj = {
   },
 };
 
-export const NodeInteractivityStates: StoryObj = {
+const detailsUseCases = {
+  'No details': {},
+  'Only Tag': { tag: 'Host' },
+  'Tag and IPs': { tag: 'Host', ips: ['10.200.0.202', '74.25.14.20'] },
+  'Tag and Country Codes': { tag: 'Host', countryCodes: ['us', 'fr', 'es'] },
+  'Tag and Count > 1': { tag: 'Host', count: 2 },
+  Everything: {
+    tag: 'Host',
+    count: 2,
+    ips: ['10.200.0.202', '74.25.14.20'],
+    countryCodes: ['us', 'fr', 'es'],
+  },
+};
+
+export const Details: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => {
+    const nodes = Object.entries(detailsUseCases).map(([useCaseName, props], index) => ({
+      id: useCaseName,
+      type: 'hexagon',
+      data: {
+        id: useCaseName,
+        shape: 'hexagon',
+        color: 'primary',
+        icon: 'storage',
+        interactive: true,
+        ...props,
+      },
+      position: { x: index * 200, y: 0 },
+    }));
+
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={nodes}>
+          <Controls />
+          <Background />
+        </ReactFlow>
+        <GlobalGraphStyles />
+      </ThemeProvider>
+    );
+  },
+};
+
+export const Interactivity: StoryObj = {
+  parameters: {
+    controls: { disable: true },
+  },
   render: () => {
     const interactivityNodes = [
       {
@@ -211,7 +222,7 @@ export const NodeInteractivityStates: StoryObj = {
         data: {
           id: 'interactive-node',
           label: 'Interactive Node',
-          tag: 'Interactive',
+          tag: 'Host',
           color: 'primary',
           icon: 'gear',
           interactive: true,
@@ -225,7 +236,7 @@ export const NodeInteractivityStates: StoryObj = {
         data: {
           id: 'non-interactive-node',
           label: 'Non-Interactive Node',
-          tag: 'Static',
+          tag: 'Host',
           color: 'primary',
           icon: 'gear',
           interactive: false,
@@ -243,65 +254,6 @@ export const NodeInteractivityStates: StoryObj = {
           nodeTypes={nodeTypes}
           nodes={interactivityNodes}
         >
-          <Controls />
-          <Background />
-        </ReactFlow>
-        <GlobalGraphStyles />
-      </ThemeProvider>
-    );
-  },
-};
-
-export const NodeWithMixedFlags: StoryObj = {
-  render: () => {
-    const flagNodes = [
-      {
-        id: 'single-flag-node',
-        type: 'ellipse',
-        data: {
-          id: 'single-flag-node',
-          label: 'Single Flag',
-          tag: 'Host',
-          countryCodes: ['us'],
-          color: 'primary',
-          interactive: true,
-          shape: 'ellipse',
-        },
-        position: { x: 0, y: 0 },
-      },
-      {
-        id: 'multiple-flags-node',
-        type: 'ellipse',
-        data: {
-          id: 'multiple-flags-node',
-          label: 'Multiple Flags',
-          tag: 'Host',
-          countryCodes: ['us', 'gb', 'fr', 'de', 'jp'],
-          color: 'primary',
-          interactive: true,
-          shape: 'ellipse',
-        },
-        position: { x: 200, y: 0 },
-      },
-      {
-        id: 'many-flags-node',
-        type: 'ellipse',
-        data: {
-          id: 'many-flags-node',
-          label: 'Many Flags',
-          tag: 'Host',
-          countryCodes: ['us', 'gb', 'fr', 'de', 'jp', 'au', 'ca', 'br', 'in', 'cn'],
-          color: 'primary',
-          interactive: true,
-          shape: 'ellipse',
-        },
-        position: { x: 400, y: 0 },
-      },
-    ];
-
-    return (
-      <ThemeProvider theme={{ darkMode: false }}>
-        <ReactFlow fitView attributionPosition={undefined} nodeTypes={nodeTypes} nodes={flagNodes}>
           <Controls />
           <Background />
         </ReactFlow>
