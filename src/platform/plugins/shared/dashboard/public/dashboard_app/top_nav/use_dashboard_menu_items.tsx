@@ -36,10 +36,9 @@ export const useDashboardMenuItems = ({
   showResetChange?: boolean;
 }) => {
   const isMounted = useMountedState();
-
+  const client = useMemo(() => getAccessControlClient(), []);
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
-  const [isInEditAccessMode, setIsInEditAccessMode] = useState(false);
 
   const dashboardApi = useDashboardApi();
 
@@ -54,23 +53,21 @@ export const useDashboardMenuItems = ({
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
+  const isInEditAccessMode = client.isInEditAccessMode(accessControl);
 
   useEffect(() => {
     const getAcccessControl = async () => {
-      const accessControlClient = await getAccessControlClient();
-
-      const isDashboardInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
-      setIsInEditAccessMode(isDashboardInEditAccessMode);
-
-      const canManage = await accessControlClient.canManageAccessControl({
+      const user = await coreServices?.userProfile.getCurrent();
+      const canManage = await client.canManageAccessControl({
         accessControl,
         createdBy: dashboardApi.createdBy,
+        uid: user?.uid,
       });
       setCanManageAccessControl(canManage);
     };
 
     getAcccessControl();
-  }, [accessControl, dashboardApi.createdBy]);
+  }, [accessControl, dashboardApi.createdBy, client]);
 
   const isEditButtonDisabled = useMemo(() => {
     if (disableTopNav) return true;

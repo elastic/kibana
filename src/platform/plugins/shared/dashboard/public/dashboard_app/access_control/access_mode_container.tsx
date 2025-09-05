@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ChangeEvent, useState, useEffect } from 'react';
+import React, { type ChangeEvent, useState, useEffect, useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { getAccessControlClient } from './get_access_control_client';
-import { spacesService } from '../../services/kibana_services';
+import { coreServices, spacesService } from '../../services/kibana_services';
 
 const selectOptions = [
   {
@@ -56,7 +56,8 @@ export const AccessModeContainer = ({ onChangeAccessMode, accessControl, created
   const [spaceName, setSpaceName] = useState('');
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
-  const [isInEditAccessMode, setIsInEditAccessMode] = useState(false);
+  const client = useMemo(() => getAccessControlClient(), []);
+  const isInEditAccessMode = client.isInEditAccessMode(accessControl);
 
   useEffect(() => {
     spacesService?.getActiveSpace().then((activeSpace) => {
@@ -65,21 +66,18 @@ export const AccessModeContainer = ({ onChangeAccessMode, accessControl, created
   }, []);
 
   useEffect(() => {
-    const getAcccessControl = async () => {
-      const accessControlClient = await getAccessControlClient();
-
-      const isDashboardInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
-      setIsInEditAccessMode(isDashboardInEditAccessMode);
-
-      const canManage = await accessControlClient.canManageAccessControl({
+    const getCanManage = async () => {
+      const user = await coreServices?.userProfile.getCurrent();
+      const canManage = await client.canManageAccessControl({
         accessControl,
         createdBy,
+        uid: user?.uid,
       });
       setCanManageAccessControl(canManage);
     };
 
-    getAcccessControl();
-  }, [accessControl, createdBy]);
+    getCanManage();
+  }, [accessControl, createdBy, client]);
 
   const selectId = useGeneratedHtmlId({ prefix: 'accessControlSelect' });
 

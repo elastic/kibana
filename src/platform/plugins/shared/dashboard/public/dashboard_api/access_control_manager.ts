@@ -29,7 +29,7 @@ export function initializeAccessControlManager(
     }
 
     try {
-      const client = await getAccessControlClient();
+      const client = getAccessControlClient();
 
       await client.changeAccessMode({
         objects: [{ id: dashboardId, type: CONTENT_ID }],

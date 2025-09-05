@@ -8,7 +8,6 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { AuthenticatedUser } from '@kbn/core/public';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type {
   ChangeAccesModeParameters,
@@ -31,7 +30,6 @@ export class AccessControlClient implements AccessControlClientPublic {
   constructor(
     private readonly deps: {
       http: HttpStart;
-      user: AuthenticatedUser | null;
       contentTypeId: string;
     }
   ) {}
@@ -65,10 +63,12 @@ export class AccessControlClient implements AccessControlClientPublic {
     };
   }
 
-  checkUserAccessControl({ accessControl, createdBy }: CheckUserAccessControlParameters): boolean {
-    const userId = this.deps.user?.profile_uid;
-
-    if (!userId) {
+  checkUserAccessControl({
+    accessControl,
+    createdBy,
+    uid,
+  }: CheckUserAccessControlParameters): boolean {
+    if (!uid) {
       return false;
     }
 
@@ -77,10 +77,10 @@ export class AccessControlClient implements AccessControlClientPublic {
       if (!createdBy) {
         return true;
       }
-      return userId === createdBy;
+      return uid === createdBy;
     }
 
-    return userId === accessControl.owner;
+    return uid === accessControl.owner;
   }
 
   isInEditAccessMode(accessControl?: Partial<SavedObjectAccessControl>): boolean {
@@ -91,11 +91,16 @@ export class AccessControlClient implements AccessControlClientPublic {
     );
   }
 
-  async canManageAccessControl({ accessControl, createdBy }: CheckUserAccessControlParameters) {
+  async canManageAccessControl({
+    accessControl,
+    createdBy,
+    uid,
+  }: CheckUserAccessControlParameters) {
     const { isGloballyAuthorized } = await this.checkGlobalPrivilege();
     const canManage = this.checkUserAccessControl({
       accessControl,
       createdBy,
+      uid,
     });
     return isGloballyAuthorized || canManage;
   }

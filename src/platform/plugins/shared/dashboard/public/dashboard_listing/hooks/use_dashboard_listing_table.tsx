@@ -115,6 +115,7 @@ export const useDashboardListingTable = ({
     () => getDashboardContentManagementService(),
     []
   );
+  const accessControlClient = useMemo(() => getAccessControlClient(), []);
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
@@ -223,9 +224,16 @@ export const useDashboardListingTable = ({
         },
       });
 
-      const accessControlClient = await getAccessControlClient();
+      const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
+        coreServices.userProfile.getCurrent(),
+        accessControlClient.checkGlobalPrivilege(),
+      ]);
 
-      const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege();
+      const uid = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
+      const isGloballyAuthorized =
+        globalPrivilegeResponse.status === 'fulfilled'
+          ? globalPrivilegeResponse.value.isGloballyAuthorized
+          : false;
 
       const searchEndTime = window.performance.now();
       const searchDuration = searchEndTime - searchStartTime;
@@ -241,8 +249,9 @@ export const useDashboardListingTable = ({
         const canManageAccessControl =
           isGloballyAuthorized ||
           accessControlClient.checkUserAccessControl({
-            accessControl: hit.accessControl,
+            accessControl: hit?.accessControl,
             createdBy: hit.createdBy,
+            uid,
           });
 
         return toTableListViewSavedObject(hit, canManageAccessControl);
@@ -250,7 +259,7 @@ export const useDashboardListingTable = ({
 
       return { total, hits: results };
     },
-    [listingLimit, dashboardContentManagementService]
+    [listingLimit, dashboardContentManagementService, accessControlClient]
   );
 
   const deleteItems = useCallback(

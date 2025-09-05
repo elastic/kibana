@@ -11,12 +11,16 @@ import { AccessControlClient } from '@kbn/access-control';
 import { CONTENT_ID } from '../../../common/content_management';
 import { coreServices } from '../../services/kibana_services';
 
-export const getAccessControlClient = async () => {
-  const user = await coreServices.security.authc.getCurrentUser();
+let accessControlClient: AccessControlClient | null = null;
+
+export const getAccessControlClient = () => {
+  if (accessControlClient) {
+    return accessControlClient;
+  }
   const client = new AccessControlClient({
     http: coreServices.http,
-    user,
     contentTypeId: CONTENT_ID,
   });
+  accessControlClient = client;
   return client;
 };
