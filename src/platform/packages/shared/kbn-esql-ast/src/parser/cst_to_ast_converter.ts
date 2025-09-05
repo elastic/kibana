@@ -2411,8 +2411,13 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
+
       if (entry) {
         map.entries.push(entry);
+
+        if (entry.incomplete) {
+          map.incomplete = true;
+        }
       } else {
         map.incomplete = true;
       }
@@ -2426,17 +2431,40 @@ export class CstToAstConverter {
     const valueCtx = ctx._value;
 
     if (keyCtx && valueCtx) {
+      let value: ast.ESQLAstExpression | undefined;
       const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
 
-      const value = this.fromConstant(valueCtx.constant()) as ast.ESQLAstExpression;
+      if (!key) {
+        return undefined;
+      }
 
-      const entry = Builder.expression.entry(key, value, {
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception),
-      });
+      const constantCtx = valueCtx.constant();
 
-      return entry;
+      if (constantCtx) {
+        value = this.fromConstant(constantCtx) as ast.ESQLAstExpression;
+      }
+
+      const mapExpressionCtx = valueCtx.mapExpression();
+
+      if (mapExpressionCtx) {
+        value = this.fromMapExpression(mapExpressionCtx);
+      }
+
+      if (!value) {
+        value = this.fromParserRuleToUnknown(valueCtx);
+        value.incomplete = true;
+      }
+
+      if (value) {
+        const entry = Builder.expression.entry(key, value, {
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+        });
+
+        return entry;
+      }
     }
+    return undefined;
   }
 
   // ----------------------------------------------------- constant expressions
