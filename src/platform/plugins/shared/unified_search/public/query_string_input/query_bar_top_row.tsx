@@ -864,10 +864,5 @@ const inputStringStyles = {
       '.euiDatePopoverButton-isInvalid': {
         backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
       },
-
-      '.euiFormControlLayout, .euiFormControlLayout .euiButtonEmpty, .euiFormControlLayout .euiButtonIcon':
-        {
-          blockSize: euiTheme.size.xl,
-        },
     }),
 };
