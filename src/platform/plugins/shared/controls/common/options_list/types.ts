@@ -10,6 +10,7 @@
 import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { OptionsListSelection } from './options_list_selections';
 import type { OptionsListSortingType } from './suggestions_sorting';
 import type { DefaultDataControlState } from '../types';
@@ -29,9 +30,7 @@ export interface OptionsListDisplaySettings {
   hideSort?: boolean;
 }
 
-export interface OptionsListControlState
-  extends DefaultDataControlState,
-    OptionsListDisplaySettings {
+type OptionsListBaseControlState = OptionsListDisplaySettings & {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: OptionsListSelection[];
@@ -39,7 +38,18 @@ export interface OptionsListControlState
   runPastTimeout?: boolean;
   singleSelect?: boolean;
   exclude?: boolean;
-}
+};
+export type OptionsListDSLControlState = DefaultDataControlState & OptionsListBaseControlState;
+export type OptionsListESQLControlState = ESQLControlState & OptionsListBaseControlState;
+
+export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
+
+export const isOptionsListESQLControlState = (
+  state: OptionsListControlState
+): state is OptionsListESQLControlState =>
+  Object.hasOwn(state, 'esqlQuery') &&
+  Object.hasOwn(state, 'controlType') &&
+  !Object.hasOwn(state, 'fieldName');
 
 /**
  * ----------------------------------------------------------------
@@ -76,31 +86,53 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
 /**
  * The Options list request type taken in by the public Options List service.
  */
-export type OptionsListRequest = Omit<
-  OptionsListRequestBody,
-  'filters' | 'fieldName' | 'fieldSpec'
-> & {
+interface OptionsListRequestBase
+  extends Pick<OptionsListControlState, 'searchTechnique' | 'sort' | 'selectedOptions'> {
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  allowExpensiveQueries: boolean;
+  runPastTimeout?: boolean;
+  searchString?: string;
+  size: number;
+  ignoreValidations?: boolean;
   timeRange?: TimeRange;
-  dataView: DataView;
+  dataView?: DataView;
   filters?: Filter[];
-  field: FieldSpec;
+  field?: FieldSpec;
   query?: Query | AggregateQuery;
+}
+
+export type OptionsListDSLRequest = OptionsListRequestBase &
+  Required<Pick<OptionsListRequestBase, 'dataView' | 'field'>>;
+
+export type OptionsListESQLRequest = Omit<
+  OptionsListRequestBase,
+  'query' | 'size' | 'allowExpensiveQueries'
+> & {
+  query: AggregateQuery;
+};
+
+export type OptionsListRequest = OptionsListDSLRequest | OptionsListESQLRequest;
+
+export const isOptionsListDSLRequest = (request: unknown): request is OptionsListDSLRequest => {
+  const req = request as OptionsListDSLRequest;
+  return Object.hasOwn(req, 'dataView') && Object.hasOwn(req, 'field');
+};
+export const isOptionsListESQLRequest = (request: unknown): request is OptionsListESQLRequest => {
+  const req = request as OptionsListESQLRequest;
+  return (
+    !Object.hasOwn(req, 'dataView') &&
+    !Object.hasOwn(req, 'field') &&
+    Object.hasOwn(req, 'query') &&
+    Object.hasOwn(req.query, 'esql')
+  );
 };
 
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListRequestBody
-  extends Pick<
-    OptionsListControlState,
-    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
-  > {
-  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  allowExpensiveQueries: boolean;
-  ignoreValidations?: boolean;
+export interface OptionsListDSLRequestBody
+  extends Omit<OptionsListRequestBase, 'filters' | 'fieldSpec'>,
+    Pick<OptionsListDSLControlState, 'fieldName'> {
   filters?: Array<{ bool: BoolQuery }>;
-  runPastTimeout?: boolean;
-  searchString?: string;
   fieldSpec?: FieldSpec;
-  size: number;
 }

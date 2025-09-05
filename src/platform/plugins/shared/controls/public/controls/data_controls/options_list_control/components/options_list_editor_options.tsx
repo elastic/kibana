@@ -87,8 +87,8 @@ export const OptionsListEditorOptions = ({
   );
 
   const compatibleSearchTechniques = useMemo(
-    () => getCompatibleSearchTechniques(field.type),
-    [field.type]
+    () => getCompatibleSearchTechniques(field?.type),
+    [field?.type]
   );
 
   const searchOptions = useMemo(() => {

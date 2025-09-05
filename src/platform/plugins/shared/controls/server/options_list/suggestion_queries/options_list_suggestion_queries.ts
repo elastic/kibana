@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { OptionsListDSLRequestBody } from '../../../common/options_list/types';
 import { getAllSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';
@@ -15,7 +15,7 @@ import { getSearchSuggestionsAggregationBuilder } from './options_list_search_su
 /**
  * Suggestion aggregations
  */
-export const getSuggestionAggregationBuilder = (request: OptionsListRequestBody) => {
+export const getSuggestionAggregationBuilder = (request: OptionsListDSLRequestBody) => {
   const { searchString, searchTechnique, allowExpensiveQueries } = request;
   const hasSearchString = searchString && searchString.length > 0;
   if (!hasSearchString) {

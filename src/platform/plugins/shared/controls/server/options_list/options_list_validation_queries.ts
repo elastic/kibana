@@ -12,7 +12,7 @@ import { get, isEmpty } from 'lodash';
 
 import type { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import { getSelectionAsFieldType } from '../../common/options_list/options_list_selections';
-import type { OptionsListRequestBody } from '../../common/options_list/types';
+import type { OptionsListDSLRequestBody } from '../../common/options_list/types';
 import type { OptionsListValidationAggregationBuilder } from './types';
 
 /**
@@ -20,7 +20,7 @@ import type { OptionsListValidationAggregationBuilder } from './types';
  */
 export const getValidationAggregationBuilder: () => OptionsListValidationAggregationBuilder =
   () => ({
-    buildAggregation: ({ selectedOptions, fieldName, fieldSpec }: OptionsListRequestBody) => {
+    buildAggregation: ({ selectedOptions, fieldName, fieldSpec }: OptionsListDSLRequestBody) => {
       let selectedOptionsFilters;
       if (selectedOptions) {
         selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
