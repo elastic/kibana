@@ -43,7 +43,7 @@ export const CustomSamplesDataSourceCard = ({
 
   /**
    * To have the editor properly handle the set xjson language
-   * we need to avoid the continuos parsing/serialization of the editor value
+   * we need to avoid the continuous parsing/serialization of the editor value
    * using a parallel state always setting a string make the editor format well the content.
    */
   const [editorValue, setEditorValue] = React.useState(() =>
