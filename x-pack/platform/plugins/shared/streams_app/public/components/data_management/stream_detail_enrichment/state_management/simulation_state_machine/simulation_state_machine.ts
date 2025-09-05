@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { assign, sendParent, setup } from 'xstate5';
+import { assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
@@ -26,7 +26,7 @@ import {
   createSimulationRunFailureNotifier,
 } from './simulation_runner_actor';
 import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
-import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -83,23 +83,14 @@ export const simulationMachine = setup({
       })
     ),
     deriveDetectedSchemaFields: assign(({ context }) => ({
-      detectedSchemaFields: context.simulation
-        ? getSchemaFieldsFromSimulation(
-            context.simulation.detected_fields,
-            context.detectedSchemaFields,
-            context.streamName
-          )
-        : context.detectedSchemaFields,
+      detectedSchemaFields: getSchemaFieldsFromSimulation(context),
     })),
     mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
-      detectedSchemaFields: mapField(context.detectedSchemaFields, params.field),
+      detectedSchemaFields: mapField(context, params.field),
     })),
     unmapField: assign(({ context }, params: { fieldName: string }) => ({
-      detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
+      detectedSchemaFields: unmapField(context, params.fieldName),
     })),
-    restoreFields: assign((_, params: { restoredFields: SchemaField[] }) => {
-      return { detectedSchemaFields: params.restoredFields };
-    }),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
       explicitlyEnabledPreviewColumns: [],
@@ -126,6 +117,7 @@ export const simulationMachine = setup({
   id: 'simulation',
   context: ({ input }) => ({
     detectedSchemaFields: [],
+    detectedSchemaFieldsCache: new Map(),
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     explicitlyDisabledPreviewColumns: [],
@@ -249,14 +241,6 @@ export const simulationMachine = setup({
           target: 'assertingRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
         },
-        'simulation.restoreFields': {
-          target: 'idle',
-          reenter: true,
-          actions: [{ type: 'restoreFields', params: ({ event }) => event }],
-        },
-        'simulation.noRestoration': {
-          // No-op event, do nothing
-        },
       },
     },
 
@@ -288,24 +272,16 @@ export const simulationMachine = setup({
           detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
-          target: 'simulationCompleted',
+          target: 'idle',
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
             { type: 'deriveDetectedSchemaFields' },
-            sendParent({ type: 'simulation.completed' }),
           ],
         },
         onError: {
           target: 'idle',
           actions: [{ type: 'notifySimulationRunFailure' }],
         },
-      },
-    },
-
-    simulationCompleted: {
-      entry: [sendParent({ type: 'simulation.completed' })],
-      always: {
-        target: 'idle',
       },
     },
   },

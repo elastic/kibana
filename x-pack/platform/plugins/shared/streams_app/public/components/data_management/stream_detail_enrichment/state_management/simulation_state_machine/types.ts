@@ -65,6 +65,7 @@ export type SimulationEvent =
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];
   explicitlyEnabledPreviewColumns: string[];
