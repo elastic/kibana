@@ -11,6 +11,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
+import type { DocumentMatchFilterOptions } from '.';
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNofitier: (streamName: string) => void;
@@ -41,4 +42,5 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.fork' }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
-  | { type: 'routingRule.save' };
+  | { type: 'routingRule.save' }
+  | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions };
