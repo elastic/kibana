@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import {
@@ -18,6 +18,8 @@ import {
   NodeButton,
   HandleStyleOverride,
   useNodeFillColor,
+  styleEntityNodeMiddleShape,
+  styleEntityNodeBottomShape,
 } from './styles';
 import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
 import { NodeExpandButton } from './node_expand_button';
@@ -78,11 +80,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={{
-                transform: 'scale(0.8) translateY(16px)',
-                transformOrigin: 'center',
-                stroke: transparentize(strokeColor, 0.3),
-              }}
+              css={styleEntityNodeMiddleShape(strokeColor)}
             />
           )}
           {showStackedShape(count) && (
@@ -90,11 +88,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
               data-test-subj={GRAPH_STACKED_SHAPE_ID}
               fill={fillColor}
               stroke={strokeColor}
-              css={{
-                transform: 'scale(0.9) translateY(7px)',
-                transformOrigin: 'center',
-                stroke: transparentize(strokeColor, 0.5),
-              }}
+              css={styleEntityNodeBottomShape(strokeColor)}
             />
           )}
           <DiamondShape fill={fillColor} stroke={strokeColor} />
