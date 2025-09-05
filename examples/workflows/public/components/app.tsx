@@ -14,9 +14,9 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import * as yaml from 'js-yaml';
 import React, { useEffect, useState } from 'react';
-import { ExecutionGraph } from '@kbn/workflows-management-plugin/public';
 import { PLUGIN_NAME } from '../../common';
 
 interface WorkflowsAppDeps {
@@ -80,6 +80,7 @@ workflow:
         message: |
           Hello from Kibana!
           The user name from event is {{event.additionalData.userName}} and email is {{event.additionalData.user}}
+
     - name: step-with-5-seconds-delay
       type: delay
       connector-id: delay
@@ -237,7 +238,12 @@ workflow:
                       ignoreTag
                     />
                   </EuiButton>
-                  {workflowYaml && <ExecutionGraph workflowYaml={workflowYaml} />}
+                  {workflowExecutionId && (
+                    <WorkflowExecution
+                      workflowExecutionId={workflowExecutionId}
+                      workflowYaml={workflowYaml}
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageTemplate.Section>
