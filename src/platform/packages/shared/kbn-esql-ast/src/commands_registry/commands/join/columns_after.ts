@@ -11,11 +11,12 @@ import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData } from '../../types';
 import type { IAdditionalFields } from '../../registry';
 
-export const columnsAfter = (
+export const columnsAfter = async (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
   query: string,
-  newFields: IAdditionalFields
+  additionalFields: IAdditionalFields
 ) => {
-  return uniqBy([...(newFields.fromJoin ?? []), ...previousColumns], 'name');
+  const joinFields = await additionalFields.fromJoin(command);
+  return uniqBy([...(joinFields ?? []), ...previousColumns], 'name');
 };

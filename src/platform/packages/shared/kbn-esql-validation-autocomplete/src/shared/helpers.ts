@@ -114,35 +114,49 @@ export async function getCurrentQueryAvailableColumns(
 ) {
   const lastCommand = commands[commands.length - 1];
   const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
-  const extraFields: IAdditionalFields = {};
 
-  // Handle JOIN command: fetch fields from joined indices
-  if (lastCommand.name === 'join') {
+  const getJoinFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
     const joinSummary = mutate.commands.join.summarize({
       type: 'query',
-      commands,
+      commands: [command],
     } as ESQLAstQueryExpression);
     const joinIndices = joinSummary.map(({ target: { index } }) => index);
     if (joinIndices.length > 0) {
       const joinFieldQuery = synth.cmd`FROM ${joinIndices}`.toString();
-      extraFields.fromJoin = await fetchFields(joinFieldQuery);
+      return fetchFields(joinFieldQuery);
     }
-  }
+    return Promise.resolve([]);
+  };
 
-  // Handle ENRICH command: fetch fields from enrich policy
-  if (lastCommand.name === 'enrich' && isSource(lastCommand.args[0])) {
-    const policyName = lastCommand.args[0].name;
+  const getEnrichFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    if (!isSource(command.args[0])) {
+      return Promise.resolve([]);
+    }
+
+    const policyName = command.args[0].name;
     const policy = policies.get(policyName);
     if (policy) {
       const fieldsQuery = `FROM ${policy.sourceIndices.join(
         ', '
       )} | KEEP ${policy.enrichFields.join(', ')}`;
-      extraFields.fromEnrich = await fetchFields(fieldsQuery);
+      return fetchFields(fieldsQuery);
     }
-  }
+
+    return Promise.resolve([]);
+  };
+
+  const additionalFields: IAdditionalFields = {
+    fromJoin: getJoinFields,
+    fromEnrich: getEnrichFields,
+  };
 
   if (commandDef?.methods.columnsAfter) {
-    return commandDef.methods.columnsAfter(lastCommand, previousPipeFields, query, extraFields);
+    return commandDef.methods.columnsAfter(
+      lastCommand,
+      previousPipeFields,
+      query,
+      additionalFields
+    );
   }
   return previousPipeFields;
 }

@@ -11,16 +11,21 @@ import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('JOIN columnsAfter', () => {
-  it('returns previousColumns when no join columns', () => {
+  it('returns previousColumns when no join columns', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
     ];
-    const result = columnsAfter({} as any, previousColumns, '', { fromJoin: undefined });
+
+    const result = await columnsAfter({} as any, previousColumns, '', {
+      fromJoin: () => Promise.resolve([]),
+      fromEnrich: () => Promise.resolve([]),
+    });
+
     expect(result).toEqual(previousColumns);
   });
 
-  it('prepends joinColumns to previousColumns when joinColumns is provided', () => {
+  it('prepends joinColumns to previousColumns when joinColumns is provided', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
@@ -29,11 +34,16 @@ describe('JOIN columnsAfter', () => {
       { name: 'joinField1', type: 'keyword', userDefined: false },
       { name: 'joinField2', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter({} as any, previousColumns, '', { fromJoin: joinColumns });
+
+    const result = await columnsAfter({} as any, previousColumns, '', {
+      fromJoin: () => Promise.resolve(joinColumns),
+      fromEnrich: () => Promise.resolve([]),
+    });
+
     expect(result).toEqual([...joinColumns, ...previousColumns]);
   });
 
-  it('overwrites previous columns with the same name', () => {
+  it('overwrites previous columns with the same name', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
@@ -42,7 +52,12 @@ describe('JOIN columnsAfter', () => {
       { name: 'fieldA', type: 'text', userDefined: false },
       { name: 'fieldC', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter({} as any, previousColumns, '', { fromJoin: joinColumns });
+
+    const result = await columnsAfter({} as any, previousColumns, '', {
+      fromJoin: () => Promise.resolve(joinColumns),
+      fromEnrich: () => Promise.resolve([]),
+    });
+
     expect(result).toEqual([
       { name: 'fieldA', type: 'text', userDefined: false },
       { name: 'fieldC', type: 'double', userDefined: false },

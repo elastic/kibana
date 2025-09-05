@@ -12,18 +12,19 @@ import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('ENRICH columnsAfter', () => {
-  it('returns previousColumns when no enrich columns', () => {
+  it('returns previousColumns when no enrich columns', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
     ];
-    const result = columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
-      fromJoin: undefined,
+    const result = await columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
+      fromJoin: () => Promise.resolve([]),
+      fromEnrich: () => Promise.resolve([]),
     });
     expect(result).toEqual(previousColumns);
   });
 
-  it('adds all enrich columns to when no WITH clause', () => {
+  it('adds all enrich columns to when no WITH clause', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
@@ -32,13 +33,14 @@ describe('ENRICH columnsAfter', () => {
       { name: 'enrichField1', type: 'keyword', userDefined: false },
       { name: 'enrichField2', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
-      fromEnrich: enrichColumns,
+    const result = await columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
+      fromJoin: () => Promise.resolve([]),
+      fromEnrich: () => Promise.resolve(enrichColumns),
     });
     expect(result).toEqual([...enrichColumns, ...previousColumns]);
   });
 
-  it('adds only declared columns when WITH clause is present', () => {
+  it('adds only declared columns when WITH clause is present', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
@@ -47,18 +49,19 @@ describe('ENRICH columnsAfter', () => {
       { name: 'enrichField1', type: 'keyword', userDefined: false },
       { name: 'enrichField2', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter(
+    const result = await columnsAfter(
       synth.cmd`ENRICH policy ON matchfield WITH enrichField2`,
       previousColumns,
       '',
       {
-        fromEnrich: enrichColumns,
+        fromJoin: () => Promise.resolve([]),
+        fromEnrich: () => Promise.resolve(enrichColumns),
       }
     );
     expect(result).toEqual([enrichColumns[1], ...previousColumns]);
   });
 
-  it('renames enrichment fields using WITH', () => {
+  it('renames enrichment fields using WITH', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
@@ -67,12 +70,13 @@ describe('ENRICH columnsAfter', () => {
       { name: 'enrichField1', type: 'keyword', userDefined: false },
       { name: 'enrichField2', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter(
+    const result = await columnsAfter(
       synth.cmd`ENRICH policy ON matchfield WITH foo = enrichField1, bar = enrichField2`,
       previousColumns,
       '',
       {
-        fromEnrich: enrichColumns,
+        fromEnrich: () => Promise.resolve(enrichColumns),
+        fromJoin: () => Promise.resolve([]),
       }
     );
     const expected = [
@@ -83,7 +87,7 @@ describe('ENRICH columnsAfter', () => {
     expect(result).toEqual(expected);
   });
 
-  it('overwrites previous columns with the same name', () => {
+  it('overwrites previous columns with the same name', async () => {
     const previousColumns: ESQLColumnData[] = [
       { name: 'fieldA', type: 'keyword', userDefined: false },
       { name: 'fieldB', type: 'long', userDefined: false },
@@ -92,8 +96,9 @@ describe('ENRICH columnsAfter', () => {
       { name: 'fieldA', type: 'text', userDefined: false },
       { name: 'fieldC', type: 'double', userDefined: false },
     ];
-    const result = columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
-      fromEnrich: enrichFields,
+    const result = await columnsAfter(synth.cmd`ENRICH policy ON matchfield`, previousColumns, '', {
+      fromEnrich: () => Promise.resolve(enrichFields),
+      fromJoin: () => Promise.resolve([]),
     });
     expect(result).toEqual([
       { name: 'fieldA', type: 'text', userDefined: false },

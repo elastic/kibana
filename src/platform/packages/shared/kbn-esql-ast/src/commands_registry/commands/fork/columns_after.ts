@@ -11,11 +11,13 @@ import { esqlCommandRegistry } from '../../../..';
 import type { ESQLAstQueryExpression } from '../../../types';
 import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
+import type { IAdditionalFields } from '../../registry';
 
-export const columnsAfter = (
+export const columnsAfter = async (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
-  query: string
+  query: string,
+  additionalFields: IAdditionalFields
 ) => {
   const branches = command.args as ESQLAstQueryExpression[];
 
@@ -27,11 +29,11 @@ export const columnsAfter = (
     for (const branchCommand of branch.commands) {
       const commandDef = esqlCommandRegistry.getCommandByName(branchCommand.name);
       if (commandDef?.methods?.columnsAfter) {
-        columnsFromBranch = commandDef.methods?.columnsAfter?.(
+        columnsFromBranch = await commandDef.methods?.columnsAfter?.(
           branchCommand,
           columnsFromBranch,
           query,
-          {} // TODO support nested JOIN commands :scared-hedgie:
+          additionalFields
         );
       }
     }

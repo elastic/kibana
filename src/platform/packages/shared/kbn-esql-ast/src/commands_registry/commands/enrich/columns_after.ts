@@ -13,13 +13,13 @@ import { type ESQLCommand } from '../../../types';
 import type { ESQLColumnData } from '../../types';
 import type { IAdditionalFields } from '../../registry';
 
-export const columnsAfter = (
+export const columnsAfter = async (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[],
   query: string,
-  newFields: IAdditionalFields
+  additionalFields: IAdditionalFields
 ) => {
-  const enrichFields = newFields.fromEnrich ?? [];
+  const enrichFields = await additionalFields.fromEnrich(command);
   let fieldsToAdd = enrichFields;
 
   // the with option scopes down the fields that are added

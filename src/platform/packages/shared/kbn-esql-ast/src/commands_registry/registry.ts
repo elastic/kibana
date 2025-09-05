@@ -67,7 +67,7 @@ export interface ICommandMethods<TContext = any> {
     previousColumns: ESQLColumnData[],
     query: string,
     newFields: IAdditionalFields
-  ) => ESQLColumnData[];
+  ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
 }
 
 export interface ICommandMetadata {
@@ -121,8 +121,8 @@ export interface ICommandRegistry {
 }
 
 export interface IAdditionalFields {
-  fromJoin?: ESQLFieldWithMetadata[];
-  fromEnrich?: ESQLFieldWithMetadata[];
+  fromJoin: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
 }
 
 /**
