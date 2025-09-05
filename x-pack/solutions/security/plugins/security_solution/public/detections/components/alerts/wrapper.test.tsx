@@ -134,7 +134,22 @@ describe('<Wrapper />', () => {
       (useSourcererDataView as jest.Mock).mockReturnValue({});
     });
 
-    it('should render a loading skeleton while creating the dataView', async () => {
+    it('should render a loading skeleton if the dataView status is pristine', async () => {
+      (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'pristine' });
+
+      render(
+        <TestProviders>
+          <Wrapper />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
+      });
+    });
+
+    it('should render a loading skeleton if the dataView status is loading', async () => {
       (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'loading' });
 
       render(
@@ -167,6 +182,28 @@ describe('<Wrapper />', () => {
       );
     });
 
+    it('should render an error if the dataView status is ready but it has no indices', async () => {
+      (useDataView as jest.Mock).mockReturnValue({
+        dataView: {
+          ...dataView,
+          getRuntimeMappings: jest.fn(),
+          hasMatchedIndices: jest.fn().mockReturnValue(false),
+        },
+        status: 'ready',
+      });
+
+      render(
+        <TestProviders>
+          <Wrapper />
+        </TestProviders>
+      );
+
+      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+      expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+        'Unable to retrieve the data view'
+      );
+    });
+
     it('should render the content', async () => {
       (useDataView as jest.Mock).mockReturnValue({
         dataView: {
@@ -174,6 +211,7 @@ describe('<Wrapper />', () => {
           id: 'id',
           getIndexPattern: jest.fn().mockReturnValue('title'),
           getRuntimeMappings: jest.fn(),
+          hasMatchedIndices: jest.fn().mockReturnValue(true),
         },
         status: 'ready',
       });
