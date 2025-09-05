@@ -18,6 +18,5 @@ export const OnechatConversationsPage: React.FC = () => {
       path: appPaths.chat.new,
     },
   ]);
-
   return <OnechatConversationsView />;
 };
