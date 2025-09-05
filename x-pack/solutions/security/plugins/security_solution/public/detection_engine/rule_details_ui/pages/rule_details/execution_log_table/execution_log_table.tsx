@@ -247,7 +247,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       newDataViewPickerEnabled
         ? experimentalDataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
         : oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [experimentalDataView.fields, newDataViewPickerEnabled, oldSourcererDataView.fields]
+    [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView.fields]
   );
 
   // Callbacks

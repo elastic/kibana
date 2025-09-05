@@ -23,6 +23,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const CSPM_RADIO_OPTION = 'policy-template-radio-button-cspm';
   const CNVM_RADIO_OPTION = 'policy-template-radio-button-vuln_mgmt';
 
+  const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
+
   const POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 
   describe('Agentless Security Posture Integration Options', function () {
@@ -46,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const hasSetupTechnologySelector = await testSubjects.exists(
-        cisIntegration.testSubjectIds.SETUP_TECHNOLOGY_SELECTOR
+        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
@@ -65,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const hasSetupTechnologySelector = await testSubjects.exists(
-        cisIntegration.testSubjectIds.SETUP_TECHNOLOGY_SELECTOR
+        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
@@ -83,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const hasSetupTechnologySelector = await testSubjects.exists(
-        cisIntegration.testSubjectIds.SETUP_TECHNOLOGY_SELECTOR
+        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
