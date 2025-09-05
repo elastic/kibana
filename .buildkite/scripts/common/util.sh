@@ -140,6 +140,52 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
+
+# ------------------------------------------------------------------------------
+# Function to find a valid commit SHA, aka a SHA for which a snapshot exists
+# ------------------------------------------------------------------------------
+findExistingSnapshotSha() {
+  # The merge base commit, to start looking for existing snapshots.
+  local sha=${1}
+  # The maximum number of attempts to find a existing snapshot,
+  # recursing through the commit parent hierarchy. (defaults to 10)
+  local max_attempts=${2:-10}
+
+  # Counter for the number of attempts made.
+  local attempts=1
+
+  while [ $attempts -le $max_attempts ]; do
+    # Use curl to check the URL.
+    local url="https://storage.googleapis.com/kibana-so-types-snapshots/$sha.json"
+    local http_status=$(curl -o /dev/null -I -sw "%{http_code}" "$url")
+
+    # Check if the HTTP status code indicates success (2xx or 3xx range).
+    if [[ "$http_status" =~ ^[23] ]]; then
+      echo "$sha" # Echo the valid SHA to standard output
+      return 0    # Return success status
+    else
+      if [[ "$http_status" =~ ^[404] ]]; then
+        echo "Snapshot '$url' NOT FOUND, fetching parent commit snapshot (attempt $attempts of $max_attempts)..." >&2
+        # Obtain the parent SHA
+        sha=$(git rev-parse $sha^)
+      else
+        echo "Error fetching snapshot '$url' (attempt $attempts of $max_attempts)..." >&2
+      fi
+
+      # Increment the attempts counter.
+      attempts=$((attempts + 1))
+
+      # Pause before the next attempt.
+      sleep 2
+    fi
+  done
+
+  return 1
+}
+
+# ------------------------------------------------------------------------------
+# Function to find and expand the current serverless release SHA
+# ------------------------------------------------------------------------------
 set_serverless_release_sha() {
   GITHUB_SERVERLESS_RELEASE_SHA="$(buildkite-agent meta-data get current-serverless-release-sha --default '')"
 
