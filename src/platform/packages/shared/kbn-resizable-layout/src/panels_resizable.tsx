@@ -19,7 +19,6 @@ import useLatest from 'react-use/lib/useLatest';
 import type { ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
-export const MAX_FIX_PANEL_SIZE_PCT = 0.8;
 export const PanelsResizable = ({
   className,
   direction,

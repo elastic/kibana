@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { MAX_FIX_PANEL_SIZE_PCT, PanelsResizable } from './panels_resizable';
+import { PanelsResizable } from './panels_resizable';
 import { ResizableLayoutDirection } from '../types';
 
 const containerHeight = 1000;
@@ -60,7 +60,7 @@ describe('Panels resizable', () => {
     fixedPanel?: ReactElement;
     flexPanel?: ReactElement;
     attachTo?: HTMLElement;
-    onFixedPanelSizeChange?: (fixedPanelSize: number | 'max-content') => void;
+    onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
   }) => {
     const PanelsWrapper = ({ fixedPanelSize }: { fixedPanelSize?: number }) => (
       <PanelsResizable
@@ -250,10 +250,21 @@ describe('Panels resizable', () => {
   });
 
   it('should set the initial fixed panel size to max-content', () => {
-    const initialFixedPanelSize = 'max-content';
+    const minFlexPanelSize = 200;
+
     const component = mountComponent({
-      initialFixedPanelSize,
+      minFlexPanelSize,
+      initialFixedPanelSize: 'max-content',
     });
-    expectCorrectPanelSizes(component, containerWidth, containerWidth * MAX_FIX_PANEL_SIZE_PCT);
+
+    const flexPanelSizePct = (minFlexPanelSize / containerHeight) * 100;
+
+    expect(
+      component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
+    ).toBe(100 - flexPanelSizePct);
+
+    expect(
+      component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
+    ).toBe(flexPanelSizePct);
   });
 });
