@@ -27,6 +27,7 @@ export interface WorkflowsExecutionEnginePluginStart {
     context: Record<string, any>,
     request: KibanaRequest
   ): Promise<ExecuteWorkflowResponse>;
+  cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
