@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { KibanaRequest, SavedObject, RequestHandlerContext } from '@kbn/core/server';
-import { CONTENT_ID, LATEST_VERSION } from '@kbn/dashboard-plugin/common/content_management';
+import type { ContentClient } from '@kbn/content-management-plugin/server';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management';
 import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import { initPromisePool } from '../../../../../utils/promise_pool';
@@ -36,23 +35,14 @@ interface InstallTranslatedProps {
   /**
    * The content management setup
    */
-  contentManagement: ContentManagementServerSetup;
-
-  /**
-   * The request object for content management client
-   */
-  request: KibanaRequest;
-
-  context: RequestHandlerContext;
+  dashboardClient: ContentClient<DashboardAttributes>;
 }
 
 export const installTranslated = async ({
   migrationId,
   ids,
-  contentManagement,
+  dashboardClient,
   securitySolutionContext,
-  request,
-  context,
 }: InstallTranslatedProps): Promise<number> => {
   const dashboardMigrationsClient = securitySolutionContext.siemMigrations.getDashboardsClient();
 
@@ -68,9 +58,7 @@ export const installTranslated = async ({
   while (dashboardsToInstall.length) {
     const { dashboardsToUpdate, errors } = await installDashboards(
       dashboardsToInstall,
-      contentManagement,
-      request,
-      context
+      dashboardClient
     );
     installedCount += dashboardsToUpdate.length;
     installationErrors.push(...errors);
@@ -88,9 +76,7 @@ export const installTranslated = async ({
 
 const installDashboards = async (
   dashboardsToInstall: DashboardMigrationDashboard[],
-  contentManagement: ContentManagementServerSetup,
-  request: KibanaRequest,
-  context: RequestHandlerContext
+  dashboardClient: ContentClient<DashboardAttributes>
 ): Promise<{
   dashboardsToUpdate: Array<DashboardMigrationDashboard>;
   errors: Error[];
@@ -103,19 +89,16 @@ const installDashboards = async (
     items: dashboardsToInstall,
     executor: async (dashboard) => {
       try {
-        // Parse the dashboard data (assuming it's JSON)
-        const dashboardData = JSON.parse(dashboard.elastic_dashboard?.data || '');
+        // Check if dashboard data exists
+        if (!dashboard.elastic_dashboard?.data) {
+          throw new Error('Invalid Dashboard: No data to install');
+        }
 
-        // Create dashboard using content management client
-        const client = contentManagement.contentClient
-          .getForRequest({
-            request,
-            requestHandlerContext: context,
-          })
-          .for<SavedObject>(CONTENT_ID, LATEST_VERSION);
+        // Parse the dashboard data (assuming it's JSON)
+        const dashboardData = JSON.parse(dashboard.elastic_dashboard.data);
 
         const tags = [getVendorTag(dashboard.original_dashboard)];
-        const { result } = await client.create(
+        const { result } = await dashboardClient.create(
           {
             title: dashboard.original_dashboard.title,
             description: dashboard.original_dashboard.description,

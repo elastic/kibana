@@ -87,7 +87,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       productFeaturesService,
     } = options;
 
-    const { lists, ruleRegistry, security } = plugins;
+    const { lists, ruleRegistry, security, contentManagement } = plugins;
 
     const [coreStart, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, request);
@@ -346,6 +346,12 @@ export class RequestContextFactory implements IRequestContextFactory {
           ml: plugins.ml,
           request,
           savedObjectsClient: coreContext.savedObjects.client,
+        });
+      }),
+      getContentClient: memoize(() => {
+        return contentManagement.contentClient.getForRequest({
+          request,
+          requestHandlerContext: context,
         });
       }),
     };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SIEM_DASHBOARD_MIGRATION_INSTALL_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -58,17 +58,17 @@ export const registerSiemDashboardMigrationsInstallRoute = (
               const ctx = await context.resolve(['core', 'contentManagement', 'securitySolution']);
 
               const securitySolutionContext = ctx.securitySolution;
-              const contentManagement = ctx.contentManagement;
+              const contentClient = ctx.securitySolution.getContentClient();
 
+              // Get a specific content type client (e.g., for dashboards)
+              const dashboardClient = contentClient.for('dashboard');
               await siemMigrationAuditLogger.logInstallDashboards({ ids, migrationId });
 
               const installed = await installTranslated({
                 migrationId,
                 ids,
                 securitySolutionContext,
-                contentManagement,
-                request: req,
-                context: ctx as unknown as RequestHandlerContext,
+                dashboardClient,
               });
 
               return res.ok({ body: { installed } });

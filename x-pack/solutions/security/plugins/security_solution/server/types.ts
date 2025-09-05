@@ -22,7 +22,10 @@ import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type {
+  ContentManagementServerSetup,
+  ContentClient,
+} from '@kbn/content-management-plugin/server';
 import type { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { Immutable } from '../common/endpoint/types';
@@ -83,6 +86,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
+  getContentClient: () => ContentClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
