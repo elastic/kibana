@@ -254,12 +254,12 @@ describe('Query API Keys route', () => {
         },
         {
           id: 'undefined_name',
-          name: '',
+          name: 'undefined_name',
           invalidated: false,
         },
         {
           id: 'null_name',
-          name: '',
+          name: 'null_name',
           invalidated: false,
         },
       ]);

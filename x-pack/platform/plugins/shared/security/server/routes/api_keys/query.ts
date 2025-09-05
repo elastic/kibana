@@ -21,7 +21,7 @@ interface QueryClause {
 const transformAPIKeyNames = (keys: SecurityApiKey[]) => {
   return keys.map((key) => {
     if (!key.name) {
-      key.name = '';
+      key.name = key.id;
     }
     return key;
   });
