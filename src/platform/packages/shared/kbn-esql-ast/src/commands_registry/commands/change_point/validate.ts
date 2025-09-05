@@ -54,24 +54,15 @@ export const validate = (
     });
   }
 
-  // validate AS
-  const asArg = command.args.find((arg) => isOptionNode(arg) && arg.name === 'as');
-  if (asArg && isOptionNode(asArg)) {
-    // populate userDefinedColumns references to prevent the common check from failing with unknown column
-    asArg.args.forEach((arg, index) => {
-      if (isColumn(arg)) {
-        // TODO - can we remove this?
-        context?.columns.set(arg.name, {
-          name: arg.name,
-          location: arg.location,
-          type: index === 0 ? 'keyword' : 'long',
-          userDefined: true,
-        });
-      }
-    });
-  }
-
-  messages.push(...validateCommandArguments(command, ast, context, callbacks));
+  messages.push(
+    ...validateCommandArguments(
+      // exclude AS option from generic validation
+      { ...command, args: command.args.filter((arg) => !(isOptionNode(arg) && arg.name === 'as')) },
+      ast,
+      context,
+      callbacks
+    )
+  );
 
   return messages;
 };
