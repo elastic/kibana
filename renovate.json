@@ -4260,7 +4260,7 @@
       ],
       "minimumReleaseAge": "7 days",
       "separateMajorMinor": true,
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "XState5",
