@@ -20,7 +20,7 @@
       "actions",
       "stackConnectors",
       "onechat",
-      "inference",
+      "inference"
     ],
     "requiredBundles": [
       "kibanaUtils"

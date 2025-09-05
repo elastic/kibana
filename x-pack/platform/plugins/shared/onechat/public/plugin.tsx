@@ -17,7 +17,6 @@ import { registerAnalytics, registerApp } from './register';
 import type { OnechatInternalService } from './services';
 import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import { ConversationSettingsService } from './services/conversations/conversations_settings';
-import { OnechatConversationsView } from './application/components/conversations/conversations_view';
 
 import type {
   ConfigSchema,
@@ -81,7 +80,6 @@ export class OnechatPlugin
     };
 
     return {
-      OnechatConversationsView,
       internalServices: this.internalServices,
     };
   }
