@@ -46747,11 +46747,18 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "slos": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
                               "rules",
+                              "slos",
                               "queries"
                             ],
                             "type": "object"
@@ -50049,11 +50056,18 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "slos": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
                               "rules",
+                              "slos",
                               "queries"
                             ],
                             "type": "object"
@@ -52908,11 +52922,18 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "slos": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
                               "rules",
+                              "slos",
                               "queries"
                             ],
                             "type": "object"
@@ -55906,11 +55927,18 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "slos": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
                               }
                             },
                             "required": [
                               "dashboards",
                               "rules",
+                              "slos",
                               "queries"
                             ],
                             "type": "object"
@@ -58767,11 +58795,18 @@
                               "type": "string"
                             },
                             "type": "array"
+                          },
+                          "slos": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
                           }
                         },
                         "required": [
                           "dashboards",
                           "rules",
+                          "slos",
                           "queries"
                         ],
                         "type": "object"
@@ -66554,6 +66589,178 @@
           "streams"
         ],
         "x-state": "Technical Preview; added in 9.1.0"
+      }
+    },
+    "/api/streams/{name}/slos": {
+      "get": {
+        "description": "Fetches all SLOs linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "get-streams-name-slos",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Get stream SLOs",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/slos/{sloId}": {
+      "delete": {
+        "description": "Unlinks a SLO from a stream. Noop if the SLO is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
+        "operationId": "delete-streams-name-slos-sloid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "sloId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Unlink a SLO from a stream",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "put": {
+        "description": "Links a SLO to a stream. Noop if the SLO is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
+        "operationId": "put-streams-name-slos-sloid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "sloId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Link a SLO to a stream",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
       }
     }
   },
