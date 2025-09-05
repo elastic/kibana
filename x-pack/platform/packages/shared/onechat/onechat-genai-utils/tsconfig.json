@@ -26,5 +26,6 @@
     "@kbn/core",
     "@kbn/inference-tracing",
     "@kbn/es-errors",
+    "@kbn/i18n",
   ]
 }
