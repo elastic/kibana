@@ -17,6 +17,10 @@ import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/se
 import type { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import {
+  ADVANCED_OPTION_ACCORDION_TEST_SUBJ,
+  NAMESPACE_INPUT_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import type { CloudSetupConfig, UpdatePolicy } from './types';
 import { updatePolicyWithInputs, getDefaultCloudCredentialsType } from './utils';
 import { ProviderSelector } from './provider_selector';
@@ -40,7 +44,7 @@ const EditScreenStepTitle = () => (
     <EuiTitle size="s">
       <h4>
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.integrationSettingsTitle"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.integrationSettingsTitle"
           defaultMessage="Integration Settings"
         />
       </h4>
@@ -125,7 +129,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         {isEditPage && <EditScreenStepTitle />}
         {/* Shows info on the active policy template */}
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.configureCspmIntegrationDescription"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.configureIntegrationDescription"
           defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
         />
         <EuiSpacer size="l" />
@@ -184,7 +188,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             <EuiSpacer size="m" />
             <EuiAccordion
               id="advancedOptions"
-              data-test-subj="advancedOptionsAccordion"
+              data-test-subj={ADVANCED_OPTION_ACCORDION_TEST_SUBJ}
               buttonContent={
                 <EuiText
                   size="xs"
@@ -194,7 +198,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                   }}
                 >
                   <FormattedMessage
-                    id="securitySolutionPackages.fleetIntegration.advancedOptionsLabel"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.advancedOptionsLabel"
                     defaultMessage="Advanced options"
                   />
                 </EuiText>
@@ -210,9 +214,9 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                 onNamespaceChange={(namespace: string) => {
                   updatePolicy({ updatedPolicy: { ...newPolicy, namespace } });
                 }}
-                data-test-subj="namespaceInput"
-                labelId="securitySolutionPackages.fleetIntegration.namespaceLabel"
-                helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                data-test-subj={NAMESPACE_INPUT_TEST_SUBJ}
+                labelId="securitySolutionPackages.cloudSecurityPosture.cloudSetup.namespaceLabel"
+                helpTextId="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationDescription"
               />
             </EuiAccordion>
           </>
