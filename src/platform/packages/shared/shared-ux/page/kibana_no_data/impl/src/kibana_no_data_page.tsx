@@ -40,10 +40,7 @@ export const KibanaNoDataPage = ({
       setHasUserDataViews(await hasUserDataView());
       setIsLoading(false);
     };
-    checkData().catch((e) => {
-      setIsLoading(false);
-      // eslint-disable-next-line no-console
-      console.error(e);
+      console.error('Failed to check data availability in KibanaNoDataPage:', e);
     });
   }, [hasESData, hasUserDataView]);
 
