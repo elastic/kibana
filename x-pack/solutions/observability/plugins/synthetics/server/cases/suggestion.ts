@@ -148,7 +148,7 @@ export function getMonitors(
           }
 
           for (const savedObj of resultMonitorsConfigWithLegacy.saved_objects) {
-            if (!savedObj.error && savedObj.id && savedObj.attributes) {
+            if (!savedObj.error) {
               savedObjectsAttrHash[savedObj.id] = savedObj.attributes;
             }
           }
