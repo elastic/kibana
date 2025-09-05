@@ -29,7 +29,7 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
-import { ExplainWithAiAssistant } from './explain_with_ai_assistant';
+import { AskAiAssistant } from './ask_ai_assistant';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -220,7 +220,7 @@ export const RiskInputsTab = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
-      <ExplainWithAiAssistant entityType={entityType} entityName={entityName} />
+      <AskAiAssistant entityType={entityType} entityName={entityName} />
     </>
   );
 };

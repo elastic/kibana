@@ -16,7 +16,7 @@ import type { AnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_a
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import type { EntityType } from '../../../../../../common/search_strategy';
-import { useExplainInAiAssistant } from './use_explain_in_ai_assistant';
+import { useAskAiAssistant } from './use_explain_in_ai_assistant';
 
 export interface ExplainWithAiAssistantProps<T extends EntityType> {
   entityType: T;
@@ -25,7 +25,7 @@ export interface ExplainWithAiAssistantProps<T extends EntityType> {
 
 const currentReplacements = {};
 
-export const ExplainWithAiAssistant = <T extends EntityType>({
+export const AskAiAssistant = <T extends EntityType>({
   entityType,
   entityName,
 }: ExplainWithAiAssistantProps<T>) => {
@@ -54,7 +54,7 @@ export const ExplainWithAiAssistant = <T extends EntityType>({
     [anonymizedEntityName, entityType]
   );
 
-  const { showAssistantOverlay, disabled: aiAssistantDisable } = useExplainInAiAssistant({
+  const { showAssistantOverlay, disabled: aiAssistantDisable } = useAskAiAssistant({
     title: `Explain ${entityType} '${entityName}' Risk Score`,
     description: `Entity: ${entityName}`,
     suggestedPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
@@ -90,4 +90,4 @@ export const ExplainWithAiAssistant = <T extends EntityType>({
   );
 };
 
-ExplainWithAiAssistant.displayName = 'ExplainWithAiAssistant';
+AskAiAssistant.displayName = 'ExplainWithAiAssistant';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ExplainWithAiAssistant } from './explain_with_ai_assistant';
+import { AskAiAssistant } from './ask_ai_assistant';
 import { TestProviders } from '../../../../../common/mock';
 import type { EntityType } from '../../../../../../common/search_strategy';
 
@@ -21,7 +21,6 @@ jest.mock('@kbn/elastic-assistant-common', () => {
   };
 });
 
-// import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 jest.mock('../../../../../common/hooks/use_experimental_features', () => {
   const actual = jest.requireActual('../../../../../common/hooks/use_experimental_features');
   return {
@@ -74,7 +73,7 @@ describe('ExplainWithAiAssistant', () => {
   });
 
   it('should render the button when AI assistant is enabled', () => {
-    render(<ExplainWithAiAssistant {...defaultProps} />, { wrapper: TestProviders });
+    render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
     expect(screen.getByTestId('explain-with-ai-button')).toBeInTheDocument();
     expect(screen.getByText('Ask AI Assistant')).toBeInTheDocument();
@@ -86,7 +85,7 @@ describe('ExplainWithAiAssistant', () => {
       disabled: true,
     });
 
-    const { container } = render(<ExplainWithAiAssistant {...defaultProps} />, {
+    const { container } = render(<AskAiAssistant {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
@@ -94,7 +93,7 @@ describe('ExplainWithAiAssistant', () => {
   });
 
   it('should call showAssistantOverlay when button is clicked', () => {
-    render(<ExplainWithAiAssistant {...defaultProps} />, { wrapper: TestProviders });
+    render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
     const button = screen.getByTestId('explain-with-ai-button');
     fireEvent.click(button);
@@ -109,7 +108,7 @@ describe('ExplainWithAiAssistant', () => {
       },
     });
 
-    render(<ExplainWithAiAssistant {...defaultProps} />, { wrapper: TestProviders });
+    render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
     expect(screen.getByTestId('explain-with-ai-button')).toBeInTheDocument();
   });
@@ -120,7 +119,7 @@ describe('ExplainWithAiAssistant', () => {
         data: [],
       },
     });
-    render(<ExplainWithAiAssistant {...defaultProps} />, { wrapper: TestProviders });
+    render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
     expect(mockUseExplainInAiAssistant).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -131,7 +130,7 @@ describe('ExplainWithAiAssistant', () => {
   });
 
   it('should pass correct props to useExplainInAiAssistant hook', () => {
-    render(<ExplainWithAiAssistant {...defaultProps} />, { wrapper: TestProviders });
+    render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
     expect(mockUseExplainInAiAssistant).toHaveBeenCalledWith({
       title: "Explain user 'test-user' Risk Score",
@@ -143,7 +142,7 @@ describe('ExplainWithAiAssistant', () => {
   });
 
   it('should generate prompt with anonymized field', async () => {
-    render(<ExplainWithAiAssistant {...defaultProps} />, { wrapper: TestProviders });
+    render(<AskAiAssistant {...defaultProps} />, { wrapper: TestProviders });
 
     const getPromptContext = mockUseExplainInAiAssistant.mock.calls[0][0].getPromptContext;
     const promptContext = await getPromptContext();
@@ -157,7 +156,7 @@ describe('ExplainWithAiAssistant', () => {
       entityName: 'test-host',
     };
 
-    render(<ExplainWithAiAssistant {...hostProps} />, { wrapper: TestProviders });
+    render(<AskAiAssistant {...hostProps} />, { wrapper: TestProviders });
 
     expect(mockUseExplainInAiAssistant).toHaveBeenCalledWith(
       expect.objectContaining({

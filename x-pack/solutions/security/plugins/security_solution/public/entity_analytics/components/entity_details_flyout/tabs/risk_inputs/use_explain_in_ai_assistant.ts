@@ -16,7 +16,7 @@ import { useAssistantAvailability } from '../../../../../assistant/use_assistant
  */
 const category = 'insight';
 
-export const useExplainInAiAssistant = ({
+export const useAskAiAssistant = ({
   title,
   description,
   replacements,
