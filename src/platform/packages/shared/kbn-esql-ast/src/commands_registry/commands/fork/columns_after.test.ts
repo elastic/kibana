@@ -74,7 +74,7 @@ describe('FORK', () => {
     ];
 
     const result = await columnsAfter(
-      synth.cmd`FORK (LOOKUP JOIN lookup-index ON joinField) (ENRICH policy ON enrichField)`,
+      synth.cmd`FORK (LOOKUP JOIN lookup-index ON joinField) (ENRICH policy ON matchField)`,
       previousCommandFields,
       '',
       {

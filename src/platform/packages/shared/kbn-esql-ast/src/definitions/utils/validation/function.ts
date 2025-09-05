@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import { uniqBy } from 'lodash';
 import { errors, getFunctionDefinition } from '..';
 import { FunctionDefinitionTypes, within } from '../../../..';
 import {
@@ -35,8 +34,8 @@ import {
   getSignaturesWithMatchingArity,
   matchesArity,
 } from '../expressions';
-import { ColumnValidator } from './column';
 import { isArrayType } from '../operators';
+import { ColumnValidator } from './column';
 
 export function validateFunction({
   fn,
@@ -170,13 +169,7 @@ class FunctionValidator {
       return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
     });
 
-    // uniqBy is used to cover a special case in ENRICH where an implicit assignment is possible
-    // so the AST actually stores an explicit "columnX = columnX" which duplicates the message
-    //
-    // @TODO - we will no longer need to store an assignment in the AST approach when we
-    // align field availability detection with the system used by autocomplete
-    // (start using columnsAfter instead of collectUserDefinedColumns)
-    this.report(...uniqBy(columnMessages, ({ location }) => `${location.min}-${location.max}`));
+    this.report(...columnMessages);
   }
 
   /**
