@@ -29,9 +29,9 @@ export const updateUrlFromDatasetQualityDetailsState = ({
   }
 
   // we want to use always the newest schema version
-  const encodedUrlStateValues = urlSchemaV2
-    .stateFromUntrustedUrlRT()
-    .encode(datasetQualityDetailsState);
+  const encodedUrlStateValues = urlSchemaV2.stateFromUntrustedUrlRT.encode(
+    datasetQualityDetailsState
+  );
 
   urlStateStorageContainer.set(DATA_QUALITY_URL_STATE_KEY, encodedUrlStateValues, {
     replace: true,
@@ -53,11 +53,7 @@ export const getDatasetQualityDetailsStateFromUrl = ({
     urlStateStorageContainer.get<unknown>(DATA_QUALITY_URL_STATE_KEY) ?? undefined;
 
   const stateValuesE = rt
-    .union([
-      rt.undefined,
-      urlSchemaV1.stateFromUntrustedUrlRT(),
-      urlSchemaV2.stateFromUntrustedUrlRT(),
-    ])
+    .union([rt.undefined, urlSchemaV1.stateFromUntrustedUrlRT, urlSchemaV2.stateFromUntrustedUrlRT])
     .decode(urlStateValues);
 
   if (Either.isLeft(stateValuesE)) {

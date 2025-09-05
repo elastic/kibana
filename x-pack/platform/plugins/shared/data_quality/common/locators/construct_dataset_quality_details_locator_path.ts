@@ -26,7 +26,7 @@ export const constructDatasetQualityDetailsLocatorPath = async (
 ) => {
   const { locatorParams, useHash, managementLocator } = params;
 
-  const pageState = datasetQualityDetailsUrlSchemaV2.urlSchemaRT(false).encode(
+  const pageState = datasetQualityDetailsUrlSchemaV2.urlSchemaRT.encode(
     deepCompactObject({
       v: 2,
       ...locatorParams,

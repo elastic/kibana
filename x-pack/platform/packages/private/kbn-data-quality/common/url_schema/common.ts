@@ -57,10 +57,3 @@ export const dataStreamRT = new rt.Type<string, string, unknown>(
       : rt.failure(input, context),
   rt.identity
 );
-
-export const streamRT = new rt.Type<string, string, unknown>(
-  'dataStreamRT',
-  (input: unknown): input is string => typeof input === 'string',
-  (input, context) => (typeof input === 'string' ? rt.success(input) : rt.failure(input, context)),
-  rt.identity
-);
