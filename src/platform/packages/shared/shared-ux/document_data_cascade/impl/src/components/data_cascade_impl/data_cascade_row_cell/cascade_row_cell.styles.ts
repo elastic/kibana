@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { type EuiThemeShape } from '@elastic/eui';
 
 export const cascadeRowCellStyles = (euiTheme: EuiThemeShape) => ({
-  cellWrapper: css({
+  cellWrapper: css({ width: '100%' }),
+  cellInner: css({
     border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     borderRadius: euiTheme.border.radius.small,
     '& > *': {

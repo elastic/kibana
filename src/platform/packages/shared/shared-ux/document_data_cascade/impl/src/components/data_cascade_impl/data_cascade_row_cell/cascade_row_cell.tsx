@@ -98,13 +98,13 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem tabIndex={0}>
+      <EuiFlexItem css={styles.cellWrapper} tabIndex={0}>
         <EuiSkeletonText
           lines={3}
           size={size === 'l' ? 'm' : size}
           isLoading={isPendingRowLeafDataFetch || !leafData}
         >
-          <div className={styles.cellWrapper}>
+          <div css={styles.cellInner}>
             {React.createElement(children, {
               data: leafData,
               key: leafCacheKey,
