@@ -69,6 +69,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/openapi-common",
     "@kbn/spaces-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
   ]
 }
