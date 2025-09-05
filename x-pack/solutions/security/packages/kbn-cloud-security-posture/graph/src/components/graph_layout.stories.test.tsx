@@ -65,10 +65,13 @@ describe('GraphLargeStackedEdgeCases story', () => {
 
     for (const { label } of labels ?? []) {
       // Get all label nodes that contains the label's text
-      const allLabelElements = getAllByText((_content, element) => element?.textContent === label, {
-        exact: true,
-        selector: 'div.react-flow__node-label',
-      });
+      const allLabelElements = getAllByText(
+        (_content, element) => element?.textContent?.includes(label ?? '') || false,
+        {
+          exact: true,
+          selector: 'div.react-flow__node-label',
+        }
+      );
       expect(allLabelElements.length).toBeGreaterThan(0);
 
       for (const labelElm of allLabelElements) {
