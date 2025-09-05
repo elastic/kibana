@@ -72,7 +72,7 @@ export const IndexSearchExample = ({
           <h5>
             <FormattedMessage
               id="xpack.searchIndices.indexDetail.searchExample.playground.title"
-              defaultMessage="RAG Playground"
+              defaultMessage="Playground"
             />
           </h5>
         </EuiTitle>
@@ -94,7 +94,7 @@ export const IndexSearchExample = ({
           >
             <FormattedMessage
               id="xpack.searchIndices.indexDetail.searchExample.playground.cta"
-              defaultMessage="Search in RAG Playground"
+              defaultMessage="Search in Playground"
             />
           </EuiButton>
         </div>

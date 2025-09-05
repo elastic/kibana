@@ -6882,6 +6882,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture/server/plugin.ts"
               },
               {
@@ -7159,6 +7163,10 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/clean.ts"
+              },
+              {
+                "plugin": "inspectComponent",
+                "path": "src/platform/plugins/private/inspect_component/server/routes/routes.ts"
               },
               {
                 "plugin": "interactiveSetup",
@@ -8035,6 +8043,18 @@
               {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/plugin.test.ts"
+              },
+              {
+                "plugin": "inspectComponent",
+                "path": "src/platform/plugins/private/inspect_component/server/routes/routes.test.ts"
+              },
+              {
+                "plugin": "inspectComponent",
+                "path": "src/platform/plugins/private/inspect_component/server/routes/routes.test.ts"
+              },
+              {
+                "plugin": "inspectComponent",
+                "path": "src/platform/plugins/private/inspect_component/server/routes/routes.test.ts"
               },
               {
                 "plugin": "savedObjectsManagement",

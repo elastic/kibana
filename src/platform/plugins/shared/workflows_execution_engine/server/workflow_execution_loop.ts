@@ -91,7 +91,12 @@ async function catchError(
 
       if ((stepImplementation as unknown as StepErrorCatcher).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as StepErrorCatcher;
-        await stepErrorCatcher.catchError();
+
+        try {
+          await stepErrorCatcher.catchError();
+        } catch (error) {
+          workflowRuntime.setWorkflowError(error);
+        }
       }
 
       if (workflowRuntime.getWorkflowExecution().error) {

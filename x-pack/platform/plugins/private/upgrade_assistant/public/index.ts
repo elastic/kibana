@@ -11,3 +11,5 @@ import { UpgradeAssistantUIPlugin } from './plugin';
 export const plugin = (ctx: PluginInitializerContext) => {
   return new UpgradeAssistantUIPlugin(ctx);
 };
+
+export { generateNewIndexName } from './application/components/es_deprecations/deprecation_types/indices/index_settings';

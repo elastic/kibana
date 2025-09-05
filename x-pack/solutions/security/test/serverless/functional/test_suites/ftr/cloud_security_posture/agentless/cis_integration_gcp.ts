@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 import type * as http from 'http';
+import {
+  GCP_PROVIDER_TEST_SUBJ,
+  GCP_SINGLE_ACCOUNT_TEST_SUBJ,
+  GCP_INPUT_FIELDS_TEST_SUBJECTS,
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -19,7 +24,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
-    let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
 
     const mockAgentlessApiService = setupMockServer();
     let mockApiServer: http.Server;
@@ -29,7 +33,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
-      testSubjectIds = pageObjects.cisAddIntegration.testSubjectIds;
     });
 
     after(async () => {
@@ -45,8 +48,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`should show CIS_GCP Launch Cloud Shell button`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmPage();
 
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_SUBJ);
 
         await cisIntegration.selectSetupTechnology('agentless');
 
@@ -60,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`should show CIS_GCP Launch Cloud Shell button`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmPage();
 
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
         await cisIntegration.selectSetupTechnology('agentless');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -76,17 +79,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           cloudProvider: 'gcp',
         });
         await cisIntegration.editAgentlessIntegration(
-          testSubjectIds.CREDENTIALS_JSON_TEST_ID,
+          GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON,
           newCredentialsJSON
         );
 
         // assert the form values are saved
         expect(
-          await cisIntegration.getFieldAttributeValue(testSubjectIds.PRJ_ID_TEST_ID, 'disabled')
+          await cisIntegration.getFieldAttributeValue(
+            GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID,
+            'disabled'
+          )
         ).to.be('true');
         expect(
           await cisIntegration.getFieldAttributeValue(
-            testSubjectIds.CREDENTIALS_JSON_TEST_ID,
+            GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON,
             'value'
           )
         ).to.be(newCredentialsJSON);

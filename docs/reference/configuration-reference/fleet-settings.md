@@ -111,10 +111,10 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     `is_managed`
     :   If `true`, this policy is not editable by the user and can only be changed by updating the {{kib}} config.
 
-    `is_default`
+    `is_default` {applies_to}`stack: deprecated 8.1.0`
     :   If `true`, this policy is the default agent policy.
 
-    `is_default_fleet_server`
+    `is_default_fleet_server` {applies_to}`stack: deprecated 8.1.0`
     :   If `true`, this policy is the default {{fleet-server}} agent policy.
 
     `data_output_id`
