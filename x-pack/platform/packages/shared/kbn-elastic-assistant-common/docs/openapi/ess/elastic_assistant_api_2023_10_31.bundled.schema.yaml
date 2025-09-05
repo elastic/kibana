@@ -2536,7 +2536,6 @@ components:
               type: string
           required:
             - type
-            - content
       description: Interrupt that requests user to provide text input
     InterruptResumeValue:
       description: Union of the interrupt resume values
