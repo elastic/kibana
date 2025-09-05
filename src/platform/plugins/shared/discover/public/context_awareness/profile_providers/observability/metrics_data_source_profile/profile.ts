@@ -20,7 +20,7 @@ import { createChartSection } from './accessor/chart_section';
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
 const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
-// TODO: could kbn-esql-ast provide a union type with existing commands?
+// FIXME: could kbn-esql-ast provide a union type with existing commands?
 const VALID_ESQL_COMMANDS = new Set(['from', 'ts', 'limit', 'sort']);
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -44,23 +44,16 @@ export const createMetricsDataSourceProfileProvider = (
       return { isMatch: false };
     }
 
-    try {
-      const { indexPatternMetadata } = await metricsClient.getIndexPatternMetadata({
-        indexPattern,
-      });
+    const { indexPatternMetadata } = await metricsClient.getIndexPatternMetadata({
+      indexPattern,
+    });
 
-      return {
-        isMatch: Object.values(indexPatternMetadata).some((meta) => meta.hasTimeSeriesFields),
-        context: {
-          category: DataSourceCategory.Metrics,
-        },
-      };
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        return { isMatch: false };
-      }
-      throw err;
-    }
+    return {
+      isMatch: Object.values(indexPatternMetadata).some((meta) => meta.hasTimeSeriesFields),
+      context: {
+        category: DataSourceCategory.Metrics,
+      },
+    };
   },
 });
 
