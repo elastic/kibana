@@ -159,6 +159,22 @@ export const registerFeatures = (plugins: WorkflowsManagementPluginServerDepende
                 },
                 ui: ['readWorkflowExecution'],
               },
+              {
+                api: ['workflow_execution:cancel'],
+                id: 'workflow_execution_cancel',
+                name: i18n.translate(
+                  'platform.plugins.shared.workflows_management.featureRegistry.cancelWorkflowExecutionSubFeaturePrivilege',
+                  {
+                    defaultMessage: 'Cancel Workflow Execution',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  read: ['workflow_execution'],
+                  all: [],
+                },
+                ui: ['cancelWorkflowExecution'],
+              },
             ],
           },
         ],

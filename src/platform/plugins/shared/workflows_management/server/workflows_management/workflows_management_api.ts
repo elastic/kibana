@@ -278,6 +278,14 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.getStepExecution(params, spaceId);
   }
 
+  public async cancelWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<void> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return await workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+  }
+
   public async getWorkflowStats(spaceId: string) {
     return await this.workflowsService.getWorkflowStats(spaceId);
   }
