@@ -9,14 +9,16 @@ import type { PackageList } from '@kbn/fleet-plugin/common';
 import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
+const INTEGRATION_WEIGHTS = [
+  { ids: ['endpoint'], weight: 2 }, // Elastic Defend should be boosted
+  { ids: ['splunk', 'elastic_security'], weight: 0 }, // exclude Splunk and Elastic Security integrations since they don't make sense
+];
+
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 40 as const;
 /* The number of integrations the RAG will return, sorted by score */
 const RETURNED_INTEGRATIONS = 5 as const;
 
-/* BULK_MAX_SIZE defines the number to break down the bulk operations by.
- * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
- */
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
   /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
   public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
@@ -93,8 +95,18 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
     const query = {
       bool: {
         should: [
-          { semantic: { query: semanticQuery, field: 'elser_embedding', boost: 1.5 } },
-          { multi_match: { query: semanticQuery, fields: ['title^2', 'description'], boost: 3 } },
+          {
+            function_score: {
+              query: { semantic: { query: semanticQuery, field: 'elser_embedding' } },
+              // Boost/nerf specific integrations
+              functions: INTEGRATION_WEIGHTS.map(({ ids, weight }) => ({
+                filter: { ids: { values: ids } },
+                weight,
+              })),
+              score_mode: 'multiply' as const,
+              boost_mode: 'multiply' as const,
+            },
+          },
         ],
         // Filter to ensure we only return integrations that have data streams
         // because there may be integrations without data streams indexed in old migrations
