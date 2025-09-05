@@ -54,3 +54,16 @@ export async function addNamespaceFilteringToQuery(query: any, namespace?: strin
     },
   };
 }
+
+export async function namespaceFilterEsql(namespace?: string) {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
+  if (!useSpaceAwareness || !namespace) {
+    return '';
+  }
+
+  return `AND ${
+    namespace === DEFAULT_NAMESPACE_STRING
+      ? `(namespaces == "default" OR namespaces IS NULL)`
+      : `namespaces == "${namespace}"`
+  }`;
+}
