@@ -55,5 +55,7 @@ function isTraceDocument(
 ): boolean {
   const traceId = getFieldValue(record, TRACE_ID_FIELD);
 
+  // TODO: Relying on this data source check is a hack, this should be refactored to use
+  // _index field once ES|QL queries return default metadata.
   return dataSourceContext.category === DataSourceCategory.Traces && !!traceId;
 }

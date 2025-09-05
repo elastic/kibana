@@ -12,8 +12,8 @@ import { lastValueFrom } from 'rxjs';
 import { DURATION, TRANSACTION_DURATION } from '@kbn/apm-types';
 import { waitFor } from '@testing-library/dom';
 import { renderHook } from '@testing-library/react';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { TraceRootSpanProvider, useTraceRootSpanContext } from './use_trace_root_span';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
