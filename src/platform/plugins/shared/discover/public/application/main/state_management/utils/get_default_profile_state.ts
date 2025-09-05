@@ -48,13 +48,6 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
-      if (
-        resetDefaultProfileState.chartSectionHeight &&
-        defaultState.chartSectionHeight !== undefined
-      ) {
-        stateUpdate.chartSectionHeight = defaultState.chartSectionHeight;
-      }
-
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
 
@@ -98,10 +91,6 @@ export const getDefaultProfileState = ({
 
       if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
         stateUpdate.rowHeight = defaultState.rowHeight;
-      }
-
-      if (resetDefaultProfileState.chartSectionHeight) {
-        stateUpdate.chartSectionHeight = defaultState.chartSectionHeight;
       }
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;

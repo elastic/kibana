@@ -22,7 +22,6 @@ import { cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import useLatest from 'react-use/lib/useLatest';
-import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
@@ -165,9 +164,7 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
-  const { euiTheme } = useEuiTheme();
 
-  const defaultTopPanelHeight = euiTheme.base * 12;
   const { stateProps, requestParams, api, input$ } = useServicesBootstrap(props);
 
   // Load async services and initialize API
@@ -263,12 +260,11 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       chart,
       isChartAvailable,
       hits: stateProps.hits,
-      topPanelHeight: stateProps.topPanelHeight ?? defaultTopPanelHeight,
+      topPanelHeight: stateProps.topPanelHeight,
       onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
     }),
     [
       chart,
-      defaultTopPanelHeight,
       isChartAvailable,
       stateProps.hits,
       stateProps.onTopPanelHeightChange,

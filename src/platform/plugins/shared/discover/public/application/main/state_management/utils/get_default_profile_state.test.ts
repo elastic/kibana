@@ -35,7 +35,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: true,
           hideChart: false,
-          chartSectionHeight: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -50,7 +49,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: true,
           hideChart: false,
-          chartSectionHeight: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -66,7 +64,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: true,
-          chartSectionHeight: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -81,38 +78,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          chartSectionHeight: false,
-        },
-        dataView: emptyDataView,
-      }).getPreFetchState();
-      expect(appState).toEqual(undefined);
-    });
-
-    it('should return expected chartSectionHeight', () => {
-      let appState = getDefaultProfileState({
-        scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-          chartSectionHeight: true,
-        },
-        dataView: dataViewWithTimefieldMock,
-      }).getPreFetchState();
-      expect(appState).toEqual({
-        chartSectionHeight: 'max-content',
-      });
-      appState = getDefaultProfileState({
-        scopedProfilesManager,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-          chartSectionHeight: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -130,7 +95,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          chartSectionHeight: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -158,7 +122,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          chartSectionHeight: false,
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -189,7 +152,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: true,
           breakdownField: false,
           hideChart: false,
-          chartSectionHeight: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -210,7 +172,6 @@ describe('getDefaultProfileState', () => {
           rowHeight: false,
           breakdownField: false,
           hideChart: false,
-          chartSectionHeight: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({

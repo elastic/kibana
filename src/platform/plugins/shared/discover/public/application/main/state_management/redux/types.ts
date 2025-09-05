@@ -73,7 +73,6 @@ export interface TabState extends TabItem {
     columns: boolean;
     rowHeight: boolean;
     breakdownField: boolean;
-    chartSectionHeight: boolean;
     hideChart: boolean;
   };
   documentsRequest: DocumentsRequest;

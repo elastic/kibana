@@ -102,7 +102,6 @@ export const useDiscoverHistogram = (
       const oldState = {
         hideChart: appState.hideChart,
         interval: appState.interval,
-        chartSectionHeight: appState.chartSectionHeight,
       };
       const newState = { ...oldState, ...stateChanges };
 
@@ -376,9 +375,6 @@ export const useDiscoverHistogram = (
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
-  const chartSectionHeight =
-    useAppStateSelector((state) => state.chartSectionHeight) ??
-    options?.initialLayoutProps?.topPanelHeight;
 
   const onBreakdownFieldChange = useCallback<
     NonNullable<UseUnifiedHistogramProps['onBreakdownFieldChange']>
@@ -400,7 +396,7 @@ export const useDiscoverHistogram = (
     initialState: {
       chartHidden,
       timeInterval,
-      topPanelHeight: chartSectionHeight,
+      topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
       totalHitsStatus: UnifiedHistogramFetchStatus.loading,
       totalHitsResult: undefined,
     },
@@ -457,10 +453,6 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
         changes.interval = curr.timeInterval;
       }
 
-      if (prev?.topPanelHeight !== curr.topPanelHeight) {
-        changes.chartSectionHeight = curr.topPanelHeight;
-      }
-
       return changes;
     }),
     filter((changes) => Object.keys(changes).length > 0)
@@ -484,10 +476,6 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 
       if (prev?.hideChart !== curr.hideChart) {
         changes.chartHidden = curr.hideChart;
-      }
-
-      if (prev?.chartSectionHeight !== curr.chartSectionHeight) {
-        changes.topPanelHeight = curr.chartSectionHeight;
       }
 
       return changes;
