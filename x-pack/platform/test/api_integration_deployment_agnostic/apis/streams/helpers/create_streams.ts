@@ -6,7 +6,7 @@
  */
 
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 type StreamPutItem = Streams.WiredStream.UpsertRequest & {
@@ -16,7 +16,6 @@ type StreamPutItem = Streams.WiredStream.UpsertRequest & {
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
-    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -111,7 +110,6 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test',
-    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -133,7 +131,6 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test2',
-    rules: [],
     stream: {
       description: '',
       ingest: {
@@ -162,7 +159,6 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.deeply.nested.streamname',
-    rules: [],
     stream: {
       description: '',
       ingest: {

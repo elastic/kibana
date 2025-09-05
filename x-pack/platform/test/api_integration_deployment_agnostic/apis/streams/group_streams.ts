@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { emptyAssets } from '@kbn/streams-schema';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -313,9 +313,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       members: [unmanagedStreamName],
                     },
                   },
-                  dashboards: [],
-                  rules: [],
-                  queries: [],
+                  ...emptyAssets,
                 },
               },
             })

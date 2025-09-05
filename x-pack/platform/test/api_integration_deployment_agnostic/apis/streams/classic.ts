@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -216,9 +216,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await indexDocument(esClient, 'logs-invalid_pipeline-default', doc);
         expect(response.result).to.eql('created');
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
@@ -584,9 +582,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
         });
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -662,9 +658,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('fails to store non-existing processor', async () => {
         const body: Streams.ClassicStream.UpsertRequest = {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
