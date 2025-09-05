@@ -32,7 +32,7 @@ const selectOptions = [
     value: 'default',
     text: (
       <FormattedMessage
-        id="dashboard.accessControl.accessMode.container.select.options.isEditable"
+        id="contentManagement.accessControl.accessMode.container.select.options.isEditable"
         defaultMessage="Can edit"
       />
     ),
@@ -41,7 +41,7 @@ const selectOptions = [
     value: 'read_only',
     text: (
       <FormattedMessage
-        id="dashboard.accessControl.accessMode.container.select.options.isReadOnly"
+        id="contentManagement.accessControl.accessMode.container.select.options.isReadOnly"
         defaultMessage="Can view"
       />
     ),
@@ -53,6 +53,7 @@ interface Props {
   getActiveSpace?: () => Promise<Space>;
   getCurrentUser: () => Promise<GetUserProfileResponse<UserProfileData>>;
   accessControlClient: AccessControlClient;
+  entityName: string;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
 }
@@ -62,6 +63,7 @@ export const AccessModeContainer = ({
   getActiveSpace,
   getCurrentUser,
   accessControlClient,
+  entityName,
   accessControl,
   createdBy,
 }: Props) => {
@@ -99,12 +101,12 @@ export const AccessModeContainer = ({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="dashboardAccessModeContainer">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="accessModeContainer">
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>
             <FormattedMessage
-              id="dashboard.accessControl.accessMode.container.title"
+              id="contentManagement.accessControl.accessMode.container.title"
               defaultMessage="Permissions"
             />
           </h4>
@@ -117,7 +119,7 @@ export const AccessModeContainer = ({
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
                   <FormattedMessage
-                    id="dashboard.accessControl.accessMode.container.description.content"
+                    id="contentManagement.accessControl.accessMode.container.description.content"
                     defaultMessage="Everybody in the space"
                   />
                 </EuiText>
@@ -132,7 +134,7 @@ export const AccessModeContainer = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
                       <FormattedMessage
-                        id="dashboard.accessControl.accessMode.container.description.permissionType"
+                        id="contentManagement.accessControl.accessMode.container.description.permissionType"
                         defaultMessage="can {permissionType}"
                         values={{
                           permissionType: isInEditAccessMode ? 'edit' : 'view',
@@ -140,22 +142,21 @@ export const AccessModeContainer = ({
                       />
                     </EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                    data-test-subj="dashboardAccessModeContainerDescriptionTooltip"
-                  >
+                  <EuiFlexItem grow={false} data-test-subj="accessModeContainerDescriptionTooltip">
                     <EuiIconTip
                       type="info"
                       content={
                         <FormattedMessage
-                          id="dashboard.accessControl.accessMode.container.description.tooltipContent"
-                          defaultMessage="Only the dashboard author can edit permissions."
+                          id="contentManagement.accessControl.accessMode.container.description.tooltipContent"
+                          defaultMessage="Only the {entityName} author can edit permissions."
+                          values={{ entityName }}
                         />
                       }
                       aria-label={i18n.translate(
-                        'dashboard.accessControl.accessMode.container.description.tooltipAriaLabel',
+                        'contentManagement.accessControl.accessMode.container.description.tooltipAriaLabel',
                         {
-                          defaultMessage: 'Only the dashboard author can edit permissions.',
+                          defaultMessage: 'Only the {entityName} author can edit permissions.',
+                          values: { entityName },
                         }
                       )}
                       position="bottom"
@@ -171,14 +172,15 @@ export const AccessModeContainer = ({
                 id={selectId}
                 isLoading={isUpdatingPermissions}
                 disabled={isUpdatingPermissions}
-                data-test-subj="dashboardAccessModeSelect"
+                data-test-subj="accessModeSelect"
                 options={selectOptions}
                 defaultValue={accessControl?.accessMode ?? 'default'}
                 onChange={handleSelectChange}
                 aria-label={i18n.translate(
-                  'dashboard.accessControl.accessMode.container.select.ariaLabel',
+                  'contentManagement.accessControl.accessMode.container.select.ariaLabel',
                   {
-                    defaultMessage: 'Modify access acess mode for the dashboard',
+                    defaultMessage: 'Modify access acess mode for the {entityName}.',
+                    values: { entityName },
                   }
                 )}
               />

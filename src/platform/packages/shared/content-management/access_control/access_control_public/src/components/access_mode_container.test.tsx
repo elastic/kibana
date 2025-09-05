@@ -46,6 +46,7 @@ describe('Access Mode Container', () => {
     getCurrentUser: mockGetCurrentUser,
     accessControlClient: mockAccessControlClient,
     getActiveSpace: mockGetActiveSpace,
+    entityName: 'dashboard',
   });
 
   it('should render access mode container', async () => {
@@ -58,7 +59,7 @@ describe('Access Mode Container', () => {
       renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
-    const container = screen.getByTestId('dashboardAccessModeContainer');
+    const container = screen.getByTestId('accessModeContainer');
     expect(container).toBeInTheDocument();
   });
 
@@ -72,7 +73,7 @@ describe('Access Mode Container', () => {
       renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
-    const select = screen.getByTestId('dashboardAccessModeSelect');
+    const select = screen.getByTestId('accessModeSelect');
 
     expect(select).toBeInTheDocument();
   });
@@ -134,7 +135,7 @@ describe('Access Mode Container', () => {
       renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
-    const tooltip = screen.getByTestId('dashboardAccessModeContainerDescriptionTooltip');
+    const tooltip = screen.getByTestId('accessModeContainerDescriptionTooltip');
 
     await waitFor(() => {
       expect(tooltip).toBeInTheDocument();
@@ -151,7 +152,7 @@ describe('Access Mode Container', () => {
       renderWithI18n(<AccessModeContainer {...getDefaultProps(accessControl)} />);
     });
 
-    const tooltip = screen.queryByTestId('dashboardAccessModeContainerDescriptionTooltip');
+    const tooltip = screen.queryByTestId('accessModeContainerDescriptionTooltip');
 
     await waitFor(() => {
       expect(tooltip).not.toBeInTheDocument();

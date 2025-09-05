@@ -23,6 +23,7 @@ import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { AccessModeContainer } from '@kbn/content-management-access-control-public';
+import { DASHBOARD_CONTENT_ID } from '../../utils/telemetry_constants';
 import { getAccessControlClient } from '../../dashboard_app/access_control/get_access_control_client';
 
 import {
@@ -157,6 +158,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             getActiveSpace={spacesService?.getActiveSpace}
             getCurrentUser={coreServices.userProfile.getCurrent}
             accessControlClient={accessControlClient}
+            entityName={DASHBOARD_CONTENT_ID}
           />
         </Fragment>
       </Fragment>
