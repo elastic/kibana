@@ -104,19 +104,19 @@ describe('COMPLETION Validation', () => {
       it('prompt is a constant, but not text', async () => {
         await completionExpectErrors(
           `FROM index | COMPLETION 47 WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [integer]']
+          ['COMPLETION query must be of type text. Found integer']
         );
 
         await completionExpectErrors(
           `FROM index | COMPLETION true WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [boolean]']
+          ['COMPLETION query must be of type text. Found boolean']
         );
       });
 
       it('prompt is a function, but does not return text', async () => {
         await completionExpectErrors(
           `FROM index | COMPLETION PI() WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [double]']
+          ['COMPLETION query must be of type text. Found double']
         );
 
         await completionExpectErrors(
@@ -126,18 +126,18 @@ describe('COMPLETION Validation', () => {
                       var0 == 0, 2,
                       var0 == 1, 1
                     ) WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [integer]']
+          ['COMPLETION query must be of type text. Found integer']
         );
 
         await completionExpectErrors(
           `FROM index | COMPLETION TO_DATETIME("2023-12-02T11:00:00.000Z") WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [date]']
+          ['COMPLETION query must be of type text. Found date']
         );
 
         await completionExpectErrors(
           `FROM index | COMPLETION AVG(integerField) WITH { "inference_id": "inferenceId"}`,
           [
-            '[COMPLETION] prompt must be of type [text] but is [double]',
+            'COMPLETION query must be of type text. Found double',
             'Function AVG not allowed in COMPLETION',
           ]
         );
@@ -146,19 +146,19 @@ describe('COMPLETION Validation', () => {
       it('prompt is a column, but not a text one', () => {
         completionExpectErrors(
           `FROM index | EVAL integerPrompt = 47 | COMPLETION integerPrompt WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [integer]']
+          ['COMPLETION query must be of type text. Found integer']
         );
         completionExpectErrors(
           `FROM index | EVAL ipPrompt = to_ip("1.2.3.4") | COMPLETION ipPrompt WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [ip]']
+          ['COMPLETION query must be of type text. Found ip']
         );
         completionExpectErrors(
           `FROM index | COMPLETION dateField WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [date]']
+          ['COMPLETION query must be of type text. Found date']
         );
         completionExpectErrors(
           `FROM index | COMPLETION counterIntegerField WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [counter_integer]']
+          ['COMPLETION query must be of type text. Found counter_integer']
         );
       });
 
@@ -176,26 +176,26 @@ describe('COMPLETION Validation', () => {
       it('prompt is a parenthesized expression, but not a text one', () => {
         completionExpectErrors(
           `FROM index | COMPLETION (1 > 2) WITH { "inference_id": "inferenceId"}`,
-          ['[COMPLETION] prompt must be of type [text] but is [boolean]']
+          ['COMPLETION query must be of type text. Found boolean']
         );
       });
 
       it('inference_id is not provided', () => {
         completionExpectErrors(`FROM index | COMPLETION "prompt"`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required for COMPLETION.',
         ]);
         completionExpectErrors(`FROM index | COMPLETION "prompt" WITH`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required for COMPLETION.',
         ]);
         completionExpectErrors(`FROM index | COMPLETION "prompt" WITH {}`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required for COMPLETION.',
         ]);
         completionExpectErrors(`FROM index | COMPLETION "prompt" WITH { "": ""}`, [
-          '[COMPLETION] inference_id parameter is required',
+          '"inference_id" parameter is required for COMPLETION.',
         ]);
         completionExpectErrors(
           `FROM index | COMPLETION "prompt" WITH { "some_param": "some_value"}`,
-          ['[COMPLETION] inference_id parameter is required']
+          ['"inference_id" parameter is required for COMPLETION.']
         );
       });
     });

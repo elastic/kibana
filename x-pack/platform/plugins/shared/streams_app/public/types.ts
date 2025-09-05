@@ -32,6 +32,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -72,6 +73,7 @@ export interface StreamsAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   unifiedDocViewer: UnifiedDocViewerStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  dashboard: DashboardStart;
 }
 
 export interface StreamsAppPublicSetup {}
