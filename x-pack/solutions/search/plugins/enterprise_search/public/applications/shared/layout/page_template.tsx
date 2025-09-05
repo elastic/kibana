@@ -85,8 +85,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   return (
     <KibanaPageTemplate
       {...pageTemplateProps}
-      className={classNames('enterpriseSearchPageTemplate', className)}
-      css={Styles.enterpriseSearchPageTemplate}
+      className={classNames(Styles.enterpriseSearchPageTemplate, className)}
       mainProps={{
         ...pageTemplateProps.mainProps,
         className: classNames(

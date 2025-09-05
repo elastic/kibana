@@ -14,7 +14,7 @@ import * as Styles from './styles';
 export const Loading: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   return (
-    <div css={Styles.enterpriseSearchLoading(euiTheme)}>
+    <div className="enterpriseSearchLoading" css={Styles.enterpriseSearchLoading(euiTheme)}>
       <EuiLoadingLogo size="xl" logo="logoElasticsearch" />
     </div>
   );
@@ -23,7 +23,10 @@ export const Loading: React.FC = () => {
 export const LoadingOverlay: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   return (
-    <div css={Styles.enterpriseSearchLoadingOverlay(euiTheme)}>
+    <div
+      className="enterpriseSearchLoadingOverlay"
+      css={Styles.enterpriseSearchLoadingOverlay(euiTheme)}
+    >
       <div css={Styles.enterpriseSearchLoading(euiTheme)}>
         <EuiLoadingSpinner size="xl" />
       </div>

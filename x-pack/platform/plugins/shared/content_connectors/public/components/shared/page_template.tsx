@@ -45,8 +45,7 @@ export const SearchConnectorsPageTemplateWrapper: React.FC<PageTemplateProps> = 
   return (
     <KibanaPageTemplate
       {...pageTemplateProps}
-      className={classNames('searchConnectorsPageTemplate', className)}
-      css={Styles.searchConnectorsPageTemplate}
+      className={classNames(Styles.searchConnectorsPageTemplate, className)}
       mainProps={{
         ...pageTemplateProps.mainProps,
         className: classNames(
