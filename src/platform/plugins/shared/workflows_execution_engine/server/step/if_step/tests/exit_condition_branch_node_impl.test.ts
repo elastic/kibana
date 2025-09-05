@@ -10,10 +10,12 @@
 import type { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('ExitConditionBranchNodeImpl', () => {
   let step: ExitConditionBranchNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
+  let workflowGraphMock: WorkflowGraph;
   let impl: ExitConditionBranchNodeImpl;
   let goToStep: jest.Mock<any, any, any>;
   let getNodeSuccessors: jest.Mock<any, any, any>;
@@ -28,9 +30,11 @@ describe('ExitConditionBranchNodeImpl', () => {
     };
     wfExecutionRuntimeManagerMock = {
       goToStep,
+    } as any;
+    workflowGraphMock = {
       getNodeSuccessors,
     } as any;
-    impl = new ExitConditionBranchNodeImpl(step, wfExecutionRuntimeManagerMock);
+    impl = new ExitConditionBranchNodeImpl(step, workflowGraphMock, wfExecutionRuntimeManagerMock);
 
     getNodeSuccessors.mockReturnValue([
       {

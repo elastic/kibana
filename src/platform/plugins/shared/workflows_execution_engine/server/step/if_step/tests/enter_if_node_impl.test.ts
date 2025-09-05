@@ -12,6 +12,7 @@ import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_
 import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('EnterIfNodeImpl', () => {
   let step: EnterIfNode;
@@ -46,12 +47,15 @@ describe('EnterIfNodeImpl', () => {
     wfExecutionRuntimeManagerMock = {
       startStep,
       goToStep,
-      getNodeSuccessors,
       enterScope,
+    } as any;
+    const workflowGraph: WorkflowGraph = {
+      getNodeSuccessors,
     } as any;
     impl = new EnterIfNodeImpl(
       step,
       wfExecutionRuntimeManagerMock,
+      workflowGraph,
       workflowContextManagerMock,
       workflowContextLoggerMock
     );

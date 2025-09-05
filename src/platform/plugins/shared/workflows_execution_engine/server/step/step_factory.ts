@@ -97,13 +97,18 @@ export class StepFactory {
         return new EnterIfNodeImpl(
           step as any,
           this.workflowRuntime,
+          this.workflowGraph,
           this.contextManager,
           this.workflowLogger
         );
       case 'enter-condition-branch':
         return new EnterConditionBranchNodeImpl(this.workflowRuntime);
       case 'exit-condition-branch':
-        return new ExitConditionBranchNodeImpl(step as any, this.workflowRuntime);
+        return new ExitConditionBranchNodeImpl(
+          step as any,
+          this.workflowGraph,
+          this.workflowRuntime
+        );
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, this.workflowRuntime);
       case 'wait':
