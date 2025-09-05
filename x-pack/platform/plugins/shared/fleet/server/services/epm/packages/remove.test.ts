@@ -12,6 +12,8 @@ import { packagePolicyService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
 
 import { deleteESAsset, removeInstallation, cleanupAssets } from './remove';
+import { deletePackageKnowledgeBase } from './knowledge_base_index';
+import { getInstallation } from './get';
 
 jest.mock('../..', () => {
   return {
@@ -41,8 +43,33 @@ jest.mock('../../audit_logging');
 
 jest.mock('../../package_policies/populate_package_policy_assigned_agents_count');
 
+jest.mock('./knowledge_base_index', () => ({
+  deletePackageKnowledgeBase: jest.fn(),
+}));
+jest.mock('./get', () => ({
+  getPackageInfo: jest.fn().mockResolvedValue({
+    name: 'test-package',
+    version: '1.0.0',
+    conditions: { kibana: { version: '^8.0.0' } },
+  }),
+  getInstallation: jest.fn(),
+}));
+jest.mock('../kibana/index_pattern/install', () => ({
+  removeUnusedIndexPatterns: jest.fn(),
+}));
+jest.mock('../archive', () => ({
+  deletePackageCache: jest.fn(),
+}));
+jest.mock('../archive/storage', () => ({
+  removeArchiveEntries: jest.fn(),
+}));
+
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+const mockDeletePackageKnowledgeBase = deletePackageKnowledgeBase as jest.MockedFunction<
+  typeof deletePackageKnowledgeBase
+>;
+const mockGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
 
 describe('removeInstallation', () => {
   let soClientMock: any;
@@ -55,6 +82,14 @@ describe('removeInstallation', () => {
       find: jest.fn().mockResolvedValue({ saved_objects: [] }),
       bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
     } as any;
+
+    mockGetInstallation.mockResolvedValue({
+      name: 'test-package',
+      version: '1.0.0',
+      installed_kibana: [],
+      installed_es: [],
+      package_assets: [],
+    } as any);
   });
   it('should remove package policies when force', async () => {
     await removeInstallation({
@@ -112,6 +147,18 @@ describe('removeInstallation', () => {
       name: 'system',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
+  });
+
+  it('should delete knowledge base content when removing package', async () => {
+    await removeInstallation({
+      savedObjectsClient: soClientMock,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      esClient: esClientMock,
+      force: true,
+    });
+
+    expect(mockDeletePackageKnowledgeBase).toHaveBeenCalledWith(esClientMock, 'test-package');
   });
 });
 
