@@ -45,7 +45,6 @@ export const DefaultAiConnectorSettingsContextProvider = ({
   });
   return (
     <DefaultAiConnectorSettingContext.Provider value={value}>
-      {' '}
       {children}
     </DefaultAiConnectorSettingContext.Provider>
   );
