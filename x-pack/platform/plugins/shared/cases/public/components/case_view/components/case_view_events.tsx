@@ -12,7 +12,7 @@ import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
 import { EventsTable } from '../../events/events_table';
 
-interface CaseViewAlertsProps {
+interface CaseViewEventsProps {
   caseData: CaseUI;
 }
 
