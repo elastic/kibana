@@ -19,6 +19,8 @@ import {
   transformPendingActionsToOptions,
   checkActionCancelPermission,
 } from '../shared';
+import { canCancelResponseAction } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
@@ -67,10 +69,28 @@ export const PendingActionsSelector = memo<
   const endpointId = command.commandDefinition.meta?.endpointId;
 
   const userPrivileges = useUserPrivileges();
+  const featureFlags = ExperimentalFeaturesService.get();
+
   const privilegeChecker = useMemo(
-    () => (actionCommand: string) =>
-      checkActionCancelPermission(actionCommand, userPrivileges.endpointPrivileges),
-    [userPrivileges.endpointPrivileges]
+    () => (actionCommand: string) => {
+      // First check if the overall cancel feature is available
+      const canCancelGeneral = canCancelResponseAction(
+        userPrivileges.endpointPrivileges,
+        featureFlags,
+        agentType
+      );
+
+      if (!canCancelGeneral) {
+        return {
+          canCancel: false,
+          reason: 'Cancel action is not available for this agent type or user.',
+        };
+      }
+
+      // Then check specific command permission
+      return checkActionCancelPermission(actionCommand, userPrivileges.endpointPrivileges);
+    },
+    [userPrivileges.endpointPrivileges, featureFlags, agentType]
   );
 
   const transformToOptionsWithPrivileges = useMemo(

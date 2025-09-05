@@ -8,7 +8,6 @@
 import {
   type ConsoleResponseActionCommands,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-  NO_SPECIFIC_PRIVILEGE_REQUIRED,
 } from './constants';
 import type { EndpointPrivileges } from '../../types';
 
@@ -20,11 +19,6 @@ export const getRbacControl = ({
   privileges: EndpointPrivileges;
 }): boolean => {
   const requiredPrivilege = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName];
-
-  // For commands that don't require specific privileges, always return true
-  if (requiredPrivilege === NO_SPECIFIC_PRIVILEGE_REQUIRED) {
-    return true;
-  }
 
   return Boolean(privileges[requiredPrivilege]);
 };

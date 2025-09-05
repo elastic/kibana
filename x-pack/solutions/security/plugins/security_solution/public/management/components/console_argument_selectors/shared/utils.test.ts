@@ -344,6 +344,7 @@ describe('utils', () => {
       canReadWorkflowInsights: true,
       canReadAdminData: true,
       canWriteAdminData: true,
+      canCancelResponseActions: false,
     };
 
     describe('with valid permissions', () => {
@@ -411,9 +412,7 @@ describe('utils', () => {
         const result = checkActionCancelPermission('unknown-command', mockEndpointPrivileges);
 
         expect(result.canCancel).toBe(false);
-        expect(result.reason).toContain(
-          'Unable to verify permissions for unknown-command action cancellation'
-        );
+        expect(result.reason).toContain("You don't have permission to run unknown-command action.");
       });
     });
   });

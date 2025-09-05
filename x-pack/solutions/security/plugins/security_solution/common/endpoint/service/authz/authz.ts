@@ -10,15 +10,10 @@ import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
 import { omit } from 'lodash';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { ProductFeaturesService } from '../../../../server/lib/product_features_service';
-import {
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  NO_SPECIFIC_PRIVILEGE_REQUIRED,
-} from '../response_actions/constants';
+import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
-import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
+import type { EndpointAuthz } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
-import type { ResponseActionsApiCommandNames } from '../response_actions/constants';
 
 /**
  * Checks to see if a given Kibana privilege was granted.
@@ -179,6 +174,7 @@ export const calculateEndpointAuthz = (
     // ---------------------------------------------------------
     canReadAdminData,
     canWriteAdminData,
+    canCancelResponseActions: false, // Always false - requires dynamic validation via utility functions
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -187,11 +183,11 @@ export const calculateEndpointAuthz = (
   // to allow access to Response Console.
   authz.canAccessResponseConsole =
     isEnterpriseLicense &&
-    Object.values(omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, ['release', 'cancel']))
-      .filter((authzKey) => authzKey !== NO_SPECIFIC_PRIVILEGE_REQUIRED)
-      .some((responseActionAuthzKey) => {
-        return authz[responseActionAuthzKey as keyof EndpointAuthz];
-      });
+    Object.values(
+      omit(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ, ['release', 'cancel'])
+    ).some((responseActionAuthzKey) => {
+      return authz[responseActionAuthzKey as keyof EndpointAuthz];
+    });
 
   return authz;
 };
@@ -242,6 +238,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteWorkflowInsights: false,
     canReadAdminData: false,
     canWriteAdminData: false,
+    canCancelResponseActions: false,
   };
 };
 
@@ -264,20 +261,4 @@ export const canFetchPackageAndAgentPolicies = (capabilities: Capabilities): boo
   const canReadIntegrations = Boolean(capabilities.fleet?.read);
 
   return canReadPolicyManagement || (canReadFleetAgentPolicies && canReadIntegrations);
-};
-
-/**
- * Determines the required permissions to cancel a specific action based on its command type permissions to cancel actions.
- **/
-
-export const getRequiredCancelPermissions = (
-  command: ResponseActionsApiCommandNames
-): EndpointAuthzKeyList[number] | typeof NO_SPECIFIC_PRIVILEGE_REQUIRED => {
-  const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
-
-  if (!consoleCommand || !(consoleCommand in RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ)) {
-    throw new Error(`Unknown or unsupported command for cancellation: ${command}`);
-  }
-
-  return RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
 };

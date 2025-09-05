@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { canCancelResponseAction } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
@@ -210,6 +211,13 @@ export const getEndpointConsoleCommands = ({
     }
 
     return false;
+  };
+
+  const canCancelForCurrentContext = () => {
+    return (
+      canCancelResponseAction(endpointPrivileges, featureFlags, agentType) &&
+      isActionSupportedByAgentType(agentType, 'cancel', 'manual')
+    );
   };
 
   const consoleCommands: CommandDefinition[] = [
@@ -530,7 +538,7 @@ export const getEndpointConsoleCommands = ({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported: doesEndpointSupportCommand('cancel'),
+        isSupported: canCancelResponseAction(endpointPrivileges, featureFlags, agentType),
       }),
       RenderComponent: CancelActionResult,
       meta: {
@@ -564,13 +572,8 @@ export const getEndpointConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled:
-        !doesEndpointSupportCommand('cancel') || agentType !== 'microsoft_defender_endpoint',
-      helpHidden:
-        !getRbacControl({
-          commandName: 'cancel',
-          privileges: endpointPrivileges,
-        }) || agentType !== 'microsoft_defender_endpoint',
+      helpDisabled: !canCancelForCurrentContext(),
+      helpHidden: !canCancelForCurrentContext(),
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });
   }

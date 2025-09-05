@@ -9,7 +9,6 @@ import {
   calculateEndpointAuthz,
   canFetchPackageAndAgentPolicies,
   getEndpointAuthzInitialState,
-  getRequiredCancelPermissions,
 } from './authz';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
@@ -18,9 +17,7 @@ import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
 import {
   CONSOLE_RESPONSE_ACTION_COMMANDS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
-  NO_SPECIFIC_PRIVILEGE_REQUIRED,
   type ResponseConsoleRbacControls,
-  type ResponseActionsApiCommandNames,
 } from '../response_actions/constants';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
@@ -29,16 +26,16 @@ describe('Endpoint Authz service', () => {
   let fleetAuthz: FleetAuthz;
   let userRoles: string[];
 
-  const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
-    ResponseConsoleRbacControls[]
-  >((acc, e) => {
-    const item = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e];
-    // Filter out sentinel values that are not actual Fleet privileges
-    if (!acc.includes(item) && item !== NO_SPECIFIC_PRIVILEGE_REQUIRED) {
-      acc.push(item);
-    }
-    return acc;
-  }, []);
+  const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice()
+    .filter((cmd) => cmd !== 'cancel') // Exclude cancel as it uses dynamic permission checking
+    .reduce<ResponseConsoleRbacControls[]>((acc, e) => {
+      const item =
+        RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e as Exclude<typeof e, 'cancel'>];
+      if (!acc.includes(item)) {
+        acc.push(item);
+      }
+      return acc;
+    }, []);
 
   beforeEach(() => {
     licenseService = createLicenseServiceMock();
@@ -387,6 +384,7 @@ describe('Endpoint Authz service', () => {
         canWriteEndpointExceptions: false,
         canReadAdminData: false,
         canWriteAdminData: false,
+        canCancelResponseActions: false,
       });
     });
   });
@@ -448,31 +446,6 @@ describe('Endpoint Authz service', () => {
           expect(canFetchPackageAndAgentPolicies(capabilities as Capabilities)).toBe(result);
         }
       );
-    });
-  });
-
-  describe('getRequiredCancelPermissions()', () => {
-    it.each<[ResponseActionsApiCommandNames, string]>([
-      ['isolate', 'canIsolateHost'],
-      ['unisolate', 'canUnIsolateHost'],
-      ['kill-process', 'canKillProcess'],
-      ['suspend-process', 'canSuspendProcess'],
-      ['running-processes', 'canGetRunningProcesses'],
-      ['get-file', 'canWriteFileOperations'],
-      ['execute', 'canWriteExecuteOperations'],
-      ['upload', 'canWriteFileOperations'],
-      ['scan', 'canWriteScanOperations'],
-      ['runscript', 'canWriteExecuteOperations'],
-    ])('should return correct permissions for %s command', (command, expectedCommandSpecific) => {
-      const result = getRequiredCancelPermissions(command);
-
-      expect(result).toEqual(expectedCommandSpecific);
-    });
-
-    it('should throw error for unknown command', () => {
-      expect(() =>
-        getRequiredCancelPermissions('unknown-command' as ResponseActionsApiCommandNames)
-      ).toThrow('Unknown or unsupported command for cancellation: unknown-command');
     });
   });
 });

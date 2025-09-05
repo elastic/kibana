@@ -1051,7 +1051,7 @@ describe('Response actions', () => {
           action_id: 'test-action-id-1',
           expiration: '2024-12-31T23:59:59.999Z',
           type: 'INPUT_ACTION' as const,
-          input_type: 'endpoint' as const,
+          input_type: 'microsoft_defender_endpoint' as const,
           data: {
             command: 'isolate',
           },
@@ -1062,7 +1062,7 @@ describe('Response actions', () => {
           action_id: 'test-action-id-2',
           expiration: '2024-12-31T23:59:59.999Z',
           type: 'INPUT_ACTION' as const,
-          input_type: 'endpoint' as const,
+          input_type: 'microsoft_defender_endpoint' as const,
           data: {
             command: 'runscript',
           },
@@ -1094,7 +1094,7 @@ describe('Response actions', () => {
             startedAt: '2023-05-01T12:00:00Z',
             completedAt: '2023-05-01T12:01:00Z',
             comment: '',
-            parameters: { id: 'test-action-id' },
+            action_id: 'test-action-id',
           }),
         };
 
@@ -1117,8 +1117,15 @@ describe('Response actions', () => {
       });
 
       it('allows cancel action when user has baseline permissions for isolate command', async () => {
+        fetchActionByIdSpy.mockResolvedValue({
+          EndpointActions: {
+            data: { command: 'isolate' },
+            input_type: 'microsoft_defender_endpoint',
+          },
+        });
+
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          body: { action_id: 'test-action-id' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canIsolateHost: true },
           version: '2023-10-31',
         });
@@ -1126,10 +1133,11 @@ describe('Response actions', () => {
         expect(fetchActionByIdSpy).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
-          'test-action-id'
+          'test-action-id',
+          expect.anything()
         );
         expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
-          parameters: { id: 'test-action-id' },
+          action_id: 'test-action-id',
         });
       });
 
@@ -1139,11 +1147,12 @@ describe('Response actions', () => {
         fetchActionByIdSpy.mockResolvedValue({
           EndpointActions: {
             data: { command: 'isolate' },
+            input_type: 'microsoft_defender_endpoint',
           },
         });
 
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          body: { action_id: 'test-action-id' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: false, canIsolateHost: true }, // Has permission for the command being cancelled
           version: '2023-10-31',
         });
@@ -1151,8 +1160,15 @@ describe('Response actions', () => {
       });
 
       it('prohibits cancel action when user lacks command-specific permission for isolate', async () => {
+        fetchActionByIdSpy.mockResolvedValue({
+          EndpointActions: {
+            data: { command: 'isolate' },
+            input_type: 'microsoft_defender_endpoint',
+          },
+        });
+
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          body: { action_id: 'test-action-id' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canIsolateHost: false },
           version: '2023-10-31',
         });
@@ -1162,20 +1178,20 @@ describe('Response actions', () => {
       it('allows cancel action for runscript command when user has required permissions', async () => {
         fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          body: { action_id: 'test-action-id' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: true },
           version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
         expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
-          parameters: { id: 'test-action-id' },
+          action_id: 'test-action-id',
         });
       });
 
       it('prohibits cancel action for runscript command when user lacks execute permissions', async () => {
         fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          body: { action_id: 'test-action-id' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: false },
           version: '2023-10-31',
         });
@@ -1185,7 +1201,7 @@ describe('Response actions', () => {
       it('returns 404 when action to cancel is not found', async () => {
         fetchActionByIdSpy.mockResolvedValue(null);
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'non-existent-action' } } as CancelActionRequestBody,
+          body: { action_id: 'non-existent-action' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true },
           version: '2023-10-31',
         });
@@ -1200,7 +1216,7 @@ describe('Response actions', () => {
       it('returns 400 when action has missing command information', async () => {
         fetchActionByIdSpy.mockResolvedValue({ EndpointActions: { data: {} } });
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'test-action-id' } } as CancelActionRequestBody,
+          body: { action_id: 'test-action-id' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true },
           version: '2023-10-31',
         });
@@ -1216,7 +1232,7 @@ describe('Response actions', () => {
         // Simulate action not found in current space (user in 'other-space', action in 'default')
         fetchActionByIdSpy.mockResolvedValue(null);
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'action-from-different-space' } } as CancelActionRequestBody,
+          body: { action_id: 'action-from-different-space' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true },
           version: '2023-10-31',
         });
@@ -1243,7 +1259,7 @@ describe('Response actions', () => {
           );
 
         await callRoute(CANCEL_ROUTE, {
-          body: { parameters: { id: 'already-completed-action' } } as CancelActionRequestBody,
+          body: { action_id: 'already-completed-action' } as CancelActionRequestBody,
           authz: { canReadActionsLogManagement: true, canIsolateHost: true },
           version: '2023-10-31',
         });

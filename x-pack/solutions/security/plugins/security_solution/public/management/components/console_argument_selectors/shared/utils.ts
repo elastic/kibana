@@ -13,12 +13,9 @@ import type {
 } from '../../../../../common/endpoint/types';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { BaseSelectorState } from './types';
-import { getRequiredCancelPermissions } from '../../../../../common/endpoint/service/authz/authz';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
-import {
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  NO_SPECIFIC_PRIVILEGE_REQUIRED,
-} from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
+import { canUserCancelCommand } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
 
 /**
  * Type representing a pending action item for cancellation
@@ -107,13 +104,10 @@ export const checkActionCancelPermission = (
     command;
 
   try {
-    const requiredPermission = getRequiredCancelPermissions(
+    const canCancel = canUserCancelCommand(
+      endpointPrivileges,
       command as ResponseActionsApiCommandNames
     );
-    const canCancel =
-      requiredPermission === NO_SPECIFIC_PRIVILEGE_REQUIRED
-        ? true
-        : endpointPrivileges[requiredPermission as keyof EndpointAuthz] || false;
 
     if (!canCancel) {
       return {

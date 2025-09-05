@@ -88,18 +88,8 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
 
-/**
- * Sentinel value used to indicate that a response action command does not require
- * any specific privilege beyond basic access to the Security Solution.
- *
- * This is used in privilege mapping to distinguish between commands that need
- * specific authorizations (like 'writeHostIsolation') and commands that can be
- * executed by any user who has access to the response actions system.
- *
- * Note: This is NOT an actual privilege in the EndpointAuthz interface - it's
- * purely a marker value for the privilege mapping system.
- */
-export const NO_SPECIFIC_PRIVILEGE_REQUIRED = 'NO_SPECIFIC_PRIVILEGE_REQUIRED' as const;
+// Note: NO_SPECIFIC_PRIVILEGE_REQUIRED sentinel value has been removed as part of
+// cancel action permission architecture redesign to follow established Kibana patterns
 
 export type ResponseConsoleRbacControls =
   | 'writeHostIsolation'
@@ -107,14 +97,14 @@ export type ResponseConsoleRbacControls =
   | 'writeProcessOperations'
   | 'writeFileOperations'
   | 'writeExecuteOperations'
-  | 'writeScanOperations'
-  | typeof NO_SPECIFIC_PRIVILEGE_REQUIRED;
+  | 'writeScanOperations';
 
 /**
  * maps the console command to the RBAC control (kibana feature control) that is required to access it via console
+ * Note: 'cancel' command is excluded as it uses dynamic permission checking via utility functions
  */
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
-  ConsoleResponseActionCommands,
+  Exclude<ConsoleResponseActionCommands, 'cancel'>,
   ResponseConsoleRbacControls
 > = Object.freeze({
   isolate: 'writeHostIsolation',
@@ -127,7 +117,6 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
   runscript: 'writeExecuteOperations',
-  cancel: NO_SPECIFIC_PRIVILEGE_REQUIRED,
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -182,10 +171,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
  * The list of console commands mapped to the required EndpointAuthz to access that command
  */
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
-  Record<
-    ConsoleResponseActionCommands,
-    EndpointAuthzKeyList[number] | typeof NO_SPECIFIC_PRIVILEGE_REQUIRED
-  >
+  Record<ConsoleResponseActionCommands, EndpointAuthzKeyList[number]>
 >({
   isolate: 'canIsolateHost',
   release: 'canUnIsolateHost',
@@ -197,7 +183,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
-  cancel: NO_SPECIFIC_PRIVILEGE_REQUIRED,
+  cancel: 'canWriteSecuritySolution', // Use base permission for cancel operations
 });
 
 // 4 hrs in seconds

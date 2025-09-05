@@ -1448,6 +1448,7 @@ describe('MS Defender response actions client', () => {
             msClientMock.cancel({
               endpoint_ids: ['1-2-3'],
               comment: 'test comment',
+              action_id: 'target-action-id-123',
               parameters: { id: 'target-action-id-123' },
             })
           ).rejects.toThrow(
@@ -1483,6 +1484,7 @@ describe('MS Defender response actions client', () => {
             msClientMock.cancel({
               endpoint_ids: ['1-2-3'],
               comment: 'test comment',
+              action_id: 'target-action-id-123',
               parameters: { id: 'target-action-id-123' },
             })
           ).rejects.not.toThrow(

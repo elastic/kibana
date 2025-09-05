@@ -9,21 +9,20 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
 
-export const CancelActionRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.object({
-      id: schema.string({
-        minLength: 1,
-        validate: (value) => {
-          if (!value.trim().length) {
-            return 'id cannot be an empty string';
-          }
-        },
-      }),
-      comment: schema.maybe(schema.string({ minLength: 1 })),
-    }),
+const CancelActionRequestBodySchema = schema.object({
+  ...BaseActionRequestSchema,
+  action_id: schema.string({
+    minLength: 1,
+    validate: (value) => {
+      if (!value.trim().length) {
+        return 'action_id cannot be an empty string';
+      }
+    },
   }),
+});
+
+export const CancelActionRequestSchema = {
+  body: CancelActionRequestBodySchema,
 };
 
 export type CancelActionRequestBody = TypeOf<typeof CancelActionRequestSchema.body>;

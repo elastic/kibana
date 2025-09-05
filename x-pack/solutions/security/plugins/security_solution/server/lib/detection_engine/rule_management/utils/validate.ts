@@ -19,7 +19,6 @@ import {
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-  NO_SPECIFIC_PRIVILEGE_REQUIRED,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
@@ -90,11 +89,6 @@ export const validateResponseActionsPermissions = async (
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
         RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.params.command]
       ];
-
-    // Skip validation for commands that don't require specific privileges
-    if (authzPropName === NO_SPECIFIC_PRIVILEGE_REQUIRED) {
-      return;
-    }
 
     const isValid = endpointAuthz[authzPropName];
 
