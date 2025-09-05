@@ -7,7 +7,6 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
@@ -506,7 +505,6 @@ describe('#create', () => {
         name: 'KibanaFeature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        scope: [KibanaFeatureScope.Security],
         privileges: {
           all: {
             savedObject: {
@@ -872,7 +870,6 @@ describe('#update', () => {
         name: 'KibanaFeature',
         app: [],
         category: { id: 'foo', label: 'foo' },
-        scope: [KibanaFeatureScope.Security],
         privileges: {
           all: {
             savedObject: {

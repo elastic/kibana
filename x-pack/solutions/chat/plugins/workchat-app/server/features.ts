@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   WORKCHAT_FEATURE_ID,
@@ -23,7 +22,6 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     minimumLicense: 'enterprise',
     order: 1000,
     category: DEFAULT_APP_CATEGORIES.chat,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['kibana', WORKCHAT_APP_ID],
     catalogue: [WORKCHAT_FEATURE_ID],
     privileges: {

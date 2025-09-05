@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -64,7 +63,6 @@ export class AIAssistantManagementSelectionPlugin
       order: 8600,
       app: [],
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
         ai: [
           'aiAssistantManagementSelection',
