@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
-import { EuiLink, useCurrentEuiBreakpoint } from '@elastic/eui';
+import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
   InfraWaffleMapBounds,
@@ -134,23 +134,7 @@ export const NodesOverview = ({
         })}
         bodyText={
           hasDataOnAnotherSchema ? (
-            <FormattedMessage
-              id="xpack.infra.waffle.noDataInSelectedSchemaTitle"
-              defaultMessage="{switchSchema} to view hosts matching another schema."
-              values={{
-                switchSchema: (
-                  <EuiLink
-                    data-test-subj="infraHostsTableNoDataInSelectedSchema"
-                    target="_blank"
-                    href="https://ela.st/schema-selector-hosts"
-                  >
-                    {i18n.translate('xpack.infra.waffle.switchSchemaDocsLink', {
-                      defaultMessage: 'Switch schema',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
+            <SwitchSchemaMessage dataTestSubj="infraInventoryViewNoDataInSelectedSchema" />
           ) : (
             i18n.translate('xpack.infra.waffle.noDataDescription', {
               defaultMessage: 'Try adjusting your time or filter.',
