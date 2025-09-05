@@ -39,6 +39,7 @@ const ThreatsDetectedMetricComponent: React.FC<Props> = ({ from, to }) => {
         .echMetricText {
           padding: 8px 20px 60px;
         }
+        .euiPanel,
         .embPanel,
         .echMetric,
         .echChartBackground,

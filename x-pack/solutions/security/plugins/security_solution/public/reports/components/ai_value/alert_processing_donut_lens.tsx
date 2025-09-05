@@ -46,6 +46,7 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
             font-size: ${font.scale.xl}em;
           }
         }
+        .euiPanel,
         .embPanel,
         .echMetric,
         .echChartBackground,

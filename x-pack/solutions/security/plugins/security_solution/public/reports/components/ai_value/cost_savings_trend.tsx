@@ -70,6 +70,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
     <div
       css={css`
         padding: ${size.base};
+        .euiPanel,
         .embPanel,
         .echMetric,
         .echChartBackground,

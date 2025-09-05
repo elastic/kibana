@@ -51,6 +51,7 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
         .echMetricText {
           padding: 8px 20px 60px;
         }
+        .euiPanel,
         .embPanel,
         .echMetric,
         .echChartBackground,
