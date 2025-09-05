@@ -393,11 +393,11 @@ export const EDIT_TITLE = i18n.translate('xpack.securitySolution.reports.aiValue
   defaultMessage: 'Edit title inline',
 });
 
-// New translations for updated executive summary design
-export const EXECUTIVE_SUMMARY_TITLE = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveSummaryTitle',
+export const LEGAL_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.legalDisclaimer',
   {
-    defaultMessage: 'Elastic AI value report',
+    defaultMessage:
+      'The savings, figures, and estimates presented herein are for illustrative and informational purposes only. Individual results may vary significantly. This information is not, and should not be taken as, legal or financial advice to any person or company. Before making any decisions, consult with a qualified advisor. Elastic accepts no liability or responsibility whatsoever for any losses or liabilities allegedly arising from the use of this information.',
   }
 );
 

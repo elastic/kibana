@@ -48,6 +48,7 @@ const ValueReportSettingsComponent: React.FC<Props> = ({ minutesPerAlert, analys
           />
         </EuiLink>
       </p>
+      <p>{i18n.LEGAL_DISCLAIMER}</p>
     </EuiText>
   );
 };
