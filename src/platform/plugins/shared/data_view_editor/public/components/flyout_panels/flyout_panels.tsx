@@ -18,7 +18,8 @@ import React, {
   PropsWithChildren,
 } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexGroupProps, euiMaxBreakpoint, UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Panel {
   width?: number;
@@ -51,6 +52,8 @@ export interface Props {
 }
 
 export const Panels: FC<PropsWithChildren<Props>> = ({ maxWidth, flyoutClassName, ...props }) => {
+  const styles = useMemoCss(componentStyles);
+
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 
@@ -120,8 +123,17 @@ export const useFlyoutPanelsContext = (): Context => {
   return ctx;
 };
 
-const styles = {
-  flyoutPanels: css({
-    height: '100%',
-  }),
+const componentStyles = {
+  flyoutPanels: (themeContext: UseEuiTheme) =>
+    css({
+      height: '100%',
+      [euiMaxBreakpoint(themeContext, 'm')]: {
+        overflow: 'auto',
+        '.euiFlyoutFooter': {
+          position: 'sticky',
+          bottom: 0,
+          flexGrow: 1,
+        },
+      },
+    }),
 };
