@@ -31,7 +31,7 @@ import { IS_SERVERLESS } from '../../../../env_var_names_constants';
 describe(
   'Alert suppression - advanced settings',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const setupRuleAndAlerts = () => {

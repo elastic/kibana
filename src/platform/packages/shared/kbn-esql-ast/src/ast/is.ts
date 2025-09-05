@@ -27,6 +27,9 @@ export const isCommand = (node: unknown): node is types.ESQLCommand =>
 export const isFunctionExpression = (node: unknown): node is types.ESQLFunction =>
   isProperNode(node) && node.type === 'function';
 
+export const isUnaryExpression = (node: unknown): node is types.ESQLUnaryExpression =>
+  isFunctionExpression(node) && node.subtype === 'unary-expression';
+
 /**
  * Returns true if the given node is a binary expression, i.e. an operator
  * surrounded by two operands:

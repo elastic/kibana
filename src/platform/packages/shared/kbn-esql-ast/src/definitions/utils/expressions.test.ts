@@ -160,6 +160,26 @@ describe('getExpressionType', () => {
       );
     });
 
+    // this is here to fix https://github.com/elastic/kibana/issues/215157
+    it('handles conflict fields', () => {
+      expect(
+        getExpressionType(
+          getASTForExpression('fieldName'),
+          new Map([
+            [
+              'fieldName',
+              {
+                name: 'fieldName',
+                type: 'unsupported',
+                hasConflict: true,
+              },
+            ],
+          ]),
+          new Map()
+        )
+      ).toBe('unknown');
+    });
+
     it('handles fields defined by a named param', () => {
       expect(getExpressionType(getASTForExpression('??field'), new Map(), new Map())).toBe('param');
     });
