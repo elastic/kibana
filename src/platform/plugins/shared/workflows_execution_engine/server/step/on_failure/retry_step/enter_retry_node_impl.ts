@@ -25,8 +25,6 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
   ) {}
 
   public async run(): Promise<void> {
-    this.workflowRuntime.enterScope();
-
     if (!this.workflowRuntime.getStepState(this.node.id)) {
       // If retry state exists, it means we are re-entering the retry step
       await this.initializeRetry();
@@ -63,6 +61,10 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
 
   private async initializeRetry(): Promise<void> {
     await this.workflowRuntime.startStep(this.node.id);
+    // Enter whole retry step scope
+    this.workflowRuntime.enterScope();
+    // Enter first attempt scope. Since attempt is 0 based, we add 1 to it.
+    this.workflowRuntime.enterScope('1-attempt');
     await this.workflowRuntime.setStepState(this.node.id, {
       attempt: 0,
     });
@@ -74,6 +76,8 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
     const attempt = retryState.attempt + 1;
     this.workflowLogger.logDebug(`Retrying "${this.node.id}" step. (attempt ${attempt}).`);
     await this.workflowRuntime.setStepState(this.node.id, { attempt });
+    // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
+    this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);
     this.workflowRuntime.goToNextStep();
   }
 

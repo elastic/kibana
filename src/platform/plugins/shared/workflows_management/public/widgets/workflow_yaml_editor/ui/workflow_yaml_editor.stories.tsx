@@ -128,6 +128,7 @@ export const WithStepExecutions: Story = {
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
         executionIndex: 0,
+        path: [],
       },
       {
         stepId: 'debug_ai_response',
@@ -139,6 +140,7 @@ export const WithStepExecutions: Story = {
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
         executionIndex: 0,
+        path: [],
       },
       {
         stepId: 'print-enter-dash',
@@ -150,6 +152,7 @@ export const WithStepExecutions: Story = {
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
         executionIndex: 0,
+        path: [],
       },
       {
         stepId: 'foreachstep',
@@ -161,6 +164,7 @@ export const WithStepExecutions: Story = {
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
         executionIndex: 0,
+        path: [],
       },
       {
         stepId: 'log-name-surname',
@@ -172,6 +176,7 @@ export const WithStepExecutions: Story = {
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
         executionIndex: 0,
+        path: [],
       },
       {
         stepId: 'slack_it',
@@ -183,6 +188,7 @@ export const WithStepExecutions: Story = {
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
         executionIndex: 0,
+        path: [],
       },
       {
         stepId: 'print-exit-dash',
@@ -194,6 +200,7 @@ export const WithStepExecutions: Story = {
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
         executionIndex: 0,
+        path: [],
       },
     ],
   },

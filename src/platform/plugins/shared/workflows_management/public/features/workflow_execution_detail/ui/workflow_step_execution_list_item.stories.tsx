@@ -35,6 +35,7 @@ export const Default: Story = {
       topologicalIndex: 1,
       executionIndex: 0,
       spaceId: 'default',
+      path: [],
     },
   },
 };
@@ -52,6 +53,7 @@ export const Running: Story = {
       topologicalIndex: 1,
       executionIndex: 0,
       spaceId: 'default',
+      path: [],
     },
   },
 };
@@ -69,6 +71,7 @@ export const Failed: Story = {
       topologicalIndex: 1,
       executionIndex: 0,
       spaceId: 'default',
+      path: [],
     },
   },
 };
