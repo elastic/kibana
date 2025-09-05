@@ -42,7 +42,7 @@ export const IndicatorBlock: FC<IndicatorBlockProps> = ({
   const { key, value } = getIndicatorFieldAndValue(indicator, field);
 
   return (
-    <EuiPanel {...panelProps}>
+    <EuiPanel {...panelProps} data-test-subj={`${dataTestSubj}Item`}>
       <SecurityCellActions
         data={{ field: key, value }}
         mode={CellActionsMode.HOVER_DOWN}
