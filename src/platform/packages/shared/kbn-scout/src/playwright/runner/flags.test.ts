@@ -10,14 +10,28 @@
 import { parseTestFlags } from './flags';
 import { FlagsReader } from '@kbn/dev-cli-runner';
 import * as configValidator from './config_validator';
-import fs from 'fs';
-import path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
+import * as testFilesUtils from '../../common/utils';
 
 const validatePlaywrightConfigMock = jest.spyOn(configValidator, 'validatePlaywrightConfig');
 
+// Mock the entire module to avoid spy redefinition issues
+jest.mock('../../common/utils', () => ({
+  ...jest.requireActual('../../common/utils'),
+  validateAndProcessTestFiles: jest.fn(),
+}));
+
+const validateAndProcessTestFilesMock =
+  testFilesUtils.validateAndProcessTestFiles as jest.MockedFunction<
+    typeof testFilesUtils.validateAndProcessTestFiles
+  >;
+
 describe('parseTestFlags', () => {
-  it(`should throw an error without 'config' flag`, async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    validatePlaywrightConfigMock.mockResolvedValue();
+  });
+
+  it(`should throw an error without 'config' or 'testFiles' flag`, async () => {
     const flags = new FlagsReader({
       stateful: true,
       logToFile: false,
@@ -25,7 +39,21 @@ describe('parseTestFlags', () => {
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
-      'Path to playwright config is required: --config <file path>'
+      `Either '--config' or '--testFiles' flag is required`
+    );
+  });
+
+  it(`should throw an error when both 'config' and 'testFiles' are provided`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      testFiles: 'test.spec.ts',
+      stateful: true,
+      logToFile: false,
+      headed: false,
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `Cannot use both '--config' or '--testFiles' flags at the same time`
     );
   });
 
@@ -168,56 +196,23 @@ describe('parseTestFlags', () => {
   });
 
   describe('testFiles flag', () => {
-    let existsSyncSpy: jest.SpyInstance;
-    let statSyncSpy: jest.SpyInstance;
-
     beforeEach(() => {
-      // Reset all mocks
       jest.clearAllMocks();
       validatePlaywrightConfigMock.mockResolvedValue();
-
-      // Spy on fs methods
-      existsSyncSpy = jest.spyOn(fs, 'existsSync');
-      statSyncSpy = jest.spyOn(fs, 'statSync');
     });
 
-    afterEach(() => {
-      // Restore fs methods
-      existsSyncSpy.mockRestore();
-      statSyncSpy.mockRestore();
-    });
+    it('should use validateAndProcessTestFiles helper and derive config path', async () => {
+      const testFile =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/test.spec.ts';
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/playwright.config.ts';
 
-    it('should parse without testFiles flag (optional)', async () => {
-      const flags = new FlagsReader({
-        config: '/path/to/config',
-        stateful: true,
-        logToFile: false,
-        headed: false,
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles: [testFile],
+        configPath: derivedConfig,
       });
 
-      const result = await parseTestFlags(flags);
-
-      expect(result).toEqual({
-        mode: 'stateful',
-        configPath: '/path/to/config',
-        testTarget: 'local',
-        headed: false,
-        esFrom: undefined,
-        installDir: undefined,
-        logsDir: undefined,
-      });
-      expect(result).not.toHaveProperty('testFiles');
-    });
-
-    it('should parse with single test file', async () => {
-      const testFile = 'src/test.spec.ts';
-      const fullPath = path.resolve(REPO_ROOT, testFile);
-
-      existsSyncSpy.mockReturnValue(true);
-      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
-
       const flags = new FlagsReader({
-        config: '/path/to/config',
         testFiles: testFile,
         stateful: true,
         logToFile: false,
@@ -226,9 +221,10 @@ describe('parseTestFlags', () => {
 
       const result = await parseTestFlags(flags);
 
+      expect(validateAndProcessTestFilesMock).toHaveBeenCalledWith(testFile);
       expect(result).toEqual({
         mode: 'stateful',
-        configPath: '/path/to/config',
+        configPath: derivedConfig,
         testTarget: 'local',
         headed: false,
         testFiles: [testFile],
@@ -236,19 +232,23 @@ describe('parseTestFlags', () => {
         installDir: undefined,
         logsDir: undefined,
       });
-      expect(existsSyncSpy).toHaveBeenCalledWith(fullPath);
-      expect(statSyncSpy).toHaveBeenCalledWith(fullPath);
     });
 
-    it('should parse with multiple test files', async () => {
-      const testFiles = ['src/test1.spec.ts', 'src/test2.spec.ts', 'src/test3.spec.ts'];
+    it('should handle multiple test files through helper', async () => {
+      const testFiles = [
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/test1.spec.ts',
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/test2.spec.ts',
+      ];
       const testFilesString = testFiles.join(',');
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/playwright.config.ts';
 
-      existsSyncSpy.mockReturnValue(true);
-      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles,
+        configPath: derivedConfig,
+      });
 
       const flags = new FlagsReader({
-        config: '/path/to/config',
         testFiles: testFilesString,
         stateful: true,
         logToFile: false,
@@ -257,9 +257,10 @@ describe('parseTestFlags', () => {
 
       const result = await parseTestFlags(flags);
 
+      expect(validateAndProcessTestFilesMock).toHaveBeenCalledWith(testFilesString);
       expect(result).toEqual({
         mode: 'stateful',
-        configPath: '/path/to/config',
+        configPath: derivedConfig,
         testTarget: 'local',
         headed: false,
         testFiles,
@@ -267,20 +268,21 @@ describe('parseTestFlags', () => {
         installDir: undefined,
         logsDir: undefined,
       });
-      expect(existsSyncSpy).toHaveBeenCalledTimes(3);
-      expect(statSyncSpy).toHaveBeenCalledTimes(3);
     });
 
-    it('should handle test files with spaces around commas', async () => {
-      const testFiles = ['src/test1.spec.ts', 'src/test2.spec.ts'];
-      const testFilesString = ' src/test1.spec.ts , src/test2.spec.ts ';
+    it('should handle API tests with correct config derivation', async () => {
+      const testFile =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/test.spec.ts';
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/playwright.config.ts';
 
-      existsSyncSpy.mockReturnValue(true);
-      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles: [testFile],
+        configPath: derivedConfig,
+      });
 
       const flags = new FlagsReader({
-        config: '/path/to/config',
-        testFiles: testFilesString,
+        testFiles: testFile,
         stateful: true,
         logToFile: false,
         headed: false,
@@ -288,84 +290,55 @@ describe('parseTestFlags', () => {
 
       const result = await parseTestFlags(flags);
 
-      expect(result.testFiles).toEqual(testFiles);
-    });
-
-    it('should filter out empty strings from comma-separated list', async () => {
-      const testFile = 'src/test.spec.ts';
-      const testFilesString = 'src/test.spec.ts,,, ,';
-
-      existsSyncSpy.mockReturnValue(true);
-      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
-
-      const flags = new FlagsReader({
-        config: '/path/to/config',
-        testFiles: testFilesString,
-        stateful: true,
-        logToFile: false,
-        headed: false,
-      });
-
-      const result = await parseTestFlags(flags);
-
+      expect(result.configPath).toBe(derivedConfig);
       expect(result.testFiles).toEqual([testFile]);
     });
 
-    it('should throw error when test file does not exist', async () => {
-      const testFile = 'src/nonexistent.spec.ts';
+    it('should handle parallel tests with correct config derivation', async () => {
+      const testFile =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel_tests/test.spec.ts';
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel.playwright.config.ts';
 
-      existsSyncSpy.mockReturnValue(false);
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles: [testFile],
+        configPath: derivedConfig,
+      });
 
       const flags = new FlagsReader({
-        config: '/path/to/config',
         testFiles: testFile,
         stateful: true,
         logToFile: false,
         headed: false,
       });
 
-      await expect(parseTestFlags(flags)).rejects.toThrow(`Test file does not exist: ${testFile}`);
+      const result = await parseTestFlags(flags);
+
+      expect(result.configPath).toBe(derivedConfig);
+      expect(result.testFiles).toEqual([testFile]);
     });
 
-    it('should throw error when test file path is outside repository', async () => {
-      const testFile = '../outside/test.spec.ts';
+    it('should propagate validation errors from helper', async () => {
+      const testFile = 'invalid/path/test.spec.ts';
+      const errorMessage = 'Test file must be from scout directory';
+
+      validateAndProcessTestFilesMock.mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
 
       const flags = new FlagsReader({
-        config: '/path/to/config',
         testFiles: testFile,
         stateful: true,
         logToFile: false,
         headed: false,
       });
 
-      await expect(parseTestFlags(flags)).rejects.toThrow(
-        `Test file must be within the repository: ${testFile}`
-      );
+      await expect(parseTestFlags(flags)).rejects.toThrow(errorMessage);
     });
 
-    it('should throw error when test file path is a directory', async () => {
-      const testFile = 'src/directory';
-
-      existsSyncSpy.mockReturnValue(true);
-      statSyncSpy.mockReturnValue({ isFile: () => false } as any);
-
+    it('should not include testFiles in result when empty', async () => {
       const flags = new FlagsReader({
         config: '/path/to/config',
-        testFiles: testFile,
-        stateful: true,
-        logToFile: false,
-        headed: false,
-      });
-
-      await expect(parseTestFlags(flags)).rejects.toThrow(
-        `Test file must be a file, not a directory: ${testFile}`
-      );
-    });
-
-    it('should handle empty testFiles string', async () => {
-      const flags = new FlagsReader({
-        config: '/path/to/config',
-        testFiles: '',
         stateful: true,
         logToFile: false,
         headed: false,
@@ -374,6 +347,7 @@ describe('parseTestFlags', () => {
       const result = await parseTestFlags(flags);
 
       expect(result).not.toHaveProperty('testFiles');
+      expect(result.configPath).toBe('/path/to/config');
     });
   });
 });
