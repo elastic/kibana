@@ -40,6 +40,7 @@ import {
 } from '../../../doc_viewer_source/get_height';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { SpanLinks } from '../components/span_links';
+import { Errors } from '../components/errors';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   indexes: TraceIndexes;
@@ -162,6 +163,12 @@ export function TransactionOverview({
               traceId={traceId}
               docId={transactionId}
               processorEvent={ProcessorEvent.transaction}
+            />
+            <EuiSpacer size="m" />
+            <Errors
+              traceId={traceId}
+              transactionId={transactionId}
+              serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
             />
             <EuiFlexItem />
             <EuiFlexItem>
