@@ -83,8 +83,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
-  const config = getService('config');
-  const isServerless = !!config.get('serverless');
 
   describe('Root stream', () => {
     before(async () => {
