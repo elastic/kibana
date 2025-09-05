@@ -41,15 +41,11 @@ export const columnsAfter = async (
     columnsFromBranches.push(columnsFromBranch);
   }
 
-  /**
-   * One of the branches may have overwritten
-   */
-
   const maps = columnsFromBranches.map((cols) => new Map(cols.map((_col) => [_col.name, _col])));
 
   const merged = new Map<string, ESQLColumnData>();
 
-  // O(b * n), where b is the branches and n is the number of columns
+  // O(b * n), where b is the branches and n is the max number of columns in a branch
   for (const map of maps) {
     for (const [name, colData] of map) {
       /**
