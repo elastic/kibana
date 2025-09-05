@@ -463,6 +463,25 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               </EuiFormRow>
             </>
           )}
+          <EuiFormRow
+            helpText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.writeToStreamsHelpText"
+                defaultMessage="When enabled, adds logs and logs.* to the output streams configuration in the agent policy."
+              />
+            }
+          >
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.writeToStreamsLabel"
+                  defaultMessage="Write to logs streams"
+                />
+              }
+              checked={inputs.writeToStreams.value}
+              onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
+            />
+          </EuiFormRow>
           {supportsPresets &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,

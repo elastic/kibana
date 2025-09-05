@@ -66,6 +66,11 @@ const actionNames: {
     completedText: 'migrated',
     cancelledText: 'migration',
   },
+  PRIVILEGE_LEVEL_CHANGE: {
+    inProgressText: 'Changing privilege level of',
+    completedText: 'changed privilege level',
+    cancelledText: 'change privilege level',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 

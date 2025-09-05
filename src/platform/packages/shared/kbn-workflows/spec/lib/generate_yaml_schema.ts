@@ -12,10 +12,12 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
+  getHttpStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
+  getOnFailureStepSchema,
   getParallelStepSchema,
-  HttpStepSchema,
+  getWorkflowSettingsSchema,
   WaitStepSchema,
   WorkflowSchema,
 } from '../schema';
@@ -27,11 +29,16 @@ export interface ConnectorContract {
   outputSchema: z.ZodType;
 }
 
-function generateStepSchemaForConnector(connector: ConnectorContract) {
+function generateStepSchemaForConnector(
+  connector: ConnectorContract,
+  stepSchema: z.ZodType,
+  loose: boolean = false
+) {
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
+    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
 }
 
@@ -39,14 +46,16 @@ function createRecursiveStepSchema(
   connectors: ConnectorContract[],
   loose: boolean = false
 ): z.ZodType {
-  const connectorSchemas = connectors.map(generateStepSchemaForConnector);
-
   const stepSchema: z.ZodType = z.lazy(() => {
     // Create step schemas with the recursive reference
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
+    const httpSchema = getHttpStepSchema(stepSchema, loose);
+    const connectorSchemas = connectors.map((c) =>
+      generateStepSchemaForConnector(c, stepSchema, loose)
+    );
 
     // Return discriminated union with all step types
     return z.discriminatedUnion('type', [
@@ -55,7 +64,7 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
-      HttpStepSchema,
+      httpSchema,
       ...connectorSchemas,
     ]);
   });
@@ -76,6 +85,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   return WorkflowSchema.extend({
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
     steps: z.array(recursiveStepSchema),
   });
 }

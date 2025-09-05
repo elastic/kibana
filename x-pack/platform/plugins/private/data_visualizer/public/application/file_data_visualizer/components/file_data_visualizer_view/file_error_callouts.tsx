@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
-import type { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureErrorResponse } from '@kbn/file-upload-common';
 import type { FileSizeChecker } from '@kbn/file-upload/file_upload_manager/file_size_check';
 
 interface FileTooLargeProps {
