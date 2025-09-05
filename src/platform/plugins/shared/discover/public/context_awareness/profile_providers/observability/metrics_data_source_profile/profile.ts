@@ -27,9 +27,9 @@ export const createMetricsDataSourceProfileProvider = (
       services.metricsContextService.getMetricsExperienceClient()
     ),
   },
-  resolve: async (params) => {
+  resolve: (params) => {
     const metricsClient = services.metricsContextService.getMetricsExperienceClient();
-    const isEnabled = await services.core.featureFlags.getBooleanValue(
+    const isEnabled = services.core.featureFlags.getBooleanValue(
       METRICS_EXPERIENCE_FEATURE_FLAG_KEY,
       false
     );
