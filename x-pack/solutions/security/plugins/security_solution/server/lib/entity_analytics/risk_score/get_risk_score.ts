@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
@@ -16,11 +15,6 @@ import {
   type EntityType,
 } from '../../../../common/search_strategy/security_solution';
 import { buildRiskScoreQuery } from '../../../search_strategy/security_solution/factory/risk_score/all/query.risk_score.dsl';
-
-export interface RiskInputsIndexResponse {
-  index: string;
-  runtimeMappings: MappingRuntimeFields;
-}
 
 export const createGetRiskScores =
   ({

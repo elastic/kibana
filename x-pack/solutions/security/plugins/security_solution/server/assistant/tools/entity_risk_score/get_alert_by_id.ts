@@ -12,7 +12,7 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { AlertData } from '../../../../public/detection_engine/rule_exceptions/utils/types';
 
 export const createGetAlertsById =
-  ({ esClient }: { esClient: ElasticsearchClient; spaceId: string }) =>
+  ({ esClient }: { esClient: ElasticsearchClient }) =>
   async ({
     index,
     ids,
