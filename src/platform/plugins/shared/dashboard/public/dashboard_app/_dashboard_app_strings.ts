@@ -312,3 +312,22 @@ export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
     defaultMessage: 'Add time slider control',
   });
+
+export const contentEditorFlyoutStrings = {
+  readonlyReason: {
+    accessControl: i18n.translate('dashboard.contentEditorFlyout.readonlyReason.accessControl', {
+      defaultMessage:
+        "You don't have permissions to edit this dashboard. Contact the author to change it.",
+    }),
+    missingPrivileges: i18n.translate(
+      'dashboard.contentEditorFlyout.readonlyReason.missingPrivileges',
+      {
+        defaultMessage:
+          "You don't have permissions to edit this dashboard. Contact your admin to change your role.",
+      }
+    ),
+    managedEntity: i18n.translate('dashboard.contentEditorFlyout.readonlyReason.managedEntity', {
+      defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
+    }),
+  },
+};

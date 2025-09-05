@@ -16,6 +16,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
+import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import { getAccessControlClient } from '../../dashboard_app/access_control/get_access_control_client';
 import type { DashboardSearchOut } from '../../../server/content_management';
 import {
@@ -349,13 +350,13 @@ export const useDashboardListingTable = ({
 
         const getReason = () => {
           if (!showWriteControls) {
-            return 'missing_privileges';
+            return contentEditorFlyoutStrings.readonlyReason.missingPrivileges;
           }
           if (item?.managed) {
-            return 'managed_entity';
+            return contentEditorFlyoutStrings.readonlyReason.managedEntity;
           }
           if (item?.canManageAccessControl === false) {
-            return 'access_control';
+            return contentEditorFlyoutStrings.readonlyReason.accessControl;
           }
         };
 

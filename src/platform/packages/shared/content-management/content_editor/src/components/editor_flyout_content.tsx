@@ -61,45 +61,6 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
   const form = useMetadataForm({ item, customValidators });
 
-  const defaultReadonlyReasons = new Map<string, string>([
-    [
-      'missing_privileges',
-      i18n.translate('contentManagement.contentEditor.metadataForm.missingPrivilegesTooltip', {
-        defaultMessage:
-          "You don't have permissions to edit this dashboard. Contact your admin to change your role.",
-      }),
-    ],
-    [
-      'managed_entity',
-      i18n.translate('contentManagement.contentEditor.metadataForm.notFoundTooltip', {
-        defaultMessage: 'This {entityName} is managed by Elastic. Duplicate it to make changes.',
-        values: { entityName },
-      }),
-    ],
-    [
-      'access_control',
-      i18n.translate('contentManagement.contentEditor.metadataForm.accessControlTooltip', {
-        defaultMessage:
-          "You don't have permissions to edit this {entityName}. Contact the author to change it.",
-        values: { entityName },
-      }),
-    ],
-  ]);
-
-  const getReadonlyReason = (reason: string | undefined) => {
-    if (reason && defaultReadonlyReasons.has(reason)) {
-      return defaultReadonlyReasons.get(reason)!;
-    }
-
-    if (reason) {
-      return reason;
-    }
-
-    return i18n.translate('contentManagement.contentEditor.metadataForm.readOnlyToolTip', {
-      defaultMessage: 'To edit these details, contact your administrator for access.',
-    });
-  };
-
   const hasNoChanges = () => {
     const itemTags = item.tags.map((obj) => obj.id).sort();
     const formTags = form.tags.value.slice().sort();
@@ -169,7 +130,12 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
         <MetadataForm
           form={{ ...form, isSubmitted }}
           isReadonly={isReadonly}
-          readonlyReason={getReadonlyReason(readonlyReason)}
+          readonlyReason={
+            readonlyReason ||
+            i18n.translate('contentManagement.contentEditor.metadataForm.readOnlyToolTip', {
+              defaultMessage: 'To edit these details, contact your administrator for access.',
+            })
+          }
           tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}
