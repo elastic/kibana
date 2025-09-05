@@ -9,7 +9,6 @@ import type {
   CoreSetup,
   ElasticsearchClient,
   Logger,
-  SavedObjectsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type {
@@ -29,8 +28,8 @@ import { createCasesAnalyticsIndex, scheduleCasesAnalyticsSyncTask } from './cas
 import { createCommentsAnalyticsIndex, scheduleCommentsAnalyticsSyncTask } from './comments_index';
 import { createActivityAnalyticsIndex, scheduleActivityAnalyticsSyncTask } from './activity_index';
 import type { ConfigType } from '../config';
-import type { CasesClient } from '../client';
 import { getAllSpacesWithCases } from './utils';
+import { registerCAISchedulerTask } from './tasks/scheduler_task';
 
 export const createCasesAnalyticsIndexes = async ({
   esClient,
@@ -136,18 +135,28 @@ export const registerCasesAnalyticsIndexesTasks = ({
   analyticsConfig: ConfigType['analytics'];
 }) => {
   registerCAIBackfillTask({ taskManager, logger, core, analyticsConfig });
+  registerCAISchedulerTask({ taskManager, logger, core, analyticsConfig });
   registerCAISynchronizationTask({ taskManager, logger, core, analyticsConfig });
 };
 
 export const scheduleCasesAnalyticsSyncTasks = ({
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) => {
-  scheduleActivityAnalyticsSyncTask({ taskManager, logger });
-  scheduleCasesAnalyticsSyncTask({ taskManager, logger });
-  scheduleCommentsAnalyticsSyncTask({ taskManager, logger });
-  scheduleAttachmentsAnalyticsSyncTask({ taskManager, logger });
+  scheduleActivityAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+  scheduleCasesAnalyticsSyncTask({
+    taskManager,
+    logger,
+    spaceId,
+    owner,
+  });
+  scheduleCommentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+  scheduleAttachmentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
 };

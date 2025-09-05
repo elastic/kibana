@@ -15,8 +15,9 @@ import {
   CAI_ACTIVITY_INDEX_VERSION,
   CAI_ACTIVITY_SOURCE_INDEX,
   getActivitySourceQuery,
-  CAI_ACTIVITY_BACKFILL_TASK_ID,
-  CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID,
+  getCAIActivitySynchronizationTaskId,
+  getCAIActivityBackfillTaskId,
+  CAI_ACTIVITY_SYNC_TYPE,
 } from './constants';
 import { CAI_ACTIVITY_INDEX_MAPPINGS } from './mappings';
 import { CAI_ACTIVITY_INDEX_SCRIPT, CAI_ACTIVITY_INDEX_SCRIPT_ID } from './painless_scripts';
@@ -48,7 +49,7 @@ export const createActivityAnalyticsIndex = ({
     mappings: CAI_ACTIVITY_INDEX_MAPPINGS,
     painlessScriptId: CAI_ACTIVITY_INDEX_SCRIPT_ID,
     painlessScript: CAI_ACTIVITY_INDEX_SCRIPT,
-    taskId: CAI_ACTIVITY_BACKFILL_TASK_ID,
+    taskId: getCAIActivityBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
     sourceQuery: getActivitySourceQuery(spaceId, owner),
   });
@@ -64,16 +65,18 @@ export const scheduleActivityAnalyticsSyncTask = ({
   spaceId: string;
   owner: Owner;
 }) => {
+  const taskId = getCAIActivitySynchronizationTaskId(spaceId, owner);
   scheduleCAISynchronizationTask({
-    taskId: CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID,
+    taskId,
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
     destIndex: getDestinationIndexName(spaceId, owner),
+    spaceId,
+    owner,
+    syncType: CAI_ACTIVITY_SYNC_TYPE,
     taskManager,
     logger,
   }).catch((e) => {
-    logger.error(
-      `Error scheduling ${CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
-    );
+    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };
 

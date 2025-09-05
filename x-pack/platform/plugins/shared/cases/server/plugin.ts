@@ -52,11 +52,8 @@ import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
 
-import {
-  createCasesAnalyticsIndexes,
-  registerCasesAnalyticsIndexesTasks,
-  scheduleCasesAnalyticsSyncTasks,
-} from './cases_analytics';
+import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
+import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 
 export class CasePlugin
   implements
@@ -212,11 +209,14 @@ export class CasePlugin
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
 
       if (this.caseConfig.analytics.index?.enabled) {
-        scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
         const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
         ]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
+        scheduleCAISchedulerTask({
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+        });
         createCasesAnalyticsIndexes({
           esClient: core.elasticsearch.client.asInternalUser,
           logger: this.logger,

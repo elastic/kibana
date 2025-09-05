@@ -15,8 +15,9 @@ import {
   CAI_ATTACHMENTS_INDEX_VERSION,
   CAI_ATTACHMENTS_SOURCE_INDEX,
   getAttachmentsSourceQuery,
-  CAI_ATTACHMENTS_BACKFILL_TASK_ID,
-  CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
+  getCAIAttachmentsBackfillTaskId,
+  getCAIAttachmentsSynchronizationTaskId,
+  CAI_ATTACHMENTS_SYNC_TYPE,
 } from './constants';
 import { CAI_ATTACHMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_ATTACHMENTS_INDEX_SCRIPT, CAI_ATTACHMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
@@ -48,7 +49,7 @@ export const createAttachmentsAnalyticsIndex = ({
     mappings: CAI_ATTACHMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_ATTACHMENTS_INDEX_SCRIPT_ID,
     painlessScript: CAI_ATTACHMENTS_INDEX_SCRIPT,
-    taskId: CAI_ATTACHMENTS_BACKFILL_TASK_ID,
+    taskId: getCAIAttachmentsBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
     sourceQuery: getAttachmentsSourceQuery(spaceId, owner),
   });
@@ -64,16 +65,18 @@ export const scheduleAttachmentsAnalyticsSyncTask = ({
   spaceId: string;
   owner: Owner;
 }) => {
+  const taskId = getCAIAttachmentsSynchronizationTaskId(spaceId, owner);
   scheduleCAISynchronizationTask({
-    taskId: CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
+    taskId,
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
     destIndex: getDestinationIndexName(spaceId, owner),
     taskManager,
+    spaceId,
+    owner,
+    syncType: CAI_ATTACHMENTS_SYNC_TYPE,
     logger,
   }).catch((e) => {
-    logger.error(
-      `Error scheduling ${CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
-    );
+    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };
 

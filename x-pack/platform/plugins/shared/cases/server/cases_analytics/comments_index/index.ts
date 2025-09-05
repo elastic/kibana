@@ -15,8 +15,9 @@ import {
   CAI_COMMENTS_INDEX_VERSION,
   CAI_COMMENTS_SOURCE_INDEX,
   getCommentsSourceQuery,
-  CAI_COMMENTS_BACKFILL_TASK_ID,
-  CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
+  getCAIBackfillTaskId,
+  getCAICommentsSynchronizationTaskId,
+  CAI_COMMENTS_SYNC_TYPE,
 } from './constants';
 import { CAI_COMMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_COMMENTS_INDEX_SCRIPT, CAI_COMMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
@@ -48,7 +49,7 @@ export const createCommentsAnalyticsIndex = ({
     mappings: CAI_COMMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_COMMENTS_INDEX_SCRIPT_ID,
     painlessScript: CAI_COMMENTS_INDEX_SCRIPT,
-    taskId: CAI_COMMENTS_BACKFILL_TASK_ID,
+    taskId: getCAIBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
     sourceQuery: getCommentsSourceQuery(spaceId, owner),
   });
@@ -64,16 +65,18 @@ export const scheduleCommentsAnalyticsSyncTask = ({
   spaceId: string;
   owner: Owner;
 }) => {
+  const taskId = getCAICommentsSynchronizationTaskId(spaceId, owner);
   scheduleCAISynchronizationTask({
-    taskId: CAI_COMMENTS_SYNCHRONIZATION_TASK_ID,
+    taskId,
     sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
     destIndex: getDestinationIndexName(spaceId, owner),
     taskManager,
+    owner,
+    spaceId,
+    syncType: CAI_COMMENTS_SYNC_TYPE,
     logger,
   }).catch((e) => {
-    logger.error(
-      `Error scheduling ${CAI_COMMENTS_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
-    );
+    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };
 
