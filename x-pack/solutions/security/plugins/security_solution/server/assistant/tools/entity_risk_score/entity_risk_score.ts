@@ -82,7 +82,6 @@ export const ENTITY_RISK_SCORE_TOOL: AssistantTool = {
         });
         const getAlerts = createGetAlertsById({
           esClient,
-          spaceId,
         });
 
         const entityField = EntityTypeToIdentifierField[input.identifier_type];

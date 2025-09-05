@@ -54,7 +54,6 @@ describe('createGetAlertsById', () => {
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
-      spaceId: 'default',
     });
 
     const result = await getAlertsById({
@@ -80,7 +79,6 @@ describe('createGetAlertsById', () => {
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
-      spaceId: 'default',
     });
 
     await getAlertsById({
@@ -104,7 +102,6 @@ describe('createGetAlertsById', () => {
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
-      spaceId: 'default',
     });
 
     const result = await getAlertsById({
@@ -122,7 +119,6 @@ describe('createGetAlertsById', () => {
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
-      spaceId: 'default',
     });
 
     const result = await getAlertsById({
@@ -150,7 +146,6 @@ describe('createGetAlertsById', () => {
 
     const getAlertsById = createGetAlertsById({
       esClient: mockEsClient,
-      spaceId: 'default',
     });
 
     await getAlertsById({
