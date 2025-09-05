@@ -16,8 +16,7 @@ import React, {
   useContext,
 } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem, euiMaxBreakpoint, type UseEuiTheme } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EuiFlexItem, euiMaxBreakpoint, useEuiTheme } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
@@ -49,7 +48,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   border,
   ...rest
 }) => {
-  const styles = useMemoCss(componentStyles);
+  const themeContext = useEuiTheme();
   const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({
     hasContent: false,
     hasFooter: false,
@@ -93,7 +92,16 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   }
 
   return (
-    <EuiFlexItem css={styles.flyoutColumn} style={dynamicStyles}>
+    <EuiFlexItem
+      css={css({
+        height: '100%',
+        overflow: 'hidden',
+        [euiMaxBreakpoint(themeContext, 'm')]: {
+          height: 'auto',
+        },
+      })}
+      style={dynamicStyles}
+    >
       <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
         <div
           css={[
@@ -123,15 +131,7 @@ export const useFlyoutPanelContext = (): Context => {
   return ctx;
 };
 
-const componentStyles = {
-  flyoutColumn: (themeContext: UseEuiTheme) =>
-    css({
-      height: '100%',
-      overflow: 'hidden',
-      [euiMaxBreakpoint(themeContext, 'm')]: {
-        height: 'auto',
-      },
-    }),
+const styles = {
   flyoutPanel: css({
     height: '100%',
     overflowY: 'auto',
