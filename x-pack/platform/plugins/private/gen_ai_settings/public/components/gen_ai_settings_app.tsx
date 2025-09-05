@@ -34,13 +34,11 @@ import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_
 import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
+import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/gen-ai-settings-plugin/common/constants';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
-
-export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
-  'aiAssistant.defaultLlmSettingEnabled' as const;
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
