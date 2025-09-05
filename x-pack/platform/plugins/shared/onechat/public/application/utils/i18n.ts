@@ -50,6 +50,9 @@ export const labels = {
     editToolButtonLabel: i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
       defaultMessage: 'Edit',
     }),
+    viewToolButtonLabel: i18n.translate('xpack.onechat.tools.viewToolButtonLabel', {
+      defaultMessage: 'View',
+    }),
     deleteToolButtonLabel: i18n.translate('xpack.onechat.tools.deleteToolButtonLabel', {
       defaultMessage: 'Delete',
     }),

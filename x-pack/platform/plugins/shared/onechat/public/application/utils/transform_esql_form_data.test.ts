@@ -15,7 +15,10 @@ import {
   transformEsqlToolToFormData,
   transformFormDataToEsqlTool,
 } from './transform_esql_form_data';
-import type { EsqlToolFormData } from '../components/tools/form/types/tool_form_types';
+import {
+  EsqlParamSource,
+  type EsqlToolFormData,
+} from '../components/tools/form/types/tool_form_types';
 
 describe('transformEsqlFormData', () => {
   let mockFormData: EsqlToolFormData;
@@ -27,10 +30,21 @@ describe('transformEsqlFormData', () => {
       description: 'A tool for testing.',
       esql: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
       params: [
-        { name: 'param1', type: 'text', description: 'A string parameter.' },
-        { name: 'param2', type: 'long', description: 'A number parameter.' },
+        {
+          name: 'param1',
+          type: 'text',
+          description: 'A string parameter.',
+          source: EsqlParamSource.Custom,
+        },
+        {
+          name: 'param2',
+          type: 'long',
+          description: 'A number parameter.',
+          source: EsqlParamSource.Custom,
+        },
       ],
       labels: ['test', 'esql'],
+      type: ToolType.esql,
     };
 
     mockTool = {
@@ -74,6 +88,7 @@ describe('transformEsqlFormData', () => {
         name: 'unusedParam',
         description: 'An unused parameter.',
         type: 'text',
+        source: EsqlParamSource.Custom,
       });
 
       const expectedTool = { ...mockTool };
@@ -106,6 +121,7 @@ describe('transformEsqlFormData', () => {
         esql: 'FROM other_index',
         params: [],
         labels: [],
+        type: ToolType.esql,
       };
 
       const expectedPayload: CreateToolPayload = {
@@ -129,10 +145,21 @@ describe('transformEsqlFormData', () => {
         description: 'A tool for testing.',
         esql: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1',
         params: [
-          { name: 'param1', type: 'text', description: 'A string parameter.' },
-          { name: 'param2', type: 'long', description: 'A number parameter.' },
+          {
+            name: 'param1',
+            type: 'text',
+            description: 'A string parameter.',
+            source: EsqlParamSource.Custom,
+          },
+          {
+            name: 'param2',
+            type: 'long',
+            description: 'A number parameter.',
+            source: EsqlParamSource.Custom,
+          },
         ],
         labels: ['test', 'esql'],
+        type: ToolType.esql,
       };
 
       const expectedPayload: CreateToolPayload = {

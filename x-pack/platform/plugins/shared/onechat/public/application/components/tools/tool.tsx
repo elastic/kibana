@@ -16,17 +16,20 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { i18n } from '@kbn/i18n';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { isEsqlTool } from '@kbn/onechat-common/tools';
+import { ToolType } from '@kbn/onechat-common/tools/definition';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { i18n } from '@kbn/i18n';
 import type {
   CreateToolPayload,
   CreateToolResponse,
   UpdateToolPayload,
   UpdateToolResponse,
 } from '../../../../common/http_api/tools';
+import { useToolForm } from '../../hooks/tools/use_tool_form';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
@@ -35,33 +38,40 @@ import {
   transformEsqlFormDataForUpdate,
   transformEsqlToolToFormData,
 } from '../../utils/transform_esql_form_data';
-import { ToolForm, ToolFormMode } from './form/tool_form';
-import type { EsqlToolFormData } from './form/types/tool_form_types';
-import { useEsqlToolForm } from '../../hooks/tools/use_esql_tool_form';
 import { OnechatTestFlyout } from './execute/test_tools';
+import { ToolForm, ToolFormMode } from './form/tool_form';
+import type { ToolFormData } from './form/types/tool_form_types';
+import { transformBuiltInToolToFormData } from '../../utils/transform_built_in_form_data';
 
 interface ToolBaseProps {
-  tool?: EsqlToolDefinitionWithSchema;
+  tool?: ToolDefinitionWithSchema;
   isLoading: boolean;
-  isSubmitting: boolean;
 }
 
 interface ToolCreateProps extends ToolBaseProps {
   mode: ToolFormMode.Create;
+  isSubmitting: boolean;
   saveTool: (data: CreateToolPayload) => Promise<CreateToolResponse>;
 }
 
 interface ToolEditProps extends ToolBaseProps {
   mode: ToolFormMode.Edit;
+  isSubmitting: boolean;
   saveTool: (data: UpdateToolPayload) => Promise<UpdateToolResponse>;
 }
 
-export type ToolProps = ToolCreateProps | ToolEditProps;
+interface ToolViewProps extends ToolBaseProps {
+  mode: ToolFormMode.View;
+  isSubmitting?: never;
+  saveTool?: never;
+}
+
+export type ToolProps = ToolCreateProps | ToolEditProps | ToolViewProps;
 
 export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting, saveTool }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
-  const form = useEsqlToolForm();
+  const form = useToolForm(tool);
   const { reset, formState, watch, handleSubmit } = form;
   const { errors } = formState;
   const [showTestFlyout, setShowTestFlyout] = useState(false);
@@ -73,13 +83,28 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, [navigateToOnechatUrl]);
 
   const handleSave = useCallback(
-    async (data: EsqlToolFormData, shouldRedirect = true) => {
+    async (data: ToolFormData, shouldRedirect = true) => {
+      if (mode === ToolFormMode.View) return;
       if (mode === ToolFormMode.Edit) {
-        await saveTool(transformEsqlFormDataForUpdate(data));
+        switch (data.type) {
+          case ToolType.esql:
+            await saveTool(transformEsqlFormDataForUpdate(data));
+            break;
+          default:
+            break;
+        }
       } else {
-        await saveTool(transformEsqlFormDataForCreate(data));
+        switch (data.type) {
+          case ToolType.esql:
+            await saveTool(transformEsqlFormDataForCreate(data));
+            break;
+          default:
+            break;
+        }
       }
-      navigateToOnechatUrl(appPaths.tools.list);
+      if (shouldRedirect) {
+        navigateToOnechatUrl(appPaths.tools.list);
+      }
     },
     [mode, saveTool, navigateToOnechatUrl]
   );
@@ -89,7 +114,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   }, []);
 
   const handleSaveAndTest = useCallback(
-    async (data: EsqlToolFormData) => {
+    async (data: ToolFormData) => {
       await handleSave(data, false);
       handleTestTool();
     },
@@ -98,16 +123,20 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   useEffect(() => {
     if (tool) {
-      reset(transformEsqlToolToFormData(tool), {
-        keepDefaultValues: true,
-        keepDirty: true,
-      });
+      if (isEsqlTool(tool)) {
+        reset(transformEsqlToolToFormData(tool));
+      }
+      if (tool.type === ToolType.builtin) {
+        reset(transformBuiltInToolToFormData(tool));
+      }
     }
   }, [tool, reset]);
 
-  const esqlToolFormId = useGeneratedHtmlId({
-    prefix: 'esqlToolForm',
+  const toolFormId = useGeneratedHtmlId({
+    prefix: 'toolForm',
   });
+
+  const isViewMode = mode === ToolFormMode.View;
 
   const saveButton = (
     <EuiButton
@@ -115,7 +144,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       type="submit"
       fill
       iconType="save"
-      form={esqlToolFormId}
+      form={toolFormId}
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
       css={css`
@@ -163,7 +192,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     <FormProvider {...form}>
       <KibanaPageTemplate>
         <KibanaPageTemplate.Header
-          pageTitle={mode === ToolFormMode.Edit ? tool?.id : labels.tools.newToolTitle}
+          pageTitle={
+            [ToolFormMode.View, ToolFormMode.Edit].includes(mode)
+              ? tool?.id
+              : labels.tools.newToolTitle
+          }
           css={css`
             background-color: ${euiTheme.colors.backgroundBasePlain};
             border-block-end: none;
@@ -176,7 +209,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
             </EuiFlexGroup>
           ) : (
             <>
-              <ToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
+              {isViewMode ? (
+                <ToolForm mode={ToolFormMode.View} formId={toolFormId} />
+              ) : (
+                <ToolForm mode={mode} formId={toolFormId} saveTool={handleSave} />
+              )}
               {showTestFlyout && currentToolId && (
                 <OnechatTestFlyout
                   isOpen={showTestFlyout}
@@ -193,33 +230,37 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
             </>
           )}
         </KibanaPageTemplate.Section>
-        <KibanaPageTemplate.BottomBar
-          css={css`
-            z-index: ${euiTheme.levels.header};
-          `}
-          paddingSize="m"
-          restrictWidth={false}
-        >
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="cross" onClick={handleCancel}>
-                {labels.tools.cancelButtonLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {mode === ToolFormMode.Edit ? testButton : saveAndTestButton}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {Object.keys(errors).length > 0 ? (
-                <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>
-                  {saveButton}
-                </EuiToolTip>
-              ) : (
-                saveButton
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </KibanaPageTemplate.BottomBar>
+        {!isViewMode && (
+          <KibanaPageTemplate.BottomBar
+            css={css`
+              z-index: ${euiTheme.levels.header};
+            `}
+            paddingSize="m"
+            restrictWidth={false}
+            position="fixed"
+            usePortal
+          >
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty size="s" iconType="cross" onClick={handleCancel}>
+                  {labels.tools.cancelButtonLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {mode === ToolFormMode.Edit ? testButton : saveAndTestButton}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {Object.keys(errors).length > 0 ? (
+                  <EuiToolTip display="block" content={labels.tools.saveButtonTooltip}>
+                    {saveButton}
+                  </EuiToolTip>
+                ) : (
+                  saveButton
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </KibanaPageTemplate.BottomBar>
+        )}
       </KibanaPageTemplate>
     </FormProvider>
   );

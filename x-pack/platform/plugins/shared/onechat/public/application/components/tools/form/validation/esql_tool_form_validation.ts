@@ -15,6 +15,7 @@ import {
   isReservedToolId,
   isInProtectedNamespace,
   hasProtectedNamespaceName,
+  ToolType,
 } from '@kbn/onechat-common/tools';
 import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod';
@@ -117,9 +118,9 @@ export const esqlFormValidationSchema = z
   .object({
     toolId: z
       .string()
-      .min(1, { message: i18nMessages.name.requiredError })
-      .max(toolIdMaxLength, { message: i18nMessages.name.tooLongError })
-      .regex(toolIdRegexp, { message: i18nMessages.name.formatError })
+      .min(1, { message: i18nMessages.toolId.requiredError })
+      .max(toolIdMaxLength, { message: i18nMessages.toolId.tooLongError })
+      .regex(toolIdRegexp, { message: i18nMessages.toolId.formatError })
       .refine(
         (name) => !isReservedToolId(name),
         (name) => ({
@@ -129,7 +130,7 @@ export const esqlFormValidationSchema = z
       .refine(
         (name) => !isInProtectedNamespace(name) && !hasProtectedNamespaceName(name),
         (name) => ({
-          message: i18nMessages.name.protectedNamespaceError(name),
+          message: i18nMessages.toolId.protectedNamespaceError(name),
         })
       ),
     description: z.string(),
@@ -172,6 +173,7 @@ export const esqlFormValidationSchema = z
         });
       }),
     labels: z.array(z.string()),
+    type: z.literal(ToolType.esql),
   })
   .superRefine(({ esql, params }, ctx) => {
     const inferredParams = getESQLQueryVariables(esql);

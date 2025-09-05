@@ -208,6 +208,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
                 fullWidth
                 popoverProps={{
                   panelMinWidth: 150,
+                  zIndex: (euiTheme.levels.header as number) - 1, // ensure the popover doesn't render on top of the bottom bar
                 }}
                 options={Object.values(EsqlToolFieldType).map((option) => ({
                   value: option,

@@ -6,19 +6,31 @@
  */
 
 import { EuiCallOut, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { ToolType } from '@kbn/onechat-common/tools/definition';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { EsqlEditorField } from '../components/esql_editor_field';
-import { EsqlParams } from '../components/esql_params';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
-import type { EsqlToolFormData } from '../types/tool_form_types';
+import type { ToolFormData } from '../types/tool_form_types';
+import { EsqlConfiguration } from './configuration_fields/esql_configuration_fields';
 
 export const Configuration = () => {
   const {
     formState: { errors },
     control,
-  } = useFormContext<EsqlToolFormData>();
+  } = useFormContext<ToolFormData>();
+  const type = useWatch({ control, name: 'type' });
+
+  let configurationFields: React.ReactNode;
+  switch (type) {
+    case ToolType.esql:
+      configurationFields = <EsqlConfiguration />;
+      break;
+    default:
+      configurationFields = null;
+      break;
+  }
+
   return (
     <ToolFormSection
       title={i18nMessages.configuration.documentation.title}
@@ -33,7 +45,7 @@ export const Configuration = () => {
       }
       documentation={{
         title: i18nMessages.configuration.documentation.documentationLink,
-        href: 'https://www.elastic.co/guide/en/enterprise-search/current/configuring-tools.html',
+        href: '#', // TODO: add documentation link when available
       }}
     >
       <EuiFormRow label={i18nMessages.configuration.form.type.label} error={errors.type?.message}>
@@ -50,19 +62,7 @@ export const Configuration = () => {
           )}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18nMessages.configuration.form.esql.queryLabel}
-        isInvalid={!!errors.esql}
-        error={errors.esql?.message}
-      >
-        <EsqlEditorField />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18nMessages.configuration.form.esql.parametersLabel}
-        isInvalid={!!errors.params}
-      >
-        <EsqlParams />
-      </EuiFormRow>
+      {configurationFields}
     </ToolFormSection>
   );
 };

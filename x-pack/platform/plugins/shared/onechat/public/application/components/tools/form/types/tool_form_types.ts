@@ -23,14 +23,23 @@ export type EsqlParamFormData = EsqlParam & {
   source: EsqlParamSource;
 };
 
-export interface ToolFormData {
-  type: ToolType;
+export interface BaseToolFormData {
   toolId: string;
   description: string;
   labels: string[];
 }
-
-export interface EsqlToolFormData extends ToolFormData {
+export interface EsqlToolFormData extends BaseToolFormData {
+  type: ToolType.esql;
   esql: string;
   params: EsqlParamFormData[];
 }
+
+export interface BuiltinToolFormData extends BaseToolFormData {
+  type: ToolType.builtin;
+}
+
+export interface IndexSearchToolFormData extends BaseToolFormData {
+  type: ToolType.index_search;
+}
+
+export type ToolFormData = EsqlToolFormData | BuiltinToolFormData | IndexSearchToolFormData;

@@ -10,7 +10,10 @@ import type { EsqlToolDefinition, EsqlToolFieldTypes } from '@kbn/onechat-common
 import { ToolType } from '@kbn/onechat-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
-import type { EsqlToolFormData } from '../components/tools/form/types/tool_form_types';
+import {
+  EsqlParamSource,
+  type EsqlToolFormData,
+} from '../components/tools/form/types/tool_form_types';
 
 /**
  * Transforms an ES|QL tool into its UI form representation.
@@ -27,6 +30,7 @@ export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): EsqlToolF
       name,
       type,
       description,
+      source: EsqlParamSource.Custom,
     })),
     type: ToolType.esql,
   };

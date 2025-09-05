@@ -11,14 +11,22 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { useToolsTags } from '../../../../hooks/tools/use_tool_tags';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
-import type { EsqlToolFormData } from '../types/tool_form_types';
+import { ToolFormMode } from '../tool_form';
+import type { ToolFormData } from '../types/tool_form_types';
 
-export const Labels = () => {
+export interface LabelsProps {
+  mode: ToolFormMode;
+}
+
+export const Labels = ({ mode }: LabelsProps) => {
   const { tags, isLoading: isLoadingTags } = useToolsTags();
   const {
     control,
     formState: { errors },
-  } = useFormContext<EsqlToolFormData>();
+  } = useFormContext<ToolFormData>();
+
+  const isReadOnly = mode === ToolFormMode.View;
+
   return (
     <ToolFormSection
       title={i18nMessages.toolLabels.documentation.title}
@@ -26,19 +34,21 @@ export const Labels = () => {
       description={i18nMessages.toolLabels.documentation.description}
       documentation={{
         title: i18nMessages.toolLabels.documentation.documentationLink,
-        href: 'https://www.elastic.co/guide/en/enterprise-search/current/tool-labels.html',
+        href: '#', // TODO: add documentation link when available
       }}
     >
       <EuiFormRow
         label={i18nMessages.toolLabels.form.label}
         labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18nMessages.optionalFieldLabel}
-          </EuiText>
+          !isReadOnly ? (
+            <EuiText size="xs" color="subdued">
+              {i18nMessages.optionalFieldLabel}
+            </EuiText>
+          ) : undefined
         }
         isInvalid={!!errors.labels}
         helpText={i18nMessages.toolLabels.form.helpText}
-        error={errors.labels?.message as string}
+        error={errors.labels?.message}
       >
         <Controller
           control={control}
@@ -58,6 +68,7 @@ export const Labels = () => {
               isLoading={isLoadingTags}
               isInvalid={invalid}
               fullWidth
+              isDisabled={isReadOnly}
               inputRef={ref}
               {...field}
             />

@@ -21,7 +21,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { i18nMessages } from '../i18n';
 import { ToolFormSection } from '../components/tool_form_section';
 import { ToolFormMode } from '../tool_form';
-import type { EsqlToolFormData } from '../types/tool_form_types';
+import type { ToolFormData } from '../types/tool_form_types';
 export interface SystemReferencesProps {
   mode: ToolFormMode;
 }
@@ -30,7 +30,10 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
   const {
     control,
     formState: { errors },
-  } = useFormContext<EsqlToolFormData>();
+  } = useFormContext<ToolFormData>();
+
+  const isReadOnly = mode === ToolFormMode.View;
+  const isToolIdDisabled = mode === ToolFormMode.Edit || isReadOnly;
 
   return (
     <ToolFormSection
@@ -74,11 +77,11 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
       }
       documentation={{
         title: i18nMessages.systemReferences.documentation.toolBasicsDocumentationLink,
-        href: 'https://www.elastic.co/guide/en/enterprise-search/current/tool-basics.html',
+        href: '#', // TODO: add documentation link when available
       }}
     >
       <EuiFormRow
-        isDisabled={mode === ToolFormMode.Edit}
+        isDisabled={isToolIdDisabled}
         label={i18nMessages.systemReferences.form.toolId.label}
         isInvalid={!!errors.toolId}
         helpText={i18nMessages.systemReferences.form.toolId.helpText}
@@ -89,7 +92,8 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           name="toolId"
           render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
             <EuiFieldText
-              disabled={mode === ToolFormMode.Edit}
+              disabled={isToolIdDisabled}
+              readOnly={isReadOnly}
               {...field}
               inputRef={ref}
               isInvalid={invalid}
@@ -100,9 +104,11 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
       <EuiFormRow
         label={i18nMessages.systemReferences.form.description.label}
         labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18nMessages.optionalFieldLabel}
-          </EuiText>
+          !isReadOnly ? (
+            <EuiText size="xs" color="subdued">
+              {i18nMessages.optionalFieldLabel}
+            </EuiText>
+          ) : undefined
         }
         isInvalid={!!errors.description}
         error={errors.description?.message}
@@ -114,6 +120,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
             <EuiMarkdownEditor
               aria-label={i18nMessages.systemReferences.form.description.label}
               height={482}
+              readOnly={isReadOnly}
               {...field}
             />
           )}
