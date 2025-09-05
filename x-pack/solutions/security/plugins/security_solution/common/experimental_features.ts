@@ -248,6 +248,11 @@ export const allowedExperimentalValues = Object.freeze({
   privilegedUserMonitoringDisabled: false,
 
   /**
+   * Enables Integrations Sync for Privileged User Monitoring
+   */
+  integrationsSyncEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
