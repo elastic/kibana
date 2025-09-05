@@ -143,7 +143,6 @@ components:
         - type: object
           required:
             - 'type'
-            - 'content'
           properties:
             type:
               type: string
