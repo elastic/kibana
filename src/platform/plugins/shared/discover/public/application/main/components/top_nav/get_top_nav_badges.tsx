@@ -55,34 +55,27 @@ export const getTopNavBadges = ({
   //   });
   // }
 
-  if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
-    entries.push(
-      getTopNavUnsavedChangesBadge({
-        onRevert: async () => {
-          dismissFlyouts([DiscoverFlyouts.lensEdit]);
-
-          const { persistedDiscoverSession } = stateContainer.internalState.getState();
-
-          if (persistedDiscoverSession) {
-            await stateContainer.internalState
-              .dispatch(internalStateActions.resetDiscoverSession())
-              .unwrap();
-          }
-        },
-        onSave:
-          services.capabilities.discover_v2.save && !isManaged
-            ? async () => {
-                await saveDiscoverSession();
-              }
-            : undefined,
-        onSaveAs: services.capabilities.discover_v2.save
-          ? async () => {
-              await saveDiscoverSession(true);
-            }
-          : undefined,
-      })
-    );
-  }
+  // if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
+  //   entries.push(
+  //     getTopNavUnsavedChangesBadge({
+  //       onRevert: async () => {
+  //         dismissFlyouts([DiscoverFlyouts.lensEdit]);
+  //         await stateContainer.actions.undoSavedSearchChanges();
+  //       },
+  //       onSave:
+  //         services.capabilities.discover_v2.save && !isManaged
+  //           ? async () => {
+  //               await saveSearch();
+  //             }
+  //           : undefined,
+  //       onSaveAs: services.capabilities.discover_v2.save
+  //         ? async () => {
+  //             await saveSearch(true);
+  //           }
+  //         : undefined,
+  //     })
+  //   );
+  // }
 
   if (isManaged) {
     entries.push(

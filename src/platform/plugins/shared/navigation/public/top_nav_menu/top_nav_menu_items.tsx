@@ -61,6 +61,7 @@ export const TopNavMenuItems = ({
       emphasize: false,
       iconOnly: true,
       iconType: 'boxesVertical',
+      iconDisplay: 'empty',
     };
 
     // Build visible items: secondary items first, then More button (if needed), then primary items last

@@ -277,9 +277,12 @@ export const useTopNavLinks = ({
         description: i18n.translate('discover.localMenu.saveSearchDescription', {
           defaultMessage: 'Save session',
         }),
+        className: `dscSplitSaveLeft${hasUnsavedChanges ? ' dscSplitSaveLeft--hasChanges' : ''}`,
         testId: 'discoverSaveButton',
         fill: Boolean(hasUnsavedChanges),
         color: hasUnsavedChanges ? 'primary' : 'text',
+        // iconType: hasUnsavedChanges ? 'dot' : undefined,
+        // iconSide: hasUnsavedChanges ? 'right' : undefined,
         emphasize: true,
         run: (anchorElement: HTMLElement) => {
           onSaveDiscoverSession({
@@ -302,6 +305,7 @@ export const useTopNavLinks = ({
           defaultMessage: 'More save actions',
         }),
         testId: 'discoverSaveMoreButton',
+        className: `dscSplitSaveRight${hasUnsavedChanges ? ' dscSplitSaveRight--hasChanges' : ''}`,
         emphasize: true,
         fill: Boolean(hasUnsavedChanges),
         color: hasUnsavedChanges ? 'primary' : 'text',
