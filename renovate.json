@@ -46,6 +46,9 @@
         "xstate",
         "@xstate/react"
       ],
+      "reviewers": [
+        "team:obs-ux-logs-team"
+      ],
       "enabled": false
     },
     {
