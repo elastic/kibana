@@ -998,6 +998,7 @@
     "@kbn/shared-ux-router-types": "link:src/platform/packages/shared/shared-ux/router/types",
     "@kbn/shared-ux-tabbed-modal": "link:src/platform/packages/shared/shared-ux/modal/tabbed",
     "@kbn/shared-ux-table-persist": "link:src/platform/packages/shared/shared-ux/table_persist",
+    "@kbn/shared-ux-toolbar-selector": "link:src/platform/packages/shared/shared-ux/toolbar_selector",
     "@kbn/shared-ux-utility": "link:src/platform/packages/shared/kbn-shared-ux-utility",
     "@kbn/slo-plugin": "link:x-pack/solutions/observability/plugins/slo",
     "@kbn/slo-schema": "link:x-pack/platform/packages/shared/kbn-slo-schema",
