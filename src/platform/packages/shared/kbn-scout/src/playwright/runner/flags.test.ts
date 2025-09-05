@@ -10,6 +10,9 @@
 import { parseTestFlags } from './flags';
 import { FlagsReader } from '@kbn/dev-cli-runner';
 import * as configValidator from './config_validator';
+import fs from 'fs';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const validatePlaywrightConfigMock = jest.spyOn(configValidator, 'validatePlaywrightConfig');
 
@@ -161,6 +164,216 @@ describe('parseTestFlags', () => {
       esFrom: 'snapshot',
       installDir: undefined,
       logsDir: undefined,
+    });
+  });
+
+  describe('testFiles flag', () => {
+    let existsSyncSpy: jest.SpyInstance;
+    let statSyncSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      // Reset all mocks
+      jest.clearAllMocks();
+      validatePlaywrightConfigMock.mockResolvedValue();
+
+      // Spy on fs methods
+      existsSyncSpy = jest.spyOn(fs, 'existsSync');
+      statSyncSpy = jest.spyOn(fs, 'statSync');
+    });
+
+    afterEach(() => {
+      // Restore fs methods
+      existsSyncSpy.mockRestore();
+      statSyncSpy.mockRestore();
+    });
+
+    it('should parse without testFiles flag (optional)', async () => {
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result).toEqual({
+        mode: 'stateful',
+        configPath: '/path/to/config',
+        testTarget: 'local',
+        headed: false,
+        esFrom: undefined,
+        installDir: undefined,
+        logsDir: undefined,
+      });
+      expect(result).not.toHaveProperty('testFiles');
+    });
+
+    it('should parse with single test file', async () => {
+      const testFile = 'src/test.spec.ts';
+      const fullPath = path.resolve(REPO_ROOT, testFile);
+
+      existsSyncSpy.mockReturnValue(true);
+      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
+
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result).toEqual({
+        mode: 'stateful',
+        configPath: '/path/to/config',
+        testTarget: 'local',
+        headed: false,
+        testFiles: [testFile],
+        esFrom: undefined,
+        installDir: undefined,
+        logsDir: undefined,
+      });
+      expect(existsSyncSpy).toHaveBeenCalledWith(fullPath);
+      expect(statSyncSpy).toHaveBeenCalledWith(fullPath);
+    });
+
+    it('should parse with multiple test files', async () => {
+      const testFiles = ['src/test1.spec.ts', 'src/test2.spec.ts', 'src/test3.spec.ts'];
+      const testFilesString = testFiles.join(',');
+
+      existsSyncSpy.mockReturnValue(true);
+      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
+
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: testFilesString,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result).toEqual({
+        mode: 'stateful',
+        configPath: '/path/to/config',
+        testTarget: 'local',
+        headed: false,
+        testFiles,
+        esFrom: undefined,
+        installDir: undefined,
+        logsDir: undefined,
+      });
+      expect(existsSyncSpy).toHaveBeenCalledTimes(3);
+      expect(statSyncSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it('should handle test files with spaces around commas', async () => {
+      const testFiles = ['src/test1.spec.ts', 'src/test2.spec.ts'];
+      const testFilesString = ' src/test1.spec.ts , src/test2.spec.ts ';
+
+      existsSyncSpy.mockReturnValue(true);
+      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
+
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: testFilesString,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result.testFiles).toEqual(testFiles);
+    });
+
+    it('should filter out empty strings from comma-separated list', async () => {
+      const testFile = 'src/test.spec.ts';
+      const testFilesString = 'src/test.spec.ts,,, ,';
+
+      existsSyncSpy.mockReturnValue(true);
+      statSyncSpy.mockReturnValue({ isFile: () => true } as any);
+
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: testFilesString,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result.testFiles).toEqual([testFile]);
+    });
+
+    it('should throw error when test file does not exist', async () => {
+      const testFile = 'src/nonexistent.spec.ts';
+
+      existsSyncSpy.mockReturnValue(false);
+
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      await expect(parseTestFlags(flags)).rejects.toThrow(`Test file does not exist: ${testFile}`);
+    });
+
+    it('should throw error when test file path is outside repository', async () => {
+      const testFile = '../outside/test.spec.ts';
+
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      await expect(parseTestFlags(flags)).rejects.toThrow(
+        `Test file must be within the repository: ${testFile}`
+      );
+    });
+
+    it('should throw error when test file path is a directory', async () => {
+      const testFile = 'src/directory';
+
+      existsSyncSpy.mockReturnValue(true);
+      statSyncSpy.mockReturnValue({ isFile: () => false } as any);
+
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      await expect(parseTestFlags(flags)).rejects.toThrow(
+        `Test file must be a file, not a directory: ${testFile}`
+      );
+    });
+
+    it('should handle empty testFiles string', async () => {
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        testFiles: '',
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result).not.toHaveProperty('testFiles');
     });
   });
 });
