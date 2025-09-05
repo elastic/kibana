@@ -56,7 +56,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
       <EuiAccordion
         id="cloudFormationAccordianInstructions"
         data-test-subj={''}
-        buttonContent={<EuiLink>{'Steps to generate IAM role credentials'}</EuiLink>}
+        buttonContent={<EuiLink>{'Steps to assume role'}</EuiLink>}
         paddingSize="l"
       >
         <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
