@@ -83,8 +83,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
-  const config = getService('config');
-  const isServerless = !!config.get('serverless');
 
   describe('Root stream', () => {
     before(async () => {
@@ -190,18 +188,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '@timestamp': '2024-01-01T00:00:20.000Z',
         message: 'test',
       };
-      let threw = false;
-      try {
-        await indexDocument(esClient, 'logs.gcpcloud', doc);
-      } catch (e) {
-        threw = true;
-        if (isServerless) {
-          expect(e.message).to.contain('stream.name is not set properly');
-        } else {
-          expect(e.message).to.contain('Direct writes to child streams are prohibited');
-        }
-      }
-      expect(threw).to.be(true);
+      const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
+      // @ts-expect-error failure_store is not in the types, but in the actual response
+      expect(response.failure_store).to.be('used');
     });
   });
 }
