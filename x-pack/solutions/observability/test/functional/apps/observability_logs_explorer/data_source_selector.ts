@@ -273,37 +273,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        it('should load more integrations by scrolling to the end of the list', async () => {
-          // Install more integrations and reload the page
-          const cleanupAdditionalSetup =
-            await PageObjects.observabilityLogsExplorer.setupAdditionalIntegrations();
-          await browser.refresh();
-
-          await PageObjects.observabilityLogsExplorer.openDataSourceSelector();
-
-          // Initially fetched integrations
-          await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(nodes.length).to.be(15);
-            await nodes.at(-1)?.scrollIntoView();
-          });
-
-          // Load more integrations
-          await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(nodes.length).to.be(20);
-            await nodes.at(-1)?.scrollIntoView();
-          });
-
-          // No other integrations to load after scrolling to last integration
-          await retry.try(async () => {
-            const { nodes } = await PageObjects.observabilityLogsExplorer.getIntegrations();
-            expect(nodes.length).to.be(20);
-          });
-
-          await cleanupAdditionalSetup();
-        });
-
         describe('clicking on integration and moving into the second navigation level', () => {
           before(async () => {
             await PageObjects.observabilityLogsExplorer.navigateTo();

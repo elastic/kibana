@@ -603,17 +603,25 @@ export const ESQLEditor = memo(function ESQLEditor({
   useEffect(() => {
     const setQueryToTheCache = async () => {
       if (editor1?.current) {
-        const parserMessages = await parseMessages();
-        const clientParserStatus = parserMessages.errors?.length
-          ? 'error'
-          : parserMessages.warnings.length
-          ? 'warning'
-          : 'success';
+        try {
+          const parserMessages = await parseMessages();
+          const clientParserStatus = parserMessages.errors?.length
+            ? 'error'
+            : parserMessages.warnings.length
+            ? 'warning'
+            : 'success';
 
-        addQueriesToCache({
-          queryString: code,
-          status: clientParserStatus,
-        });
+          addQueriesToCache({
+            queryString: code,
+            status: clientParserStatus,
+          });
+        } catch (error) {
+          // Default to warning when parseMessages fails
+          addQueriesToCache({
+            queryString: code,
+            status: 'warning',
+          });
+        }
       }
     };
     if (isQueryLoading || isLoading) {

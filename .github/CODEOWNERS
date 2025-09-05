@@ -1641,6 +1641,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/cli/serve/ @elastic/kibana-operations
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
+/.github/copilot-instructions.md @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
@@ -2830,6 +2831,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/sharing/*.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overviews @elastic/appex-sharedux
+/x-pack/platform/test/functional/apps/product_intercept @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
@@ -2849,6 +2851,7 @@ packages/react @elastic/appex-sharedux
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
+/x-pack/test/api_integration/deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/core-docs @elastic/experience-docs
