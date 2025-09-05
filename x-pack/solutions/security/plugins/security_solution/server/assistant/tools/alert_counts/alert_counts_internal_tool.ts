@@ -28,12 +28,12 @@ export const ALERT_COUNTS_INTERNAL_TOOL_DESCRIPTION =
  */
 export const alertCountsInternalTool = (): BuiltinToolDefinition<typeof alertCountsToolSchema> => {
   return {
-    id: '.alert-counts-internal-tool',
+    id: 'alert-counts-internal-tool',
     description: ALERT_COUNTS_INTERNAL_TOOL_DESCRIPTION,
     schema: alertCountsToolSchema,
-    handler: async ({ alertsIndexPattern }, { esClient }) => {
+    handler: async ({ alertsIndexPattern }, context) => {
       const query = getAlertsCountQuery(alertsIndexPattern);
-      const result = await esClient.asCurrentUser.search<SearchResponse>(query);
+      const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
 
       // Create a new contentReferencesStore for this tool execution
       const contentReferencesStore = newContentReferencesStore();
@@ -46,14 +46,14 @@ export const alertCountsInternalTool = (): BuiltinToolDefinition<typeof alertCou
       // Format the reference string
       const reference = `\n${contentReferenceString(alertsCountReference)}`;
 
-      // Combine the result with the reference
-      const resultWithReference = `${JSON.stringify(result)}${reference}`;
-
       return {
         results: [
           {
             type: ToolResultType.other,
-            data: resultWithReference,
+            data: {
+              result,
+              reference,
+            },
           },
         ],
       };

@@ -14,6 +14,7 @@ import type { ConversationSettings } from '../../../services/types';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { NewConversationButton } from './new_conversation_button';
+import { SettingsContextMenu } from '../settings/settings_context_menu';
 
 export const ConversationActions: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -26,7 +27,6 @@ export const ConversationActions: React.FC<{}> = () => {
     {}
   );
 
-  const settingsMenuComponent = conversationSettings?.settingsMenuComponent;
   const isFlyoutMode = conversationSettings?.isFlyoutMode;
 
   const actionsContainerStyles = css`
@@ -51,9 +51,15 @@ export const ConversationActions: React.FC<{}> = () => {
             <NewConversationButton />
           </EuiFlexItem>
         )}
-        {settingsMenuComponent && isFlyoutMode && (
-          <EuiFlexItem grow={false}>{settingsMenuComponent}</EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <SettingsContextMenu
+            selectedConnectorId={conversationSettings?.selectedConnectorId}
+            onConnectorSelectionChange={(connector) =>
+              conversationSettings?.setConnectorId?.(connector.id)
+            }
+          />
+        </EuiFlexItem>
+        {isFlyoutMode && <EuiFlexItem grow={false}></EuiFlexItem>}
       </EuiFlexGroup>
     </EuiPageHeaderSection>
   );

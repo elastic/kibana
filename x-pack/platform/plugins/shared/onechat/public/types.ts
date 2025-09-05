@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import type { OnechatInternalService } from './services';
-import type { OnechatServicesContext } from './application/context/onechat_services_context';
-
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { OnechatInternalService } from './services';
+import type { OnechatServicesContext } from './application/context/onechat_services_context';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -23,11 +26,14 @@ export interface OnechatSetupDependencies {
   spaces: SpacesPluginSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface OnechatStartDependencies {
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  spaces: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface OnechatPluginSetup {}

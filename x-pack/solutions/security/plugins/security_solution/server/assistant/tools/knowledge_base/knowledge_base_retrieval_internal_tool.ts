@@ -70,17 +70,17 @@ export const knowledgeBaseRetrievalInternalTool = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
 ): BuiltinToolDefinition<typeof knowledgeBaseRetrievalToolSchema> => {
   return {
-    id: '.knowledge-base-retrieval-internal-tool',
+    id: 'knowledge-base-retrieval-internal-tool',
     description: toolDescription,
     schema: knowledgeBaseRetrievalToolSchema,
-    handler: async ({ query }, { request }) => {
+    handler: async ({ query }, context) => {
       try {
         // Get access to the elastic-assistant plugin through start services
         const [, pluginsStart] = await getStartServices();
 
         // Get the knowledge base data client
         const kbDataClient = await pluginsStart.elasticAssistant.getKnowledgeBaseDataClient(
-          request
+          context.request
         );
 
         if (!kbDataClient) {
@@ -88,10 +88,10 @@ export const knowledgeBaseRetrievalInternalTool = (
             results: [
               {
                 type: ToolResultType.other,
-                data: JSON.stringify({
+                data: {
                   message: 'Knowledge base is not available or not enabled',
                   query,
-                }),
+                },
               },
             ],
           };
@@ -114,7 +114,9 @@ export const knowledgeBaseRetrievalInternalTool = (
           results: [
             {
               type: ToolResultType.other,
-              data: JSON.stringify(enrichedDocs),
+              data: {
+                documents: enrichedDocs,
+              },
             },
           ],
         };
@@ -123,11 +125,11 @@ export const knowledgeBaseRetrievalInternalTool = (
           results: [
             {
               type: ToolResultType.other,
-              data: JSON.stringify({
+              data: {
                 error: 'Failed to retrieve knowledge base data',
                 message: error instanceof Error ? error.message : 'Unknown error',
                 query,
-              }),
+              },
             },
           ],
         };

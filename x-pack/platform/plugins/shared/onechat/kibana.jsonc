@@ -17,7 +17,8 @@
       "inference",
       "kibanaUtils",
       "lens",
-      "spaces"
+      "spaces",
+      "triggersActionsUi"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"],

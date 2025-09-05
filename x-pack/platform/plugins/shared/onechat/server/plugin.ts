@@ -44,7 +44,6 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const { spaces: spacesSetup } = pluginsSetup;
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
     });

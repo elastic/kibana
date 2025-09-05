@@ -21,7 +21,7 @@ export interface StarterPrompt {
 
 export interface ConversationSettings {
   isFlyoutMode?: boolean;
-  settingsMenuComponent?: React.ReactNode;
+  // settingsMenuComponent?: React.ReactNode;
   getLastConversation?: (selectedConversation?: { id: string; title?: string }) => {
     id: string;
     title?: string;

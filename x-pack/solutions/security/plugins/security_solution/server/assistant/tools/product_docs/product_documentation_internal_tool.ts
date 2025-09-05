@@ -52,17 +52,17 @@ export const productDocumentationInternalTool = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
 ): BuiltinToolDefinition<typeof productDocumentationToolSchema> => {
   return {
-    id: '.product-documentation-internal-tool',
+    id: 'product-documentation-internal-tool',
     description: PRODUCT_DOCUMENTATION_INTERNAL_TOOL_DESCRIPTION,
     schema: productDocumentationToolSchema,
-    handler: async ({ query, product, connectorId }, { request }) => {
+    handler: async ({ query, product, connectorId }, context) => {
       const [, pluginsStart] = await getStartServices();
       const response = await pluginsStart.llmTasks.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
         max: 3,
         connectorId,
-        request,
+        request: context.request,
         functionCalling: 'auto',
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
@@ -84,7 +84,7 @@ export const productDocumentationInternalTool = (
         results: [
           {
             type: ToolResultType.other,
-            data: JSON.stringify(resultWithReference),
+            data: resultWithReference,
           },
         ],
       };

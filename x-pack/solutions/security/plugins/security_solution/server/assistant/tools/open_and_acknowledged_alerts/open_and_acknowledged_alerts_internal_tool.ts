@@ -44,10 +44,10 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
   typeof openAndAcknowledgedAlertsToolSchema
 > => {
   return {
-    id: '.open-and-acknowledged-alerts-internal-tool',
+    id: 'open-and-acknowledged-alerts-internal-tool',
     description: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION,
     schema: openAndAcknowledgedAlertsToolSchema,
-    handler: async ({ alertsIndexPattern, size }, { esClient, request }) => {
+    handler: async ({ alertsIndexPattern, size }, context) => {
       // Validate size is within range
       if (sizeIsOutOfRange(size)) {
         throw new Error(`Size ${size} is out of range`);
@@ -59,7 +59,7 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
         size,
       });
 
-      const result = await esClient.asCurrentUser.search<SearchResponse>(query);
+      const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
 
       // Create a new contentReferencesStore for this tool execution
       const contentReferencesStore = newContentReferencesStore();
@@ -88,7 +88,9 @@ export const openAndAcknowledgedAlertsInternalTool = (): BuiltinToolDefinition<
         results: [
           {
             type: ToolResultType.other,
-            data: JSON.stringify(content),
+            data: {
+              alerts: content,
+            },
           },
         ],
       };

@@ -44,7 +44,7 @@ export class OnechatPlugin
     this.logger = context.logger.get();
     this.conversationSettingsService = new ConversationSettingsService();
   }
-  setup(core: CoreSetup<OnechatSetupDependencies, OnechatPluginStart>): OnechatPluginSetup {
+  setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
     const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
 
     if (isOnechatUiEnabled) {

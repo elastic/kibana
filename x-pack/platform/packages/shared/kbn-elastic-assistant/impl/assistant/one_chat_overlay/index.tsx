@@ -204,7 +204,7 @@ export const OneChatOverlay = React.memo(() => {
         newConversationSubtitle: EMPTY_SCREEN_DESCRIPTION,
         newConversationPrompts: fetchedPromptGroups,
         selectedConnectorId: connectorId,
-        settingsMenuComponent: assistantSettings,
+        // settingsMenuComponent: assistantSettings,
         setLastConversation,
         defaultAgentId: 'siem-security-analyst',
         commentActionsMounter,

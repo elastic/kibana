@@ -19,7 +19,7 @@
       "triggersActionsUi",
       "actions",
       "stackConnectors",
-      "onechat"
+      "onechat",
       "inference",
     ],
     "requiredBundles": [
