@@ -65,6 +65,17 @@ const DataViewFlyoutContentContainer = ({
         }
         saveResponse = editData;
       } else {
+        if (editData && isDuplicating) {
+          const editDataSpec = editData.toSpec();
+          dataViewSpec = {
+            ...editDataSpec,
+            id: undefined,
+            name: dataViewSpec.name,
+            timeFieldName: dataViewSpec.timeFieldName,
+            title: dataViewSpec.title,
+            allowHidden: dataViewSpec.allowHidden,
+          };
+        }
         saveResponse = persist
           ? await dataViews.createAndSave(dataViewSpec)
           : await dataViews.create(dataViewSpec);
