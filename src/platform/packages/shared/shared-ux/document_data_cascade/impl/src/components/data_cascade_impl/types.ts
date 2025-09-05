@@ -69,6 +69,10 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * Whether to enable row selection. Default is false.
    */
   enableRowSelection?: boolean;
+  /**
+   * Whether to enable secondary expansion for nodes. Default is false.
+   */
+  enableSecondaryExpansionAction?: boolean;
   isActiveSticky: boolean;
   innerRef: React.LegacyRef<HTMLDivElement>;
   /**
@@ -112,7 +116,11 @@ export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = P
 
 export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowPrimitiveProps<G, L>,
-  'onCascadeGroupNodeExpanded' | 'rowHeaderMetaSlots' | 'rowHeaderTitleSlot' | 'rowHeaderActions'
+  | 'onCascadeGroupNodeExpanded'
+  | 'rowHeaderMetaSlots'
+  | 'rowHeaderTitleSlot'
+  | 'rowHeaderActions'
+  | 'enableSecondaryExpansionAction'
 > & {
   /**
    * Child element for the cascade row.
