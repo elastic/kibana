@@ -88,7 +88,8 @@
     "@kbn/file-upload",
     "@kbn/charts-theme",
     "@kbn/presentation-util",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": [
     "target/**/*",

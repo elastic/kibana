@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import { addPanelMenuTrigger } from '@kbn/ui-actions-triggers';
 import { i18n } from '@kbn/i18n';
 import { coreServices, uiActionsService } from '../services/kibana_services';

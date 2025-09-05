@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { firstValueFrom } from 'rxjs';
 import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
@@ -24,7 +24,7 @@ const supportedApps = [DASHBOARD_APP_ID];
 
 export function createApplyInfluencerFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<SwimLaneDrilldownContext> {
+): ActionDefinition<SwimLaneDrilldownContext> {
   return {
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,

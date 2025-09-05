@@ -11,7 +11,7 @@ import { exporters } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { IncompatibleActionError } from '@kbn/ui-actions';
 
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';

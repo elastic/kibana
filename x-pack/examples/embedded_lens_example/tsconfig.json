@@ -19,7 +19,7 @@
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/ui-actions",
   ]
 }

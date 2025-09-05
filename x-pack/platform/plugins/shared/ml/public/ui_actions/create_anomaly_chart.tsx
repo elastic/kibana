@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { IncompatibleActionError } from '@kbn/ui-actions';
 import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
 import type { AnomalyChartsEmbeddableApi } from '../embeddables';
@@ -34,7 +34,7 @@ const parentApiIsCompatible = async (
 
 export function createAddAnomalyChartsPanelAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<CreateAnomalyChartsPanelActionContext> {
+): ActionDefinition<CreateAnomalyChartsPanelActionContext> {
   return {
     id: 'create-anomaly-charts',
     grouping: [

@@ -12,7 +12,7 @@ import type {
   Action,
   ActionExecutionMeta,
   FrequentCompatibilityChangeAction,
-} from '@kbn/ui-actions-plugin/public';
+} from '@kbn/ui-actions';
 import { IncompatibleActionError } from '@kbn/ui-actions';
 import React from 'react';
 

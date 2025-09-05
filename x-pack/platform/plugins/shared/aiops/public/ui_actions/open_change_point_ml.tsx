@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { IncompatibleActionError } from '@kbn/ui-actions';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -33,7 +33,7 @@ const getEmbeddableTimeRange = async (
 export function createOpenChangePointInMlAppAction(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
-): UiActionsActionDefinition<ChangePointChartActionContext> {
+): ActionDefinition<ChangePointChartActionContext> {
   return {
     id: 'open-change-point-in-ml-app',
     type: OPEN_CHANGE_POINT_IN_ML_APP_ACTION,

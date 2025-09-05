@@ -12,7 +12,7 @@ import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { Trigger } from '@kbn/ui-actions-triggers';
-import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';

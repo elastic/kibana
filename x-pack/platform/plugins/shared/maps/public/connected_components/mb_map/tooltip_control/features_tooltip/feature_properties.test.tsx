@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { FeatureProperties } from './feature_properties';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import type { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions';
 
 class MockTooltipProperty {
   private _key: string;

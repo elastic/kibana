@@ -9,7 +9,7 @@
 
 import type { Configurable } from '@kbn/kibana-utils-plugin/public';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import type { Presentable } from '@kbn/ui-actions';
 import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type {

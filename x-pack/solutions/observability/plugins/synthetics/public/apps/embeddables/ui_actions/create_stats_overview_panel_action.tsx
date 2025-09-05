@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { IncompatibleActionError } from '@kbn/ui-actions';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
@@ -19,7 +19,7 @@ import { openMonitorConfiguration } from '../common/monitors_open_configuration'
 export function createStatusOverviewPanelAction(
   coreStart: CoreStart,
   pluginStart: ClientPluginsStart
-): UiActionsActionDefinition<EmbeddableApiContext> {
+): ActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,

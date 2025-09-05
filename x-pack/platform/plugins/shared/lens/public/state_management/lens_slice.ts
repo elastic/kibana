@@ -6,7 +6,7 @@
  */
 
 import { createAction, createReducer, current } from '@reduxjs/toolkit';
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions';
 import { mapValues, uniq } from 'lodash';
 import type { Filter, Query } from '@kbn/es-query';
 import type { History } from 'history';

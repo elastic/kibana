@@ -22,7 +22,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import type { LensEmbeddableInput, FormulaPublicApi } from '@kbn/lens-plugin/public';
 
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';

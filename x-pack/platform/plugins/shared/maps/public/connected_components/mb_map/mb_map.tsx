@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { supported as maplibreglSupported } from '@mapbox/mapbox-gl-supported';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { METRIC_TYPE } from '@kbn/analytics';

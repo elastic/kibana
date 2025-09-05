@@ -6,7 +6,7 @@
  */
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions';
 import type { ValueFormatConfig } from '../../../../common/types';
 import type { VisualizeEditorContext } from '../../../types';
 

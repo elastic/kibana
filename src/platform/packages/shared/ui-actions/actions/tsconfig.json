@@ -18,5 +18,8 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/ui-actions-triggers",
+    "@kbn/expressions-plugin",
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
   ]
 }

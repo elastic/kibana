@@ -8,7 +8,7 @@
 import type { TimeRange } from '@kbn/es-query';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 
 export type LensWrapperProps = Omit<
   TypedLensByValueInput,

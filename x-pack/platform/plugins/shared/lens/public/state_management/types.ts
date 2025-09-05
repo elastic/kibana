@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions';
 import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';

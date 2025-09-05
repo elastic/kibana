@@ -9,7 +9,7 @@
 
 import type { FC } from 'react';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import type {
   ActionFactoryDefinition,

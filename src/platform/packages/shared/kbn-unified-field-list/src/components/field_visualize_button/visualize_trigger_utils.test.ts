@@ -8,7 +8,8 @@
  */
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { getVisualizeInformation } from './visualize_trigger_utils';
 
 const field = {

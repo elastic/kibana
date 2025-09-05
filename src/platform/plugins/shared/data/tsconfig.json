@@ -60,7 +60,8 @@
     "@kbn/data-service-server",
     "@kbn/css-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

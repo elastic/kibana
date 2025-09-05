@@ -11,7 +11,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions';
 import { css } from '@emotion/react';
 import type { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { IncompatibleActionError } from '@kbn/ui-actions';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
@@ -37,7 +37,7 @@ const parentApiIsCompatible = async (
 export function createAddLogRateAnalysisEmbeddableAction(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
-): UiActionsActionDefinition<LogRateAnalysisActionContext> {
+): ActionDefinition<LogRateAnalysisActionContext> {
   return {
     id: 'create-log-rate-analysis-embeddable',
     grouping: AIOPS_EMBEDDABLE_GROUPING,

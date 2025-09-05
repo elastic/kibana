@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-triggers';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import { type ServiceDependencies } from './rule_flyout_component';

@@ -8,7 +8,7 @@
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import type { MlCoreSetup } from '../plugin';
 import type { AnomalyChartsFieldSelectionContext } from '../embeddables';
@@ -23,7 +23,7 @@ export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction'
 export function createApplyEntityFieldFiltersAction(
   getStartServices: MlCoreSetup['getStartServices'],
   constrolledBy?: string
-): UiActionsActionDefinition<AnomalyChartsFieldSelectionContext> {
+): ActionDefinition<AnomalyChartsFieldSelectionContext> {
   return {
     id: constrolledBy ? 'smv-apply-entity-field-filters' : 'apply-entity-field-filters',
     type: APPLY_ENTITY_FIELD_FILTERS_ACTION,

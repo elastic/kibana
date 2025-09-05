@@ -11,7 +11,6 @@
     "@kbn/expressions-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/ui-actions-plugin",
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/monaco",
@@ -21,7 +20,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-theme-browser-mocks",
     "@kbn/presentation-publishing",
-    "@kbn/ui-actions-triggers"
+    "@kbn/ui-actions-triggers",
+    "@kbn/ui-actions"
   ],
   "exclude": [
     "target/**/*",

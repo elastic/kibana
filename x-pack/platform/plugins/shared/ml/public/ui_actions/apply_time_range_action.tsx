@@ -8,7 +8,7 @@
 import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import moment from 'moment';
 import { firstValueFrom } from 'rxjs';
 import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
@@ -30,7 +30,7 @@ export interface ApplyTimeRangeSelectionActionContext extends EmbeddableApiConte
 
 export function createApplyTimeRangeSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<ApplyTimeRangeSelectionActionContext> {
+): ActionDefinition<ApplyTimeRangeSelectionActionContext> {
   return {
     id: 'apply-time-range-selection',
     type: APPLY_TIME_RANGE_SELECTION_ACTION,

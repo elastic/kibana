@@ -13,7 +13,7 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId, EXISTS_OPERATOR } from '../../../../../common/types';
 import { addProvider } from '../../../../timelines/store/actions';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import type { TimeRange } from '@kbn/es-query';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';

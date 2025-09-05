@@ -17,7 +17,7 @@ import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { createStore as createReduxStore } from 'redux';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { mockGlobalState } from '../../mock/global_state';
 import { getMappedNonEcsValue } from './utils';

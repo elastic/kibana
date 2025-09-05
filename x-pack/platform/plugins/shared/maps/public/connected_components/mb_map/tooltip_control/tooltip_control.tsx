@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Geometry } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions';
 import type { RawValue } from '../../../../common/constants';
 import { LON_INDEX, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import type { TooltipFeature, TooltipState } from '../../../../common/descriptor_types';

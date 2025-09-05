@@ -18,17 +18,4 @@ export type {
   UiActionsPublicSetup as UiActionsSetup,
   UiActionsPublicStart as UiActionsStart,
 } from './plugin';
-export type { Action, ActionDefinition as UiActionsActionDefinition } from '@kbn/ui-actions';
 export { buildContextMenuForActions } from './context_menu';
-export type { VisualizeFieldContext } from './types';
-export {
-  ACTION_VISUALIZE_FIELD,
-  ACTION_VISUALIZE_GEO_FIELD,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from './types';
-export type {
-  ActionExecutionContext,
-  ActionExecutionMeta,
-  ActionMenuItemProps,
-  FrequentCompatibilityChangeAction,
-} from '@kbn/ui-actions';

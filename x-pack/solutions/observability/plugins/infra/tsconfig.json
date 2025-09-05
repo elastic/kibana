@@ -121,6 +121,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
     "@kbn/apm-types",
+    "@kbn/ui-actions",
   ],
   "exclude": ["target/**/*"]
 }

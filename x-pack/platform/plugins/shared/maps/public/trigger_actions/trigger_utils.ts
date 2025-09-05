@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { RawValue } from '../../common/constants';
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { AlertsCountPanel } from '.';
 
 import type { Status } from '../../../../../common/api/detection_engine';

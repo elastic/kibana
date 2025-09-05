@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { IncompatibleActionError } from '@kbn/ui-actions';
 import { HttpService } from '../application/services/http_service';
 import type { MlApi } from '../application/services/ml_api_service';
@@ -33,7 +33,7 @@ const parentApiIsCompatible = async (
 
 export function createAddSingleMetricViewerPanelAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<CreateSingleMetricViewerPanelActionContext> {
+): ActionDefinition<CreateSingleMetricViewerPanelActionContext> {
   // @ts-ignore
   return {
     id: 'create-single-metric-viewer',

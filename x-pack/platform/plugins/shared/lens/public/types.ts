@@ -26,7 +26,8 @@ import type {
   NavigateToLensContext,
   SeriesType,
 } from '@kbn/visualizations-plugin/common';
-import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions';
 import type { RowClickContext } from '@kbn/ui-actions-triggers';
 import type {
   ClickTriggerEvent,

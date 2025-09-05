@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { getTitle } from '@kbn/presentation-publishing';

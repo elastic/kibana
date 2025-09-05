@@ -9,7 +9,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DEFAULT_LOGS_DATA_VIEW,

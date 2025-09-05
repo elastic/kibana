@@ -39,7 +39,7 @@ import type {
   MedianIndexPatternColumn,
   MetricVisualizationState,
 } from '@kbn/lens-plugin/public';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
 import type { AllOverrides, LensAttributesByType } from './controls';

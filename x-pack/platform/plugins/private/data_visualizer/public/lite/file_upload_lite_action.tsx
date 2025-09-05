@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-triggers';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import type { CoreStart } from '@kbn/core/public';
 import {
   OPEN_FILE_UPLOAD_LITE_ACTION,
@@ -31,7 +31,7 @@ export const createOpenFileUploadLiteTrigger: Trigger = {
 export function createOpenFileUploadLiteAction(
   coreStart: CoreStart,
   plugins: DataVisualizerStartDependencies
-): UiActionsActionDefinition<OpenFileUploadLiteContext> {
+): ActionDefinition<OpenFileUploadLiteContext> {
   return {
     id: 'create-open-file-upload-lite-action',
     type: OPEN_FILE_UPLOAD_LITE_ACTION,

@@ -30,11 +30,8 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  VisualizeFieldContext,
-  ACTION_VISUALIZE_LENS_FIELD,
-  UiActionsStart,
-} from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';

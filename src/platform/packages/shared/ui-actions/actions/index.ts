@@ -8,6 +8,7 @@
  */
 
 export type * from './src/presentable';
-export type * from './src/action';
+export type * from './src/types';
+export * from './src/action';
 export { IncompatibleActionError } from './src/incompatible_action_error';
 export { createAction } from './src/create_action';

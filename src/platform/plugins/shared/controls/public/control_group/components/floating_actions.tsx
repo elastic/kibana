@@ -17,7 +17,7 @@ import { Subscription, switchMap } from 'rxjs';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { uiActionsService } from '../../services/kibana_services';

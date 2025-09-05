@@ -6,7 +6,7 @@
  */
 
 import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import type { StartServices } from '../../types';
 import type { SecurityCellActionExecutionContext } from './types';
 import { AppEventTypes } from '../../common/lib/telemetry';

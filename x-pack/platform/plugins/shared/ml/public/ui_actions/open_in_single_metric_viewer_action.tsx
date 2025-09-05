@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
@@ -34,7 +34,7 @@ export function isSingleMetricViewerEmbeddableContext(
 
 export function createOpenInSingleMetricViewerAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<OpenInSingleMetricViewerActionContext> {
+): ActionDefinition<OpenInSingleMetricViewerActionContext> {
   return {
     id: 'open-in-single-metric-viewer',
     type: OPEN_IN_SINGLE_METRIC_VIEWER_ACTION,

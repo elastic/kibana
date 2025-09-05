@@ -26,7 +26,7 @@ import {
   getInheritedViewMode,
   getTitle,
 } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { IncompatibleActionError } from '@kbn/ui-actions';
 
 import { coreServices } from '../services/kibana_services';

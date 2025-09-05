@@ -11,7 +11,7 @@ import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import type { ExplorerAppState } from '../../common/types/locator';
@@ -52,7 +52,7 @@ export function isAnomalyChartsEmbeddableContext(arg: unknown): arg is {
 
 export function createOpenInExplorerAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<
+): ActionDefinition<
   OpenInAnomalyExplorerSwimLaneActionContext | OpenInAnomalyExplorerAnomalyChartsActionContext
 > {
   return {

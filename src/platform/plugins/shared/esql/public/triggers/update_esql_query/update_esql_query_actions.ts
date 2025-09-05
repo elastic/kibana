@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isActionCompatible, executeAction } from './update_esql_query_helpers';
 import { ACTION_UPDATE_ESQL_QUERY } from '../constants';

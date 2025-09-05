@@ -32,7 +32,7 @@ import {
   getViewModeSubject,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionMeta } from '@kbn/ui-actions';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { uiActionsService } from '../services/kibana_services';
