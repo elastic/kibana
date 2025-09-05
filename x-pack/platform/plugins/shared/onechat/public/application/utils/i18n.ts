@@ -19,7 +19,7 @@ export const labels = {
         'Agents use tools — modular, reusable actions — to search, retrieve, and take meaningful steps on your behalf. Start with built-in capabilities from Elastic, or create your own to fit your workflow.',
     }),
     newToolButton: i18n.translate('xpack.onechat.tools.newToolButton', {
-      defaultMessage: 'New tool',
+      defaultMessage: 'New Tool',
     }),
 
     newEsqlToolTitle: i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
