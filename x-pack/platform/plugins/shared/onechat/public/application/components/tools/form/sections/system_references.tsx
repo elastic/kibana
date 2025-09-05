@@ -103,13 +103,6 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
       </EuiFormRow>
       <EuiFormRow
         label={i18nMessages.systemReferences.form.description.label}
-        labelAppend={
-          !isReadOnly ? (
-            <EuiText size="xs" color="subdued">
-              {i18nMessages.optionalFieldLabel}
-            </EuiText>
-          ) : undefined
-        }
         isInvalid={!!errors.description}
         error={errors.description?.message}
       >

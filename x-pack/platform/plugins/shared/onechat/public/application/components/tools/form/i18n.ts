@@ -72,7 +72,7 @@ export const i18nMessages = {
           description: i18n.translate(
             'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.toolId.description',
             {
-              defaultMessage: 'Unique ID for reference the tool in code or configurations.',
+              defaultMessage: 'Unique ID for referencing the tool in code or configurations.',
             }
           ),
         },

@@ -49,6 +49,14 @@ const i18nMessages = {
         values: { name },
       }),
   },
+  description: {
+    requiredError: i18n.translate(
+      'xpack.onechat.tools.newTool.validation.description.requiredError',
+      {
+        defaultMessage: 'Description is required.',
+      }
+    ),
+  },
   // Specific errors will be provided by the ES|QL editor
   esql: {
     requiredError: i18n.translate('xpack.onechat.tools.newTool.validation.esql.requiredError', {
@@ -70,6 +78,12 @@ const i18nMessages = {
       {
         defaultMessage:
           'Parameter name must start with a letter or underscore and contain only letters, numbers, and underscores.',
+      }
+    ),
+    descriptionRequiredError: i18n.translate(
+      'xpack.onechat.tools.newTool.validation.params.descriptionRequiredError',
+      {
+        defaultMessage: 'Parameter description is required.',
       }
     ),
     duplicateError: (name: string) =>
@@ -133,7 +147,7 @@ export const esqlFormValidationSchema = z
           message: i18nMessages.toolId.protectedNamespaceError(name),
         })
       ),
-    description: z.string(),
+    description: z.string().min(1, { message: i18nMessages.description.requiredError }),
     esql: z
       .string()
       .min(1, { message: i18nMessages.esql.requiredError })
@@ -153,7 +167,7 @@ export const esqlFormValidationSchema = z
             .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, {
               message: i18nMessages.params.nameFormatError,
             }),
-          description: z.string(),
+          description: z.string().min(1, { message: i18nMessages.params.descriptionRequiredError }),
           type: z.nativeEnum(EsqlToolFieldType),
         })
       )
