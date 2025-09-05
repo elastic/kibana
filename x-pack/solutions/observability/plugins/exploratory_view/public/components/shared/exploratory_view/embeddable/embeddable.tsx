@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useEBTTelemetry } from '../hooks/use_ebt_telemetry';
 import { AllSeries } from '../../../..';
 import { AppDataType, ReportViewType } from '../types';
@@ -52,6 +53,7 @@ export interface ExploratoryEmbeddableProps {
   lineHeight?: number;
   dataTestSubj?: string;
   searchSessionId?: string;
+  dslFilters?: QueryDslQueryContainer[];
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {

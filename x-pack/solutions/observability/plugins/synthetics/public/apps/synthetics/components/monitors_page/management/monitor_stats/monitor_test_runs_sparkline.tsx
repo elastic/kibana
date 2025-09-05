@@ -10,11 +10,13 @@ import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 
+import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useRefreshedRange } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
-export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] }) => {
+export const MonitorTestRunsSparkline = () => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
@@ -22,6 +24,8 @@ export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] 
   const theme = useTheme();
 
   const { from, to } = useRefreshedRange(30, 'days');
+  const filters = useMonitorFilters({});
+  const queryFilter = useMonitorQueryFilters();
 
   const attributes = useMemo(() => {
     return [
@@ -29,18 +33,18 @@ export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] 
         seriesType: 'area' as const,
         time: { from, to },
         reportDefinitions: {
-          'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'], // Show no data when monitorIds is empty
+          'monitor.type': ['http', 'tcp', 'browser', 'icmp'],
         },
         dataType: 'synthetics' as const,
         selectedMetricField: 'total_test_runs',
-        filters: [],
+        filters,
         name: labels.TEST_RUNS_LABEL,
         color: theme.eui.euiColorVis1,
         operationType: 'count',
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, JSON.stringify({ ids: [...monitorIds].sort() }), theme.eui.euiColorVis1, to]);
+  }, [from, theme.eui.euiColorVis1, to]);
 
   return (
     <ExploratoryViewEmbeddable
@@ -51,6 +55,7 @@ export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] 
       hideTicks={true}
       attributes={attributes}
       customHeight={'68px'}
+      dslFilters={queryFilter}
     />
   );
 };
