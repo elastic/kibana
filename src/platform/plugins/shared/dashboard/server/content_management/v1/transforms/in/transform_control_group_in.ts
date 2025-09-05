@@ -26,11 +26,11 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      let transformedControlState = controlState;
+      let transformedControlState = controlState as Partial<ControlsGroupState['controls'][number]>;
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState);
-          transformedControlState = { ...controlState, ...transformed.state }; // spreading keeps types happy
+          transformedControlState = transformed.state;
           references = [...references, ...(transformed.references ?? [])];
         }
       } catch (transformInError) {

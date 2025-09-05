@@ -14,8 +14,6 @@ import { transformControlGroupOut } from './transform_control_group_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
-import { ControlsGroupState } from '@kbn/controls-schemas';
-import { Reference } from '@kbn/content-management-utils';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,

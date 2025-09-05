@@ -40,7 +40,6 @@ export function transformControlProperties(
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
-      console.log({ explicitInput });
       return {
         id,
         type,

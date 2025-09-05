@@ -20,6 +20,7 @@ export function extractReferences(
   referenceNameSuffix: string
 ): { state: Omit<DataControlState, 'dataViewId'>; references?: Reference[] } {
   if (!state.id) return { state: { ...state } };
+  console.log({ state });
   return {
     state: { ...omit(state, 'dataViewId') },
     references: [

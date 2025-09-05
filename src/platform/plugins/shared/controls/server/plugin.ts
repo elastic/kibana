@@ -13,13 +13,13 @@ import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
 
-import { transforms } from '../common/options_list/transforms';
 import { esqlStaticControlPersistableStateServiceFactory } from './esql_control/esql_control_factory';
 import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';
 import { timeSliderPersistableStateServiceFactory } from './time_slider/time_slider_embeddable_factory';
+import { registerDataControlTransforms } from './register_data_control_transforms';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -30,10 +30,10 @@ interface SetupDeps {
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
   public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
-    embeddable.registerTransforms(OPTIONS_LIST_CONTROL, transforms);
+    registerDataControlTransforms(embeddable, OPTIONS_LIST_CONTROL, 'optionsListDataView');
 
     embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
-    embeddable.registerTransforms(RANGE_SLIDER_CONTROL, transforms);
+    registerDataControlTransforms(embeddable, RANGE_SLIDER_CONTROL, 'rangeSliderDataView');
 
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(esqlStaticControlPersistableStateServiceFactory());
