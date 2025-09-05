@@ -645,7 +645,9 @@ export const RuleDetailsPage = connector(
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={oldSourcererDataViewSpec} // Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataViewSpec
+              }
             />
           </FiltersGlobal>
           <RuleDetailsContextProvider>
