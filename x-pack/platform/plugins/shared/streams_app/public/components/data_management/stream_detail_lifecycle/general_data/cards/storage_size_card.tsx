@@ -23,6 +23,7 @@ export const StorageSizeCard = ({
   stats?: DataStreamStats;
   statsError?: Error;
 }) => {
+  const hasPrivileges = definition.privileges?.monitor ?? false;
   const metric = [
     {
       data: (
@@ -33,20 +34,14 @@ export const StorageSizeCard = ({
           {statsError || !stats || !stats.sizeBytes ? '-' : formatBytes(stats.sizeBytes)}
         </PrivilegesWarningIconWrapper>
       ),
-      subtitle: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={definition.privileges.monitor}
-          title="totalDocCount"
-        >
-          {' '}
-          {i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
+      subtitle: hasPrivileges
+        ? i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
             defaultMessage: '{totalDocs} documents',
             values: {
               totalDocs: stats && stats.totalDocs ? formatNumber(stats.totalDocs, '0,0') : '-',
             },
-          })}
-        </PrivilegesWarningIconWrapper>
-      ),
+          })
+        : null,
       'data-test-subj': 'storageSize',
     },
   ];

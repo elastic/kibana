@@ -26,7 +26,7 @@ interface ActionButton {
 
 interface Metrics {
   data: React.ReactNode;
-  subtitle: string | string[] | React.ReactNode;
+  subtitle: string | string[] | React.ReactNode | null;
   'data-test-subj'?: string;
 }
 
@@ -36,6 +36,8 @@ interface BaseMetricCardProps {
   metrics: Metrics[];
   grow?: boolean;
 }
+
+const EMPTY_LINE = '\u00A0';
 
 export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
   title,
@@ -81,61 +83,41 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
     );
   };
 
+  const renderSingleMetric = (metric: Metrics) => {
+    if (!metric) return null;
+
+    return (
+      <>
+        <EuiText size="m">
+          <h3 data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric`}>
+            {metric.data}
+          </h3>
+        </EuiText>
+        <EuiText
+          size="s"
+          color="subdued"
+          data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric-subtitle`}
+        >
+          {metric.subtitle
+            ? Array.isArray(metric.subtitle)
+              ? metric.subtitle.join(' · ')
+              : metric.subtitle
+            : EMPTY_LINE}
+        </EuiText>
+      </>
+    );
+  };
+
   const renderMetrics = () => {
     if (metrics.length === 1) {
-      const metric = metrics[0];
-      return (
-        <>
-          <EuiFlexItem>
-            <EuiText size="m">
-              <h3 data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric`}>
-                {metric.data}
-              </h3>
-            </EuiText>
-          </EuiFlexItem>
-          {metric.subtitle && (
-            <EuiFlexItem>
-              <EuiText
-                size="s"
-                color="subdued"
-                data-test-subj={
-                  metric['data-test-subj'] && `${metric['data-test-subj']}-metric-subtitle`
-                }
-              >
-                {Array.isArray(metric.subtitle) ? metric.subtitle.join(' · ') : metric.subtitle}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </>
-      );
+      return <>{renderSingleMetric(metrics[0])}</>;
     }
 
     return (
       <EuiFlexGroup direction="row">
         {metrics.map((metric, index) => (
           <EuiFlexGroup key={index} direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText size="m">
-                <h3
-                  data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric`}
-                >
-                  {metric.data}
-                </h3>
-              </EuiText>
-            </EuiFlexItem>
-            {metric.subtitle && (
-              <EuiFlexItem>
-                <EuiText
-                  size="s"
-                  color="subdued"
-                  data-test-subj={
-                    metric['data-test-subj'] && `${metric['data-test-subj']}-metric-subtitle`
-                  }
-                >
-                  {Array.isArray(metric.subtitle) ? metric.subtitle.join(' · ') : metric.subtitle}
-                </EuiText>
-              </EuiFlexItem>
-            )}
+            {renderSingleMetric(metric)}
           </EuiFlexGroup>
         ))}
       </EuiFlexGroup>

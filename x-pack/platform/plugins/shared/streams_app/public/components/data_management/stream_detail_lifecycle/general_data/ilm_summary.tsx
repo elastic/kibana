@@ -139,8 +139,12 @@ function IlmPhase({
             backgroundColor: ilmPhases[phase.name].color,
             margin: '0',
             borderRadius,
-            borderRight: phase.name !== 'delete' ? '1px solid white' : undefined,
-            paddingLeft: phase.name !== 'hot' ? '1px solid white' : undefined,
+            borderRight:
+              phase.name !== 'delete'
+                ? `1px solid ${euiTheme.colors.backgroundBasePlain}`
+                : undefined,
+            paddingLeft:
+              phase.name !== 'hot' ? `1px solid ${euiTheme.colors.backgroundBasePlain}` : undefined,
             minHeight: '50px',
           }}
           grow={false}
@@ -164,7 +168,9 @@ function IlmPhase({
                 <b>{capitalize(phase.name)}</b>
               </EuiText>
               {'size_in_bytes' in phase && (
-                <EuiText size="xs">{formatBytes(phase.size_in_bytes)}</EuiText>
+                <EuiText size="xs" color={euiTheme.colors.plainDark}>
+                  {formatBytes(phase.size_in_bytes)}
+                </EuiText>
               )}
             </>
           )}
