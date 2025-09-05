@@ -62,12 +62,12 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     const breadcrumbs = [
       ...(showAiBreadcrumb
         ? [
-            {
-              text: i18n.translate('genAiSettings.breadcrumbs.ai', {
-                defaultMessage: 'AI',
-              }),
-            },
-          ]
+          {
+            text: i18n.translate('genAiSettings.breadcrumbs.ai', {
+              defaultMessage: 'AI',
+            }),
+          },
+        ]
         : []),
       {
         text: i18n.translate('genAiSettings.breadcrumbs.genAiSettings', {
@@ -90,18 +90,22 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     });
   }, [application, http.basePath, isPermissionsBased]);
 
+  const showDefaultLlmSetting = featureFlags.getBooleanValue(
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+    false
+  );
+
   const connectorDescription = useMemo(() => {
     if (!hasElasticManagedLlm) {
       return (
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must ${
-              hasConnectorsAllPrivilege ? 'set up' : 'have'
-            } a Generative AI connector. {manageConnectors}`}
+            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must ${hasConnectorsAllPrivilege ? 'set up' : 'have'
+              } a Generative AI connector. {manageConnectors}`}
             values={{
               manageConnectors: (
-                <EuiLink
+                showDefaultLlmSetting ? <EuiLink
                   href={application.getUrlForApp('management', {
                     path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
                   })}
@@ -113,7 +117,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                       hasConnectorsAllPrivilege ? 'Manage connectors' : 'View connectors'
                     }
                   />
-                </EuiLink>
+                </EuiLink> : null
               ),
             }}
           />
@@ -127,11 +131,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       <p>
         <FormattedMessage
           id="genAiSettings.aiConnectorDescriptionWithLink"
-          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
-            showSpacesNote
-              ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
-              : ''
-          } {manageConnectors}`}
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${showSpacesNote
+            ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
+            : ''
+            } {manageConnectors}`}
           values={{
             link: (
               <EuiLink
@@ -144,7 +147,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 />
               </EuiLink>
             ),
-            manageConnectors: (
+            manageConnectors: showDefaultLlmSetting ? (
               <EuiLink
                 href={application.getUrlForApp('management', {
                   path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
@@ -156,7 +159,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   defaultMessage="Manage connectors"
                 />
               </EuiLink>
-            ),
+            ) : null,
             elasticManagedLlm: (
               <strong>
                 <FormattedMessage
@@ -230,11 +233,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       </EuiButton>
     );
   }, [application, hasConnectorsAllPrivilege]);
-
-  const showDefaultLlmSetting = featureFlags.getBooleanValue(
-    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
-  );
 
   return (
     <>
