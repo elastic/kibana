@@ -199,6 +199,38 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
+  public async testStep(
+    workflowYaml: string,
+    stepId: string,
+    stepInputs: Record<string, any>,
+    spaceId: string
+  ): Promise<string> {
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+
+    if (parsedYaml.error) {
+      // TODO: handle error properly
+      // It should throw BadRequestError in the API
+      throw parsedYaml.error;
+    }
+
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
+      {
+        id: 'test-workflow',
+        name: workflowToCreate.name,
+        enabled: workflowToCreate.enabled,
+        definition: workflowToCreate.definition,
+        yaml: workflowYaml,
+        isTestRun: true,
+        spaceId,
+      },
+      stepId,
+      stepInputs
+    );
+    return executeResponse.workflowExecutionId;
+  }
+
   public async getWorkflowExecutions(
     workflowId: string,
     spaceId: string

@@ -231,7 +231,7 @@ export class WorkflowsExecutionEnginePlugin
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
         id: generateUuid(),
-        spaceId: context.spaceId,
+        spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
