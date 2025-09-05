@@ -89,7 +89,9 @@ export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({ process
       color={iconColor}
       aria-label={label}
       size="s"
-      data-test-subj="processorStatusIcon"
+      iconProps={{
+        'data-test-subj': 'processorStatusIcon',
+      }}
     />
   );
 };

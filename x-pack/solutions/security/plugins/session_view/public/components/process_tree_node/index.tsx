@@ -335,6 +335,9 @@ export function ProcessTreeNode({
                 data-test-subj={iconTestSubj}
                 type={processIcon}
                 css={styles.icon}
+                iconProps={{
+                  'data-test-subj': iconTestSubj,
+                }}
               />
               <span css={styles.textSection}>
                 <TextHighlight

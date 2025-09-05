@@ -74,8 +74,10 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
               color="danger"
               title={drilldown.error}
               aria-label={drilldown.error}
-              data-test-subj={`drilldownError-${drilldown.id}`}
               css={{ marginLeft: '4px' }}
+              iconProps={{
+                'data-test-subj': `drilldownError-${drilldown.id}`,
+              }}
             />
           )}
         </div>

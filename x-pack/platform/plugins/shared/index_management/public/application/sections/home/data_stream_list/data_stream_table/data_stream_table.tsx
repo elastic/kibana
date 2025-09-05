@@ -252,7 +252,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                 type="info"
                 size="s"
                 color="subdued"
-                data-test-subj="usingMaxRetention"
+                iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
               />
             </>
           )}

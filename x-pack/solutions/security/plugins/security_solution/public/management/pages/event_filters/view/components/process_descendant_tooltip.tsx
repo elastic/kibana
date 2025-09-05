@@ -57,7 +57,7 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
           </EuiText>
         }
         data-test-subj={getTestId('tooltipText')}
-        anchorProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
+        iconProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
         type="info"
       />
     );

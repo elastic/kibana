@@ -118,10 +118,12 @@ const NameColumn = ({
           content={i18n.MISSING_INDEX_TOOLTIP_CONTENT}
           type="warning"
           color="danger"
-          anchorProps={{ 'data-test-subj': 'missing-index-icon' }}
           css={css`
             margin-left: 10px;
           `}
+          iconProps={{
+            'data-test-subj': 'missing-index-icon',
+          }}
         />
       )}
     </>
