@@ -31,6 +31,11 @@ export const SideNavLogoComponent = ({
   label,
   ...props
 }: SideNavLogoProps): JSX.Element => {
+  // Force logoElastic for all solutions
+  const forcedProps = {
+    ...props,
+    iconType: 'logoElastic',
+  };
   const { euiTheme } = useEuiTheme();
   const { tooltipRef, handleMouseOut } = useTooltip();
 
@@ -63,7 +68,7 @@ export const SideNavLogoComponent = ({
         isTruncated={false}
         {...props}
       >
-        {label}
+        Elastic
       </MenuItem>
     </div>
   );

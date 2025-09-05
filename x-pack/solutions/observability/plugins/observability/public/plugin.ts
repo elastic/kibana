@@ -208,6 +208,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
+      icon: 'bell',
       visibleIn: [],
       deepLinks: [
         {
@@ -238,6 +239,7 @@ export class Plugin
             [CasesDeepLinkId.cases]: {
               order: 8003,
               visibleIn: [],
+              icon: 'casesApp',
             },
             [CasesDeepLinkId.casesCreate]: {
               visibleIn: [],
@@ -412,7 +414,9 @@ export class Plugin
                         defaultMessage: 'SLOs',
                       }),
                       app: 'slo',
-                      path: '',
+                      path: '/app/slos',
+                      icon: 'visGauge',
+                      iconV2: 'visGauge',
                     },
                   ]
                 : [];
@@ -434,6 +438,7 @@ export class Plugin
                   app: observabilityAppId,
                   label: link.title,
                   path: link.path ?? '',
+                  iconV2: 'bell',
                 }));
 
               const casesLink: NavigationEntry[] = otherLinks
@@ -442,6 +447,7 @@ export class Plugin
                   app: observabilityAppId,
                   label: link.title,
                   path: link.path ?? '',
+                  iconV2: 'casesApp',
                 }));
 
               return [
