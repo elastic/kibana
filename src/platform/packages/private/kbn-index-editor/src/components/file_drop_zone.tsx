@@ -69,6 +69,16 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   useEffect(
     function checkForErrors() {
+      const removeFilesByName = (fileNames: string[]) => {
+        fileUploadManager
+          .getFiles()
+          .map((f, i) => ({ fileName: f.getFileName(), index: i }))
+          .filter((f) => fileNames.includes(f.fileName))
+          .forEach((f) => {
+            fileUploadManager.removeFile(f.index);
+          });
+      };
+
       // File size errors
       const filesTooBig = filesStatus.filter((f) => f.fileTooLarge);
       if (filesTooBig.length > 0) {
@@ -83,6 +93,8 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           },
         });
         indexUpdateService.setError(IndexEditorErrors.FILE_TOO_BIG_ERROR, errorDetail);
+        const filesToRemove = filesTooBig.map((f) => f.fileName);
+        removeFilesByName(filesToRemove);
       }
 
       // Analysis errors
@@ -93,14 +105,8 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           .join('\n');
 
         indexUpdateService.setError(IndexEditorErrors.FILE_ANALYSIS_ERROR, errorDetail);
-        analysisErrors.forEach((file) => {
-          const fileIndex = fileUploadManager
-            .getFiles()
-            .findIndex((f) => f.getFileName() === file.fileName);
-          if (fileIndex > -1) {
-            fileUploadManager.removeFile(fileIndex);
-          }
-        });
+        const filesToRemove = analysisErrors.map((f) => f.fileName);
+        removeFilesByName(filesToRemove);
       }
     },
     [fileUploadManager, filesStatus, indexUpdateService]
