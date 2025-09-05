@@ -23,6 +23,15 @@ export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
   CLOUD_FORMATION_CLOUD_CONNECTORS: 'cloud_formation_cloud_connectors_template',
 };
 
+export const ProviderAccountTypeInputNames: Record<
+  typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER,
+  string
+> = {
+  aws: 'aws.account_type',
+  azure: 'azure.account_type',
+  gcp: 'gcp.account_type',
+};
+
 // Azure constants
 export const AZURE_SETUP_FORMAT = {
   ARM_TEMPLATE: 'arm_template',
