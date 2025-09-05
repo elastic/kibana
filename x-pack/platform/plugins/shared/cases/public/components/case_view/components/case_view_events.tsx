@@ -18,7 +18,7 @@ interface CaseViewAlertsProps {
 
 export const CaseViewEvents = ({ caseData }: CaseViewAlertsProps) => {
   return (
-    <EuiFlexItem data-test-subj="case-view-alerts">
+    <EuiFlexItem data-test-subj="case-view-events">
       <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />
       <EventsTable caseData={caseData} />
     </EuiFlexItem>
