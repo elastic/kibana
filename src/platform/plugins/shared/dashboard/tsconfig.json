@@ -101,7 +101,6 @@
     "@kbn/presentation-util",
     "@kbn/security-plugin-types-server",
     "@kbn/core-saved-objects-common",
-    "@kbn/access-control"
   ],
   "exclude": ["target/**/*"]
 }
