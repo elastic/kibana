@@ -18,6 +18,7 @@ import type { SearchQueryRulesQueryRule } from '../../types';
 import { RulesetDetailEmptyPrompt } from '../empty_prompt/ruleset_detail_empty_prompt';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { QueryRuleSearchResultsList } from './query_rule_draggable_list/query_rule_search_results';
 
 interface QueryRuleDetailPanelProps {
   rules: SearchQueryRulesQueryRule[];
@@ -171,6 +172,16 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                   setIsFormDirty(true);
                 }
                 deleteRule?.(ruleId);
+              }}
+            />
+          )}
+          {rules.length > 0 && searchFilter.trim() !== '' && (
+            <QueryRuleSearchResultsList
+              rules={rules}
+              rulesetId={rulesetId}
+              onEditRuleFlyoutOpen={(ruleId: string) => {
+                setFlyoutMode('edit');
+                setRuleIdToEdit(ruleId);
               }}
             />
           )}
