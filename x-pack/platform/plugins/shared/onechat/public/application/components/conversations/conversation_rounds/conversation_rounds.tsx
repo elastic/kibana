@@ -18,8 +18,10 @@ import { RoundResponse } from './round_response';
 import { conversationRoundsId } from './conversation_rounds.styles';
 
 export const ConversationRounds: React.FC<{}> = () => {
-  const conversationRounds = useConversationRounds();
   const { isResponseLoading, retry, error } = useSendMessage();
+
+  const conversationRounds = useConversationRounds();
+
   return (
     <ConversationContent>
       <EuiFlexGroup
@@ -34,6 +36,7 @@ export const ConversationRounds: React.FC<{}> = () => {
           const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           const isError = Boolean(error) && isCurrentRound;
+
           return (
             <RoundLayout
               key={index}
