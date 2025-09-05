@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n as i18nLib } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiInlineEditTitle,
   useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { DEFAULT_VALUE_REPORT_TITLE } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 import { CostSavings } from './cost_savings';
 import { getTimeRangeAsDays, formatDollars, formatThousands } from './metrics';
 import * as i18n from './translations';
 import type { ValueMetrics } from './metrics';
-import logo from './logo.svg';
-import logoDark from './logo-dark.svg';
-import { useGetCurrentUserProfile } from '../../../common/components/user_profiles/use_get_current_user_profile';
 import { TimeSaved } from './time_saved';
 import { FilteringRate } from './filtering_rate';
 import { ThreatsDetected } from './threats_detected';
@@ -51,7 +49,21 @@ export const ExecutiveSummary: React.FC<Props> = ({
   valueMetrics,
   valueMetricsCompare,
 }) => {
-  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const { uiSettings } = useKibana().services;
+  const [title, setTitle] = useState<string>(uiSettings.get(DEFAULT_VALUE_REPORT_TITLE));
+  const updateTitle = useCallback(
+    (newTitle: string) => {
+      uiSettings.set(DEFAULT_VALUE_REPORT_TITLE, newTitle);
+      setTitle(newTitle);
+    },
+    [uiSettings]
+  );
+  const onTitleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      updateTitle(e.target.value);
+    },
+    [updateTitle]
+  );
   const subtitle = useMemo(() => {
     const fromDate = new Date(from);
     const toDate = new Date(to);
@@ -67,7 +79,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
       year: 'numeric',
     })}`;
   }, [from, to]);
-  const isDarkMode = useKibanaIsDarkMode();
   const isSmall = useIsWithinMaxBreakpoint('m');
   const costSavings = useMemo(
     () => formatDollars(valueMetrics.costSavings),
@@ -76,7 +87,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
 
   const timerangeAsDays = useMemo(() => getTimeRangeAsDays({ from, to }), [from, to]);
 
-  const logoSvg = useMemo(() => (isDarkMode ? logoDark : logo), [isDarkMode]);
   const {
     euiTheme: { size },
   } = useEuiTheme();
@@ -84,20 +94,23 @@ export const ExecutiveSummary: React.FC<Props> = ({
     <div
       data-test-subj="executiveSummaryContainer"
       css={css`
-        // background: linear-gradient(
-        //     112deg,
-        //     rgba(89, 159, 254, 0.08) 3.58%,
-        //     rgba(240, 78, 152, 0.08) 98.48%
-        //   ),
-        //   url(${logoSvg}) no-repeat bottom right;
         border-radius: ${size.s};
         padding: ${size.base};
         min-height: 200px;
       `}
     >
-      <EuiTitle size="l" data-test-subj="executiveSummaryTitle">
-        <h1>{i18n.EXECUTIVE_SUMMARY_TITLE}</h1>
-      </EuiTitle>
+      <EuiInlineEditTitle
+        className="executiveSummaryTitle"
+        data-test-subj="executiveSummaryTitle"
+        size="l"
+        heading="h1"
+        inputAriaLabel={i18n.EDIT_TITLE}
+        value={title}
+        onChange={onTitleChange}
+        onCancel={(previousValue) => {
+          updateTitle(previousValue);
+        }}
+      />
 
       <EuiText size="s" color="subdued" data-test-subj="executiveSummaryDateRange">
         <p>{subtitle}</p>
@@ -116,30 +129,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
           data-test-subj="executiveSummaryMainInfo"
         >
           <span>
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              responsive={false}
-              data-test-subj="executiveSummaryGreetingGroup"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="logoElastic" size="m" data-test-subj="executiveSummaryLogo" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <p data-test-subj="executiveSummaryGreeting">
-                    {i18n.EXECUTIVE_GREETING(
-                      currentUserProfile?.user?.full_name ??
-                        currentUserProfile?.user?.username ??
-                        ''
-                    )}
-                  </p>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
             <EuiText size="s">
               {hasAttackDiscoveries && (
                 <p data-test-subj="executiveSummaryMessage">

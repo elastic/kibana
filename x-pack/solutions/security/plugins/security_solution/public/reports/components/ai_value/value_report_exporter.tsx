@@ -21,26 +21,29 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
   const toasts = useToasts();
   const uiAdjuster = useCallback((eRef: HTMLDivElement) => {
     const valueReportSettings = eRef.querySelector('.valueReportSettings');
+    const editTitleSvg = eRef.querySelector('.executiveSummaryTitle svg');
+    const elementsToHide = [valueReportSettings, editTitleSvg];
 
     const adjustUI = () => {
-      if (valueReportSettings) {
-        valueReportSettings.setAttribute(
-          'data-original-style',
-          valueReportSettings.getAttribute('style') || ''
-        );
-        (valueReportSettings as HTMLElement).style.display = 'none';
-      }
+      elementsToHide.forEach((e) => {
+        if (e) {
+          e.setAttribute('data-original-style', e.getAttribute('style') || '');
+          (e as HTMLElement).style.display = 'none';
+        }
+      });
     };
 
     const restoreUI = () => {
-      if (valueReportSettings) {
-        const original = valueReportSettings.getAttribute('data-original-style');
-        if (original) {
-          valueReportSettings.setAttribute('style', original);
-        } else {
-          valueReportSettings.removeAttribute('style');
+      elementsToHide.forEach((e) => {
+        if (e) {
+          const original = e.getAttribute('data-original-style');
+          if (original) {
+            e.setAttribute('style', original);
+          } else {
+            e.removeAttribute('style');
+          }
         }
-      }
+      });
     };
 
     return { adjustUI, restoreUI };
