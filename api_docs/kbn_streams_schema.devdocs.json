@@ -1240,6 +1240,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Group.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/group/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.Group.tags",
             "type": "Array",
             "tags": [],

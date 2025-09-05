@@ -426,7 +426,7 @@
             "section": "def-common.ToolDefinition",
             "text": "ToolDefinition"
           },
-          "<Record<string, unknown>>, \"id\" | \"type\" | \"configuration\">"
+          "<Record<string, unknown>>, \"id\" | \"type\" | \"readonly\" | \"configuration\">"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
         "deprecated": false,
@@ -435,14 +435,11 @@
           {
             "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.BuiltinToolDefinition.id",
-            "type": "Uncategorized",
+            "type": "string",
             "tags": [],
             "label": "id",
             "description": [
-              "\nBuilt-in tool ID following the {@link BuiltinToolId} pattern"
-            ],
-            "signature": [
-              "`.${string}`"
+              "\nBuilt-in tool ID"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/tools.ts",
             "deprecated": false,
