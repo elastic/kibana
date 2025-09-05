@@ -93,7 +93,7 @@ export const PanelsResizable = ({
     let flexPanelSizePct: number;
 
     const resolvedFixedPanelSize =
-      fixedPanelSize === 'max-content' ? containerSize * MAX_FIX_PANEL_SIZE_PCT : fixedPanelSize;
+      fixedPanelSize === 'max-content' ? containerSize - minFlexPanelSize : fixedPanelSize;
 
     // If the container size is less than the minimum main content size
     // plus the current fixed panel size, then we need to make some adjustments.

@@ -256,9 +256,9 @@ export type ChartSectionConfiguration =
        */
       localStorageKeyPrefix?: string;
       /**
-       * The initial chart section height
+       * The default chart section height
        */
-      initialTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
     }
   | {
       replaceDefaultChart: false;

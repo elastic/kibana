@@ -23,10 +23,6 @@ export const createMetricsDataSourceProfileProvider = (
   restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   isExperimental: true,
   profile: {
-    getDefaultAppState: (prev) => (params) => ({
-      ...(prev ? prev(params) : {}),
-      chartSectionHeight: 'max-content',
-    }),
     getChartSectionConfiguration: createChartSection(
       services.metricsContextService.getMetricsExperienceClient()
     ),

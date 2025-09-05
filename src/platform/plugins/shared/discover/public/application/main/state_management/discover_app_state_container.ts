@@ -27,7 +27,6 @@ import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plug
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { UnifiedHistogramTopPanelHeightContext } from '@kbn/unified-histogram/types';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
@@ -160,11 +159,6 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
-
-  /**
-   * Document explorer chart section height option
-   */
-  chartSectionHeight?: UnifiedHistogramTopPanelHeightContext | undefined;
 }
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
@@ -278,8 +272,10 @@ export const getDiscoverAppStateContainer = ({
     // Set the default profile state only if not loading a saved search,
     // to avoid overwriting saved search state
     if (!currentSavedSearch.id) {
-      const { breakdownField, columns, rowHeight, hideChart, chartSectionHeight } =
-        getCurrentUrlState(stateStorage, services);
+      const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
+        stateStorage,
+        services
+      );
 
       // Only set default state which is not already set in the URL
       internalState.dispatch(
@@ -289,7 +285,6 @@ export const getDiscoverAppStateContainer = ({
             rowHeight: rowHeight === undefined,
             breakdownField: breakdownField === undefined,
             hideChart: hideChart === undefined,
-            chartSectionHeight: chartSectionHeight === undefined,
           },
         })
       );

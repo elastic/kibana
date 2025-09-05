@@ -99,7 +99,6 @@ export const buildEsqlFetchSubscribe = ({
                 rowHeight: true,
                 breakdownField: true,
                 hideChart: true,
-                chartSectionHeight: true,
               },
             })
           );
@@ -161,7 +160,6 @@ export const buildEsqlFetchSubscribe = ({
             rowHeight: false,
             breakdownField: false,
             hideChart: false,
-            chartSectionHeight: false,
           },
         })
       );
