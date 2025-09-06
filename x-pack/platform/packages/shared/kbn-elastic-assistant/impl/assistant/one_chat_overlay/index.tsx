@@ -23,6 +23,7 @@ import {
 import type { ShowOneChatOverlayProps } from '../../assistant_context';
 import { useAssistantContext } from '../../assistant_context';
 import { EMPTY_SCREEN_DESCRIPTION } from '../translations';
+import { useConversationMenuItems } from '../settings/settings_context_menu/use_conversation_menu_items';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -178,6 +179,10 @@ export const OneChatOverlay = React.memo(() => {
     [trackPrompt]
   );
 
+  // Get conversation menu items from the helper hook
+  const { menuItems: conversationMenuItems, modals: conversationModals } =
+    useConversationMenuItems();
+
   // Move setConversationSettings to useEffect to avoid setState during render
   useEffect(() => {
     if (onechatServices && isModalVisible) {
@@ -193,7 +198,7 @@ export const OneChatOverlay = React.memo(() => {
           alertsIndexPattern,
           size: knowledgeBase.latestAlerts,
         },
-        customMenuItems: [],
+        customMenuItems: conversationMenuItems,
       });
     }
   }, [
@@ -205,6 +210,7 @@ export const OneChatOverlay = React.memo(() => {
     knowledgeBase.latestAlerts,
     handleConnectorSelectionChange,
     onSelectPrompt,
+    conversationMenuItems,
   ]);
 
   if (!isModalVisible || !OnechatConversationsView || !onechatServices) return null;
@@ -231,6 +237,7 @@ export const OneChatOverlay = React.memo(() => {
         </OnechatServicesContext.Provider>
       </EuiFlyoutResizable>
       <UnifiedTimelineGlobalStyles />
+      {conversationModals}
     </>
   );
 });
