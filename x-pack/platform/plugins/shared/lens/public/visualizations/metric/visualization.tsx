@@ -11,7 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -57,7 +57,7 @@ export const showingBar = (
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
   if (showingBar(state) && isMetricNumeric) {
-    return euiLightVars.euiColorPrimary;
+    return euiThemeVars.euiColorVis2;
   }
   if (state.applyColorTo === 'value') {
     return euiThemeVars.euiColorVisText0;
