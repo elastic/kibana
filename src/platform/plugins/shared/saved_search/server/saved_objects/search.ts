@@ -22,6 +22,7 @@ import {
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
   SCHEMA_SEARCH_MODEL_VERSION_7,
+  SCHEMA_SEARCH_MODEL_VERSION_8,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -101,6 +102,38 @@ export function getSavedSearchObjectType(
         schemas: {
           forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_7.extends({}, { unknowns: 'ignore' }),
           create: SCHEMA_SEARCH_MODEL_VERSION_7,
+        },
+      },
+      8: {
+        changes: [
+          {
+            type: 'data_removal',
+            removedAttributePaths: [
+              'columns',
+              'sort',
+              'grid',
+              'rowHeight',
+              'rowsPerPage',
+              'hideChart',
+              'breakdownField',
+              'kibanaSavedObjectMeta',
+              'isTextBasedQuery',
+              'usesAdHocDataView',
+              'timeRestore',
+              'timeRange',
+              'refreshInterval',
+              'viewMode',
+              'hideAggregatedPreview',
+              'sampleSize',
+              'headerRowHeight',
+              'visContext',
+              'density',
+            ],
+          },
+        ],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_8,
         },
       },
     },

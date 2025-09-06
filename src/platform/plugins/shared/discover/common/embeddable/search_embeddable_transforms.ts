@@ -8,13 +8,16 @@
  */
 
 import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
-import { extractTabs } from '@kbn/saved-search-plugin/common';
+import { extractTabs, removeTopLevelTabAttributes } from '@kbn/saved-search-plugin/common';
 import type { SearchEmbeddableSerializedState } from '../../public';
 
 export const searchEmbeddableTransforms: EmbeddableTransforms<SearchEmbeddableSerializedState> = {
   transformOut: (state) => {
     if (!state.attributes) return state;
-    const attributes = extractTabs(state.attributes);
+    const attributes =
+      'tabs' in state.attributes
+        ? removeTopLevelTabAttributes(state.attributes)
+        : extractTabs(state.attributes);
     return { ...state, attributes };
   },
 };
