@@ -177,7 +177,6 @@ export async function mountApp({
       },
     ],
   });
-
   if (!getDashboardCapabilities().showWriteControls) {
     coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),

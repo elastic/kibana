@@ -41,6 +41,7 @@ import {
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
 import type { ApiExecutionContext } from './types';
+import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
@@ -107,13 +108,26 @@ export const performBulkCreate = async <T>(
         error = e;
       }
     }
+    const method = requestId && overwrite ? 'index' : 'create';
+    const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
+    const accessMode = options.accessControl?.accessMode;
+    const typeSupportsAccessControl = registry.supportsAccessControl(type);
+
+    if (!typeSupportsAccessControl && accessMode) {
+      error = SavedObjectsErrorHelpers.createBadRequestError(
+        `The "accessMode" field is not supported for saved objects of type "${type}".`
+      );
+    }
+
+    if (!createdBy && accessMode === 'read_only') {
+      error = SavedObjectsErrorHelpers.createBadRequestError(
+        `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+      );
+    }
 
     if (error) {
       return left({ id: requestId, type, error: errorContent(error) });
     }
-
-    const method = requestId && overwrite ? 'index' : 'create';
-    const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
 
     return right({
       method,
@@ -121,6 +135,11 @@ export const performBulkCreate = async <T>(
         ...object,
         id,
         managed: setManaged({ optionsManaged, objectManaged }),
+        accessControl: setAccessControl({
+          typeSupportsAccessControl,
+          createdBy,
+          accessMode,
+        }),
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
     }) as ExpectedResult;
@@ -237,6 +256,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
+        accessControl: object.accessControl,
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),
