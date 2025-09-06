@@ -81,7 +81,6 @@
     "@kbn/visualization-utils",
     "@kbn/core-rendering-browser",
     "@kbn/grid-layout",
-    "@kbn/ui-actions-browser",
     "@kbn/esql-types",
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/react-kibana-context-theme",
@@ -90,7 +89,8 @@
     "@kbn/data-service-server",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

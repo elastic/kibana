@@ -18,15 +18,9 @@ export type {
   UiActionsPublicSetup as UiActionsSetup,
   UiActionsPublicStart as UiActionsStart,
 } from './plugin';
-export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { ActionInternal, createAction, IncompatibleActionError } from './actions';
+export type { Action, ActionDefinition as UiActionsActionDefinition } from '@kbn/ui-actions';
 export { buildContextMenuForActions } from './context_menu';
-export type {
-  Presentable as UiActionsPresentable,
-  PresentableGroup as UiActionsPresentableGroup,
-  PresentableGrouping as UiActionsPresentableGrouping,
-} from '@kbn/ui-actions-browser/src/types';
-export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser/src/triggers';
+export type { Trigger, RowClickContext } from '@kbn/ui-actions-triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
@@ -36,7 +30,7 @@ export {
   rowClickTrigger,
   ADD_PANEL_TRIGGER,
   addPanelMenuTrigger,
-} from '@kbn/ui-actions-browser/src/triggers';
+} from '@kbn/ui-actions-triggers';
 export type { VisualizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,
@@ -48,4 +42,4 @@ export type {
   ActionExecutionMeta,
   ActionMenuItemProps,
   FrequentCompatibilityChangeAction,
-} from './actions';
+} from '@kbn/ui-actions';

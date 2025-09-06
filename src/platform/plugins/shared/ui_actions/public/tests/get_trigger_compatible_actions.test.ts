@@ -9,9 +9,9 @@
 
 import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from './test_samples';
-import type { ActionDefinition } from '../actions';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Trigger } from '@kbn/ui-actions-browser';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 
 const coreStart = coreMock.createStart();
 let action: ActionDefinition<{ name: string }>;

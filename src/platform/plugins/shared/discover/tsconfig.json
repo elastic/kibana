@@ -114,7 +114,8 @@
     "@kbn/core-application-browser",
     "@kbn/timerange",
     "@kbn/metrics-experience-plugin",
-    "@kbn/unified-metrics-grid"
+    "@kbn/unified-metrics-grid",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

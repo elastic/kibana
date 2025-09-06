@@ -18,11 +18,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import React from 'react';
 import { createEsqlDataSource } from '../../../common/data_sources';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import type {
-  Action,
-  ActionDefinition,
-  ActionExecutionContext,
-} from '@kbn/ui-actions-plugin/public/actions';
+import type { Action, ActionDefinition, ActionExecutionContext } from '@kbn/ui-actions';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   type AdditionalCellAction,

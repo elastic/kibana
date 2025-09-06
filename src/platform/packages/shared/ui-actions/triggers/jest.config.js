@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './action';
-export * from './action_internal';
-export * from './create_action';
-export * from './incompatible_action_error';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/ui-actions/triggers'],
+};

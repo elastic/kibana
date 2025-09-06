@@ -13,8 +13,8 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
+import type { Trigger } from '@kbn/ui-actions-triggers';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -25,7 +25,7 @@ export const txtMore = i18n.translate('uiActions.actionPanel.more', {
 });
 
 export interface ActionWithContext<Context extends object = object> {
-  action: Action<Context> | ActionInternal<Context>;
+  action: Action<Context>;
   context: Context;
 
   /**
@@ -47,7 +47,7 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
 };
 
 const onClick =
-  (action: Action | ActionInternal, context: ActionExecutionContext<object>, close: () => void) =>
+  (action: Action, context: ActionExecutionContext<object>, close: () => void) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
