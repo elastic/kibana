@@ -792,6 +792,45 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.cancelRequested",
+            "type": "boolean",
+            "tags": [],
+            "label": "cancelRequested",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.cancelledAt",
+            "type": "string",
+            "tags": [],
+            "label": "cancelledAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.cancelledBy",
+            "type": "string",
+            "tags": [],
+            "label": "cancelledBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.EsWorkflowExecution.duration",
             "type": "number",
             "tags": [],
@@ -886,6 +925,22 @@
             "tags": [],
             "label": "stepId",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowStepExecution.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "Current step's scope path"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2209,7 +2264,7 @@
         "label": "EnterConditionBranchNode",
         "description": [],
         "signature": [
-          "{ id: string; type: \"enter-condition-branch\"; condition?: string | undefined; }"
+          "{ id: string; type: \"enter-then-branch\" | \"enter-else-branch\"; condition?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
         "deprecated": false,
@@ -2344,7 +2399,7 @@
         "label": "ExitConditionBranchNode",
         "description": [],
         "signature": [
-          "{ id: string; type: \"exit-condition-branch\"; startNodeId: string; }"
+          "{ id: string; type: \"exit-then-branch\" | \"exit-else-branch\"; startNodeId: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
         "deprecated": false,
@@ -2926,7 +2981,7 @@
         "label": "EnterConditionBranchNodeSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodLiteral<\"enter-condition-branch\">; condition: Zod.ZodUnion<[Zod.ZodString, Zod.ZodUndefined]>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"enter-condition-branch\"; condition?: string | undefined; }, { id: string; type: \"enter-condition-branch\"; condition?: string | undefined; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodUnion<[Zod.ZodLiteral<\"enter-then-branch\">, Zod.ZodLiteral<\"enter-else-branch\">]>; condition: Zod.ZodUnion<[Zod.ZodString, Zod.ZodUndefined]>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"enter-then-branch\" | \"enter-else-branch\"; condition?: string | undefined; }, { id: string; type: \"enter-then-branch\" | \"enter-else-branch\"; condition?: string | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
         "deprecated": false,
@@ -2941,7 +2996,7 @@
         "label": "ExitConditionBranchNodeSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodLiteral<\"exit-condition-branch\">; startNodeId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"exit-condition-branch\"; startNodeId: string; }, { id: string; type: \"exit-condition-branch\"; startNodeId: string; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodUnion<[Zod.ZodLiteral<\"exit-then-branch\">, Zod.ZodLiteral<\"exit-else-branch\">]>; startNodeId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"exit-then-branch\" | \"exit-else-branch\"; startNodeId: string; }, { id: string; type: \"exit-then-branch\" | \"exit-else-branch\"; startNodeId: string; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
         "deprecated": false,
