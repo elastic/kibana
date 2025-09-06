@@ -21,7 +21,7 @@ import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import { EnhancementsRegistry } from './enhancements/registry';
+import { EnhancementsRegistry } from '../common/enhancements/registry';
 import type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
@@ -73,6 +73,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getTransforms,
       hasTransforms,
       getEnhancement: this.enhancementsRegistry.getEnhancement,
+      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
+      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
     };
 
     setKibanaServices(core, embeddableStart, deps);

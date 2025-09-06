@@ -9,6 +9,7 @@
 
 import { identity } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { Reference } from '@kbn/content-management-utils';
 import type { EnhancementRegistryDefinition, EnhancementRegistryItem } from './types';
 
 export class EnhancementsRegistry {
@@ -47,5 +48,43 @@ export class EnhancementsRegistry {
         migrations: {},
       }
     );
+  };
+
+  /**
+   * extracts references from enhancements state
+   */
+  public transformIn = (incomingState: { [key: string]: unknown }) => {
+    const outputState: { [key: string]: unknown } = {};
+    const extractedReferences: Reference[] = [];
+    Object.keys(incomingState).forEach((key) => {
+      if (!incomingState[key]) return;
+      const enhancementStateManger = this.getEnhancement(key);
+      const { state, references } = enhancementStateManger
+        ? enhancementStateManger.extract(incomingState[key] as SerializableRecord)
+        : { state: incomingState[key], references: [] };
+      outputState[key] = state;
+      extractedReferences.push(...references);
+    });
+
+    return {
+      enhancementsState: outputState,
+      enhancementsReferences: extractedReferences,
+    };
+  };
+
+  /**
+   * Injects enhancements state with references
+   */
+  public transformOut = (incomingState: { [key: string]: unknown }, references: Reference[]) => {
+    const outputState: { [key: string]: unknown } = {};
+    Object.keys(incomingState).forEach((key) => {
+      if (!incomingState[key]) return;
+      const enhancementStateManger = this.getEnhancement(key);
+      outputState[key] = enhancementStateManger
+        ? enhancementStateManger.inject(incomingState[key] as SerializableRecord, references)
+        : incomingState[key];
+    });
+
+    return outputState;
   };
 }
