@@ -11,7 +11,7 @@ import { createCopyToClipboardLensAction } from './copy_to_clipboard';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import type { TimeRange } from '@kbn/es-query';
 import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 

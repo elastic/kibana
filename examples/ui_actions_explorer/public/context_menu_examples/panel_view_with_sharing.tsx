@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 import { sampleAction } from './util';
 

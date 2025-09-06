@@ -8,7 +8,7 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import type { BooleanRelation } from '@kbn/es-query';
 import { extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
 import type { QueryStart } from '../query';
@@ -36,7 +36,7 @@ export interface MultiValueClickContext {
 
 export function createMultiValueClickActionDefinition(
   getStartServices: () => { query: QueryStart }
-): UiActionsActionDefinition<MultiValueClickContext> {
+): ActionDefinition<MultiValueClickContext> {
   return {
     type: ACTION_MULTI_VALUE_CLICK,
     id: ACTION_MULTI_VALUE_CLICK,

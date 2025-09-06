@@ -9,7 +9,7 @@
 
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Action, FrequentCompatibilityChangeAction } from '.';
+import type { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions';
 import type { UiActionsPublicSetup, UiActionsPublicStart } from './plugin';
 import { plugin as pluginInitializer } from '.';
 

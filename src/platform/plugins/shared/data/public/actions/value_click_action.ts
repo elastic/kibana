@@ -10,7 +10,8 @@
 import type { Filter, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 
 export type ValueClickActionContext = ValueClickContext;
@@ -35,7 +36,7 @@ export interface ValueClickContext {
 
 export function createValueClickActionDefinition(
   getStartServices: () => { uiActions: UiActionsStart }
-): UiActionsActionDefinition<ValueClickContext> {
+): ActionDefinition<ValueClickContext> {
   return {
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,

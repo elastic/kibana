@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 import { FeatureEditTools } from './feature_draw_controls/feature_edit_tools';

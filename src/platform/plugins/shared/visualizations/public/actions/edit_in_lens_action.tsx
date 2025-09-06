@@ -24,7 +24,7 @@ import {
   apiHasUniqueId,
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import React from 'react';
 import { take } from 'rxjs';
 import {

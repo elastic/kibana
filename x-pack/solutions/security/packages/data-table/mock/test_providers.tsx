@@ -17,7 +17,7 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createStore as createReduxStore } from 'redux';
 
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { mockGlobalState } from './global_state';
 import { localStorageMock } from './mock_local_storage';

@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {

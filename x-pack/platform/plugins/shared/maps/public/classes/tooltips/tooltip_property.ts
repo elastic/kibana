@@ -9,7 +9,7 @@ import _ from 'lodash';
 import type { ReactNode } from 'react';
 import type { GeoJsonProperties, Geometry } from 'geojson';
 import type { Filter } from '@kbn/es-query';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions';
 import type { RawValue } from '../../../common/constants';
 import type { TooltipFeature } from '../../../common/descriptor_types';
 

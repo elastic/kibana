@@ -8,7 +8,8 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import type { Action, ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { Serializable } from '@kbn/utility-types';
 import type { EuiButtonIconProps } from '@elastic/eui';

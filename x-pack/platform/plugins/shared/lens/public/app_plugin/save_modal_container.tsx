@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions';
 import type { Reference } from '@kbn/content-management-utils';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';

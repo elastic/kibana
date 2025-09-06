@@ -11,8 +11,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
+import { IncompatibleActionError } from '@kbn/ui-actions';
 import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
@@ -39,7 +39,7 @@ export function createFilterAction(
   coreStart: CoreStart,
   id: string = ACTION_GLOBAL_APPLY_FILTER,
   type: string = ACTION_GLOBAL_APPLY_FILTER
-): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
+): ActionDefinition<ApplyGlobalFilterActionContext> {
   return {
     type,
     id,

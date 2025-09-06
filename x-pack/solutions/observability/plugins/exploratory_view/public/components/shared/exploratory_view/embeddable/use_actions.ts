@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions';
 import { createExploratoryViewRoutePath } from '../configurations/utils';
 import { createExploratoryViewUrl } from '../configurations/exploratory_view_url';
 import type { ReportViewType } from '../types';

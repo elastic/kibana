@@ -23,7 +23,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions';
 import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import { css } from '@emotion/react';

@@ -12,11 +12,8 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import type {
-  ActionExecutionContext,
-  UiActionsStart,
-  VisualizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, VisualizeFieldContext } from '@kbn/ui-actions';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
 import type { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
 

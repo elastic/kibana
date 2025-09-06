@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import type { VisualizeEditorContext, Suggestion } from '../types';
 import type { TypedLensByValueInput } from '../react_embeddable/types';

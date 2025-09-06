@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionMeta } from '@kbn/ui-actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { ACTION_EDIT_PANEL } from './constants';

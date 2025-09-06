@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
+import { IncompatibleActionError } from '@kbn/ui-actions';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
@@ -33,7 +33,7 @@ const parentApiIsCompatible = async (
 export function createAddPatternAnalysisEmbeddableAction(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
-): UiActionsActionDefinition<PatternAnalysisActionContext> {
+): ActionDefinition<PatternAnalysisActionContext> {
   return {
     id: 'create-pattern-analysis-embeddable',
     grouping: AIOPS_EMBEDDABLE_GROUPING,

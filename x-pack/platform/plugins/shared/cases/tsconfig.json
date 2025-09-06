@@ -98,7 +98,8 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/licensing-types",
-    "@kbn/cases-ai"
+    "@kbn/cases-ai",
+    "@kbn/ui-actions"
   ],
   "exclude": ["target/**/*"]
 }

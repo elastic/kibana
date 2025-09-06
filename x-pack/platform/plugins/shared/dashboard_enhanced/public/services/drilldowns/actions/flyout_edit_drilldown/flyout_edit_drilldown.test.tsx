@@ -15,7 +15,7 @@ import {
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { flyoutEditDrilldownAction } from './flyout_edit_drilldown';
-import type { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionDefinitionContext } from '@kbn/ui-actions';
 
 jest.mock('../../../kibana_services', () => {
   return {

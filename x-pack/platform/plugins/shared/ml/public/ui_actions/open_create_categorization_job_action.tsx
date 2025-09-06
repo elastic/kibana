@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
@@ -26,7 +27,7 @@ export const createCategorizationADJobTrigger: Trigger = {
 
 export function createCategorizationADJobAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<CreateCategorizationADJobContext> {
+): ActionDefinition<CreateCategorizationADJobContext> {
   return {
     id: 'create-ml-categorization-ad-job-action',
     type: CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,

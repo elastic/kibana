@@ -7,5 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './types';
-export * from './triggers';
+import type { ActionDefinition, Action } from './types';
+
+export function createAction<Context extends object = object>(
+  action: ActionDefinition<Context>
+): Action<Context> {
+  return {
+    getIconType: () => undefined,
+    order: 0,
+    isCompatible: () => Promise.resolve(true),
+    getDisplayName: () => '',
+    ...action,
+  } as Action<Context>;
+}

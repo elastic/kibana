@@ -62,7 +62,7 @@ import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/chart
 import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';

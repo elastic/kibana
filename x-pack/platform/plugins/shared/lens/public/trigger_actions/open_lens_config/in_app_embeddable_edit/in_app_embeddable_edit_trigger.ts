@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 import { IN_APP_EMBEDDABLE_EDIT_TRIGGER } from '../constants';
 
 export const inAppEmbeddableEditTrigger: Trigger = {

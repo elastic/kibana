@@ -13,7 +13,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';

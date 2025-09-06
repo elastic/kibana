@@ -20,8 +20,8 @@ import {
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
-import type { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions';
+import { IncompatibleActionError } from '@kbn/ui-actions';
 import { map } from 'rxjs';
 import { ACTION_EDIT_PANEL } from './constants';
 

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { isLensApi } from '@kbn/lens-plugin/public';
 import { isMapApi } from '@kbn/maps-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -20,7 +20,7 @@ export const isApiCompatible = (api: unknown | null): api is ActionApi => apiHas
 
 export function createVisToADJobAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<EmbeddableApiContext> {
+): ActionDefinition<EmbeddableApiContext> {
   return {
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,

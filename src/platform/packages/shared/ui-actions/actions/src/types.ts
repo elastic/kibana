@@ -7,9 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Presentable } from '@kbn/ui-actions-browser/src/types';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 import type { Observable } from 'rxjs';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { Presentable } from './presentable';
+
+export interface VisualizeFieldContext {
+  fieldName: string;
+  dataViewSpec: DataViewSpec;
+  contextualFields?: string[];
+  textBasedColumns?: DatatableColumn[];
+  originatingApp?: string;
+  query?: AggregateQuery;
+}
 
 /**
  * During action execution we can provide additional information,

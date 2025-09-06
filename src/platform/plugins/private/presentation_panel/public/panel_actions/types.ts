@@ -8,6 +8,6 @@
  */
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 
 export type AnyApiAction = Action<EmbeddableApiContext>;

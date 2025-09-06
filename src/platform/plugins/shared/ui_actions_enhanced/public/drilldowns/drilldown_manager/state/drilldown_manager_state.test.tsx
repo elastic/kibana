@@ -13,7 +13,7 @@ import { DrilldownManagerState } from './drilldown_manager_state';
 import { DynamicActionManager } from '../../../dynamic_actions/dynamic_action_manager';
 import { uiActionsEnhancedPluginMock } from '../../../mocks';
 import type { AdvancedUiActionsStart } from '../../..';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { DrilldownState } from './drilldown_state';

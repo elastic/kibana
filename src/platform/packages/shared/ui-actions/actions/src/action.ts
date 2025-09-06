@@ -7,16 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionDefinition, Action } from './action';
-
-export function createAction<Context extends object = object>(
-  action: ActionDefinition<Context>
-): Action<Context> {
-  return {
-    getIconType: () => undefined,
-    order: 0,
-    isCompatible: () => Promise.resolve(true),
-    getDisplayName: () => '',
-    ...action,
-  } as Action<Context>;
-}
+export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
+export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
+export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';

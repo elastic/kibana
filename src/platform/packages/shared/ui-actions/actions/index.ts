@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './action';
-export * from './action_internal';
-export * from './create_action';
-export * from './incompatible_action_error';
+export type * from './src/presentable';
+export type * from './src/types';
+export * from './src/action';
+export { IncompatibleActionError } from './src/incompatible_action_error';
+export { createAction } from './src/create_action';

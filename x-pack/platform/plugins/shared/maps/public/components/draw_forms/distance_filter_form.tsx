@@ -16,7 +16,7 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { ActionSelect } from '../action_select';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionExecutionMeta, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionMeta, ActionDefinition } from '@kbn/ui-actions';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { UPDATE_FILTER_REFERENCES_ACTION } from './constants';
 
@@ -26,7 +26,7 @@ export interface UpdateFilterReferencesActionContext extends ActionExecutionMeta
 
 export function createUpdateFilterReferencesAction(
   filterManager: FilterManager
-): UiActionsActionDefinition<UpdateFilterReferencesActionContext> {
+): ActionDefinition<UpdateFilterReferencesActionContext> {
   return {
     type: UPDATE_FILTER_REFERENCES_ACTION,
     id: UPDATE_FILTER_REFERENCES_ACTION,

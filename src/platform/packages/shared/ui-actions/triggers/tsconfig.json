@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -17,7 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/expressions-plugin",
     "@kbn/presentation-publishing",
+    "@kbn/expressions-plugin",
   ]
 }

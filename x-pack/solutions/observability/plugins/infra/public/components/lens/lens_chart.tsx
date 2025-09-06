@@ -13,7 +13,7 @@ import {
   EuiLink,
   type EuiPanelProps,
 } from '@elastic/eui';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
 import type { UserMessage } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';

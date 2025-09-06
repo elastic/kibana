@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-ui-actions-browser'],
-};
+export type { Trigger, RowClickContext } from './src';
+export {
+  VISUALIZE_FIELD_TRIGGER,
+  visualizeFieldTrigger,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  visualizeGeoFieldTrigger,
+  ROW_CLICK_TRIGGER,
+  rowClickTrigger,
+  defaultTrigger,
+  ALERT_RULE_TRIGGER,
+  alertRuleTrigger,
+  ADD_PANEL_TRIGGER,
+  addPanelMenuTrigger,
+} from './src';

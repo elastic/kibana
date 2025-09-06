@@ -30,7 +30,6 @@
     "@kbn/es-query",
     "@kbn/field-formats-plugin",
     "@kbn/coloring",
-    "@kbn/ui-actions-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/core-http-browser",
     "@kbn/share-plugin",
@@ -46,6 +45,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
     "@kbn/config-schema",
+    "@kbn/ui-actions",
   ],
   "exclude": ["target/**/*"]
 }

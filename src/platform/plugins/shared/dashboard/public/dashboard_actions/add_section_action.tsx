@@ -15,8 +15,8 @@ import { i18n } from '@kbn/i18n';
 import type { CanAddNewSection } from '@kbn/presentation-containers';
 import { apiCanAddNewSection } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions';
+import { IncompatibleActionError } from '@kbn/ui-actions';
 
 import { ACTION_ADD_SECTION } from './constants';
 

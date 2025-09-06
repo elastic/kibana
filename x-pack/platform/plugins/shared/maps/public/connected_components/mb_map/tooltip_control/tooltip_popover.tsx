@@ -12,7 +12,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { GeoJsonProperties, Geometry } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions';
 import { FeaturesTooltip } from './features_tooltip';
 import type { RawValue } from '../../../../common/constants';
 import { LAT_INDEX, LON_INDEX } from '../../../../common/constants';

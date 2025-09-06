@@ -12,8 +12,8 @@ import type {
   Action,
   ActionExecutionMeta,
   FrequentCompatibilityChangeAction,
-} from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+} from '@kbn/ui-actions';
+import { IncompatibleActionError } from '@kbn/ui-actions';
 import React from 'react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';

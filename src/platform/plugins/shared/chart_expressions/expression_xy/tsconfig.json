@@ -39,10 +39,10 @@
     "@kbn/core-rendering-browser",
     "@kbn/palettes",
     "@kbn/alerts-ui-shared",
-    "@kbn/ui-actions-browser",
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
     "@kbn/chart-test-jest-helpers",
+    "@kbn/ui-actions-triggers",
   ],
   "exclude": [
     "target/**/*",

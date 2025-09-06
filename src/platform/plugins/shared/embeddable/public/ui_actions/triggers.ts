@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-import type { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import type { Trigger, RowClickContext } from '@kbn/ui-actions-triggers';
 import type { BooleanRelation } from '@kbn/es-query';
 
 export type ValueClickContext = Partial<EmbeddableApiContext> & {

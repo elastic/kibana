@@ -18,7 +18,7 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useErrorTextStyle } from '@kbn/react-hooks';
-import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionMeta } from '@kbn/ui-actions';
 import type { DefaultPresentationPanelApi } from './types';
 import { uiActions } from '../kibana_services';
 import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';

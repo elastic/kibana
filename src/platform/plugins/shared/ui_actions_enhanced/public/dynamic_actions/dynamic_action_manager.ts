@@ -10,7 +10,7 @@
 import type { StateContainer } from '@kbn/kibana-utils-plugin/common';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import type { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { StartContract } from '../plugin';

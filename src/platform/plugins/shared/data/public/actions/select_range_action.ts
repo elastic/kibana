@@ -9,7 +9,8 @@
 
 import type { AggregateQuery } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 
 export interface SelectRangeActionContext {
@@ -29,7 +30,7 @@ export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
 export function createSelectRangeActionDefinition(
   getStartServices: () => { uiActions: UiActionsStart }
-): UiActionsActionDefinition<SelectRangeActionContext> {
+): ActionDefinition<SelectRangeActionContext> {
   return {
     type: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
