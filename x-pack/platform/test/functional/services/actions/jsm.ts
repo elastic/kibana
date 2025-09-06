@@ -11,11 +11,10 @@ import type { ActionsCommon } from './common';
 
 export interface ConnectorFormFields {
   name: string;
-  apiUrl: string;
   apiKey: string;
 }
 
-export function ActionsOpsgenieServiceProvider(
+export function ActionsJsmServiceProvider(
   { getService }: FtrProviderContext,
   common: ActionsCommon
 ) {
@@ -24,7 +23,7 @@ export function ActionsOpsgenieServiceProvider(
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
-      await common.openNewConnectorForm('opsgenie');
+      await common.openNewConnectorForm('jira-service-management');
       await this.setConnectorFields(fields);
 
       const flyOutSaveButton = await testSubjects.find('create-connector-flyout-save-btn');
@@ -32,9 +31,8 @@ export function ActionsOpsgenieServiceProvider(
       await flyOutSaveButton.click();
     },
 
-    async setConnectorFields({ name, apiUrl, apiKey }: ConnectorFormFields) {
+    async setConnectorFields({ name, apiKey }: ConnectorFormFields) {
       await testSubjects.setValue('nameInput', name);
-      await testSubjects.setValue('config.apiUrl-input', apiUrl);
       await testSubjects.setValue('secrets.apiKey-input', apiKey);
     },
 
