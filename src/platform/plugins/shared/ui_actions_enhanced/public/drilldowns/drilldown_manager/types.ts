@@ -9,7 +9,7 @@
 
 import type { ToastsStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-triggers';
 import type {
   ActionFactory,
   BaseActionFactoryContext,

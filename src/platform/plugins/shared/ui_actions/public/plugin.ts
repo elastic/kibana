@@ -15,7 +15,7 @@ import {
   visualizeGeoFieldTrigger,
   addPanelMenuTrigger,
   alertRuleTrigger,
-} from '@kbn/ui-actions-browser/src/triggers';
+} from '@kbn/ui-actions-triggers';
 import { UiActionsService } from './service';
 import { setAnalytics, setI18n, setNotifications, setTheme, setUserProfile } from './services';
 

@@ -24,9 +24,9 @@ pageLoadAssetSize:
   core: 602071
   crossClusterReplication: 12662
   customIntegrations: 11715
-  dashboard: 19000
+  dashboard: 21126
   dashboardEnhanced: 12500
-  dashboardMarkdown: 5134
+  dashboardMarkdown: 5827
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -43,7 +43,7 @@ pageLoadAssetSize:
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 18810
-  embeddableAlertsTable: 6596
+  embeddableAlertsTable: 7355
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
   esql: 10370
@@ -74,7 +74,7 @@ pageLoadAssetSize:
   graph: 10014
   grokdebugger: 5484
   home: 13710
-  imageEmbeddable: 6000
+  imageEmbeddable: 7250
   indexLifecycleManagement: 29870
   indexManagement: 35861
   inference: 10368

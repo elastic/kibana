@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-triggers';
 import type { CoreStart } from '@kbn/core/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import {
