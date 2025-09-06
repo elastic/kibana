@@ -894,11 +894,6 @@ describe('es_query executor', () => {
           groupBy: 'top',
           termSize: 10,
           termField: 'host.name',
-          sourceFields: [
-            { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-            { label: 'host.id', searchPath: 'host.id.keyword' },
-            { label: 'host.name', searchPath: 'host.name.keyword' },
-          ],
         },
       });
 

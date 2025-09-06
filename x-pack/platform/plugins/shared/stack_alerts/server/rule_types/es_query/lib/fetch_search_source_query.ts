@@ -30,7 +30,7 @@ import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types'
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
-import { checkForShardFailures } from '../util';
+import { checkForShardFailures, getSourceFields } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -111,6 +111,8 @@ export async function fetchSearchSourceQuery({
     spacePrefix,
     filterToExcludeHitsFromPreviousRun
   );
+  const sourceFields = getSourceFields();
+
   return {
     link,
     numMatches: Number(searchResult.hits.total),
@@ -119,7 +121,8 @@ export async function fetchSearchSourceQuery({
       isCountAgg,
       isGroupAgg,
       esResult: searchResult,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
+      generateSourceFieldsFromHits: true,
       termField: params.termField,
     }),
     index: [index.name],
@@ -190,7 +193,6 @@ export async function updateSearchSource(
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
