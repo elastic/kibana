@@ -25,11 +25,7 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
-export const DashboardViewport = ({
-  dashboardContainerRef,
-}: {
-  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
-}) => {
+export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
@@ -146,11 +142,7 @@ export const DashboardViewport = ({
         data-shared-items-count={visiblePanelCount}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? (
-          <DashboardEmptyScreen />
-        ) : (
-          <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
-        )}
+        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
       </div>
     </div>
   );

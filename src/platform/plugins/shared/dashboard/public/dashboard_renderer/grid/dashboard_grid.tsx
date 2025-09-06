@@ -31,11 +31,7 @@ import {
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
 
-export const DashboardGrid = ({
-  dashboardContainerRef,
-}: {
-  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
-}) => {
+export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const layoutRef = useRef<HTMLDivElement | null>(null);
@@ -44,19 +40,20 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const [expandedPanelId, useMargins, viewMode, layout] = useBatchedPublishingSubjects(
-    dashboardApi.expandedPanelId$,
-    dashboardApi.settings.useMargins$,
-    dashboardApi.viewMode$,
-    dashboardInternalApi.gridLayout$
-  );
+  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef] =
+    useBatchedPublishingSubjects(
+      dashboardApi.expandedPanelId$,
+      dashboardApi.settings.useMargins$,
+      dashboardApi.viewMode$,
+      dashboardInternalApi.gridLayout$,
+      dashboardInternalApi.dashboardContainerRef$
+    );
 
   useEffect(() => {
-    setTopOffset(
-      dashboardContainerRef?.current?.getBoundingClientRect().top ??
-        DEFAULT_DASHBOARD_DRAG_TOP_OFFSET
-    );
-  }, [dashboardContainerRef]);
+    const newTopOffset =
+      dashboardContainerRef?.getBoundingClientRect().top ?? DEFAULT_DASHBOARD_DRAG_TOP_OFFSET;
+    if (newTopOffset !== topOffset) setTopOffset(newTopOffset);
+  }, [dashboardContainerRef, topOffset]);
 
   const appFixedViewport = useAppFixedViewport();
 
@@ -121,12 +118,11 @@ export const DashboardGrid = ({
           type={type}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
-          dashboardContainerRef={dashboardContainerRef}
           data-grid-row={panels[id].gridData.y} // initialize data-grid-row
         />
       );
     },
-    [appFixedViewport, dashboardContainerRef, dashboardInternalApi.layout$]
+    [appFixedViewport, dashboardInternalApi.layout$]
   );
 
   const styles = useMemoCss(dashboardGridStyles);
