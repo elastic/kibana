@@ -1,0 +1,94 @@
+---
+id: kibDevDocsOpsEslintCustom
+slug: /kibana-dev-docs/ops/eslint-custom
+title: 'ESLint Custom'
+description: Runs ESLint with your own ESlint config
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'ts']
+---
+
+This allows you to do an ESLint pass with an optional config that you define, and offers a configurable formatter where you can do something with the results ESLint gives you.
+
+## Usage
+
+```
+node scripts/eslint_custom_config --help
+```
+
+This will run ESLint with a custom config, on all packages inside `x-pack` with 10 workers and will format the results in a summary report.
+
+```
+node scripts/eslint_custom_config --concurrency=10 --formatter=packages/kbn-eslint-plugin-perf-suggestions/format_perf_summary.ts --eslint-config=packages/kbn-eslint-plugin-perf-suggestions/.eslintrc.js --filter=x-pack/
+```
+
+## Writing a custom formatter
+
+Formatters are simple functions that receive a minimal logger and the aggregated ESLint JSON results. Your formatter must default-export a function with the signature:
+
+- input: `(log, results)`
+- output: `void` (print whatever you want using `log.info()` or `log.write()`).
+
+Contract:
+
+- log.info(msg: string): writes a line with repo-standard formatting.
+- log.write(chunk: string): writes raw text without a newline (useful for progress or blank lines).
+- results: Array of packages with an ESLint JSON report for each file.
+
+TypeScript example (recommended):
+
+```ts
+// packages/your-plugin/formatters/my_summary.ts
+export default function (
+  log: { info: (s: string) => void; write: (s: string) => void },
+  results: Array<{
+    name: string;
+    directory: string;
+    report: Array<{ filePath: string; messages: Array<{ ruleId?: string; message?: string }> }>;
+    exitCode: number;
+  }>
+) {
+  // Group by package name and count messages by text
+  const summary = new Map<string, Map<string, number>>();
+
+  for (const r of results) {
+    if (!r || !Array.isArray(r.report)) continue;
+    let pkg = summary.get(r.name);
+    if (!pkg) summary.set(r.name, (pkg = new Map()));
+    for (const f of r.report) {
+      for (const m of f.messages || []) {
+        const key = typeof m.message === 'string' ? m.message : String(m.ruleId || 'unknown');
+        pkg.set(key, (pkg.get(key) || 0) + 1);
+      }
+    }
+  }
+
+  for (const [name, counts] of summary) {
+    if (!counts.size) continue;
+    log.info(name);
+    for (const [msg, count] of counts) log.info(`[${count}] ${msg}`);
+    log.write('\n');
+  }
+}
+```
+
+Usage:
+
+```bash
+node scripts/eslint_custom_config \
+	--eslint-config=path/to/.eslintrc.js \
+	--formatter=packages/your-plugin/formatters/my_summary.ts \
+	--concurrency=8 \
+	--filter=x-pack/
+```
+
+Notes:
+
+- The formatter module must default-export a function. Named exports are ignored.
+- When a formatter is provided, ESLint is run in JSON mode and worker output is not streamed; your formatter prints the final summary.
+- Exit code is non-zero if there are any findings (to make CI consumption easy).
+
+Available flags:
+
+- --concurrency (optionally set the amount of workers you want to use)
+- --formatter (optionally pass in the path to a formatter which will format the results of ESLint)
+- --eslint-config (optionally pass in the path to an eslint config)
+- --filter [optional folder path to which you want to limit the checking]
