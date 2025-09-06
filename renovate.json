@@ -1566,8 +1566,7 @@
     {
       "groupName": "json-stable-stringify",
       "matchDepNames": [
-        "json-stable-stringify",
-        "@types/json-stable-stringify"
+        "json-stable-stringify"
       ],
       "reviewers": [
         "team:kibana-operations"
