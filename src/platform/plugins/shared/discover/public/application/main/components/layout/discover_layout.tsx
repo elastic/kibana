@@ -10,11 +10,11 @@
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiDelayRender,
   EuiPage,
   EuiPageBody,
   EuiPanel,
   EuiProgress,
-  EuiDelayRender,
   useEuiBreakpoint,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -446,6 +446,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             spaces={spaces}
             history={history}
           />
+
           <DiscoverResizableLayout
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
