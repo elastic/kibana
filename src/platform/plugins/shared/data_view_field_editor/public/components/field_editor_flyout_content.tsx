@@ -10,6 +10,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -38,6 +39,13 @@ const i18nTexts = {
   saveButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutSaveButtonLabel', {
     defaultMessage: 'Save',
   }),
+  disabledSaveCalloutMessage: i18n.translate(
+    'indexPatternFieldEditor.editor.flyoutDisabledSaveCalloutMessage',
+    {
+      defaultMessage:
+        "You can't edit managed data view fields. Instead, you can duplicate the data view and make changes to your newly created copy.",
+    }
+  ),
 };
 
 const defaultModalVisibility = {
@@ -243,12 +251,22 @@ const FieldEditorFlyoutContentComponent = ({
                   />
                 </p>
               </EuiText>
+              {dataView.managed && (
+                <EuiCallOut
+                  title={i18nTexts.disabledSaveCalloutMessage}
+                  color="primary"
+                  iconType="info"
+                  size="s"
+                  style={{ marginTop: '10px' }}
+                />
+              )}
             </FlyoutPanels.Header>
 
             <FieldEditor
               field={fieldToEdit ?? fieldToCreate}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
+              isDisabled={dataView.managed}
             />
           </FlyoutPanels.Content>
 
@@ -272,7 +290,7 @@ const FieldEditorFlyoutContentComponent = ({
                     onClick={onClickSave}
                     data-test-subj="fieldSaveButton"
                     fill
-                    disabled={hasErrors}
+                    disabled={hasErrors || dataView.managed}
                     isLoading={isSavingField || isSubmitting}
                   >
                     {i18nTexts.saveButtonLabel}

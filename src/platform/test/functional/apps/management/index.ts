@@ -51,5 +51,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_files'));
     loadTestFile(require.resolve('./_data_view_field_filters'));
     loadTestFile(require.resolve('./data_views/_cache'));
+    loadTestFile(require.resolve('./data_views/_managed_data_view'));
   });
 }

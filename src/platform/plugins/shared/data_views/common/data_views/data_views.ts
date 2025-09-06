@@ -88,6 +88,10 @@ export interface DataViewListItem {
    */
   typeMeta?: TypeMeta;
   name?: string;
+  /**
+   * Whether the data view is managed by the application.
+   */
+  managed?: boolean;
 }
 
 /**
@@ -494,6 +498,7 @@ export class DataViewsService {
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
       name: obj?.attributes?.name,
+      managed: obj?.managed,
     }));
   };
 
@@ -824,6 +829,7 @@ export class DataViewsService {
         name,
         allowHidden,
       },
+      managed,
     } = savedObject;
 
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
@@ -861,6 +867,7 @@ export class DataViewsService {
       runtimeFieldMap: parsedRuntimeFieldMap,
       name,
       allowHidden,
+      managed,
     };
   };
 
@@ -1259,13 +1266,13 @@ export class DataViewsService {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
     }
-
     const body = dataView.getAsSavedObjectBody();
 
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
       id: dataView.id,
       initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
       overwrite,
+      managed: dataView.managed,
     })) as SavedObject<DataViewAttributes>;
 
     if (this.savedObjectsCache) {
