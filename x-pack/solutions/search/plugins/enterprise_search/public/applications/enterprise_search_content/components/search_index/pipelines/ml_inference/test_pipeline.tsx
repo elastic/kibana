@@ -29,8 +29,6 @@ import { i18n } from '@kbn/i18n';
 
 import { TestPipelineLogic } from './test_pipeline_logic';
 
-import './add_inference_pipeline_flyout.scss';
-
 export const TestPipeline: React.FC = () => {
   const {
     addInferencePipelineModal: {

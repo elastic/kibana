@@ -20,6 +20,7 @@ import {
   EuiHorizontalRule,
   EuiCard,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -30,9 +31,11 @@ import { SEARCH_EXPERIENCES_PLUGIN } from '../../../../../common/constants';
 import searchExperiencesIllustration from '../../../../assets/images/search_experiences.svg';
 
 import { SetSearchExperiencesChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import * as Styles from '../../styles';
 import { EnterpriseSearchSearchExperiencesPageTemplate } from '../layout';
 
 export const SearchExperiencesGuide: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EnterpriseSearchSearchExperiencesPageTemplate
       restrictWidth
@@ -45,7 +48,7 @@ export const SearchExperiencesGuide: React.FC = () => {
       <SetPageChrome />
       <EuiPanel color="transparent" paddingSize="none">
         <EuiFlexGroup
-          className="addContentEmptyPrompt"
+          css={Styles.searchExperiencesGuide(euiTheme)}
           justifyContent="spaceBetween"
           direction="row"
           responsive
