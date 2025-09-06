@@ -105,14 +105,14 @@ export const validateWithScoutCiConfig = (
   const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
   const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
   const ciConfig = yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
-    ui_tests: {
+    tests: {
       enabled?: string[];
       disabled?: string[];
     };
   };
 
-  const enabledPlugins = new Set(ciConfig.ui_tests.enabled || []);
-  const disabledPlugins = new Set(ciConfig.ui_tests.disabled || []);
+  const enabledPlugins = new Set(ciConfig.tests.enabled || []);
+  const disabledPlugins = new Set(ciConfig.tests.disabled || []);
   const allRegisteredPlugins = new Set([...enabledPlugins, ...disabledPlugins]);
 
   const unregisteredPlugins: string[] = [];
