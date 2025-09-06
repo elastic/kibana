@@ -14,15 +14,22 @@ import {
   getIsFullScreen,
   getIsTimesliderOpen,
 } from '../../selectors/ui_selectors';
-import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
+import {
+  cancelAllInFlightRequests,
+  exitFullScreen,
+  setSelectedLayer,
+  updateFlyout,
+} from '../../actions';
 import {
   isMapLoading,
   getLayerList,
   getMapInitError,
   getMapSettings,
   getQueryableUniqueIndexPatternIds,
+  getSelectedLayerId,
 } from '../../selectors/map_selectors';
 import type { MapStoreState } from '../../reducers/store';
+import { FLYOUT_STATE } from '../../reducers/ui';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -34,6 +41,7 @@ function mapStateToProps(state: MapStoreState) {
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
     settings: getMapSettings(state),
     layerList: getLayerList(state),
+    selectedLayerId: getSelectedLayerId(state),
   };
 }
 
@@ -41,6 +49,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     exitFullScreen: () => dispatch(exitFullScreen()),
     cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
+    closeFlyout: () => {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(setSelectedLayer(null));
+    },
   };
 }
 
