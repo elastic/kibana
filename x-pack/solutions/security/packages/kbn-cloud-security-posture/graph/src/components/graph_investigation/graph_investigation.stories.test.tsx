@@ -18,7 +18,7 @@ import {
   GRAPH_INVESTIGATION_TEST_ID,
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
-  NODE_EXPAND_BUTTON_TEST_ID,
+  GRAPH_NODE_EXPAND_BUTTON_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
@@ -81,7 +81,7 @@ const expandNode = (container: HTMLElement, nodeId: string) => {
   userEvent.hover(nodeElement!);
   (
     nodeElement?.querySelector(
-      `[data-test-subj="${NODE_EXPAND_BUTTON_TEST_ID}"]`
+      `[data-test-subj="${GRAPH_NODE_EXPAND_BUTTON_ID}"]`
     ) as HTMLButtonElement
   )?.click();
 };
