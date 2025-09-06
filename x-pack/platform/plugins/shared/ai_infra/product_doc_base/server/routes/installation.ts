@@ -18,6 +18,7 @@ import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
+  UPDATE_ALL_API_PATH,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
 import type { ProductInstallState } from '../../common/install_status';
@@ -104,10 +105,8 @@ export const registerInstallationRoutes = ({
       let failureReason = null;
       if (status === 'error' && installStatus) {
         failureReason = Object.values(installStatus)
-          .filter(
-            (product: ProductInstallState) => product.status === 'error' && product.failureReason
-          )
-          .map((product: ProductInstallState) => product.failureReason)
+          .filter((product) => product.status === 'error' && product.failureReason)
+          .map((product) => product.failureReason)
           .join('\n');
       }
       return res.ok<PerformInstallResponse>({
@@ -115,6 +114,83 @@ export const registerInstallationRoutes = ({
           installed: status === 'installed',
           ...(failureReason ? { failureReason } : {}),
         },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: UPDATE_ALL_API_PATH,
+      validate: {},
+      options: {
+        access: 'internal',
+        timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const { documentationManager } = getServices();
+
+      const resp = await documentationManager.updateAll({
+        request: req,
+      });
+      const inferenceIds = resp.inferenceIds ?? [];
+
+      // check status after installation in case of failure
+      const statuses = await Promise.allSettled(
+        inferenceIds.map((inferenceId) =>
+          documentationManager.getStatus({
+            inferenceId,
+          })
+        )
+      );
+      const body = statuses.reduce<Record<string, PerformInstallResponse>>(
+        (acc, installationStatus, index) => {
+          const inferenceId = inferenceIds[index];
+          // Handle internal server error
+          if (installationStatus.status === 'rejected') {
+            const failureReason = installationStatus.reason;
+            // @TODO: remove
+            return {
+              ...acc,
+              [inferenceId]: {
+                installed: status === 'uninstalled',
+                ...(failureReason ? { failureReason: JSON.stringify(failureReason) } : {}),
+              },
+            };
+          }
+          if (installationStatus.status === 'fulfilled') {
+            const { status, installStatus } = installationStatus.value;
+
+            let failureReason = null;
+            // Check for real reason of previous installation failure
+            if (status === 'error' && installStatus) {
+              failureReason = Object.values(installStatus)
+                .filter(
+                  (product: ProductInstallState) =>
+                    product.status === 'error' && product.failureReason
+                )
+                .map((product: ProductInstallState) => product.failureReason)
+                .join('\n');
+            }
+            return {
+              ...acc,
+              [inferenceId]: {
+                installed: status === 'installed',
+                ...(failureReason ? { failureReason } : {}),
+              } as PerformInstallResponse,
+            };
+          }
+          return acc;
+        },
+        {}
+      );
+      return res.ok<Record<string, PerformInstallResponse>>({
+        body,
       });
     }
   );
