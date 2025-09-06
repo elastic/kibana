@@ -221,14 +221,17 @@ export async function runTask({
             newDoc.entity = new HashMap();
             newDoc.entity.id = ctx._source.entity.id;
           }
+          // Keep host/user/service identity fields if present
+          if (ctx._source.${entityType}?.name != null) {
+            newDoc.${entityType} = new HashMap();
+            newDoc.${entityType}.name = ctx._source.${entityType}?.name;
+          }
 
           // Set the @timestamp field to the current time
           newDoc['@timestamp'] = new Date();
 
           // Set the entity.last_seen_timestamp field to the current time
-          if (newDoc.entity != null) {
-            newDoc.entity.last_seen_timestamp = new Date();
-          }
+          newDoc.entity.last_seen_timestamp = new Date();
 
           // Replace the existing document with the new filtered document
           ctx._source = newDoc;
