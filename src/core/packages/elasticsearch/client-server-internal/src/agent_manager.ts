@@ -118,18 +118,11 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private registerMetrics() {
     const meter = metrics.getMeter('kibana.elasticsearch.client');
 
-    const totalActiveSocketsObservable = meter.createObservableUpDownCounter(
-      'elasticsearch.client.sockets.active',
+    const totalSocketsObservable = meter.createObservableUpDownCounter(
+      'elasticsearch.client.sockets.usage',
       {
-        description: 'Elasticsearch Clients: Number of active sockets',
-        unit: '1',
-        valueType: ValueType.INT,
-      }
-    );
-    const totalIdleSocketsObservable = meter.createObservableUpDownCounter(
-      'elasticsearch.client.sockets.idle',
-      {
-        description: 'Elasticsearch Clients: Number of available idle sockets',
+        description:
+          'Elasticsearch Clients: Number of sockets (attributes indicate if active, idle).',
         unit: '1',
         valueType: ValueType.INT,
       }
@@ -143,7 +136,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
       }
     );
     const maxTotalSocketsObservable = meter.createObservableUpDownCounter(
-      'elasticsearch.client.sockets.max_open',
+      'elasticsearch.client.sockets.open.limit',
       {
         description: 'Elasticsearch Clients: Maximum number of sockets allowed to each agent.',
         unit: '1',
@@ -151,7 +144,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
       }
     );
     const maxIdleSocketsObservable = meter.createObservableUpDownCounter(
-      'elasticsearch.client.sockets.max_idle',
+      'elasticsearch.client.sockets.idle.limit',
       {
         description: 'Elasticsearch Clients: Maximum number of idle sockets allowed to each agent.',
         unit: '1',
@@ -210,8 +203,14 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
               'elasticsearch.client.node': node,
             };
             result.observe(totalQueuedRequestsObservable, queued, attributes);
-            result.observe(totalActiveSocketsObservable, active, attributes);
-            result.observe(totalIdleSocketsObservable, idle, attributes);
+            result.observe(totalSocketsObservable, active, {
+              ...attributes,
+              'elasticsearch.client.socket.state': 'active',
+            });
+            result.observe(totalSocketsObservable, idle, {
+              ...attributes,
+              'elasticsearch.client.socket.state': 'idle',
+            });
           });
 
           result.observe(maxTotalSocketsObservable, maxTotalSockets, {
