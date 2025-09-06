@@ -41,6 +41,16 @@ const listItems = [
   {
     title: (
       <>
+        <kbd>Alt</kbd> <kbd>Click</kbd>
+      </>
+    ),
+    description: i18n.translate('esqlEditor.query.runKeyboardShortcutsLabel', {
+      defaultMessage: 'Select multiple queries',
+    }),
+  },
+  {
+    title: (
+      <>
         <kbd>{COMMAND_KEY}</kbd> <kbd>/</kbd>
       </>
     ),

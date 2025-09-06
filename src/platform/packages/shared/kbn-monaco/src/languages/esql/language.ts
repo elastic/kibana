@@ -74,15 +74,15 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       },
     };
   },
-  getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
+  getSuggestionProvider: (callbacks?: ESQLCallbacks, isMultiline: boolean = false): monaco.languages.CompletionItemProvider => {
     return {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
-        const fullText = model.getValue();
-        const offset = monacoPositionToOffset(fullText, position);
+        const fullText = isMultiline ? model.getLineContent(position.lineNumber) : model.getValue();
+        const offset = isMultiline ? position.column : monacoPositionToOffset(fullText, position);
         const suggestions = await suggest(fullText, offset, callbacks);
         return {
           // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638

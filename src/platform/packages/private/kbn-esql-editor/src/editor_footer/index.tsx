@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiCode,
   EuiButtonIcon,
-  EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
@@ -64,6 +63,7 @@ interface EditorFooterProps {
   hideQueryHistory?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
+  hideLimitInfo?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -90,6 +90,7 @@ export const EditorFooter = memo(function EditorFooter({
   measuredContainerWidth,
   code,
   dataErrorsControl,
+  hideLimitInfo,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -182,39 +183,26 @@ export const EditorFooter = memo(function EditorFooter({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-limit-info">
-                      <p>
-                        {isSpaceReduced
-                          ? i18n.translate('esqlEditor.query.limitInfoReduced', {
-                              defaultMessage: 'LIMIT {limit}',
-                              values: { limit },
-                            })
-                          : i18n.translate('esqlEditor.query.limitInfo', {
-                              defaultMessage: 'LIMIT {limit} rows',
-                              values: { limit },
-                            })}
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {errors && errors.length > 0 && (
-                <ErrorsWarningsFooterPopover
-                  isPopoverOpen={isErrorPopoverOpen}
-                  items={errors}
-                  type="error"
-                  setIsPopoverOpen={(isOpen) => {
-                    if (isOpen) {
-                      setIsWarningPopoverOpen(false);
-                    }
-                    setIsErrorPopoverOpen(isOpen);
-                  }}
-                  onErrorClick={onErrorClick}
-                  dataErrorsControl={dataErrorsControl}
-                />
+              {!hideLimitInfo && (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-limit-info">
+                        <p>
+                          {isSpaceReduced
+                            ? i18n.translate('esqlEditor.query.limitInfoReduced', {
+                                defaultMessage: 'LIMIT {limit}',
+                                values: { limit },
+                              })
+                            : i18n.translate('esqlEditor.query.limitInfo', {
+                                defaultMessage: 'LIMIT {limit} rows',
+                                values: { limit },
+                              })}
+                        </p>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               )}
               {warnings && warnings.length > 0 && (
                 <ErrorsWarningsFooterPopover
@@ -269,21 +257,8 @@ export const EditorFooter = memo(function EditorFooter({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-              {displayDocumentationAsFlyout && !Boolean(editorIsInline) && (
+              {displayDocumentationAsFlyout && (
                 <>
-                  <EuiButtonEmpty
-                    iconType="documentation"
-                    color="text"
-                    data-test-subj="ESQLEditor-documentation"
-                    size="m"
-                    onClick={() => toggleLanguageComponent()}
-                    aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                      defaultMessage: 'Open documentation',
-                    })}
-                    css={css`
-                      cursor: pointer;
-                    `}
-                  />
                   <LanguageDocumentationFlyout
                     searchInDescription
                     linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
