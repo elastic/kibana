@@ -30,10 +30,10 @@ export const cacheNonParametrizedAsyncFunction = <T>(
   let lastCallTime = 0;
   let value: Promise<T> | undefined;
 
-  return () => {
+  return ({ forceRefresh = false }: { forceRefresh?: boolean } = {}) => {
     const time = now();
 
-    if (time - lastCallTime > maxCacheDuration) {
+    if (forceRefresh || time - lastCallTime > maxCacheDuration) {
       value = undefined;
     }
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getTimeFieldFromESQLQuery, getIndexPatternFromESQLQuery } from './query_parsing_helpers';
 
@@ -32,11 +32,13 @@ async function sha256(str: string) {
 // as solving the problem described here https://github.com/elastic/kibana/issues/168131
 export async function getESQLAdHocDataview(
   query: string,
-  dataViewsService: DataViewsPublicPluginStart
+  dataViewsService: DataViewsPublicPluginStart,
+  dataViewSpec: DataViewSpec = {}
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataView = await dataViewsService.create({
+    ...dataViewSpec,
     title: indexPattern,
     type: ESQL_TYPE,
     id: await sha256(`esql-${indexPattern}`),
