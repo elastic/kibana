@@ -14,4 +14,5 @@ module.exports = {
   testMatch: ['**/common_fields/*.test.[jt]s?(x)'],
   openHandlesTimeout: 0,
   forceExit: true,
+  maxWorkers: '50%',
 };
