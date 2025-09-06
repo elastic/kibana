@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
-import type { EsqlResponse } from './steps/execute_esql';
-import { executeEsql } from './steps/execute_esql';
+import type { EsqlResponse } from './utils/esql';
+import { executeEsql } from './utils/esql';
 import { generateEsql } from './generate_esql';
 
 export interface NaturalLanguageSearchResponse {
