@@ -6,10 +6,10 @@
  */
 
 import { AttachmentRegistry } from '../../../common/registry';
-import type { ExternalReferenceAttachmentType } from './types';
+import type { SuggestionType } from './types';
 
-export class ExternalReferenceAttachmentTypeRegistry extends AttachmentRegistry<ExternalReferenceAttachmentType> {
+export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionType> {
   constructor() {
-    super('ExternalReferenceAttachmentTypeRegistry');
+    super('AttachmentSuggestionRegistry');
   }
 }

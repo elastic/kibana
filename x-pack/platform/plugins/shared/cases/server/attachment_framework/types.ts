@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
+import type {
+  PersistableStateAttachmentPayload,
+  SuggestionOwner,
+  SuggestionContext,
+  SuggestionHandlerResponse,
+  GenericSuggestionPayload,
+} from '../../common/types/domain';
 
 export type PersistableStateAttachmentState = Pick<
   PersistableStateAttachmentPayload,
@@ -32,11 +39,36 @@ export interface ExternalReferenceAttachmentType {
   schemaValidator?: (data: unknown) => void;
 }
 
+export interface SuggestionType<
+  TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
+> {
+  /* Unique identifier for the suggestion type */
+  id: string;
+  /* Unique identifier for the type of attachment the suggestion is for */
+  attachmentTypeId: string;
+  /* The owner of the suggestion. Dictates which solutions can use this suggestion */
+  owner: SuggestionOwner;
+  // Handlers for fetching the suggestion
+  handlers: Record<string, SuggestionHandler<TPayload>>;
+}
+
+export type SuggestionHandler<
+  TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
+> = (params: SuggestionHandlerParams) => Promise<SuggestionHandlerResponse<TPayload>>;
+
+export interface SuggestionHandlerParams {
+  request: KibanaRequest;
+  context: SuggestionContext;
+}
+
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
   ) => void;
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
+  ) => void;
+  registerSuggestion: <TPayload extends GenericSuggestionPayload = GenericSuggestionPayload>(
+    attachmentSuggestion: SuggestionType<TPayload>
   ) => void;
 }
