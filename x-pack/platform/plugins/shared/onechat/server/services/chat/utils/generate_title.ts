@@ -18,12 +18,10 @@ export const generateTitle$ = ({
   chatModel,
   conversation$,
   nextInput,
-  toolParameters,
 }: {
   chatModel: InferenceChatModel;
   conversation$: Observable<Conversation>;
   nextInput: RoundInput;
-  toolParameters?: Record<string, any>;
 }): Observable<string> => {
   return conversation$.pipe(
     switchMap((conversation) => {
@@ -32,7 +30,6 @@ export const generateTitle$ = ({
           previousRounds: conversation.rounds,
           nextInput,
           chatModel,
-          toolParameters,
         })
       ).pipe(shareReplay());
     })
@@ -43,12 +40,10 @@ export const generateConversationTitle = async ({
   previousRounds,
   nextInput,
   chatModel,
-  toolParameters,
 }: {
   previousRounds: ConversationRound[];
   nextInput: RoundInput;
   chatModel: InferenceChatModel;
-  toolParameters?: Record<string, any>;
 }) => {
   return withActiveInferenceSpan(
     'GenerateTitle',
@@ -65,7 +60,7 @@ export const generateConversationTitle = async ({
           'system',
           "'You are a helpful assistant. Assume the following messages is the start of a conversation between you and a user; give this conversation a title based on the content below",
         ],
-        ...conversationToLangchainMessages({ previousRounds, nextInput, toolParameters }),
+        ...conversationToLangchainMessages({ previousRounds, nextInput }),
       ];
 
       const { title } = await structuredModel.invoke(prompt);

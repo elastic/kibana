@@ -39,7 +39,6 @@ export interface OnechatStartDependencies {
 export interface OnechatPluginSetup {}
 
 export interface OnechatPluginStart {
-  OnechatConversationsView: React.ComponentType;
   internalServices: OnechatInternalService;
 }
 

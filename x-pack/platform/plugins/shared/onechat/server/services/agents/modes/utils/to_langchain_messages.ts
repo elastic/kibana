@@ -49,7 +49,6 @@ export const roundToLangchain = (
   messages.push(
     createUserMessage({
       content: round.input.message,
-      toolParameters,
     })
   );
 

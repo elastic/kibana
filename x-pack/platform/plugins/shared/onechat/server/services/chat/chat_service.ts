@@ -213,7 +213,6 @@ class ChatServiceImpl implements ChatService {
                     chatModel: chatModel.chatModel,
                     conversation$,
                     nextInput,
-                    toolParameters,
                   })
                 : conversation$.pipe(
                     switchMap((conversation) => {

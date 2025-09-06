@@ -18,28 +18,18 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import type { AIConnector } from '@kbn/elastic-assistant-common';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { useAssistantContext } from '../../../..';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
-import { ConnectorSelector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
 interface Params {
   isDisabled?: boolean;
-  isOneChatMode?: boolean;
-  selectedConnectorId?: string;
-  onConnectorSelectionChange?: (connector: AIConnector) => void;
 }
 
 export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
-  ({
-    isDisabled = false,
-    isOneChatMode = false,
-    onConnectorSelectionChange,
-    selectedConnectorId,
-  }: Params) => {
+  ({ isDisabled = false }: Params) => {
     const { assistantAvailability, navigateToApp, knowledgeBase, showAssistantOverlay } =
       useAssistantContext();
 
@@ -143,27 +133,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        ...(isOneChatMode
-          ? [
-              <EuiContextMenuItem
-                aria-label={'connector-selector'}
-                key={'connector-selector'}
-                icon={'link'}
-                data-test-subj={'connector-selector'}
-              >
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <ConnectorSelector
-                      selectedConnectorId={selectedConnectorId}
-                      onConnectorSelectionChange={onConnectorSelectionChange}
-                      isDisabled={isDisabled}
-                      fullWidth={true}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiContextMenuItem>,
-            ]
-          : []),
       ],
       [
         handleNavigateToSettings,
@@ -171,10 +140,6 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
-        isOneChatMode,
-        selectedConnectorId,
-        isDisabled,
-        onConnectorSelectionChange,
       ]
     );
 
