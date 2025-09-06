@@ -9,7 +9,7 @@ import type { FieldDefinition } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation } from './types';
+import type { DetectedField, Simulation, SimulationContext } from './types';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
@@ -80,47 +80,47 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
   }
 }
 
-export function getSchemaFieldsFromSimulation(
-  detectedFields: DetectedField[],
-  previousDetectedFields: SchemaField[],
-  streamName: string
-) {
-  const previousDetectedFieldsMap = previousDetectedFields.reduce<Record<string, SchemaField>>(
-    (acc, field) => {
-      acc[field.name] = field;
-      return acc;
-    },
-    {}
-  );
+export function getSchemaFieldsFromSimulation(context: SimulationContext) {
+  if (!context.simulation) return context.detectedSchemaFields;
+
+  const detectedFields = context.simulation.detected_fields;
+  const previousDetectedFieldsCache = context.detectedSchemaFieldsCache;
+  const streamName = context.streamName;
 
   const schemaFields: SchemaField[] = detectedFields.map((field) => {
     // Detected field already mapped by the user on previous simulation
-    if (previousDetectedFieldsMap[field.name]) {
-      return previousDetectedFieldsMap[field.name];
+    const cachedField = previousDetectedFieldsCache.get(field.name);
+    if (cachedField) {
+      return cachedField;
     }
+
+    // Detected field unmapped by default
+    let fieldSchema: SchemaField = {
+      status: 'unmapped',
+      esType: field.esType,
+      name: field.name,
+      parent: streamName,
+    };
+
     // Detected field already inherited
     if ('from' in field) {
-      return {
+      fieldSchema = {
         ...field,
         status: 'inherited',
         parent: field.from,
       };
     }
     // Detected field already mapped
-    if ('type' in field) {
-      return {
+    else if ('type' in field) {
+      fieldSchema = {
         ...field,
         status: 'mapped',
         parent: streamName,
       };
     }
-    // Detected field still unmapped
-    return {
-      status: 'unmapped',
-      esType: field.esType,
-      name: field.name,
-      parent: streamName,
-    };
+
+    previousDetectedFieldsCache.set(fieldSchema.name, fieldSchema);
+    return fieldSchema;
   });
 
   return schemaFields.sort(compareFieldsByStatus);
@@ -132,21 +132,25 @@ const compareFieldsByStatus = (curr: SchemaField, next: SchemaField) => {
 };
 
 export function mapField(
-  schemaFields: SchemaField[],
+  context: SimulationContext,
   updatedField: MappedSchemaField
 ): SchemaField[] {
-  return schemaFields.map((field) => {
+  return context.detectedSchemaFields.map((field) => {
     if (field.name !== updatedField.name) return field;
 
-    return { ...updatedField, status: 'mapped' };
+    const schemaField: SchemaField = { ...updatedField, status: 'mapped' };
+    context.detectedSchemaFieldsCache.set(schemaField.name, schemaField);
+    return schemaField;
   });
 }
 
-export function unmapField(schemaFields: SchemaField[], fieldName: string): SchemaField[] {
-  return schemaFields.map((field) => {
+export function unmapField(context: SimulationContext, fieldName: string): SchemaField[] {
+  return context.detectedSchemaFields.map((field) => {
     if (field.name !== fieldName) return field;
 
-    return { ...field, status: 'unmapped' };
+    const schemaField: SchemaField = { ...field, status: 'unmapped' };
+    context.detectedSchemaFieldsCache.set(schemaField.name, schemaField);
+    return schemaField;
   });
 }
 

@@ -83,19 +83,13 @@ export const simulationMachine = setup({
       })
     ),
     deriveDetectedSchemaFields: assign(({ context }) => ({
-      detectedSchemaFields: context.simulation
-        ? getSchemaFieldsFromSimulation(
-            context.simulation.detected_fields,
-            context.detectedSchemaFields,
-            context.streamName
-          )
-        : context.detectedSchemaFields,
+      detectedSchemaFields: getSchemaFieldsFromSimulation(context),
     })),
     mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
-      detectedSchemaFields: mapField(context.detectedSchemaFields, params.field),
+      detectedSchemaFields: mapField(context, params.field),
     })),
     unmapField: assign(({ context }, params: { fieldName: string }) => ({
-      detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
+      detectedSchemaFields: unmapField(context, params.fieldName),
     })),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
@@ -123,6 +117,7 @@ export const simulationMachine = setup({
   id: 'simulation',
   context: ({ input }) => ({
     detectedSchemaFields: [],
+    detectedSchemaFieldsCache: new Map(),
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     explicitlyDisabledPreviewColumns: [],
