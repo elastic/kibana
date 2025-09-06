@@ -23,9 +23,9 @@ export const useFindCostSavingsPrompts = (
   payload: UseFindPromptContextsParams
 ): { part1: string; part2: string } | null => {
   const {
-    data: { prompts },
+    data: { prompts = [] },
   } = useFindPrompts(payload);
   const part1 = prompts.find((p) => p.promptId === 'costSavingsInsightPart1')?.prompt;
   const part2 = prompts.find((p) => p.promptId === 'costSavingsInsightPart2')?.prompt;
-  return part1 && part2 ? { part1, part2 } : null;
+  return part1 != null && part2 != null ? { part1, part2 } : null;
 };

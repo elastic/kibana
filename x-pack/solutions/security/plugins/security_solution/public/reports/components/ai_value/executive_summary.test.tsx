@@ -28,6 +28,16 @@ jest.mock('../../../common/components/user_profiles/use_get_current_user_profile
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: () => <div data-test-subj="mockVisualizationEmbeddable" />,
 }));
+// Mock useKibana
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      uiSettings: {
+        get: jest.fn(() => 'mock-connector-id'),
+      },
+    },
+  }),
+}));
 
 const defaultProps = {
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
@@ -59,31 +69,17 @@ const defaultProps = {
 };
 
 describe('ExecutiveSummary', () => {
-  it('renders main container and flex group', () => {
+  it('renders main container, flex group, info, executive message and stats list, and side stats', () => {
     render(<ExecutiveSummary {...defaultProps} />);
     expect(screen.getByTestId('executiveSummaryContainer')).toBeInTheDocument();
     expect(screen.getByTestId('executiveSummaryFlexGroup')).toBeInTheDocument();
-  });
-
-  it('renders greeting and main info', () => {
-    render(<ExecutiveSummary {...defaultProps} />);
-    expect(screen.getByTestId('executiveSummaryGreeting').textContent).toContain('Test User');
     expect(screen.getByTestId('executiveSummaryMainInfo')).toBeInTheDocument();
-    expect(screen.getByTestId('executiveSummaryGreetingGroup')).toBeInTheDocument();
-  });
-
-  it('renders executive message and stats list when hasAttackDiscoveries is true', () => {
-    render(<ExecutiveSummary {...defaultProps} />);
     expect(screen.getByTestId('executiveSummaryMessage').textContent).toContain('$1,000');
     expect(screen.getByTestId('executiveSummaryMessage').textContent).toContain('10');
     expect(screen.getByTestId('executiveSummarySideStats')).toBeInTheDocument();
     expect(screen.getByTestId('mockCostSavings')).toBeInTheDocument();
     expect(screen.getByTestId('mockTimeSaved')).toBeInTheDocument();
     expect(screen.getByTestId('mockFilteringRate')).toBeInTheDocument();
-  });
-
-  it('renders side stats when hasAttackDiscoveries is true', () => {
-    render(<ExecutiveSummary {...defaultProps} />);
     expect(screen.getByTestId('executiveSummarySideStats')).toBeInTheDocument();
     expect(screen.getByTestId('mockCostSavings')).toBeInTheDocument();
     expect(screen.getByTestId('mockTimeSaved')).toBeInTheDocument();

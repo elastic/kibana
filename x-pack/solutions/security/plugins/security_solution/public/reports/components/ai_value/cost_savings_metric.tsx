@@ -17,7 +17,7 @@ import {
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
-import { useMetricAnimation } from './use_metric_animation';
+import { useMetricAnimation } from '../../hooks/use_metric_animation';
 
 interface Props {
   from: string;

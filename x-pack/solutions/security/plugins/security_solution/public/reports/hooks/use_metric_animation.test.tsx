@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import * as d3 from 'd3';
 import { useMetricAnimation } from './use_metric_animation';
@@ -289,14 +288,14 @@ describe('useMetricAnimation', () => {
   });
 
   it('should prevent multiple animations on the same element', () => {
-    const { result } = renderHook(() =>
+    renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
         selector: '.echMetricText__value',
       })
     );
 
-    const firstCallCount = d3.select.mock.calls.length;
+    const firstCallCount = (d3.select as jest.Mock).mock.calls.length;
 
     // Try to render the hook again - should not start a second animation
     renderHook(() =>
@@ -307,7 +306,7 @@ describe('useMetricAnimation', () => {
     );
 
     // Should not start a second animation
-    expect(d3.select.mock.calls.length).toBe(firstCallCount);
+    expect((d3.select as jest.Mock).mock.calls.length).toBe(firstCallCount);
   });
 
   it('should handle animation duration parameter', () => {
@@ -327,8 +326,6 @@ describe('useMetricAnimation', () => {
   });
 
   it('should format animated values with currency and commas', () => {
-    let tweenFunction: (t: number) => void;
-
     renderHook(() =>
       useMetricAnimation({
         animationDurationMs: 2000,
@@ -342,7 +339,7 @@ describe('useMetricAnimation', () => {
     });
 
     // Get the tween function
-    tweenFunction = mockTransition.tween.mock.calls[0][1];
+    const tweenFunction = mockTransition.tween.mock.calls[0][1];
 
     // Test the tween function
     act(() => {
