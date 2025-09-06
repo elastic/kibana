@@ -9,6 +9,7 @@ import Papa from 'papaparse';
 import type { SiemMigrationResourceData } from '../../../../../../common/siem_migrations/model/common.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SiemRuleMigrationsClient } from '../../siem_rule_migrations_service';
+import type { SiemDashboardMigrationsClient } from '../../../dashboards/siem_dashboard_migration_service';
 
 interface LookupWithData extends SiemMigrationResourceData {
   data: object[] | null;
@@ -16,7 +17,7 @@ interface LookupWithData extends SiemMigrationResourceData {
 
 export const processLookups = async (
   resources: SiemMigrationResourceData[],
-  ruleMigrationsClient: SiemRuleMigrationsClient
+  migrationsClient: SiemRuleMigrationsClient | SiemDashboardMigrationsClient
 ): Promise<SiemMigrationResourceData[]> => {
   const lookupsData: Record<string, LookupWithData> = {};
 
@@ -39,7 +40,7 @@ export const processLookups = async (
         lookups.push({ ...resource, content: '' }); // empty content will make lookup be ignored during translation
         return;
       }
-      const indexName = await ruleMigrationsClient.data.lookups.create(name, data);
+      const indexName = await migrationsClient.data.lookups.create(name, data);
       lookups.push({ ...resource, content: indexName }); // lookup will be translated using the index name
     },
   });
