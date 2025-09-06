@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import {
@@ -48,6 +49,10 @@ const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
+
+const eventLogger = eventLogMock.createSetup().getLogger({
+  event: { provider: 'task_manager' },
+});
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
@@ -938,6 +943,137 @@ describe('TaskManagerRunner', () => {
       expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'framework-error']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
+    test('logs execute-start and execute event logs appropriately when task runs successfully', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'execute-start',
+          kind: 'task',
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: 'foo',
+            },
+          ],
+          task: {
+            id: 'foo',
+            schedule_delay: '0',
+            scheduled: '1970-01-01T00:00:00.000Z',
+            task_type: 'bar',
+          },
+        },
+        message: `Task bar "foo" is starting to run`,
+      });
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'execute',
+          kind: 'task',
+          outcome: 'success',
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: 'foo',
+            },
+          ],
+          task: {
+            id: 'foo',
+            schedule_delay: '0',
+            scheduled: '1970-01-01T00:00:00.000Z',
+            task_type: 'bar',
+          },
+        },
+        message: `Task bar "foo" ran successfully`,
+      });
+    });
+    test('logs execute-start and execute event logs appropriately when task fails', async () => {
+      const err = new Error('rar');
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          params: { a: 'b' },
+          state: { hey: 'there' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw err;
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'execute-start',
+          kind: 'task',
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: 'foo',
+            },
+          ],
+          task: {
+            id: 'foo',
+            schedule_delay: '0',
+            scheduled: '1970-01-01T00:00:00.000Z',
+            task_type: 'bar',
+          },
+        },
+        message: `Task bar "foo" is starting to run`,
+      });
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'execute',
+          kind: 'task',
+          outcome: 'failure',
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: 'foo',
+            },
+          ],
+          task: {
+            id: 'foo',
+            schedule_delay: '0',
+            scheduled: '1970-01-01T00:00:00.000Z',
+            task_type: 'bar',
+          },
+        },
+        message: `Task bar "foo" failed: Error: rar`,
+        error: {
+          message: 'rar',
+          stack_trace: err.stack,
+        },
+      });
+    });
     test('logs user errors as expected when task fails', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         instance: {
@@ -1711,6 +1847,32 @@ describe('TaskManagerRunner', () => {
       expect(store.partialUpdate).toHaveBeenCalledWith(expect.any(Object), {
         validate: false,
         doc: taskInstance,
+      });
+      expect(eventLogger.logEvent).toHaveBeenCalledWith({
+        event: {
+          action: 'execute',
+          kind: 'task',
+          outcome: 'failure',
+        },
+        kibana: {
+          saved_objects: [
+            {
+              type: 'task',
+              id: 'foo',
+            },
+          ],
+          task: {
+            id: 'foo',
+            schedule_delay: '0',
+            scheduled: '1970-01-01T00:00:00.000Z',
+            task_type: 'bar',
+          },
+        },
+        message: `Task bar "foo" failed due to the task state being invalid: [foo]: expected value of type [string] but got [boolean]`,
+        error: {
+          message: '[foo]: expected value of type [string] but got [boolean]',
+          stack_trace: expect.any(String),
+        },
       });
     });
 
@@ -2983,6 +3145,7 @@ describe('TaskManagerRunner', () => {
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
       getPollInterval: () => 500,
+      eventLogger,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

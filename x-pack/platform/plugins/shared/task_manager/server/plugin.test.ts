@@ -15,6 +15,7 @@ import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
@@ -129,6 +130,45 @@ describe('TaskManagerPlugin', () => {
         'Disabling authentication for background task utilization API'
       );
     });
+
+    test('should sett up the event logger', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        unsafe: {
+          exclude_task_types: [],
+          authenticate_background_task_utilization: false,
+        },
+      });
+
+      const eventLogSetup = eventLogMock.createSetup();
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      const pluginSetup = taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
+      pluginSetup.registerEventLogService(eventLogSetup);
+      expect(eventLogSetup.getLogger).toHaveBeenCalled();
+      expect(eventLogSetup.registerProviderActions).toHaveBeenCalled();
+    });
+
+    test('should throw error when attempting to register the event logger more than once', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        unsafe: {
+          exclude_task_types: [],
+          authenticate_background_task_utilization: false,
+        },
+      });
+
+      const eventLogSetup = eventLogMock.createSetup();
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      const pluginSetup = taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
+      pluginSetup.registerEventLogService(eventLogSetup);
+      expect(() => pluginSetup.registerEventLogService(eventLogSetup)).toThrowError(
+        'eventLogger already defined'
+      );
+    });
   });
 
   describe('start', () => {
@@ -138,7 +178,10 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = true;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      const pluginSetup = taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
+      pluginSetup.registerEventLogService(eventLogMock.createSetup());
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
         licensing: licensingMock.createStart(),
@@ -161,6 +204,23 @@ describe('TaskManagerPlugin', () => {
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
     });
+
+    test('should throw an error if event log service not registered by the time start is defined', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
+      expect(() =>
+        taskManagerPlugin.start(coreStart, {
+          cloud: cloudMock.createStart(),
+          licensing: licensingMock.createStart(),
+        })
+      ).toThrowError('Unable to start. eventLogger not defined.');
+    });
   });
 
   describe('stop', () => {
@@ -170,7 +230,11 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = true;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      const pluginSetup = taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
+      pluginSetup.registerEventLogService(eventLogMock.createSetup());
+
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
         licensing: licensingMock.createStart(),
@@ -206,7 +270,10 @@ describe('TaskManagerPlugin', () => {
       );
       pluginInitializerContext.node.roles.backgroundTasks = true;
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      const pluginSetup = taskManagerPlugin.setup(coreMock.createSetup(), {
+        usageCollection: undefined,
+      });
+      pluginSetup.registerEventLogService(eventLogMock.createSetup());
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
         licensing: licensingMock.createStart(),
